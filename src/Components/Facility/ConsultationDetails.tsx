@@ -171,28 +171,29 @@ export const ConsultationDetails = (props: any) => {
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap">
           <PageTitle
-            title="Patient Details"
+            title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
-
           <div className="flex items-start justify-start sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
-            <div className="px-2">
-              <button
-                onClick={() => setShowDoctors(true)}
-                className="btn m-1 btn-primary hover:text-white"
-              >
-                Doctor Video
-              </button>
-              {patientData.last_consultation?.id && (
-                <Link
-                  href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+            {patientData.is_active && (
+              <div className="px-2">
+                <button
+                  onClick={() => setShowDoctors(true)}
                   className="btn m-1 btn-primary hover:text-white"
                 >
-                  Camera Feed
-                </Link>
-              )}
-            </div>
+                  Doctor Video
+                </button>
+                {patientData.last_consultation?.id && (
+                  <Link
+                    href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                    className="btn m-1 btn-primary hover:text-white"
+                  >
+                    Camera Feed
+                  </Link>
+                )}
+              </div>
+            )}
             <div className="px-2">
               <Link
                 href={`/facility/${patientData.facility}/patient/${patientData.id}`}
@@ -201,7 +202,7 @@ export const ConsultationDetails = (props: any) => {
                 Patient Details
               </Link>
               <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes/`}
+                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
                 className="btn m-1 btn-primary hover:text-white"
               >
                 Doctor&apos;s Notes
@@ -289,15 +290,6 @@ export const ConsultationDetails = (props: any) => {
             </div>
 
             <div className="mt-2">
-              {consultationData.other_symptoms && (
-                <div className="capitalize">
-                  <span className="font-semibold leading-relaxed">
-                    Other Symptoms:{" "}
-                  </span>
-                  {consultationData.other_symptoms}
-                </div>
-              )}
-
               {consultationData.diagnosis && (
                 <div className="text-sm w-full">
                   <span className="font-semibold leading-relaxed">
@@ -363,6 +355,14 @@ export const ConsultationDetails = (props: any) => {
                       <div className="capitalize">
                         {consultationData.symptoms_text || "-"}
                       </div>
+                      {consultationData.other_symptoms && (
+                        <div className="capitalize">
+                          <span className="font-semibold leading-relaxed">
+                            Other Symptoms:{" "}
+                          </span>
+                          {consultationData.other_symptoms}
+                        </div>
+                      )}
                       <span className="font-semibold leading-relaxed text-gray-800 text-xs">
                         from{" "}
                         {moment(consultationData.symptoms_onset_date).format(
@@ -410,39 +410,43 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               )}
 
-              <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                    Notes
-                  </h3>
-                  <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                    {consultationData.diagnosis && (
-                      <div>
-                        <h5>Diagnosis</h5>
-                        <p className="text-justify break-words">
-                          {consultationData.diagnosis}
-                        </p>
-                      </div>
-                    )}
-                    {consultationData.operation && (
-                      <div className="mt-4">
-                        <h5>Operation</h5>
-                        <p className="text-justify break-words">
-                          {consultationData.operation}
-                        </p>
-                      </div>
-                    )}
-                    {consultationData.special_instruction && (
-                      <div className="mt-4">
-                        <h5>Special Instruction</h5>
-                        <p className="text-justify break-words">
-                          {consultationData.special_instruction}
-                        </p>
-                      </div>
-                    )}
+              {(consultationData.diagnosis ||
+                consultationData.operation ||
+                consultationData.special_instruction) && (
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      Notes
+                    </h3>
+                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                      {consultationData.diagnosis && (
+                        <div>
+                          <h5>Diagnosis</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.diagnosis}
+                          </p>
+                        </div>
+                      )}
+                      {consultationData.operation && (
+                        <div className="mt-4">
+                          <h5>Operation</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.operation}
+                          </p>
+                        </div>
+                      )}
+                      {consultationData.special_instruction && (
+                        <div className="mt-4">
+                          <h5>Special Instruction</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.special_instruction}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {consultationData.intubation_start_date && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">

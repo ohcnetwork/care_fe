@@ -10,7 +10,7 @@ import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
-import React, { useCallback, useReducer, useState } from "react";
+import { useCallback, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -37,6 +37,7 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
+import { Cancel, CheckCircle } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -129,6 +130,7 @@ export const UserAdd = (props: UserProps) => {
   const [selectedFacility, setSelectedFacility] = useState<
     FacilityModel[] | null
   >([]);
+  const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -256,7 +258,7 @@ export const UserAdd = (props: UserProps) => {
       }
       setIsStateLoading(false);
     },
-    [dispatchAction]
+    [dispatchAction, username]
   );
 
   useAbortableEffect(
@@ -553,7 +555,7 @@ export const UserAdd = (props: UserProps) => {
                 />
               </div>
 
-              <div className="col-span-2">
+              <div className="md:col-span-2">
                 <InputLabel>Facilities</InputLabel>
                 {userType === "Staff" || userType === "StaffReadOnly" ? (
                   <MultiSelectField
@@ -586,7 +588,32 @@ export const UserAdd = (props: UserProps) => {
                   margin="dense"
                   onChange={handleChange}
                   errors={state.errors.username}
+                  onFocus={() => setUsernameInputInFocus(true)}
+                  onBlur={() => setUsernameInputInFocus(false)}
                 />
+
+                {usernameInputInFocus && (
+                  <div className="pl-2 text-small text-gray-500">
+                    <div>
+                      {state.form.username?.length < 2 ? (
+                        <Cancel fontSize="inherit" color="error" />
+                      ) : (
+                        <CheckCircle fontSize="inherit" color="primary" />
+                      )}{" "}
+                      username should be atleast 2 characters long
+                    </div>
+                    <div>
+                      {!/[^.@+_-]/.test(
+                        state.form.username[state.form.username?.length - 1]
+                      ) ? (
+                        <Cancel fontSize="inherit" color="error" />
+                      ) : (
+                        <CheckCircle fontSize="inherit" color="primary" />
+                      )}{" "}
+                      username can't end with ^ . @ + _ -
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
