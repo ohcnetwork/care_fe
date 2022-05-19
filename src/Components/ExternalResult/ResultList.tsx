@@ -383,45 +383,40 @@ export default function ResultList() {
             </dl>
           </div>
         </div>
-        <div>
-          <div>
-            <div className="text-sm font-semibold mb-2">Search by Name</div>
-            <InputSearchBox
-              search={searchByName}
-              value={qParams.name || ""}
-              placeholder="Search by Patient Name"
-              errors=""
-            />
+        <div className="w-full">
+          <div className="text-sm font-semibold my-2 lg:my-0 lg:mb-2">
+            Search by Name
           </div>
-          <div>
-            <div className="text-sm font-semibold mt-2">Search by number</div>
-            <InputSearchBox
-              value={qParams.mobile_number || ""}
-              search={searchByPhone}
-              placeholder="Search by Phone Number"
-              errors=""
-            />
-          </div>
+          <InputSearchBox
+            search={searchByName}
+            value={qParams.name || ""}
+            placeholder="Search by Patient Name"
+            errors=""
+          />
+          <div className="text-sm font-semibold my-2">Search by number</div>
+          <InputSearchBox
+            value={qParams.mobile_number || ""}
+            search={searchByPhone}
+            placeholder="Search by Phone Number"
+            errors=""
+          />
         </div>
-        <div className="flex flex-col justify-between">
-          <div className="flex">
+        <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
+          <div className="flex justify-end gap-2">
             <div
-              className="btn mt-8 ml-auto btn-primary"
+              className="btn btn-primary"
               onClick={(_) => navigate("external_results/upload")}
             >
               Upload List
             </div>
-            <div
-              className="btn mt-8 ml-4 gap-2 btn-primary"
-              onClick={triggerDownload}
-            >
+            <div className="btn btn-primary" onClick={triggerDownload}>
               <span>
                 <GetAppIcon className="cursor-pointer" />
                 Export
               </span>
             </div>
           </div>
-          <div className="flex ml-auto  gap-2">
+          <div className="flex justify-end items-center gap-2">
             <button
               className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
               onClick={(_) => setShowFilters((show) => !show)}
