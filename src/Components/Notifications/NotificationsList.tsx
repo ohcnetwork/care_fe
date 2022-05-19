@@ -273,8 +273,8 @@ export default function ResultList({
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div>
-        <h5> No Results Found</h5>
+      <div className="px-4 pt-3 lg:px-8">
+        <h5> No Results Found </h5>
       </div>
     );
   }
