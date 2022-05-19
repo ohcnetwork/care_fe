@@ -285,9 +285,7 @@ export default function ShiftingBoard({
     accept: "shift-card",
     drop: (item: any) => {
       if (item.status !== board) {
-        navigate(
-          `http://localhost:4000/shifting/${item.id}/update?status=${board}`
-        );
+        navigate(`/shifting/${item.id}/update?status=${board}`);
       }
     },
     collect: (monitor) => ({ isOver: !!monitor.isOver() }),
