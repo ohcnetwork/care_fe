@@ -1,4 +1,4 @@
-import { Card, CardContent, Box, Button } from "@material-ui/core";
+import { Card, CardContent, Button } from "@material-ui/core";
 import moment from "moment";
 import loadable from "@loadable/component";
 import { useCallback, useState } from "react";
@@ -14,11 +14,11 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface SampleDetailsProps {
   id: number;
-  patientId?: string;
+  _patientId?: string;
 }
 
 export const SampleDetails = (props: SampleDetailsProps) => {
-  const { id, patientId } = props;
+  const { id, _patientId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [sampleDetails, setSampleDetails] = useState<SampleTestModel>({});
@@ -368,7 +368,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             {sampleDetails.doctor_name && (
               <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
-                  Doctor's Name:{" "}
+                  Doctor&apos;s Name:{" "}
                 </span>
                 {sampleDetails.doctor_name}
               </div>
