@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useCallback, useEffect } from "react";
+import { useReducer, useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -10,7 +10,7 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, updateShift, getUserList } from "../../Redux/actions";
 import { SelectField } from "../Common/HelperInputFields";
@@ -89,6 +89,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState(null);
   const [assignedUserLoading, setAssignedUserLoading] = useState(false);
+  const [qParams, _] = useQueryParams(); //eslint-disable-line @typescript-eslint/no-unused-vars
 
   const shiftFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -130,7 +131,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   }, [dispatchAction, state.form.assigned_to]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
       if (!state.form[field] || !state.form[field].length) {
@@ -163,7 +164,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async () => {
     const validForm = validateForm();
 
     if (validForm) {
@@ -215,12 +216,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         if (res && res.data) {
           const d = res.data;
           d["initial_status"] = res.data.status;
+          d["status"] = qParams.status || res.data.status;
           dispatch({ type: "set_form", form: d });
         }
         setIsLoading(false);
       }
     },
-    [props.id, dispatchAction]
+    [props.id, dispatchAction, qParams.status]
   );
 
   useAbortableEffect(
@@ -469,7 +471,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
-                  onClick={(e) => handleSubmit(e)}
+                  onClick={() => handleSubmit()}
                   startIcon={
                     <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                   }

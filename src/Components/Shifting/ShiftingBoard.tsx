@@ -11,6 +11,8 @@ import moment from "moment";
 import { Modal } from "@material-ui/core";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
+import { useDrag, useDrop } from "react-dnd";
+import classNames from "classnames";
 
 const limit = 14;
 
@@ -36,7 +38,239 @@ const reduceLoading = (action: string, current: any) => {
   }
 };
 
-export default function ListView({
+const ShiftCard = ({ shift, filter }: any) => {
+  const dispatch: any = useDispatch();
+  const [modalFor, setModalFor] = useState({
+    externalId: undefined,
+    loading: false,
+  });
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: "shift-card",
+    item: shift,
+    collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
+  }));
+
+  const handleTransferComplete = (shift: any) => {
+    setModalFor({ ...modalFor, loading: true });
+    dispatch(completeTransfer({ externalId: modalFor })).then(() => {
+      navigate(
+        `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+      );
+    });
+  };
+
+  return (
+    <div
+      ref={drag}
+      className={"w-full mt-2"}
+      style={{ cursor: isDragging ? "grabbing" : "grab" }}
+    >
+      <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
+        <div
+          className={
+            "p-4 h-full flex flex-col justify-between " +
+            (shift.patient_object.disease_status == "POSITIVE"
+              ? "bg-red-50"
+              : "")
+          }
+        >
+          <div>
+            <div className="flex justify-between">
+              <div className="font-bold text-xl capitalize mb-2">
+                {shift.patient_object.name} - {shift.patient_object.age}
+              </div>
+              <div>
+                {shift.emergency && (
+                  <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                    Emergency
+                  </span>
+                )}
+              </div>
+            </div>
+            <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+              <div className="sm:col-span-1">
+                <dt
+                  title="Phone Number"
+                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                >
+                  <i className="fas fa-mobile mr-2" />
+                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                    {shift.patient_object.phone_number || ""}
+                  </dd>
+                </dt>
+              </div>
+              <div className="sm:col-span-1">
+                <dt
+                  title=" Origin facility"
+                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                >
+                  <i className="fas fa-plane-departure mr-2"></i>
+                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                    {(shift.orgin_facility_object || {}).name}
+                  </dd>
+                </dt>
+              </div>
+              <div className="sm:col-span-1">
+                <dt
+                  title="Shifting approving facility"
+                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                >
+                  <i className="fas fa-user-check mr-2"></i>
+                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                    {(shift.shifting_approving_facility_object || {}).name}
+                  </dd>
+                </dt>
+              </div>
+              <div className="sm:col-span-1">
+                <dt
+                  title=" Assigned facility"
+                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                >
+                  <i className="fas fa-plane-arrival mr-2"></i>
+
+                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                    {(shift.assigned_facility_object || {}).name ||
+                      "Yet to be decided"}
+                  </dd>
+                </dt>
+              </div>
+
+              <div className="sm:col-span-1">
+                <dt
+                  title="  Last Modified"
+                  className={
+                    "text-sm leading-5 font-medium flex items-center " +
+                    (moment().subtract(2, "hours").isBefore(shift.modified_date)
+                      ? "text-gray-900"
+                      : "rounded p-1 bg-red-400 text-white")
+                  }
+                >
+                  <i className="fas fa-stopwatch mr-2"></i>
+                  <dd className="font-bold text-sm leading-5">
+                    {moment(shift.modified_date).format("LLL") || "--"}
+                  </dd>
+                </dt>
+              </div>
+
+              <div className="sm:col-span-1">
+                <dt
+                  title="Patient Address"
+                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                >
+                  <i className="fas fa-home mr-2"></i>
+                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                    {shift.patient_object.address || "--"}
+                  </dd>
+                </dt>
+              </div>
+
+              {shift.assigned_to_object && (
+                <div className="sm:col-span-1">
+                  <dt
+                    title="Assigned to"
+                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                  >
+                    <i className="fas fa-user mr-2"></i>
+                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                      {shift.assigned_to_object.first_name}{" "}
+                      {shift.assigned_to_object.last_name} -{" "}
+                      {shift.assigned_to_object.user_type}
+                    </dd>
+                  </dt>
+                </div>
+              )}
+
+              <div className="sm:col-span-1">
+                <dt
+                  title="Patient State"
+                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                >
+                  <i className="fas fa-thumbtack mr-2"></i>
+                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                    {shift.patient_object.state_object.name || "--"}
+                  </dd>
+                </dt>
+              </div>
+            </dl>
+          </div>
+
+          <div className="mt-2 flex">
+            <button
+              onClick={() => navigate(`/shifting/${shift.external_id}`)}
+              className="btn w-full btn-default bg-white mr-2"
+            >
+              <i className="fas fa-eye mr-2" /> All Details
+            </button>
+          </div>
+          {filter === "TRANSFER IN PROGRESS" && shift.assigned_facility && (
+            <div className="mt-2">
+              <Button
+                size="small"
+                variant="outlined"
+                fullWidth
+                onClick={() => setModalFor(shift.external_id)}
+              >
+                TRANSFER TO RECEIVING FACILITY
+              </Button>
+
+              <Modal
+                open={modalFor === shift.external_id}
+                onClose={() =>
+                  setModalFor({ externalId: undefined, loading: false })
+                }
+              >
+                <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+                  <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
+                    <div className="mb-4">
+                      <h1 className="text-2xl">Confirm Transfer Complete!</h1>
+                    </div>
+                    <div className="mb-8">
+                      <p>
+                        Are you sure you want to mark this transfer as complete?
+                        The Origin facility will no longer have access to this
+                        patient
+                      </p>
+                      <p className="mt-2 text-yellow-600">
+                        Note: You will be redirected to create consultation
+                        form. Please complete the form to finish the transfer
+                        process
+                      </p>
+                    </div>
+                    <div className="flex gap-2 justify-center">
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        fullWidth
+                        onClick={() => {
+                          setModalFor({
+                            externalId: undefined,
+                            loading: false,
+                          });
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        fullWidth
+                        onClick={() => handleTransferComplete(shift)}
+                      >
+                        Confirm
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </Modal>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function ShiftingBoard({
   board,
   filterProp,
   formatFilter,
@@ -47,10 +281,17 @@ export default function ListView({
   const [totalCount, setTotalCount] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState({ board: false, more: false });
-  const [modalFor, setModalFor] = useState({
-    externalId: undefined,
-    loading: false,
-  });
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: "shift-card",
+    drop: (item: any) => {
+      if (item.status !== board) {
+        navigate(
+          `http://localhost:4000/shifting/${item.id}/update?status=${board}`
+        );
+      }
+    },
+    collect: (monitor) => ({ isOver: !!monitor.isOver() }),
+  }));
 
   const fetchData = () => {
     setIsLoading((loading) => reduceLoading("BOARD", loading));
@@ -119,230 +360,22 @@ export default function ListView({
     });
   };
 
-  const handleTransferComplete = (shift: any) => {
-    setModalFor({ ...modalFor, loading: true });
-    dispatch(completeTransfer({ externalId: modalFor })).then(() => {
-      navigate(
-        `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
-      );
-    });
-  };
-
-  let patientFilter = (filter: string) => {
+  const patientFilter = (filter: string) => {
     return data
       .filter(({ status }) => status === filter)
-      .map((shift: any, idx: number) => (
-        <div key={`shift_${shift.id}`} className="w-full mt-2 ">
-          <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
-            <div
-              className={
-                "p-4 h-full flex flex-col justify-between " +
-                (shift.patient_object.disease_status == "POSITIVE"
-                  ? "bg-red-50"
-                  : "")
-              }
-            >
-              <div>
-                <div className="flex justify-between">
-                  <div className="font-bold text-xl capitalize mb-2">
-                    {shift.patient_object.name} - {shift.patient_object.age}
-                  </div>
-                  <div>
-                    {shift.emergency && (
-                      <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
-                        Emergency
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
-                  <div className="sm:col-span-1">
-                    <dt
-                      title="Phone Number"
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                    >
-                      <i className="fas fa-mobile mr-2" />
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
-                        {shift.patient_object.phone_number || ""}
-                      </dd>
-                    </dt>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt
-                      title=" Origin facility"
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                    >
-                      <i className="fas fa-plane-departure mr-2"></i>
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
-                        {(shift.orgin_facility_object || {}).name}
-                      </dd>
-                    </dt>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt
-                      title="Shifting approving facility"
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                    >
-                      <i className="fas fa-user-check mr-2"></i>
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
-                        {(shift.shifting_approving_facility_object || {}).name}
-                      </dd>
-                    </dt>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt
-                      title=" Assigned facility"
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                    >
-                      <i className="fas fa-plane-arrival mr-2"></i>
-
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
-                        {(shift.assigned_facility_object || {}).name ||
-                          "Yet to be decided"}
-                      </dd>
-                    </dt>
-                  </div>
-
-                  <div className="sm:col-span-1">
-                    <dt
-                      title="  Last Modified"
-                      className={
-                        "text-sm leading-5 font-medium flex items-center " +
-                        (moment()
-                          .subtract(2, "hours")
-                          .isBefore(shift.modified_date)
-                          ? "text-gray-900"
-                          : "rounded p-1 bg-red-400 text-white")
-                      }
-                    >
-                      <i className="fas fa-stopwatch mr-2"></i>
-                      <dd className="font-bold text-sm leading-5">
-                        {moment(shift.modified_date).format("LLL") || "--"}
-                      </dd>
-                    </dt>
-                  </div>
-
-                  <div className="sm:col-span-1">
-                    <dt
-                      title="Patient Address"
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                    >
-                      <i className="fas fa-home mr-2"></i>
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
-                        {shift.patient_object.address || "--"}
-                      </dd>
-                    </dt>
-                  </div>
-
-                  {shift.assigned_to_object && (
-                    <div className="sm:col-span-1">
-                      <dt
-                        title="Assigned to"
-                        className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                      >
-                        <i className="fas fa-user mr-2"></i>
-                        <dd className="font-bold text-sm leading-5 text-gray-900">
-                          {shift.assigned_to_object.first_name}{" "}
-                          {shift.assigned_to_object.last_name} -{" "}
-                          {shift.assigned_to_object.user_type}
-                        </dd>
-                      </dt>
-                    </div>
-                  )}
-
-                  <div className="sm:col-span-1">
-                    <dt
-                      title="Patient State"
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                    >
-                      <i className="fas fa-thumbtack mr-2"></i>
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
-                        {shift.patient_object.state_object.name || "--"}
-                      </dd>
-                    </dt>
-                  </div>
-                </dl>
-              </div>
-
-              <div className="mt-2 flex">
-                <button
-                  onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
-                  className="btn w-full btn-default bg-white mr-2"
-                >
-                  <i className="fas fa-eye mr-2" /> All Details
-                </button>
-              </div>
-              {filter === "TRANSFER IN PROGRESS" && shift.assigned_facility && (
-                <div className="mt-2">
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => setModalFor(shift.external_id)}
-                  >
-                    TRANSFER TO RECEIVING FACILITY
-                  </Button>
-
-                  <Modal
-                    open={modalFor === shift.external_id}
-                    onClose={(_) =>
-                      setModalFor({ externalId: undefined, loading: false })
-                    }
-                  >
-                    <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                      <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
-                        <div className="mb-4">
-                          <h1 className="text-2xl">
-                            Confirm Transfer Complete!
-                          </h1>
-                        </div>
-                        <div className="mb-8">
-                          <p>
-                            Are you sure you want to mark this transfer as
-                            complete? The Origin facility will no longer have
-                            access to this patient
-                          </p>
-                          <p className="mt-2 text-yellow-600">
-                            Note: You will be redirected to create consultation
-                            form. Please complete the form to finish the
-                            transfer process
-                          </p>
-                        </div>
-                        <div className="flex gap-2 justify-center">
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            fullWidth
-                            onClick={() => {
-                              setModalFor({
-                                externalId: undefined,
-                                loading: false,
-                              });
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            fullWidth
-                            onClick={(_) => handleTransferComplete(shift)}
-                          >
-                            Confirm
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Modal>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+      .map((shift: any) => (
+        <ShiftCard key={`shift_${shift.id}`} shift={shift} filter={filter} />
       ));
   };
+
   return (
-    <div className="bg-gray-200 mr-2 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
+    <div
+      ref={drop}
+      className={classNames(
+        "bg-gray-200 mr-2 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md",
+        { "cursor-move": isOver }
+      )}
+    >
       <div className="sticky top-0 pt-2 bg-gray-200 rounded z-10">
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">
@@ -382,7 +415,7 @@ export default function ListView({
             </div>
           ) : (
             <button
-              onClick={(_) => handlePagination(currentPage + 1, limit)}
+              onClick={() => handlePagination(currentPage + 1, limit)}
               className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white"
             >
               More...
