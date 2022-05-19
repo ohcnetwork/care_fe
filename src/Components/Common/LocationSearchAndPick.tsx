@@ -10,7 +10,7 @@ const KEYS = {
   ENTER_KEY: 13,
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((_theme) => ({
   locationItem: {
     border: "1px solid #C4C4CD",
     cursor: "pointer",
@@ -49,7 +49,7 @@ export const LocationSearchAndPick = (props: LocationSearchAndPickProps) => {
   }, [props.latitude, props.longitude]);
 
   const geocode = async (address: string) => {
-    const endpoint: string = "https://nominatim.openstreetmap.org/search";
+    const endpoint = "https://nominatim.openstreetmap.org/search";
     await axios.get(`${endpoint}?format=json&q=${address}`).then((res: any) => {
       setLocationSearchResults(res.data);
       setIsLocationSearchInProgress(false);
