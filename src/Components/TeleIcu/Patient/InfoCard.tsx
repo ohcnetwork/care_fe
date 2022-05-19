@@ -3,6 +3,9 @@ import { GENDER } from "../../../Common/constants";
 import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { RightArrowIcon } from "../Icons/ArrowIcon";
+import { Modal } from "@material-ui/core";
+import Beds from "../../Facility/Consultations/Beds";
+import { useState } from "react";
 
 export interface ITeleICUPatientInfoCardProps {
   patient: PatientModel;
@@ -11,14 +14,36 @@ export interface ITeleICUPatientInfoCardProps {
 export default function TeleICUPatientInfoCard({
   patient,
 }: ITeleICUPatientInfoCardProps) {
+  const [open, setOpen] = useState(false);
+  console.log(patient);
   return (
     <section className="flex items-stretch my-2 lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2">
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <div className="bg-white md:w-4/5 p-4 mx-auto ">
+          {patient?.facility &&
+          patient?.id &&
+          patient?.last_consultation?.id ? (
+            <Beds
+              facilityId={patient?.facility}
+              patientId={patient?.id}
+              consultationId={patient?.last_consultation?.id}
+            />
+          ) : (
+            <div>Invalid Patient Data</div>
+          )}
+        </div>
+      </Modal>
       <div className="bg-white border-b p-5 flex items-center lg:w-7/12 w-full">
-        <img
-          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full self-start object-cover"
-          src="/images/empty_avatar.jpg"
-          alt="Avatar"
-        />
+        {patient.blood_group && (
+          <div className="flex flex-col items-center ">
+            <div className="text-2xl border border-cool-gray-300 rounded-full font-semibold items-center m-2 h-20 w-20 flex justify-center">
+              {patient.blood_group === "UNKNOWN" ? "?" : patient.blood_group}
+            </div>
+            <span className="font-light text-primary-600 text-xs mr-1">
+              Blood Group
+            </span>
+          </div>
+        )}
         <div className="pl-4">
           <p className="sm:text-xl md:text-4xl font-semibold ml-1">
             {patient.name}
@@ -33,15 +58,25 @@ export default function TeleICUPatientInfoCard({
             <span className="mx-2">•</span>
             <span>{patient.gender && GENDER[patient.gender]}</span>
           </p>
-          <div className="text-sm flex flex-wrap">
-            {patient.blood_group && (
+          <div className="text-sm flex flex-wrap items-center">
+            {!patient.last_consultation?.current_bed ? (
+              <button
+                className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
+                onClick={() => setOpen(true)}
+              >
+                Assign Bed
+              </button>
+            ) : (
               <div className="m-1">
-                <span className="font-light text-primary-600 text-xs mr-1">
-                  Blood Group
-                </span>
                 <span className="sm:text-base font-semibold text-sm mr-2">
-                  {patient.blood_group}
+                  {patient.last_consultation?.current_bed?.bed_object?.name}
                 </span>
+                <button
+                  className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
+                  onClick={() => setOpen(true)}
+                >
+                  Switch Bed
+                </button>
               </div>
             )}
             {patient.last_consultation?.weight && (
