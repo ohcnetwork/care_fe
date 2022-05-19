@@ -66,7 +66,30 @@ const selectLocalBody = [
 ];
 const initialWards = [{ id: 0, name: "Choose Ward", number: 0 }];
 
-const initForm: any = {
+type FacilityForm = {
+  facility_type: string;
+  name: string;
+  state: string;
+  district: string;
+  local_body: string;
+  ward: string;
+  kasp_empanelled: string;
+  address: string;
+  phone_number: string;
+  latitude: string;
+  longitude: string;
+  pincode: string;
+  oxygen_capacity: string;
+  type_b_cylinders: string;
+  type_c_cylinders: string;
+  type_d_cylinders: string;
+  expected_oxygen_requirement: string;
+  expected_type_b_cylinders: string;
+  expected_type_c_cylinders: string;
+  expected_type_d_cylinders: string;
+};
+
+const initForm: FacilityForm = {
   facility_type: "2",
   name: "",
   state: "",
