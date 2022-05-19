@@ -112,7 +112,7 @@ const initForm: FacilityForm = {
   expected_type_d_cylinders: "",
 };
 
-const initError = Object.assign(
+const initError: Record<string, string> = Object.assign(
   {},
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
@@ -122,34 +122,29 @@ const initialState = {
   errors: { ...initError },
 };
 
-const facility_create_reducer = (state = initialState, action: any) => {
+type SetFormAction = { type: "set_form"; form: FacilityForm };
+type SetErrorAction = { type: "set_error"; errors: Record<string, string> };
+type FacilityCreateFormAction = SetFormAction | SetErrorAction;
+
+const facilityCreateReducer = (
+  state = initialState,
+  action: FacilityCreateFormAction
+) => {
   switch (action.type) {
-    case "set_form": {
-      return {
-        ...state,
-        form: action.form,
-      };
-    }
-    case "set_error": {
-      return {
-        ...state,
-        errors: action.errors,
-      };
-    }
-    default:
-      return state;
+    case "set_form":
+      return { ...state, form: action.form };
+    case "set_error":
+      return { ...state, errors: action.errors };
   }
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
+const goBack = () => window.history.go(-1);
 
 export const FacilityCreate = (props: FacilityProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
-  const [state, dispatch] = useReducer(facility_create_reducer, initialState);
+  const [state, dispatch] = useReducer(facilityCreateReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
@@ -290,16 +285,18 @@ export const FacilityCreate = (props: FacilityProps) => {
     [dispatch, fetchData]
   );
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    form[e.target.name] = e.target.value;
-    dispatch({ type: "set_form", form });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [e.target.name]: e.target.value },
+    });
   };
 
-  const handleValueChange = (value: any, name: string) => {
-    const form = { ...state.form };
-    form[name] = value;
-    dispatch({ type: "set_form", form });
+  const handleValueChange = (value: any, field: string) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [field]: value },
+    });
   };
 
   const handleClickLocationPicker = (event: React.MouseEvent) => {
@@ -309,10 +306,14 @@ export const FacilityCreate = (props: FacilityProps) => {
           position.coords.latitude,
           position.coords.longitude,
         ]);
-        const form = { ...state.form };
-        form["latitude"] = position.coords.latitude;
-        form["longitude"] = position.coords.longitude;
-        dispatch({ type: "set_form", form });
+        dispatch({
+          type: "set_form",
+          form: {
+            ...state.form,
+            latitude: String(position.coords.latitude),
+            longitude: String(position.coords.longitude),
+          },
+        });
       });
     }
 
@@ -462,14 +463,16 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
-  const handleLocationSelect = (location: any) => {
-    const form = { ...state.form };
-    const latitude = parseFloat(location.lat);
-    const longitude = parseFloat(location.lon);
-    form["latitude"] = latitude;
-    form["longitude"] = longitude;
-    dispatch({ type: "set_form", form });
-    setMapLoadLocation([latitude, longitude]);
+  const handleLocationSelect = (location: { lat: string; lon: string }) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        latitude: location.lat,
+        longitude: location.lon,
+      },
+    });
+    setMapLoadLocation([parseFloat(location.lat), parseFloat(location.lon)]);
   };
 
   if (isLoading) {
@@ -644,7 +647,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <PhoneNumberField
                   label="Emergency Contact Number*"
                   value={state.form.phone_number}
-                  onChange={(value: any) =>
+                  onChange={(value: string) =>
                     handleValueChange(value, "phone_number")
                   }
                   errors={state.errors.phone_number}
