@@ -23,6 +23,11 @@ export default function TeleICUPatientInfoCard({
           <p className="sm:text-xl md:text-4xl font-semibold ml-1">
             {patient.name}
           </p>
+          {!patient.is_active && (
+            <div className="bg-red-400 text-white inline-block rounded-lg px-2 py-1">
+              Discharged from CARE
+            </div>
+          )}
           <p className="text-sm sm:text-base my-1 ml-1 text-primary-800">
             <span>{patient.age} years</span>
             <span className="mx-2">•</span>
@@ -39,7 +44,7 @@ export default function TeleICUPatientInfoCard({
                 </span>
               </div>
             )}
-            {patient.last_consultation?.weight ? (
+            {patient.last_consultation?.weight && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Weight
@@ -48,10 +53,8 @@ export default function TeleICUPatientInfoCard({
                   {getDimensionOrDash(patient.last_consultation.weight, " kg")}
                 </span>
               </div>
-            ) : (
-              <></>
             )}
-            {patient.last_consultation?.height ? (
+            {patient.last_consultation?.height && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Height
@@ -60,40 +63,34 @@ export default function TeleICUPatientInfoCard({
                   {getDimensionOrDash(patient.last_consultation?.height, "cm")}
                 </span>
               </div>
-            ) : (
-              <></>
             )}
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-x-4 flex-1 gap-y-2">
-        {patient.last_consultation?.id && (
-          <Link
-            href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`}
-            className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
-          >
-            <p className="text-sm sm:text-base px-2 font-semibold">
-              Edit Consultation Details
-            </p>
-            <span>
-              <i className="fas fa-pencil-alt mr-2"></i>
-            </span>
-          </Link>
-        )}
-
-        {patient.last_consultation?.id && (
-          <Link
-            href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/daily-rounds`}
-            className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
-          >
-            <p className="text-sm sm:text-base px-2 font-semibold">
-              Log Update
-            </p>
-            <span>
-              <i className="font-bold fas fa-plus mr-2"></i>
-            </span>
-          </Link>
-        )}
+      <div
+        className={`grid grid-cols-${
+          patient.is_active ? "2" : "1"
+        } gap-x-4 flex-1 gap-y-2`}
+      >
+        {patient.is_active &&
+          patient.last_consultation?.id &&
+          [
+            ["update", "Edit Consultation Details", "pencil-alt"],
+            ["daily-rounds", "Log Update", "plus"],
+          ].map((action, i) => (
+            <Link
+              key={i}
+              href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/${action[0]}`}
+              className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+            >
+              <p className="text-sm sm:text-base px-2 font-semibold">
+                {action[1]}
+              </p>
+              <span>
+                <i className={`fas fa-${action[2]} mr-2`}></i>
+              </span>
+            </Link>
+          ))}
         <Link
           href={`/patient/${patient.id}/investigation_reports`}
           className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
