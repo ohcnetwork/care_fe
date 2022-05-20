@@ -350,6 +350,14 @@ export default function ManageUsers() {
                     <div className="font-semibold">{user.user_type}</div>
                   </div>
                 )}
+                {user.created_by && (
+                  <div className="mt-2">
+                    <div className="text-gray-500 leading-relaxed font-light">
+                      Created by:
+                    </div>
+                    <div className="font-semibold">{user.created_by}</div>
+                  </div>
+                )}
                 {user.local_body_object && (
                   <div className="mt-2">
                     <div className="text-gray-500 leading-relaxed font-light">
