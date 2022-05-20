@@ -1,19 +1,20 @@
 import loadable from "@loadable/component";
 import Grid from "@material-ui/core/Grid";
 import { Button } from "@material-ui/core";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate, useQueryParams } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+// import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
-import { PhoneNumberField } from "../Common/HelperInputFields";
+// import { PhoneNumberField } from "../Common/HelperInputFields";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import moment from "moment";
 import { CSVLink } from "react-csv";
-import { externalResultFormatter } from "./Commons";
+// import { externalResultFormatter } from "./Commons";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
@@ -21,21 +22,21 @@ import { FacilityModel } from "../Facility/models";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-function Badge(props: { color: string; icon: string; text: string }) {
-  return (
-    <span
-      className="m-1 h-full inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
-      title={props.text}
-    >
-      <i
-        className={
-          "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-        }
-      ></i>
-      {props.text}
-    </span>
-  );
-}
+// function Badge(props: { color: string; icon: string; text: string }) {
+//   return (
+//     <span
+//       className="m-1 h-full inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+//       title={props.text}
+//     >
+//       <i
+//         className={
+//           "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
+//         }
+//       ></i>
+//       {props.text}
+//     </span>
+//   );
+// }
 
 const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
@@ -49,6 +50,8 @@ export default function ResultList() {
   const [qParams, setQueryParams] = useQueryParams();
   const [showFilters, setShowFilters] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
@@ -57,11 +60,11 @@ export default function ResultList() {
     lsgList: [],
     wardList: [],
   });
-
   let manageResults: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
-    localStorage.getItem("lsg-ward-data") || '{"lsgList": [], "wardList": []}'
+    localStorage.getItem("lsg-ward-data") ||
+      JSON.stringify({ lsgList: [], wardList: [] })
   );
 
   useEffect(() => {
@@ -135,9 +138,9 @@ export default function ResultList() {
     updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
 
-  const handleFilter = (value: string) => {
-    updateQuery({ disease_status: value, page: 1 });
-  };
+  // const handleFilter = (value: string) => {
+  //   updateQuery({ disease_status: value, page: 1 });
+  // };
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
@@ -212,11 +215,15 @@ export default function ResultList() {
   };
 
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res?.data);
-    document.getElementById(`downloadCSV`)?.click();
+    document.getElementById("downloadCSV")?.click();
   };
 
   const badge = (key: string, value: any, paramKey: string) => {
@@ -228,7 +235,7 @@ export default function ResultList() {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -247,7 +254,7 @@ export default function ResultList() {
           {value.name}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) =>
+            onClick={() =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
                 : paramKey === "wards"
@@ -262,7 +269,7 @@ export default function ResultList() {
 
   let resultList: any[] = [];
   if (data && data.length) {
-    resultList = data.map((result: any, idx: number) => {
+    resultList = data.map((result: any) => {
       const resultUrl = `/external_results/${result.id}`;
       return (
         <tr key={`usr_${result.id}`} className="bg-white">
@@ -412,11 +419,17 @@ export default function ResultList() {
               Upload List
             </div>
             <div
-              className="btn mt-8 ml-4 gap-2 btn-primary"
+              className={`btn mt-8 ml-4 gap-2 btn-primary ${
+                downloadLoading ? "pointer-events-none" : ""
+              }`}
               onClick={triggerDownload}
             >
-              <span>
-                <GetAppIcon className="cursor-pointer" />
+              <span className="flex flex-row justify-center">
+                {downloadLoading ? (
+                  <CircularProgress className="w-5 h-5 mr-1 text-white" />
+                ) : (
+                  <GetAppIcon className="cursor-pointer" />
+                )}
                 Export
               </span>
             </div>
@@ -510,7 +523,7 @@ export default function ResultList() {
         filename={`external-result--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`downloadCSV`}
+        id={"downloadCSV"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
