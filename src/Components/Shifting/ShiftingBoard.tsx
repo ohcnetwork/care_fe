@@ -10,6 +10,7 @@ import { navigate } from "raviger";
 import moment from "moment";
 import { Modal } from "@material-ui/core";
 import { CSVLink } from "react-csv";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
 const limit = 14;
@@ -47,6 +48,8 @@ export default function ListView({
   const [totalCount, setTotalCount] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState({ board: false, more: false });
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -66,12 +69,16 @@ export default function ListView({
     });
   };
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       downloadShiftRequests({
         ...formatFilter({ ...filterProp, status: board }),
         csv: 1,
       })
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById(`shiftRequests-${board}`)?.click();
   };
@@ -128,10 +135,10 @@ export default function ListView({
     });
   };
 
-  let patientFilter = (filter: string) => {
+  const patientFilter = (filter: string) => {
     return data
       .filter(({ status }) => status === filter)
-      .map((shift: any, idx: number) => (
+      .map((shift: any) => (
         <div key={`shift_${shift.id}`} className="w-full mt-2 ">
           <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
             <div
@@ -347,7 +354,14 @@ export default function ListView({
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">
             {renderBoardTitle(board)}{" "}
-            <GetAppIcon className="cursor-pointer" onClick={triggerDownload} />
+            {downloadLoading ? (
+              <CircularProgress className="w-6 h-6 ml-2 text-black" />
+            ) : (
+              <GetAppIcon
+                className="cursor-pointer"
+                onClick={triggerDownload}
+              />
+            )}
           </h3>
           <span className="rounded-lg ml-2 bg-primary-500 text-white px-2">
             {totalCount || "0"}
