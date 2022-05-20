@@ -82,7 +82,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     ""
   )}`;
   const path = usePath();
-  const url = path.split("/");
+  const url = path.replaceAll("/", "");
 
   const active = menus.reduce((acc, menu) => {
     const tag = menu.link.replaceAll("/", "");

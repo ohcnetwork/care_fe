@@ -212,6 +212,47 @@ export const updateFacilityBed = (
     }
   );
 
+// Consultation Beds
+export const listConsultationBeds = (params: object) =>
+  fireRequest("listConsultationBeds", [], params, {});
+export const createConsultationBed = (
+  params: object,
+  consultation_id: number,
+  bed_id: string
+) =>
+  fireRequest(
+    "createConsultationBed",
+    [],
+    { ...params, consultation: consultation_id, bed: bed_id },
+    {}
+  );
+
+export const getConsultationBed = (
+  consultation_external_id: string,
+  bed_id: string,
+  external_id: string
+) =>
+  fireRequest(
+    "getConsultationBed",
+    [],
+    { consultation: consultation_external_id, bed: bed_id },
+    { external_id }
+  );
+export const updateConsultationBed = (
+  params: object,
+  consultation_external_id: string,
+  external_id: string,
+  bed_id: string
+) =>
+  fireRequest(
+    "updateConsultationBed",
+    [],
+    { ...params, consultation: consultation_external_id, bed: bed_id },
+    {
+      external_id,
+    }
+  );
+
 // Download Actions
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");
