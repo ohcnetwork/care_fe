@@ -1,16 +1,21 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useQueryParams, navigate } from "raviger";
 import ListFilter from "./ListFilter";
-import ResourceBoard from "./ResourceBoard";
+import ResourceBoard, { reduceLoading } from "./ResourceBoard";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { InputSearchBox } from "../Common/SearchBox";
-import { downloadResourceRequests } from "../../Redux/actions";
+import {
+  downloadResourceRequests,
+  listResourceRequests,
+  updateResource,
+} from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import moment from "moment";
 import GetAppIcon from "@material-ui/icons/GetApp";
+import { DragDropContext } from "@react-forked/dnd";
 
 import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
@@ -34,6 +39,7 @@ export default function BoardView() {
   const [downloadFile, setDownloadFile] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [boardsData, setBoardsData] = useState<any[]>([]);
 
   const local = useMemo(
     () => JSON.parse(localStorage.getItem("resource-filters") || "{}"),
@@ -80,6 +86,37 @@ export default function BoardView() {
   const onListViewBtnClick = () => {
     navigate("/resource/list-view", qParams);
     localStorage.setItem("defaultResourceView", "list");
+  };
+
+  // updating the drag and drop backend
+
+  const updateResourceOrder = (result: any) => {
+    //   dispatch(
+    //     listResourceRequests()
+    //   ).then((res: any) => {
+    //     if (res && res.data) {
+    //       setBoardsData(res.data.results);
+    //     }
+    //     setIsLoading((loading) => reduceLoading("COMPLETE", loading));
+    //   });
+
+    //   let currentResource =
+
+    //   boardFilter.filter((board) => {board.id = })
+
+    dispatch(
+      updateResource(
+        result.resource.id,
+        formatFilter({ ...result.resource, status: result.resource.board })
+      )
+    ).then((res: any) => {
+      if (res && res.data) {
+        // update here
+        setBoardFilter({ ...boardFilter }); //, result.resource);
+      }
+      setIsLoading((loading) => reduceLoading("COMPLETE", loading));
+    });
+    console.log("New value: ", result.resource);
   };
 
   return (
@@ -138,27 +175,29 @@ export default function BoardView() {
           </button>
         </div>
       </div>
-
       <BadgesList
         appliedFilters={appliedFilters}
         local={local}
         updateFilter={updateFilter}
       />
-
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
         {isLoading ? (
           <Loading />
         ) : (
-          boardFilter.map((board) => (
-            <ResourceBoard
-              key={board}
-              filterProp={qParams}
-              board={board}
-              formatFilter={formatFilter}
-            />
-          ))
+          // drag and drop feature
+          <DragDropContext onDragEnd={updateResourceOrder}>
+            {boardFilter.map((board) => (
+              <ResourceBoard
+                key={board}
+                filterProp={qParams}
+                board={board}
+                formatFilter={formatFilter}
+              />
+            ))}
+          </DragDropContext>
         )}
       </div>
+
       <CSVLink
         data={downloadFile}
         filename={`resource-requests--${now}.csv`}
