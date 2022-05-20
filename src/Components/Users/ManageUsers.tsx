@@ -23,6 +23,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
+import UserDetails from "../Common/UserDetails";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -343,46 +344,32 @@ export default function ManageUsers() {
                 </div>
 
                 {user.user_type && (
-                  <div className="mt-2">
-                    <div className="text-gray-500 leading-relaxed font-light">
-                      Role:
-                    </div>
+                  <UserDetails title="Role">
                     <div className="font-semibold">{user.user_type}</div>
-                  </div>
+                  </UserDetails>
                 )}
                 {user.created_by && (
-                  <div className="mt-2">
-                    <div className="text-gray-500 leading-relaxed font-light">
-                      Created by:
-                    </div>
+                  <UserDetails title="Created by">
                     <div className="font-semibold">{user.created_by}</div>
-                  </div>
+                  </UserDetails>
                 )}
                 {user.local_body_object && (
-                  <div className="mt-2">
-                    <div className="text-gray-500 leading-relaxed font-light">
-                      Location:
-                    </div>
+                  <UserDetails title="Location">
                     <div className="font-semibold">
                       {user.local_body_object.name}
                     </div>
-                  </div>
+                  </UserDetails>
                 )}
                 {user.district_object && (
-                  <div className="mt-2">
-                    <div className="text-gray-500 leading-relaxed font-light">
-                      District:
-                    </div>
+                  <UserDetails title="District">
                     <div className="font-semibold">
                       {user.district_object.name}
                     </div>
-                  </div>
+                  </UserDetails>
                 )}
+
                 {user.username && (
-                  <div className="mt-2">
-                    <div className="text-gray-500 leading-relaxed font-light">
-                      Facilities:
-                    </div>
+                  <UserDetails title="Facilities">
                     {user.facilities &&
                       showFacilities(user.username, user.facilities)}
                     {!user.facilities && (
@@ -394,7 +381,7 @@ export default function ManageUsers() {
                         Click here to show
                       </a>
                     )}
-                  </div>
+                  </UserDetails>
                 )}
               </div>
               {user.phone_number && (
