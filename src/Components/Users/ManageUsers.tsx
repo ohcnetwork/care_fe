@@ -298,8 +298,10 @@ export default function ManageUsers() {
   };
 
   let userList: any[] = [];
-  if (users && users.length) {
-    userList = users.map((user: any) => {
+
+  users &&
+    users.length &&
+    (userList = users.map((user: any) => {
       return (
         <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
@@ -414,8 +416,7 @@ export default function ManageUsers() {
           </div>
         </div>
       );
-    });
-  }
+    }));
 
   if (isLoading || !users) {
     manageUsers = <Loading />;
