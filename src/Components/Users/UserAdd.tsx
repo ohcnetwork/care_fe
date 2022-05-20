@@ -16,6 +16,7 @@ import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateEmailAddress,
+  validateName,
   validatePassword,
   validateUsername,
 } from "../../Common/validation";
@@ -340,6 +341,19 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
+        case "first_name":
+        case "last_name":
+          if (!state.form[field]) {
+            errors[field] = `${field
+              .split("_")
+              .map((word) => word[0].toUpperCase() + word.slice(1))
+              .join(" ")} is required`;
+            invalidForm = true;
+          } else if (!validateName(state.form[field])) {
+            errors[field] = "Please enter a valid name";
+            invalidForm = true;
+          }
+          return;
         case "gender":
           if (!state.form[field]) {
             errors[field] = "Please select the Gender";
@@ -610,7 +624,7 @@ export const UserAdd = (props: UserProps) => {
                       ) : (
                         <CheckCircle fontSize="inherit" color="primary" />
                       )}{" "}
-                      username can't end with ^ . @ + _ -
+                      {"username can't end with ^ . @ + _ -"}
                     </div>
                   </div>
                 )}
@@ -661,7 +675,7 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <InputLabel>First name</InputLabel>
+                <InputLabel>First name*</InputLabel>
                 <TextInputField
                   fullWidth
                   name="first_name"
@@ -674,7 +688,7 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <InputLabel>Last name</InputLabel>
+                <InputLabel>Last name*</InputLabel>
                 <TextInputField
                   fullWidth
                   name="last_name"
