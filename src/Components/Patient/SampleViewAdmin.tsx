@@ -53,6 +53,8 @@ export default function SampleViewAdmin() {
   const [fetchFlag, callFetchData] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [facilityName, setFacilityName] = useState("");
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
     sample: SampleTestModel;
@@ -113,7 +115,11 @@ export default function SampleViewAdmin() {
   );
 
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(downloadSampleTests({ ...qParams }));
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById("download-sample-tests")?.click();
   };
@@ -418,10 +424,14 @@ export default function SampleViewAdmin() {
         className="mx-3 md:mx-8"
         breadcrumbs={false}
         componentRight={
-          <GetAppIcon
-            className="cursor-pointer mt-2 ml-2"
-            onClick={triggerDownload}
-          />
+          downloadLoading ? (
+            <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
+          ) : (
+            <GetAppIcon
+              className="cursor-pointer mt-2 ml-2"
+              onClick={triggerDownload}
+            />
+          )
         }
       />
       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
