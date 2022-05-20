@@ -15,9 +15,9 @@ import {
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import Pagination from "../Common/Pagination";
-import { Modal, Button } from "@material-ui/core";
+import { Modal, Button, CircularProgress } from "@material-ui/core";
 
-import { limit, formatFilter, badge } from "./Commons";
+import { limit, formatFilter } from "./Commons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -34,6 +34,8 @@ export default function ListView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -52,11 +54,15 @@ export default function ListView() {
   }, []);
 
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-ALL`)?.click();
+    document.getElementById("shiftRequests-ALL")?.click();
   };
 
   const updateQuery = (filter: any) => {
@@ -145,7 +151,7 @@ export default function ListView() {
     localStorage.setItem("shift-filters", JSON.stringify(local));
   };
 
-  let showShiftingCardList = (data: any) => {
+  const showShiftingCardList = (data: any) => {
     if (data && !data.length) {
       return (
         <div className="flex flex-1 justify-center text-gray-600 mt-64">
@@ -351,10 +357,14 @@ export default function ListView() {
           title={"Shifting"}
           hideBack={true}
           componentRight={
-            <GetAppIcon
-              className="cursor-pointer mt-2 ml-2"
-              onClick={triggerDownload}
-            />
+            downloadLoading ? (
+              <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
+            ) : (
+              <GetAppIcon
+                className="cursor-pointer mt-2 ml-2"
+                onClick={triggerDownload}
+              />
+            )
           }
           breadcrumbs={false}
         />
@@ -437,7 +447,7 @@ export default function ListView() {
         filename={`shift-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`shiftRequests-ALL`}
+        id={"shiftRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
