@@ -10,6 +10,7 @@ import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import moment from "moment";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
 import BadgesList from "./BadgesList";
@@ -34,6 +35,8 @@ export default function BoardView() {
   const [downloadFile, setDownloadFile] = useState("");
   // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(false);
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   const local = useMemo(
@@ -71,9 +74,13 @@ export default function BoardView() {
   };
 
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById("resourceRequests-ALL")?.click();
   };
@@ -90,10 +97,14 @@ export default function BoardView() {
           title={"Resource"}
           hideBack={true}
           componentRight={
-            <GetAppIcon
-              className="cursor-pointer mt-2 ml-2"
-              onClick={triggerDownload}
-            />
+            downloadLoading ? (
+              <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
+            ) : (
+              <GetAppIcon
+                className="cursor-pointer mt-2 ml-2"
+                onClick={triggerDownload}
+              />
+            )
           }
           breadcrumbs={false}
         />
