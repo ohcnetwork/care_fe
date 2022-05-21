@@ -214,9 +214,10 @@ export default function ResultList(
       return (
         <div
           key={`usr_${result.id}`}
-          onClick={() =>
-            navigate(resultUrl(result.event, result.caused_objects))
-          }
+          onClick={() => {
+            navigate(resultUrl(result.event, result.caused_objects));
+            setShowNotifications(false);
+          }}
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
         >
           <div className="text-lg font-bold">
