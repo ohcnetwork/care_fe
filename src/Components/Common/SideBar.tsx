@@ -173,6 +173,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               <Link
                 key={item.title}
                 href={item.link}
+                onClick={() => setIsOpen(false)}
                 className={clsx(
                   "flex justify-items-start items-center overflow-hidden w-10 py-1 my-1 hover:bg-primary-700 hover:text-white rounded transition-all duration-300",
                   active === item.link.replaceAll("/", "")
@@ -197,7 +198,10 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               </Link>
             );
           })}
-          <NotificationsList expanded={expanded} />
+          <NotificationsList
+            expanded={expanded}
+            onClickCB={() => setIsOpen(false)}
+          />
 
           <a
             key="dashboard"
