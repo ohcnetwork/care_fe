@@ -20,9 +20,12 @@ import { useTranslation } from "react-i18next";
 const RESULT_LIMIT = 14;
 
 export default function ResultList(
-  props: { expanded: boolean } = { expanded: false }
+  props: {
+    expanded: boolean;
+    onClickCB?: () => void;
+  } = { expanded: false }
 ) {
-  const { expanded } = props;
+  const { expanded, onClickCB } = props;
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
@@ -216,6 +219,7 @@ export default function ResultList(
           key={`usr_${result.id}`}
           onClick={() => {
             navigate(resultUrl(result.event, result.caused_objects));
+            onClickCB && onClickCB();
             setShowNotifications(false);
           }}
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
