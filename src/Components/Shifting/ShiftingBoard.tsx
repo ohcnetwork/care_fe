@@ -60,12 +60,14 @@ const ShiftCard = ({ shift, filter }: any) => {
   };
 
   return (
-    <div
-      ref={drag}
-      className={"w-full mt-2"}
-      style={{ cursor: isDragging ? "grabbing" : "grab" }}
-    >
-      <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
+    <div ref={drag} className={"w-full mt-2"}>
+      <div
+        className="overflow-hidden shadow rounded-lg bg-white h-full mx-2"
+        style={{
+          opacity: isDragging ? 0.2 : 1,
+          cursor: isDragging ? "grabbing" : "grab",
+        }}
+      >
         <div
           className={
             "p-4 h-full flex flex-col justify-between " +
