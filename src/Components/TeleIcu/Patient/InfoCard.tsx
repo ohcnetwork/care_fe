@@ -15,22 +15,29 @@ export default function TeleICUPatientInfoCard({
   patient,
 }: ITeleICUPatientInfoCardProps) {
   const [open, setOpen] = useState(false);
-  console.log(patient);
+  // console.log(patient);
   return (
     <section className="flex items-stretch my-2 lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2">
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <div className="bg-white md:w-4/5 p-4 mx-auto ">
-          {patient?.facility &&
-          patient?.id &&
-          patient?.last_consultation?.id ? (
-            <Beds
-              facilityId={patient?.facility}
-              patientId={patient?.id}
-              consultationId={patient?.last_consultation?.id}
-            />
-          ) : (
-            <div>Invalid Patient Data</div>
-          )}
+      <Modal
+        className="top-1/2 md:left-40 md:top-1/4 flex items-center justify-center"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        <div className="flex justify-center items-center">
+          <div className="bg-white md:w-4/5 p-4 mx-auto">
+            {patient?.facility &&
+            patient?.id &&
+            patient?.last_consultation?.id ? (
+              <Beds
+                facilityId={patient?.facility}
+                patientId={patient?.id}
+                consultationId={patient?.last_consultation?.id}
+                smallLoader={true}
+              />
+            ) : (
+              <div>Invalid Patient Data</div>
+            )}
+          </div>
         </div>
       </Modal>
       <div className="bg-white border-b p-5 flex items-center lg:w-7/12 w-full">

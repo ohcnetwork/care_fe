@@ -10,6 +10,7 @@ import Loading from "../../Common/Loading";
 import { BedModel, CurrentBed } from "../models";
 import { BedSelect } from "../../Common/BedSelect";
 import { Button, InputLabel } from "@material-ui/core";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { TextInputField } from "../../Common/HelperInputFields";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
@@ -18,6 +19,7 @@ interface BedsProps {
   facilityId: string;
   patientId: number;
   consultationId: number;
+  smallLoader?: boolean;
 }
 
 const Beds = (props: BedsProps) => {
@@ -82,7 +84,17 @@ const Beds = (props: BedsProps) => {
     }
   };
 
-  if (isLoading) return <Loading />;
+  if (isLoading) {
+    // small loader for modal
+    if (props.smallLoader && props.smallLoader === true) {
+      return (
+        <div className="p-5 pl-10 pr-10">
+          <CircularProgress />
+        </div>
+      );
+    }
+    return <Loading />;
+  }
 
   return (
     <div>
