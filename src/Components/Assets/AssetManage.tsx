@@ -124,7 +124,7 @@ const AssetManage = (props: AssetManageProps) => {
     if (txns.length > 0) {
       setTransactionDetails(
         transactions.map((transaction: AssetTransaction) => (
-          <tr>
+          <tr key={`transaction_id_${transaction.id}`}>
             <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
               <span className="text-cool-gray-900 font-medium">
                 {transaction.from_location.name}
@@ -179,7 +179,7 @@ const AssetManage = (props: AssetManageProps) => {
         <div className="text-2xl font-semibold mb-4">{asset?.name}</div>
         <div className="md:flex justify-between">
           <div className="mb-2">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Typography className="flex flex-col">
                 <span className="font-bold">Location</span>
                 <span>{asset?.location_object.name || "--"}</span>
