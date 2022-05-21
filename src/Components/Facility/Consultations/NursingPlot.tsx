@@ -8,8 +8,10 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const NursingPlot = (props: any) => {
+  // eslint-disable-next-line
   const { facilityId, patientId, consultationId } = props;
   const dispatch: any = useDispatch();
+  // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,7 +46,7 @@ export const NursingPlot = (props: any) => {
     },
     [currentPage]
   );
-
+  // eslint-disable-next-line
   const handlePagination = (page: number, limit: number) => {
     setCurrentPage(page);
   };
@@ -56,7 +58,7 @@ export const NursingPlot = (props: any) => {
     };
   });
 
-  let dataToDisplay = data
+  const dataToDisplay = data
     .map((x) =>
       x.nursing.map((f: any) => {
         f["date"] = x.date;
@@ -72,11 +74,25 @@ export const NursingPlot = (props: any) => {
     return filtered.length > 0;
   };
 
+  const areFieldsEmpty = () => {
+    let emptyFieldCount = 0;
+    for (let i = 0; i < NURSING_CARE_FIELDS.length; i++) {
+      if (!filterEmpty(NURSING_CARE_FIELDS[i])) emptyFieldCount++;
+    }
+    if (emptyFieldCount === NURSING_CARE_FIELDS.length) return true;
+    else return false;
+  };
+
   return (
     <div>
       <div className="">
         <div>
           <div className="flex flex-row overflow-x-scroll">
+            {areFieldsEmpty() && (
+              <div className="text-center text-lg mt-5 w-full">
+                No data available
+              </div>
+            )}
             {NURSING_CARE_FIELDS.map(
               (f: any) =>
                 filterEmpty(f) && (

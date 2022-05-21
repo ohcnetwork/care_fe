@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { getInvestigationSessions } from "../../../Redux/actions";
-import PageTitle from "../../Common/PageTitle";
+// import PageTitle from "../../Common/PageTitle";
 import moment from "moment";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
@@ -47,9 +47,17 @@ export default function ViewInvestigations(props: any) {
         <Loading />
       ) : (
         <div className="mt-4 space-y-2 ">
-          {investigationData.map((data: InvestigationType) => {
+          {investigationData.length === 0 && (
+            <div className="text-lg h-full text-center mt-5">
+              No Investigation Reports Found
+            </div>
+          )}
+          {investigationData.map((data: InvestigationType, indx: number) => {
             return (
-              <div className="flex justify-between items-center bg-white hover:bg-gray-200 cursor-pointer p-4 border rounded-lg shadow">
+              <div
+                key={indx}
+                className="flex justify-between items-center bg-white hover:bg-gray-200 cursor-pointer p-4 border rounded-lg shadow"
+              >
                 <div>{moment(data.session_created_date).format("lll")}</div>
                 <button
                   onClick={() =>

@@ -1,15 +1,17 @@
 import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { NURSING_CARE_FIELDS } from "../../../Common/constants";
+// import { NURSING_CARE_FIELDS } from "../../../Common/constants";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const MedicineTables = (props: any) => {
+  // eslint-disable-next-line
   const { facilityId, patientId, consultationId } = props;
   const dispatch: any = useDispatch();
+  // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,7 +46,7 @@ export const MedicineTables = (props: any) => {
     },
     [currentPage]
   );
-
+  // eslint-disable-next-line
   const handlePagination = (page: number, limit: number) => {
     setCurrentPage(page);
   };
@@ -56,8 +58,13 @@ export const MedicineTables = (props: any) => {
       {results && (
         <div>
           <div className="mt-4 text-lg font-bold">Consultation Updates</div>
-          {Object.keys(results).map((k: any) => (
-            <div>
+          {Object.keys(results).length === 0 && (
+            <div className="text-md h-full text-center mt-5">
+              No Consultation Updates Found
+            </div>
+          )}
+          {Object.keys(results).map((k: any, indx: number) => (
+            <div key={indx}>
               {Object.keys(results[k].medication_given).length !== 0 && (
                 <div className="grid md:grid-cols-full gap-4">
                   <div className="mt-4">
