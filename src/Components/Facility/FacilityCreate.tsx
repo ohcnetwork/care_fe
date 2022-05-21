@@ -655,7 +655,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
 
-              <div className="md:col-span-2 grid grid-cols-1 xl:grid-cols-2 gap-4">
+              <div className="md:col-span-2 grid grid-cols-1 xl:grid-cols-2 gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <InputLabel
@@ -909,7 +909,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-between mt-6">
               <Button color="default" variant="contained" onClick={goBack}>
                 Cancel
               </Button>
