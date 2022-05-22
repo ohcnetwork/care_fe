@@ -424,7 +424,7 @@ export default function SampleViewAdmin() {
           />
         }
       />
-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
+      <div className="mt-5 md:grid md:grid-cols-1 gap-5">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -446,7 +446,7 @@ export default function SampleViewAdmin() {
         </div>
 
         <div>
-          <div>
+          <div className="mt-2">
             <div className="text-sm font-semibold mb-2">
               Search by District Name
             </div>
@@ -457,7 +457,7 @@ export default function SampleViewAdmin() {
               errors=""
             />
           </div>
-          <div>
+          <div className="mt-2">
             <div className="text-sm font-semibold mb-2">Search by Name</div>
             <InputSearchBox
               value={qParams.patient_name}
@@ -469,7 +469,7 @@ export default function SampleViewAdmin() {
         </div>
 
         <div>
-          <div className="flex items-start mb-2">
+          <div className="flex items-start mt-2 mb-2">
             <button
               className="btn btn-primary-ghost md:mt-7 "
               onClick={() => setShowFilters((show) => !show)}
@@ -556,7 +556,7 @@ export default function SampleViewAdmin() {
           {badge("Facility", facilityName, "facility")}
         </div>
       </div>
-      <div className="px-3 md:px-8">
+      <div className="md:px-2">
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
       </div>
 
