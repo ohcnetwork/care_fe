@@ -2,18 +2,18 @@ import loadable from "@loadable/component";
 import Grid from "@material-ui/core/Grid";
 import { Button } from "@material-ui/core";
 import { navigate, useQueryParams } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+// import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
-import { PhoneNumberField } from "../Common/HelperInputFields";
+// import { PhoneNumberField } from "../Common/HelperInputFields";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import moment from "moment";
 import { CSVLink } from "react-csv";
-import { externalResultFormatter } from "./Commons";
+// import { externalResultFormatter } from "./Commons";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
@@ -21,6 +21,7 @@ import { FacilityModel } from "../Facility/models";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
+// eslint-disable-next-line
 function Badge(props: { color: string; icon: string; text: string }) {
   return (
     <span
@@ -61,7 +62,7 @@ export default function ResultList() {
   let manageResults: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
-    localStorage.getItem("lsg-ward-data") || '{"lsgList": [], "wardList": []}'
+    localStorage.getItem("lsg-ward-data") || "{'lsgList': [], 'wardList': []}"
   );
 
   useEffect(() => {
@@ -135,6 +136,7 @@ export default function ResultList() {
     updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
 
+  // eslint-disable-next-line
   const handleFilter = (value: string) => {
     updateQuery({ disease_status: value, page: 1 });
   };
@@ -216,7 +218,7 @@ export default function ResultList() {
       externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
     setDownloadFile(res?.data);
-    document.getElementById(`downloadCSV`)?.click();
+    document.getElementById("downloadCSV")?.click();
   };
 
   const badge = (key: string, value: any, paramKey: string) => {
@@ -228,6 +230,7 @@ export default function ResultList() {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            // eslint-disable-next-line
             onClick={(e) => removeFilter(paramKey)}
           ></i>
         </span>
@@ -247,6 +250,7 @@ export default function ResultList() {
           {value.name}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            // eslint-disable-next-line
             onClick={(e) =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
@@ -262,7 +266,7 @@ export default function ResultList() {
 
   let resultList: any[] = [];
   if (data && data.length) {
-    resultList = data.map((result: any, idx: number) => {
+    resultList = data.map((result: any) => {
       const resultUrl = `/external_results/${result.id}`;
       return (
         <tr key={`usr_${result.id}`} className="bg-white">
@@ -329,7 +333,7 @@ export default function ResultList() {
       <>
         {resultList}
         {totalCount > RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center">
+          <div className="flex pt-4 sm:pl-4 lg:pl-0 items-center justify-center bg-cool-gray-50">
             <Pagination
               cPage={qParams.page}
               defaultPerPage={RESULT_LIMIT}
@@ -344,7 +348,7 @@ export default function ResultList() {
     manageResults = (
       <Grid item xs={12} md={12}>
         <Grid container justify="center" alignItems="center">
-          <h5> No Results Found</h5>
+          <h5 className="m-5"> No Results Found</h5>
         </Grid>
       </Grid>
     );
@@ -510,7 +514,7 @@ export default function ResultList() {
         filename={`external-result--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`downloadCSV`}
+        id={"downloadCSV"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
