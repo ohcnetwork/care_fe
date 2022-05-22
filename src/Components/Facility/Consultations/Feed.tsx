@@ -298,7 +298,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               )}
             </div>
           </div>
-          <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch overflow-auto">
+          <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch overflow-y-hidden">
             {cameraPTZ.map((option) => (
               <button
                 key={option.action}
