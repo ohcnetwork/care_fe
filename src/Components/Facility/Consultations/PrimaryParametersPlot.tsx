@@ -1,4 +1,4 @@
-import { navigate } from "raviger";
+// import { navigate } from "raviger";
 import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -120,7 +120,7 @@ export const PrimaryParametersPlot = (props: any) => {
   ];
 
   let rhythmValues: any = {};
-  Object.entries(results).map((obj: any) => {
+  Object.entries(results).forEach((obj: any) => {
     if (obj[1].rhythm && obj[1].rhythm > 0) {
       const key: string = moment(obj[0]).format("LL");
       const lst: Array<any> = rhythmValues.hasOwnProperty(key)
@@ -203,7 +203,7 @@ export const PrimaryParametersPlot = (props: any) => {
         {Object.entries(rhythmValues).map((obj: any) => {
           if (obj[1].length > 0) {
             return (
-              <div>
+              <div key={obj}>
                 <h4 className="text-base my-3">{obj[0]}</h4>
                 <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4 w-max-content max-w-full">
                   <div className="flex flex-row overflow-x-auto">
@@ -234,7 +234,7 @@ export const PrimaryParametersPlot = (props: any) => {
           {Object.entries(results).map((obj: any) => {
             if (obj[1].rhythm_detail) {
               return (
-                <div className="mx-2 my-1">
+                <div key={obj.id} className="mx-2 my-1">
                   <h4 className="text-sm">- {moment(obj[0]).format("LLL")}</h4>
                   <div className="px-5 text-sm">
                     <div>{obj[1].rhythm_detail}</div>

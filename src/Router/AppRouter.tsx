@@ -1,13 +1,13 @@
 import {
   useRedirect,
   useRoutes,
-  navigate,
+  // navigate,
   usePath,
-  Link,
+  // Link,
   Redirect,
 } from "raviger";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../Components/Facility/TreatmentSummary";
@@ -74,9 +74,9 @@ import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 
-const get = require("lodash.get");
+// const get = require("lodash.get");
 
-const img = process.env.REACT_APP_LIGHT_LOGO;
+// const img = process.env.REACT_APP_LIGHT_LOGO;
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
 const routes = {
@@ -400,7 +400,7 @@ const routes = {
   ),
 };
 
-let menus = [
+/*let menus = [
   {
     title: "Facilities",
     link: "/facility",
@@ -461,7 +461,7 @@ let menus = [
     link: "/notice_board/",
     icon: "fas fa-comment-alt",
   },
-];
+];*/
 
 const AppRouter = (props: any) => {
   useRedirect("/", "/facility");

@@ -757,7 +757,7 @@ export const ConsultationForm = (props: any) => {
                         <ErrorHelperText error={state.errors.admitted} />
                       </div>
                     </div>
-                    {!id && JSON.parse(state.form.admitted) ? (
+                    {JSON.parse(state.form.admitted) ? (
                       <>
                         <div className="flex">
                           <div className="flex-1" id="admission_date-div">

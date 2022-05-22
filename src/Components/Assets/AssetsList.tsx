@@ -18,7 +18,7 @@ import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import AssetFilter from "./AssetFilter";
-import { FacilityModel } from "../Facility/models";
+// import { FacilityModel } from "../Facility/models";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
 

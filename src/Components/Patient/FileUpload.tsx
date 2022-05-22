@@ -1,8 +1,8 @@
 import axios from "axios";
 import {
   Button,
-  Card,
-  CardContent,
+  // Card,
+  // CardContent,
   CircularProgress,
   InputLabel,
 } from "@material-ui/core";
@@ -12,8 +12,8 @@ import loadable from "@loadable/component";
 import React, {
   useCallback,
   useState,
-  useRef,
-  ChangeEvent,
+  // useRef,
+  // ChangeEvent,
   useEffect,
 } from "react";
 import { useDispatch } from "react-redux";
@@ -21,12 +21,12 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
   retrieveUpload,
-  retrieveUploadFilesURL,
+  // retrieveUploadFilesURL,
   createUpload,
-  getUserList,
+  // getUserList,
   getPatient,
 } from "../../Redux/actions";
-import { FlowModel, FileUploadModel } from "./models";
+import { FileUploadModel } from "./models";
 import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
@@ -162,7 +162,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
   const [contentType, setcontentType] = useState<string>("");
-  const classes = useStyles();
+  // const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
   const initialState = {
@@ -466,7 +466,7 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
-  const handleUpload = async (e: any) => {
+  const handleUpload = async () => {
     const f = file;
     if (f === undefined) return;
     const category = "UNSPECIFIED";
@@ -524,7 +524,7 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
-  const handleAudioUpload = async (e: any) => {
+  const handleAudioUpload = async () => {
     const f = audioBlob;
     if (f === undefined) return;
     const category = "AUDIO";
@@ -679,7 +679,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
                   onClick={(e: any) => {
-                    handleAudioUpload(e);
+                    handleAudioUpload();
                   }}
                 >
                   Save Recording
@@ -727,7 +727,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                         }
                         onClick={(e: any) => {
-                          handleUpload(e);
+                          handleUpload();
                         }}
                       >
                         Upload

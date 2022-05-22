@@ -1,5 +1,5 @@
 import { Grid } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+//import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
@@ -36,7 +36,7 @@ const statusChoices = [...SAMPLE_TEST_STATUS];
 
 const statusFlow = { ...SAMPLE_FLOW_RULES };
 
-const roleStatusMap = { ...ROLE_STATUS_MAP };
+// const roleStatusMap = { ...ROLE_STATUS_MAP };
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
@@ -212,10 +212,10 @@ export default function SampleViewAdmin(props: any) {
       const statusText = SAMPLE_TEST_STATUS.find(
         (i) => i.text === status
       )?.desc;
-      const validStatusChoices = statusChoices.filter(
+      /*const validStatusChoices = statusChoices.filter(
         (i) =>
           status && statusFlow[status] && statusFlow[status].includes(i.text)
-      );
+      );*/
       // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">

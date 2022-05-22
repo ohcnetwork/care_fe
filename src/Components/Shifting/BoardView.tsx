@@ -13,7 +13,7 @@ import { useDispatch } from "react-redux";
 import moment from "moment";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
-import { formatFilter, badge } from "./Commons";
+import { formatFilter } from "./Commons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
