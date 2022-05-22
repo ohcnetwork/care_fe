@@ -10,6 +10,7 @@ import {
   Typography,
   Box,
   Button,
+  Grid,
 } from "@material-ui/core";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
@@ -17,6 +18,7 @@ import { getColorIndex, rowColor, transformData } from "./utils";
 import { InvestigationResponse } from "./types";
 import moment from "moment";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyle = makeStyles((theme: Theme) => ({
   tableCell: {
     fontSize: "1.1rem",
@@ -45,6 +47,7 @@ const useStyle = makeStyles((theme: Theme) => ({
   },
 }));
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const StyledTableRow = withStyles((theme: Theme) =>
   createStyles({
     root: {
@@ -74,6 +77,7 @@ const ReportRow = ({ data, name, min, max }: any) => {
         });
         return (
           <TableCell
+            key={d?.value}
             className={className.tableCell}
             align="center"
             style={{
@@ -105,12 +109,18 @@ const ReportRow = ({ data, name, min, max }: any) => {
 
 interface ReportTableProps {
   title: string;
+  patientDetails: {
+    name: string;
+    age: number;
+    hospitalName: string;
+  };
   investigationData: InvestigationResponse;
 }
 
 const ReportTable: React.FC<ReportTableProps> = ({
   title,
   investigationData,
+  patientDetails,
 }) => {
   const className = useStyle();
   const { data, sessions } = transformData(investigationData);
@@ -141,6 +151,15 @@ const ReportTable: React.FC<ReportTableProps> = ({
             {title}
           </Typography>
         )}
+        <br />
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <p>Name: {patientDetails.name}</p>
+
+            <p>Age: {patientDetails.age}</p>
+            <p>Hospital: {patientDetails.hospitalName}</p>
+          </Grid>
+        </Grid>
         <br />
         <div className="my-4">
           <span className="inline-block  bg-yellow-200 py-1 m-1 px-6 rounded-full text-yellow-900 font-medium">
@@ -204,7 +223,6 @@ const ReportTable: React.FC<ReportTableProps> = ({
                       min={t.investigation_object.min_value}
                       max={t.investigation_object.max_value}
                       name={t.investigation_object.name}
-                      onChange={(e: { target: { value: any } }) => {}}
                     />
                   );
                 })
