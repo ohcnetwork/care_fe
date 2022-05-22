@@ -16,11 +16,12 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
-import { validateEmailAddress, phonePreg } from "../../Common/validation";
+import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import Switch from "@material-ui/core/Switch";
+import { postForgotPassword } from "../../Redux/actions";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -87,6 +88,7 @@ const editFormReducer = (state: State, action: Action) => {
 };
 export default function UserProfile() {
   const [states, dispatch] = useReducer(editFormReducer, initialState);
+  const reduxDispatch: any = useDispatch();
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -139,9 +141,9 @@ export default function UserProfile() {
   );
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
-    Object.keys(states.form).forEach((field, i) => {
+    Object.keys(states.form).forEach((field) => {
       switch (field) {
         case "firstName":
         case "lastName":
@@ -164,12 +166,14 @@ export default function UserProfile() {
           }
           return;
         case "phoneNumber":
+          // eslint-disable-next-line no-case-declarations
           const phoneNumber = parsePhoneNumberFromString(
             states.form[field],
             "IN"
           );
 
-          let is_valid: boolean = false;
+          // eslint-disable-next-line no-case-declarations
+          let is_valid = false;
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
           }
@@ -180,7 +184,8 @@ export default function UserProfile() {
           }
           return;
         case "altPhoneNumber":
-          let alt_is_valid: boolean = false;
+          // eslint-disable-next-line no-case-declarations
+          let alt_is_valid = false;
           if (states.form[field] && states.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               states.form[field],
@@ -213,7 +218,7 @@ export default function UserProfile() {
   };
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let form: EditForm = { ...states.form, [e.target.name]: e.target.value };
+    const form: EditForm = { ...states.form, [e.target.name]: e.target.value };
     dispatch({ type: "set_form", form });
   };
 
@@ -273,7 +278,7 @@ export default function UserProfile() {
   };
 
   const checkForNewBuildVersion = async () => {
-    let [isLatestBundle, newVersion] = await checkIfLatestBundle();
+    const [isLatestBundle, newVersion] = await checkIfLatestBundle();
 
     if (!isLatestBundle) {
       setUpdateBtnText("updating...");
@@ -298,6 +303,25 @@ export default function UserProfile() {
   if (isLoading) {
     return <Loading />;
   }
+
+  const changePassword = (e: any) => {
+    e.preventDefault();
+    const form = { username: username };
+    setIsLoading(true);
+    reduxDispatch(postForgotPassword(form)).then((resp: any) => {
+      setIsLoading(false);
+      const res = resp && resp.data;
+      if (res && res.status === "OK") {
+        Notification.Success({
+          msg: "Password Reset Email Sent. Please check your email to change your password.",
+        });
+      } else {
+        Notification.Error({
+          msg: "There was some error. Please try again in some time.",
+        });
+      }
+    });
+  };
   return (
     <div>
       <div className="md:p-20 p-10">
@@ -554,7 +578,19 @@ export default function UserProfile() {
                       </div>
                     </div>
                   </div>
-                  <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                  <div className="inline-block px-4 py-3 bg-gray-50 text-left sm:px-6">
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      style={{ marginLeft: "auto" }}
+                      onClick={(e) => changePassword(e)}
+                    >
+                      {" "}
+                      CHANGE PASSWORD{" "}
+                    </Button>
+                  </div>
+                  <div className="inline-block float-right px-4 py-3 bg-gray-50 text-right sm:px-6">
                     <Button
                       color="primary"
                       variant="contained"
@@ -623,8 +659,8 @@ export default function UserProfile() {
           <div className="text-lg font-medium leading-6 text-gray-900">
             Check for software updates
             <p className="mt-1 text-sm leading-5 text-gray-600">
-              Click the update button to see if you have the latest "care"
-              version.
+              Click the update button to see if you have the latest
+              &quotcare&quot version.
             </p>
           </div>
           <button
