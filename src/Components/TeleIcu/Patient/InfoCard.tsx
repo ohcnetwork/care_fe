@@ -34,13 +34,16 @@ export default function TeleICUPatientInfoCard({
         </div>
       </Modal>
       <div className="bg-white border-b p-5 flex items-center lg:w-7/12 w-full">
-        {patient.blood_group && (
-          <div className="flex flex-col items-center ">
-            <div className="text-2xl border border-cool-gray-300 rounded-full font-semibold items-center m-2 h-20 w-20 flex justify-center">
-              {patient.blood_group === "UNKNOWN" ? "?" : patient.blood_group}
-            </div>
-            <span className="font-light text-primary-600 text-xs mr-1">
-              Blood Group
+        {patient?.last_consultation && patient?.last_consultation?.current_bed && (
+          <div className="w-32 self-stretch flex-shrink-0 bg-cool-gray-100 border border-cool-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
+            <span className="text-center text-gray-900 text-sm">
+              {
+                patient?.last_consultation?.current_bed?.bed_object
+                  ?.location_object?.name
+              }
+            </span>
+            <span className="text-md font-bold">
+              {patient?.last_consultation?.current_bed?.bed_object.name}
             </span>
           </div>
         )}
@@ -67,19 +70,24 @@ export default function TeleICUPatientInfoCard({
                 Assign Bed
               </button>
             ) : (
-              <div className="m-1">
-                <span className="sm:text-base font-semibold text-sm mr-2">
-                  {patient.last_consultation?.current_bed?.bed_object?.name}
-                </span>
-                <button
-                  className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
-                  onClick={() => setOpen(true)}
-                >
-                  Switch Bed
-                </button>
-              </div>
+              <button
+                className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
+                onClick={() => setOpen(true)}
+              >
+                Switch Bed
+              </button>
             )}
-            {patient.last_consultation?.weight && (
+            {patient.blood_group ? (
+              <div className="m-1">
+                <span className="font-light text-primary-600 text-sm mr-1">
+                  Blood group
+                </span>
+                <span className="sm:text-base font-semibold text-sm mr-2">
+                  {patient.blood_group}
+                </span>
+              </div>
+            ) : null}
+            {patient.last_consultation?.weight ? (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Weight
@@ -88,8 +96,8 @@ export default function TeleICUPatientInfoCard({
                   {getDimensionOrDash(patient.last_consultation.weight, " kg")}
                 </span>
               </div>
-            )}
-            {patient.last_consultation?.height && (
+            ) : null}
+            {patient.last_consultation?.height ? (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Height
@@ -98,7 +106,7 @@ export default function TeleICUPatientInfoCard({
                   {getDimensionOrDash(patient.last_consultation?.height, "cm")}
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
