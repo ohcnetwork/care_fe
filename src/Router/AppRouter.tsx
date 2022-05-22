@@ -61,7 +61,6 @@ import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import HubDashboard from "../Components/Dashboard/HubDashboard";
 import { SideBar } from "../Components/Common/SideBar";
-import { Feed } from "../Components/Facility/Consultations/Feed";
 import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
@@ -354,14 +353,6 @@ const routes = {
       tab={"updates"}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/feed":
-    ({ facilityId, patientId, consultationId }: any) => (
-      <Feed
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={consultationId}
-      />
-    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
     ({ patientId, consultationId }: any) => (
       <TreatmentSummary

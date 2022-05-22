@@ -16,7 +16,6 @@ import {
   partialUpdateAssetBed,
 } from "../../../Redux/actions";
 import Loading from "../../Common/Loading";
-import PageTitle from "../../Common/PageTitle";
 import { ConsultationModel } from "../models";
 import * as Notification from "../../../Utils/Notifications.js";
 
@@ -51,8 +50,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
-      const consultation = res.data as ConsultationModel;
-      if (!status.aborted) {
+      if (!status.aborted && res.data) {
+        const consultation = res.data as ConsultationModel;
         if (consultation?.current_bed?.bed_object?.id) {
           let bedAssets = await dispatch(
             listAssetBeds({ bed: consultation?.current_bed?.bed_object?.id })
@@ -200,18 +199,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const cameraPTZ = getCameraPTZ(precision);
 
   return (
-    <div
-      className="px-2 flex flex-col gap-4 overflow-hidden w-full"
-      style={{ height: "90vh", maxHeight: "860px" }}
-    >
+    <div className="px-2 flex flex-col gap-4 overflow-hidden w-full">
       <div className="flex items-center flex-wrap justify-between gap-2">
-        <PageTitle
-          title={
-            "Patient Details | " +
-            (bedPresets?.[0]?.asset_object?.location_object?.name ?? "")
-          }
-          breadcrumbs={false}
-        />
         <div className="flex items-center gap-4 px-3">
           <p className="block text-lg font-medium"> Camera Presets :</p>
           <div className="flex items-center">
@@ -309,7 +298,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               )}
             </div>
           </div>
-          <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch">
+          <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch overflow-auto">
             {cameraPTZ.map((option) => (
               <button
                 key={option.action}

@@ -7,7 +7,6 @@ import {
   getConsultation,
   getDailyReport,
   getPatient,
-  listAssetBeds,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel } from "./models";
@@ -32,11 +31,11 @@ import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
-import LiveFeed from "./Consultations/LiveFeed";
 import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
 import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
 import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
 import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
+import { Feed } from "./Consultations/Feed";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -54,9 +53,6 @@ export const ConsultationDetails = (props: any) => {
     {}
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [cameraAsset, setCameraAsset] = useState({});
-  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState({});
-  const [cameraConfig, setCameraConfig] = useState({});
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -80,7 +76,7 @@ export const ConsultationDetails = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [res, dailyRounds] = await Promise.all([
+      const [res, _] = await Promise.all([
         dispatch(getConsultation(consultationId)),
         dispatch(getDailyReport({ limit: 1, offset: 0 }, { consultationId })),
       ]);
@@ -126,24 +122,6 @@ export const ConsultationDetails = (props: any) => {
               is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
             };
             setPatientData(data);
-          }
-        }
-        const current_bed = (res as ConsultationModel)?.current_bed?.bed_object
-          ?.id;
-        if (dailyRounds?.data?.results?.length && current_bed) {
-          const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
-          if (bedAssets?.data?.results?.length) {
-            const { camera_address, camera_access_key, middleware_hostname } =
-              bedAssets.data.results[0].asset_object.meta;
-            setCameraAsset({
-              id: bedAssets.data.results[0].asset_object.id,
-              hostname: camera_address,
-              username: camera_access_key.split(":")[0],
-              password: camera_access_key.split(":")[1],
-              port: 80,
-            });
-            setCameraMiddlewareHostname(middleware_hostname);
-            setCameraConfig(bedAssets.data.results[0].meta);
           }
         }
 
@@ -590,11 +568,18 @@ export const ConsultationDetails = (props: any) => {
           </div>
         )}
         {tab === "FEED" && (
-          <LiveFeed
-            asset={cameraAsset}
-            middlewareHostname={cameraMiddlewareHostname}
-            config={cameraConfig}
-          />
+          <div>
+            <PageTitle
+              title="Camera Feed"
+              breadcrumbs={false}
+              hideBack={true}
+            />
+            <Feed
+              facilityId={facilityId}
+              patientId={patientId}
+              consultationId={consultationId}
+            />
+          </div>
         )}
         {tab === "SUMMARY" && (
           <div className="mt-4">
