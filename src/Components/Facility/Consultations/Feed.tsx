@@ -52,11 +52,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       const res = await dispatch(getConsultation(consultationId));
       if (!status.aborted && res.data) {
         const consultation = res.data as ConsultationModel;
-        if (consultation?.current_bed?.bed_object?.id) {
+        const consultationBedId = consultation.current_bed?.bed_object?.id;
+        if (consultationBedId) {
           let bedAssets = await dispatch(
-            listAssetBeds({ bed: consultation?.current_bed?.bed_object?.id })
+            listAssetBeds({ bed: consultationBedId })
           );
-          setBed(consultation?.current_bed?.bed_object?.id);
+          setBed(consultationBedId);
           bedAssets = {
             ...bedAssets,
             data: {
