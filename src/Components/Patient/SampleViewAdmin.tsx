@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
-  ROLE_STATUS_MAP,
+  // ROLE_STATUS_MAP,
   SAMPLE_FLOW_RULES,
   SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
@@ -32,9 +32,9 @@ import GetAppIcon from "@material-ui/icons/GetApp";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const statusChoices = [...SAMPLE_TEST_STATUS];
+// const statusChoices = [...SAMPLE_TEST_STATUS];
 
-const statusFlow = { ...SAMPLE_FLOW_RULES };
+// const statusFlow = { ...SAMPLE_FLOW_RULES };
 
 // const roleStatusMap = { ...ROLE_STATUS_MAP };
 
