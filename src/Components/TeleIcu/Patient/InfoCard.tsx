@@ -1,5 +1,4 @@
 import { Link } from "raviger";
-import { GENDER } from "../../../Common/constants";
 import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { RightArrowIcon } from "../Icons/ArrowIcon";
@@ -59,7 +58,7 @@ export default function TeleICUPatientInfoCard({
           <p className="text-sm sm:text-base my-1 ml-1 text-primary-800">
             <span>{patient.age} years</span>
             <span className="mx-2">•</span>
-            <span>{patient.gender && GENDER[patient.gender]}</span>
+            <span>{patient.gender}</span>
           </p>
           <div className="text-sm flex flex-wrap items-center">
             {!patient.last_consultation?.current_bed ? (
