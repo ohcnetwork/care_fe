@@ -16,9 +16,19 @@ interface CameraConfigureProps {
   bed: BedModel;
   newPreset: string;
   setNewPreset(preset: string): void;
+  refreshPresetsHash: number;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
-  const { asset, addPreset, setBed, bed, newPreset, setNewPreset } = props;
+  const {
+    asset,
+    addPreset,
+    setBed,
+    bed,
+    newPreset,
+    setNewPreset,
+    refreshPresetsHash,
+  } = props;
+
   return (
     <Fragment>
       <Card>
@@ -75,8 +85,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             middlewareHostname={asset?.meta?.middleware_hostname}
             asset={getCameraConfig(asset)}
             showRefreshButton={true}
-            // getAsset={props.asset}
-            // getBed={props.bed}
+            refreshPresetsHash={refreshPresetsHash}
           />
         </CardContent>
       </Card>

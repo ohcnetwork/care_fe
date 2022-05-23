@@ -1,6 +1,7 @@
 import React from "react";
 import { navigate } from "raviger";
 import Breadcrumbs from "./Breadcrumbs";
+import PageHeadTitle from "./PageHeadTitle";
 
 interface PageTitleProps {
   title: string;
@@ -34,6 +35,7 @@ export default function PageTitle(props: PageTitleProps) {
   // 'px-3 md:px-8'
   return (
     <div className={`pt-4 mb-4 ${className}`}>
+      <PageHeadTitle title={title} />
       <div className="flex items-center">
         {!hideBack && (
           <button onClick={goBack}>
