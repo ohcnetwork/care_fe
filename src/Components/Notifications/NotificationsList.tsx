@@ -100,9 +100,7 @@ export default function ResultList({
                   pf_p256dh: "",
                   pf_auth: "",
                 };
-                const _res = await dispatch(
-                  updateUserPnconfig(data, { username: username })
-                );
+                dispatch(updateUserPnconfig(data, { username: username }));
 
                 setIsSubscribed("NotSubscribed");
                 setIsSubscribing(false);
