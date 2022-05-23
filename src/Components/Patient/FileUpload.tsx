@@ -1,29 +1,15 @@
 import axios from "axios";
-import {
-  Button,
-  // Card,
-  // CardContent,
-  CircularProgress,
-  InputLabel,
-} from "@material-ui/core";
+import { Button, CircularProgress, InputLabel } from "@material-ui/core";
 import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import loadable from "@loadable/component";
-import React, {
-  useCallback,
-  useState,
-  // useRef,
-  // ChangeEvent,
-  useEffect,
-} from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
   retrieveUpload,
-  // retrieveUploadFilesURL,
   createUpload,
-  // getUserList,
   getPatient,
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
@@ -73,29 +59,29 @@ const ExtImage: URLS = {
   svg: "1",
 };
 
-function getModalStyle() {
-  const top = 100;
-  const left = 100;
+// function getModalStyle() {
+//   const top = 100;
+//   const left = 100;
 
-  return {
-    top: `${top}%`,
-    left: `${left}%`,
-    transform: `translate(-${top}%, -${left}%)`,
-  };
-}
+//   return {
+//     top: `${top}%`,
+//     left: `${left}%`,
+//     transform: `translate(-${top}%, -${left}%)`,
+//   };
+// }
 
-/*const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    paper: {
-      position: "absolute",
-      width: "60%",
-      backgroundColor: theme.palette.background.paper,
-      border: "2px solid #000",
-      boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3),
-    },
-  })
-);*/
+// const useStyles = makeStyles((theme: Theme) =>
+//   createStyles({
+//     paper: {
+//       position: "absolute",
+//       width: "60%",
+//       backgroundColor: theme.palette.background.paper,
+//       border: "2px solid #000",
+//       boxShadow: theme.shadows[5],
+//       padding: theme.spacing(2, 4, 3),
+//     },
+//   })
+// );
 
 export const LinearProgressWithLabel = (props: any) => {
   return (
@@ -155,7 +141,7 @@ export const FileUpload = (props: FileUploadProps) => {
     {},
   ]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
+  // const [uploadSuccess, setUploadSuccess] = useState(false);
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
@@ -163,7 +149,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [fileUrl, setFileUrl] = useState("");
   const [contentType, setcontentType] = useState<string>("");
   // const classes = useStyles();
-  const [modalStyle] = React.useState(getModalStyle);
+  // const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
   const initialState = {
     open: false,
@@ -287,7 +273,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      var data = {
+      const data = {
         file_type: type,
         associating_id: getAssociatedId(),
         limit: limit,
@@ -314,12 +300,12 @@ export const FileUpload = (props: FileUploadProps) => {
     );
 
     const getURL = async (audio_files: any) => {
-      var data = { file_type: type, associating_id: getAssociatedId() };
-      let all_urls: any = {};
+      const data = { file_type: type, associating_id: getAssociatedId() };
+      const all_urls: any = {};
 
       for (const x of audio_files) {
         if (x.id) {
-          var responseData = await dispatch(retrieveUpload(data, x.id));
+          const responseData = await dispatch(retrieveUpload(data, x.id));
           all_urls[`${x.id}`] = responseData.data.read_signed_url;
         }
       }
@@ -348,8 +334,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const loadFile = async (id: any) => {
     setFileUrl("");
     setFileState({ ...file_state, open: true });
-    var data = { file_type: type, associating_id: getAssociatedId() };
-    var responseData = await dispatch(retrieveUpload(data, id));
+    const data = { file_type: type, associating_id: getAssociatedId() };
+    const responseData = await dispatch(retrieveUpload(data, id));
     setFileState({
       ...file_state,
       open: true,
@@ -386,7 +372,12 @@ export const FileUpload = (props: FileUploadProps) => {
               <div>
                 {item.id ? (
                   Object.keys(url).length > 0 ? (
-                    <audio src={url[item.id]} controls preload="auto" />
+                    <audio
+                      className="max-h-full max-w-full m-auto object-contain"
+                      src={url[item.id]}
+                      controls
+                      preload="auto"
+                    />
                   ) : (
                     <CircularProgress />
                   )
@@ -432,8 +423,8 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const uploadfile = (response: any) => {
-    var url = response.data.signed_url;
-    var internal_name = response.data.internal_name;
+    const url = response.data.signed_url;
+    const internal_name = response.data.internal_name;
     const f = file;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
@@ -444,7 +435,7 @@ export const FileUpload = (props: FileUploadProps) => {
         "Content-disposition": "inline",
       },
       onUploadProgress: (progressEvent: any) => {
-        var percentCompleted = Math.round(
+        const percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
         );
         setUploadPercent(percentCompleted);
@@ -452,16 +443,16 @@ export const FileUpload = (props: FileUploadProps) => {
     };
     axios
       .put(url, newFile, config)
-      .then((result) => {
+      .then(() => {
         setUploadStarted(false);
-        setUploadSuccess(true);
+        // setUploadSuccess(true);
         setUploadFileName("");
         setReload(!reload);
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
       })
-      .catch((error) => {
+      .catch(() => {
         setUploadStarted(false);
       });
   };
@@ -471,9 +462,9 @@ export const FileUpload = (props: FileUploadProps) => {
     if (f === undefined) return;
     const category = "UNSPECIFIED";
     const filename = uploadFileName;
-    let name = f.name;
+    const name = f.name;
     setUploadStarted(true);
-    setUploadSuccess(false);
+    // setUploadSuccess(false);
     const requestData = {
       original_name: name,
       file_type: type,
@@ -493,7 +484,7 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const uploadAudiofile = (response: any) => {
-    var url = response.data.signed_url;
+    const url = response.data.signed_url;
     const internal_name = response.data.internal_name;
     const f = audioBlob;
     if (f === undefined) return;
@@ -501,7 +492,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
     const config = {
       onUploadProgress: (progressEvent: any) => {
-        var percentCompleted = Math.round(
+        const percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
         );
         setUploadPercent(percentCompleted);
@@ -510,16 +501,16 @@ export const FileUpload = (props: FileUploadProps) => {
 
     axios
       .put(url, newFile, config)
-      .then((result) => {
+      .then(() => {
         setUploadStarted(false);
-        setUploadSuccess(true);
+        // setUploadSuccess(true);
         setUploadFileName("");
         setReload(!reload);
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
       })
-      .catch((error) => {
+      .catch(() => {
         setUploadStarted(false);
       });
   };
@@ -529,9 +520,9 @@ export const FileUpload = (props: FileUploadProps) => {
     if (f === undefined) return;
     const category = "AUDIO";
     const filename = Date.now().toString();
-    let name = "audio.mp3";
+    const name = "audio.mp3";
     setUploadStarted(true);
-    setUploadSuccess(false);
+    // setUploadSuccess(false);
     const requestData = {
       original_name: name,
       file_type: type,
@@ -674,11 +665,12 @@ export const FileUpload = (props: FileUploadProps) => {
                   color="primary"
                   variant="contained"
                   type="submit"
-                  style={{ marginLeft: "auto", float: "left" }}
+                  style={{ marginLeft: "auto" }}
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
-                  onClick={(e: any) => {
+
+                  onClick={() => {
                     handleAudioUpload();
                   }}
                 >
@@ -726,7 +718,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         startIcon={
                           <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                         }
-                        onClick={(e: any) => {
+                        onClick={() => {
                           handleUpload();
                         }}
                       >
