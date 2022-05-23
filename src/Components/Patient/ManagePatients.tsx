@@ -643,7 +643,7 @@ export const PatientManager = (props: any) => {
   }
 
   return (
-    <div className="px-6">
+    <div className="px-2">
       {showDialog && (
         <FacilitiesSelectDialogue
           setSelected={(e) => setSelectedFacility(e)}
@@ -660,8 +660,8 @@ export const PatientManager = (props: any) => {
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
       <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="title-text flex align-center">
-          <div>
+        <div className="title-text sm:flex align-center">
+          <div className="text-center">
             <Button
               color="primary"
               size="small"
@@ -738,9 +738,9 @@ export const PatientManager = (props: any) => {
         </div>
         <div>
           <div>
-            <div className="flex items-end gap-2 mb-2">
+            <div className="md:flex items-end gap-2 mb-2">
               <button
-                className="btn btn-primary-ghost md:mt-7 "
+                className="btn btn-primary-ghost w-full mt-2 md:mt-7 "
                 onClick={(_) => setShowFilters((show) => !show)}
               >
                 <svg
@@ -775,7 +775,7 @@ export const PatientManager = (props: any) => {
                 <span>Advanced Filters</span>
               </button>
               <button
-                className="btn-primary btn md:mt-7 w-full md:w-fit"
+                className="btn-primary btn md:mt-7 mt-2 w-full md:w-fit"
                 onClick={() => {
                   if (facilityId) {
                     navigate(`/facility/${facilityId}/patient`);
