@@ -103,7 +103,11 @@ const InvestigationReports = ({ id }: any) => {
   const [sessionPage, setSessionPage] = useState(1);
   const [isNextSessionDisabled, setIsNextSessionDisabled] = useState(false);
   const [isLoadMoreDisabled, setIsLoadMoreDisabled] = useState(false);
-  const [patientName, setPatientName] = useState("");
+  const [patientDetails, setPatientDetails] = useState<{
+    name: string;
+    age: number;
+    hospitalName: string;
+  }>({ name: "", age: -1, hospitalName: "" });
   const [state, dispatch] = useReducer(
     investigationReportsReducer,
     initialState
@@ -119,7 +123,11 @@ const InvestigationReports = ({ id }: any) => {
   } = state as InitialState;
 
   const fetchInvestigationsData = useCallback(
-    (onSuccess: Function, curPage = 1, curSessionPage = 1) => {
+    (
+      onSuccess: (data: any, pageNo: number) => void,
+      curPage = 1,
+      curSessionPage = 1
+    ) => {
       dispatch({
         type: "set_loading",
         payload: { ...isLoading, tableData: true },
@@ -144,12 +152,14 @@ const InvestigationReports = ({ id }: any) => {
         )
       ).then((res: any) => {
         if (res?.data?.results) {
-          onSuccess(res.data);
+          onSuccess(res.data, curPage);
           setPage(curPage + 1);
-          dispatch({
-            type: "set_loading",
-            payload: { ...isLoading, tableData: false },
-          });
+          if (res.data.results.length !== 0 || curPage >= totalPage) {
+            dispatch({
+              type: "set_loading",
+              payload: { ...isLoading, tableData: false },
+            });
+          }
         }
       });
     },
@@ -213,10 +223,18 @@ const InvestigationReports = ({ id }: any) => {
       if (id) {
         const res = await dispatchAction(getPatient({ id: id }));
         if (res.data) {
-          setPatientName(res.data.name);
+          setPatientDetails({
+            name: res.data.name,
+            age: res.data.age,
+            hospitalName: res.data.facility_object.name,
+          });
         }
       } else {
-        setPatientName("");
+        setPatientDetails({
+          name: "",
+          age: -1,
+          hospitalName: "",
+        });
       }
     }
     fetchPatientName();
@@ -234,12 +252,17 @@ const InvestigationReports = ({ id }: any) => {
     fetchInvestigationGroups.current();
   }, []);
 
+  // eslint-disable-next-line
   const handleLoadMore = (e: any) => {
-    const onSuccess = (data: any) => {
-      dispatch({
-        type: "set_investigation_table_data",
-        payload: [...state.investigationTableData, ...data.results],
-      });
+    const onSuccess = (data: any, pageNo: number) => {
+      if (data.results.length === 0 && pageNo + 1 <= totalPage) {
+        fetchInvestigationsData(onSuccess, pageNo + 1, sessionPage);
+      } else {
+        dispatch({
+          type: "set_investigation_table_data",
+          payload: [...state.investigationTableData, ...data.results],
+        });
+      }
     };
 
     fetchInvestigationsData(onSuccess, page, sessionPage);
@@ -313,7 +336,7 @@ const InvestigationReports = ({ id }: any) => {
         title={"Investigation Reports"}
         crumbsReplacements={{
           patient: { style: "pointer-events-none" },
-          [id]: { name: patientName },
+          [id]: { name: patientDetails.name },
         }}
       />
       {!isLoading.investigationGroupLoading ? (
@@ -431,6 +454,7 @@ const InvestigationReports = ({ id }: any) => {
                 <ReportTable
                   investigationData={investigationTableData}
                   title="Report"
+                  patientDetails={patientDetails}
                 />
 
                 {!!isLoading.tableData && (
