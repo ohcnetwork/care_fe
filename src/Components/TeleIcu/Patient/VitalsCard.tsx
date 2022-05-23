@@ -86,8 +86,8 @@ export default function TeleICUPatientVitalsCard({
   };
 
   useEffect(() => {
-    const url = hl7Asset?.meta?.camera_address
-      ? `wss://${hl7Asset?.meta?.middleware_hostname}/observations/${hl7Asset?.meta?.camera_address}`
+    const url = hl7Asset?.meta?.local_ip_address
+      ? `wss://${hl7Asset?.meta?.middleware_hostname}/observations/${hl7Asset?.meta?.local_ip_address}`
       : null;
 
     if (url) connectWs(url);
@@ -95,7 +95,7 @@ export default function TeleICUPatientVitalsCard({
     return () => {
       wsClient.current?.close();
     };
-  }, [hl7Asset?.meta?.camera_address, hl7Asset?.meta?.middleware_hostname]);
+  }, [hl7Asset?.meta?.local_ip_address, hl7Asset?.meta?.middleware_hostname]);
 
   useEffect(() => {
     return () => {

@@ -14,11 +14,9 @@ import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   CURRENT_HEALTH_CHANGE,
-  PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
-  ADMITTED_TO,
   RHYTHM_CHOICES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -37,15 +35,11 @@ import {
   getConsultationDailyRoundsDetails,
   updateDailyReport,
   getPatient,
-  listFacilityBeds,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { make as Link } from "../Common/components/Link.gen";
-import { BedModel } from "../Facility/models";
-import { BedSelect } from "../Common/BedSelect";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-const admittedToChoices = ["Select", ...ADMITTED_TO];
 
 const initForm: any = {
   otherSymptom: false,
@@ -79,14 +73,6 @@ const initError = Object.assign(
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
 
-const categoryChoices = [
-  {
-    id: 0,
-    text: "Select suspect category",
-  },
-  ...PATIENT_CATEGORY,
-];
-
 const initialState = {
   form: { ...initForm },
   errors: { ...initError },
@@ -115,10 +101,6 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
-
 export const DailyRounds = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
@@ -126,9 +108,6 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [beds, setBeds] = useState<any>([]);
-  const [isTeleicu, setIsTeleicu] = useState<string>("false");
-  const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
@@ -164,28 +143,6 @@ export const DailyRounds = (props: any) => {
     [dispatchAction, fetchpatient]
   );
 
-  const fetchBeds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatchAction(
-        listFacilityBeds({ facility: facilityId })
-      );
-
-      if (!status.aborted) {
-        if (res && res.data) {
-          setBeds(res.data.results ?? []);
-        }
-      }
-    },
-    [consultationId, facilityId, dispatchAction]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      if (facilityId) fetchBeds(status);
-    },
-    [dispatchAction, fetchBeds]
-  );
-
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
@@ -206,7 +163,7 @@ export const DailyRounds = (props: any) => {
     const errors = { ...initError };
     let invalidForm = false;
     const error_div = "";
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "other_symptoms":
           if (state.form.otherSymptom && !state.form[field]) {
@@ -308,12 +265,15 @@ export const DailyRounds = (props: any) => {
           data = {
             ...data,
             bp:
-              state.form.systolic && state.form.diastolic
+              state.form.bp && state.form.bp.systolic && state.form.bp.diastolic
                 ? {
-                    systolic: Number(state.form.systolic),
-                    diastolic: Number(state.form.diastolic),
+                    systolic: Number(state.form.bp.systolic),
+                    diastolic: Number(state.form.bp.diastolic),
                     mean: Number(
-                      calculateMAP(state.form.systolic, state.form.diastolic)
+                      calculateMAP(
+                        state.form.bp.systolic,
+                        state.form.bp.diastolic
+                      )
                     ),
                   }
                 : undefined,
@@ -396,9 +356,21 @@ export const DailyRounds = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleAutoComplete = (name: any, value: any) => {
+  const handleAutoComplete = (name: string, value: any) => {
     const form = { ...state.form };
-    form[name] = value;
+    if (name.includes(".")) {
+      const splitName = name.split(".");
+      splitName.reduce((prev, curr, index) => {
+        if (index === splitName.length - 1) {
+          prev[curr] = value;
+        } else {
+          prev[curr] = prev[curr] || {};
+        }
+        return prev[curr];
+      }, form);
+    } else {
+      form[name] = value;
+    }
     dispatch({ type: "set_form", form });
   };
 
@@ -807,10 +779,10 @@ export const DailyRounds = (props: any) => {
                                 name="systolic"
                                 multiple={false}
                                 variant="standard"
-                                value={state.form.systolic}
+                                value={state.form.bp?.systolic}
                                 options={generateOptions(0, 250, 1, 0)}
                                 onChange={(e: any, value: any) =>
-                                  handleAutoComplete("systolic", value)
+                                  handleAutoComplete("bp.systolic", value)
                                 }
                                 placeholder="Enter value"
                                 noOptionsText={"Invalid value"}
@@ -836,10 +808,10 @@ export const DailyRounds = (props: any) => {
                                 name="diastolic"
                                 multiple={false}
                                 variant="standard"
-                                value={state.form.diastolic}
+                                value={state.form.bp?.diastolic}
                                 options={generateOptions(30, 180, 1, 0)}
                                 onChange={(e: any, value: any) =>
-                                  handleAutoComplete("diastolic", value)
+                                  handleAutoComplete("bp.diastolic", value)
                                 }
                                 placeholder="Enter value"
                                 noOptionsText={"Invalid value"}

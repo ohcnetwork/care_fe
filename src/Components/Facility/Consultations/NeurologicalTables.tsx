@@ -58,23 +58,31 @@ const DataTable = (props: any) => {
 
 const DataDescription = (props: any) => {
   const { title, data } = props;
+  console.log("Data Description", title, data);
+
   return (
     <div>
       <div className="text-xl font-semibold">{title}</div>
       <div className="p-4 bg-white border rounded-lg shadow">
-        {data.map((x: any, i: any) => (
-          <div key={`${title}_${i}`} className="mb-2">
-            <div className="text-sm font-bold">{`- ${x.date}`}</div>
-            <div className="text-cool-gray-800 pl-2">
-              <span className="font-semibold">Left: </span>
-              {x.left}
+        {data.length ? (
+          data.map((x: any, i: any) => (
+            <div key={`${title}_${i}`} className="mb-2">
+              <div className="text-sm font-bold">{`- ${x.date}`}</div>
+              <div className="text-cool-gray-800 pl-2">
+                <span className="font-semibold">Left: </span>
+                {x.left}
+              </div>
+              <div className="text-cool-gray-800 pl-2">
+                <span className="font-semibold">Right: </span>
+                {x.right}
+              </div>
             </div>
-            <div className="text-cool-gray-800 pl-2">
-              <span className="font-semibold">Right: </span>
-              {x.right}
-            </div>
+          ))
+        ) : (
+          <div className="text-gray-500 text-sm text-center">
+            No Data Available!
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -83,9 +91,6 @@ const DataDescription = (props: any) => {
 export const NeurologicalTable = (props: any) => {
   const { consultationId } = props;
   const dispatch: any = useDispatch();
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -119,7 +124,6 @@ export const NeurologicalTable = (props: any) => {
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -153,7 +157,6 @@ export const NeurologicalTable = (props: any) => {
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
@@ -165,6 +168,7 @@ export const NeurologicalTable = (props: any) => {
     },
     [currentPage]
   );
+
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handlePagination = (page: number, limit: number) => {
@@ -287,6 +291,8 @@ export const NeurologicalTable = (props: any) => {
     }
   });
 
+  console.log("locDes", locDescription);
+
   return (
     <div className="mt-2">
       <div className="mb-6">
@@ -316,12 +322,18 @@ export const NeurologicalTable = (props: any) => {
             Level Of Consciousness Description
           </div>
           <div className="p-4 bg-white border rounded-lg shadow">
-            {locDescription.map((x: any, i: any) => (
-              <div key={`loc_desc_${i}`} className="mb-2">
-                <div className="text-sm font-semibold">{`- ${x.date}`}</div>
-                <div className="text-cool-gray-800 pl-2">{x.loc}</div>
+            {locDescription.length ? (
+              locDescription.map((x: any, i: any) => (
+                <div key={`loc_desc_${i}`} className="mb-2">
+                  <div className="text-sm font-semibold">{`- ${x.date}`}</div>
+                  <div className="text-cool-gray-800 pl-2">{x.loc}</div>
+                </div>
+              ))
+            ) : (
+              <div className="text-gray-500 text-sm text-center">
+                No Data Available!
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
