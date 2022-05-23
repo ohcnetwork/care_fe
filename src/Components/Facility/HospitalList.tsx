@@ -510,7 +510,7 @@ const HospitalListPage = (props: any) => {
 
         <div className="flex justify-end w-full mt-4">
           <div>
-            <Accordion className="mt-10 lg:mt-0 md:mt-0">
+            <Accordion className="mt-10 lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"
