@@ -9,7 +9,6 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const PrimaryParametersPlot = (props: any) => {
-  const { consultationId } = props;
   const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -111,7 +110,6 @@ export const PrimaryParametersPlot = (props: any) => {
         .reverse(),
     },
   ];
-
 
   const rhythmValues: any = {};
   Object.entries(results).forEach((obj: any) => {

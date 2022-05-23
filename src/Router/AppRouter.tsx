@@ -454,7 +454,7 @@ const menus = [
     link: "/notice_board/",
     icon: "fas fa-comment-alt",
   },
-];*/
+];
 
 const AppRouter = () => {
   useRedirect("/", "/facility");
