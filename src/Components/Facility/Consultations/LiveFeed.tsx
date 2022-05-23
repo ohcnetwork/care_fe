@@ -48,7 +48,9 @@ const LiveFeed = (props: any) => {
     url,
     videoEl,
   });
-  
+
+  const refreshPresetsHash = props.refreshPresetsHash;
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentPreset, setCurrentPreset] = useState<any>();
   const {
@@ -324,7 +326,6 @@ const LiveFeed = (props: any) => {
                       >
                         {option.label}
                       </button>
-
                     ))}
                     {/* Page Number Next and Prev buttons */}
                     <button
