@@ -25,6 +25,7 @@ export interface FacilityModel {
   id?: number;
   name?: string;
   district?: number;
+  cover_image_url?: string;
   facility_type?: string;
   address?: string;
   location?: {
