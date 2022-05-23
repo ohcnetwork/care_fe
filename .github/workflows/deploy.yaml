@@ -18,20 +18,21 @@ env:
   EKS_CLUSTER_NAME: ${{ secrets.AWS_EKS_CLUSTER_NAME }}
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   name: Test
-  #   steps:
-  #     - uses: actions/checkout@v2
+  test:
+    runs-on: ubuntu-latest
+    name: Test
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Run tests
-  #       run: |
-  #         if [ -f docker-compose.test.yml ]; then
-  #           docker-compose --file docker-compose.test.yml build
-  #           docker-compose --file docker-compose.test.yml run sut
-  #         else
-  #           docker build . --file Dockerfile
-  #         fi
+      - name: Run tests
+        run: |
+          if [ -f docker-compose.test.yml ]; then
+            docker-compose --file docker-compose.test.yml build
+            docker-compose --file docker-compose.test.yml run sut
+          else
+            docker build . --file Dockerfile
+          fi
   build-dockerhub-staging:
     # needs: test
     name: Build & Push to Dockerhub
