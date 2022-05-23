@@ -72,7 +72,7 @@ export const DailyRoundsList = (props: any) => {
         itemData.last_updated_by_telemedicine;
 
       return (
-        <div key={`daily_round_${idx}`} className="w-full">
+        <div key={`daily_round_${idx}`} className="w-ful">
           <div
             className={`block border rounded-lg ${
               telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
@@ -177,7 +177,7 @@ export const DailyRoundsList = (props: any) => {
               <div className="mt-2 flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-2">
                 <button
                   className="btn btn-default"
-                  onClick={(e) =>
+                  onClick={() =>
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}`
                     )
@@ -188,7 +188,7 @@ export const DailyRoundsList = (props: any) => {
                 </button>
                 <button
                   className="btn btn-default"
-                  onClick={(e) => {
+                  onClick={() => {
                     if (itemData.rounds_type === "NORMAL") {
                       navigate(
                         `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
@@ -224,7 +224,7 @@ export const DailyRoundsList = (props: any) => {
         <div className="flex flex-wrap">
           <div className="overflow-y-auto h-screen space-y-4">{roundsList}</div>
           {!isDailyRoundLoading && totalCount > limit && (
-            <div className="mt-4 flex w-full justify-center">
+            <div className="mt-4 flex justify-center">
               <Pagination
                 cPage={currentPage}
                 defaultPerPage={limit}
