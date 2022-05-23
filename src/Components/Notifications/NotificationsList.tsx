@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   getNotifications,
+  markNotificationAsRead,
   getUserPnconfig,
   updateUserPnconfig,
   getPublicKey,
@@ -12,6 +13,7 @@ import { SelectField } from "../Common/HelperInputFields";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
+import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
@@ -37,7 +39,7 @@ export default function ResultList({
   const [showNotifications, setShowNotifications] = useState(false);
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
-
+  const [isMarkingAsRead, setIsMarkingAsRead] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
 
@@ -188,6 +190,22 @@ export default function ResultList({
   //   updateQuery({ page, limit });
   // };
 
+  const handleMarkAsRead = async (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    notificationId: string
+  ) => {
+    setIsMarkingAsRead(true);
+    event.stopPropagation();
+    await dispatch(markNotificationAsRead(notificationId));
+    const notifications = data.map((notification) => {
+      if (notification.id === notificationId)
+        return { ...notification, read_at: new Date() };
+      return notification;
+    });
+    setData(notifications);
+    setIsMarkingAsRead(false);
+  };
+
   const resultUrl = (event: string, data: any) => {
     switch (event) {
       case "PATIENT_CREATED":
@@ -232,13 +250,29 @@ export default function ResultList({
             {getNotificationTitle(result.event)}
           </div>
           <div className="text-sm">{result.message}</div>
-          <div className="text-xs">
+          <div className="text-xs text-right">
             {moment(result.created_date).format("lll")}
           </div>
-          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0">
-            <i className="fas fa-eye mr-2 text-primary-500" />
-            Visit Link
-          </a>
+          <div className="mt-2 gap-2 flex flex-row-reverse items-center">
+            <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
+              <i className="fas fa-eye mr-2 text-primary-500" />
+              Visit Link
+            </button>
+            {!result.read_at && (
+              <button
+                className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                disabled={isMarkingAsRead}
+                onClick={(event) => handleMarkAsRead(event, result.id)}
+              >
+                {isMarkingAsRead ? (
+                  <Spinner />
+                ) : (
+                  <i className="fa-solid fa-check mr-2 text-primary-500" />
+                )}
+                Mark as Read
+              </button>
+            )}
+          </div>
         </div>
       );
     });
@@ -353,27 +387,7 @@ export default function ResultList({
                     className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs flex-shrink-0"
                     disabled={isSubscribing}
                   >
-                    {isSubscribing && (
-                      <svg
-                        className="animate-spin h-5 w-5 mr-3"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-75"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="#f1edf7"
-                          fill="white"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className=""
-                          fill="white"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                    )}
+                    {isSubscribing && <Spinner />}
                     {getButtonText()}
                   </button>
                 </div>
