@@ -133,11 +133,11 @@ export const ConsultationDetails = (props: any) => {
         if (dailyRounds?.data?.results?.length && current_bed) {
           const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
           if (bedAssets?.data?.results?.length) {
-            const { camera_address, camera_access_key, middleware_hostname } =
+            const { local_ip_address, camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
-              hostname: camera_address,
+              hostname: local_ip_address,
               username: camera_access_key.split(":")[0],
               password: camera_access_key.split(":")[1],
               port: 80,
