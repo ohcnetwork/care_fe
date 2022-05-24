@@ -112,7 +112,7 @@ const initForm: FacilityForm = {
   expected_type_d_cylinders: "",
 };
 
-const initError: Record<string, string> = Object.assign(
+const initError: Record<keyof FacilityForm, string> = Object.assign(
   {},
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
@@ -123,7 +123,10 @@ const initialState = {
 };
 
 type SetFormAction = { type: "set_form"; form: FacilityForm };
-type SetErrorAction = { type: "set_error"; errors: Record<string, string> };
+type SetErrorAction = {
+  type: "set_error";
+  errors: Record<keyof FacilityForm, string>;
+};
 type FacilityCreateFormAction = SetFormAction | SetErrorAction;
 
 const facilityCreateReducer = (
