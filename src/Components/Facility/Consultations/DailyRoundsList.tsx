@@ -65,7 +65,7 @@ export const DailyRoundsList = (props: any) => {
     roundsList = (
       <Typography>No Consultation Update data is available.</Typography>
     );
-  } else if (dailyRoundsListData.length > 0) {
+  } else if (dailyRoundsListData.length) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
       const telemedicine_doctor_update =
         itemData.created_by_telemedicine ||
