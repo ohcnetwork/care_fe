@@ -142,8 +142,8 @@ const Pagination = (props: PaginationProps) => {
       <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
         <div>
           <nav className="relative z-0 inline-flex shadow-sm">
-            {renderNavigationBtn("First", firstBtnDisable, "rounded-l-md")}
-            {renderNavigationBtn("Prev", prevBtnDisable, "")}
+            {renderNavigationBtn("<<<", firstBtnDisable, "rounded-l-md")}
+            {renderNavigationBtn("<", prevBtnDisable, "")}
             {pageNumbers.map((pageNo) => (
               <button
                 type="button"
@@ -158,8 +158,8 @@ const Pagination = (props: PaginationProps) => {
                 {pageNo}
               </button>
             ))}
-            {renderNavigationBtn("Next", nextBtnDisable, "")}
-            {renderNavigationBtn("Last", lastBtnDisable, "rounded-r-md")}
+            {renderNavigationBtn(">", nextBtnDisable, "")}
+            {renderNavigationBtn(">>>", lastBtnDisable, "rounded-r-md")}
           </nav>
         </div>
       </div>
