@@ -23,21 +23,19 @@ export default function TeleICUPatientInfoCard({
         open={open}
         onClose={() => setOpen(false)}
       >
-        <div className="flex justify-center items-center">
-          <div className="bg-white md:w-4/5 p-4 mx-auto">
-            {patient?.facility &&
-            patient?.id &&
-            patient?.last_consultation?.id ? (
-              <Beds
-                facilityId={patient?.facility}
-                patientId={patient?.id}
-                consultationId={patient?.last_consultation?.id}
-                smallLoader={true}
-              />
-            ) : (
-              <div>Invalid Patient Data</div>
-            )}
-          </div>
+        <div className="bg-white md:w-4/5 p-4 mx-auto">
+          {patient?.facility &&
+          patient?.id &&
+          patient?.last_consultation?.id ? (
+            <Beds
+              facilityId={patient?.facility}
+              patientId={patient?.id}
+              consultationId={patient?.last_consultation?.id}
+              smallLoader={true}
+            />
+          ) : (
+            <div>Invalid Patient Data</div>
+          )}
         </div>
       </Modal>
       <div className="bg-white border-b p-5 flex items-center lg:w-7/12 w-full">

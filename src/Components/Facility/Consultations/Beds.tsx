@@ -88,7 +88,7 @@ const Beds = (props: BedsProps) => {
     // small loader for modal
     if (props.smallLoader && props.smallLoader === true) {
       return (
-        <div className="p-5 pl-10 pr-10">
+        <div className="p-5 pl-10 pr-10 w-full flex justify-center items-center">
           <CircularProgress />
         </div>
       );
