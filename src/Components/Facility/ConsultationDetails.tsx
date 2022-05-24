@@ -3,11 +3,7 @@ import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getConsultation,
-  getDailyReport,
-  getPatient,
-} from "../../Redux/actions";
+import { getConsultation, getPatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel } from "./models";
 import { PatientModel } from "../Patient/models";
@@ -76,10 +72,7 @@ export const ConsultationDetails = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [res, _] = await Promise.all([
-        dispatch(getConsultation(consultationId)),
-        dispatch(getDailyReport({ limit: 1, offset: 0 }, { consultationId })),
-      ]);
+      const res = await dispatch(getConsultation(consultationId));
       if (!status.aborted) {
         if (res && res.data) {
           const data: ConsultationModel = {
@@ -124,26 +117,6 @@ export const ConsultationDetails = (props: any) => {
             setPatientData(data);
           }
         }
-        
-        const current_bed = (res as ConsultationModel)?.current_bed?.bed_object
-          ?.id;
-        if (dailyRounds?.data?.results?.length && current_bed) {
-          const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
-          if (bedAssets?.data?.results?.length) {
-            const { local_ip_address, camera_access_key, middleware_hostname } =
-              bedAssets.data.results[0].asset_object.meta;
-            setCameraAsset({
-              id: bedAssets.data.results[0].asset_object.id,
-              hostname: local_ip_address,
-              username: camera_access_key.split(":")[0],
-              password: camera_access_key.split(":")[1],
-              port: 80,
-            });
-            setCameraMiddlewareHostname(middleware_hostname);
-            setCameraConfig(bedAssets.data.results[0].meta);
-          }
-        }
-
         setIsLoading(false);
       }
     },
