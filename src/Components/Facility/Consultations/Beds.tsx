@@ -112,7 +112,7 @@ const Beds = (props: BedsProps) => {
     <div>
       <h3 className="mb-4 text-lg">Move to a new bed: </h3>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           <div>
             <InputLabel id="asset-type">Bed</InputLabel>
             <BedSelect
@@ -141,16 +141,18 @@ const Beds = (props: BedsProps) => {
             />
           </div>
         </div>
-        <div className="flex justify-between mt-4">
-          <Button
-            color="primary"
-            variant="contained"
-            type="submit"
-            style={{ marginLeft: "auto" }}
-            startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-          >
-            Move to bed
-          </Button>
+        <div className="flex flex-row justify-center mt-4">
+          <div>
+            <Button
+              color="primary"
+              variant="contained"
+              type="submit"
+              style={{ marginLeft: "auto" }}
+              startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
+            >
+              Move to bed
+            </Button>
+          </div>
         </div>
       </form>
       <div>
