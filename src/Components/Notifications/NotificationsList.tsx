@@ -126,14 +126,13 @@ export default function ResultList({
 
   // Function to remove padding from base64 string
   const removePadding = (base64String: string) => {
-    let _base64 = base64String.replace(/=/g, "");
-    _base64 = _base64.replace(/\+/g, "-").replace(/\//g, "_");
-    // remove ------BEGIN PUBLIC KEY------ and ------END PUBLIC KEY------
-    _base64 = _base64.replace(/-----BEGIN PUBLIC KEY-----/, "");
-    _base64 = _base64.replace(/-----END PUBLIC KEY-----/, "");
-    // remove \n
-    _base64 = _base64.replace(/\n/g, "");
-    return _base64;
+    return base64String
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/-----BEGIN PUBLIC KEY-----/, "") // Remove the first line
+      .replace(/-----END PUBLIC KEY-----/, "") // Remove the last line
+      .replace(/\n/g, ""); // Remove new lines
   };
 
   async function subscribe() {
