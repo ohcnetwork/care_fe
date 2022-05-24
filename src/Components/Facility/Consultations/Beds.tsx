@@ -15,6 +15,18 @@ import { TextInputField } from "../../Common/HelperInputFields";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
 
+const formatDateTime: () => string = () => {
+  const current = new Date();
+  console.log(current);
+  const yyyy = String(current.getFullYear()).padStart(4, "0");
+  const mm = String(current.getMonth() + 1).padStart(2, "0");
+  const dd = String(current.getDate()).padStart(2, "0");
+  const hh = String(current.getHours()).padStart(2, "0");
+  const min = String(current.getMinutes()).padStart(2, "0");
+
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+};
+
 interface BedsProps {
   facilityId: string;
   patientId: number;
@@ -26,7 +38,7 @@ const Beds = (props: BedsProps) => {
   const dispatch = useDispatch();
   const { facilityId, consultationId } = props;
   const [bed, setBed] = React.useState<BedModel>({});
-  const [startDate, setStartDate] = React.useState<string>("");
+  const [startDate, setStartDate] = React.useState<string>(formatDateTime());
   const [consultationBeds, setConsultationBeds] = React.useState<CurrentBed[]>(
     []
   );
