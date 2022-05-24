@@ -4,8 +4,8 @@ import { useDispatch } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  listFacilityAssetLocation,
-  updateFacilityAssetLocation,
+  // listFacilityAssetLocation,
+  // updateFacilityAssetLocation,
   getAnyFacility,
   listFacilityBeds,
   updateFacilityBed,
@@ -41,7 +41,7 @@ interface BedRowProps {
 }
 
 const BedRow = (props: BedRowProps) => {
-  let {
+  const {
     id,
     facilityId,
     name,
@@ -336,7 +336,10 @@ export const BedManagement = (props: BedManagementProps) => {
         title="Bed Management"
         hideBack={false}
         className="mx-3 md:mx-8"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [locationId]: { style: "pointer-events-none" },
+        }}
       />
       <div className="container mx-auto px-4 py-4 md:my-8 sm:px-8">
         <Button

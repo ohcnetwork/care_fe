@@ -44,6 +44,8 @@ export default function Breadcrumbs(props: any) {
       };
     });
 
+  console.log(crumbs);
+
   const [showFullPath, setShowFullPath] = useState(false);
 
   return (
@@ -113,10 +115,7 @@ export default function Breadcrumbs(props: any) {
               crumb.name && (
                 <li
                   key={crumb.name}
-                  className={
-                    "text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer " +
-                    crumb.style
-                  }
+                  className={`text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer ${crumb.style}`}
                 >
                   <div className="flex items-center">
                     <svg
