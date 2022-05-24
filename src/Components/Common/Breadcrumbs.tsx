@@ -44,8 +44,6 @@ export default function Breadcrumbs(props: any) {
       };
     });
 
-  console.log(crumbs);
-
   const [showFullPath, setShowFullPath] = useState(false);
 
   return (
