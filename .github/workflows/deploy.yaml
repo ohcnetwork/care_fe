@@ -271,7 +271,7 @@ jobs:
 
   deploy-production-manipur:
     needs: build-github-production
-    name: Deploy to EKS Manipur
+    name: Deploy to GKE Manipur
     runs-on: ubuntu-latest
     environment:
       name: Production-Manipur
