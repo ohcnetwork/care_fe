@@ -450,6 +450,7 @@ const menus = [
 const AppRouter = () => {
   useRedirect("/", "/facility");
   useRedirect("/teleicu", "/teleicu/facility");
+  useRedirect("/user", "/users");
   const pages = useRoutes(routes);
   const path = usePath();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

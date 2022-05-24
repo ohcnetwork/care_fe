@@ -124,6 +124,25 @@ export const ConsultationDetails = (props: any) => {
             setPatientData(data);
           }
         }
+        
+        const current_bed = (res as ConsultationModel)?.current_bed?.bed_object
+          ?.id;
+        if (dailyRounds?.data?.results?.length && current_bed) {
+          const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
+          if (bedAssets?.data?.results?.length) {
+            const { local_ip_address, camera_access_key, middleware_hostname } =
+              bedAssets.data.results[0].asset_object.meta;
+            setCameraAsset({
+              id: bedAssets.data.results[0].asset_object.id,
+              hostname: local_ip_address,
+              username: camera_access_key.split(":")[0],
+              password: camera_access_key.split(":")[1],
+              port: 80,
+            });
+            setCameraMiddlewareHostname(middleware_hostname);
+            setCameraConfig(bedAssets.data.results[0].meta);
+          }
+        }
 
         setIsLoading(false);
       }
