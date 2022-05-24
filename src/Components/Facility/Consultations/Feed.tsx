@@ -73,12 +73,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           };
           console.log("Found " + bedAssets.data.results.length + "bedAssets:");
           if (bedAssets?.data?.results?.length) {
-            const { camera_address, camera_access_key, middleware_hostname } =
+            const { local_ip_address, camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
             const config = camera_access_key.split(":");
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
-              hostname: camera_address,
+              hostname: local_ip_address,
               username: config[0] || "",
               password: config[1] || "",
               port: 80,
