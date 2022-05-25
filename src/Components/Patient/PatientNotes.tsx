@@ -84,6 +84,12 @@ const PatientNotes = (props: PatientNotesProps) => {
     const payload = {
       note: noteField,
     };
+    if (noteField.length < 1) {
+      Notification.Error({
+        msg: "Note Should Contain At Least 1 Character",
+      });
+      return;
+    }
     dispatch(addPatientNote(props.patientId, payload)).then(() => {
       Notification.Success({ msg: "Note added successfully" });
       fetchData();

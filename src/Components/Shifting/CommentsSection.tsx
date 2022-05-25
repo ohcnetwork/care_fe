@@ -42,7 +42,7 @@ const CommentSection = (props: CommentSectionProps) => {
     };
     if (commentBox.length < 1) {
       Notification.Error({
-        msg: "Comment Should Contain At Least 1 Characters",
+        msg: "Comment Should Contain At Least 1 Character",
       });
       return;
     }
