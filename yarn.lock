@@ -5600,7 +5600,6 @@ __metadata:
     clsx: ^1.1.1
     concurrently: ^6.2.0
     cross-env: ^7.0.3
-    css-loader: ^5.2.6
     cssnano: ^5.0.5
     cypress: ^7.5.0
     date-fns: ^2.16.1
@@ -5618,7 +5617,6 @@ __metadata:
     eslint-plugin-promise: ^5.2.0
     eslint-plugin-react: ^7.29.4
     eslint-plugin-react-hooks: ^4.3.0
-    file-loader: ^6.2.0
     gentype: ^4.1.0
     http-server: ^0.12.3
     husky: ^6.0.0
@@ -5634,7 +5632,6 @@ __metadata:
     lodash.debounce: ^4.0.8
     lodash.get: ^4.4.2
     lodash.isempty: ^4.4.0
-    mini-css-extract-plugin: ^1.6.0
     moment: ^2.29.1
     postcss: ^8.4.13
     postcss-cli: ^9.1.0
@@ -5669,7 +5666,6 @@ __metadata:
     save: ^2.4.0
     screenfull: ^5.1.0
     snyk: ^1.618.0
-    source-map-loader: 1.1.3
     tailwindcss: ^3.0.24
     tslib: ^2.2.0
     typescript: ^4.3.2
@@ -6386,26 +6382,6 @@ __metadata:
   bin:
     css-has-pseudo: dist/cli.cjs
   checksum: 8f165d68f6621891d9fa1d874794916a52ed8847dfbec591523ad68774650cc1eae062ba08f59514666e04aeba27be72c9b211892f3a187c5ba6e287bd4260e7
-  languageName: node
-  linkType: hard
-
-"css-loader@npm:^5.2.6":
-  version: 5.2.7
-  resolution: "css-loader@npm:5.2.7"
-  dependencies:
-    icss-utils: ^5.1.0
-    loader-utils: ^2.0.0
-    postcss: ^8.2.15
-    postcss-modules-extract-imports: ^3.0.0
-    postcss-modules-local-by-default: ^4.0.0
-    postcss-modules-scope: ^3.0.0
-    postcss-modules-values: ^4.0.0
-    postcss-value-parser: ^4.1.0
-    schema-utils: ^3.0.0
-    semver: ^7.3.5
-  peerDependencies:
-    webpack: ^4.27.0 || ^5.0.0
-  checksum: fb0742b30ac0919f94b99a323bdefe6d48ae46d66c7d966aae59031350532f368f8bba5951fcd268f2e053c5e6e4655551076268e9073ccb58e453f98ae58f8e
   languageName: node
   linkType: hard
 
@@ -12583,19 +12559,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mini-css-extract-plugin@npm:^1.6.0":
-  version: 1.6.2
-  resolution: "mini-css-extract-plugin@npm:1.6.2"
-  dependencies:
-    loader-utils: ^2.0.0
-    schema-utils: ^3.0.0
-    webpack-sources: ^1.1.0
-  peerDependencies:
-    webpack: ^4.4.0 || ^5.0.0
-  checksum: c2c1f3d7e5bc206b5bece0f37b65467ee58e0bb0b61d5e031bb818682b02db2552b296f5018af9058b18eb7127e00f6462fb718712a3d4432079dfa848b510cc
-  languageName: node
-  linkType: hard
-
 "mini-css-extract-plugin@npm:^2.4.5":
   version: 2.6.0
   resolution: "mini-css-extract-plugin@npm:2.6.0"
@@ -14555,7 +14518,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.2.15, postcss@npm:^8.3.5, postcss@npm:^8.4.12, postcss@npm:^8.4.13, postcss@npm:^8.4.4, postcss@npm:^8.4.7":
+"postcss@npm:^8.3.5, postcss@npm:^8.4.12, postcss@npm:^8.4.13, postcss@npm:^8.4.4, postcss@npm:^8.4.7":
   version: 8.4.14
   resolution: "postcss@npm:8.4.14"
   dependencies:
@@ -16788,22 +16751,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-loader@npm:1.1.3":
-  version: 1.1.3
-  resolution: "source-map-loader@npm:1.1.3"
-  dependencies:
-    abab: ^2.0.5
-    iconv-lite: ^0.6.2
-    loader-utils: ^2.0.0
-    schema-utils: ^3.0.0
-    source-map: ^0.6.1
-    whatwg-mimetype: ^2.3.0
-  peerDependencies:
-    webpack: ^4.0.0 || ^5.0.0
-  checksum: 0ca16a1458f206e12925f242ce52913b5f35de657d2ec17fd60ab3de7fa85b72b6707951b7a18899bdf05679d679a8b9edeb660c557aafa66453886d6907e3ec
-  languageName: node
-  linkType: hard
-
 "source-map-loader@npm:^3.0.0":
   version: 3.0.1
   resolution: "source-map-loader@npm:3.0.1"
@@ -18441,7 +18388,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-sources@npm:^1.1.0, webpack-sources@npm:^1.4.3":
+"webpack-sources@npm:^1.4.3":
   version: 1.4.3
   resolution: "webpack-sources@npm:1.4.3"
   dependencies:
