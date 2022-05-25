@@ -25,7 +25,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const { patientId, facilityId } = props;
 
   const dispatch: any = useDispatch();
-  let initialData: any = { notes: [], cPage: 1, count: 1 };
+  const initialData: any = { notes: [], cPage: 1, count: 1 };
   const [state, setState] = useState(initialData);
   const [noteField, setNoteField] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +33,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [patientName, setPatientName] = useState("");
 
   const fetchData = useCallback(
-    async (page: number = 1, status: statusType = { aborted: false }) => {
+    async (page = 1, status: statusType = { aborted: false }) => {
       setIsLoading(true);
       const res = await dispatch(
         getPatientNotes(props.patientId, pageSize, (page - 1) * pageSize)
@@ -84,7 +84,7 @@ const PatientNotes = (props: PatientNotesProps) => {
     const payload = {
       note: noteField,
     };
-    dispatch(addPatientNote(props.patientId, payload)).then((res: any) => {
+    dispatch(addPatientNote(props.patientId, payload)).then(() => {
       Notification.Success({ msg: "Note added successfully" });
       fetchData();
     });
@@ -123,7 +123,10 @@ const PatientNotes = (props: PatientNotesProps) => {
         <h3 className="text-lg">Added Notes</h3>
         <div className="w-full">
           {state.notes.map((note: any) => (
-            <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
+            <div
+              key={note.id}
+              className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+            >
               <div className="flex  w-full ">
                 <p className="text-justify">{note.note}</p>
               </div>
