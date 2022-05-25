@@ -79,7 +79,7 @@ export default function TeleICUPatientInfoCard({
                 </button>
               </div>
             )}
-            {patient.last_consultation?.weight && (
+            {(patient.last_consultation?.weight || false) && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Weight
@@ -89,7 +89,7 @@ export default function TeleICUPatientInfoCard({
                 </span>
               </div>
             )}
-            {patient.last_consultation?.height && (
+            {(patient.last_consultation?.height || false) && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Height
