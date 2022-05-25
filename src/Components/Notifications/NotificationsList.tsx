@@ -17,13 +17,17 @@ import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
-const RESULT_LIMIT = 14;
+// const Loading = loadable(() => import("../Common/Loading"));
+// const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-export default function ResultList({
-  expanded = false,
-}: {
-  expanded?: boolean;
-}) {
+const RESULT_LIMIT = 14;
+// const now = moment().format("DD-MM-YYYY:hh:mm:ss");
+
+interface Props {
+  expanded: boolean;
+}
+
+export default function ResultList({ expanded = false }: Props) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
@@ -39,6 +43,17 @@ export default function ResultList({
 
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setShowNotifications(false);
+        console.log("esc");
+      }
+    }
+    if (showNotifications) document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [showNotifications]);
 
   const intialSubscriptionState = async () => {
     try {
