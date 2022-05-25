@@ -105,7 +105,7 @@ export default function ResultList({ expanded = false }: Props) {
           .then(function (subscription) {
             subscription
               ?.unsubscribe()
-              .then(async function (_) {
+              .then(async function (_successful) {
                 const data = {
                   pf_endpoint: "",
                   pf_p256dh: "",
@@ -118,19 +118,19 @@ export default function ResultList({ expanded = false }: Props) {
                 setIsSubscribed("NotSubscribed");
                 setIsSubscribing(false);
               })
-              .catch(function (_) {
+              .catch(function (_e) {
                 Error({
                   msg: "Unsubscribe failed.",
                 });
               });
           })
-          .catch(function (_) {
+          .catch(function (_e) {
             Error({
               msg: "Subscription Error",
             });
           });
       })
-      .catch(function (_) {
+      .catch(function (_e) {
         Error({
           msg: "Service Worker Error",
         });
@@ -288,8 +288,8 @@ export default function ResultList({ expanded = false }: Props) {
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div>
-        <h5> No Results Found</h5>
+      <div className="px-4 pt-3 lg:px-8">
+        <h5> No Results Found </h5>
       </div>
     );
   }
