@@ -82,7 +82,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     ""
   )}`;
   const path = usePath();
-  const url = path.split("/");
+  const url = path.replaceAll("/", "");
 
   const active = menus.reduce((acc, menu) => {
     const tag = menu.link.replaceAll("/", "");
@@ -147,7 +147,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     >
       <div
         className={clsx(
-          "overflow-hidden transition-all duration-300",
+          "flex flex-col overflow-hidden transition-all duration-300 h-full",
           expanded ? "w-64" : "w-14"
         )}
       >
@@ -173,6 +173,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               <Link
                 key={item.title}
                 href={item.link}
+                onClick={() => isMobile && setIsOpen(false)}
                 className={clsx(
                   "flex justify-items-start items-center overflow-hidden w-10 py-1 my-1 hover:bg-primary-700 hover:text-white rounded transition-all duration-300",
                   active === item.link.replaceAll("/", "")
@@ -197,13 +198,17 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               </Link>
             );
           })}
-          <NotificationsList expanded={expanded} />
+          <NotificationsList
+            expanded={expanded}
+            onClickCB={() => setIsOpen(false)}
+          />
 
           <a
             key="dashboard"
             href={process.env.REACT_APP_DASHBOARD_URL}
             target="_blank"
             rel="noreferrer"
+            onClick={() => isMobile && setIsOpen(false)}
             className={clsx(
               "flex justify-items-start items-center overflow-hidden w-10 py-1 my-1 hover:bg-primary-700 hover:text-white rounded transition-all duration-300 text-primary-300",
               expanded && "w-60"
@@ -226,7 +231,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
 
         <div
           className={clsx(
-            "fixed bottom-0 flex flex-no-wrap items-center ml-2 overflow-hidden transition-all duration-300 py-4",
+            "flex flex-no-wrap items-center ml-2 overflow-hidden transition-all duration-300 py-4",
             expanded ? "w-60" : "w-10"
           )}
         >

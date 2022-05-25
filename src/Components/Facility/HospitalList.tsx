@@ -30,6 +30,7 @@ import { CSVLink } from "react-csv";
 import moment from "moment";
 import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
@@ -81,6 +82,8 @@ const HospitalListPage = (props: any) => {
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
   const [modalFor, setModalFor] = useState(undefined);
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = props;
   const limit = 14;
 
@@ -204,25 +207,41 @@ const HospitalListPage = (props: any) => {
   };
 
   const handleDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatchAction(downloadFacility());
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById("facilityDownloader")?.click();
   };
 
   const handleCapacityDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const cap = await dispatchAction(downloadFacilityCapacity());
+    // file ready to download
+    setDownloadLoading(false);
     setCapacityDownloadFile(cap.data);
     document.getElementById("capacityDownloader")?.click();
   };
 
   const handleDoctorsDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const doc = await dispatchAction(downloadFacilityDoctors());
+    // file ready to download
+    setDownloadLoading(false);
     setDoctorsDownloadFile(doc.data);
     document.getElementById("doctorsDownloader")?.click();
   };
 
   const handleTriageDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const tri = await dispatchAction(downloadFacilityTriage());
+    // file ready to download
+    setDownloadLoading(false);
     setTriageDownloadFile(tri.data);
     document.getElementById("triageDownloader")?.click();
   };
@@ -538,30 +557,38 @@ const HospitalListPage = (props: any) => {
                         setdownloadSelect(e.target.value);
                       }}
                     />
-                    <button
-                      className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
-                      onClick={handleDownloader}
-                    >
-                      <svg
-                        className="h-6 w-6"
-                        viewBox="0 0 16 16"
-                        fill="white"
-                        xmlns="http://www.w3.org/2000/svg"
+
+                    {downloadLoading ? (
+                      <div className="px-2 ml-2 my-2 pt-1 rounded">
+                        <CircularProgress className="text-primary-600 w-6 h-6" />
+                      </div>
+                    ) : (
+                      <button
+                        className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
+                        onClick={handleDownloader}
+                        disabled={downloadLoading}
                       >
-                        <path
-                          fillRule="evenodd"
-                          d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
-                        />
-                        <path
-                          fillRule="evenodd"
-                          d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
-                        />
-                        <path
-                          fillRule="evenodd"
-                          d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          className="h-6 w-6"
+                          viewBox="0 0 16 16"
+                          fill="white"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
+                          />
+                          <path
+                            fillRule="evenodd"
+                            d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
+                          />
+                          <path
+                            fillRule="evenodd"
+                            d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
+                          />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="hidden">
@@ -607,9 +634,16 @@ const HospitalListPage = (props: any) => {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Facilities
               </dt>
-              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                {totalCount}
-              </dd>
+              {/* Show spinner until cound is fetched from server */}
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
             </dl>
           </div>
         </div>

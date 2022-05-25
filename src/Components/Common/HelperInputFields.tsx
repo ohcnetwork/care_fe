@@ -544,6 +544,10 @@ export const AutoCompleteAsyncField = (props: any) => {
   return (
     <>
       <Autocomplete
+        openOnFocus
+        autoSelect
+        autoComplete
+        autoHighlight
         multiple={multiple}
         onOpen={onOpen}
         options={options}
@@ -592,6 +596,7 @@ export const PhoneNumberField = (props: any) => {
     onlyIndia,
     value,
     turnOffAutoFormat,
+    disabled,
   } = props;
   const countryRestriction = !!onlyIndia ? { onlyCountries: ["in"] } : {};
   const onChangeHandler = debounce(onChange, 500);
@@ -613,6 +618,7 @@ export const PhoneNumberField = (props: any) => {
           placeholder={placeholder}
           onChange={handleChange}
           country="in"
+          disabled={disabled}
           autoFormat={!turnOffAutoFormat}
           {...countryRestriction}
         />

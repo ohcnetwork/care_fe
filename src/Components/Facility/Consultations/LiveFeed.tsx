@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 import loadable from "@loadable/component";
 import { listAssetBeds, partialUpdateAssetBed } from "../../../Redux/actions";
 import RefreshIcon from "@material-ui/icons/Refresh";
@@ -13,6 +14,8 @@ import {
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
+import { Tooltip } from "@material-ui/core";
+import { FeedCameraPTZHelpButton } from "./Feed";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -28,6 +31,12 @@ const LiveFeed = (props: any) => {
   );
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
+  const [page, setPage] = useState({
+    count: 0,
+    limit: 10,
+    offset: 0,
+  });
+
   const liveFeedPlayerRef = useRef<any>(null);
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
@@ -42,6 +51,8 @@ const LiveFeed = (props: any) => {
     url,
     videoEl,
   });
+
+  const refreshPresetsHash = props.refreshPresetsHash;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentPreset, setCurrentPreset] = useState<any>();
@@ -60,8 +71,18 @@ const LiveFeed = (props: any) => {
   });
 
   const getBedPresets = async (id: any) => {
-    const bedAssets = await dispatch(listAssetBeds({ asset: id }));
+    const bedAssets = await dispatch(
+      listAssetBeds({
+        asset: id,
+        limit: page.limit,
+        offset: page.offset,
+      })
+    );
     setBedPresets(bedAssets?.data?.results);
+    setPage({
+      ...page,
+      count: bedAssets?.data?.count,
+    });
   };
 
   const gotoBedPreset = (preset: any) => {
@@ -72,11 +93,14 @@ const LiveFeed = (props: any) => {
   };
   useEffect(() => {
     getPresets({ onSuccess: (resp) => setPresets(resp.data) });
+  }, []);
+
+  useEffect(() => {
     getBedPresets(cameraAsset.id);
     if (bedPresets?.[0]?.position) {
       absoluteMove(bedPresets[0]?.position, {});
     }
-  }, [cameraAsset.id]);
+  }, [page.offset, cameraAsset.id, refreshPresetsHash]);
 
   const viewOptions = (page: number) =>
     presets
@@ -87,8 +111,6 @@ const LiveFeed = (props: any) => {
           label: "Monitor " + (i + 1),
           value: i + 1,
         }));
-
-  const cameraPTZ = getCameraPTZ(precision);
 
   useEffect(() => {
     let tId: any;
@@ -107,8 +129,89 @@ const LiveFeed = (props: any) => {
     };
   }, [startStream, streamStatus]);
 
+  const handlePagination = (cOffset: number) => {
+    setPage({
+      ...page,
+      offset: cOffset,
+    });
+  };
+
+  const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
+    precision: () => {
+      setPrecision((precision: number) =>
+        precision === 16 ? 1 : precision * 2
+      );
+    },
+    reset: () => {
+      setStreamStatus(StreamStatus.Loading);
+      startStream({
+        onSuccess: () => setStreamStatus(StreamStatus.Playing),
+        onError: () => setStreamStatus(StreamStatus.Offline),
+      });
+    },
+    stop: () => {
+      // NEED ID TO STOP STREAM
+    },
+    fullScreen: () => {
+      if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
+      screenfull.request(liveFeedPlayerRef.current);
+    },
+    updatePreset: (option) => {
+      getCameraStatus({
+        onSuccess: async ({ data }) => {
+          console.log({ currentPreset, data });
+          if (currentPreset?.asset_object?.id && data?.position) {
+            setLoading(option.loadingLabel);
+            console.log("Updating Preset");
+            const response = await dispatch(
+              partialUpdateAssetBed(
+                {
+                  asset: currentPreset.asset_object.id,
+                  bed: currentPreset.bed_object.id,
+                  meta: {
+                    ...currentPreset.meta,
+                    position: data?.position,
+                  },
+                },
+                currentPreset?.id
+              )
+            );
+            if (response && response.status === 200) {
+              Notification.Success({ msg: "Preset Updated" });
+              getBedPresets(cameraAsset?.id);
+              getPresets({});
+            }
+            setLoading(undefined);
+          }
+        },
+      });
+    },
+    other: (option) => {
+      setLoading(option.loadingLabel);
+      relativeMove(getPTZPayload(option.action, precision), {
+        onSuccess: () => setLoading(undefined),
+      });
+    },
+  };
+
+  const cameraPTZ = getCameraPTZ(precision).map((option) => {
+    const cb =
+      cameraPTZActionCBs[
+        cameraPTZActionCBs[option.action] ? option.action : "other"
+      ];
+    return { ...option, callback: () => cb(option) };
+  });
+
+  // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
+  // hence shall not cause issues. (https://news.ycombinator.com/item?id=24363703)
+  for (const option of cameraPTZ) {
+    if (!option.shortcutKey) continue;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKeyboardShortcut(option.shortcutKey, option.callback);
+  }
+
   return (
-    <div className="mt-4 px-6 mb-20">
+    <div className="mt-4 px-6 mb-2">
       <PageTitle title="Live Feed" hideBack={true} />
 
       <div className="mt-4 flex flex-col">
@@ -172,77 +275,50 @@ const LiveFeed = (props: any) => {
               </div>
             </div>
             <div className="flex max-w-lg mt-4">
-              {cameraPTZ.map((option: any) => (
-                <button
-                  className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
-                  key={option.action}
-                  onClick={() => {
-                    if (option.action === "precision") {
-                      setPrecision((precision) =>
-                        precision === 16 ? 1 : precision * 2
-                      );
-                    } else if (option.action === "reset") {
-                      setStreamStatus(StreamStatus.Loading);
-                      startStream({
-                        onSuccess: () => setStreamStatus(StreamStatus.Playing),
-                        onError: () => setStreamStatus(StreamStatus.Offline),
-                      });
-                    } else if (option.action === "stop") {
-                      // NEED ID TO STOP STREAM
-                    } else if (option.action === "fullScreen") {
-                      if (screenfull.isEnabled && liveFeedPlayerRef.current) {
-                        screenfull.request(liveFeedPlayerRef.current);
-                      }
-                    } else if (option.action === "updatePreset") {
-                      getCameraStatus({
-                        onSuccess: async ({ data }: any) => {
-                          console.log({ currentPreset, data });
-                          if (
-                            currentPreset?.asset_object?.id &&
-                            data?.position
-                          ) {
-                            setLoading(option.loadingLabel);
-                            console.log("Updating Preset");
-                            const response = await dispatch(
-                              partialUpdateAssetBed(
-                                {
-                                  asset: currentPreset.asset_object.id,
-                                  bed: currentPreset.bed_object.id,
-                                  meta: {
-                                    ...currentPreset.meta,
-                                    position: data?.position,
-                                  },
-                                },
-                                currentPreset?.id
-                              )
-                            );
-                            if (response && response.status === 200) {
-                              Notification.Success({
-                                msg: "Preset Updated",
-                              });
-                            }
-                            setLoading(undefined);
-                          }
-                        },
-                      });
-                    } else {
-                      setLoading(option.loadingLabel);
-                      relativeMove(getPTZPayload(option.action, precision), {
-                        onSuccess: () => setLoading(undefined),
-                      });
+              {cameraPTZ.map((option) => {
+                const shortcutKeyDescription =
+                  option.shortcutKey &&
+                  option.shortcutKey
+                    .join(" + ")
+                    .replace("Control", "Ctrl")
+                    .replace("ArrowUp", "↑")
+                    .replace("ArrowDown", "↓")
+                    .replace("ArrowLeft", "←")
+                    .replace("ArrowRight", "→");
+
+                return (
+                  <Tooltip
+                    placement="top"
+                    arrow={true}
+                    title={
+                      <span className="text-sm font-semibold">
+                        {`${option.label}  (${shortcutKeyDescription})`}
+                      </span>
                     }
-                  }}
-                >
-                  <span className="sr-only">{option.label}</span>
-                  {option.icon ? (
-                    <i className={`${option.icon} md:p-2`}></i>
-                  ) : (
-                    <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
-                      {option.value}x
-                    </span>
-                  )}
-                </button>
-              ))}
+                    key={option.action}
+                  >
+                    <button
+                      className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
+                      onClick={option.callback}
+                    >
+                      <span className="sr-only">{option.label}</span>
+                      {option.icon ? (
+                        <i className={`${option.icon} md:p-2`}></i>
+                      ) : (
+                        <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                          {option.value}x
+                        </span>
+                      )}
+                    </button>
+                  </Tooltip>
+                );
+              })}
+              <div className="pl-3">
+                <FeedCameraPTZHelpButton
+                  cameraPTZ={cameraPTZ}
+                  tooltipPlacement="top"
+                />
+              </div>
             </div>
           </div>
 
@@ -318,28 +394,48 @@ const LiveFeed = (props: any) => {
                     </button>
                   </>
                 ) : (
-                  bedPresets?.map((preset: any, index: number) => (
+                  <>
+                    {bedPresets?.map((preset: any, index: number) => (
+                      <button
+                        key={preset.id}
+                        className="flex flex-col bg-green-100 border border-white rounded-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
+                        onClick={() => {
+                          setLoading("Moving");
+                          gotoBedPreset(preset);
+                          setCurrentPreset(preset);
+                          getBedPresets(cameraAsset?.id);
+                          getPresets({});
+                        }}
+                      >
+                        <span className="justify-start text-xs font-semibold">
+                          {preset.bed_object.name}
+                        </span>
+                        <span className="mx-auto">
+                          {preset.meta.preset_name
+                            ? preset.meta.preset_name
+                            : `Unnamed Preset ${index + 1}`}
+                        </span>
+                      </button>
+                    ))}
                     <button
-                      key={preset.id}
-                      className="flex flex-col bg-green-100 border border-white rounded-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
+                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                      disabled={page.offset === 0}
                       onClick={() => {
-                        setLoading("Moving");
-                        gotoBedPreset(preset);
-                        setCurrentPreset(preset);
-                        getBedPresets(cameraAsset?.id);
-                        getPresets({});
+                        handlePagination(page.offset - page.limit);
                       }}
                     >
-                      <span className="justify-start text-xs font-semibold">
-                        {preset.bed_object.name}
-                      </span>
-                      <span className="mx-auto">
-                        {preset.meta.preset_name
-                          ? preset.meta.preset_name
-                          : `Unnamed Preset ${index + 1}`}
-                      </span>
+                      <i className="fas fa-arrow-left"></i>
                     </button>
-                  ))
+                    <button
+                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                      disabled={page.offset + page.limit >= page.count}
+                      onClick={() => {
+                        handlePagination(page.offset + page.limit);
+                      }}
+                    >
+                      <i className="fas fa-arrow-right"></i>
+                    </button>
+                  </>
                 )}
               </div>
               {props?.showRefreshButton && (

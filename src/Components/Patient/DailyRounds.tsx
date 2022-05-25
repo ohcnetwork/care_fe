@@ -265,7 +265,7 @@ export const DailyRounds = (props: any) => {
           data = {
             ...data,
             bp:
-              state.form.bp.systolic && state.form.bp.diastolic
+              state.form.bp && state.form.bp.systolic && state.form.bp.diastolic
                 ? {
                     systolic: Number(state.form.bp.systolic),
                     diastolic: Number(state.form.bp.diastolic),
@@ -277,14 +277,14 @@ export const DailyRounds = (props: any) => {
                     ),
                   }
                 : undefined,
-            pulse: Number(state.form.pulse),
+            pulse: state.form.pulse,
             resp: Number(state.form.resp),
             temperature: state.form.tempInCelcius
               ? celciusToFahrenheit(state.form.temperature)
               : state.form.temperature,
             rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
-            ventilator_spo2: Number(state.form.ventilator_spo2),
+            ventilator_spo2: state.form.ventilator_spo2,
           };
         }
       } else {
