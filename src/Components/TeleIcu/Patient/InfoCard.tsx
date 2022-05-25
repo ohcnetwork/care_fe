@@ -33,7 +33,7 @@ export default function TeleICUPatientInfoCard({
           )}
         </div>
       </Modal>
-      <div className="bg-white border-b p-5 flex items-center lg:w-7/12 w-full">
+      <div className="bg-white border-b py-5 flex items-center lg:w-7/12 w-full">
         {patient.blood_group && (
           <div className="flex flex-col items-center ">
             <div className="text-2xl border border-cool-gray-300 rounded-full font-semibold items-center m-2 h-20 w-20 flex justify-center">
