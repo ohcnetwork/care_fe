@@ -251,15 +251,12 @@
     ]
   },
   "lint-staged": {
-    "**/*": [
-      "prettier --write --ignore-unknown",
-      "eslint --fix",
-      "git add"
-    ]
+    "**/*": []
   },
   "eslintConfig": {
     "extends": [
       "react-app"
     ]
-  }
+  },
+  "packageManager": "yarn@3.2.1"
 }
