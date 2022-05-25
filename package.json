@@ -107,7 +107,7 @@
     "build:react": "DISABLE_ESLINT_PLUGIN='true' cross-env NODE_ENV=production react-scripts build",
     "build": "INLINE_RUNTIME_CHUNK=false yarn run build:react",
     "start:react": "cross-env PORT=4000 react-scripts start",
-    "start": "yarn run re:build && start:react",
+    "start": "yarn run re:build && yarn start:react",
     "start:Dev": "cross-env NODE_ENV=production http-server dist",
     "re:build": "rescript clean && rescript build",
     "re:watch": "rescript clean && rescript build -w",
