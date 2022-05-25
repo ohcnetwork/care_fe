@@ -1,4 +1,4 @@
-import { Card, CardContent, Box, Button } from "@material-ui/core";
+import { Card, CardContent, Button } from "@material-ui/core";
 import moment from "moment";
 import loadable from "@loadable/component";
 import { useCallback, useState } from "react";
@@ -18,7 +18,7 @@ interface SampleDetailsProps {
 }
 
 export const SampleDetails = (props: SampleDetailsProps) => {
-  const { id, patientId } = props;
+  const { id } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [sampleDetails, setSampleDetails] = useState<SampleTestModel>({});
@@ -43,6 +43,12 @@ export const SampleDetails = (props: SampleDetailsProps) => {
     },
     [dispatch, fetchData, id]
   );
+  const yesornoBadge = (param: any) =>
+    param ? (
+      <span className="badge badge-pill badge-warning">Yes</span>
+    ) : (
+      <span className="badge badge-pill badge-secondary">No</span>
+    );
 
   const showPatientCard = (patientData: any) => {
     const patientGender = GENDER_TYPES.find(
@@ -54,7 +60,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
 
     return (
       <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
-        <div className="grid grid-cols-2">
+        <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="mt-2">
             <div>
               <span className="font-semibold leading-relaxed">Name: </span>
@@ -171,21 +177,13 @@ export const SampleDetails = (props: SampleDetailsProps) => {
               <span className="font-semibold leading-relaxed">
                 Contact with confirmed carrier:{" "}
               </span>
-              {patientData?.contact_with_confirmed_carrier ? (
-                <span className="badge badge-pill badge-warning">Yes</span>
-              ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              {yesornoBadge(patientData?.contact_with_confirmed_carrier)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Contact with suspected carrier:{" "}
               </span>
-              {patientData?.contact_with_suspected_carrier ? (
-                <span className="badge badge-pill badge-warning">Yes</span>
-              ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              {yesornoBadge(patientData?.contact_with_suspected_carrier)}
             </div>
             {patientData?.estimated_contact_date && (
               <div>
@@ -199,21 +197,13 @@ export const SampleDetails = (props: SampleDetailsProps) => {
               <span className="font-semibold leading-relaxed">
                 Has SARI (Severe Acute Respiratory illness)?:{" "}
               </span>
-              {patientData?.has_SARI ? (
-                <span className="badge badge-pill badge-warning">Yes</span>
-              ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              {yesornoBadge(patientData?.has_SARI)}
             </div>
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
                 Domestic/international Travel (within last 28 days):{" "}
               </span>
-              {patientData?.past_travel ? (
-                <span className="badge badge-pill badge-warning">Yes</span>
-              ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              {yesornoBadge(patientData?.past_travel)}
             </div>
             {patientData?.countries_travelled &&
               !!patientData?.countries_travelled.length && (
@@ -368,7 +358,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             {sampleDetails.doctor_name && (
               <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
-                  Doctor's Name:{" "}
+                  Doctor&apos;s Name:{" "}
                 </span>
                 {sampleDetails.doctor_name}
               </div>
@@ -401,21 +391,13 @@ export const SampleDetails = (props: SampleDetailsProps) => {
               <span className="font-semibold leading-relaxed">
                 Is Atypical presentation{" "}
               </span>
-              {sampleDetails.is_atypical_presentation ? (
-                <span className="badge badge-pill badge-warning">Yes</span>
-              ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              {yesornoBadge(sampleDetails.is_atypical_presentation)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Is unusual course{" "}
               </span>
-              {sampleDetails.is_unusual_course ? (
-                <span className="badge badge-pill badge-warning">Yes</span>
-              ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              {yesornoBadge(sampleDetails.is_unusual_course)}
             </div>
             {sampleDetails.atypical_presentation && (
               <div className="md:col-span-2">
@@ -429,41 +411,25 @@ export const SampleDetails = (props: SampleDetailsProps) => {
               <span className="font-semibold leading-relaxed">
                 SARI - Severe Acute Respiratory illness{" "}
               </span>
-              {sampleDetails.has_sari ? (
-                <span className="badge badge-pill badge-warning">Yes</span>
-              ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              {yesornoBadge(sampleDetails.has_sari)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 ARI - Acute Respiratory illness{" "}
               </span>
-              {sampleDetails.has_ari ? (
-                <span className="badge badge-pill badge-warning">Yes</span>
-              ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              {yesornoBadge(sampleDetails.has_ari)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Contact with confirmed carrier{" "}
               </span>
-              {sampleDetails.patient_has_confirmed_contact ? (
-                <span className="badge badge-pill badge-warning">Yes</span>
-              ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              {yesornoBadge(sampleDetails.patient_has_confirmed_contact)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Contact with suspected carrier{" "}
               </span>
-              {sampleDetails.patient_has_suspected_contact ? (
-                <span className="badge badge-pill badge-warning">Yes</span>
-              ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              {yesornoBadge(sampleDetails.patient_has_suspected_contact)}
             </div>
             {sampleDetails.patient_travel_history && (
               <div className="md:col-span-2">
