@@ -111,7 +111,7 @@ export const OnlineUsersSelect = (props: Props) => {
                   <span
                     aria-label="Online"
                     className={
-                      "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
+                      "shrink-0 inline-block h-2 w-2 rounded-full " +
                       (selectedUser
                         ? moment()
                             .subtract(5, "minutes")
@@ -182,7 +182,7 @@ export const OnlineUsersSelect = (props: Props) => {
                         <span
                           aria-label="Online"
                           className={
-                            "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
+                            "shrink-0 inline-block h-2 w-2 rounded-full " +
                             (moment()
                               .subtract(5, "minutes")
                               .isBefore(user.last_login)

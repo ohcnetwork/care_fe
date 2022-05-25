@@ -154,7 +154,7 @@ export default function ListView() {
                 </div>
                 <div>
                   {resource.emergency && (
-                    <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                    <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
                       Emergency
                     </span>
                   )}

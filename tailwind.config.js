@@ -1,8 +1,14 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+const colors = require("tailwindcss/colors");
+
 module.exports = {
   important: true,
   theme: {
     extend: {
       colors: {
+        green: colors.emerald,
+        yellow: colors.amber,
+        purple: colors.violet,
         primary: {
           100: "#def7ec",
           200: "#bcf0da",
@@ -31,28 +37,11 @@ module.exports = {
       },
     },
   },
-  content: [
-    "./src/**/*.html",
-    "./src/**/*.tsx",
-    "./src/**/*.ts",
-    "./src/**/*.js",
-    "./src/**/*.res",
-  ],
   corePlugins: {
     aspectRatio: false,
   },
-  purge: {
-    content: [
-      "./src/**/*.html",
-      "./src/**/*.tsx",
-      "./src/**/*.ts",
-      "./src/**/*.js",
-      "./src/**/*.res",
-    ],
-    options: {
-      safelist: [{ pattern: /^(bg|text|border)-/, variants: ["hover"] }],
-    },
-  },
+  content: ["./src/**/*.{html,md,js,jsx,ts,tsx,res}"],
+  safelist: [{ pattern: /^(bg|text|border)-/, variants: ["hover"] }],
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),

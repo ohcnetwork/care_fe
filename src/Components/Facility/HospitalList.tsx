@@ -343,7 +343,7 @@ const HospitalListPage = (props: any) => {
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="flex ">
-              <div className="md:flex hidden w-32 self-stretch flex-shrink-0 bg-gray-300 items-center justify-center">
+              <div className="md:flex hidden w-32 self-stretch shrink-0 bg-gray-300 items-center justify-center">
                 {facility.cover_image_url ? (
                   <img
                     src={facility.cover_image_url}

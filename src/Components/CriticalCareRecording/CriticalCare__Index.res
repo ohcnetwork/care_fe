@@ -79,8 +79,8 @@ let title = text => {
   <div className="text-lg font-bold mt-2"> {str(text)} </div>
 }
 
-@react.component
-export make = (
+@genType @react.component
+let make = (
   ~id,
   ~facilityId,
   ~patientId,
@@ -115,19 +115,19 @@ export make = (
           <CriticalCare__PageTitle title="General" />
           <DailyRound__General others title renderOptionalDescription />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Neurological Monitoring" />
           <DailyRound__NeurologicalMonitoring
             neurologicalMonitoring title renderLine renderOptionalDescription renderOptionalInt
           />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Medicines" />
           <DailyRound__Medicines prescriptions={medicine} />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Arterial Blood Gas Analysis" />
           <DailyRound__ABG
@@ -136,19 +136,19 @@ export make = (
             renderOptionalFloatWithIndicators
           />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Blood Sugar" />
           <DailyRound__BloodSugar
             bloodSugar renderOptionalIntWithIndicators renderOptionalFloat renderLine
           />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Dialysis" />
           <DailyRound__Dialysis dialysis renderOptionalInt />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Hemodynamic Parameters" />
           <DailyRound__HemodynamicParameters
@@ -163,22 +163,22 @@ export make = (
             renderOptionalInt
           />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="I/O Balance" />
           <DailyRound__IOBalance ioBalance title renderOptionalDescription />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Nursing Care" />
           <DailyRound__NursingCare nursingCare renderLine />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Pressure Sore" />
           <DailyRound__PressureSore pressureSoreParameter />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Ventilator Parameters" />
           <DailyRound__VentilatorParameters
@@ -189,12 +189,12 @@ export make = (
             renderLine
           />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Others" />
           <DailyRound__Others others renderOptionalIntWithIndicators renderOptionalBool />
         </div>
-        <div className="flex-grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-gray-400 mt-4" />
       </div>
     </div>
   </div>

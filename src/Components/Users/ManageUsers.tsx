@@ -310,12 +310,12 @@ export default function ManageUsers() {
                       {user.username}
                     </div>
                   )}
-                  <div className="flex-shrink-0 text-sm text-gray-600 mt-2 min-width-50">
+                  <div className="shrink-0 text-sm text-gray-600 mt-2 min-width-50">
                     Last Online:{" "}
                     <span
                       aria-label="Online"
                       className={
-                        "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
+                        "shrink-0 inline-block h-2 w-2 rounded-full " +
                         (moment()
                           .subtract(5, "minutes")
                           .isBefore(user.last_login)
