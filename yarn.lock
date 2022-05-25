@@ -5633,7 +5633,7 @@ __metadata:
     lodash.get: ^4.4.2
     lodash.isempty: ^4.4.0
     moment: ^2.29.1
-    postcss: ^8.4.13
+    postcss: ^8.4.14
     postcss-cli: ^9.1.0
     postcss-safe-parser: ^6.0.0
     prettier: ^2.3.0
@@ -14518,7 +14518,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.3.5, postcss@npm:^8.4.12, postcss@npm:^8.4.13, postcss@npm:^8.4.4, postcss@npm:^8.4.7":
+"postcss@npm:^8.3.5, postcss@npm:^8.4.12, postcss@npm:^8.4.14, postcss@npm:^8.4.4, postcss@npm:^8.4.7":
   version: 8.4.14
   resolution: "postcss@npm:8.4.14"
   dependencies:
