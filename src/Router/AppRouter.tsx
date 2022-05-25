@@ -396,6 +396,7 @@ const AppRouter = () => {
   const pages = useRoutes(routes);
   const path = usePath();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isNotificationsListOpen, setIsNotificationsListOpen] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
@@ -405,7 +406,12 @@ const AppRouter = () => {
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
-      <SideBar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      <SideBar
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+        isNotificationsListOpen={isNotificationsListOpen}
+        setIsNotificationsListOpen={setIsNotificationsListOpen}
+      />
 
       <div className="flex flex-col w-full flex-1 overflow-hidden">
         <div className="flex md:hidden relative z-10 flex-shrink-0 h-16 bg-white shadow">
@@ -450,7 +456,11 @@ const AppRouter = () => {
         >
           {unreadNotifications}
         </span>
-        <NotificationsList setUnreadNotifications={setUnreadNotifications} />
+        <NotificationsList
+          setUnreadNotifications={setUnreadNotifications}
+          isNotificationsListOpen={isNotificationsListOpen}
+          setIsNotificationsListOpen={setIsNotificationsListOpen}
+        />
       </div>
     </div>
   );

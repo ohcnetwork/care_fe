@@ -71,9 +71,16 @@ const menus = [
 interface SideBarProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  isNotificationsListOpen: boolean;
+  setIsNotificationsListOpen: (isNotificationsListOpen: boolean) => void;
 }
 
-export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
+export const SideBar: React.FC<SideBarProps> = ({
+  isOpen,
+  setIsOpen,
+  isNotificationsListOpen,
+  setIsNotificationsListOpen,
+}) => {
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const loginUser = `${get(currentUser, "data.first_name", "")} ${get(
@@ -197,7 +204,11 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               </Link>
             );
           })}
-          <NotificationsList expanded={expanded} />
+          <NotificationsList
+            expanded={expanded}
+            isNotificationsListOpen={isNotificationsListOpen}
+            setIsNotificationsListOpen={setIsNotificationsListOpen}
+          />
 
           <a
             key="dashboard"

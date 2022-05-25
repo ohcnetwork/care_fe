@@ -23,12 +23,16 @@ interface ResultListProps {
   expanded?: boolean;
   className?: string;
   setUnreadNotifications?: any;
+  isNotificationsListOpen: boolean;
+  setIsNotificationsListOpen: (isNotificationsListOpen: boolean) => void;
 }
 
 export default function ResultList({
   expanded = false,
   className = "",
   setUnreadNotifications,
+  isNotificationsListOpen,
+  setIsNotificationsListOpen,
 }: ResultListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -40,7 +44,6 @@ export default function ResultList({
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
 
@@ -199,7 +202,7 @@ export default function ResultList({
   }, [
     dispatch,
     reload,
-    showNotifications,
+    isNotificationsListOpen,
     offset,
     eventFilter,
     isSubscribed,
@@ -301,10 +304,10 @@ export default function ResultList({
   return (
     <div className={className}>
       <button
-        onClick={() => setShowNotifications(!showNotifications)}
+        onClick={() => setIsNotificationsListOpen(!isNotificationsListOpen)}
         className={clsx(
           "flex justify-items-start items-center overflow-hidden w-10 hover:text-white py-1 my-1 hover:bg-primary-700 rounded transition-all duration-300",
-          showNotifications
+          isNotificationsListOpen
             ? "bg-primary-900 hover:bg-primary-900 text-white"
             : expanded
             ? "bg-primary-800 text-primary-300"
@@ -332,7 +335,7 @@ export default function ResultList({
         )} */}
       </button>
       {/* <button
-        onClick={() => setShowNotifications(!showNotifications)}
+        onClick={() => setIsNotificationsListOpen(!isNotificationsListOpen)}
         className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
       >
         <i
@@ -343,7 +346,10 @@ export default function ResultList({
         Notifications
       </button> */}
 
-      <SlideOver show={showNotifications} setShow={setShowNotifications}>
+      <SlideOver
+        show={isNotificationsListOpen}
+        setShow={setIsNotificationsListOpen}
+      >
         <div className="bg-white h-full">
           <div className="w-full bg-gray-100 border-b sticky top-0 z-30 px-4 pb-1 lg:px-8">
             <div className="flex flex-col pt-4 py-2">
@@ -364,7 +370,7 @@ export default function ResultList({
                 </div>
                 <div>
                   <button
-                    onClick={() => setShowNotifications(false)}
+                    onClick={() => setIsNotificationsListOpen(false)}
                     className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
                   >
                     <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
