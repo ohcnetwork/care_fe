@@ -11,10 +11,11 @@ import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import moment from "moment";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import GetAppIcon from "@material-ui/icons/GetApp";
+
+import GetAppIcon from "@mui/icons-material/GetApp";
 
 import { formatFilter } from "./Commons";
+import { CircularProgress } from "@mui/material";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));

@@ -1,4 +1,5 @@
-import DateFnsUtils from "@date-io/date-fns";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import {
   Checkbox,
   Chip,
@@ -14,20 +15,14 @@ import {
   Select,
   TextField,
   TextFieldProps,
-} from "@material-ui/core";
-import Box from "@material-ui/core/Box";
-import FormControl from "@material-ui/core/FormControl";
-import { NativeSelectInputProps } from "@material-ui/core/NativeSelect/NativeSelectInput";
-import { SelectProps } from "@material-ui/core/Select";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import {
-  DatePickerProps,
-  KeyboardDatePicker,
-  KeyboardDateTimePicker,
-  KeyboardTimePicker,
-  MuiPickersUtilsProvider,
-} from "@material-ui/pickers";
-import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+} from "@mui/material";
+import Box from "@mui/material/Box";
+import FormControl from "@mui/material/FormControl";
+import { NativeSelectInputProps } from "@mui/material/NativeSelect/NativeSelectInput";
+import { SelectProps } from "@mui/material/Select";
+import Autocomplete from "@mui/lab/Autocomplete";
+import { DatePicker, DateTimePicker, TimePicker } from "@mui/x-date-pickers";
+// import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { debounce } from "lodash";
 import React, { ChangeEvent } from "react";
 import PhoneInput, { ICountryData } from "react-phone-input-2";
@@ -77,29 +72,28 @@ type ActionTextFieldProps = TextFieldPropsExtended & {
   actionIcon?: React.ReactElement;
   action?: () => void;
 };
-// type Option = { text: string; score: number };
-// interface InputProps {
-//   options: Array<Option>;
-//   onChange: (
-//     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-//     index: number
-//   ) => void;
-//   handleDeleteOption: (index: number) => void;
-//   errors: Array<Option>;
-//   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-// }
-interface DateInputFieldProps extends DatePickerProps {
-  value: string;
+
+type Option = { text: string; score: number };
+interface InputProps {
+  options: Array<Option>;
   onChange: (
-    date: MaterialUiPickersDate,
-    value?: string | null | undefined
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+    index: number
   ) => void;
-  label?: string;
-  errors: string;
-  inputVariant?: "standard" | "outlined" | "filled";
-  disabled?: boolean;
-  margin?: "none" | "dense" | "normal";
+  handleDeleteOption: (index: number) => void;
+  errors: Array<Option>;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
+// interface DateInputFieldProps extends DatePickerProps<string, Date> {
+//   value: string;
+//   onChange: (
+//     date: Date | null,
+//     keyboardInputValue?: string | null | undefined
+//   ) => void;
+//   label?: string;
+//   errors: string;
+//   disabled?: boolean;
+// }
 // interface TimeInputFieldProps {
 //   value: string;
 //   onChange: (
@@ -208,72 +202,60 @@ export const MultilineInputField = (props: TextFieldPropsExtended) => {
   );
 };
 
-export const DateTimeFiled = (props: DateInputFieldProps) => {
-  const { label, errors, onChange, value, margin, disabled, ...restProps } =
-    props;
+export const DateTimeFiled = (props: any) => {
+  const { label, errors, onChange, value, disabled, ...restProps } = props;
   return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <KeyboardDateTimePicker
-        margin={margin || "normal"}
-        id="date-time-picker-dialog"
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <DateTimePicker
         label={label}
         value={value}
-        format="dd/MM/yyyy HH:mm"
+        inputFormat="dd/MM/yyyy HH:mm"
         onChange={onChange}
         disabled={disabled}
+        renderInput={(props) => <TextField {...props} />}
         {...restProps}
       />
       <ErrorHelperText error={errors} />
-    </MuiPickersUtilsProvider>
+    </LocalizationProvider>
   );
 };
 
-export const DateInputField = (props: DateInputFieldProps) => {
-  const {
-    value,
-    onChange,
-    label,
-    errors,
-    // variant,
-    disabled,
-    margin,
-    ...restProps
-  } = props;
+
+export const DateInputField = (props: any) => {
+  const { value, onChange, label, errors, disabled, ...restProps } = props;
   return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <KeyboardDatePicker
-        margin={margin || "normal"}
-        id="date-picker-dialog"
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <DatePicker
         label={label}
-        format="dd/MM/yyyy"
+        inputFormat="dd/MM/yyyy"
         value={value}
         onChange={onChange}
         disabled={disabled}
-        KeyboardButtonProps={{
+        OpenPickerButtonProps={{
           "aria-label": "change date",
         }}
+        renderInput={(props) => <TextField {...props} />}
         {...restProps}
       />
       <ErrorHelperText error={errors} />
-    </MuiPickersUtilsProvider>
+    </LocalizationProvider>
   );
 };
 
 export const TimeInputField = (props: any) => {
   const { value, onChange, label } = props;
   return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <KeyboardTimePicker
-        margin="normal"
-        id="time-picker"
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <TimePicker
         label={label}
         value={value}
         onChange={onChange}
-        KeyboardButtonProps={{
+        OpenPickerButtonProps={{
           "aria-label": "change time",
         }}
+        renderInput={(props) => <TextField {...props} />}
       />
-    </MuiPickersUtilsProvider>
+    </LocalizationProvider>
   );
 };
 
@@ -555,7 +537,7 @@ export const AutoCompleteAsyncField = (props: any) => {
         value={value}
         loading={loading}
         noOptionsText={noOptionsText}
-        getOptionSelected={getOptionSelected}
+        isOptionEqualToValue={getOptionSelected}
         getOptionLabel={getOptionLabel}
         renderOption={renderOption}
         filterOptions={filterOptions}

@@ -1,19 +1,7 @@
-import React, { useCallback, useReducer, useState } from "react";
-import {
-  MultilineInputField,
-  PhoneNumberField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { useState } from "react";
+import { SelectField } from "../Common/HelperInputFields";
 
-import {
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  InputLabel,
-  IconButton,
-} from "@material-ui/core";
+import { InputLabel } from "@mui/material";
 
 export const ExternalResultLocalbodySelector = (props: any) => {
   const [localBody, setLocalBody] = useState(0);

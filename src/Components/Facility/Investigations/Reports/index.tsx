@@ -10,11 +10,12 @@ import {
 } from "../../../../Redux/actions";
 import { MultiSelectField } from "../../../Common/HelperInputFields";
 import PageTitle from "../../../Common/PageTitle";
-import { Button, ButtonGroup, Checkbox, TextField } from "@material-ui/core";
+import { Button, ButtonGroup, Checkbox, TextField } from "@mui/material";
 import Loading from "../../../Common/Loading";
 import _ from "lodash";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { InputLabel, makeStyles, CircularProgress } from "@material-ui/core";
+import Autocomplete from "@mui/lab/Autocomplete";
+import { InputLabel, CircularProgress } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { InvestigationResponse } from "./types";
 import ReportTable from "./ReportTable";
 import * as Notification from "../../../../Utils/Notifications";
@@ -381,15 +382,15 @@ const InvestigationReports = ({ id }: any) => {
                   value={selectedInvestigations}
                   disableCloseOnSelect
                   getOptionLabel={(option) => option.name}
-                  renderOption={(option, { selected }) => (
-                    <React.Fragment>
+                  renderOption={(props, option, { selected }) => (
+                    <li {...props}>
                       <Checkbox
                         style={{ marginRight: 8 }}
                         checked={selected}
                         color="primary"
                       />
                       {option.name}
-                    </React.Fragment>
+                    </li>
                   )}
                   renderInput={(params) => (
                     <>

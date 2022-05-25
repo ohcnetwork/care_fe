@@ -8,7 +8,7 @@ import {
   PhoneNumberField,
   SelectField,
 } from "../Common/HelperInputFields";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
@@ -27,7 +27,7 @@ import {
   Box,
   FormControlLabel,
   Button,
-} from "@material-ui/core";
+} from "@mui/material";
 import { phonePreg } from "../../Common/validation";
 
 import { createShift, getPatient } from "../../Redux/actions";
@@ -433,7 +433,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div className="md:col-span-2 flex justify-between mt-4">
-                <Button color="default" variant="contained" onClick={goBack}>
+                <Button color="secondary" variant="contained" onClick={goBack}>
                   Cancel
                 </Button>
                 <Button

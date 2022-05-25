@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -6,7 +5,7 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-} from "@material-ui/core";
+} from "@mui/material";
 
 interface ConfirmDialogProps {
   title: string;

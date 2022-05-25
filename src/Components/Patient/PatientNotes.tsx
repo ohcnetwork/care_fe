@@ -6,7 +6,7 @@ import {
   addPatientNote,
   getPatient,
 } from "../../Redux/actions";
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 import * as Notification from "../../Utils/Notifications.js";
 import moment from "moment";
 import PageTitle from "../Common/PageTitle";

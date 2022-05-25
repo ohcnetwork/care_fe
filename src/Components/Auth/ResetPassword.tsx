@@ -7,18 +7,19 @@ import {
   CardContent,
   CardActions,
   Button,
-} from "@material-ui/core";
+} from "@mui/material";
 import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import { createStyles, makeStyles } from "@mui/styles";
+import { Theme } from "@mui/material/styles";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
 import { postResetPassword } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   formTop: {
     marginTop: "100px",
   },
@@ -137,8 +138,8 @@ export const ResetPassword = (props: any) => {
                 />
                 {passReg === 0 && (
                   <div className={panel.root}>
-                    <ExpansionPanel>
-                      <ExpansionPanelDetails>
+                    <Accordion>
+                      <AccordionDetails>
                         <Typography className="text-red-500">
                           <li>Minimum password length 8</li>
                           <li>Require at least one digit</li>
@@ -146,8 +147,8 @@ export const ResetPassword = (props: any) => {
                           <li>Require at least one lower case letter</li>
                           <li>Require at least one symbol</li>
                         </Typography>
-                      </ExpansionPanelDetails>
-                    </ExpansionPanel>
+                      </AccordionDetails>
+                    </Accordion>
                   </div>
                 )}
                 <TextInputField

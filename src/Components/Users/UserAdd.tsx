@@ -4,8 +4,8 @@ import {
   CardContent,
   CircularProgress,
   InputLabel,
-} from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+} from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
@@ -39,7 +39,7 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
-import { Cancel, CheckCircle } from "@material-ui/icons";
+import { Cancel, CheckCircle } from "@mui/icons-material";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -652,7 +652,9 @@ export const UserAdd = (props: UserProps) => {
                 <DateInputField
                   fullWidth={true}
                   value={state.form.date_of_birth}
-                  onChange={(date) => handleDateChange(date, "date_of_birth")}
+                  onChange={(date: Date) =>
+                    handleDateChange(date, "date_of_birth")
+                  }
                   errors={state.errors.date_of_birth}
                   inputVariant="outlined"
                   margin="dense"
@@ -806,7 +808,7 @@ export const UserAdd = (props: UserProps) => {
               )}
             </div>
             <div className="flex justify-between mt-4">
-              <Button color="default" variant="contained" onClick={goBack}>
+              <Button color="secondary" variant="contained" onClick={goBack}>
                 Cancel
               </Button>
               <Button

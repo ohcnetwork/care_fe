@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import get from "lodash.get";
 import { useSelector } from "react-redux";
 import { Link, navigate, usePath } from "raviger";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
-import { IconButton, useTheme } from "@material-ui/core";
-import Drawer from "@material-ui/core/Drawer";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { IconButton, useTheme } from "@mui/material";
+import Drawer from "@mui/material/Drawer";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import NotificationsList from "../Notifications/NotificationsList";
-import { Close } from "@material-ui/icons";
+import { Close } from "@mui/icons-material";
 import { PREFERENCE_SIDEBAR_KEY, SIDEBAR } from "../../Common/constants";
 
 const LOGO = process.env.REACT_APP_LIGHT_LOGO;

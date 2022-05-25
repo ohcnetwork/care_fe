@@ -1,7 +1,7 @@
-import { Theme, withStyles } from "@material-ui/core/styles";
-import TableCell from "@material-ui/core/TableCell";
+import { Theme } from "@mui/material/styles";
+import { withStyles } from "@mui/styles";
+import TableCell from "@mui/material/TableCell";
 import clsx from "clsx";
-import React from "react";
 import { AutoSizer, Column, Table } from "react-virtualized";
 
 const styles = (theme: Theme): any => ({

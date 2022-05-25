@@ -5,7 +5,7 @@ import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
 import BadgesList from "./BadgesList";
 import moment from "moment";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import GetAppIcon from "@mui/icons-material/GetApp";
 import { CSVLink } from "react-csv";
 import {
   listShiftRequests,
@@ -15,7 +15,8 @@ import {
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import Pagination from "../Common/Pagination";
-import { Modal, Button, CircularProgress } from "@material-ui/core";
+
+import { Modal, Button, CircularProgress } from "@mui/material";
 
 import { limit, formatFilter } from "./Commons";
 

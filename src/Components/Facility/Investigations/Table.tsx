@@ -10,9 +10,9 @@ import {
   InputLabel,
   Typography,
   Box,
-} from "@material-ui/core";
+} from "@mui/material";
 import { SelectField } from "../../Common/HelperInputFields";
-import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
+import { createStyles, makeStyles, withStyles } from "@mui/styles";
 import React from "react";
 import { useState } from "react";
 import { TextInputField } from "../../Common/HelperInputFields";

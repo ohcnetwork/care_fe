@@ -5,7 +5,7 @@ import screenfull from "screenfull";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import loadable from "@loadable/component";
 import { listAssetBeds, partialUpdateAssetBed } from "../../../Redux/actions";
-import RefreshIcon from "@material-ui/icons/Refresh";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { getCameraPTZ } from "../../../Common/constants";
 import {
   StreamStatus,

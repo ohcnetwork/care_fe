@@ -10,8 +10,8 @@ import {
   Box,
   Button,
   TableRowProps,
-} from "@material-ui/core";
-import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
+} from "@mui/material";
+import { createStyles, makeStyles, withStyles } from "@mui/styles";
 import React from "react";
 import { useState } from "react";
 import { SelectField, TextInputField } from "../../Common/HelperInputFields";

@@ -16,7 +16,7 @@ import {
 import moment from "moment";
 import { getAnyFacility, getUserList } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";

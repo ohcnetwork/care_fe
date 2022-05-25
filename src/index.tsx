@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom";
 import reducer from "../src/Redux/Reducer";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import App from "./App";
 import "./i18n";
 import { applyMiddleware, createStore } from "redux";
@@ -17,10 +17,13 @@ Sentry.init({
   dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
 });
 
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
     primary: {
       main: "#0e9f6e",
+    },
+    secondary: {
+      main: "#e0e0e0",
     },
   },
 });

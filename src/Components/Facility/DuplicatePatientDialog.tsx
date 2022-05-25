@@ -10,11 +10,10 @@ import {
   Box,
   RadioGroup,
   InputLabel,
-} from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { WithStyles, withStyles } from "@material-ui/styles";
+} from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { WithStyles, withStyles } from "@mui/styles";
 import React, { useState } from "react";
-import { CheckboxField } from "../Common/HelperInputFields";
 import { VirtualizedTable } from "../Common/VirtualizedTable";
 import { DupPatientModel } from "./models";
 

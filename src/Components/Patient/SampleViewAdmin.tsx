@@ -1,5 +1,5 @@
-import { Grid, CircularProgress } from "@material-ui/core";
-import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
+import { Grid, CircularProgress } from "@mui/material";
+import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
 import { navigate, useQueryParams } from "raviger";
@@ -26,7 +26,7 @@ import { SampleTestModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import { CSVLink } from "react-csv";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import GetAppIcon from "@mui/icons-material/GetApp";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");

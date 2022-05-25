@@ -4,7 +4,7 @@ import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getMinQuantity, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import { Button, ButtonBase } from "@material-ui/core";
+import { Button, ButtonBase } from "@mui/material";
 import { navigate } from "raviger";
 import { RoleButton } from "../Common/RoleButton";
 const Loading = loadable(() => import("../Common/Loading"));

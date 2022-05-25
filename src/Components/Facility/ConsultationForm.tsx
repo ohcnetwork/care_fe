@@ -8,9 +8,9 @@ import {
   InputLabel,
   Radio,
   RadioGroup,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, {
@@ -52,7 +52,7 @@ import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
-import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+// import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
 
@@ -537,7 +537,7 @@ export const ConsultationForm = (props: any) => {
   //     dispatch({ type: "set_form", form });
   //   }
 
-  const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
+  const handleDateChange = (date: any, key: string) => {
     moment(date).isValid() &&
       dispatch({ type: "set_form", form: { ...state.form, [key]: date } });
   };
@@ -620,7 +620,7 @@ export const ConsultationForm = (props: any) => {
                     <DateInputField
                       label="Date of onset of the symptoms*"
                       value={state.form?.symptoms_onset_date}
-                      onChange={(date) =>
+                      onChange={(date: Date) =>
                         handleDateChange(date, "symptoms_onset_date")
                       }
                       disableFuture={true}
@@ -756,7 +756,7 @@ export const ConsultationForm = (props: any) => {
                           margin="dense"
                           value={state.form.admission_date}
                           disableFuture={true}
-                          onChange={(date) =>
+                          onChange={(date: Date) =>
                             handleDateChange(date, "admission_date")
                           }
                           errors={state.errors.admission_date}
@@ -1047,7 +1047,7 @@ export const ConsultationForm = (props: any) => {
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button
-                  color="default"
+                  color="secondary"
                   variant="contained"
                   type="button"
                   onClick={() =>

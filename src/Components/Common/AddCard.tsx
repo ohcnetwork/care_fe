@@ -1,13 +1,14 @@
 import React from "react";
-import { Box, Card, Grid, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Box, Card, Grid, Typography } from "@mui/material";
+import { Theme } from "@mui/material/styles";
+import { makeStyles } from "@mui/styles";
 
 interface AddCardProps {
   title: string;
   onClick: any;
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   card: {
     background: "#ffffff",
     border: "dashed 1px #333",

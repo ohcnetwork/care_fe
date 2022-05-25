@@ -1,7 +1,7 @@
 import loadable from "@loadable/component";
 import React, { useState, useCallback, useReducer } from "react";
-import { InputLabel, Button } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import { InputLabel, Button } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   GENDER_TYPES,
@@ -20,13 +20,13 @@ import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
-import Switch from "@material-ui/core/Switch";
 import {
   ProfileLabel,
   LabelValueCard,
   ProfileValue,
   ValueBadge,
 } from "./ProfileComponents";
+import Switch from "@mui/material/Switch";
 
 const Loading = loadable(() => import("../Common/Loading"));
 

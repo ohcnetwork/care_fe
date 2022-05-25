@@ -4,8 +4,8 @@ import {
   CardActions,
   CardContent,
   InputLabel,
-} from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+} from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import { useCallback, useEffect, useReducer, useState } from "react";
@@ -326,7 +326,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
               >
                 <Button
                   id="bed-capacity-cancel"
-                  color="default"
+                  color="secondary"
                   variant="contained"
                   type="button"
                   onClick={goBack}

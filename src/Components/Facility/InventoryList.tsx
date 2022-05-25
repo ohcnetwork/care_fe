@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";

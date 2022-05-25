@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from "react";
-import { TextFieldProps } from "@material-ui/core";
+import { TextFieldProps } from "@mui/material";
 import debounce from "lodash/debounce";
 
 type TextFieldPropsExtended = TextFieldProps & {

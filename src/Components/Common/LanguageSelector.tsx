@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_NAMES } from "../../Locale/config";
 

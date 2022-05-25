@@ -8,8 +8,8 @@ import {
   RadioGroup,
   Box,
   FormControlLabel,
-} from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+} from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import loadable from "@loadable/component";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -333,7 +333,7 @@ export default function UpdateResult(props: any) {
           </div>
           <div className="flex justify-end mt-4">
             <Button
-              color="default"
+              color="secondary"
               variant="contained"
               type="button"
               onClick={goBack}

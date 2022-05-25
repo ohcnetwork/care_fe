@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
 import { navigate, Link } from "raviger";
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 import QRCode from "qrcode.react";
 import {
   GENDER_TYPES,
@@ -12,11 +12,11 @@ import {
   KeralaLogo,
 } from "../../Common/constants";
 import moment from "moment";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
 import CommentSection from "./CommentSection";
 const Loading = loadable(() => import("../Common/Loading"));

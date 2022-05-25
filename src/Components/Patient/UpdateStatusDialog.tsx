@@ -4,10 +4,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from "@material-ui/core";
-import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { WithStyles, withStyles } from "@material-ui/styles";
+} from "@mui/material";
+import CloudUploadOutlineIcon from "@mui/icons-material/CloudUpload";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { WithStyles, withStyles } from "@mui/styles";
 import React, { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {

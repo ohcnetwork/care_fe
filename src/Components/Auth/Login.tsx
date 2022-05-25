@@ -7,13 +7,13 @@ import {
   CardContent,
   Grid,
   CircularProgress,
-} from "@material-ui/core";
+} from "@mui/material";
 import { TextInputField } from "../Common/HelperInputFields";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import LanguageSelector from "../Common/LanguageSelector";
 import { RECAPTCHA_SITE_KEY } from "../../Common/env";
 import get from "lodash.get";
@@ -191,7 +191,7 @@ export const Login = (props: any) => {
               </div>
             </CardContent>
             <CardActions className="padding16">
-              <Grid container justify="center">
+              <Grid container justifyContent="center">
                 {isCaptchaEnabled && (
                   <Grid item className="px-8 py-4">
                     <ReCaptcha

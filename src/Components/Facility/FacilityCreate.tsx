@@ -9,10 +9,10 @@ import {
   FormControlLabel,
   Box,
   Radio,
-} from "@material-ui/core";
-import Popover from "@material-ui/core/Popover";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import MyLocationIcon from "@material-ui/icons/MyLocation";
+} from "@mui/material";
+import Popover from "@mui/material/Popover";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -912,8 +912,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-6">
-              <Button color="default" variant="contained" onClick={goBack}>
+
+            <div className="flex justify-between mt-4">
+              <Button color="secondary" variant="contained" onClick={goBack}>
                 Cancel
               </Button>
               <Button

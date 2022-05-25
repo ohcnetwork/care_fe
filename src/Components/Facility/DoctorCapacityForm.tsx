@@ -1,5 +1,5 @@
-import { Button, Card, CardContent, Grid, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import { Button, Card, CardContent, Grid, InputLabel } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import React, { useCallback, useEffect, useReducer, useState } from "react";
@@ -283,11 +283,11 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
               />
             </CardContent>
             <CardContent>
-              <Grid container justify="space-between" spacing={5}>
+              <Grid container justifyContent="space-between" spacing={5}>
                 <Grid item>
                   <Button
                     id="doctor-cancel"
-                    color="default"
+                    color="secondary"
                     variant="contained"
                     onClick={goBack}
                   >

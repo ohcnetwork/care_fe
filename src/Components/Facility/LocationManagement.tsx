@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
-import { Button, CircularProgress } from "@material-ui/core";
+import { Button, CircularProgress } from "@mui/material";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   listFacilityAssetLocation,
@@ -112,7 +112,7 @@ const LocationRow = (props: LocationRowProps) => {
         {isEditable ? (
           <div className="flex space-x-2">
             <Button
-              color={isLoading ? "default" : "primary"}
+              color={isLoading ? "secondary" : "primary"}
               variant="contained"
               type="submit"
               size="small"

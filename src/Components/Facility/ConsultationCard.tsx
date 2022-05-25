@@ -1,4 +1,4 @@
-import { CardContent, Grid, Typography } from "@material-ui/core";
+import { CardContent, Grid, Typography } from "@mui/material";
 import { navigate } from "raviger";
 import moment from "moment";
 import React from "react";
@@ -22,7 +22,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
       )}
 
       <CardContent>
-        <Grid container justify="space-between" alignItems="center">
+        <Grid container justifyContent="space-between" alignItems="center">
           <Grid item xs={12} container spacing={1}>
             <Grid item xs={7}>
               <Typography>

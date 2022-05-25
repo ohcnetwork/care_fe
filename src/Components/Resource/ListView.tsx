@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import loadable from "@loadable/component";
-// import { InputSearchBox } from "../Common/SearchBox";
+import { CircularProgress } from "@mui/material";
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
 import moment from "moment";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import GetAppIcon from "@mui/icons-material/GetApp";
 import { CSVLink } from "react-csv";
 import {
   listResourceRequests,
@@ -13,9 +13,6 @@ import {
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import Pagination from "../Common/Pagination";
-// import { Modal, Button } from "@material-ui/core";
-import CircularProgress from "@material-ui/core/CircularProgress";
-
 import { limit, formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
 

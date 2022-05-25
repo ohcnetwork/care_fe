@@ -1,6 +1,5 @@
-import React from "react";
-import Tooltip from "@material-ui/core/Tooltip";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
+import Tooltip from "@mui/material/Tooltip";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 export default function HelpToolTip(props: any) {
   const { text, link, place = "right" } = props;
@@ -19,7 +18,6 @@ export default function HelpToolTip(props: any) {
           </a>
         </div>
       }
-      interactive
       arrow
       placement={place}
     >

@@ -5,9 +5,9 @@ import {
   DialogContent,
   DialogTitle,
   InputLabel,
-} from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { WithStyles, withStyles } from "@material-ui/styles";
+} from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { WithStyles, withStyles } from "@mui/styles";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useReducer, useState } from "react";
@@ -182,7 +182,9 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
               <DateInputField
                 fullWidth={true}
                 value={state.form.date_of_birth}
-                onChange={(date) => handleDateChange(date, "date_of_birth")}
+                onChange={(date: Date) =>
+                  handleDateChange(date, "date_of_birth")
+                }
                 errors={state.errors.date_of_birth}
                 inputVariant="outlined"
                 margin="dense"

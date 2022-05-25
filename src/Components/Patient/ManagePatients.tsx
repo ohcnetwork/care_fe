@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import loadable from "@loadable/component";
-import Box from "@material-ui/core/Box";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Button from "@material-ui/core/Button";
-import Grid from "@material-ui/core/Grid";
-import { makeStyles, Theme, useTheme } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
-import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import { makeStyles } from "@mui/styles";
+import { Theme, useTheme } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
@@ -93,7 +94,7 @@ const useStylesTab = makeStyles((theme: Theme) => ({
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   paginateTopPadding: {
     paddingTop: "50px",
   },
@@ -635,7 +636,7 @@ export const PatientManager = (props: any) => {
   } else if (data && data.length === 0) {
     managePatients = (
       <Grid item xs={12} md={12} className={classes.displayFlex}>
-        <Grid container justify="center" alignItems="center">
+        <Grid container justifyContent="center" alignItems="center">
           <h5> No Patients Found</h5>
         </Grid>
       </Grid>

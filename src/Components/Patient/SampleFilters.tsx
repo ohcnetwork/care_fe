@@ -10,7 +10,7 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);

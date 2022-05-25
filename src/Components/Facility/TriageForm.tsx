@@ -1,6 +1,6 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Button, Card, CardContent, InputLabel } from "@mui/material";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import moment from "moment";
 import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -215,7 +215,9 @@ export const TriageForm = (props: triageFormProps) => {
                 <DateInputField
                   label="Entry Date"
                   value={state.form.entry_date}
-                  onChange={(date) => handleDateChange(date, "entry_date")}
+                  onChange={(date: Date) =>
+                    handleDateChange(date, "entry_date")
+                  }
                   errors={state.errors.entry_date}
                 />
               </div>
@@ -308,7 +310,7 @@ export const TriageForm = (props: triageFormProps) => {
               </div>
               <div className="flex justify-between mt-4">
                 <Button
-                  color="default"
+                  color="secondary"
                   variant="contained"
                   type="button"
                   onClick={goBack}

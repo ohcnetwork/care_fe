@@ -1,8 +1,8 @@
 import { Fragment } from "react";
 import React from "react";
 import { AssetData } from "../AssetTypes";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { Card, CardContent, InputLabel, Button } from "@material-ui/core";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { Card, CardContent, InputLabel, Button } from "@mui/material";
 import { TextInputField } from "../../Common/HelperInputFields";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";

@@ -2,14 +2,13 @@ import React, { useState, useCallback } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { getPatient } from "../../Redux/actions";
-import { PatientModel } from "../Patient/models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import {
   TextInputField,
   MultilineInputField,
 } from "../Common/HelperInputFields";
-import { InputLabel } from "@material-ui/core";
+import { InputLabel } from "@mui/material";
 import moment from "moment";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
