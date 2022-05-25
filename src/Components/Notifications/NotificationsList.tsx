@@ -17,11 +17,8 @@ import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
-// const Loading = loadable(() => import("../Common/Loading"));
-// const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const RESULT_LIMIT = 14;
-// const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 interface Props {
   expanded: boolean;
@@ -234,9 +231,10 @@ export default function ResultList({ expanded = false }: Props) {
       return (
         <div
           key={`usr_${result.id}`}
-          onClick={() =>
-            navigate(resultUrl(result.event, result.caused_objects))
-          }
+          onClick={() => {
+            navigate(resultUrl(result.event, result.caused_objects));
+            setShowNotifications(false);
+          }}
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
         >
           <div className="text-lg font-bold">
