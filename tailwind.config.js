@@ -41,7 +41,18 @@ module.exports = {
   corePlugins: {
     aspectRatio: false,
   },
-  safelist: [{ pattern: /^(bg|text|border)-/, variants: ["hover"] }],
+  purge: {
+    content: [
+      "./src/**/*.html",
+      "./src/**/*.tsx",
+      "./src/**/*.ts",
+      "./src/**/*.js",
+      "./src/**/*.res",
+    ],
+    options: {
+      safelist: [{ pattern: /^(bg|text|border)-/, variants: ["hover"] }],
+    },
+  },
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
