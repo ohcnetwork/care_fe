@@ -182,7 +182,7 @@ export const ConsultationDetails = (props: any) => {
                   onClick={() => setShowDoctors(true)}
                   className="btn m-1 btn-primary hover:text-white"
                 >
-                  Doctor Video
+                  Doctor Connect
                 </button>
                 {patientData.last_consultation?.id && (
                   <Link
