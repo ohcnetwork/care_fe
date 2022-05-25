@@ -47,7 +47,6 @@ src/style/index.css
 # Yarn
 .pnp.*
 .yarn/*
-.yarn/
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
