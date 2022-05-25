@@ -539,7 +539,10 @@ export const AutoCompleteAsyncField = (props: any) => {
         noOptionsText={noOptionsText}
         isOptionEqualToValue={getOptionSelected}
         getOptionLabel={getOptionLabel}
-        renderOption={renderOption}
+        renderOption={(props: any, option: any) => [
+          props,
+          renderOption(option),
+        ]}
         filterOptions={filterOptions}
         className={className}
         renderInput={(params: any) => (

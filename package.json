@@ -95,7 +95,7 @@
     "react-virtualized": "^9.22.3",
     "redux": "^4.1.0",
     "redux-thunk": "^2.3.0",
-    "rescript-material-ui": "^2.1.2",
+    "rescript-material-ui": "^3.0.2",
     "resolve": "^1.20.0",
     "save": "^2.4.0",
     "screenfull": "^5.1.0",
