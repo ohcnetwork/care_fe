@@ -21,6 +21,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Test
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v2
 
@@ -33,7 +34,7 @@ jobs:
             docker build . --file Dockerfile
           fi
   build-dockerhub-staging:
-    needs: test
+    # needs: test
     name: Build & Push to Dockerhub
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
@@ -69,7 +70,7 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:latest
           docker push $IMAGE_ID --all-tags
   build-github-staging:
-    needs: test
+    # needs: test
     if: github.ref == 'refs/heads/develop'
     name: Build and push to GitHub Staging
     runs-on: ubuntu-latest 
@@ -101,7 +102,7 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:latest
           docker push $IMAGE_ID --all-tags
   build-dockerhub-production:
-    needs: test
+    # needs: test
     name: Build & Push to Dockerhub prod
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
@@ -137,7 +138,7 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:production-latest
           docker push $IMAGE_ID --all-tags
   build-github-production:
-    needs: test
+    # needs: test
     if: github.ref == 'refs/heads/master'
     name: Build and push to GitHub
     runs-on: ubuntu-latest
@@ -234,7 +235,6 @@ jobs:
           cd kube/deployments/
           sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
           kubectl apply -f care-fe.yaml
-
   deploy-production-futureace:
     needs: build-github-production
     name: Deploy to EKS Futureace
@@ -270,8 +270,8 @@ jobs:
           kubectl apply -f care-fe.yaml
 
   deploy-production-manipur:
-    if: github.ref == 'refs/heads/devops/add-mn-deploy'
-    name: Deploy to EKS Manipur
+    needs: build-github-production
+    name: Deploy to GKE Manipur
     runs-on: ubuntu-latest
     environment:
       name: Production-Manipur
@@ -294,8 +294,8 @@ jobs:
       # Get the GKE credentials so we can deploy to the cluster
       - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
         with:
-          cluster_name: ${{ env.GKE_CLUSTER }}
-          location: ${{ env.GKE_ZONE }}
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
           credentials: ${{ secrets.GKE_SA_KEY }}
 
       - name: install kubectl
@@ -309,4 +309,4 @@ jobs:
           mkdir -p $HOME/.kube/
           cd kube/deployments/
           sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
-          kubectl apply -f care-fe.yaml
+          kubectl apply -f care-fe.yaml 

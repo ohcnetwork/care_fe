@@ -57,7 +57,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
           setLocation(assetData.data.meta?.location);
           setMiddlewareHostname(assetData.data.meta?.middleware_hostname);
           setCameraType(assetData.data.meta?.camera_type);
-          setCameraAddress(assetData.data.meta?.camera_address);
+          setCameraAddress(assetData.data.meta?.local_ip_address);
           setCameraAccessKey(assetData.data.meta?.camera_access_key);
         }
       }
@@ -80,7 +80,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
         location: location,
         middleware_hostname: middlewareHostname,
         camera_type: cameraType,
-        camera_address: cameraAddress,
+        local_ip_address: cameraAddress,
         camera_access_key: cameraAccessKey,
       },
     };

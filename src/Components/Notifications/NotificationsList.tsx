@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   getNotifications,
@@ -25,6 +25,8 @@ interface ResultListProps {
   setUnreadNotifications?: any;
   isNotificationsListOpen: boolean;
   setIsNotificationsListOpen: (isNotificationsListOpen: boolean) => void;
+  expanded: boolean;
+  onClickCB?: () => void;
 }
 
 export default function ResultList({
@@ -50,7 +52,19 @@ export default function ResultList({
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
 
-  const intialSubscriptionState = useCallback(async () => {
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setShowNotifications(false);
+        console.log("esc");
+      }
+    }
+    if (showNotifications) document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [showNotifications]);
+
+  const intialSubscriptionState = async () => {
     try {
       const res = await dispatch(getUserPnconfig({ username: username }));
       const reg = await navigator.serviceWorker.ready;
@@ -241,9 +255,11 @@ export default function ResultList({
       return (
         <div
           key={`usr_${result.id}`}
-          onClick={() =>
-            navigate(resultUrl(result.event, result.caused_objects))
-          }
+          onClick={() => {
+            navigate(resultUrl(result.event, result.caused_objects));
+            onClickCB && onClickCB();
+            setShowNotifications(false);
+          }}
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
         >
           <div className="text-lg font-bold">
@@ -295,8 +311,8 @@ export default function ResultList({
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div>
-        <h5> No Results Found</h5>
+      <div className="px-4 pt-3 lg:px-8">
+        <h5> No Results Found </h5>
       </div>
     );
   }
