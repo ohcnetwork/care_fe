@@ -18,22 +18,6 @@ import { FacilityModel } from "../Facility/models";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-// function Badge(props: { color: string; icon: string; text: string }) {
-//   return (
-//     <span
-//       className="m-1 h-full inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
-//       title={props.text}
-//     >
-//       <i
-//         className={
-//           "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-//         }
-//       ></i>
-//       {props.text}
-//     </span>
-//   );
-// }
-
 const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
@@ -133,10 +117,6 @@ export default function ResultList() {
   const searchByPhone = (value: string) => {
     updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
-
-  // const handleFilter = (value: string) => {
-  //   updateQuery({ disease_status: value, page: 1 });
-  // };
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
