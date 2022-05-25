@@ -24,8 +24,7 @@ interface Props {
   onClickCB?: () => void;
 }
 
-export default function ResultList({ expanded = false }: Props) {
-  const { expanded, onClickCB } = props;
+export default function ResultList({ expanded = false, onClickCB }: Props) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
