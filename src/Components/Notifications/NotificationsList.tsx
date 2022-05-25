@@ -17,12 +17,14 @@ import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
+
 const RESULT_LIMIT = 14;
 
-export default function ResultList(
-  props: { expanded: boolean } = { expanded: false }
-) {
-  const { expanded } = props;
+interface Props {
+  expanded: boolean;
+}
+
+export default function ResultList({ expanded = false }: Props) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
@@ -38,6 +40,17 @@ export default function ResultList(
 
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setShowNotifications(false);
+        console.log("esc");
+      }
+    }
+    if (showNotifications) document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [showNotifications]);
 
   const intialSubscriptionState = async () => {
     try {
@@ -109,11 +122,15 @@ export default function ResultList(
               });
           })
           .catch(function (_e) {
-            Error({ msg: "Subscription Error" });
+            Error({
+              msg: "Subscription Error",
+            });
           });
       })
       .catch(function (_e) {
-        Error({ msg: "Service Worker Error" });
+        Error({
+          msg: "Service Worker Error",
+        });
       });
   };
 
@@ -210,7 +227,7 @@ export default function ResultList(
 
   let resultList: any[] = [];
   if (data && data.length) {
-    resultList = data.map((result: any) => {
+    resultList = data.map((result: any, _idx: number) => {
       return (
         <div
           key={`usr_${result.id}`}
@@ -269,8 +286,8 @@ export default function ResultList(
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div>
-        <h5> No Results Found</h5>
+      <div className="px-4 pt-3 lg:px-8">
+        <h5> No Results Found </h5>
       </div>
     );
   }
