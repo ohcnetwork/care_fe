@@ -21,22 +21,21 @@ import { FacilityModel } from "../Facility/models";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-// eslint-disable-next-line
-function Badge(props: { color: string; icon: string; text: string }) {
-  return (
-    <span
-      className="m-1 h-full inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
-      title={props.text}
-    >
-      <i
-        className={
-          "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-        }
-      ></i>
-      {props.text}
-    </span>
-  );
-}
+// function Badge(props: { color: string; icon: string; text: string }) {
+//   return (
+//     <span
+//       className="m-1 h-full inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+//       title={props.text}
+//     >
+//       <i
+//         className={
+//           "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
+//         }
+//       ></i>
+//       {props.text}
+//     </span>
+//   );
+// }
 
 const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
@@ -137,10 +136,9 @@ export default function ResultList() {
     updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
 
-  // eslint-disable-next-line
-  const handleFilter = (value: string) => {
-    updateQuery({ disease_status: value, page: 1 });
-  };
+  // const handleFilter = (value: string) => {
+  //   updateQuery({ disease_status: value, page: 1 });
+  // };
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
@@ -231,8 +229,7 @@ export default function ResultList() {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            // eslint-disable-next-line
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={(_) => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -251,8 +248,7 @@ export default function ResultList() {
           {value.name}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            // eslint-disable-next-line
-            onClick={(e) =>
+            onClick={(_) =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
                 : paramKey === "wards"
