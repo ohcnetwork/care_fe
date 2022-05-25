@@ -22,9 +22,11 @@ const RESULT_LIMIT = 14;
 
 interface Props {
   expanded: boolean;
+    onClickCB?: () => void;
 }
 
 export default function ResultList({ expanded = false }: Props) {
+  const { expanded, onClickCB } = props;
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
@@ -122,15 +124,11 @@ export default function ResultList({ expanded = false }: Props) {
               });
           })
           .catch(function (_e) {
-            Error({
-              msg: "Subscription Error",
-            });
+            Error({ msg: "Subscription Error" });
           });
       })
       .catch(function (_e) {
-        Error({
-          msg: "Service Worker Error",
-        });
+        Error({ msg: "Service Worker Error" });
       });
   };
 
@@ -233,6 +231,7 @@ export default function ResultList({ expanded = false }: Props) {
           key={`usr_${result.id}`}
           onClick={() => {
             navigate(resultUrl(result.event, result.caused_objects));
+            onClickCB && onClickCB();
             setShowNotifications(false);
           }}
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
