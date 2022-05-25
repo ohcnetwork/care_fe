@@ -198,7 +198,10 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               </Link>
             );
           })}
-          <NotificationsList expanded={expanded} />
+          <NotificationsList
+            expanded={expanded}
+            onClickCB={() => setIsOpen(false)}
+          />
 
           <a
             key="dashboard"

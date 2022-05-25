@@ -11,6 +11,7 @@ import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import moment from "moment";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
 import { formatFilter } from "./Commons";
@@ -34,6 +35,8 @@ export default function BoardView() {
   const [downloadFile, setDownloadFile] = useState("");
   const [isLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
 
   const updateQuery = (filter: any) => {
@@ -66,9 +69,13 @@ export default function BoardView() {
   const appliedFilters = formatFilter(qParams);
 
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById("shiftRequests-ALL")?.click();
   };
@@ -91,10 +98,14 @@ export default function BoardView() {
             title={"Shifting"}
             hideBack={true}
             componentRight={
-              <GetAppIcon
-                className="cursor-pointer mt-2 ml-2"
-                onClick={triggerDownload}
-              />
+              downloadLoading ? (
+                <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
+              ) : (
+                <GetAppIcon
+                  className="cursor-pointer mt-2 ml-2"
+                  onClick={triggerDownload}
+                />
+              )
             }
             breadcrumbs={false}
           />
