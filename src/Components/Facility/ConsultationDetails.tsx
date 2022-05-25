@@ -171,7 +171,7 @@ export const ConsultationDetails = (props: any) => {
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap">
           <PageTitle
-            title="Patient Dashboard"
+            title="Patient Details"
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
@@ -214,7 +214,11 @@ export const ConsultationDetails = (props: any) => {
           <div className="border rounded-lg bg-white shadow h-full text-black p-4 w-full">
             <div>
               <div className="flex md:flex-row flex-col md:items-center">
-                <div className="text-sm md:mt-2 md:pl-2">
+                <div className="text-2xl md:mt-2 font-semibold">
+                  <i
+                    className="text-gray-500 fas fa-hospital text-2xl"
+                    aria-hidden="true"
+                  ></i>{" "}
                   {consultationData.facility_name}
                 </div>
               </div>

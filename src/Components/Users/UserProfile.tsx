@@ -163,6 +163,8 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
+        // variables declared inside case, gets outside there "case" scope
+        // so explicitly declare there scope to pass eslint test
         case "phoneNumber": {
           const phoneNumber = parsePhoneNumberFromString(
             states.form[field],
@@ -180,6 +182,7 @@ export default function UserProfile() {
           }
           return;
         }
+        // limit variables scope inside case block
         case "altPhoneNumber": {
           let alt_is_valid = false;
           if (states.form[field] && states.form[field] !== "+91") {
@@ -202,6 +205,7 @@ export default function UserProfile() {
           }
           return;
         }
+
         case "email":
           if (states.form[field] && !validateEmailAddress(states.form[field])) {
             errors[field] = "Enter a valid email address";
@@ -625,8 +629,8 @@ export default function UserProfile() {
           <div className="text-lg font-medium leading-6 text-gray-900">
             Check for software updates
             <p className="mt-1 text-sm leading-5 text-gray-600">
-              Click the update button to see if you have the latest {"care"}
-              version.
+              Click the update button to see if you have the latest
+              &quot;care&quot; version.
             </p>
           </div>
           <button
