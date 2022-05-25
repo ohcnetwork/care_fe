@@ -488,7 +488,7 @@ export const PatientManager = (props: any) => {
             (patient.disease_status == "POSITIVE" ? "bg-red-50" : "")
           }
         >
-          <div className="px-4  flex gap-2">
+          <div className="px-4  flex gap-2 w-full">
             {patient?.last_consultation &&
               patient?.last_consultation?.current_bed && (
                 <div className="w-32 self-stretch flex-shrink-0 bg-cool-gray-100 border border-cool-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
@@ -522,19 +522,19 @@ export const PatientManager = (props: any) => {
               {patient.facility_object && (
                 <div className="font-normal text-sm">
                   {patient.facility_object.name},
-                  <span className="text-xs ml-2">
+                  <span className="text-xs ml-1">
                     Updated at: {moment(patient.modified_date).format("lll")}
                   </span>
+                  <br />
                   {patient.review_time && (
                     <span
                       className={
-                        "m-1 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
+                        "m-1 inline-block items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
                         (moment().isBefore(patient.review_time)
                           ? " bg-gray-100"
                           : "rounded p-1 bg-red-400 text-white")
                       }
                     >
-                      <i className="mr-2 text-md fas fa-clock"></i>
                       {(moment().isBefore(patient.review_time)
                         ? "Review at: "
                         : "Review Missed: ") +
@@ -545,8 +545,8 @@ export const PatientManager = (props: any) => {
               )}
             </div>
           </div>
-          <div className="md:flex">
-            <div className="md:flex flex-wrap justify-end">
+          <div className="flex w-full">
+            <div className="flex flex-wrap flex-row justify-start">
               {patient.allow_transfer ? (
                 <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
               ) : (
@@ -605,9 +605,9 @@ export const PatientManager = (props: any) => {
                 </span>
               )}
             </div>
-            <div className="px-2">
-              <div className="btn btn-default bg-white">Details</div>
-            </div>
+          </div>
+          <div className="px-2">
+            <div className="btn btn-default bg-white">Details</div>
           </div>
         </div>
       );
