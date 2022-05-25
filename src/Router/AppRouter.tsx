@@ -46,7 +46,6 @@ import Investigation from "../Components/Facility/Investigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import AssetCreate from "../Components/Facility/AssetCreate";
-import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
@@ -456,7 +455,7 @@ const menus = [
   },
 ];
 
-const AppRouter = () => {
+export default function AppRouter() {
   useRedirect("/", "/facility");
   useRedirect("/teleicu", "/teleicu/facility");
   useRedirect("/user", "/users");
@@ -511,5 +510,4 @@ const AppRouter = () => {
       </div>
     </div>
   );
-};
-export default withTranslation()(AppRouter);
+}

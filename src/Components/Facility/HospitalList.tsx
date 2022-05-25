@@ -37,7 +37,7 @@ import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -51,13 +51,12 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     heading: {
       fontSize: theme.typography.pxToRem(15),
-      fontWeight: theme.typography.fontWeightRegular,
     },
   })
 );
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const HospitalListPage = (props: any) => {
+export const HospitalList = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
   const classes = useStyles();
   const dispatchAction: any = useDispatch();
@@ -84,7 +83,7 @@ const HospitalListPage = (props: any) => {
   const [modalFor, setModalFor] = useState(undefined);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
-  const { t } = props;
+  const { t } = useTranslation();
   const limit = 14;
 
   const fetchData = useCallback(
@@ -735,4 +734,3 @@ const HospitalListPage = (props: any) => {
     </div>
   );
 };
-export const HospitalList = withTranslation()(HospitalListPage);
