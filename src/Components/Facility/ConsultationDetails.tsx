@@ -133,11 +133,11 @@ export const ConsultationDetails = (props: any) => {
         if (dailyRounds?.data?.results?.length && current_bed) {
           const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
           if (bedAssets?.data?.results?.length) {
-            const { camera_address, camera_access_key, middleware_hostname } =
+            const { local_ip_address, camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
-              hostname: camera_address,
+              hostname: local_ip_address,
               username: camera_access_key.split(":")[0],
               password: camera_access_key.split(":")[1],
               port: 80,
@@ -150,7 +150,7 @@ export const ConsultationDetails = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch]
+    [consultationId, dispatch, patientData.is_vaccinated]
   );
 
   useAbortableEffect((status: statusType) => {
@@ -500,8 +500,8 @@ export const ConsultationDetails = (props: any) => {
                       Lines and Catheters
                     </h3>
                     <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.lines?.map((line: any, i: number) => (
-                        <div className="mt-4" key={i}>
+                      {consultationData.lines?.map((line: any, idx: number) => (
+                        <div key={idx} className="mt-4">
                           <h5>{line.type}</h5>
                           <p className="text-justify break-word">
                             Details:
