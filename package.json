@@ -116,7 +116,7 @@
   "scripts": {
     "prebuild": "npm run re:build && npm run generate-build-meta",
     "build:react": "DISABLE_ESLINT_PLUGIN='true' cross-env NODE_ENV=production react-scripts build",
-    "build:tailwind": "cross-env NODE_ENV=production postcss ./src/style/index.tailwind.css -o ./src/style/index.css",
+    "build:tailwind": "npx tailwindcss -i ./src/style/index.tailwind.css -o ./src/style/index.css --minify",
     "build": "npm run build:tailwind && INLINE_RUNTIME_CHUNK=false npm run build:react",
     "start:react": "cross-env PORT=4000 react-scripts start",
     "start:tailwind": "postcss -w src/style/index.tailwind.css -o src/style/index.css",
@@ -166,7 +166,6 @@
     "@typescript-eslint/parser": "^5.13.0",
     "concurrently": "^6.2.0",
     "copy-webpack-plugin": "6.4.1",
-    "cssnano": "^5.1.9",
     "cypress": "^7.5.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.5.0",
@@ -251,6 +250,7 @@
   "lint-staged": {
     "**/*": [
       "prettier --write --ignore-unknown",
+      "eslint --fix",
       "git add"
     ]
   },
