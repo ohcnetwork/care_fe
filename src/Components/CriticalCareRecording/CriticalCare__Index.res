@@ -79,8 +79,8 @@ let title = text => {
   <div className="text-lg font-bold mt-2"> {str(text)} </div>
 }
 
-@genType @react.component
-let make = (
+@react.component
+export make = (
   ~id,
   ~facilityId,
   ~patientId,
