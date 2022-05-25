@@ -77,17 +77,17 @@ type ActionTextFieldProps = TextFieldPropsExtended & {
   actionIcon?: React.ReactElement;
   action?: () => void;
 };
-type Option = { text: string; score: number };
-interface InputProps {
-  options: Array<Option>;
-  onChange: (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-    index: number
-  ) => void;
-  handleDeleteOption: (index: number) => void;
-  errors: Array<Option>;
-  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-}
+// type Option = { text: string; score: number };
+// interface InputProps {
+//   options: Array<Option>;
+//   onChange: (
+//     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+//     index: number
+//   ) => void;
+//   handleDeleteOption: (index: number) => void;
+//   errors: Array<Option>;
+//   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+// }
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
   onChange: (
@@ -100,13 +100,13 @@ interface DateInputFieldProps extends DatePickerProps {
   disabled?: boolean;
   margin?: "none" | "dense" | "normal";
 }
-interface TimeInputFieldProps {
-  value: string;
-  onChange: (
-    date: MaterialUiPickersDate,
-    value?: string | null | undefined
-  ) => void;
-}
+// interface TimeInputFieldProps {
+//   value: string;
+//   onChange: (
+//     date: MaterialUiPickersDate,
+//     value?: string | null | undefined
+//   ) => void;
+// }
 
 interface CheckboxProps extends Omit<FormControlLabelProps, "control"> {
   label: string;
@@ -234,7 +234,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
     onChange,
     label,
     errors,
-    variant,
+    // variant,
     disabled,
     margin,
     ...restProps
@@ -598,11 +598,11 @@ export const PhoneNumberField = (props: any) => {
     turnOffAutoFormat,
     disabled,
   } = props;
-  const countryRestriction = !!onlyIndia ? { onlyCountries: ["in"] } : {};
+  const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
   const onChangeHandler = debounce(onChange, 500);
   const handleChange = (
     value: string,
-    data: ICountryData | {},
+    data: Partial<ICountryData>,
     event: ChangeEvent<HTMLInputElement>,
     formattedValue: string
   ) => {
