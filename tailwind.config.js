@@ -38,6 +38,9 @@ module.exports = {
     "./src/**/*.js",
     "./src/**/*.res",
   ],
+  corePlugins: {
+    aspectRatio: false,
+  },
   safelist: [{ pattern: /^(bg|text|border)-/, variants: ["hover"] }],
   plugins: [
     require("@tailwindcss/forms"),
