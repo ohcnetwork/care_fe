@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
-import classNames from "classnames";
+import clsx from "clsx";
 import { UserModel } from "../Users/models";
 
 type UserFetchState = {
@@ -93,9 +93,10 @@ export const OnlineUsersSelect = (props: Props) => {
                 name="searchTerm"
                 type="text"
                 placeholder="Search by name or username"
-                className={classNames("py-2 pl-3 w-full outline-none", {
-                  hidden: !isDropdownExpanded,
-                })}
+                className={clsx(
+                  "py-2 pl-3 w-full outline-none",
+                  !isDropdownExpanded && "hidden"
+                )}
                 value={searchTerm}
                 onChange={(e) =>
                   setState({ ...state, searchTerm: e.target.value })
@@ -103,9 +104,10 @@ export const OnlineUsersSelect = (props: Props) => {
                 onKeyUp={(e) => e.preventDefault()}
               />
               <div
-                className={classNames("flex items-center justify-between", {
-                  hidden: isDropdownExpanded,
-                })}
+                className={clsx(
+                  "flex items-center justify-between",
+                  isDropdownExpanded && "hidden"
+                )}
               >
                 <div className="space-x-3 flex items-center">
                   <span
