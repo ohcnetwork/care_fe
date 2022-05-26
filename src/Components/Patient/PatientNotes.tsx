@@ -84,7 +84,7 @@ const PatientNotes = (props: PatientNotesProps) => {
     const payload = {
       note: noteField,
     };
-    if (noteField.length < 1) {
+    if (!/\S+/.test(noteField)) {
       Notification.Error({
         msg: "Note Should Contain At Least 1 Character",
       });
