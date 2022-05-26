@@ -4,8 +4,6 @@ import { useDispatch } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  listFacilityAssetLocation,
-  updateFacilityAssetLocation,
   getAnyFacility,
   listFacilityBeds,
   updateFacilityBed,
@@ -20,7 +18,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
-import classNames from "classnames";
+import clsx from "clsx";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
@@ -41,7 +39,7 @@ interface BedRowProps {
 }
 
 const BedRow = (props: BedRowProps) => {
-  let {
+  const {
     id,
     facilityId,
     name,
@@ -160,7 +158,7 @@ const BedRow = (props: BedRowProps) => {
             >
               <CircularProgress
                 size={20}
-                className={classNames("absolute z-10", { hidden: !isLoading })}
+                className={clsx("absolute z-10", !isLoading && "hidden")}
               />
               <p> SAVE </p>
             </Button>
