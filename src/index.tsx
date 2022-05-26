@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom";
-import reducer from "../src/Redux/Reducer";
+import reducer from "./Redux/Reducer";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import App from "./App";
 import "./i18n";

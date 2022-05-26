@@ -43,6 +43,16 @@ export const updateFacility = (id: number, params: object) => {
 export const deleteFacility = (id: number) => {
   return fireRequest("deleteFacility", [id], {});
 };
+
+export const updateFacilityImage = (facilityId: string, params: object) => {
+  // fireRequest("API_URL", [], params, {
+  //   // Replace API_URL with the actual URL for Facility Image Upload.
+  //   facilityId,
+  // });
+  console.log(facilityId);
+  console.table(params);
+};
+
 export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };

@@ -26,7 +26,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { CapacityModal, OptionsType } from "./models";
-const Loading = loadable(() => import("../../Components/Common/Loading"));
+const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface BedCapacityProps extends CapacityModal {

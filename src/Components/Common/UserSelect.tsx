@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getFacilityUsers } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import { AutoCompleteAsyncField } from "./HelperInputFields";
 import { UserModel } from "../Users/models";
 
 export const UserSelect = (props: any) => {

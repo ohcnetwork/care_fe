@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { listFacilityBeds } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import { AutoCompleteAsyncField } from "./HelperInputFields";
 import { BedModel } from "../Facility/models";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { debounce } from "lodash";

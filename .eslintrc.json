@@ -47,6 +47,7 @@
     "*.bs.js",
     "*.gen.tsx",
     "*.res",
-    "*.css"
+    "*.css",
+    "*.toml"
   ]
 }

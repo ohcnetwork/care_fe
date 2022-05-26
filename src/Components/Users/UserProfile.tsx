@@ -19,7 +19,7 @@ import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
-import LanguageSelector from "../../Components/Common/LanguageSelector";
+import LanguageSelector from "../Common/LanguageSelector";
 import Switch from "@material-ui/core/Switch";
 
 const Loading = loadable(() => import("../Common/Loading"));

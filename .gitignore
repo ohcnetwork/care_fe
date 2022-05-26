@@ -43,3 +43,5 @@ public/build-meta.json
 
 # Generated CSS file from Tailwind
 src/style/index.css
+.gitignore
+src_2

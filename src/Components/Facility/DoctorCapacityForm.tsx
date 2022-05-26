@@ -19,7 +19,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
-const Loading = loadable(() => import("../../Components/Common/Loading"));
+const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface DoctorCapacityProps extends DoctorModal {
