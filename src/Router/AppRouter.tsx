@@ -506,7 +506,7 @@ const AppRouter = () => {
           id="pages"
           className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none"
         >
-          <div className="max-w-8xl mx-auto px-5 py-3">{pages}</div>
+          <div className="max-w-8xl mx-auto px-3 py-3">{pages}</div>
         </main>
       </div>
     </div>

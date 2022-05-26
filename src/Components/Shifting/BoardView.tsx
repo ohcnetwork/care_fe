@@ -99,7 +99,7 @@ export default function BoardView() {
             breadcrumbs={false}
           />
         </div>
-        <div className="w-2/3 md:w-full flex items-end pt-2 space-y-2 lg:space-x-4 lg:items-center flex-end flex-col lg:flex-row">
+        <div className="w-full md:w-full flex items-end pt-2 space-y-2 lg:space-x-4 lg:items-center flex-end flex-col lg:flex-row">
           <InputSearchBox
             value={qParams.patient_name || ""}
             search={searchByName}
@@ -154,7 +154,7 @@ export default function BoardView() {
         local={local}
         updateFilter={updateFilter}
       />
-      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
+      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-2">
         {isLoading ? (
           <Loading />
         ) : (
