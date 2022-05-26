@@ -211,9 +211,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
                   <span className="font-semibold leading-relaxed">
                     Countries travelled:{" "}
                   </span>
-                  {Array.isArray(patientData?.countries_travelled)
-                    ? patientData?.countries_travelled.join(", ")
-                    : patientData?.countries_travelled.split(",").join(", ")}
+                  {patientData?.countries_travelled.join(", ")}
                 </div>
               )}
             {patientData?.ongoing_medication && (

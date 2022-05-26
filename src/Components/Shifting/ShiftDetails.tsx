@@ -18,7 +18,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
-import ReactDOM from "react-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import CommentSection from "./CommentsSection";
 
@@ -27,7 +26,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ShiftDetails(props: { id: string }) {
   const dispatch: any = useDispatch();
-  let initialData: any = {};
+  const initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
@@ -59,14 +58,14 @@ export default function ShiftDetails(props: { id: string }) {
   const handleShiftDelete = async () => {
     setOpenDeleteShiftDialog(true);
 
-    let res = await dispatch(deleteShiftRecord(props.id));
+    const res = await dispatch(deleteShiftRecord(props.id));
     if (res.status >= 200) {
       Notification.Success({
         msg: "Shifting record has been deleted successfully.",
       });
     }
 
-    navigate(`/shifting`);
+    navigate("/shifting");
   };
 
   const showCopyToclipBoard = (data: any) => {
@@ -300,9 +299,7 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="font-semibold leading-relaxed">
                   Countries travelled:{" "}
                 </span>
-                {Array.isArray(patientData?.countries_travelled)
-                  ? patientData?.countries_travelled.join(", ")
-                  : patientData?.countries_travelled.split(",").join(", ")}
+                {patientData?.countries_travelled.join(", ")}
               </div>
             )}
           {patientData?.ongoing_medication && (

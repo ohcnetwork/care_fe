@@ -955,7 +955,10 @@ export default function SampleReport(props: samplePreviewProps) {
                       <Typography className={`${classes.cellText}`}>
                         {sampleData &&
                           sampleData.exposure_history &&
-                          sampleData.exposure_history.places_of_travel}
+                          sampleData.exposure_history.places_of_travel &&
+                          sampleData.exposure_history.places_of_travel.join(
+                            ", "
+                          )}
                       </Typography>
                     </Box>
                   </Box>

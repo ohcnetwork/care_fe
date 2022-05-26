@@ -757,11 +757,7 @@ export const PatientHome = (props: any) => {
                         Countries travelled
                       </div>
                       <div className="mt-1 text-sm leading-5 text-gray-900">
-                        {Array.isArray(patientData.countries_travelled)
-                          ? patientData.countries_travelled.join(", ")
-                          : patientData.countries_travelled
-                              .split(",")
-                              .join(", ")}
+                        {patientData.countries_travelled.join(", ")}
                       </div>
                     </div>
                   )}
