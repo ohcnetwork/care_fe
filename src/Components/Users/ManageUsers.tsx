@@ -304,13 +304,13 @@ export default function ManageUsers() {
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="flex justify-between">
+                <div className="flex lg:flex-row flex-col justify-between">
                   {user.username && (
                     <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                       {user.username}
                     </div>
                   )}
-                  <div className="flex-shrink-0 text-sm text-gray-600 mt-2 min-width-50">
+                  <div className="flex-shrink-0 text-sm text-gray-600 min-width-50">
                     Last Online:{" "}
                     <span
                       aria-label="Online"
