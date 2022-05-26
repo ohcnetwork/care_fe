@@ -17,16 +17,14 @@ import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
-
 const RESULT_LIMIT = 14;
 
 interface Props {
   expanded: boolean;
-    onClickCB?: () => void;
+  onClickCB?: () => void;
 }
 
-export default function ResultList({ expanded = false }: Props) {
-  const { expanded, onClickCB } = props;
+export default function ResultList({ expanded = false, onClickCB }: Props) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
