@@ -20,7 +20,7 @@ import { IconButton, CircularProgress } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
-import classNames from "classnames";
+import clsx from "clsx";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 
@@ -223,11 +223,10 @@ export default function ManageUsers() {
     });
   };
 
-  const facilityClassname = classNames({
-    "align-baseline font-bold text-sm": true,
-    "text-blue-500 hover:text-blue-800": !isFacilityLoading,
-    "text-gray-500": isFacilityLoading,
-  });
+  const facilityClassname = clsx(
+    "align-baseline font-bold text-sm",
+    isFacilityLoading ? "text-gray-500" : "text-blue-500 hover:text-blue-800"
+  );
 
   const showLinkFacility = (username: string) => {
     return (
