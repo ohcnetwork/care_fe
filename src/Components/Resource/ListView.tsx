@@ -248,7 +248,7 @@ export default function ListView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="fmd:flex md:items-end md:justify-between px-4">
+      <div className="md:flex md:items-end md:justify-between px-4">
         <PageTitle
           title={"Resource"}
           hideBack={true}
