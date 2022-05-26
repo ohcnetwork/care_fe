@@ -22,7 +22,7 @@ const initialLocation = {
 };
 
 function AssetFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter } = props;
   const dispatch: any = useDispatch();
   const [facility, setFacility] = useState<FacilityModel>({ name: "" });
   const [location, setLocation] =

@@ -12,7 +12,7 @@ interface NavTabsProps {
 }
 
 export default function NavTabs(props: NavTabsProps) {
-  let { active, options, onChange } = props;
+  const { active, options, onChange } = props;
   return (
     <div>
       <div className="sm:hidden p-2">

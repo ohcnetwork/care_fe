@@ -34,7 +34,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
     status: number,
     result: number
   ) => {
-    let sampleData: any = {
+    const sampleData: any = {
       id: sample.id,
       status,
       consultation: sample.consultation,

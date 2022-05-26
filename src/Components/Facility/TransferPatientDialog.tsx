@@ -93,7 +93,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   };
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {

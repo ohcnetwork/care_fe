@@ -113,7 +113,7 @@ export const FacilityHome = (props: any) => {
     capacityList = <h5>No Bed Types Found</h5>;
   } else {
     capacityList = BED_TYPES.map((x) => {
-      let res = capacityData.find((data) => {
+      const res = capacityData.find((data) => {
         return data.room_type === x.id;
       });
       if (res) {
@@ -139,7 +139,7 @@ export const FacilityHome = (props: any) => {
     });
   }
 
-  let stats = patientStatsData.map((data: PatientStatsModel, index) => {
+  const stats = patientStatsData.map((data: PatientStatsModel, index) => {
     return (
       <tr className="border" key={index}>
         <td className="border px-4 py-2 whitespace-no-wrap">

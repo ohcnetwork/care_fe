@@ -134,7 +134,7 @@ export default function ResourceCreate(props: resourceProps) {
   }, [dispatchAction, facilityId]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
       switch (field) {

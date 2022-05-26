@@ -171,13 +171,13 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
   }, [bedTypes]);
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
 
   const validateData = () => {
-    let errors = { ...initForm };
+    const errors = { ...initForm };
     let invalidForm = false;
     Object.keys(state.form).forEach((field, i) => {
       if (!state.form[field]) {

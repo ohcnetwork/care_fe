@@ -88,7 +88,7 @@ export default function BadgesList(props: any) {
   }, [dispatch, appliedFilters.assigned_facility]);
 
   const filtersExists = () => {
-    let { limit, offset, ...rest } = filterParams;
+    const { limit, offset, ...rest } = filterParams;
 
     return Object.values(rest).some((value) => value);
   };

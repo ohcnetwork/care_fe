@@ -135,8 +135,8 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   };
 
   const uploadfile = (response: any) => {
-    var url = response.data.signed_url;
-    var internal_name = response.data.internal_name;
+    const url = response.data.signed_url;
+    const internal_name = response.data.internal_name;
     const f = file;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
@@ -147,7 +147,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
         "Content-disposition": "inline",
       },
       onUploadProgress: (progressEvent: any) => {
-        var percentCompleted = Math.round(
+        const percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
         );
         setUploadPercent(percentCompleted);
@@ -181,7 +181,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
     const f = file;
     if (f === undefined) return;
     const category = "UNSPECIFIED";
-    let name = f.name;
+    const name = f.name;
     setUploadStarted(true);
     setUploadDone(false);
     const requestData = {

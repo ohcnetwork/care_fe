@@ -56,7 +56,7 @@ export const NursingPlot = (props: any) => {
     };
   });
 
-  let dataToDisplay = data
+  const dataToDisplay = data
     .map((x) =>
       x.nursing.map((f: any) => {
         f["date"] = x.date;

@@ -12,7 +12,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResultItem(props: any) {
   const dispatch: any = useDispatch();
-  let initialData: any = {};
+  const initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
@@ -32,7 +32,7 @@ export default function ResultItem(props: any) {
   );
 
   const handleDelete = async () => {
-    let res = await dispatch(deleteExternalResult(props.id));
+    const res = await dispatch(deleteExternalResult(props.id));
     if (res.status >= 200) {
       Notification.Success({
         msg: "Record has been deleted successfully.",
@@ -40,7 +40,7 @@ export default function ResultItem(props: any) {
     }
 
     setShowDeleteAlert(false);
-    navigate(`/external_results`);
+    navigate("/external_results");
   };
 
   useAbortableEffect(

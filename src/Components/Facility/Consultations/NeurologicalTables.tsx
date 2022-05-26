@@ -169,7 +169,6 @@ export const NeurologicalTable = (props: any) => {
     [currentPage]
   );
 
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handlePagination = (page: number, limit: number) => {
     setCurrentPage(page);

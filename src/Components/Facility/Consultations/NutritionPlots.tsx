@@ -87,7 +87,7 @@ export const NutritionPlots = (props: any) => {
     )
   );
 
-  let infusionsData: any = {};
+  const infusionsData: any = {};
   infusionList.map(
     (x: any) =>
       (infusionsData[x] = {
@@ -113,7 +113,7 @@ export const NutritionPlots = (props: any) => {
     )
   );
 
-  let IVFluidsData: any = {};
+  const IVFluidsData: any = {};
   IVFluidsList.map(
     (x: any) =>
       (IVFluidsData[x] = {
@@ -139,7 +139,7 @@ export const NutritionPlots = (props: any) => {
     )
   );
 
-  let FeedsData: any = {};
+  const FeedsData: any = {};
   FeedsList.map(
     (x: any) =>
       (FeedsData[x] = {
@@ -165,7 +165,7 @@ export const NutritionPlots = (props: any) => {
     )
   );
 
-  let OutputData: any = {};
+  const OutputData: any = {};
   OutputList.map(
     (x: any) =>
       (OutputData[x] = {

@@ -28,7 +28,7 @@ export const UserSelect = (props: UserSelectProps) => {
   const [UserList, setUserList] = useState<Array<UserModel>>([]);
 
   const getPersonName = (user: any) => {
-    let personName = user.first_name + " " + user.last_name;
+    const personName = user.first_name + " " + user.last_name;
 
     return personName.trim().length > 0 ? personName : user.username;
   };

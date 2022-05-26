@@ -139,7 +139,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
   const [state, dispatch] = useReducer(shiftFormReducer, initialState);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
       switch (field) {

@@ -34,7 +34,7 @@ interface LocationRowProps {
 }
 
 const LocationRow = (props: LocationRowProps) => {
-  let { id, facilityId, name, description, triggerRerender } = props;
+  const { id, facilityId, name, description, triggerRerender } = props;
 
   const dispatchAction: any = useDispatch();
   const [isEditable, setIsEditable] = useState(false);

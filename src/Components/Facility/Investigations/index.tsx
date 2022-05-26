@@ -57,7 +57,7 @@ const testFormReducer = (state = initialState, action: any) => {
   }
 };
 
-let listOfInvestigations = (
+const listOfInvestigations = (
   group_id: string,
   investigations: InvestigationType[]
 ) => {
@@ -66,7 +66,7 @@ let listOfInvestigations = (
   );
 };
 
-let findGroup = (group_id: string, groups: Group[]) => {
+const findGroup = (group_id: string, groups: Group[]) => {
   return groups.find((g) => g.external_id === group_id);
 };
 
@@ -140,12 +140,12 @@ const Investigation = (props: {
   }, [props.consultationId]);
 
   const initialiseForm = () => {
-    let investigationsArray = selectedGroup.map((group_id: string) => {
+    const investigationsArray = selectedGroup.map((group_id: string) => {
       return listOfInvestigations(group_id, investigations);
     });
 
-    let flatInvestigations = investigationsArray.flat();
-    let form: any = {};
+    const flatInvestigations = investigationsArray.flat();
+    const form: any = {};
 
     flatInvestigations.forEach(
       (i: InvestigationType) =>

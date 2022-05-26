@@ -41,7 +41,7 @@ interface BedRowProps {
 }
 
 const BedRow = (props: BedRowProps) => {
-  let {
+  const {
     id,
     facilityId,
     name,

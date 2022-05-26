@@ -25,7 +25,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const { patientId, facilityId } = props;
 
   const dispatch: any = useDispatch();
-  let initialData: any = { notes: [], cPage: 1, count: 1 };
+  const initialData: any = { notes: [], cPage: 1, count: 1 };
   const [state, setState] = useState(initialData);
   const [noteField, setNoteField] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +33,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [patientName, setPatientName] = useState("");
 
   const fetchData = useCallback(
-    async (page: number = 1, status: statusType = { aborted: false }) => {
+    async (page = 1, status: statusType = { aborted: false }) => {
       setIsLoading(true);
       const res = await dispatch(
         getPatientNotes(props.patientId, pageSize, (page - 1) * pageSize)
