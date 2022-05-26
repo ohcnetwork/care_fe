@@ -17,7 +17,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
-import classNames from "classnames";
+import clsx from "clsx";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -34,7 +34,7 @@ interface LocationRowProps {
 }
 
 const LocationRow = (props: LocationRowProps) => {
-  let { id, facilityId, name, description, triggerRerender } = props;
+  const { id, facilityId, name, description, triggerRerender } = props;
 
   const dispatchAction: any = useDispatch();
   const [isEditable, setIsEditable] = useState(false);
@@ -121,7 +121,7 @@ const LocationRow = (props: LocationRowProps) => {
             >
               <CircularProgress
                 size={20}
-                className={classNames("absolute z-10", { hidden: !isLoading })}
+                className={clsx("absolute z-10", !isLoading && "hidden")}
               />
               <p> SAVE </p>
             </Button>
@@ -244,6 +244,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
   if (locations && locations.length) {
     locationsList = locations.map((locationItem: LocationModel) => (
       <LocationRow
+        key={locationItem.id}
         id={locationItem.id || ""}
         facilityId={facilityId || ""}
         name={locationItem.name || ""}
