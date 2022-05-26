@@ -19,7 +19,9 @@ export default function DoctorVideoSlideover(props: {
       if (facilityId) {
         const res = await dispatchAction(getFacilityUsers(facilityId));
         if (res && res.data) {
-          setDoctors(res.data);
+          setDoctors(
+            res.data.filter((user: UserModel) => user.user_type === "Doctor")
+          );
         }
       } else {
         setDoctors([]);
