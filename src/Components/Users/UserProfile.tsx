@@ -319,7 +319,7 @@ export default function UserProfile() {
               <button
                 onClick={(_) => setShowEdit(!showEdit)}
                 type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
+                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:ring-primary focus:border-primary-700 active:bg-primary-700 mt-4"
               >
                 {showEdit ? "Cancel" : "Edit User Profile"}
               </button>
@@ -462,7 +462,7 @@ export default function UserProfile() {
                           variant="outlined"
                           margin="dense"
                           type="text"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                           value={states.form.firstName}
                           onChange={handleChangeInput}
                           errors={states.errors.firstName}
@@ -480,7 +480,7 @@ export default function UserProfile() {
                           name="lastName"
                           variant="outlined"
                           margin="dense"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                           type="text"
                           value={states.form.lastName}
                           onChange={handleChangeInput}
@@ -497,7 +497,7 @@ export default function UserProfile() {
                         </label>
                         <TextInputField
                           name="age"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                           variant="outlined"
                           margin="dense"
                           value={states.form.age}

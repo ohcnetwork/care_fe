@@ -380,7 +380,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               )}
             </div>
           </div>
-          <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch">
+          <div className="mt-8 lg:mt-0 shrink-0 flex lg:flex-col items-stretch">
             <div className="pb-3">
               <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
             </div>
