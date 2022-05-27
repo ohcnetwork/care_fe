@@ -322,6 +322,10 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Please enter IP Number";
             if (!error_div) error_div = field;
             invalidForm = true;
+          } else if (!state.form[field].replace(/\s/g, "").length) {
+            errors[field] = "IP can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
           }
           return;
         case "other_symptoms":
@@ -356,6 +360,10 @@ export const ConsultationForm = (props: any) => {
         case "consultation_notes":
           if (!state.form[field]) {
             errors[field] = "Required *";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          } else if (!state.form[field].replace(/\s/g, "").length) {
+            errors[field] = "Consultation notes can not be empty";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -394,13 +402,6 @@ export const ConsultationForm = (props: any) => {
 
     if (!validForm) {
       scrollTo(error_div);
-    } // conditions to check if the required fields aren't blank spaces
-    else if (!state.form.consultation_notes.replace(/\s/g, "").length) {
-      scrollTo("consultation_notes");
-      Notification.Error({ msg: "Consultation notes can't be blank spaces" });
-    } else if (!state.form.ip_no.replace(/\s/g, "").length) {
-      scrollTo("ip_no");
-      Notification.Error({ msg: "IP can't be blank spaces" });
     } else {
       setIsLoading(true);
       const data = {
