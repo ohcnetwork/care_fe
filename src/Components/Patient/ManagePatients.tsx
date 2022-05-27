@@ -488,7 +488,7 @@ export const PatientManager = (props: any) => {
             (patient.disease_status == "POSITIVE" ? "bg-red-50" : "")
           }
         >
-          <div className="px-4  flex gap-2">
+          <div className="px-4 w-full flex gap-2">
             {patient?.last_consultation &&
               patient?.last_consultation?.current_bed && (
                 <div className="w-32 self-stretch flex-shrink-0 bg-cool-gray-100 border border-cool-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
@@ -659,10 +659,11 @@ export const PatientManager = (props: any) => {
         breadcrumbs={!!facilityId}
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
-      <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="title-text flex align-center">
+      <div className="mt-16 md:grid grid-cols-1 gap-5 sm:mt-6 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+        <div className="title-text flex flex-row gap-2 align-center mb-24 sm:mb-2">
           <div>
             <Button
+              className="bg-green-200 hover:bg-green-300"
               color="primary"
               size="small"
               onClick={handleDownloadFiltered}
@@ -738,7 +739,7 @@ export const PatientManager = (props: any) => {
         </div>
         <div>
           <div>
-            <div className="flex items-end gap-2 mb-2">
+            <div className="flex items-end gap-2 mb-2 sm:flex-row flex-col">
               <button
                 className="btn btn-primary-ghost md:mt-7 "
                 onClick={(_) => setShowFilters((show) => !show)}
@@ -775,7 +776,7 @@ export const PatientManager = (props: any) => {
                 <span>Advanced Filters</span>
               </button>
               <button
-                className="btn-primary btn md:mt-7 w-full md:w-fit"
+                className="btn-primary btn md:mt-7 md:w-fit"
                 onClick={() => {
                   if (facilityId) {
                     navigate(`/facility/${facilityId}/patient`);
