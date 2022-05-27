@@ -365,8 +365,3 @@
     border: 3px solid theme(colors.gray.100);
   }
 }
-
-.sample {
-  position: absolute !important;
-
-}
