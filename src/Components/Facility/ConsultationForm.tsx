@@ -394,6 +394,13 @@ export const ConsultationForm = (props: any) => {
 
     if (!validForm) {
       scrollTo(error_div);
+    } // conditions to check if the required fields aren't blank spaces
+    else if (!state.form.consultation_notes.replace(/\s/g, "").length) {
+      scrollTo("consultation_notes");
+      Notification.Error({ msg: "Consultation notes can't be blank spaces" });
+    } else if (!state.form.ip_no.replace(/\s/g, "").length) {
+      scrollTo("ip_no");
+      Notification.Error({ msg: "IP can't be blank spaces" });
     } else {
       setIsLoading(true);
       const data = {
