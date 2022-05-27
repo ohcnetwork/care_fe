@@ -1,8 +1,7 @@
 #build-stage
 FROM node:lts-buster-slim as build-stage
 WORKDIR /app
-COPY package*.json ./
-RUN npm install -g yarn
+COPY package.json ./
 RUN yarn install
 COPY . .
 RUN yarn run build
