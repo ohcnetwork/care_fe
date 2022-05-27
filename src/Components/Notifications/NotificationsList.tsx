@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   getNotifications,
@@ -25,7 +25,6 @@ interface ResultListProps {
   setUnreadNotifications?: any;
   isNotificationsListOpen: boolean;
   setIsNotificationsListOpen: (isNotificationsListOpen: boolean) => void;
-  expanded: boolean;
   onClickCB?: () => void;
 }
 
@@ -35,6 +34,7 @@ export default function ResultList({
   setUnreadNotifications,
   isNotificationsListOpen,
   setIsNotificationsListOpen,
+  onClickCB,
 }: ResultListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -52,19 +52,19 @@ export default function ResultList({
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
 
-
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setShowNotifications(false);
+        setIsNotificationsListOpen(false);
         console.log("esc");
       }
     }
-    if (showNotifications) document.addEventListener("keydown", handleKeyDown);
+    if (isNotificationsListOpen)
+      document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [showNotifications]);
+  }, [isNotificationsListOpen]);
 
-  const intialSubscriptionState = async () => {
+  const intialSubscriptionState = useCallback(async () => {
     try {
       const res = await dispatch(getUserPnconfig({ username: username }));
       const reg = await navigator.serviceWorker.ready;
@@ -258,7 +258,7 @@ export default function ResultList({
           onClick={() => {
             navigate(resultUrl(result.event, result.caused_objects));
             onClickCB && onClickCB();
-            setShowNotifications(false);
+            setIsNotificationsListOpen(false);
           }}
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
         >
