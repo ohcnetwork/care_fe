@@ -13,7 +13,6 @@ import {
 import Popover from "@material-ui/core/Popover";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
-import { makeStyles } from "@material-ui/styles";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -67,7 +66,30 @@ const selectLocalBody = [
 ];
 const initialWards = [{ id: 0, name: "Choose Ward", number: 0 }];
 
-const initForm: any = {
+type FacilityForm = {
+  facility_type: string;
+  name: string;
+  state: string;
+  district: string;
+  local_body: string;
+  ward: string;
+  kasp_empanelled: string;
+  address: string;
+  phone_number: string;
+  latitude: string;
+  longitude: string;
+  pincode: string;
+  oxygen_capacity: string;
+  type_b_cylinders: string;
+  type_c_cylinders: string;
+  type_d_cylinders: string;
+  expected_oxygen_requirement: string;
+  expected_type_b_cylinders: string;
+  expected_type_c_cylinders: string;
+  expected_type_d_cylinders: string;
+};
+
+const initForm: FacilityForm = {
   facility_type: "2",
   name: "",
   state: "",
@@ -90,7 +112,7 @@ const initForm: any = {
   expected_type_d_cylinders: "",
 };
 
-const initError = Object.assign(
+const initError: Record<keyof FacilityForm, string> = Object.assign(
   {},
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
@@ -100,34 +122,32 @@ const initialState = {
   errors: { ...initError },
 };
 
-const facility_create_reducer = (state = initialState, action: any) => {
+type SetFormAction = { type: "set_form"; form: FacilityForm };
+type SetErrorAction = {
+  type: "set_error";
+  errors: Record<keyof FacilityForm, string>;
+};
+type FacilityCreateFormAction = SetFormAction | SetErrorAction;
+
+const facilityCreateReducer = (
+  state = initialState,
+  action: FacilityCreateFormAction
+) => {
   switch (action.type) {
-    case "set_form": {
-      return {
-        ...state,
-        form: action.form,
-      };
-    }
-    case "set_error": {
-      return {
-        ...state,
-        errors: action.errors,
-      };
-    }
-    default:
-      return state;
+    case "set_form":
+      return { ...state, form: action.form };
+    case "set_error":
+      return { ...state, errors: action.errors };
   }
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
+const goBack = () => window.history.go(-1);
 
 export const FacilityCreate = (props: FacilityProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
-  const [state, dispatch] = useReducer(facility_create_reducer, initialState);
+  const [state, dispatch] = useReducer(facilityCreateReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
@@ -268,16 +288,18 @@ export const FacilityCreate = (props: FacilityProps) => {
     [dispatch, fetchData]
   );
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    form[e.target.name] = e.target.value;
-    dispatch({ type: "set_form", form });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [e.target.name]: e.target.value },
+    });
   };
 
-  const handleValueChange = (value: any, name: string) => {
-    const form = { ...state.form };
-    form[name] = value;
-    dispatch({ type: "set_form", form });
+  const handleValueChange = (value: any, field: string) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [field]: value },
+    });
   };
 
   const handleClickLocationPicker = (event: React.MouseEvent) => {
@@ -287,10 +309,14 @@ export const FacilityCreate = (props: FacilityProps) => {
           position.coords.latitude,
           position.coords.longitude,
         ]);
-        const form = { ...state.form };
-        form["latitude"] = position.coords.latitude;
-        form["longitude"] = position.coords.longitude;
-        dispatch({ type: "set_form", form });
+        dispatch({
+          type: "set_form",
+          form: {
+            ...state.form,
+            latitude: String(position.coords.latitude),
+            longitude: String(position.coords.longitude),
+          },
+        });
       });
     }
 
@@ -440,14 +466,16 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
-  const handleLocationSelect = (location: any) => {
-    const form = { ...state.form };
-    const latitude = parseFloat(location.lat);
-    const longitude = parseFloat(location.lon);
-    form["latitude"] = latitude;
-    form["longitude"] = longitude;
-    dispatch({ type: "set_form", form });
-    setMapLoadLocation([latitude, longitude]);
+  const handleLocationSelect = (location: { lat: string; lon: string }) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        latitude: location.lat,
+        longitude: location.lon,
+      },
+    });
+    setMapLoadLocation([parseFloat(location.lat), parseFloat(location.lon)]);
   };
 
   if (isLoading) {
@@ -622,7 +650,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <PhoneNumberField
                   label="Emergency Contact Number*"
                   value={state.form.phone_number}
-                  onChange={(value: any) =>
+                  onChange={(value: string) =>
                     handleValueChange(value, "phone_number")
                   }
                   errors={state.errors.phone_number}
@@ -630,159 +658,166 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
 
-              <div className="grid grid-cols-2">
-                <div>
-                  <InputLabel
-                    htmlFor="facility-oxygen-capacity"
-                    id="oxygen_capacity"
-                  >
-                    Liquid Oxygen Capacity (l)
-                  </InputLabel>
-                  <TextInputField
-                    id="facility-oxygen-capacity"
-                    name="oxygen_capacity"
-                    type="number"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.oxygen_capacity}
-                    onChange={handleChange}
-                    errors={state.errors.oxygen_capacity}
-                  />
+              <div className="md:col-span-2 grid grid-cols-1 xl:grid-cols-2 gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <InputLabel
+                      htmlFor="facility-oxygen-capacity"
+                      id="oxygen_capacity"
+                    >
+                      Liquid Oxygen Capacity
+                    </InputLabel>
+                    <TextInputField
+                      id="facility-oxygen-capacity"
+                      name="oxygen_capacity"
+                      type="number"
+                      variant="outlined"
+                      margin="dense"
+                      placeholder="Litres"
+                      value={state.form.oxygen_capacity}
+                      onChange={handleChange}
+                      errors={state.errors.oxygen_capacity}
+                    />
+                  </div>
+                  <div>
+                    <InputLabel
+                      htmlFor="facility-oxygen-requirement"
+                      id="name-label"
+                    >
+                      Expected Burn Rate
+                    </InputLabel>
+                    <TextInputField
+                      id="facility-oxygen-requirement"
+                      name="expected_oxygen_requirement"
+                      type="number"
+                      variant="outlined"
+                      margin="dense"
+                      placeholder="Litres / day"
+                      value={state.form.expected_oxygen_requirement}
+                      onChange={handleChange}
+                      errors={state.errors.expected_oxygen_requirement}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <InputLabel
-                    htmlFor="facility-oxygen-requirement"
-                    id="name-label"
-                  >
-                    Expected Liquid Oxygen (l)
-                  </InputLabel>
-                  <TextInputField
-                    id="facility-oxygen-requirement"
-                    name="expected_oxygen_requirement"
-                    type="number"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.expected_oxygen_requirement}
-                    onChange={handleChange}
-                    errors={state.errors.expected_oxygen_requirement}
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2">
-                <div>
-                  <InputLabel
-                    htmlFor="facility-type-b-cylinders"
-                    id="type_b_cylinders"
-                  >
-                    B Type Cylinders
-                  </InputLabel>
-                  <TextInputField
-                    id="facility-type-b-cylinders"
-                    name="type_b_cylinders"
-                    type="number"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.type_b_cylinders}
-                    onChange={handleChange}
-                    errors={state.errors.type_b_cylinders}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <InputLabel
+                      htmlFor="facility-type-b-cylinders"
+                      id="type_b_cylinders"
+                    >
+                      B Type Cylinders
+                    </InputLabel>
+                    <TextInputField
+                      id="facility-type-b-cylinders"
+                      name="type_b_cylinders"
+                      type="number"
+                      variant="outlined"
+                      margin="dense"
+                      value={state.form.type_b_cylinders}
+                      onChange={handleChange}
+                      errors={state.errors.type_b_cylinders}
+                    />
+                  </div>
+                  <div>
+                    <InputLabel
+                      htmlFor="facility-expected-type-b-cylinders"
+                      id="expected_type_b_cylinders"
+                    >
+                      Expected Burn Rate
+                    </InputLabel>
+                    <TextInputField
+                      id="facility-expected-type-b-cylinders"
+                      name="expected_type_b_cylinders"
+                      type="number"
+                      variant="outlined"
+                      margin="dense"
+                      placeholder="Cylinders / day"
+                      value={state.form.expected_type_b_cylinders}
+                      onChange={handleChange}
+                      errors={state.errors.expected_type_b_cylinders}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <InputLabel
-                    htmlFor="facility-expected-type-b-cylinders"
-                    id="expected_type_b_cylinders"
-                  >
-                    Expected B Type Cylinders
-                  </InputLabel>
-                  <TextInputField
-                    id="facility-expected-type-b-cylinders"
-                    name="expected_type_b_cylinders"
-                    type="number"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.expected_type_b_cylinders}
-                    onChange={handleChange}
-                    errors={state.errors.expected_type_b_cylinders}
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2">
-                <div>
-                  <InputLabel
-                    htmlFor="facility-type-c-cylinders"
-                    id="type_c_cylinders"
-                  >
-                    C Type Cylinders
-                  </InputLabel>
-                  <TextInputField
-                    id="facility-type-c-cylinders"
-                    name="type_c_cylinders"
-                    type="number"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.type_c_cylinders}
-                    onChange={handleChange}
-                    errors={state.errors.type_c_cylinders}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <InputLabel
+                      htmlFor="facility-type-c-cylinders"
+                      id="type_c_cylinders"
+                    >
+                      C Type Cylinders
+                    </InputLabel>
+                    <TextInputField
+                      id="facility-type-c-cylinders"
+                      name="type_c_cylinders"
+                      type="number"
+                      variant="outlined"
+                      margin="dense"
+                      value={state.form.type_c_cylinders}
+                      onChange={handleChange}
+                      errors={state.errors.type_c_cylinders}
+                    />
+                  </div>
+                  <div>
+                    <InputLabel
+                      htmlFor="facility-expected-type-c-cylinders"
+                      id="expected_type_c_cylinders"
+                    >
+                      Expected Burn Rate
+                    </InputLabel>
+                    <TextInputField
+                      id="facility-expected-type-c-cylinders"
+                      name="expected_type_c_cylinders"
+                      type="number"
+                      variant="outlined"
+                      margin="dense"
+                      placeholder="Cylinders / day"
+                      value={state.form.expected_type_c_cylinders}
+                      onChange={handleChange}
+                      errors={state.errors.expected_type_c_cylinders}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <InputLabel
-                    htmlFor="facility-expected-type-c-cylinders"
-                    id="expected_type_c_cylinders"
-                  >
-                    Expected C Type Cylinders
-                  </InputLabel>
-                  <TextInputField
-                    id="facility-expected-type-c-cylinders"
-                    name="expected_type_c_cylinders"
-                    type="number"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.expected_type_c_cylinders}
-                    onChange={handleChange}
-                    errors={state.errors.expected_type_c_cylinders}
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2">
-                <div>
-                  <InputLabel
-                    htmlFor="facility-type-d-cylinders"
-                    id="type_d_cylinders"
-                  >
-                    D Type Cylinders
-                  </InputLabel>
-                  <TextInputField
-                    id="facility-type-d-cylinders"
-                    name="type_d_cylinders"
-                    type="number"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.type_d_cylinders}
-                    onChange={handleChange}
-                    errors={state.errors.type_d_cylinders}
-                  />
-                </div>
-                <div>
-                  <InputLabel
-                    htmlFor="facility-expected-type-d-cylinders"
-                    id="expected_type_d_cylinders"
-                  >
-                    Expected D Type Cylinders
-                  </InputLabel>
-                  <TextInputField
-                    id="facility-expected-type-d-cylinders"
-                    name="expected_type_d_cylinders"
-                    type="number"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.expected_type_d_cylinders}
-                    onChange={handleChange}
-                    errors={state.errors.expected_type_d_cylinders}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <InputLabel
+                      htmlFor="facility-type-d-cylinders"
+                      id="type_d_cylinders"
+                    >
+                      D Type Cylinders
+                    </InputLabel>
+                    <TextInputField
+                      id="facility-type-d-cylinders"
+                      name="type_d_cylinders"
+                      type="number"
+                      variant="outlined"
+                      margin="dense"
+                      value={state.form.type_d_cylinders}
+                      onChange={handleChange}
+                      errors={state.errors.type_d_cylinders}
+                    />
+                  </div>
+                  <div>
+                    <InputLabel
+                      htmlFor="facility-expected-type-d-cylinders"
+                      id="expected_type_d_cylinders"
+                    >
+                      Expected Burn Rate
+                    </InputLabel>
+                    <TextInputField
+                      id="facility-expected-type-d-cylinders"
+                      name="expected_type_d_cylinders"
+                      type="number"
+                      variant="outlined"
+                      margin="dense"
+                      placeholder="Cylinders / day"
+                      value={state.form.expected_type_d_cylinders}
+                      onChange={handleChange}
+                      errors={state.errors.expected_type_d_cylinders}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -877,7 +912,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-between mt-6">
               <Button color="default" variant="contained" onClick={goBack}>
                 Cancel
               </Button>
