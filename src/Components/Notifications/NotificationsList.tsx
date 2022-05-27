@@ -42,6 +42,9 @@ export default function ResultList({
   const username = currentUser.data.username;
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(
+    isNotificationsListOpen
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
@@ -55,8 +58,8 @@ export default function ResultList({
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
+        setShowNotifications(false);
         setIsNotificationsListOpen(false);
-        console.log("esc");
       }
     }
     if (isNotificationsListOpen)
@@ -216,7 +219,7 @@ export default function ResultList({
   }, [
     dispatch,
     reload,
-    isNotificationsListOpen,
+    showNotifications,
     offset,
     eventFilter,
     isSubscribed,
@@ -258,6 +261,7 @@ export default function ResultList({
           onClick={() => {
             navigate(resultUrl(result.event, result.caused_objects));
             onClickCB && onClickCB();
+            setShowNotifications(false);
             setIsNotificationsListOpen(false);
           }}
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
@@ -320,10 +324,13 @@ export default function ResultList({
   return (
     <div className={className}>
       <button
-        onClick={() => setIsNotificationsListOpen(!isNotificationsListOpen)}
+        onClick={() => {
+          setShowNotifications(!showNotifications);
+          setIsNotificationsListOpen(!isNotificationsListOpen);
+        }}
         className={clsx(
           "flex justify-items-start items-center overflow-hidden w-10 hover:text-white py-1 my-1 hover:bg-primary-700 rounded transition-all duration-300",
-          isNotificationsListOpen
+          showNotifications && isNotificationsListOpen
             ? "bg-primary-900 hover:bg-primary-900 text-white"
             : expanded
             ? "bg-primary-800 text-primary-300"
@@ -343,28 +350,14 @@ export default function ResultList({
         >
           {t("Notifications")}
         </div>
-
-        {/* {expanded && !!unreadCount && (
-          <div className="p-0.5 bg-red-500 text-white rounded-full">
-            <span>{unreadCount}</span>
-          </div>
-        )} */}
       </button>
-      {/* <button
-        onClick={() => setIsNotificationsListOpen(!isNotificationsListOpen)}
-        className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
-      >
-        <i
-          className={
-            "fas fa-bell text-primary-400 mr-3 text-lg group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"
-          }
-        ></i>
-        Notifications
-      </button> */}
 
       <SlideOver
-        show={isNotificationsListOpen}
-        setShow={setIsNotificationsListOpen}
+        show={showNotifications && isNotificationsListOpen}
+        setShow={() => {
+          setShowNotifications(true);
+          return setIsNotificationsListOpen;
+        }}
       >
         <div className="bg-white h-full">
           <div className="w-full bg-gray-100 border-b sticky top-0 z-30 px-4 pb-1 lg:px-8">
@@ -386,7 +379,10 @@ export default function ResultList({
                 </div>
                 <div>
                   <button
-                    onClick={() => setIsNotificationsListOpen(false)}
+                    onClick={() => {
+                      setShowNotifications(false);
+                      setIsNotificationsListOpen(false);
+                    }}
                     className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
                   >
                     <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
