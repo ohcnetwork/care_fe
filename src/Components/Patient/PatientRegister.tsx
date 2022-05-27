@@ -25,11 +25,9 @@ import {
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
-  DESIGNATION_HEALTH_CARE_WORKER,
   VACCINES,
 } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
-import statesList from "../../Common/static/states.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createPatient,
@@ -66,10 +64,6 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const debounce = require("lodash.debounce");
 
-const placesList = countryList.concat(
-  statesList.filter((i: string) => i !== "Kerala")
-);
-
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
 }
@@ -81,7 +75,6 @@ interface medicalHistoryModel {
 }
 
 const medicalHistoryTypes = MEDICAL_HISTORY_CHOICES.filter((i) => i.id !== 1);
-
 const medicalHistoryChoices = medicalHistoryTypes.reduce(
   (acc: Array<{ [x: string]: string }>, cur) => [
     ...acc,
@@ -89,7 +82,6 @@ const medicalHistoryChoices = medicalHistoryTypes.reduce(
   ],
   []
 );
-
 const genderTypes = [
   {
     id: 0,
@@ -97,13 +89,9 @@ const genderTypes = [
   },
   ...GENDER_TYPES,
 ];
-
 const diseaseStatus = [...DISEASE_STATUS];
-
 const bloodGroups = [...BLOOD_GROUPS];
-
 const testType = [...TEST_TYPE];
-const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
 const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
@@ -510,7 +498,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     let invalidForm = false;
     let error_div = "";
 
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
         case "address":
@@ -853,13 +841,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       form[field] = date;
       dispatch({ type: "set_form", form });
     }
-  };
-
-  const handleCheckboxFieldChange = (e: any) => {
-    const form = { ...state.form };
-    const { checked, name } = e.target;
-    form[name] = checked;
-    dispatch({ type: "set_form", form });
   };
 
   const handleMedicalCheckboxChange = (e: any, id: number) => {
@@ -1527,138 +1508,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             </Collapse>
                           </div>
 
-                          <div id="is_vaccinated-div">
-                            <InputLabel
-                              id="is_vaccinated"
-                              htmlFor="is_vaccinated"
-                            >
-                              Is patient Vaccinated against COVID?
-                            </InputLabel>
-                            <RadioGroup
-                              aria-label="is_vaccinated"
-                              id="is_vaccinated"
-                              name="is_vaccinated"
-                              value={state.form.is_vaccinated}
-                              onChange={handleChange}
-                              style={{ padding: "0px 5px" }}
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                          </div>
-                          <Collapse
-                            in={String(state.form.is_vaccinated) === "true"}
-                            timeout="auto"
-                            unmountOnExit
-                            className="col-span-2"
-                          >
-                            {
-                              <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                                <div id="covin_id-div">
-                                  <InputLabel
-                                    id="covin_id-label"
-                                    htmlFor="covin_id"
-                                  >
-                                    COWIN ID
-                                  </InputLabel>
-                                  <TextInputField
-                                    id="covin_id"
-                                    name="covin_id"
-                                    variant="outlined"
-                                    margin="dense"
-                                    type="text"
-                                    value={state.form.covin_id}
-                                    onChange={handleChange}
-                                    errors={state.errors.covin_id}
-                                  />
-                                </div>
-                                <div id="number_of_doses-div">
-                                  <InputLabel
-                                    id="doses-label"
-                                    htmlFor="number_of_doses"
-                                  >
-                                    Number of doses
-                                  </InputLabel>
-                                  <RadioGroup
-                                    aria-label="number_of_doses"
-                                    id="number_of_doses"
-                                    name="number_of_doses"
-                                    value={state.form.number_of_doses}
-                                    onChange={handleChange}
-                                    style={{ padding: "0px 5px" }}
-                                  >
-                                    <Box display="flex" flexDirection="row">
-                                      <FormControlLabel
-                                        value="1"
-                                        control={<Radio />}
-                                        label="1"
-                                      />
-                                      <FormControlLabel
-                                        value="2"
-                                        control={<Radio />}
-                                        label="2"
-                                      />
-                                    </Box>
-                                  </RadioGroup>
-                                </div>
-                                <div id="vaccine_name-div">
-                                  <InputLabel
-                                    id="vaccine-name-label"
-                                    htmlFor="vaccine_name"
-                                    required
-                                  >
-                                    Vaccine Name
-                                  </InputLabel>
-                                  <SelectField
-                                    labelId="vaccine_name"
-                                    name="vaccine_name"
-                                    variant="outlined"
-                                    margin="dense"
-                                    optionArray={true}
-                                    value={state.form.vaccine_name}
-                                    options={vaccines}
-                                    onChange={handleChange}
-                                    errors={state.errors.vaccine_name}
-                                  />
-                                </div>
-                                <div id="last_vaccinated_date-div">
-                                  <InputLabel
-                                    id="last_vaccinated_date-label"
-                                    htmlFor="last_vaccinated_date"
-                                    required
-                                  >
-                                    Last Date of Vaccination
-                                  </InputLabel>
-                                  <DateInputField
-                                    id="last_vaccinated_date"
-                                    fullWidth={true}
-                                    value={state.form.last_vaccinated_date}
-                                    onChange={(date) =>
-                                      handleDateChange(
-                                        date,
-                                        "last_vaccinated_date"
-                                      )
-                                    }
-                                    errors={state.errors.last_vaccinated_date}
-                                    inputVariant="outlined"
-                                    margin="dense"
-                                    openTo="year"
-                                    disableFuture={true}
-                                  />
-                                </div>
-                              </div>
-                            }
-                          </Collapse>
                           <div id="contact_with_confirmed_carrier-div">
                             <InputLabel htmlFor="contact_with_confirmed_carrier">
                               Contact with confirmed Covid patient?
@@ -1968,6 +1817,142 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             errors={state.errors.ongoing_medication}
                           />
                         </div>
+
+                        <div>
+                          <div id="is_vaccinated-div">
+                            <InputLabel
+                              id="is_vaccinated"
+                              htmlFor="is_vaccinated"
+                            >
+                              Is patient Vaccinated against COVID?
+                            </InputLabel>
+                            <RadioGroup
+                              aria-label="is_vaccinated"
+                              id="is_vaccinated"
+                              name="is_vaccinated"
+                              value={state.form.is_vaccinated}
+                              onChange={handleChange}
+                              style={{ padding: "0px 5px" }}
+                            >
+                              <Box display="flex" flexDirection="row">
+                                <FormControlLabel
+                                  value="true"
+                                  control={<Radio />}
+                                  label="Yes"
+                                />
+                                <FormControlLabel
+                                  value="false"
+                                  control={<Radio />}
+                                  label="No"
+                                />
+                              </Box>
+                            </RadioGroup>
+                          </div>
+                          <Collapse
+                            in={String(state.form.is_vaccinated) === "true"}
+                            timeout="auto"
+                            unmountOnExit
+                            className="col-span-2"
+                          >
+                            {
+                              <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                                <div id="covin_id-div">
+                                  <InputLabel
+                                    id="covin_id-label"
+                                    htmlFor="covin_id"
+                                  >
+                                    COWIN ID
+                                  </InputLabel>
+                                  <TextInputField
+                                    id="covin_id"
+                                    name="covin_id"
+                                    variant="outlined"
+                                    margin="dense"
+                                    type="text"
+                                    value={state.form.covin_id}
+                                    onChange={handleChange}
+                                    errors={state.errors.covin_id}
+                                  />
+                                </div>
+                                <div id="number_of_doses-div">
+                                  <InputLabel
+                                    id="doses-label"
+                                    htmlFor="number_of_doses"
+                                  >
+                                    Number of doses
+                                  </InputLabel>
+                                  <RadioGroup
+                                    aria-label="number_of_doses"
+                                    id="number_of_doses"
+                                    name="number_of_doses"
+                                    value={state.form.number_of_doses}
+                                    onChange={handleChange}
+                                    style={{ padding: "0px 5px" }}
+                                  >
+                                    <Box display="flex" flexDirection="row">
+                                      <FormControlLabel
+                                        value="1"
+                                        control={<Radio />}
+                                        label="1"
+                                      />
+                                      <FormControlLabel
+                                        value="2"
+                                        control={<Radio />}
+                                        label="2"
+                                      />
+                                    </Box>
+                                  </RadioGroup>
+                                </div>
+                                <div id="vaccine_name-div">
+                                  <InputLabel
+                                    id="vaccine-name-label"
+                                    htmlFor="vaccine_name"
+                                    required
+                                  >
+                                    Vaccine Name
+                                  </InputLabel>
+                                  <SelectField
+                                    labelId="vaccine_name"
+                                    name="vaccine_name"
+                                    variant="outlined"
+                                    margin="dense"
+                                    optionArray={true}
+                                    value={state.form.vaccine_name}
+                                    options={vaccines}
+                                    onChange={handleChange}
+                                    errors={state.errors.vaccine_name}
+                                  />
+                                </div>
+                                <div id="last_vaccinated_date-div">
+                                  <InputLabel
+                                    id="last_vaccinated_date-label"
+                                    htmlFor="last_vaccinated_date"
+                                    required
+                                  >
+                                    Last Date of Vaccination
+                                  </InputLabel>
+                                  <DateInputField
+                                    id="last_vaccinated_date"
+                                    fullWidth={true}
+                                    value={state.form.last_vaccinated_date}
+                                    onChange={(date) =>
+                                      handleDateChange(
+                                        date,
+                                        "last_vaccinated_date"
+                                      )
+                                    }
+                                    errors={state.errors.last_vaccinated_date}
+                                    inputVariant="outlined"
+                                    margin="dense"
+                                    openTo="year"
+                                    disableFuture={true}
+                                  />
+                                </div>
+                              </div>
+                            }
+                          </Collapse>
+                        </div>
+
                         <div className="md:col-span-2">
                           <InputLabel id="med-history-label">
                             Any medical history? (Optional Information)
