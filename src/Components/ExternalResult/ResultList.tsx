@@ -61,8 +61,8 @@ export default function ResultList() {
   let manageResults: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
-    // eslint-disable-next-line
-    localStorage.getItem("lsg-ward-data") || '{"lsgList": [], "wardList": []}'
+    localStorage.getItem("lsg-ward-data") ||
+      JSON.stringify({ lsgList: [], wardList: [] })
   );
 
   useEffect(() => {
@@ -229,7 +229,7 @@ export default function ResultList() {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(_) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -248,7 +248,7 @@ export default function ResultList() {
           {value.name}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(_) =>
+            onClick={() =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
                 : paramKey === "wards"
