@@ -126,7 +126,7 @@ const AssetManage = (props: AssetManageProps) => {
         transactions.map((transaction: AssetTransaction) => (
           <tr key={`transaction_id_${transaction.id}`}>
             <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
-              <span className="text-gray-900 font-medium"
+              <span className="text-gray-900 font-medium">
                 {transaction.from_location.name}
               </span>
             </td>
