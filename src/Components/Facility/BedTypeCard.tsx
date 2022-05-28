@@ -28,6 +28,7 @@ const BedTypeCard = (props: BedTypeProps) => {
             navigate(`/facility/${props.facilityId}/bed/${props.room_type}`)
           }
           disableFor="readOnly"
+          buttonType="html"
         >
           Edit
         </RoleButton>

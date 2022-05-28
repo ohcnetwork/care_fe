@@ -168,6 +168,7 @@ export const FacilityHome = (props: any) => {
               navigate(`/facility/${facilityId}/triage/${data.id}`)
             }
             disableFor="readOnly"
+            buttonType="html"
           >
             Edit
           </RoleButton>
@@ -279,6 +280,7 @@ export const FacilityHome = (props: any) => {
                 }
                 data-testid="add-patient-button"
                 disableFor="readOnly"
+                buttonType="html"
               >
                 <i className="fas fa-plus text-white mr-2"></i>
                 Add Details of a Patient
@@ -299,6 +301,7 @@ export const FacilityHome = (props: any) => {
               className="btn-primary btn"
               handleClickCB={() => navigate(`/facility/${facilityId}/update`)}
               disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-pencil-alt text-white mr-2"></i>
               Update Facility
@@ -323,6 +326,7 @@ export const FacilityHome = (props: any) => {
                 navigate(`/facility/${facilityId}/resource/new`)
               }
               disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Resource Request
@@ -333,6 +337,7 @@ export const FacilityHome = (props: any) => {
                 navigate(`/facility/${facilityId}/assets/new`)
               }
               disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-plus-circle text-white mr-2"></i>
               Create Asset
@@ -405,6 +410,7 @@ export const FacilityHome = (props: any) => {
               className="btn-primary btn w-full md:w-auto"
               handleClickCB={() => navigate(`/facility/${facilityId}/bed`)}
               disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-bed text-white mr-2"></i>
               Add More Bed Types
@@ -420,6 +426,7 @@ export const FacilityHome = (props: any) => {
               handleClickCB={() => navigate(`/facility/${facilityId}/doctor`)}
               disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
               disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-user-md text-white mr-2"></i>
               Add Doctor Types
@@ -434,6 +441,7 @@ export const FacilityHome = (props: any) => {
               className="btn-primary btn w-full md:w-auto"
               handleClickCB={() => navigate(`/facility/${facilityId}/triage`)}
               disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-notes-medical text-white mr-2"></i>
               Add Triage

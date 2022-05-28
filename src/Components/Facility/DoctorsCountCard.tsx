@@ -22,6 +22,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             navigate(`/facility/${props.facilityId}/doctor/${props.area}`)
           }
           disableFor="readOnly"
+          buttonType="html"
         >
           Edit
         </RoleButton>
