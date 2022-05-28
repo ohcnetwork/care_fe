@@ -3,6 +3,7 @@ import { CapacityModal } from "./models";
 import { navigate } from "raviger";
 import { BED_TYPES } from "../../Common/constants";
 import moment from "moment";
+import { RoleButton } from "../Common/RoleButton";
 
 interface BedTypeProps extends CapacityModal {
   facilityId: number;
@@ -21,14 +22,15 @@ const BedTypeCard = (props: BedTypeProps) => {
         <div className="font-bold text-xs mt-2 text-center">
           Currently Occupied / Total Capacity
         </div>
-        <div
+        <RoleButton
           className="btn btn-default"
-          onClick={() =>
+          handleClickCB={() =>
             navigate(`/facility/${props.facilityId}/bed/${props.room_type}`)
           }
+          disableFor="readOnly"
         >
           Edit
-        </div>
+        </RoleButton>
         <div className="text-xs text-gray-600 mt-2">
           <i className="fas fa-history text-sm pr-2"></i>
           {props.modified_date && moment(props.modified_date).fromNow()}
