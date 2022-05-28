@@ -2,7 +2,7 @@ import { Link } from "raviger";
 import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { RightArrowIcon } from "../Icons/ArrowIcon";
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 import Beds from "../../Facility/Consultations/Beds";
 import { useState } from "react";
 

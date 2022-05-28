@@ -20,7 +20,7 @@ import PageTitle from "../../Common/PageTitle";
 import { ConsultationModel } from "../models";
 import * as Notification from "../../../Utils/Notifications.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 
 interface IFeedProps {
   facilityId: string;

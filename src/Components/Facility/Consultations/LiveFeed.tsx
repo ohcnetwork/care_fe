@@ -14,7 +14,7 @@ import {
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 import { FeedCameraPTZHelpButton } from "./Feed";
 
 const LiveFeed = (props: any) => {

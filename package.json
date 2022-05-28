@@ -36,6 +36,7 @@
     "@emotion/styled": "^11.8.1",
     "@glennsl/bs-json": "^5.0.3",
     "@loadable/component": "^5.15.0",
+    "@material-ui/core": "^4.12.4",
     "@mui/icons-material": "^5.8.0",
     "@mui/lab": "^5.0.0-alpha.82",
     "@mui/material": "^5.8.0",
