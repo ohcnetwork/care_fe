@@ -71,7 +71,7 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
             )}
           </div>
           {!patient.is_active && (
-            <div className="bg-red-200 text-red-600 inline-block mb-3 rounded-lg px-2 py-1">
+            <div className="bg-red-100 text-red-600 inline-block mb-3 rounded-lg px-2 py-1 text-sm">
               Discharged from CARE
             </div>
           )}
@@ -113,7 +113,7 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
         </div>
       </div>
       <div
-        className={`flex gap-2 flex-col bg-gray-100 p-6 `}
+        className={`flex gap-2 flex-col bg-gray-100 p-6`}
       >
         {
           [
