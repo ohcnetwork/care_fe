@@ -4,8 +4,6 @@ import { useDispatch } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  // listFacilityAssetLocation,
-  // updateFacilityAssetLocation,
   getAnyFacility,
   listFacilityBeds,
   updateFacilityBed,
