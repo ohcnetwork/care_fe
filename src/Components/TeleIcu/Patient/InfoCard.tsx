@@ -37,7 +37,7 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
             {!patient.last_consultation?.current_bed ? (
               <i className="fas fa-user-injured text-primary-600"></i>
             ) : (
-              <span className="text-2xl text-primary-600 font-semibold">
+              <span className="text-base text-primary-600 font-semibold whitespace-normal leading-tight">
                 {patient.last_consultation?.current_bed?.bed_object?.name}
               </span>
             )}
