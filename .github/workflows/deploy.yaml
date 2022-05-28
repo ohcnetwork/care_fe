@@ -215,8 +215,8 @@ jobs:
           sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
           kubectl apply -f care-fe.yaml
 
-  deploy-staging-gdc:
-    needs: build-staging
+  deploy-production-gdc:
+    needs: build-production
     name: Deploy to EKS GDC
     runs-on: ubuntu-latest
     environment:
@@ -244,7 +244,7 @@ jobs:
           version: "v1.23.6"
         id: install
 
-      - name: Deploy Care Fe Staging
+      - name: Deploy Care Fe Production
         run: |
           mkdir -p $HOME/.kube/
           aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region ap-south-1
