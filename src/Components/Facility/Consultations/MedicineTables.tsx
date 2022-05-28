@@ -46,19 +46,30 @@ export const MedicineTables = (props: any) => {
     },
     [currentPage]
   );
-  // eslint-disable-next-line
-  const handlePagination = (page: number, limit: number) => {
+
+  const handlePagination = (page: number) => {
     setCurrentPage(page);
   };
 
-  //
+  const areFieldsEmpty = () => {
+    let emptyFieldCount = 0;
+    Object.keys(results).forEach((k: any) => {
+      if (Object.keys(results[k].medication_given).length === 0) {
+        emptyFieldCount++;
+      }
+    });
+    if (emptyFieldCount === Object.keys(results).length) return true;
+    else return false;
+  };
+
+  const noDataFound = Object.keys(results).length === 0 || areFieldsEmpty();
 
   return (
     <div>
       {results && (
         <div>
           <div className="mt-4 text-lg font-bold">Consultation Updates</div>
-          {Object.keys(results).length === 0 && (
+          {noDataFound && (
             <div className="text-md h-full text-center mt-5">
               No Consultation Updates Found
             </div>
