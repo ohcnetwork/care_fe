@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
@@ -18,7 +18,7 @@ import LanguageSelector from "../Common/LanguageSelector";
 import { RECAPTCHA_SITE_KEY } from "../../Common/env";
 import get from "lodash.get";
 
-const LoginPage = (props: any) => {
+export const Login = (props: any) => {
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
@@ -30,7 +30,7 @@ const LoginPage = (props: any) => {
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const captchaKey = RECAPTCHA_SITE_KEY ?? "";
-  const { t } = props;
+  const { t } = useTranslation();
   // display spinner while login is under progress
   const [loading, setLoading] = useState(false);
 
@@ -231,5 +231,3 @@ const LoginPage = (props: any) => {
     </div>
   );
 };
-
-export const Login = withTranslation()(LoginPage);

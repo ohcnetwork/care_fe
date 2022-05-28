@@ -156,7 +156,7 @@ export default function ListView({
                   </div>
                   <div>
                     {shift.emergency && (
-                      <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                      <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
                         Emergency
                       </span>
                     )}
@@ -349,7 +349,7 @@ export default function ListView({
       ));
   };
   return (
-    <div className="bg-gray-200 mr-2 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
+    <div className="bg-gray-200 mr-2 shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
       <div className="sticky top-0 pt-2 bg-gray-200 rounded z-10">
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">

@@ -38,7 +38,7 @@ function FacillityFilter(props: any) {
   });
 
   const fetchStates = useCallback(
-    async (status) => {
+    async (status: any) => {
       setIsStateLoading(true);
       const res = await dispatchAction(getStates());
       if (!status.aborted) {
@@ -56,7 +56,7 @@ function FacillityFilter(props: any) {
   }, []);
 
   const fetchDistricts = useCallback(
-    async (status) => {
+    async (status: any) => {
       setIsDistrictLoading(true);
       const res =
         Number(filterState.state) &&
