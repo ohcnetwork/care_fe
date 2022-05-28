@@ -26,6 +26,7 @@ import {
   PatientStatsModel,
 } from "./models";
 import moment from "moment";
+import { RoleButton, roleType } from "../Common/RoleButton";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -161,14 +162,15 @@ export const FacilityHome = (props: any) => {
           {data.num_patient_confirmed_positive || "0"}
         </td>
         <td className="border px-4 py-2">
-          <button
+          <RoleButton
             className="btn btn-default"
-            onClick={() =>
+            handleClickCB={() =>
               navigate(`/facility/${facilityId}/triage/${data.id}`)
             }
+            disableFor="readOnly"
           >
             Edit
-          </button>
+          </RoleButton>
         </td>
       </tr>
     );
@@ -270,14 +272,17 @@ export const FacilityHome = (props: any) => {
               </div>
             </div>
             <div className="mt-2">
-              <button
+              <RoleButton
                 className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
-                onClick={() => navigate(`/facility/${facilityId}/patient`)}
+                handleClickCB={() =>
+                  navigate(`/facility/${facilityId}/patient`)
+                }
                 data-testid="add-patient-button"
+                disableFor="readOnly"
               >
                 <i className="fas fa-plus text-white mr-2"></i>
                 Add Details of a Patient
-              </button>
+              </RoleButton>
 
               <button
                 className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
@@ -289,14 +294,15 @@ export const FacilityHome = (props: any) => {
             </div>
           </div>
           <div className="flex flex-col mt-2 md:mt-4">
-            <button
+            <RoleButton
               id="update-facility"
               className="btn-primary btn"
-              onClick={() => navigate(`/facility/${facilityId}/update`)}
+              handleClickCB={() => navigate(`/facility/${facilityId}/update`)}
+              disableFor="readOnly"
             >
               <i className="fas fa-pencil-alt text-white mr-2"></i>
               Update Facility
-            </button>
+            </RoleButton>
             <button
               className="btn-primary btn mt-2"
               onClick={() => navigate(`/facility/${facilityId}/inventory`)}
@@ -311,20 +317,26 @@ export const FacilityHome = (props: any) => {
               <i className="fas fa-map-marker-alt text-white mr-2"></i>
               Location Management
             </button>
-            <button
+            <RoleButton
               className="btn-primary btn mt-2"
-              onClick={() => navigate(`/facility/${facilityId}/resource/new`)}
+              handleClickCB={() =>
+                navigate(`/facility/${facilityId}/resource/new`)
+              }
+              disableFor="readOnly"
             >
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Resource Request
-            </button>
-            <button
+            </RoleButton>
+            <RoleButton
               className="btn-primary btn mt-2"
-              onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
+              handleClickCB={() =>
+                navigate(`/facility/${facilityId}/assets/new`)
+              }
+              disableFor="readOnly"
             >
               <i className="fas fa-plus-circle text-white mr-2"></i>
               Create Asset
-            </button>
+            </RoleButton>
             <button
               className="btn-primary btn mt-2"
               onClick={() => navigate(`/assets?facility=${facilityId}`)}
@@ -389,40 +401,43 @@ export const FacilityHome = (props: any) => {
         <div className="mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
             <div className="font-semibold text-xl">Bed Capacity</div>
-            <button
+            <RoleButton
               className="btn-primary btn w-full md:w-auto"
-              onClick={() => navigate(`/facility/${facilityId}/bed`)}
+              handleClickCB={() => navigate(`/facility/${facilityId}/bed`)}
+              disableFor="readOnly"
             >
               <i className="fas fa-bed text-white mr-2"></i>
               Add More Bed Types
-            </button>
+            </RoleButton>
           </div>
           <div className="mt-4 flex flex-wrap">{capacityList}</div>
         </div>
         <div className="mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
             <div className="font-semibold text-xl">Doctors List</div>
-            <button
+            <RoleButton
               className="btn-primary btn w-full md:w-auto"
-              onClick={() => navigate(`/facility/${facilityId}/doctor`)}
+              handleClickCB={() => navigate(`/facility/${facilityId}/doctor`)}
               disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
+              disableFor="readOnly"
             >
               <i className="fas fa-user-md text-white mr-2"></i>
               Add Doctor Types
-            </button>
+            </RoleButton>
           </div>
           <div className="mt-4 flex flex-wrap">{doctorList}</div>
         </div>
         <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
             <div className="font-semibold text-xl">Corona Triage</div>
-            <button
+            <RoleButton
               className="btn-primary btn w-full md:w-auto"
-              onClick={() => navigate(`/facility/${facilityId}/triage`)}
+              handleClickCB={() => navigate(`/facility/${facilityId}/triage`)}
+              disableFor="readOnly"
             >
               <i className="fas fa-notes-medical text-white mr-2"></i>
               Add Triage
-            </button>
+            </RoleButton>
           </div>
           <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
             <table className="min-w-full border-2 rounded overflow-hidden">
