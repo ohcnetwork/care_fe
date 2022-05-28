@@ -569,7 +569,6 @@ export const PatientHome = (props: any) => {
             [id]: { name: patientData?.name },
           }}
         />
-
         <div className="relative mt-2">
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
@@ -972,7 +971,7 @@ export const PatientHome = (props: any) => {
                         <div className="flex justify-between mt-1">
                           <div>
                             {shift.emergency && (
-                              <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                              <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
                                 Emergency
                               </span>
                             )}

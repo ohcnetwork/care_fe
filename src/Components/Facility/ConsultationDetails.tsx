@@ -133,11 +133,11 @@ export const ConsultationDetails = (props: any) => {
         if (dailyRounds?.data?.results?.length && current_bed) {
           const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
           if (bedAssets?.data?.results?.length) {
-            const { camera_address, camera_access_key, middleware_hostname } =
+            const { local_ip_address, camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
-              hostname: camera_address,
+              hostname: local_ip_address,
               username: camera_access_key.split(":")[0],
               password: camera_access_key.split(":")[1],
               port: 80,
@@ -150,7 +150,7 @@ export const ConsultationDetails = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch]
+    [consultationId, dispatch, patientData.is_vaccinated]
   );
 
   useAbortableEffect((status: statusType) => {
@@ -171,7 +171,7 @@ export const ConsultationDetails = (props: any) => {
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap">
           <PageTitle
-            title="Patient Dashboard"
+            title="Patient Details"
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
@@ -214,7 +214,11 @@ export const ConsultationDetails = (props: any) => {
           <div className="border rounded-lg bg-white shadow h-full text-black p-4 w-full">
             <div>
               <div className="flex md:flex-row flex-col md:items-center">
-                <div className="text-sm md:mt-2 md:pl-2">
+                <div className="text-2xl md:mt-2 font-semibold">
+                  <i
+                    className="text-gray-500 fas fa-hospital text-2xl"
+                    aria-hidden="true"
+                  ></i>{" "}
                   {consultationData.facility_name}
                 </div>
               </div>
@@ -496,8 +500,8 @@ export const ConsultationDetails = (props: any) => {
                       Lines and Catheters
                     </h3>
                     <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.lines?.map((line: any, i: number) => (
-                        <div className="mt-4" key={i}>
+                      {consultationData.lines?.map((line: any, idx: number) => (
+                        <div key={idx} className="mt-4">
                           <h5>{line.type}</h5>
                           <p className="text-justify break-word">
                             Details:

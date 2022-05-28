@@ -135,7 +135,7 @@ export const TeleICUPatientsList = (props: any) => {
                   href={`/teleicu/facility/${props.facilityId}/patient/${item.id}`}
                 >
                   <div className="bg-white rounded-lg flex items-center gap-4 p-4 text-gray-800">
-                    <div className="w-32 self-stretch flex-shrink-0 bg-gray-300 text-lg flex flex-col items-center justify-center rounded">
+                    <div className="w-32 self-stretch shrink-0 bg-gray-300 text-lg flex flex-col items-center justify-center rounded">
                       <span className="">Bed No</span>
                       <span className="text-4xl font-bold">{7 + index}</span>
                     </div>
