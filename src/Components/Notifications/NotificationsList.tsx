@@ -241,7 +241,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
           <div className="text-xs">
             {moment(result.created_date).format("lll")}
           </div>
-          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0">
+          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0">
             <i className="fas fa-eye mr-2 text-primary-500" />
             Visit Link
           </a>
@@ -301,7 +301,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
           expanded && "w-60"
         )}
       >
-        <div className="flex-shrink-0 flex items-center justify-center w-10 h-9">
+        <div className="shrink-0 flex items-center justify-center w-10 h-9">
           <i className={clsx("fas fa-bell", "text-lg")}></i>
         </div>
 
@@ -338,7 +338,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
                       setData([]);
                       setOffset(0);
                     }}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
                   >
                     <i className="fa-fw fas fa-sync cursor-pointer mr-2" />{" "}
                     Reload
@@ -347,7 +347,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
                 <div>
                   <button
                     onClick={(_) => setShowNotifications(false)}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
                   >
                     <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
                     Close
@@ -356,7 +356,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
                 <div>
                   <button
                     onClick={handleSubscribeClick}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
                     disabled={isSubscribing}
                   >
                     {isSubscribing && (

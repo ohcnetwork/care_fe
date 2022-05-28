@@ -63,7 +63,7 @@ h6 {
 }
 
 .btn {
-  @apply inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
+  @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
 }
 
 .btn:focus {
@@ -99,7 +99,7 @@ button:focus {
 }
 
 .btn {
-  @apply inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
+  @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
 }
 
 .btn:focus {
@@ -232,7 +232,8 @@ button:disabled:focus,
 .button-xl {
   @apply py-2 px-6 text-base h-12;
 }
-@import "tailwindcss/utilities";
+
+@tailwind utilities;
 
 .multiselect-dropdown__search-dropdown {
   max-height: 20rem;
@@ -247,7 +248,7 @@ button:disabled:focus,
 /* Radio */
 
 .radio-label {
-  @apply select-none .cursor-pointer;
+  @apply select-none cursor-pointer;
 }
 
 .radio-label span {
@@ -300,7 +301,7 @@ button:disabled:focus,
 /* Checkbox */
 
 .checkbox__label {
-  @apply select-none .cursor-pointer;
+  @apply select-none cursor-pointer;
 }
 
 .checkbox__label span {

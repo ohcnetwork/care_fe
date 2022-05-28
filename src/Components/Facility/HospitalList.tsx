@@ -39,7 +39,7 @@ import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -53,13 +53,12 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     heading: {
       fontSize: theme.typography.pxToRem(15),
-      fontWeight: theme.typography.fontWeightRegular,
     },
   })
 );
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const HospitalListPage = (props: any) => {
+export const HospitalList = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
   const classes = useStyles();
   const dispatchAction: any = useDispatch();
@@ -91,7 +90,8 @@ const HospitalListPage = (props: any) => {
     undefined
   );
 
-  const { t } = props;
+  const { t } = useTranslation();
+
   const limit = 14;
 
   const fetchData = useCallback(
@@ -374,7 +374,7 @@ const HospitalListPage = (props: any) => {
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="flex ">
               <div
-                className="group md:flex hidden w-32 self-stretch flex-shrink-0 bg-gray-300 hover:bg-gray-500 cursor-pointer hover:fas hover:fa-pen items-center justify-center"
+                className="group md:flex hidden w-32 self-stretch shrink-0 bg-gray-300 hover:bg-gray-500 cursor-pointer items-center justify-center"
                 onClick={(e: React.MouseEvent<HTMLElement>) => {
                   setModalFor(`${facility.id}-image`);
                 }}
@@ -428,7 +428,7 @@ const HospitalListPage = (props: any) => {
                   <div>
                     {userType !== "Staff" ? (
                       <button
-                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                         onClick={(_) => setModalFor(facility.id)}
                       >
                         <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
@@ -571,14 +571,14 @@ const HospitalListPage = (props: any) => {
                   <div>
                     <Link
                       href={`/facility/${facility.id}`}
-                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     >
                       <i className="fas fa-hospital mr-2 text-primary-500"></i>
                       {t("Facility")}
                     </Link>
                     <Link
                       href={`/facility/${facility.id}/patients`}
-                      className="ml-2 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      className="ml-2 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     >
                       <i className="fas fa-user-injured text-primary-500 mr-2"></i>
                       {t("Patients")}
@@ -850,4 +850,3 @@ const HospitalListPage = (props: any) => {
     </div>
   );
 };
-export const HospitalList = withTranslation()(HospitalListPage);
