@@ -36,6 +36,7 @@ export function RoleButton(props: {
   handleClickCB: () => void;
   children: React.ReactNode;
   disableFor: roleType;
+  disabled?: boolean;
 }) {
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -46,7 +47,7 @@ export function RoleButton(props: {
       id={props.id}
       className={props.className}
       onClick={props.handleClickCB}
-      disabled={getDisableButton(type, props.disableFor)}
+      disabled={getDisableButton(type, props.disableFor) || props.disabled}
     >
       {props.children}
     </button>
