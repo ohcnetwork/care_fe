@@ -301,7 +301,7 @@ const AssetsList = () => {
         {badge("Status", qParams.status, ["status"])}
       </div>
       <div className="grow mt-10 bg-white">
-        <div className="p-8">
+        <div className="py-8 md:px-8">
           <div className="flex flex-wrap md:-mx-4">
             {assetsExist ? (
               assets.map((asset: AssetData) => (
