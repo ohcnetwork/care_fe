@@ -168,7 +168,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "asset_type":
-          if (asset_type === undefined) {
+          if (asset_type !== "EXTERNAL" && asset_type !== "INTERNAL") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -328,6 +328,18 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
 
+  const renderAssetTypeOption = (
+    value: string,
+    description: string | undefined
+  ) => {
+    return (
+      <div className="p-2 hover:bg-slate-200 flex flex-col gap-1">
+        <p className={description && "font-medium"}>{value}</p>
+        {description && <p className="max-w-xs">{description}</p>}
+      </div>
+    );
+  };
+
   return (
     <div className="px-6 pb-2">
       <PageTitle
@@ -373,19 +385,27 @@ const AssetCreate = (props: AssetProps) => {
                   margin="dense"
                   options={[
                     {
-                      id: "",
-                      name: "Select",
+                      id: "Select",
+                      value: renderAssetTypeOption("Select", undefined),
                     },
                     {
                       id: "EXTERNAL",
-                      name: "EXTERNAL",
+                      value: renderAssetTypeOption(
+                        "External",
+                        "Assets that can be transferred."
+                      ),
                     },
                     {
                       id: "INTERNAL",
-                      name: "INTERNAL",
+                      value: renderAssetTypeOption(
+                        "Internal",
+                        "Assets that cannot be transferred."
+                      ),
                     },
                   ]}
-                  optionValue="name"
+                  native={false}
+                  optionValue="value"
+                  renderValue={(value) => <span>{String(value)}</span>}
                   value={asset_type}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setAssetType(e.target.value as AssetType)
