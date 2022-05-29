@@ -68,8 +68,8 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
-            ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME
+            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest-${{ github.run_number }}-{{date 'YYYYMMDD'}}-{{sha}}
             type=semver,pattern={{version}}
@@ -129,8 +129,8 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
-            ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME
+            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=production-latest,enable=${{ github.ref == 'refs/heads/production' }}
             type=raw,value=production-latest-${{ github.run_number }}-{{date 'YYYYMMDD'}}-{{sha}}
