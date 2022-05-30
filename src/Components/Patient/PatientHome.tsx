@@ -1359,7 +1359,7 @@ export const PatientHome = (props: any) => {
                 Medical
               </div>
               <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
-                {patientData.present_health && (
+                {patientData.present_health ? (
                   <div className="sm:col-span-1">
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Present Health
@@ -1367,6 +1367,10 @@ export const PatientHome = (props: any) => {
                     <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
                       {patientData.ongoing_medication}
                     </div>
+                  </div>
+                ) : (
+                  <div className="text-gray-600 w-full font-bold flex justify-center items-center text-2xl">
+                    No Medical Found
                   </div>
                 )}
                 {patientData.ongoing_medication && (
