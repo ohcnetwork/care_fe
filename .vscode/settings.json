@@ -11,5 +11,6 @@
     "*.hrccproj": true,
     "*.sln": true,
     "*.suo": true
-  }
+  },
+  "files.autoGuessEncoding": true
 }
