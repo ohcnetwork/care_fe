@@ -277,14 +277,14 @@ export const DailyRounds = (props: any) => {
                     ),
                   }
                 : undefined,
-            pulse: Number(state.form.pulse),
+            pulse: state.form.pulse,
             resp: Number(state.form.resp),
             temperature: state.form.tempInCelcius
               ? celciusToFahrenheit(state.form.temperature)
               : state.form.temperature,
             rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
-            ventilator_spo2: Number(state.form.ventilator_spo2),
+            ventilator_spo2: state.form.ventilator_spo2,
           };
         }
       } else {
@@ -881,7 +881,7 @@ export const DailyRounds = (props: any) => {
                                 )}
                           </InputLabel>
                           <div className="flex flex-row">
-                            <div className="flex-grow mr-2">
+                            <div className="grow mr-2">
                               <AutoCompleteAsyncField
                                 name="temperature"
                                 multiple={false}

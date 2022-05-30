@@ -86,7 +86,7 @@ export const OnlineUsersSelect = (props: Props) => {
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-labelledby="listbox-label"
-              className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+              className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:ring-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5"
             >
               <input
                 ref={searchFieldRef}
@@ -111,7 +111,7 @@ export const OnlineUsersSelect = (props: Props) => {
                   <span
                     aria-label="Online"
                     className={
-                      "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
+                      "shrink-0 inline-block h-2 w-2 rounded-full " +
                       (selectedUser
                         ? moment()
                             .subtract(5, "minutes")
@@ -182,7 +182,7 @@ export const OnlineUsersSelect = (props: Props) => {
                         <span
                           aria-label="Online"
                           className={
-                            "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
+                            "shrink-0 inline-block h-2 w-2 rounded-full " +
                             (moment()
                               .subtract(5, "minutes")
                               .isBefore(user.last_login)
