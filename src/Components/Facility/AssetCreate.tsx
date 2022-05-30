@@ -84,7 +84,7 @@ const AssetCreate = (props: AssetProps) => {
 
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState("");
-  const [asset_type, setAssetType] = useState<AssetType>();
+  const [asset_type, setAssetType] = useState<AssetType | "Select">("Select");
   const [asset_class, setAssetClass] = useState<AssetClass>();
   const [not_working_reason, setNotWorkingReason] = useState("");
   const [description, setDescription] = useState("");
@@ -210,7 +210,7 @@ const AssetCreate = (props: AssetProps) => {
       setIsLoading(true);
       const data = {
         name: name,
-        asset_type: asset_type,
+        asset_type: asset_type == "Select" ? "" : asset_type,
         asset_class: asset_class,
         description: description,
         is_working: is_working,
