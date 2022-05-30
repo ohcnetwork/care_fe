@@ -152,7 +152,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
         )}
       >
         <div className="flex items-center justify-between">
-          <Link href="/" className="block flex-shrink-0 w-28">
+          <Link href="/" className="block shrink-0 w-28">
             <img
               className="m-2 p-2 h-10 w-auto transition"
               src={expanded ? LOGO : LOGO_COLLAPSE}
@@ -182,7 +182,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
                   expanded && "w-60"
                 )}
               >
-                <div className="flex-shrink-0 flex items-center justify-center w-10 h-8">
+                <div className="shrink-0 flex items-center justify-center w-10 h-8">
                   <i className={clsx(item.icon, "text-lg")}></i>
                 </div>
                 {
@@ -198,7 +198,10 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               </Link>
             );
           })}
-          <NotificationsList expanded={expanded} />
+          <NotificationsList
+            expanded={expanded}
+            onClickCB={() => setIsOpen(false)}
+          />
 
           <a
             key="dashboard"
@@ -211,7 +214,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               expanded && "w-60"
             )}
           >
-            <div className="flex-shrink-0 flex items-center justify-center w-10 h-9">
+            <div className="shrink-0 flex items-center justify-center w-10 h-9">
               <i className={clsx("fas fa-tachometer-alt", "text-lg")}></i>
             </div>
 
@@ -232,7 +235,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
             expanded ? "w-60" : "w-10"
           )}
         >
-          <div className="flex-shrink-0 flex items-center justify-center w-10">
+          <div className="shrink-0 flex items-center justify-center w-10">
             <div className="flex items-center justify-center bg-white rounded-full w-8 h-8">
               <i className="block fas fa-user text-base text-primary-800"></i>
             </div>

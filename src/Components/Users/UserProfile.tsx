@@ -16,7 +16,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
-import { validateEmailAddress, phonePreg } from "../../Common/validation";
+import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
@@ -139,9 +139,9 @@ export default function UserProfile() {
   );
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
-    Object.keys(states.form).forEach((field, i) => {
+    Object.keys(states.form).forEach((field) => {
       switch (field) {
         case "firstName":
         case "lastName":
@@ -163,13 +163,15 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "phoneNumber":
+        // variables declared inside case, gets outside there "case" scope
+        // so explicitly declare there scope to pass eslint test
+        case "phoneNumber": {
           const phoneNumber = parsePhoneNumberFromString(
             states.form[field],
             "IN"
           );
 
-          let is_valid: boolean = false;
+          let is_valid = false;
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
           }
@@ -179,8 +181,10 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "altPhoneNumber":
-          let alt_is_valid: boolean = false;
+        }
+        // limit variables scope inside case block
+        case "altPhoneNumber": {
+          let alt_is_valid = false;
           if (states.form[field] && states.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               states.form[field],
@@ -200,6 +204,8 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
+        }
+
         case "email":
           if (states.form[field] && !validateEmailAddress(states.form[field])) {
             errors[field] = "Enter a valid email address";
@@ -213,7 +219,7 @@ export default function UserProfile() {
   };
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let form: EditForm = { ...states.form, [e.target.name]: e.target.value };
+    const form: EditForm = { ...states.form, [e.target.name]: e.target.value };
     dispatch({ type: "set_form", form });
   };
 
@@ -273,7 +279,7 @@ export default function UserProfile() {
   };
 
   const checkForNewBuildVersion = async () => {
-    let [isLatestBundle, newVersion] = await checkIfLatestBundle();
+    const [isLatestBundle, newVersion] = await checkIfLatestBundle();
 
     if (!isLatestBundle) {
       setUpdateBtnText("updating...");
@@ -313,7 +319,7 @@ export default function UserProfile() {
               <button
                 onClick={(_) => setShowEdit(!showEdit)}
                 type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
+                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:ring-primary focus:border-primary-700 active:bg-primary-700 mt-4"
               >
                 {showEdit ? "Cancel" : "Edit User Profile"}
               </button>
@@ -385,7 +391,7 @@ export default function UserProfile() {
                       Verification Status
                     </dt>
                     {details.verified && (
-                      <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
+                      <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-white">
                         Verified
                       </dd>
                     )}
@@ -399,7 +405,7 @@ export default function UserProfile() {
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Access Level
                     </dt>
-                    <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-white">
                       {details.user_type || "-"}
                     </dd>
                   </div>
@@ -456,7 +462,7 @@ export default function UserProfile() {
                           variant="outlined"
                           margin="dense"
                           type="text"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                           value={states.form.firstName}
                           onChange={handleChangeInput}
                           errors={states.errors.firstName}
@@ -474,7 +480,7 @@ export default function UserProfile() {
                           name="lastName"
                           variant="outlined"
                           margin="dense"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                           type="text"
                           value={states.form.lastName}
                           onChange={handleChangeInput}
@@ -491,7 +497,7 @@ export default function UserProfile() {
                         </label>
                         <TextInputField
                           name="age"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                           variant="outlined"
                           margin="dense"
                           value={states.form.age}
@@ -623,8 +629,8 @@ export default function UserProfile() {
           <div className="text-lg font-medium leading-6 text-gray-900">
             Check for software updates
             <p className="mt-1 text-sm leading-5 text-gray-600">
-              Click the update button to see if you have the latest "care"
-              version.
+              Click the update button to see if you have the latest
+              &quot;care&quot; version.
             </p>
           </div>
           <button

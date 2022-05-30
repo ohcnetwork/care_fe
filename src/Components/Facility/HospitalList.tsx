@@ -37,7 +37,7 @@ import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -51,13 +51,12 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     heading: {
       fontSize: theme.typography.pxToRem(15),
-      fontWeight: theme.typography.fontWeightRegular,
     },
   })
 );
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const HospitalListPage = (props: any) => {
+export const HospitalList = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
   const classes = useStyles();
   const dispatchAction: any = useDispatch();
@@ -82,7 +81,9 @@ const HospitalListPage = (props: any) => {
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
   const [modalFor, setModalFor] = useState(undefined);
-  const { t } = props;
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const { t } = useTranslation();
   const limit = 14;
 
   const fetchData = useCallback(
@@ -205,25 +206,41 @@ const HospitalListPage = (props: any) => {
   };
 
   const handleDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatchAction(downloadFacility());
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById("facilityDownloader")?.click();
   };
 
   const handleCapacityDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const cap = await dispatchAction(downloadFacilityCapacity());
+    // file ready to download
+    setDownloadLoading(false);
     setCapacityDownloadFile(cap.data);
     document.getElementById("capacityDownloader")?.click();
   };
 
   const handleDoctorsDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const doc = await dispatchAction(downloadFacilityDoctors());
+    // file ready to download
+    setDownloadLoading(false);
     setDoctorsDownloadFile(doc.data);
     document.getElementById("doctorsDownloader")?.click();
   };
 
   const handleTriageDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const tri = await dispatchAction(downloadFacilityTriage());
+    // file ready to download
+    setDownloadLoading(false);
     setTriageDownloadFile(tri.data);
     document.getElementById("triageDownloader")?.click();
   };
@@ -325,7 +342,7 @@ const HospitalListPage = (props: any) => {
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="flex ">
-              <div className="md:flex hidden w-32 self-stretch flex-shrink-0 bg-gray-300 items-center justify-center">
+              <div className="md:flex hidden w-32 self-stretch shrink-0 bg-gray-300 items-center justify-center">
                 {facility.cover_image_url ? (
                   <img
                     src={facility.cover_image_url}
@@ -375,7 +392,7 @@ const HospitalListPage = (props: any) => {
                   <div>
                     {userType !== "Staff" ? (
                       <button
-                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                         onClick={(_) => setModalFor(facility.id)}
                       >
                         <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
@@ -438,14 +455,14 @@ const HospitalListPage = (props: any) => {
                   <div>
                     <Link
                       href={`/facility/${facility.id}`}
-                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     >
                       <i className="fas fa-hospital mr-2 text-primary-500"></i>
                       {t("Facility")}
                     </Link>
                     <Link
                       href={`/facility/${facility.id}/patients`}
-                      className="ml-2 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      className="ml-2 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     >
                       <i className="fas fa-user-injured text-primary-500 mr-2"></i>
                       {t("Patients")}
@@ -539,30 +556,38 @@ const HospitalListPage = (props: any) => {
                         setdownloadSelect(e.target.value);
                       }}
                     />
-                    <button
-                      className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
-                      onClick={handleDownloader}
-                    >
-                      <svg
-                        className="h-6 w-6"
-                        viewBox="0 0 16 16"
-                        fill="white"
-                        xmlns="http://www.w3.org/2000/svg"
+
+                    {downloadLoading ? (
+                      <div className="px-2 ml-2 my-2 pt-1 rounded">
+                        <CircularProgress className="text-primary-600 w-6 h-6" />
+                      </div>
+                    ) : (
+                      <button
+                        className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
+                        onClick={handleDownloader}
+                        disabled={downloadLoading}
                       >
-                        <path
-                          fillRule="evenodd"
-                          d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
-                        />
-                        <path
-                          fillRule="evenodd"
-                          d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
-                        />
-                        <path
-                          fillRule="evenodd"
-                          d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          className="h-6 w-6"
+                          viewBox="0 0 16 16"
+                          fill="white"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
+                          />
+                          <path
+                            fillRule="evenodd"
+                            d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
+                          />
+                          <path
+                            fillRule="evenodd"
+                            d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
+                          />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="hidden">
@@ -709,4 +734,3 @@ const HospitalListPage = (props: any) => {
     </div>
   );
 };
-export const HospitalList = withTranslation()(HospitalListPage);
