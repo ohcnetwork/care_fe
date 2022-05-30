@@ -9,14 +9,18 @@ import {
   SIDEBAR,
 } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserDetails, updateUserDetails } from "../../Redux/actions";
+import {
+  getUserDetails,
+  updateUserDetails,
+  updateUserPassword,
+} from "../../Redux/actions";
 import {
   PhoneNumberField,
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
-import { validateEmailAddress, phonePreg } from "../../Common/validation";
+import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
@@ -87,12 +91,33 @@ const editFormReducer = (state: State, action: Action) => {
 };
 export default function UserProfile() {
   const [states, dispatch] = useReducer(editFormReducer, initialState);
+  const reduxDispatch: any = useDispatch();
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const username = currentUser.data.username;
 
-  const [showEdit, setShowEdit] = React.useState<boolean | false>(false);
+  const [changePasswordForm, setChangePasswordForm] = useState<{
+    username: string;
+    old_password: string;
+    new_password_1: string;
+    new_password_2: string;
+  }>({
+    username: username,
+    old_password: "",
+    new_password_1: "",
+    new_password_2: "",
+  });
+
+  const [changePasswordErrors] = useState<{
+    old_password: string;
+    password_confirmation: string;
+  }>({
+    old_password: "",
+    password_confirmation: "",
+  });
+
+  const [showEdit, setShowEdit] = useState<boolean | false>(false);
   const [updateBtnText, setUpdateBtnText] = React.useState<string>("Update");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -139,9 +164,9 @@ export default function UserProfile() {
   );
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
-    Object.keys(states.form).forEach((field, i) => {
+    Object.keys(states.form).forEach((field) => {
       switch (field) {
         case "firstName":
         case "lastName":
@@ -164,12 +189,14 @@ export default function UserProfile() {
           }
           return;
         case "phoneNumber":
+          // eslint-disable-next-line no-case-declarations
           const phoneNumber = parsePhoneNumberFromString(
             states.form[field],
             "IN"
           );
 
-          let is_valid: boolean = false;
+          // eslint-disable-next-line no-case-declarations
+          let is_valid = false;
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
           }
@@ -180,7 +207,8 @@ export default function UserProfile() {
           }
           return;
         case "altPhoneNumber":
-          let alt_is_valid: boolean = false;
+          // eslint-disable-next-line no-case-declarations
+          let alt_is_valid = false;
           if (states.form[field] && states.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               states.form[field],
@@ -213,7 +241,7 @@ export default function UserProfile() {
   };
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let form: EditForm = { ...states.form, [e.target.name]: e.target.value };
+    const form: EditForm = { ...states.form, [e.target.name]: e.target.value };
     dispatch({ type: "set_form", form });
   };
 
@@ -273,7 +301,7 @@ export default function UserProfile() {
   };
 
   const checkForNewBuildVersion = async () => {
-    let [isLatestBundle, newVersion] = await checkIfLatestBundle();
+    const [isLatestBundle, newVersion] = await checkIfLatestBundle();
 
     if (!isLatestBundle) {
       setUpdateBtnText("updating...");
@@ -298,6 +326,44 @@ export default function UserProfile() {
   if (isLoading) {
     return <Loading />;
   }
+
+  const changePassword = (e: any) => {
+    e.preventDefault();
+    //validating form
+    if (
+      changePasswordForm.new_password_1 != changePasswordForm.new_password_2
+    ) {
+      Notification.Error({
+        msg: "Passwords are different in the new and the confirmation column.",
+      });
+    } else {
+      setIsLoading(true);
+      const form = {
+        username: username,
+        old_password: changePasswordForm.old_password,
+        new_password: changePasswordForm.new_password_1,
+      };
+      reduxDispatch(updateUserPassword(form)).then((resp: any) => {
+        setIsLoading(false);
+        const res = resp && resp.data;
+        if (res && res.status === "OK") {
+          Notification.Success({
+            msg: "Password changed!.",
+          });
+        } else {
+          Notification.Error({
+            msg: "There was some error. Please try again in some time.",
+          });
+        }
+        setChangePasswordForm({
+          ...changePasswordForm,
+          new_password_1: "",
+          new_password_2: "",
+          old_password: "",
+        });
+      });
+    }
+  };
   return (
     <div>
       <div className="md:p-20 p-10">
@@ -440,137 +506,231 @@ export default function UserProfile() {
             )}
 
             {showEdit && (
-              <form action="#" method="POST">
-                <div className="shadow overflow-hidden sm:rounded-md">
-                  <div className="px-4 py-5 bg-white sm:p-6">
-                    <div className="grid grid-cols-6 gap-6">
-                      <div className="col-span-6 sm:col-span-3">
-                        <label
-                          htmlFor="firstName"
-                          className="block text-sm font-medium leading-5 text-gray-700"
-                        >
-                          First name*
-                        </label>
-                        <TextInputField
-                          name="firstName"
-                          variant="outlined"
-                          margin="dense"
-                          type="text"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                          value={states.form.firstName}
-                          onChange={handleChangeInput}
-                          errors={states.errors.firstName}
-                        />
-                      </div>
+              <div>
+                <form action="#" method="POST">
+                  <div className="shadow overflow-hidden sm:rounded-md">
+                    <div className="px-4 py-5 bg-white sm:p-6">
+                      <div className="grid grid-cols-6 gap-6">
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="firstName"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            First name*
+                          </label>
+                          <TextInputField
+                            name="firstName"
+                            variant="outlined"
+                            margin="dense"
+                            type="text"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            value={states.form.firstName}
+                            onChange={handleChangeInput}
+                            errors={states.errors.firstName}
+                          />
+                        </div>
 
-                      <div className="col-span-6 sm:col-span-3">
-                        <label
-                          htmlFor="lastName"
-                          className="block text-sm font-medium leading-5 text-gray-700"
-                        >
-                          Last name*
-                        </label>
-                        <TextInputField
-                          name="lastName"
-                          variant="outlined"
-                          margin="dense"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                          type="text"
-                          value={states.form.lastName}
-                          onChange={handleChangeInput}
-                          errors={states.errors.lastName}
-                        />
-                      </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="lastName"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            Last name*
+                          </label>
+                          <TextInputField
+                            name="lastName"
+                            variant="outlined"
+                            margin="dense"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            type="text"
+                            value={states.form.lastName}
+                            onChange={handleChangeInput}
+                            errors={states.errors.lastName}
+                          />
+                        </div>
 
-                      <div className="col-span-6 sm:col-span-3">
-                        <label
-                          htmlFor="age"
-                          className="block text-sm font-medium leading-5 text-gray-700"
-                        >
-                          Age*
-                        </label>
-                        <TextInputField
-                          name="age"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                          variant="outlined"
-                          margin="dense"
-                          value={states.form.age}
-                          onChange={handleChangeInput}
-                          errors={states.errors.age}
-                        />
-                      </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="age"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            Age*
+                          </label>
+                          <TextInputField
+                            name="age"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            variant="outlined"
+                            margin="dense"
+                            value={states.form.age}
+                            onChange={handleChangeInput}
+                            errors={states.errors.age}
+                          />
+                        </div>
 
-                      <div className="col-span-6 sm:col-span-3">
-                        <label
-                          htmlFor="gender"
-                          className="block text-sm font-medium leading-5 text-gray-700"
-                        >
-                          Gender*
-                        </label>
-                        <SelectField
-                          name="gender"
-                          variant="outlined"
-                          margin="dense"
-                          value={states.form.gender}
-                          options={genderTypes}
-                          onChange={handleChangeInput}
-                          errors={states.errors.gender}
-                        />
-                      </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="gender"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            Gender*
+                          </label>
+                          <SelectField
+                            name="gender"
+                            variant="outlined"
+                            margin="dense"
+                            value={states.form.gender}
+                            options={genderTypes}
+                            onChange={handleChangeInput}
+                            errors={states.errors.gender}
+                          />
+                        </div>
 
-                      <div className="col-span-6 sm:col-span-3">
-                        <PhoneNumberField
-                          label="Phone Number*"
-                          value={states.form.phoneNumber}
-                          onChange={(value: string) =>
-                            handleValueChange(value, "phoneNumber")
-                          }
-                          errors={states.errors.phoneNumber}
-                        />
-                      </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <PhoneNumberField
+                            label="Phone Number*"
+                            value={states.form.phoneNumber}
+                            onChange={(value: string) =>
+                              handleValueChange(value, "phoneNumber")
+                            }
+                            errors={states.errors.phoneNumber}
+                          />
+                        </div>
 
-                      <div className="col-span-6 sm:col-span-3">
-                        <PhoneNumberField
-                          name="altPhoneNumber"
-                          label="Whatsapp Number"
-                          value={states.form.altPhoneNumber}
-                          onChange={(value: string) =>
-                            handleWhatsappNumChange(value, "altPhoneNumber")
-                          }
-                          errors={states.errors.altPhoneNumber}
-                        />
-                      </div>
-                      <div className="col-span-6 sm:col-span-3">
-                        <InputLabel id="email-label">Email</InputLabel>
-                        <TextInputField
-                          name="email"
-                          variant="outlined"
-                          margin="dense"
-                          type="text"
-                          value={states.form.email}
-                          onChange={handleChangeInput}
-                          errors={states.errors.email}
-                        />
+                        <div className="col-span-6 sm:col-span-3">
+                          <PhoneNumberField
+                            name="altPhoneNumber"
+                            label="Whatsapp Number"
+                            value={states.form.altPhoneNumber}
+                            onChange={(value: string) =>
+                              handleWhatsappNumChange(value, "altPhoneNumber")
+                            }
+                            errors={states.errors.altPhoneNumber}
+                          />
+                        </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <InputLabel id="email-label">Email</InputLabel>
+                          <TextInputField
+                            name="email"
+                            variant="outlined"
+                            margin="dense"
+                            type="text"
+                            value={states.form.email}
+                            onChange={handleChangeInput}
+                            errors={states.errors.email}
+                          />
+                        </div>
                       </div>
                     </div>
+                    <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        type="submit"
+                        style={{ marginLeft: "auto" }}
+                        startIcon={
+                          <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                        }
+                        onClick={(e) => handleSubmit(e)}
+                      >
+                        {" "}
+                        UPDATE{" "}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                    <Button
-                      color="primary"
-                      variant="contained"
-                      type="submit"
-                      style={{ marginLeft: "auto" }}
-                      startIcon={
-                        <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                      }
-                      onClick={(e) => handleSubmit(e)}
-                    >
-                      {" "}
-                      UPDATE{" "}
-                    </Button>
+                </form>
+                <form action="#" method="POST">
+                  <div className="shadow overflow-hidden sm:rounded-md">
+                    <div className="px-4 py-5 bg-white sm:p-6">
+                      <div className="grid grid-cols-6 gap-6">
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="old_password"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            Current Password*
+                          </label>
+                          <TextInputField
+                            name="old_password"
+                            variant="outlined"
+                            margin="dense"
+                            type="password"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            value={changePasswordForm.old_password}
+                            onChange={(e) =>
+                              setChangePasswordForm({
+                                ...changePasswordForm,
+                                old_password: e.target.value,
+                              })
+                            }
+                            errors={changePasswordErrors.old_password}
+                          />
+                        </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="new_password_1"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            New Password*
+                          </label>
+                          <TextInputField
+                            name="new_password_1"
+                            variant="outlined"
+                            margin="dense"
+                            type="password"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            value={changePasswordForm.new_password_1}
+                            onChange={(e) =>
+                              setChangePasswordForm({
+                                ...changePasswordForm,
+                                new_password_1: e.target.value,
+                              })
+                            }
+                            errors=""
+                          />
+                        </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="new_password_2"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            New Password Confirmation*
+                          </label>
+                          <TextInputField
+                            name="new_password_2"
+                            variant="outlined"
+                            margin="dense"
+                            type="password"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            value={changePasswordForm.new_password_2}
+                            onChange={(e) =>
+                              setChangePasswordForm({
+                                ...changePasswordForm,
+                                new_password_2: e.target.value,
+                              })
+                            }
+                            errors={changePasswordErrors.password_confirmation}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        type="submit"
+                        style={{ marginLeft: "auto" }}
+                        startIcon={
+                          <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                        }
+                        onClick={(e) => changePassword(e)}
+                      >
+                        {" "}
+                        CHANGE PASSWORD{" "}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </form>
+                </form>
+              </div>
             )}
           </div>
         </div>
@@ -623,8 +783,8 @@ export default function UserProfile() {
           <div className="text-lg font-medium leading-6 text-gray-900">
             Check for software updates
             <p className="mt-1 text-sm leading-5 text-gray-600">
-              Click the update button to see if you have the latest "care"
-              version.
+              Click the update button to see if you have the latest
+              &quotcare&quot version.
             </p>
           </div>
           <button

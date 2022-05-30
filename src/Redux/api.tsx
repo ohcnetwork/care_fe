@@ -35,6 +35,11 @@ const routes: Routes = {
     path: "/api/v1/password_reset/",
     method: "POST",
   },
+
+  updatePassword: {
+    path: "/api/v1/password_change/",
+    method: "PUT",
+  },
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",

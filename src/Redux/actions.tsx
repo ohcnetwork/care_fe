@@ -25,6 +25,10 @@ export const postForgotPassword = (form: object) => {
   return fireRequest("forgotPassword", [], form);
 };
 
+export const updateUserPassword = (form: object) => {
+  return fireRequest("updatePassword", [], form);
+};
+
 export const getUserPnconfig = (pathParams: object) => {
   return fireRequest("getUserPnconfig", [], {}, pathParams);
 };
