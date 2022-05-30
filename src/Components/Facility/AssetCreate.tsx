@@ -335,7 +335,11 @@ const AssetCreate = (props: AssetProps) => {
     return (
       <div className="p-2 hover:bg-slate-200 flex flex-col gap-1">
         <p className={description && "font-medium"}>{value}</p>
-        {description && <p className="max-w-xs">{description}</p>}
+        {description && (
+          <p className="max-w-xs text-gray-900">
+            <i>{description}</i>
+          </p>
+        )}
       </div>
     );
   };
@@ -392,14 +396,14 @@ const AssetCreate = (props: AssetProps) => {
                       id: "EXTERNAL",
                       value: renderAssetTypeOption(
                         "External",
-                        "Assets that can be transferred."
+                        "Asset is outside the facility premises."
                       ),
                     },
                     {
                       id: "INTERNAL",
                       value: renderAssetTypeOption(
                         "Internal",
-                        "Assets that cannot be transferred."
+                        "Asset is inside the facility premises."
                       ),
                     },
                   ]}
