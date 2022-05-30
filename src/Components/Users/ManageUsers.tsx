@@ -15,7 +15,7 @@ import { navigate, useQueryParams } from "raviger";
 import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { InputSearchBox } from "../Common/SearchBox";
 import { FacilityModel } from "../Facility/models";
-import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
+
 import { IconButton, CircularProgress } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
@@ -24,6 +24,7 @@ import classNames from "classnames";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
+import ClosingTag from "../Common/ClosingTag";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -252,22 +253,29 @@ export default function ManageUsers() {
       );
     }
     return (
-      <>
-        {facilities.map((facility, i) => (
-          <div key={`facility_${i}`} className="flex items-center mb-2">
-            <div className="font-semibold">{facility.name}</div>
-            <IconButton
-              size="small"
-              color="secondary"
-              disabled={isFacilityLoading}
-              onClick={() => removeFacility(username, facility)}
+      <div className="sm:col-start-2 col-span-full sm:col-span-3">
+        <div className="mb-2">
+          {facilities.map((facility, i) => (
+            <div
+              key={`facility_${i}`}
+              className="border-2 font-gbold inline-block rounded-md pl-3 py-1 mr-3 mt-2"
             >
-              <DeleteForeverIcon />
-            </IconButton>
-          </div>
-        ))}
+              <div className="flex items-center  space-x-1">
+                <div className="font-semibold">{facility.name}</div>
+                <IconButton
+                  size="small"
+                  color="secondary"
+                  disabled={isFacilityLoading}
+                  onClick={() => removeFacility(username, facility)}
+                >
+                  <ClosingTag />
+                </IconButton>
+              </div>
+            </div>
+          ))}
+        </div>
         {showLinkFacility(username)}
-      </>
+      </div>
     );
   };
 
@@ -303,7 +311,7 @@ export default function ManageUsers() {
     users.length &&
     (userList = users.map((user: any) => {
       return (
-        <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
+        <div key={`usr_${user.id}`} className="w-full md:w-1/3 mt-6 md:px-4">
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
@@ -345,16 +353,20 @@ export default function ManageUsers() {
                   ) : null}
                 </div>
 
-                {user.user_type && (
-                  <UserDetails title="Role">
-                    <div className="font-semibold">{user.user_type}</div>
-                  </UserDetails>
-                )}
-                {user.created_by && (
-                  <UserDetails title="Created by">
-                    <div className="font-semibold">{user.created_by}</div>
-                  </UserDetails>
-                )}
+                <div className="flex justify-between">
+                  {user.user_type && (
+                    <UserDetails title="Role">
+                      <div className="font-semibold">{user.user_type}</div>
+                    </UserDetails>
+                  )}
+                  {user.district_object && (
+                    <UserDetails title="District">
+                      <div className="font-semibold">
+                        {user.district_object.name}
+                      </div>
+                    </UserDetails>
+                  )}
+                </div>
                 {user.local_body_object && (
                   <UserDetails title="Location">
                     <div className="font-semibold">
@@ -362,13 +374,30 @@ export default function ManageUsers() {
                     </div>
                   </UserDetails>
                 )}
-                {user.district_object && (
-                  <UserDetails title="District">
-                    <div className="font-semibold">
-                      {user.district_object.name}
+                <div className="flex justify-between">
+                  {user.created_by && (
+                    <UserDetails title="Created by">
+                      <div className="font-semibold">{user.created_by}</div>
+                    </UserDetails>
+                  )}
+                  {user.phone_number && (
+                    <div className="mt-2 bg-gray-50 border-t px-6 py-2">
+                      <div className="flex py-4 justify-between">
+                        <div>
+                          <div className="text-gray-500 leading-relaxed">
+                            Phone:
+                          </div>
+                          <a
+                            href={`tel:${user.phone_number}`}
+                            className="font-semibold"
+                          >
+                            {user.phone_number || "-"}
+                          </a>
+                        </div>
+                      </div>
                     </div>
-                  </UserDetails>
-                )}
+                  )}
+                </div>
 
                 {user.username && (
                   <UserDetails title="Facilities">
@@ -386,23 +415,7 @@ export default function ManageUsers() {
                   </UserDetails>
                 )}
               </div>
-              {user.phone_number && (
-                <div className="mt-2 bg-gray-50 border-t px-6 py-2">
-                  <div className="flex py-4 justify-between">
-                    <div>
-                      <div className="text-gray-500 leading-relaxed">
-                        Phone:
-                      </div>
-                      <a
-                        href={`tel:${user.phone_number}`}
-                        className="font-semibold"
-                      >
-                        {user.phone_number || "-"}
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              )}
+
               {showDelete(user) && (
                 <button
                   type="button"
