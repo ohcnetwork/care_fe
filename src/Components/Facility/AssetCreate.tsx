@@ -173,12 +173,6 @@ const AssetCreate = (props: AssetProps) => {
             invalidForm = true;
           }
           return;
-        case "asset_class":
-          if (asset_class === undefined) {
-            errors[field] = "Field is required";
-            invalidForm = true;
-          }
-          return;
         case "support_phone":
           if (!support_phone) {
             errors[field] = "Field is required";
@@ -418,7 +412,7 @@ const AssetCreate = (props: AssetProps) => {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="asset-class" id="name=label" required>
+                <InputLabel htmlFor="asset-class" id="name=label">
                   Asset Class
                 </InputLabel>
                 <SelectField
