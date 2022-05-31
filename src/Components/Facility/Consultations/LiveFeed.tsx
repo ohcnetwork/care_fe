@@ -56,10 +56,15 @@ const LiveFeed = (props: any) => {
   });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   const refreshPresetsHash = props.refreshPresetsHash;
 
 >>>>>>> develop
+=======
+  const refreshPresetsHash = props.refreshPresetsHash;
+
+>>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentPreset, setCurrentPreset] = useState<any>();
   const {
@@ -344,6 +349,11 @@ const LiveFeed = (props: any) => {
                               Notification.Success({
                                 msg: "Preset Updated",
                               });
+<<<<<<< HEAD
+=======
+                              getBedPresets(cameraAsset?.id);
+                              getPresets({});
+>>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
                             }
                             setLoading(undefined);
                           }
@@ -454,6 +464,7 @@ const LiveFeed = (props: any) => {
                         {option.label}
                       </button>
 <<<<<<< HEAD
+<<<<<<< HEAD
                     ))}
                     {/* Page Number Next and Prev buttons */}
                     <button
@@ -462,6 +473,8 @@ const LiveFeed = (props: any) => {
                       onClick={() => {
                         setPresetsPage(presetsPage - 10);
 =======
+=======
+>>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
                     ))}
                     {/* Page Number Next and Prev buttons */}
                     <button
@@ -512,13 +525,17 @@ const LiveFeed = (props: any) => {
                       disabled={page.offset === 0}
                       onClick={() => {
                         handlePagination(page.offset - page.limit);
+<<<<<<< HEAD
 >>>>>>> develop
+=======
+>>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
                       }}
                     >
                       <i className="fas fa-arrow-left"></i>
                     </button>
                     <button
                       className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+<<<<<<< HEAD
 <<<<<<< HEAD
                       disabled={presetsPage >= presets.length}
                       onClick={() => {
@@ -528,11 +545,17 @@ const LiveFeed = (props: any) => {
                       onClick={() => {
                         handlePagination(page.offset + page.limit);
 >>>>>>> develop
+=======
+                      disabled={page.offset + page.limit >= page.count}
+                      onClick={() => {
+                        handlePagination(page.offset + page.limit);
+>>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
                       }}
                     >
                       <i className="fas fa-arrow-right"></i>
                     </button>
                   </>
+<<<<<<< HEAD
 <<<<<<< HEAD
                 ) : (
                   bedPresets?.map((preset: any, index: number) => (
@@ -559,6 +582,8 @@ const LiveFeed = (props: any) => {
                   ))
 =======
 >>>>>>> develop
+=======
+>>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
                 )}
               </div>
               {props?.showRefreshButton && (
