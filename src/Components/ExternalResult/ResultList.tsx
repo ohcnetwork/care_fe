@@ -1,6 +1,7 @@
 import loadable from "@loadable/component";
 import Grid from "@material-ui/core/Grid";
 import { Button } from "@material-ui/core";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate, useQueryParams } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -31,6 +32,8 @@ export default function ResultList() {
   const [qParams, setQueryParams] = useQueryParams();
   const [showFilters, setShowFilters] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
@@ -39,11 +42,11 @@ export default function ResultList() {
     lsgList: [],
     wardList: [],
   });
-
   let manageResults: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
-    localStorage.getItem("lsg-ward-data") || '{"lsgList": [], "wardList": []}' // eslint-disable-line
+    localStorage.getItem("lsg-ward-data") ||
+      JSON.stringify({ lsgList: [], wardList: [] })
   );
 
   useEffect(() => {
@@ -191,9 +194,13 @@ export default function ResultList() {
   };
 
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res?.data);
     document.getElementById("downloadCSV")?.click();
   };
@@ -207,7 +214,7 @@ export default function ResultList() {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(_e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -226,7 +233,7 @@ export default function ResultList() {
           {value.name}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(_e) =>
+            onClick={() =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
                 : paramKey === "wards"
@@ -247,25 +254,25 @@ export default function ResultList() {
         <tr key={`usr_${result.id}`} className="bg-white">
           <td
             onClick={() => navigate(resultUrl)}
-            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-900"
+            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-900"
           >
             <div className="flex">
               <a
                 href="#"
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
-                <p className="text-cool-gray-500 group-hover:text-cool-gray-900 transition ease-in-out duration-150">
+                <p className="text-gray-500 group-hover:text-gray-900 transition ease-in-out duration-150">
                   {result.name} - {result.age} {result.age_in}
                 </p>
               </a>
             </div>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-            <span className="text-cool-gray-900 font-medium">
+          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+            <span className="text-gray-900 font-medium">
               {result.test_type}
             </span>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
               {result.result}
             </span>
@@ -275,10 +282,10 @@ export default function ResultList() {
               </span>
             ) : null}
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
             {result.result_date || "-"}
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
             <Button
               variant="outlined"
               color="primary"
@@ -391,11 +398,17 @@ export default function ResultList() {
               Upload List
             </div>
             <div
-              className="btn mt-8 ml-4 gap-2 btn-primary"
+              className={`btn mt-8 ml-4 gap-2 btn-primary ${
+                downloadLoading ? "pointer-events-none" : ""
+              }`}
               onClick={triggerDownload}
             >
-              <span>
-                <GetAppIcon className="cursor-pointer" />
+              <span className="flex flex-row justify-center">
+                {downloadLoading ? (
+                  <CircularProgress className="w-5 h-5 mr-1 text-white" />
+                ) : (
+                  <GetAppIcon className="cursor-pointer" />
+                )}
                 Export
               </span>
             </div>
@@ -459,27 +472,27 @@ export default function ResultList() {
         {badge("SRF ID", qParams.srf_id, "srf_id")}
       </div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-        <table className="min-w-full divide-y divide-cool-gray-200">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Test Type
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wide">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wide">
                 Status
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Result Date
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Create Patient
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-cool-gray-200">
+          <tbody className="bg-white divide-y divide-gray-200">
             {manageResults}
           </tbody>
         </table>

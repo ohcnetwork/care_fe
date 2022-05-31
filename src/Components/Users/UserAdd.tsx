@@ -34,6 +34,7 @@ import {
   SelectField,
   TextInputField,
   MultiSelectField,
+  CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
@@ -130,6 +131,7 @@ export const UserAdd = (props: UserProps) => {
   const [selectedFacility, setSelectedFacility] = useState<
     FacilityModel[] | null
   >([]);
+  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
 
   const rootState: any = useSelector((rootState) => rootState);
@@ -300,6 +302,14 @@ export const UserAdd = (props: UserProps) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
+
+  useAbortableEffect(() => {
+    if (phoneIsWhatsApp) {
+      handleValueChange(state.form.phone_number, "alt_phone_number");
+    } else {
+      handleValueChange("+91", "alt_phone_number"); // reset alt_phone_number
+    }
+  }, [phoneIsWhatsApp, state.form.phone_number, state.form.alt_phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
@@ -541,6 +551,12 @@ export const UserAdd = (props: UserProps) => {
                   errors={state.errors.phone_number}
                   onlyIndia={true}
                 />
+                <CheckboxField
+                  checked={phoneIsWhatsApp}
+                  onChange={() => setPhoneIsWhatsApp(!phoneIsWhatsApp)}
+                  label="Is the phone number a WhatsApp number?"
+                  className="font-bold"
+                />
               </div>
 
               <div>
@@ -550,6 +566,7 @@ export const UserAdd = (props: UserProps) => {
                   onChange={(value: any) =>
                     handleValueChange(value, "alt_phone_number")
                   }
+                  disabled={phoneIsWhatsApp}
                   errors={state.errors.alt_phone_number}
                   onlyIndia={true}
                 />
@@ -610,7 +627,7 @@ export const UserAdd = (props: UserProps) => {
                       ) : (
                         <CheckCircle fontSize="inherit" color="primary" />
                       )}{" "}
-                      username can't end with ^ . @ + _ -
+                      {"username can't end with ^ . @ + _ -"}
                     </div>
                   </div>
                 )}

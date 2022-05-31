@@ -14,14 +14,13 @@ import { CCTVIcon } from "./Icons/CCTVIcon";
 import { WifiIcon } from "./Icons/WifiIcon";
 
 export const TeleICUFacility = () => {
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams] = useQueryParams();
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const dispatchAction: any = useDispatch();
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const { t } = useTranslation();
-  const [viewOption, setViewOption] = useState("5-para");
   const [data, setData] = useState<Array<FacilityModel>>([]);
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -109,14 +108,14 @@ export const TeleICUFacility = () => {
                 </div>
               );
             })
-          : data.map((item, index) => {
+          : data.map((item, _index) => {
               return (
                 <div key={item.id}>
                   <Link
                     href={`/teleicu/facility/${item.id}`}
                     className="bg-white rounded-lg text-black flex items-center gap-4 p-4"
                   >
-                    <div className="w-32 self-stretch flex-shrink-0 bg-gray-300 flex items-center justify-center rounded">
+                    <div className="w-32 self-stretch shrink-0 bg-gray-300 flex items-center justify-center rounded">
                       <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                     </div>
                     <div className="flex-1">
