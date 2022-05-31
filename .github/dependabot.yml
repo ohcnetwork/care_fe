@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
+  - package-ecosystem: "yarn"
     directory: "/"
     schedule:
       interval: "daily"
@@ -10,5 +10,15 @@ updates:
     assignees:
       - "tomahawk_pilot"
     labels:
-      - "npm"
+      - "yarn"
+      - "dependencies"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+        assignees:
+      - "tomahawk_pilot"
+    labels:
+      - "ci"
       - "dependencies"
