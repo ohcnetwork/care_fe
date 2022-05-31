@@ -108,7 +108,7 @@ const MuiVirtualizedTable = (props: any) => {
             return (
               <Column
                 key={dataKey}
-                headerRenderer={(headerProps) =>
+                headerRenderer={(headerProps: any) =>
                   headerRenderer({
                     ...headerProps,
                     columnIndex: index,

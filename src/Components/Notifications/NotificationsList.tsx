@@ -28,6 +28,14 @@ export default function ResultList({
 }: {
   expanded: boolean;
 }) {
+const RESULT_LIMIT = 14;
+
+interface Props {
+  expanded: boolean;
+  onClickCB?: () => void;
+}
+
+export default function ResultList({ expanded = false, onClickCB }: Props) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
@@ -43,6 +51,17 @@ export default function ResultList({
 
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setShowNotifications(false);
+        console.log("esc");
+      }
+    }
+    if (showNotifications) document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [showNotifications]);
 
   const intialSubscriptionState = async () => {
     try {
@@ -95,17 +114,22 @@ export default function ResultList({
             subscription
               ?.unsubscribe()
               .then(async (_) => {
+              .then(async function (_successful) {
                 const data = {
                   pf_endpoint: "",
                   pf_p256dh: "",
                   pf_auth: "",
                 };
                 dispatch(updateUserPnconfig(data, { username: username }));
+                await dispatch(
+                  updateUserPnconfig(data, { username: username })
+                );
 
                 setIsSubscribed("NotSubscribed");
                 setIsSubscribing(false);
               })
               .catch((_) => {
+              .catch(function (_e) {
                 Error({
                   msg: "Unsubscribe failed.",
                 });
@@ -121,6 +145,12 @@ export default function ResultList({
         Error({
           msg: "Service Worker Error",
         });
+          .catch(function (_e) {
+            Error({ msg: "Subscription Error" });
+          });
+      })
+      .catch(function (_e) {
+        Error({ msg: "Service Worker Error" });
       });
   };
 
@@ -229,12 +259,15 @@ export default function ResultList({
   let resultList: any[] = [];
   if (data && data.length) {
     resultList = data.map((result: any) => {
+    resultList = data.map((result: any, _idx: number) => {
       return (
         <div
           key={`usr_${result.id}`}
-          onClick={() =>
-            navigate(resultUrl(result.event, result.caused_objects))
-          }
+          onClick={() => {
+            navigate(resultUrl(result.event, result.caused_objects));
+            onClickCB && onClickCB();
+            setShowNotifications(false);
+          }}
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
         >
           <div className="text-lg font-bold">
@@ -244,7 +277,7 @@ export default function ResultList({
           <div className="text-xs">
             {moment(result.created_date).format("lll")}
           </div>
-          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0">
+          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0">
             <i className="fas fa-eye mr-2 text-primary-500" />
             Visit Link
           </a>
@@ -286,8 +319,8 @@ export default function ResultList({
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div>
-        <h5> No Results Found</h5>
+      <div className="px-4 pt-3 lg:px-8">
+        <h5> No Results Found </h5>
       </div>
     );
   }
@@ -304,7 +337,7 @@ export default function ResultList({
           expanded && "w-60"
         )}
       >
-        <div className="flex-shrink-0 flex items-center justify-center w-10 h-9">
+        <div className="shrink-0 flex items-center justify-center w-10 h-9">
           <i className={clsx("fas fa-bell", "text-lg")}></i>
         </div>
 
@@ -341,7 +374,7 @@ export default function ResultList({
                       setData([]);
                       setOffset(0);
                     }}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
                   >
                     <i className="fa-fw fas fa-sync cursor-pointer mr-2" />{" "}
                     Reload
@@ -350,7 +383,7 @@ export default function ResultList({
                 <div>
                   <button
                     onClick={(_) => setShowNotifications(false)}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
                   >
                     <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
                     Close
@@ -359,7 +392,7 @@ export default function ResultList({
                 <div>
                   <button
                     onClick={handleSubscribeClick}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
                     disabled={isSubscribing}
                   >
                     {isSubscribing && (

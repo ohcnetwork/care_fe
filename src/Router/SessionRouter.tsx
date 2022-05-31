@@ -2,7 +2,7 @@ import loadable from "@loadable/component";
 import { ForgotPassword, Login, ResetPassword } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import { PublicDashboard } from "../Components/Dashboard/PublicDashboard";
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 const TopBar = loadable(() => import("../Components/Common/TopBar"));
 
 const routes = {
@@ -13,9 +13,9 @@ const routes = {
   "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
 };
 
-const SessionRouter = (props: any) => {
+export default function SessionRouter(props: any) {
   const content = useRoutes(routes) || <Login />;
-  const { t } = props;
+  const { t } = useTranslation();
   const path =
     content &&
     content.props &&
@@ -56,6 +56,4 @@ const SessionRouter = (props: any) => {
       </div>
     </div>
   );
-};
-
-export default withTranslation()(SessionRouter);
+}
