@@ -250,30 +250,19 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
-<<<<<<< HEAD
       - name: install kubectl
         uses: azure/setup-kubectl@v2.0
         with:
           version: 'v1.23.6'
         id: install
       - name: Deploy Care Fe Staging
-=======
-
-      - name: install kubectl
-        uses: azure/setup-kubectl@v2.0
-        with:
-          version: "v1.23.6"
-        id: install
-
-      - name: Deploy Care Fe Production
->>>>>>> develop
         run: |
           mkdir -p $HOME/.kube/
           aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region ap-south-1
           cd kube/deployments/
           sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
           kubectl apply -f care-fe.yaml
-
+-
   deploy-production-futureace:
     needs: build-production
     name: Deploy to EKS Futureace

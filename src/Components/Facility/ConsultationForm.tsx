@@ -311,11 +311,6 @@ export const ConsultationForm = (props: any) => {
         //   }
         //   return;
         case "suggestion":
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
             if (!error_div) error_div = field;
@@ -323,10 +318,6 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "ip_no":
-<<<<<<< HEAD
->>>>>>> develop
-=======
->>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
           if (!state.form[field]) {
             errors[field] = "Please enter IP Number";
             if (!error_div) error_div = field;
@@ -669,10 +660,7 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 </div>
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-                <div className={twoColDiv}>
+                <div className={"flex gap-4 flex-nowrap flex-shrink-0"}>
                   <div id="prescribed_medication-div" className="w-1/2">
                     <InputLabel id="prescribed-medication-label">
                       Treatment Summary
@@ -693,9 +681,6 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                   {/* <div className="flex-1" id="category-div">
-=======
-=======
->>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
                 <div id="prescribed_medication-div">
                   <InputLabel id="prescribed-medication-label">
                     Treatment Plan / Treatment Summary
@@ -716,10 +701,6 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
                 {/* <div className="flex-1" id="category-div">
-<<<<<<< HEAD
->>>>>>> develop
-=======
->>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
                   <InputLabel id="category-label">Category*</InputLabel>
                   <SelectField
                     name="category"
@@ -837,10 +818,7 @@ export const ConsultationForm = (props: any) => {
                   setPrescriptions={setDischargeAdvice}
                 />
               </div>
-<<<<<<< HEAD
-
-<<<<<<< HEAD
-              <div className={twoColDiv}>
+              <div className={"flex gap-4 flex-nowrap flex-shrink-0"}>
                 <div id="ip_no-div" className="w-1/2">
                   <InputLabel id="refered-label">IP number</InputLabel>
                   <TextInputField
@@ -867,9 +845,7 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.test_id}
                   />
                 </div>
-=======
-=======
->>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
+              </div>
               <div id="ip_no-div">
                 <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
@@ -913,10 +889,6 @@ export const ConsultationForm = (props: any) => {
                   onChange={handleChange}
                   errors={state.errors.verified_by}
                 />
-<<<<<<< HEAD
->>>>>>> develop
-=======
->>>>>>> 0eec608db73c1d971377aa6fe7cbcf5776bfa200
               </div>
               <div className={"flex gap-4 flex-nowrap flex-shrink-0"}>
                 <div id="verified_by-div" className="w-1/2">
