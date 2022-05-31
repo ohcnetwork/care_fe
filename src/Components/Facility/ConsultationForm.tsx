@@ -559,8 +559,6 @@ export const ConsultationForm = (props: any) => {
     return <Loading />;
   }
 
-  const twoColDiv = "flex gap-4 flex-nowrap flex-shrink-0";
-
   return (
     <div className="px-2 pb-2 max-w-5xl mx-auto">
       <PageTitle
@@ -621,7 +619,7 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
-                <div className={twoColDiv}>
+                <div className={"flex gap-4 flex-nowrap flex-shrink-0"}>
                   <div id="existing-medication-div" className="w-1/2">
                     <InputLabel id="existing-medication-label">
                       History of present illness
@@ -844,7 +842,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.verified_by}
                 />
               </div>
-              <div className={twoColDiv}>
+              <div className={"flex gap-4 flex-nowrap flex-shrink-0"}>
                 <div id="verified_by-div" className="w-1/2">
                   <InputLabel id="exam-details-label">Verified By</InputLabel>
                   <MultilineInputField
@@ -983,7 +981,7 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-              <div className={twoColDiv}>
+              <div className={"flex gap-4 flex-nowrap flex-shrink-0"}>
                 <div id="operation-div" className="mt-2 w-1/2">
                   <InputLabel id="exam-details-label">Operation</InputLabel>
                   <MultilineInputField
