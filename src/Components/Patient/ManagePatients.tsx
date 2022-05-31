@@ -111,7 +111,7 @@ export const PatientManager = (props: any) => {
   const theme = useTheme();
   const dispatch: any = useDispatch();
 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
@@ -525,22 +525,23 @@ export const PatientManager = (props: any) => {
                   <span className="text-xs ml-2">
                     Updated at: {moment(patient.modified_date).format("lll")}
                   </span>
-                  {patient.review_time && (
-                    <span
-                      className={
-                        "m-1 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
-                        (moment().isBefore(patient.review_time)
-                          ? " bg-gray-100"
-                          : "rounded p-1 bg-red-400 text-white")
-                      }
-                    >
-                      <i className="mr-2 text-md fas fa-clock"></i>
-                      {(moment().isBefore(patient.review_time)
-                        ? "Review at: "
-                        : "Review Missed: ") +
-                        moment(patient.review_time).format("lll")}
-                    </span>
-                  )}
+                  {patient.review_time &&
+                    !patient.last_consultation?.discharge_date && (
+                      <span
+                        className={
+                          "m-1 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
+                          (moment().isBefore(patient.review_time)
+                            ? " bg-gray-100"
+                            : "rounded p-1 bg-red-400 text-white")
+                        }
+                      >
+                        <i className="mr-2 text-md fas fa-clock"></i>
+                        {(moment().isBefore(patient.review_time)
+                          ? "Review at: "
+                          : "Review Missed: ") +
+                          moment(patient.review_time).format("lll")}
+                      </span>
+                    )}
                 </div>
               )}
             </div>
