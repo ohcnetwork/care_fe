@@ -1,6 +1,13 @@
 [build]
 publish = "build/"
-environment = { NPM_FLAGS = "--legacy-peer-deps" }
+command = "CI='' yarn run build"
+
+[build.environment]
+NETLIFY_USE_YARN = "true"
+YARN_VERSION = "3.2.1"
+YARN_FLAGS = "--immutable"
+YARN_ENABLE_GLOBAL_CACHE = "true"
+YARN_GLOBAL_FOLDER = "/opt/buildhome/.yarn_cache"
 
 [[redirects]]
 from = "/api/*"
