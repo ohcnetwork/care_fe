@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import loadable from "@loadable/component";
 import Box from "@material-ui/core/Box";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles, Theme, useTheme } from "@material-ui/core/styles";
@@ -490,7 +491,7 @@ export const PatientManager = (props: any) => {
           <div className="px-4  flex gap-2">
             {patient?.last_consultation &&
               patient?.last_consultation?.current_bed && (
-                <div className="w-32 self-stretch flex-shrink-0 bg-cool-gray-100 border border-cool-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
+                <div className="w-32 self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
                   <span className="text-center text-gray-900 text-sm">
                     {
                       patient?.last_consultation?.current_bed?.bed_object
@@ -700,9 +701,16 @@ export const PatientManager = (props: any) => {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Patients
               </dt>
-              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                {totalCount}
-              </dd>
+              {/* Show spinner until count is fetched from server */}
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
             </dl>
           </div>
         </div>

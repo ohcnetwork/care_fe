@@ -54,6 +54,7 @@ import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
+import Beds from "./Consultations/Beds";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -310,8 +311,18 @@ export const ConsultationForm = (props: any) => {
         //   }
         //   return;
         case "suggestion":
+<<<<<<< HEAD
+=======
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "ip_no":
+>>>>>>> develop
+          if (!state.form[field]) {
+            errors[field] = "Please enter IP Number";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -332,7 +343,7 @@ export const ConsultationForm = (props: any) => {
           return;
         // case "admitted_to":
         case "admission_date":
-          if (JSON.parse(state.form.admitted) && !state.form[field]) {
+          if (state.form.suggestion === "A" && !state.form[field]) {
             errors[field] = "Field is required as person is admitted";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -397,13 +408,12 @@ export const ConsultationForm = (props: any) => {
           ? state.form.symptoms_onset_date
           : undefined,
         suggestion: state.form.suggestion,
-        admitted: JSON.parse(state.form.admitted),
+        admitted: state.form.suggestion === "A",
         // admitted_to: JSON.parse(state.form.admitted)
         //   ? state.form.admitted_to
         //   : undefined,
-        admission_date: JSON.parse(state.form.admitted)
-          ? state.form.admission_date
-          : undefined,
+        admission_date:
+          state.form.suggestion === "A" ? state.form.admission_date : undefined,
         category: state.form.category,
         is_kasp: state.form.is_kasp,
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
@@ -656,6 +666,7 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 </div>
 
+<<<<<<< HEAD
                 <div className={twoColDiv}>
                   <div id="prescribed_medication-div" className="w-1/2">
                     <InputLabel id="prescribed-medication-label">
@@ -677,6 +688,28 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                   {/* <div className="flex-1" id="category-div">
+=======
+                <div id="prescribed_medication-div">
+                  <InputLabel id="prescribed-medication-label">
+                    Treatment Plan / Treatment Summary
+                  </InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="prescribed_medication"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{
+                      shrink: !!state.form.prescribed_medication,
+                    }}
+                    value={state.form.prescribed_medication}
+                    onChange={handleChange}
+                    errors={state.errors.prescribed_medication}
+                  />
+                </div>
+                {/* <div className="flex-1" id="category-div">
+>>>>>>> develop
                   <InputLabel id="category-label">Category*</InputLabel>
                   <SelectField
                     name="category"
@@ -733,68 +766,38 @@ export const ConsultationForm = (props: any) => {
                         errors={state.errors.admitted_to}
                       />
                     </div>
-                  )} 
+                  )}
                 */}
                 {!id && state.form.suggestion === "A" && (
                   <>
                     <div className="flex">
-                      <div className="flex-1" id="admitted-div">
-                        <InputLabel id="admitted-label">Admitted</InputLabel>
-                        <RadioGroup
-                          aria-label="covid"
-                          name="admitted"
-                          value={state.form.admitted}
-                          onChange={handleChange}
-                          style={{ padding: "0px 5px" }}
-                        >
-                          <Box display="flex" flexDirection="row">
-                            <FormControlLabel
-                              value="true"
-                              control={<Radio />}
-                              label="Yes"
-                            />
-                            <FormControlLabel
-                              value="false"
-                              control={<Radio />}
-                              label="No"
-                            />
-                          </Box>
-                        </RadioGroup>
-                        <ErrorHelperText error={state.errors.admitted} />
+                      <div className="flex-1" id="admission_date-div">
+                        <DateInputField
+                          id="admission_date"
+                          label="Admission Date*"
+                          margin="dense"
+                          value={state.form.admission_date}
+                          disableFuture={true}
+                          onChange={(date) =>
+                            handleDateChange(date, "admission_date")
+                          }
+                          errors={state.errors.admission_date}
+                        />
                       </div>
                     </div>
-                    {!id && JSON.parse(state.form.admitted) ? (
-                      <>
-                        <div className="flex">
-                          <div className="flex-1" id="admission_date-div">
-                            <DateInputField
-                              id="admission_date"
-                              label="Admission Date*"
-                              margin="dense"
-                              value={state.form.admission_date}
-                              disableFuture={true}
-                              onChange={(date) =>
-                                handleDateChange(date, "admission_date")
-                              }
-                              errors={state.errors.admission_date}
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <InputLabel id="asset-type">Bed</InputLabel>
-                          <BedSelect
-                            name="bed"
-                            setSelected={setBed}
-                            selected={bed}
-                            errors=""
-                            multiple={false}
-                            margin="dense"
-                            // location={state.form.}
-                            facility={facilityId}
-                          />
-                        </div>
-                      </>
-                    ) : null}
+                    <div>
+                      <InputLabel id="asset-type">Bed</InputLabel>
+                      <BedSelect
+                        name="bed"
+                        setSelected={setBed}
+                        selected={bed}
+                        errors=""
+                        multiple={false}
+                        margin="dense"
+                        // location={state.form.}
+                        facility={facilityId}
+                      />
+                    </div>
                   </>
                 )}
               </div>
@@ -825,6 +828,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
+<<<<<<< HEAD
               <div className={twoColDiv}>
                 <div id="ip_no-div" className="w-1/2">
                   <InputLabel id="refered-label">IP number</InputLabel>
@@ -852,6 +856,51 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.test_id}
                   />
                 </div>
+=======
+              <div id="ip_no-div">
+                <InputLabel id="refered-label">IP number*</InputLabel>
+                <TextInputField
+                  name="ip_no"
+                  variant="outlined"
+                  margin="dense"
+                  type="string"
+                  InputLabelProps={{ shrink: !!state.form.ip_no }}
+                  value={state.form.ip_no}
+                  onChange={handleChange}
+                  errors={state.errors.ip_no}
+                  required
+                />
+              </div>
+              <div id="test_id-div">
+                <InputLabel id="refered-label">State Test ID</InputLabel>
+                <TextInputField
+                  name="test_id"
+                  variant="outlined"
+                  margin="dense"
+                  type="string"
+                  InputLabelProps={{ shrink: !!state.form.test_id }}
+                  value={state.form.test_id}
+                  onChange={handleChange}
+                  errors={state.errors.test_id}
+                />
+              </div>
+              <div id="verified_by-div">
+                <InputLabel id="exam-details-label">Verified By</InputLabel>
+                <MultilineInputField
+                  rows={3}
+                  name="verified_by"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Attending Doctors Name and Designation"
+                  InputLabelProps={{
+                    shrink: !!state.form.verified_by,
+                  }}
+                  value={state.form.verified_by}
+                  onChange={handleChange}
+                  errors={state.errors.verified_by}
+                />
+>>>>>>> develop
               </div>
               <div className={twoColDiv}>
                 <div id="verified_by-div" className="w-1/2">
@@ -1095,6 +1144,18 @@ export const ConsultationForm = (props: any) => {
           </form>
         </div>
       </div>
+      {!id ? null : (
+        <div className="mt-4 bg-white rounded shadow p-4">
+          <h3>Update Bed</h3>
+          <CardContent>
+            <Beds
+              facilityId={facilityId}
+              patientId={patientId}
+              consultationId={id}
+            ></Beds>
+          </CardContent>
+        </div>
+      )}
     </div>
   );
 };

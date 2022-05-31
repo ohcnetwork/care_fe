@@ -1,13 +1,5 @@
-import {
-  useRedirect,
-  useRoutes,
-  navigate,
-  usePath,
-  Link,
-  Redirect,
-} from "raviger";
+import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../Components/Facility/TreatmentSummary";
@@ -54,7 +46,6 @@ import Investigation from "../Components/Facility/Investigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import AssetCreate from "../Components/Facility/AssetCreate";
-import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
@@ -74,9 +65,9 @@ import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 
-const get = require("lodash.get");
+// const get = require("lodash.get");
 
-const img = process.env.REACT_APP_LIGHT_LOGO;
+// const img = process.env.REACT_APP_LIGHT_LOGO;
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
 const routes = {
@@ -139,7 +130,7 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/notes/": ({
+  "/facility/:facilityId/patient/:patientId/notes": ({
     facilityId,
     patientId,
   }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
@@ -371,7 +362,7 @@ const routes = {
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
-    ({ facilityId, patientId, consultationId }: any) => (
+    ({ patientId, consultationId }: any) => (
       <TreatmentSummary
         consultationId={consultationId}
         patientId={patientId}
@@ -400,7 +391,8 @@ const routes = {
   ),
 };
 
-let menus = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const menus = [
   {
     title: "Facilities",
     link: "/facility",
@@ -463,15 +455,17 @@ let menus = [
   },
 ];
 
-const AppRouter = (props: any) => {
+export default function AppRouter() {
   useRedirect("/", "/facility");
   useRedirect("/teleicu", "/teleicu/facility");
+  useRedirect("/user", "/users");
   const pages = useRoutes(routes);
   const path = usePath();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const pageContainer = window.document.getElementById("pages");
+    pageContainer?.scroll(0, 0);
   }, [path]);
 
   return (
@@ -479,9 +473,9 @@ const AppRouter = (props: any) => {
       <SideBar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       <div className="flex flex-col w-full flex-1 overflow-hidden">
-        <div className="flex md:hidden relative z-10 flex-shrink-0 h-16 bg-white shadow">
+        <div className="flex md:hidden relative z-10 shrink-0 h-16 bg-white shadow">
           <button
-            onClick={(_) => setIsSidebarOpen(true)}
+            onClick={() => setIsSidebarOpen(true)}
             className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:bg-gray-100 focus:text-gray-600 md:hidden"
             aria-label="Open sidebar"
           >
@@ -516,5 +510,4 @@ const AppRouter = (props: any) => {
       </div>
     </div>
   );
-};
-export default withTranslation()(AppRouter);
+}

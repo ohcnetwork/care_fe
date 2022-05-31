@@ -82,7 +82,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     ""
   )}`;
   const path = usePath();
-  const url = path.split("/");
+  const url = path.replaceAll("/", "");
 
   const active = menus.reduce((acc, menu) => {
     const tag = menu.link.replaceAll("/", "");
@@ -147,12 +147,12 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     >
       <div
         className={clsx(
-          "overflow-hidden transition-all duration-300",
+          "flex flex-col overflow-hidden transition-all duration-300 h-full",
           expanded ? "w-64" : "w-14"
         )}
       >
         <div className="flex items-center justify-between">
-          <Link href="/" className="block flex-shrink-0 w-28">
+          <Link href="/" className="block shrink-0 w-28">
             <img
               className="m-2 p-2 h-10 w-auto transition"
               src={expanded ? LOGO : LOGO_COLLAPSE}
@@ -173,6 +173,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               <Link
                 key={item.title}
                 href={item.link}
+                onClick={() => isMobile && setIsOpen(false)}
                 className={clsx(
                   "flex justify-items-start items-center overflow-hidden w-10 py-1 my-1 hover:bg-primary-700 hover:text-white rounded transition-all duration-300",
                   active === item.link.replaceAll("/", "")
@@ -181,7 +182,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
                   expanded && "w-60"
                 )}
               >
-                <div className="flex-shrink-0 flex items-center justify-center w-10 h-8">
+                <div className="shrink-0 flex items-center justify-center w-10 h-8">
                   <i className={clsx(item.icon, "text-lg")}></i>
                 </div>
                 {
@@ -197,19 +198,23 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               </Link>
             );
           })}
-          <NotificationsList expanded={expanded} />
+          <NotificationsList
+            expanded={expanded}
+            onClickCB={() => setIsOpen(false)}
+          />
 
           <a
             key="dashboard"
             href={process.env.REACT_APP_DASHBOARD_URL}
             target="_blank"
             rel="noreferrer"
+            onClick={() => isMobile && setIsOpen(false)}
             className={clsx(
               "flex justify-items-start items-center overflow-hidden w-10 py-1 my-1 hover:bg-primary-700 hover:text-white rounded transition-all duration-300 text-primary-300",
               expanded && "w-60"
             )}
           >
-            <div className="flex-shrink-0 flex items-center justify-center w-10 h-9">
+            <div className="shrink-0 flex items-center justify-center w-10 h-9">
               <i className={clsx("fas fa-tachometer-alt", "text-lg")}></i>
             </div>
 
@@ -226,11 +231,11 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
 
         <div
           className={clsx(
-            "fixed bottom-0 flex flex-no-wrap items-center ml-2 overflow-hidden transition-all duration-300 py-4",
+            "flex flex-no-wrap items-center ml-2 overflow-hidden transition-all duration-300 py-4",
             expanded ? "w-60" : "w-10"
           )}
         >
-          <div className="flex-shrink-0 flex items-center justify-center w-10">
+          <div className="shrink-0 flex items-center justify-center w-10">
             <div className="flex items-center justify-center bg-white rounded-full w-8 h-8">
               <i className="block fas fa-user text-base text-primary-800"></i>
             </div>

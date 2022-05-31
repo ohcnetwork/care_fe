@@ -5,12 +5,14 @@ import en from "./Locale/en";
 import ta from "./Locale/ta";
 import ml from "./Locale/ml";
 import mr from "./Locale/mr";
+import kn from "./Locale/kn";
 
 const resources = {
   en: { translation: en },
   ta: { translation: ta },
   ml: { translation: ml },
   mr: { translation: mr },
+  kn: { translation: kn },
 };
 
 i18n

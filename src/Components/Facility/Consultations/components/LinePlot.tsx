@@ -4,7 +4,7 @@ export const LinePlot = (props: any) => {
   const { title, name, xData, yData, low = null, high = null } = props;
   let generalOptions = {
     title: {
-      text: `${title} [ {0|${yData[yData.length - 1] || "NA"}} ]`,
+      text: `${title} [ {0|${yData[yData.length - 1]?.toFixed(2) || "NA"}} ]`,
       textStyle: {
         fontSize: 20,
         rich: {
