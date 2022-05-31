@@ -17,6 +17,7 @@ import { InputSearchBox } from "../Common/SearchBox";
 import { FacilityModel } from "../Facility/models";
 
 import { IconButton, CircularProgress } from "@material-ui/core";
+import CloseIcon from "@material-ui/icons/Close";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
@@ -24,7 +25,6 @@ import classNames from "classnames";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
-import ClosingTag from "../Common/ClosingTag";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -268,7 +268,7 @@ export default function ManageUsers() {
                   disabled={isFacilityLoading}
                   onClick={() => removeFacility(username, facility)}
                 >
-                  <ClosingTag />
+                  <CloseIcon />
                 </IconButton>
               </div>
             </div>
@@ -311,7 +311,10 @@ export default function ManageUsers() {
     users.length &&
     (userList = users.map((user: any) => {
       return (
-        <div key={`usr_${user.id}`} className="w-full md:w-1/3 mt-6 md:px-4">
+        <div
+          key={`usr_${user.id}`}
+          className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
+        >
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
