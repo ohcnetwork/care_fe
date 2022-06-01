@@ -27,7 +27,7 @@ export default function ExternalResultUpload() {
   // for disabling save button once clicked
   const [loading, setLoading] = useState(false);
   const [csvData, setCsvData] = useState(new Array<any>());
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<any>([]);
   const initalState = { loading: false, lsgs: new Array<any>() };
   const [state, setState] = useState(initalState);
   const handleForce = (data: any, fileInfo: any) => {
@@ -69,12 +69,12 @@ export default function ExternalResultUpload() {
     };
 
     if (valid) {
-      setErrors({});
+      setErrors([]);
       dispatch(externalResultUploadCsv(data)).then((resp: any) => {
         if (resp && resp.status === 202) {
           navigate("/external_results");
         } else {
-          setErrors(resp.data);
+          setErrors(resp.data.map((err: any) => Object.entries(err)));
         }
         setLoading(false);
       });
@@ -105,11 +105,8 @@ export default function ExternalResultUpload() {
                     className="mt-4 ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     href="https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/export?format=csv&id=17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE"
                   >
-                    <i
-                      className="fa fa-download mr-0 md:mr-1"
-                      aria-hidden="true"
-                    ></i>{" "}
-                    <span className="md:block hidden">Sample Format</span>
+                    <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
+                    <span>Sample Format</span>
                   </a>
                 </div>
               </div>
@@ -123,20 +120,16 @@ export default function ExternalResultUpload() {
                   <div className="p-2 mr-2 md:w-1/3">{data.name}</div>
 
                   <div className="p-2 mr-2">
-                    {errors && errors[index + 1] && (
-                      <div>
-                        {Object.keys(errors[index + 1]).map(
-                          (data: any, index: number) => {
-                            return (
-                              <div key={index}>
-                                {_.startCase(_.camelCase(data))} -{" "}
-                                {errors[index + 1] && errors[index + 1][data]}
-                              </div>
-                            );
-                          }
-                        )}
-                      </div>
-                    )}
+                    {errors && errors.length !== 0
+                      ? errors.map((error: any) => {
+                          return (
+                            <div key={error[0][0]}>
+                              {_.startCase(_.camelCase(error[0][0]))} -{" "}
+                              {error[0][1]}
+                            </div>
+                          );
+                        })
+                      : null}
                   </div>
                   {/* <div>
                       {
