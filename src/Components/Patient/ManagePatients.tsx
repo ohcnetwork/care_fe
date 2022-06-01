@@ -468,6 +468,16 @@ export const PatientManager = (props: any) => {
       });
   };
 
+  const showReviewAlert = (patient: any) => {
+    return (
+      patient.review_time &&
+      !patient.last_consultation?.discharge_date &&
+      moment(patient.review_time).isAfter(
+        patient.last_consultation?.last_daily_round?.modified_date
+      )
+    );
+  };
+
   let patientList: any[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
@@ -525,23 +535,22 @@ export const PatientManager = (props: any) => {
                   <span className="text-xs ml-2">
                     Updated at: {moment(patient.modified_date).format("lll")}
                   </span>
-                  {patient.review_time &&
-                    !patient.last_consultation?.discharge_date && (
-                      <span
-                        className={
-                          "m-1 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
-                          (moment().isBefore(patient.review_time)
-                            ? " bg-gray-100"
-                            : "rounded p-1 bg-red-400 text-white")
-                        }
-                      >
-                        <i className="mr-2 text-md fas fa-clock"></i>
-                        {(moment().isBefore(patient.review_time)
-                          ? "Review at: "
-                          : "Review Missed: ") +
-                          moment(patient.review_time).format("lll")}
-                      </span>
-                    )}
+                  {showReviewAlert(patient) && (
+                    <span
+                      className={
+                        "m-1 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
+                        (moment().isBefore(patient.review_time)
+                          ? " bg-gray-100"
+                          : "rounded p-1 bg-red-400 text-white")
+                      }
+                    >
+                      <i className="mr-2 text-md fas fa-clock"></i>
+                      {(moment().isBefore(patient.review_time)
+                        ? "Review at: "
+                        : "Review Missed: ") +
+                        moment(patient.review_time).format("lll")}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
