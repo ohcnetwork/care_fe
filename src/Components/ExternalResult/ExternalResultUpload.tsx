@@ -16,6 +16,7 @@ import {
 } from "../Common/HelperInputFields";
 import { ExternalResultLocalbodySelector } from "./ExternalResultLocalbodySelector";
 import StateManager from "react-select";
+import _ from "lodash";
 const get = require("lodash.get");
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -71,11 +72,11 @@ export default function ExternalResultUpload() {
       setErrors({});
       dispatch(externalResultUploadCsv(data)).then((resp: any) => {
         if (resp && resp.status === 202) {
-          setLoading(false);
           navigate("/external_results");
         } else {
           setErrors(resp.data);
         }
+        setLoading(false);
       });
     }
   };
@@ -90,21 +91,25 @@ export default function ExternalResultUpload() {
       <div className="max-w-3xl mx-auto mt-6">
         <div className="p-4 ">
           <div className="block text-sm leading-5 font-medium text-gray-700 sm:mt-px sm:pt-2">
-            <div className="mt-2 sm:mt-0 sm:col-span-2">
+            <div className="mt-2 sm:mt-0 sm:col-span-2 my-2">
               <div className="mx-auto max-w-lg flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                 <div className="text-center">
                   <CSVReader
+                    cssLabelClass="block text-sm leading-5 font-medium text-gray-700 pb-4 px-4"
                     cssClass="react-csv-input"
                     label="Select a CSV file in the specified format"
                     onFileLoaded={handleForce}
                     parserOptions={papaparseOptions}
                   />
                   <a
-                    className="mt-2 text-xs font-light"
-                    href="https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/edit?usp=sharing"
-                    target="blank"
+                    className="mt-4 ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    href="https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/export?format=csv&id=17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE"
                   >
-                    Sample Format
+                    <i
+                      className="fa fa-download mr-0 md:mr-1"
+                      aria-hidden="true"
+                    ></i>{" "}
+                    <span className="md:block hidden">Sample Format</span>
                   </a>
                 </div>
               </div>
@@ -124,7 +129,7 @@ export default function ExternalResultUpload() {
                           (data: any, index: number) => {
                             return (
                               <div key={index}>
-                                {data} -{" "}
+                                {_.startCase(_.camelCase(data))} -{" "}
                                 {errors[index + 1] && errors[index + 1][data]}
                               </div>
                             );
@@ -146,7 +151,7 @@ export default function ExternalResultUpload() {
           <div className="mt-2">
             <button
               disabled={loading}
-              className="btn btn-primary"
+              className="block btn btn-primary mx-auto"
               onClick={handleSubmit}
             >
               Save

@@ -347,14 +347,6 @@ export default function ResultList() {
         )}
       </>
     );
-  } else if (data && data.length === 0) {
-    manageResults = (
-      <Grid item xs={12} md={12}>
-        <Grid container justify="center" alignItems="center">
-          <h5> No Results Found</h5>
-        </Grid>
-      </Grid>
-    );
   }
 
   return (
@@ -492,32 +484,38 @@ export default function ResultList() {
         )}
         {badge("SRF ID", qParams.srf_id, "srf_id")}
       </div>
-      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead>
-            <tr>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                Test Type
-              </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wide">
-                Status
-              </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                Result Date
-              </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                Create Patient
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {manageResults}
-          </tbody>
-        </table>
-      </div>
+      {data ? (
+        data.length === 0 ? (
+          <h5 className="text-center"> No Results Found</h5>
+        ) : (
+          <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                    Test Type
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wide">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                    Result Date
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                    Create Patient
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {manageResults}
+              </tbody>
+            </table>
+          </div>
+        )
+      ) : null}
       <CSVLink
         data={downloadFile}
         filename={`external-result--${now}.csv`}
