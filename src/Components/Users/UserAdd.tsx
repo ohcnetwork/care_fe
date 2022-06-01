@@ -551,7 +551,7 @@ export const UserAdd = (props: UserProps) => {
                 <CheckboxField
                   checked={phoneIsWhatsApp}
                   onChange={(_, checked) => {
-                    setPhoneIsWhatsApp(!phoneIsWhatsApp);
+                    setPhoneIsWhatsApp(checked);
                     !checked && handleValueChange("+91", "alt_phone_number");
                   }}
                   label="Is the phone number a WhatsApp number?"
