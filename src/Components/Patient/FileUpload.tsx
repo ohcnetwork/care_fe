@@ -737,9 +737,13 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={true}
         breadcrumbs={false}
       />
-      {uploadedFiles &&
-        uploadedFiles.length > 0 &&
-        uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))}
+      {uploadedFiles && uploadedFiles.length > 0 ? (
+        uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))
+      ) : (
+        <div className="font-bold text-gray-500 text-3xl flex justify-center items-center">
+          {"No Data Found"}
+        </div>
+      )}
       {totalCount > limit && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination
