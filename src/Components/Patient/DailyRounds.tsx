@@ -9,6 +9,7 @@ import {
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
+import moment from "moment";
 import loadable from "@loadable/component";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -108,6 +109,7 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [prevReviewTime, setPreviousReviewTime] = useState("");
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
@@ -150,6 +152,7 @@ export const DailyRounds = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setPreviousReviewTime(res.data.review_time);
         }
       } else {
         setPatientName("");
@@ -440,6 +443,18 @@ export const DailyRounds = (props: any) => {
         );
       }
     }
+  };
+
+  const getExpectedReviewTime = () => {
+    if (Number(state.form.review_time))
+      return `Next Review at ${moment()
+        .add(state.form.review_time, "minutes")
+        .format("DD/MM/YYYY hh:mm A")}`;
+    if (prevReviewTime && moment().isBefore(prevReviewTime))
+      return `Next Review at ${moment(prevReviewTime).format(
+        "DD/MM/YYYY hh:mm A"
+      )}`;
+    return "No Reviews Planned!";
   };
 
   const toggleTemperature = () => {
@@ -740,12 +755,15 @@ export const DailyRounds = (props: any) => {
                         variant="standard"
                         value={state.form.review_time}
                         options={[
-                          { id: "", text: "select" },
+                          { id: 0, text: "select" },
                           ...REVIEW_AT_CHOICES,
                         ]}
                         onChange={handleChange}
                         errors={state.errors.review_time}
                       />
+                      <div className="text-gray-500 text-sm">
+                        {getExpectedReviewTime()}
+                      </div>
                     </div>
                     <div>
                       <CheckboxField
