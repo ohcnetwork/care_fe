@@ -9,7 +9,13 @@ export const StackedLinePlot = (props: any) => {
     name: x.name,
     type: "line",
     stack: x.name,
-    data: x.data,
+    data: x.data.map((d: any) =>
+      String(d).includes(".")
+        ? String(d).split(".")[1].length > 2
+          ? d.toFixed(2)
+          : d
+        : d
+    ),
     connectNulls: true,
   }));
 
