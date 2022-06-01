@@ -132,10 +132,10 @@ function FacillityFilter(props: any) {
           Apply
         </button>
       </div>
-      <div className="w-64 flex-none mt-2">
+      <div className="w-full flex-none mt-2">
         <div className="font-light text-md mt-2">Filter By:</div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">State</span>
           <div>
             {isStateLoading ? (
@@ -154,7 +154,7 @@ function FacillityFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">District</span>
           <div>
             {isDistrictLoading ? (
@@ -173,7 +173,7 @@ function FacillityFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Local Body</span>
           <div>
             <LocalBodySelect
@@ -186,7 +186,7 @@ function FacillityFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Facility type</span>
           <SelectField
             name="facility_type"
@@ -199,7 +199,7 @@ function FacillityFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">
             {KASP_STRING} Empanelled
           </span>
