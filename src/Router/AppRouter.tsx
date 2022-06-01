@@ -46,7 +46,6 @@ import Investigation from "../Components/Facility/Investigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import AssetCreate from "../Components/Facility/AssetCreate";
-import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
@@ -125,7 +124,7 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/notes/": ({
+  "/facility/:facilityId/patient/:patientId/notes": ({
     facilityId,
     patientId,
   }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
@@ -357,7 +356,7 @@ const routes = {
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
-    ({ facilityId, patientId, consultationId }: any) => (
+    ({ patientId, consultationId }: any) => (
       <TreatmentSummary
         facilityId={facilityId}
         consultationId={consultationId}
@@ -387,15 +386,17 @@ const routes = {
   ),
 };
 
-const AppRouter = () => {
+export default function AppRouter() {
   useRedirect("/", "/facility");
   useRedirect("/teleicu", "/teleicu/facility");
+  useRedirect("/user", "/users");
   const pages = useRoutes(routes) || <Error404 />;
   const path = usePath();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const pageContainer = window.document.getElementById("pages");
+    pageContainer?.scroll(0, 0);
   }, [path]);
 
   return (
@@ -403,9 +404,9 @@ const AppRouter = () => {
       <SideBar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       <div className="flex flex-col w-full flex-1 overflow-hidden">
-        <div className="flex md:hidden relative z-10 flex-shrink-0 h-16 bg-white shadow">
+        <div className="flex md:hidden relative z-10 shrink-0 h-16 bg-white shadow">
           <button
-            onClick={(_) => setIsSidebarOpen(true)}
+            onClick={() => setIsSidebarOpen(true)}
             className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:bg-gray-100 focus:text-gray-600 md:hidden"
             aria-label="Open sidebar"
           >
@@ -440,5 +441,4 @@ const AppRouter = () => {
       </div>
     </div>
   );
-};
-export default withTranslation()(AppRouter);
+}

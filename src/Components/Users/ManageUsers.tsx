@@ -16,7 +16,7 @@ import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { InputSearchBox } from "../Common/SearchBox";
 import { FacilityModel } from "../Facility/models";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
-import { IconButton } from "@material-ui/core";
+import { IconButton, CircularProgress } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
@@ -310,12 +310,12 @@ export default function ManageUsers() {
                       {user.username}
                     </div>
                   )}
-                  <div className="flex-shrink-0 text-sm text-gray-600 mt-2 min-width-50">
+                  <div className="shrink-0 text-sm text-gray-600 mt-2 min-width-50">
                     Last Online:{" "}
                     <span
                       aria-label="Online"
                       className={
-                        "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
+                        "shrink-0 inline-block h-2 w-2 rounded-full " +
                         (moment()
                           .subtract(5, "minutes")
                           .isBefore(user.last_login)
@@ -409,7 +409,7 @@ export default function ManageUsers() {
               {showDelete(user) && (
                 <button
                   type="button"
-                  className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:shadow-outline-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                  className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                   onClick={() => handleDelete(user)}
                 >
                   Delete
@@ -475,9 +475,16 @@ export default function ManageUsers() {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Users
               </dt>
-              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                {totalCount}
-              </dd>
+              {/* Show spinner until count is fetched from server */}
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
             </dl>
           </div>
         </div>
