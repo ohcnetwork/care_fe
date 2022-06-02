@@ -1507,16 +1507,18 @@ export const PatientHome = (props: any) => {
                   </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
-                    onClick={handleDischageClickOpen}
+                    handleClickCB={handleDischageClickOpen}
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Discharge from CARE
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
                   <button
