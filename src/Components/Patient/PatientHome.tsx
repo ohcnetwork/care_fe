@@ -1497,12 +1497,14 @@ export const PatientHome = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
-                    onClick={handleClickOpen}
+                    handleClickCB={handleClickOpen}
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Discharge Summary
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
                   <button
