@@ -917,22 +917,24 @@ export const PatientHome = (props: any) => {
                   </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !consultationListData ||
                       !consultationListData.length ||
                       !patientData.is_active
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       handlePatientTransfer(!patientData.allow_transfer)
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     <i className="fas fa-lock mr-2" />
                     {patientData.allow_transfer
                       ? "Disable Transfer"
                       : "Allow Transfer"}
-                  </button>
+                  </RoleButton>
                 </div>
               </div>
             </div>
