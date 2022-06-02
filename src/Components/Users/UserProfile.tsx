@@ -329,7 +329,7 @@ export default function UserProfile() {
             {!showEdit && (
               <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
                 <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Username
                     </dt>
@@ -337,7 +337,7 @@ export default function UserProfile() {
                       {details.username || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Contact No
                     </dt>
@@ -346,7 +346,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
 
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Whatsapp No
                     </dt>
@@ -354,7 +354,7 @@ export default function UserProfile() {
                       {details.alt_phone_number || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Email address
                     </dt>
@@ -362,7 +362,7 @@ export default function UserProfile() {
                       {details.email || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       First Name
                     </dt>
@@ -370,7 +370,7 @@ export default function UserProfile() {
                       {details.first_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Last Name
                     </dt>
@@ -378,7 +378,7 @@ export default function UserProfile() {
                       {details.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Age
                     </dt>
@@ -386,30 +386,30 @@ export default function UserProfile() {
                       {details.age || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Verification Status
                     </dt>
                     {details.verified && (
-                      <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-white">
+                      <dd className="mt-2 mb-1 badge badge-pill badge-primary text-sm leading-5 text-white">
                         Verified
                       </dd>
                     )}
                     {!details.verified && (
-                      <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      <dd className="mt-2 mb-1 text-sm leading-5 text-gray-900">
                         Not Verified
                       </dd>
                     )}
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Access Level
                     </dt>
-                    <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-white">
+                    <dd className="mt-2 mb-1 badge badge-pill badge-primary text-sm leading-5 text-white">
                       {details.user_type || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Gender
                     </dt>
@@ -417,7 +417,7 @@ export default function UserProfile() {
                       {details.gender || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       Local Body
                     </dt>
@@ -425,7 +425,7 @@ export default function UserProfile() {
                       {details.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       District
                     </dt>
@@ -433,7 +433,7 @@ export default function UserProfile() {
                       {details.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
+                  <div className="sm:col-span-1 mb-2">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       State
                     </dt>
