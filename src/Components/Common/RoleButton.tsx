@@ -3,19 +3,9 @@ import { useSelector } from "react-redux";
 import Button from "@material-ui/core/Button";
 import { ButtonProps } from "@material-ui/core/Button";
 
-// role types to manage button disable functionality
-// readOnly = all user types with read only access
 export type roleType = "readOnly";
-
-// render different buttons
 export type buttonType = "html" | "materialUI";
 
-/*
-Component to render button "enable" or "disable" based
-on user role
-*/
-
-// Decide whether to disable button or not
 const getDisableButton: (userType: string, disableFor: roleType) => boolean = (
   userType,
   disableFor
