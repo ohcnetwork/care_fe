@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { GENDER } from "../../../Common/constants";
 import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
@@ -6,6 +6,7 @@ import { RightArrowIcon } from "../Icons/ArrowIcon";
 import { Modal } from "@material-ui/core";
 import Beds from "../../Facility/Consultations/Beds";
 import { useState } from "react";
+import { RoleButton } from "../../Common/RoleButton";
 
 export interface ITeleICUPatientInfoCardProps {
   patient: PatientModel;
@@ -113,10 +114,16 @@ export default function TeleICUPatientInfoCard({
             ["update", "Edit Consultation Details", "pencil-alt"],
             ["daily-rounds", "Log Update", "plus"],
           ].map((action, i) => (
-            <Link
+            <RoleButton
               key={i}
-              href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/${action[0]}`}
-              className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+              handleClickCB={() =>
+                navigate(
+                  `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/${action[0]}`
+                )
+              }
+              className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 disabled:bg-gray-200 active:translate-y-1 disabled:translate-y-0 transform"
+              disableFor="readOnly"
+              buttonType="html"
             >
               <p className="text-sm sm:text-base px-2 font-semibold">
                 {action[1]}
@@ -124,7 +131,7 @@ export default function TeleICUPatientInfoCard({
               <span>
                 <i className={`fas fa-${action[2]} mr-2`}></i>
               </span>
-            </Link>
+            </RoleButton>
           ))}
         <Link
           href={`/patient/${patient.id}/investigation_reports`}
