@@ -13,7 +13,7 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
 
   console.log(patient);
   return (
-    <section className="flex items-start lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
+    <section className="flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
       <Modal open={open} onClose={() => setOpen(false)}>
         <div className="bg-white md:w-4/5 p-4 mx-auto ">
           {patient?.facility &&
