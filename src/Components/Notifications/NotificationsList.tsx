@@ -57,9 +57,9 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
       const res = await dispatch(getUserPnconfig({ username: username }));
       const reg = await navigator.serviceWorker.ready;
       const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res.data.pf_endpoint) {
+      if (!subscription && !res?.data?.pf_endpoint) {
         setIsSubscribed("NotSubscribed");
-      } else if (subscription?.endpoint === res.data.pf_endpoint) {
+      } else if (subscription?.endpoint === res?.data?.pf_endpoint) {
         setIsSubscribed("SubscribedOnThisDevice");
       } else {
         setIsSubscribed("SubscribedOnAnotherDevice");
@@ -115,18 +115,18 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
                 setIsSubscribed("NotSubscribed");
                 setIsSubscribing(false);
               })
-              .catch(function (_e) {
+              .catch(function (error) {
                 Error({
-                  msg: "Unsubscribe failed.",
+                  msg: `Unsubscribe failed - ${error}`,
                 });
               });
           })
-          .catch(function (_e) {
-            Error({ msg: "Subscription Error" });
+          .catch(function (error) {
+            Error({ msg: `Subscription Error - ${error}` });
           });
       })
-      .catch(function (_e) {
-        Error({ msg: "Service Worker Error" });
+      .catch(function (error) {
+        Error({ msg: `Service Worker Error - ${error}` });
       });
   };
 
