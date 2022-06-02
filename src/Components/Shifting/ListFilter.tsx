@@ -265,7 +265,7 @@ export default function ListFilter(props: any) {
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
         {props.showShiftingStatus && (
-          <div className="w-64 flex-none">
+          <div className="w-full flex-none">
             <span className="text-sm font-semibold">Status</span>
             <SelectField
               name="status"
@@ -279,7 +279,7 @@ export default function ListFilter(props: any) {
             />
           </div>
         )}
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Origin facility</span>
           <div className="">
             {isOriginLoading ? (
@@ -297,7 +297,7 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">
             Shifting approving facility
           </span>
@@ -319,7 +319,7 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Assigned facility</span>
           <div className="">
             {isAssignedLoading ? (
@@ -337,7 +337,7 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Assigned To</span>
           <div className="">
             {isAssignedUserLoading ? (
@@ -367,7 +367,7 @@ export default function ListFilter(props: any) {
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
         </div> */}
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Ordering</span>
           <SelectField
             name="ordering"
@@ -382,7 +382,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Is emergency case</span>
           <SelectField
             name="emergency"
@@ -397,7 +397,7 @@ export default function ListFilter(props: any) {
         </div>
 
         {KASP_ENABLED && (
-          <div className="w-64 flex-none">
+          <div className="w-full flex-none">
             <span className="text-sm font-semibold">Is {KASP_STRING}</span>
             <SelectField
               name="is_kasp"
@@ -412,7 +412,7 @@ export default function ListFilter(props: any) {
           </div>
         )}
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Is upshift case</span>
           <SelectField
             name="is_up_shift"
@@ -426,7 +426,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Disease Status</span>
           <SelectField
             name="disease_status"
@@ -440,7 +440,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Is Antenatal</span>
           <SelectField
             name="is_antenatal"
@@ -454,7 +454,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Breathlessness Level</span>
           <SelectField
             name="breathlessness_level"
@@ -468,7 +468,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Patient Phone Number</span>
           <TextInputField
             name="patient_phone_number"
@@ -480,7 +480,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <DateRangePicker
             startDate={getDate(filterState.created_date_after)}
             endDate={getDate(filterState.created_date_before)}

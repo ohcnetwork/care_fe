@@ -15,7 +15,7 @@ import {
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import Pagination from "../Common/Pagination";
-import { Modal, Button } from "@material-ui/core";
+import { Modal, Button, CircularProgress } from "@material-ui/core";
 
 import { limit, formatFilter } from "./Commons";
 
@@ -34,6 +34,8 @@ export default function ListView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -52,9 +54,13 @@ export default function ListView() {
   }, []);
 
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById("shiftRequests-ALL")?.click();
   };
@@ -172,7 +178,7 @@ export default function ListView() {
                 </div>
                 <div>
                   {shift.emergency && (
-                    <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                    <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
                       Emergency
                     </span>
                   )}
@@ -351,10 +357,14 @@ export default function ListView() {
           title={"Shifting"}
           hideBack={true}
           componentRight={
-            <GetAppIcon
-              className="cursor-pointer mt-2 ml-2"
-              onClick={triggerDownload}
-            />
+            downloadLoading ? (
+              <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
+            ) : (
+              <GetAppIcon
+                className="cursor-pointer mt-2 ml-2"
+                onClick={triggerDownload}
+              />
+            )
           }
           breadcrumbs={false}
         />

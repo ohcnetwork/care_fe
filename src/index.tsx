@@ -8,7 +8,9 @@ import thunk from "redux-thunk";
 import { Provider } from "react-redux";
 import * as Sentry from "@sentry/browser";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
-require("./style/index.css");
+
+import "./style/index.css";
+
 const store = createStore(reducer, applyMiddleware(thunk));
 Sentry.init({
   environment: process.env.NODE_ENV,

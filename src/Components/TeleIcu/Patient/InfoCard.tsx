@@ -36,7 +36,7 @@ export default function TeleICUPatientInfoCard({
       <div className="bg-white border-b p-5 flex items-center lg:w-7/12 w-full">
         {patient.blood_group && (
           <div className="flex flex-col items-center ">
-            <div className="text-2xl border border-cool-gray-300 rounded-full font-semibold items-center m-2 h-20 w-20 flex justify-center">
+            <div className="text-2xl border border-gray-300 rounded-full font-semibold items-center m-2 h-20 w-20 flex justify-center">
               {patient.blood_group === "UNKNOWN" ? "?" : patient.blood_group}
             </div>
             <span className="font-light text-primary-600 text-xs mr-1">
@@ -61,7 +61,7 @@ export default function TeleICUPatientInfoCard({
           <div className="text-sm flex flex-wrap items-center">
             {!patient.last_consultation?.current_bed ? (
               <button
-                className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
+                className="btn btn-primary text-sm p-2"
                 onClick={() => setOpen(true)}
               >
                 Assign Bed
@@ -72,14 +72,14 @@ export default function TeleICUPatientInfoCard({
                   {patient.last_consultation?.current_bed?.bed_object?.name}
                 </span>
                 <button
-                  className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
+                  className="btn btn-primary text-sm p-2"
                   onClick={() => setOpen(true)}
                 >
                   Switch Bed
                 </button>
               </div>
             )}
-            {patient.last_consultation?.weight && (
+            {(patient.last_consultation?.weight || false) && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Weight
@@ -89,7 +89,7 @@ export default function TeleICUPatientInfoCard({
                 </span>
               </div>
             )}
-            {patient.last_consultation?.height && (
+            {(patient.last_consultation?.height || false) && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Height

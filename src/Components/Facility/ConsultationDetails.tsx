@@ -167,22 +167,22 @@ export const ConsultationDetails = (props: any) => {
     }`;
 
   return (
-    <div>
+    <div className="relative">
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap">
           <PageTitle
-            title="Patient Dashboard"
+            title="Patient Details"
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
-          <div className="flex items-start justify-start sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+          <div className="lg:absolute right-0 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
               <div className="px-2">
                 <button
                   onClick={() => setShowDoctors(true)}
                   className="btn m-1 btn-primary hover:text-white"
                 >
-                  Doctor Video
+                  Doctor Connect
                 </button>
                 {patientData.last_consultation?.id && (
                   <Link
@@ -214,7 +214,11 @@ export const ConsultationDetails = (props: any) => {
           <div className="border rounded-lg bg-white shadow h-full text-black p-4 w-full">
             <div>
               <div className="flex md:flex-row flex-col md:items-center">
-                <div className="text-sm md:mt-2 md:pl-2">
+                <div className="text-2xl md:mt-2 font-semibold">
+                  <i
+                    className="text-gray-500 fas fa-hospital text-2xl"
+                    aria-hidden="true"
+                  ></i>{" "}
                   {consultationData.facility_name}
                 </div>
               </div>
@@ -655,13 +659,13 @@ export const ConsultationDetails = (props: any) => {
                           {consultationData.discharge_advice.map(
                             (med: any, index: number) => (
                               <tr className="bg-white" key={index}>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
                                   {med.medicine}
                                 </td>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                   {med.dosage}
                                 </td>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                   {med.days}
                                 </td>
                               </tr>
