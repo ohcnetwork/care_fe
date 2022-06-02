@@ -356,7 +356,7 @@ const routes = {
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
-    ({ patientId, consultationId }: any) => (
+    ({ facilityId, patientId, consultationId }: any) => (
       <TreatmentSummary
         facilityId={facilityId}
         consultationId={consultationId}
