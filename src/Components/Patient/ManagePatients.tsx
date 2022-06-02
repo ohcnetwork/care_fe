@@ -37,6 +37,7 @@ import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { FacilityModel } from "../Facility/models";
+import { RoleButton } from "../Common/RoleButton";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -774,20 +775,21 @@ export const PatientManager = (props: any) => {
                 </svg>
                 <span>Advanced Filters</span>
               </button>
-              <button
+              <RoleButton
                 className="btn-primary btn md:mt-7 w-full md:w-fit"
-                onClick={() => {
+                handleClickCB={() => {
                   if (facilityId) {
                     navigate(`/facility/${facilityId}/patient`);
                   } else {
                     setShowDialog(true);
                   }
                 }}
-                data-testid="add-patient-button"
+                disableFor="readOnly"
+                buttonType="html"
               >
                 <i className="fas fa-plus mr-2 text-white"></i>
                 Add Details of a Patient
-              </button>
+              </RoleButton>
             </div>
           </div>
           <div>
