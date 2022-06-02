@@ -65,6 +65,10 @@
   }
 }
 
+.MuiInputBase-input:focus {
+  @apply ring-0 !important
+}
+
 .Mui-selected .MuiSvgIcon-root {
   color: #0085ad !important;
 }

@@ -420,14 +420,14 @@ export const ConsultationDetails = (props: any) => {
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
-          <div className="flex items-start justify-start sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+          <div className="lg:absolute right-0 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
               <div className="px-2">
                 <button
                   onClick={() => setShowDoctors(true)}
                   className="btn m-1 btn-primary hover:text-white"
                 >
-                  Doctor Video
+                  Doctor Connect
                 </button>
                 {patientData.last_consultation?.id && (
                   <Link
@@ -916,13 +916,13 @@ export const ConsultationDetails = (props: any) => {
                           {consultationData.discharge_advice.map(
                             (med: any, index: number) => (
                               <tr className="bg-white" key={index}>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
                                   {med.medicine}
                                 </td>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                   {med.dosage}
                                 </td>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                   {med.days}
                                 </td>
                               </tr>

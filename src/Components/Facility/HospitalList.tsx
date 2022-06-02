@@ -318,14 +318,20 @@ export const HospitalList = (props: any) => {
       facility: id,
       message: notifyMessage,
     };
-    const res = await dispatchAction(sendNotificationMessages(data));
-    if (res && res.status == 204) {
-      Notification.Success({
-        msg: "Facility Notified",
-      });
-      setModalFor(undefined);
+    if (data.message.trim().length >= 1) {
+      const res = await dispatchAction(sendNotificationMessages(data));
+      if (res && res.status == 204) {
+        Notification.Success({
+          msg: "Facility Notified",
+        });
+        setModalFor(undefined);
+      } else {
+        Notification.Error({ msg: "Something went wrong..." });
+      }
     } else {
-      Notification.Error({ msg: "Something went wrong..." });
+      Notification.Error({
+        msg: "Notification should contain atleast 1 character.",
+      });
     }
   };
 
@@ -503,7 +509,7 @@ export const HospitalList = (props: any) => {
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           onClick={() => navigate("/facility/create")}
         >
           <i className="fas fa-plus text-3xl"></i>
