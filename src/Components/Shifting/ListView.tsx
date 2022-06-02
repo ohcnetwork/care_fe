@@ -185,7 +185,7 @@ export default function ListView() {
                 </div>
               </div>
               <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
-                <div className="sm:col-span-1">
+                <div className="sm:col-span-1 mb-2">
                   <dt
                     title="Shifting status"
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
@@ -196,7 +196,7 @@ export default function ListView() {
                     </dd>
                   </dt>
                 </div>
-                <div className="sm:col-span-1">
+                <div className="sm:col-span-1 mb-2">
                   <dt
                     title="Phone Number"
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
@@ -207,7 +207,7 @@ export default function ListView() {
                     </dd>
                   </dt>
                 </div>
-                <div className="sm:col-span-1">
+                <div className="sm:col-span-1 mb-2">
                   <dt
                     title=" Origin facility"
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
@@ -218,7 +218,7 @@ export default function ListView() {
                     </dd>
                   </dt>
                 </div>
-                <div className="sm:col-span-1">
+                <div className="sm:col-span-1 mb-2">
                   <dt
                     title="Shifting approving facility"
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
@@ -229,7 +229,7 @@ export default function ListView() {
                     </dd>
                   </dt>
                 </div>
-                <div className="sm:col-span-1">
+                <div className="sm:col-span-1 mb-2">
                   <dt
                     title=" Assigned facility"
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
@@ -243,7 +243,7 @@ export default function ListView() {
                   </dt>
                 </div>
 
-                <div className="sm:col-span-1">
+                <div className="sm:col-span-1 mb-2">
                   <dt
                     title="  Last Modified"
                     className={
@@ -262,7 +262,7 @@ export default function ListView() {
                   </dt>
                 </div>
 
-                <div className="sm:col-span-1">
+                <div className="sm:col-span-1 mb-2">
                   <dt
                     title="Patient Address"
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
