@@ -977,7 +977,7 @@ export const PatientHome = (props: any) => {
                             )}
                           </div>
                         </div>
-                        <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+                        <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
                           <div className="sm:col-span-1">
                             <dt
                               title="Shifting status"
@@ -1480,7 +1480,7 @@ export const PatientHome = (props: any) => {
                     className="btn btn-primary w-full"
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/notes/`
+                        `/facility/${patientData?.facility}/patient/${id}/notes`
                       )
                     }
                   >
