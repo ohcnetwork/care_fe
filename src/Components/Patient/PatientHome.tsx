@@ -1467,20 +1467,22 @@ export const PatientHome = (props: any) => {
                   </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/sample-test`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Request Sample Test
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
                   <button
