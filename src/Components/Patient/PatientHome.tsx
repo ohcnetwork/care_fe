@@ -1521,13 +1521,14 @@ export const PatientHome = (props: any) => {
                   </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
-                    onClick={() => setOpenAssignVolunteerDialog(true)}
-                    disabled={false}
+                    handleClickCB={() => setOpenAssignVolunteerDialog(true)}
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Assign to a volunteer
-                  </button>
+                  </RoleButton>
                 </div>
               </div>
             </div>
