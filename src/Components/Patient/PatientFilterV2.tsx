@@ -434,7 +434,7 @@ export default function PatientFilterV2(props: any) {
           Apply
         </button>
       </div>
-      <div className="w-64 flex-none mt-2">
+      <div className="w-full flex-none mt-2">
         <span className="text-sm font-semibold">Ordering</span>
         <SelectField
           name="ordering"
@@ -450,7 +450,7 @@ export default function PatientFilterV2(props: any) {
       </div>
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">LSG body</span>
           <div className="">
             <AutoCompleteAsyncField
@@ -479,7 +479,7 @@ export default function PatientFilterV2(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">District</span>
           <DistrictSelect
             multiple={false}
@@ -491,7 +491,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Facility</span>
           <FacilitySelect
             multiple={false}
@@ -504,7 +504,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Facility type</span>
           <SelectField
             name="facility_type"
@@ -525,7 +525,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Gender</span>
           <SelectField
             name="gender"
@@ -538,7 +538,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Is Antenatal</span>
           <SelectField
             name="is_antenatal"
@@ -556,7 +556,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         {KASP_ENABLED && (
-          <div className="w-64 flex-none">
+          <div className="w-full flex-none">
             <span className="text-sm font-semibold">{KASP_STRING}</span>
             <SelectField
               name="is_kasp"
@@ -574,7 +574,7 @@ export default function PatientFilterV2(props: any) {
           </div>
         )}
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Category</span>
           <SelectField
             name="category"
@@ -587,7 +587,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Disease Status</span>
           <SelectField
             name="disease_status"
@@ -600,7 +600,7 @@ export default function PatientFilterV2(props: any) {
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Vaccinated</span>
           <SelectField
             name="number_of_doses"
@@ -612,7 +612,7 @@ export default function PatientFilterV2(props: any) {
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Declared</span>
           <SelectField
             name="is_declared_positive"
@@ -624,7 +624,7 @@ export default function PatientFilterV2(props: any) {
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Telemedicine</span>
           <SelectField
             name="last_consultation_is_telemedicine"
@@ -636,39 +636,43 @@ export default function PatientFilterV2(props: any) {
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">SRF ID</span>
           <div className="flex justify-between">
-            <TextInputField
-              id="srf_id"
-              name="srf_id"
-              variant="outlined"
-              margin="dense"
-              errors=""
-              value={filterState.srf_id}
-              onChange={handleChange}
-              label="Srf id"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-            />
+            <div className="w-full">
+              <TextInputField
+                id="srf_id"
+                name="srf_id"
+                variant="outlined"
+                margin="dense"
+                errors=""
+                value={filterState.srf_id}
+                onChange={handleChange}
+                label="Srf id"
+                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+              />
+            </div>
           </div>
         </div>
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">COWIN ID</span>
           <div className="flex justify-between">
-            <TextInputField
-              id="covin_id"
-              name="covin_id"
-              variant="outlined"
-              margin="dense"
-              errors=""
-              value={filterState.covin_id}
-              onChange={handleChange}
-              label="COWIN ID"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-            />
+            <div className="w-full">
+              <TextInputField
+                id="covin_id"
+                name="covin_id"
+                variant="outlined"
+                margin="dense"
+                errors=""
+                value={filterState.covin_id}
+                onChange={handleChange}
+                label="COWIN ID"
+                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+              />
+            </div>
           </div>
         </div>
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">
             Last Admitted to (Bed Type)
           </span>
@@ -680,7 +684,7 @@ export default function PatientFilterV2(props: any) {
             onChange={handleMultiSelectChange}
           />
         </div>
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <DateRangePicker
             startDate={getDate(filterState.date_of_result_after)}
             endDate={getDate(filterState.date_of_result_before)}
@@ -816,7 +820,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Age</span>
           <div className="flex justify-between">
             <TextInputField

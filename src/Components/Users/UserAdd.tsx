@@ -304,12 +304,9 @@ export const UserAdd = (props: UserProps) => {
   };
 
   useAbortableEffect(() => {
-    if (phoneIsWhatsApp) {
+    phoneIsWhatsApp &&
       handleValueChange(state.form.phone_number, "alt_phone_number");
-    } else {
-      handleValueChange("+91", "alt_phone_number"); // reset alt_phone_number
-    }
-  }, [phoneIsWhatsApp, state.form.phone_number, state.form.alt_phone_number]);
+  }, [phoneIsWhatsApp, state.form.phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
@@ -553,7 +550,10 @@ export const UserAdd = (props: UserProps) => {
                 />
                 <CheckboxField
                   checked={phoneIsWhatsApp}
-                  onChange={() => setPhoneIsWhatsApp(!phoneIsWhatsApp)}
+                  onChange={(_, checked) => {
+                    setPhoneIsWhatsApp(checked);
+                    !checked && handleValueChange("+91", "alt_phone_number");
+                  }}
                   label="Is the phone number a WhatsApp number?"
                   className="font-bold"
                 />
