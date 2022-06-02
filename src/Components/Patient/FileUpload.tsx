@@ -740,8 +740,10 @@ export const FileUpload = (props: FileUploadProps) => {
       {uploadedFiles && uploadedFiles.length > 0 ? (
         uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))
       ) : (
-        <div className="font-bold text-gray-500 text-3xl flex justify-center items-center">
-          {"No Data Found"}
+        <div className="mt-4 border bg-white shadow rounded-lg p-4">
+          <div className="font-bold text-gray-500 text-3xl flex justify-center items-center">
+            {"No Data Found"}
+          </div>
         </div>
       )}
       {totalCount > limit && (
