@@ -41,10 +41,10 @@ const DataTable = (props: any) => {
                 <div className="px-2 py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 w-20">
                   {x.date}
                 </div>
-                <div className="px-2 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-gray-500">
+                <div className="px-2 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                   {x.left}
                 </div>
-                <div className="px-2 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-gray-500">
+                <div className="px-2 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                   {x.right}
                 </div>
               </div>
@@ -309,7 +309,7 @@ export const NeurologicalTable = (props: any) => {
                 <div className="px-2 border-r py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500">
                   {x.date}
                 </div>
-                <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-gray-500">
+                <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                   {x.loc}
                 </div>
               </div>
@@ -389,16 +389,16 @@ export const NeurologicalTable = (props: any) => {
                     <div className="px-2 py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 w-20">
                       {x.date}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-gray-500">
+                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                       {x.eye}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-gray-500">
+                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                       {x.verbal}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-gray-500">
+                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                       {x.motor}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 font-semibold text-gray-700 border-t-2 border-gray-500">
+                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 font-semibold text-gray-700 border-t-2 border-gray-500">
                       {x.total}
                     </div>
                   </div>
