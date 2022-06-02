@@ -1449,20 +1449,22 @@ export const PatientHome = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${id}/shift/new`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     SHIFT PATIENT
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
                   <button
