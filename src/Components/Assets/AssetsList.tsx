@@ -198,15 +198,13 @@ const AssetsList = () => {
     try {
       setIsLoading(true);
       setIsScannerActive(false);
-      // const params = parseQueryParams(assetUrl);
-      // QR Maybe searchParams "asset" or "assetQR"
-      // const assetId = params.asset || params.assetQR;
-      console.log(assetUrl);
-      if (assetUrl) {
+      const assetId = parseQueryParams(assetUrl);
+
+      if (assetId) {
         const { data }: any = await dispatch(
-          listAssets({ qr_code_id: assetUrl })
+          listAssets({ qr_code_id: assetId })
         );
-        return data.results.length ? data.results[0].id : assetUrl;
+        return data.results.length ? data.results[0].id : assetId;
       }
     } catch (err) {
       console.log(err);
