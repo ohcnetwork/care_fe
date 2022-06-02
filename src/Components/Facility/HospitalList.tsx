@@ -318,14 +318,20 @@ export const HospitalList = (props: any) => {
       facility: id,
       message: notifyMessage,
     };
-    const res = await dispatchAction(sendNotificationMessages(data));
-    if (res && res.status == 204) {
-      Notification.Success({
-        msg: "Facility Notified",
-      });
-      setModalFor(undefined);
+    if (data.message.trim().length >= 1) {
+      const res = await dispatchAction(sendNotificationMessages(data));
+      if (res && res.status == 204) {
+        Notification.Success({
+          msg: "Facility Notified",
+        });
+        setModalFor(undefined);
+      } else {
+        Notification.Error({ msg: "Something went wrong..." });
+      }
     } else {
-      Notification.Error({ msg: "Something went wrong..." });
+      Notification.Error({
+        msg: "Notification should contain atleast 1 character.",
+      });
     }
   };
 
