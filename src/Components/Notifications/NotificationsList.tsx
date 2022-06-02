@@ -307,7 +307,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
 
         <div
           className={clsx(
-            "transition-all text-left duration-300 whitespace-no-wrap",
+            "transition-all text-left duration-300 whitespace-nowrap",
             expanded ? "w-60" : "w-0"
           )}
         >

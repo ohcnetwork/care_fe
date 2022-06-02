@@ -282,7 +282,7 @@ export const BedManagement = (props: BedManagementProps) => {
           colSpan={3}
           className="px-5 py-5 border-b border-gray-200 text-center"
         >
-          <p className="text-gray-500 whitespace-no-wrap">
+          <p className="text-gray-500 whitespace-nowrap">
             No beds available in this location
           </p>
         </td>
