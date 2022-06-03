@@ -501,7 +501,7 @@ const routes: Routes = {
     method: "GET",
   },
   updateMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
+    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
     method: "PATCH",
   },
   getInventorySummary: {
