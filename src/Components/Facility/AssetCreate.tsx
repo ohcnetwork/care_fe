@@ -219,7 +219,7 @@ const AssetCreate = (props: AssetProps) => {
         support_email: support_email,
         support_phone:
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
-        qr_code_id: qrCodeId,
+        qr_code_id: qrCodeId !== "" ? qrCodeId : null,
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
