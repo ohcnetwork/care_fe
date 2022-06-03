@@ -344,7 +344,7 @@ export default function SampleViewAdmin() {
 
                 <button
                   onClick={() => navigate(`/sample/${item.id}`)}
-                  className="mt-2 w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                  className="mt-2 w-full text-sm bg-white hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                 >
                   Sample Details
                 </button>

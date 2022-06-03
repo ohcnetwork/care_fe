@@ -881,7 +881,7 @@ export const DailyRounds = (props: any) => {
                                 )}
                           </InputLabel>
                           <div className="flex flex-row">
-                            <div className="flex-grow mr-2">
+                            <div className="grow mr-2">
                               <AutoCompleteAsyncField
                                 name="temperature"
                                 multiple={false}

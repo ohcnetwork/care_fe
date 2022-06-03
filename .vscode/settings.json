@@ -3,5 +3,14 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[rescript]": {
     "editor.defaultFormatter": "chenglou92.rescript-vscode"
-  }
+  },
+  "debug.allowBreakpointsEverywhere": true,
+  "files.exclude": {
+    "**/.vscode": true,
+    "compile_commands.json": true,
+    "*.hrccproj": true,
+    "*.sln": true,
+    "*.suo": true
+  },
+  "files.autoGuessEncoding": true
 }

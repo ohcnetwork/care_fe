@@ -46,7 +46,6 @@ import Investigation from "../Components/Facility/Investigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import AssetCreate from "../Components/Facility/AssetCreate";
-import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
@@ -456,7 +455,7 @@ const menus = [
   },
 ];
 
-const AppRouter = () => {
+export default function AppRouter() {
   useRedirect("/", "/facility");
   useRedirect("/teleicu", "/teleicu/facility");
   useRedirect("/user", "/users");
@@ -474,7 +473,7 @@ const AppRouter = () => {
       <SideBar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       <div className="flex flex-col w-full flex-1 overflow-hidden">
-        <div className="flex md:hidden relative z-10 flex-shrink-0 h-16 bg-white shadow">
+        <div className="flex md:hidden relative z-10 shrink-0 h-16 bg-white shadow">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:bg-gray-100 focus:text-gray-600 md:hidden"
@@ -506,10 +505,9 @@ const AppRouter = () => {
           id="pages"
           className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none"
         >
-          <div className="max-w-8xl mx-auto px-5 py-3">{pages}</div>
+          <div className="max-w-8xl mx-auto px-3 py-3">{pages}</div>
         </main>
       </div>
     </div>
   );
-};
-export default withTranslation()(AppRouter);
+}

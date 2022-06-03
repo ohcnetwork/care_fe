@@ -100,7 +100,7 @@ export default function UserFilter(props: any) {
 
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <div className="text-sm font-semibold">Status</div>
           <SelectField
             name="status"
@@ -118,7 +118,7 @@ export default function UserFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <div className="text-sm font-semibold">Result</div>
           <SelectField
             name="result"
@@ -131,7 +131,7 @@ export default function UserFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <div className="text-sm font-semibold">Sample Test Type</div>
           <SelectField
             name="sample_type"
@@ -144,7 +144,7 @@ export default function UserFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Facility</span>
           <div className="">
             {isFacilityLoading ? (
