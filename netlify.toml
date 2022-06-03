@@ -2,12 +2,15 @@
 publish = "build/"
 command = "CI='' yarn run build"
 
++ ## Yarn 3 cache does not work out of the box as of Jan 2022. Context:
++ ## https://github.com/netlify/build/issues/1535#issuecomment-1021947989
 [build.environment]
 NETLIFY_USE_YARN = "true"
 YARN_VERSION = "3.2.1"
-YARN_FLAGS = "--immutable"
-YARN_ENABLE_GLOBAL_CACHE = "true"
-YARN_GLOBAL_FOLDER = "/opt/buildhome/.yarn_cache"
+YARN_FLAGS = "--check-cache"
+YARN_CACHE_FOLDER = "/opt/buildhome/.yarn_cache"
+## YARN_ENABLE_GLOBAL_CACHE = "true"
+## YARN_GLOBAL_FOLDER = "/opt/buildhome/.yarn_cache"
 
 [[redirects]]
 from = "/api/*"
