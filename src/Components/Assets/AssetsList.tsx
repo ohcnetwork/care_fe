@@ -243,8 +243,6 @@ const AssetsList = () => {
             if (value) {
               const assetId = await getAssetIdFromQR(value);
               checkValidAssetId(assetId ?? value);
-
-              // navigate(`/assets/${assetId ?? value}`);
             }
           }}
           onError={(e: any) =>
