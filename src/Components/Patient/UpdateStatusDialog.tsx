@@ -36,10 +36,6 @@ const styles = {
   },
 };
 
-// interface URLS {
-//   [id: string]: string;
-// }
-
 const statusChoices = [...SAMPLE_TEST_STATUS];
 
 const statusFlow = { ...SAMPLE_FLOW_RULES };
@@ -51,8 +47,6 @@ const resultTypes = [
   },
   ...SAMPLE_TEST_RESULT,
 ];
-
-// const roleStatusMap = { ...ROLE_STATUS_MAP };
 
 const initForm: any = {
   confirm: false,
@@ -96,8 +90,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   const validStatusChoices = statusChoices.filter(
     (i) => status && statusFlow[status] && statusFlow[status].includes(i.text)
   );
-  // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
-
+  
   useEffect(() => {
     const form = { ...state.form };
     form.status = currentStatus?.id;
