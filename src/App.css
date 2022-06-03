@@ -316,12 +316,15 @@
   @apply p-0;
 }
 
-.title-text {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin-top: -3rem;
-}
+@media (min-width:640px)
+  {
+    .title-text {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin-top: -3rem;
+        }
+  }
 
 .DateRangePicker_picker__portal {
   z-index: 100000 !important;
