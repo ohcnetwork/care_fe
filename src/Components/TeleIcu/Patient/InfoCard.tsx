@@ -34,7 +34,7 @@ export default function TeleICUPatientInfoCard({
       </Modal>
       <div className="bg-white border-b p-5 flex items-center lg:w-7/12 w-full">
         {patient?.last_consultation && patient?.last_consultation?.current_bed && (
-          <div className="w-32 self-stretch flex-shrink-0 bg-cool-gray-100 border border-cool-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
+          <div className="w-32 self-stretch flex-shrink-0 border-2 text-lg flex flex-col items-center justify-center rounded-md">
             <span className="text-center text-gray-900 text-sm">
               {
                 patient?.last_consultation?.current_bed?.bed_object
@@ -61,21 +61,14 @@ export default function TeleICUPatientInfoCard({
             <span>{patient.gender}</span>
           </p>
           <div className="text-sm flex flex-wrap items-center">
-            {!patient.last_consultation?.current_bed ? (
-              <button
-                className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
-                onClick={() => setOpen(true)}
-              >
-                Assign Bed
-              </button>
-            ) : (
-              <button
-                className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
-                onClick={() => setOpen(true)}
-              >
-                Switch Bed
-              </button>
-            )}
+            <button
+              className="btn btn-primary text-sm p-2"
+              onClick={() => setOpen(true)}
+            >
+              {!patient.last_consultation?.current_bed
+                ? "Assign Bed"
+                : "Switch Bed"}
+            </button>
             {patient.blood_group ? (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
@@ -86,7 +79,7 @@ export default function TeleICUPatientInfoCard({
                 </span>
               </div>
             ) : null}
-            {patient.last_consultation?.weight ? (
+            {(patient.last_consultation?.weight || false) && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Weight
@@ -95,8 +88,8 @@ export default function TeleICUPatientInfoCard({
                   {getDimensionOrDash(patient.last_consultation.weight, " kg")}
                 </span>
               </div>
-            ) : null}
-            {patient.last_consultation?.height ? (
+            )}
+            {(patient.last_consultation?.height || false) && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Height
@@ -105,7 +98,7 @@ export default function TeleICUPatientInfoCard({
                   {getDimensionOrDash(patient.last_consultation?.height, "cm")}
                 </span>
               </div>
-            ) : null}
+            )}
           </div>
         </div>
       </div>

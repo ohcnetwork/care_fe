@@ -11,7 +11,7 @@ interface CommentSectionProps {
 }
 const CommentSection = (props: CommentSectionProps) => {
   const dispatch: any = useDispatch();
-  let initialData: any = [];
+  const initialData: any = [];
   const [comments, setComments] = useState(initialData);
   const [commentBox, setCommentBox] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -46,7 +46,7 @@ const CommentSection = (props: CommentSectionProps) => {
       });
       return;
     }
-    dispatch(addShiftComments(props.id, payload)).then((res: any) => {
+    dispatch(addShiftComments(props.id, payload)).then((_: any) => {
       Notification.Success({ msg: "Comment added successfully" });
       fetchData();
       setCommentBox("");
@@ -60,7 +60,10 @@ const CommentSection = (props: CommentSectionProps) => {
           <CircularProgress />
         ) : (
           comments.map((comment: any) => (
-            <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
+            <div
+              key={comment.id}
+              className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+            >
               <div className="flex  w-full ">
                 <p className="text-justify">{comment.comment}</p>
               </div>

@@ -10,7 +10,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
-  // ROLE_STATUS_MAP,
   SAMPLE_FLOW_RULES,
   SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
@@ -30,13 +29,6 @@ import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-// const statusChoices = [...SAMPLE_TEST_STATUS];
-
-// const statusFlow = { ...SAMPLE_FLOW_RULES };
-
-// const roleStatusMap = { ...ROLE_STATUS_MAP };
-
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function SampleViewAdmin() {
@@ -53,6 +45,8 @@ export default function SampleViewAdmin() {
   const [fetchFlag, callFetchData] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [facilityName, setFacilityName] = useState("");
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
     sample: SampleTestModel;
@@ -113,7 +107,11 @@ export default function SampleViewAdmin() {
   );
 
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(downloadSampleTests({ ...qParams }));
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById("download-sample-tests")?.click();
   };
@@ -149,21 +147,6 @@ export default function SampleViewAdmin() {
   const searchByDistrict = async (district_name: string) => {
     updateQuery({ district_name, page: 1 });
   };
-
-  // const searchByPhone = async (searchValue: string) => {
-  //   setIsLoading(true);
-  //   const res = await dispatch(sampleSearch({ limit, offset, phone_number: encodeURI(searchValue) }));
-  //   if (res && res.data) {
-  //     setSample(res.data.results);
-  //     setTotalCount(res.data.count);
-  //   }
-  //   setIsLoading(false);
-  // }
-  // const handleChange = (e: any) => {
-  //   let results = { ...result };
-  //   results[e.target.name] = e.target.value;
-  //   setResult(results);
-  // };
 
   const handleApproval = async (
     sample: SampleTestModel,
@@ -211,11 +194,6 @@ export default function SampleViewAdmin() {
       const statusText = SAMPLE_TEST_STATUS.find(
         (i) => i.text === status
       )?.desc;
-      // const validStatusChoices = statusChoices.filter(
-      //   (i) =>
-      //     status && statusFlow[status] && statusFlow[status].includes(i.text)
-      // );
-      // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
@@ -338,7 +316,7 @@ export default function SampleViewAdmin() {
 
                 <button
                   onClick={() => navigate(`/sample/${item.id}`)}
-                  className="mt-2 w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                  className="mt-2 w-full text-sm bg-white hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                 >
                   Sample Details
                 </button>
@@ -418,13 +396,17 @@ export default function SampleViewAdmin() {
         className="mx-3 md:mx-8"
         breadcrumbs={false}
         componentRight={
-          <GetAppIcon
-            className="cursor-pointer mt-2 ml-2"
-            onClick={triggerDownload}
-          />
+          downloadLoading ? (
+            <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
+          ) : (
+            <GetAppIcon
+              className="cursor-pointer mt-2 ml-2"
+              onClick={triggerDownload}
+            />
+          )
         }
       />
-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
+      <div className="mt-5 md:grid md:grid-cols-1 gap-5">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -446,7 +428,7 @@ export default function SampleViewAdmin() {
         </div>
 
         <div>
-          <div>
+          <div className="mt-2">
             <div className="text-sm font-semibold mb-2">
               Search by District Name
             </div>
@@ -457,7 +439,7 @@ export default function SampleViewAdmin() {
               errors=""
             />
           </div>
-          <div>
+          <div className="mt-2">
             <div className="text-sm font-semibold mb-2">Search by Name</div>
             <InputSearchBox
               value={qParams.patient_name}
@@ -469,7 +451,7 @@ export default function SampleViewAdmin() {
         </div>
 
         <div>
-          <div className="flex items-start mb-2">
+          <div className="flex items-start mt-2 mb-2">
             <button
               className="btn btn-primary-ghost md:mt-7 "
               onClick={() => setShowFilters((show) => !show)}
@@ -516,16 +498,6 @@ export default function SampleViewAdmin() {
             </div>
           </SlideOver>
         </div>
-        {/*<div>*/}
-        {/*  <div className="text-sm font-semibold mb-2">*/}
-        {/*    Search by number*/}
-        {/*  </div>*/}
-        {/*  <InputSearchBox*/}
-        {/*      search={searchByPhone}*/}
-        {/*      placeholder='+919876543210'*/}
-        {/*      errors=''*/}
-        {/*  />*/}
-        {/*</div>*/}
         <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
           {badge("Patient Name", qParams.patient_name, "patient_name")}
           {badge("District Name", qParams.district_name, "district_name")}
@@ -556,7 +528,7 @@ export default function SampleViewAdmin() {
           {badge("Facility", facilityName, "facility")}
         </div>
       </div>
-      <div className="px-3 md:px-8">
+      <div className="md:px-2">
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
       </div>
 
