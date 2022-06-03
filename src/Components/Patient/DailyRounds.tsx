@@ -170,7 +170,10 @@ export const DailyRounds = (props: any) => {
         setHasPreviousLog(res.data.count > 0);
         dispatch({
           type: "set_form",
-          form: { ...state.form, clone_last: "false" },
+          form: {
+            ...state.form,
+            clone_last: res.data.count > 0 ? "true" : "false",
+          },
         });
       }
     }
