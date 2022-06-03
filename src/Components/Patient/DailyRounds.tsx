@@ -168,6 +168,10 @@ export const DailyRounds = (props: any) => {
           getDailyReport({ limit: 1, offset: 0 }, { consultationId })
         );
         setHasPreviousLog(res.data.count > 0);
+        dispatch({
+          type: "set_form",
+          form: { ...state.form, clone_last: "false" },
+        });
       }
     }
     fetchHasPreviousLog();
