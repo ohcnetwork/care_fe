@@ -10,7 +10,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
-  // ROLE_STATUS_MAP,
   SAMPLE_FLOW_RULES,
   SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
@@ -30,13 +29,6 @@ import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-// const statusChoices = [...SAMPLE_TEST_STATUS];
-
-// const statusFlow = { ...SAMPLE_FLOW_RULES };
-
-// const roleStatusMap = { ...ROLE_STATUS_MAP };
-
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function SampleViewAdmin() {
@@ -150,21 +142,6 @@ export default function SampleViewAdmin() {
     updateQuery({ district_name, page: 1 });
   };
 
-  // const searchByPhone = async (searchValue: string) => {
-  //   setIsLoading(true);
-  //   const res = await dispatch(sampleSearch({ limit, offset, phone_number: encodeURI(searchValue) }));
-  //   if (res && res.data) {
-  //     setSample(res.data.results);
-  //     setTotalCount(res.data.count);
-  //   }
-  //   setIsLoading(false);
-  // }
-  // const handleChange = (e: any) => {
-  //   let results = { ...result };
-  //   results[e.target.name] = e.target.value;
-  //   setResult(results);
-  // };
-
   const handleApproval = async (
     sample: SampleTestModel,
     status: number,
@@ -211,11 +188,6 @@ export default function SampleViewAdmin() {
       const statusText = SAMPLE_TEST_STATUS.find(
         (i) => i.text === status
       )?.desc;
-      // const validStatusChoices = statusChoices.filter(
-      //   (i) =>
-      //     status && statusFlow[status] && statusFlow[status].includes(i.text)
-      // );
-      // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
@@ -516,16 +488,6 @@ export default function SampleViewAdmin() {
             </div>
           </SlideOver>
         </div>
-        {/*<div>*/}
-        {/*  <div className="text-sm font-semibold mb-2">*/}
-        {/*    Search by number*/}
-        {/*  </div>*/}
-        {/*  <InputSearchBox*/}
-        {/*      search={searchByPhone}*/}
-        {/*      placeholder='+919876543210'*/}
-        {/*      errors=''*/}
-        {/*  />*/}
-        {/*</div>*/}
         <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
           {badge("Patient Name", qParams.patient_name, "patient_name")}
           {badge("District Name", qParams.district_name, "district_name")}
