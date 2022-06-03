@@ -369,3 +369,10 @@
     border: 3px solid theme(colors.gray.100);
   }
 }
+
+@media (max-width:640px)
+  {
+    .hideonmobilescreen {
+            display: none;
+        }
+  }
