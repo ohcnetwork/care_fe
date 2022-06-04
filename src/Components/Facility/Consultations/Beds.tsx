@@ -25,6 +25,7 @@ const Beds = (props: BedsProps) => {
   const { facilityId, consultationId } = props;
   const [bed, setBed] = React.useState<BedModel>({});
   const [startDate, setStartDate] = React.useState<string>("");
+  const [currentstartDate, setCurrentstartDate] = React.useState<string>("");
   const [consultationBeds, setConsultationBeds] = React.useState<CurrentBed[]>(
     []
   );
@@ -43,6 +44,12 @@ const Beds = (props: BedsProps) => {
           });
         else {
           setConsultationBeds(bedsData?.data?.results);
+          setCurrentstartDate(
+            bedsData?.data?.results.length > 0
+              ? bedsData?.data?.results.filter((bed: any) => !bed?.end_date)[0]
+                  .start_date
+              : ""
+          );
         }
       }
     },
@@ -57,29 +64,61 @@ const Beds = (props: BedsProps) => {
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+    const current_start_Date: any = new Date(
+      currentstartDate
+    ).toLocaleDateString();
+    const current_start_Time: any = new Date(
+      currentstartDate
+    ).toLocaleTimeString();
     if (!bed?.id)
       return Notification.Error({
         msg: "Please select a bed first..!",
       });
-    const res: any = await Promise.resolve(
-      dispatch(
-        createConsultationBed(
-          { start_date: startDate },
-          consultationId,
-          bed?.id
+    if (
+      check_DateTime_BeforeOrAfter(currentstartDate, startDate) ||
+      currentstartDate === ""
+    ) {
+      const res: any = await Promise.resolve(
+        dispatch(
+          createConsultationBed(
+            { start_date: startDate },
+            consultationId,
+            bed?.id
+          )
         )
-      )
-    );
-    if (res && res.status === 201) {
-      Notification.Success({
-        msg: "Bed allocated successfully",
-      });
-      window.location.reload();
+      );
+      if (res && res.status === 201) {
+        Notification.Success({
+          msg: "Bed allocated successfully",
+        });
+        window.location.reload();
+      } else {
+        Notification.Error({
+          msg: "Something went wrong..!",
+        });
+      }
     } else {
       Notification.Error({
-        msg: "Something went wrong..!",
+        msg: `Invalid Date !! Please choose a date after ${current_start_Date} and ${current_start_Time}.`,
       });
     }
+  };
+
+  const check_DateTime_BeforeOrAfter = (
+    currentstartDate: string,
+    startDate: string
+  ) => {
+    const current_start_Date: any = new Date(currentstartDate).getTime();
+    const start_Date: any = new Date(startDate).getTime();
+    console.log(
+      current_start_Date,
+      start_Date,
+      current_start_Date - start_Date
+    );
+    if (start_Date - current_start_Date > 0) {
+      return true;
+    }
+    return false;
   };
 
   if (isLoading) return <Loading />;
