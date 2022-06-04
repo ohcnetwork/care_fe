@@ -207,6 +207,7 @@ export const ConsultationForm = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
+  const [diseaseStatus, setDiseaseStatus] = useState("");
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
@@ -218,6 +219,7 @@ export const ConsultationForm = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setDiseaseStatus(res.data.disease_status);
         }
       } else {
         setPatientName("");
@@ -322,6 +324,10 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Please enter IP Number";
             if (!error_div) error_div = field;
             invalidForm = true;
+          } else if (!state.form[field].replace(/\s/g, "").length) {
+            errors[field] = "IP can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
           }
           return;
         case "other_symptoms":
@@ -356,6 +362,10 @@ export const ConsultationForm = (props: any) => {
         case "consultation_notes":
           if (!state.form[field]) {
             errors[field] = "Required *";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          } else if (!state.form[field].replace(/\s/g, "").length) {
+            errors[field] = "Consultation notes can not be empty";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -795,7 +805,6 @@ export const ConsultationForm = (props: any) => {
                   setPrescriptions={setDischargeAdvice}
                 />
               </div>
-
               <div id="ip_no-div">
                 <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
@@ -810,19 +819,22 @@ export const ConsultationForm = (props: any) => {
                   required
                 />
               </div>
-              <div id="test_id-div">
-                <InputLabel id="refered-label">State Test ID</InputLabel>
-                <TextInputField
-                  name="test_id"
-                  variant="outlined"
-                  margin="dense"
-                  type="string"
-                  InputLabelProps={{ shrink: !!state.form.test_id }}
-                  value={state.form.test_id}
-                  onChange={handleChange}
-                  errors={state.errors.test_id}
-                />
-              </div>
+
+              {diseaseStatus !== "NEGATIVE" && (
+                <div id="test_id-div">
+                  <InputLabel id="refered-label">State Test ID</InputLabel>
+                  <TextInputField
+                    name="test_id"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.test_id }}
+                    value={state.form.test_id}
+                    onChange={handleChange}
+                    errors={state.errors.test_id}
+                  />
+                </div>
+              )}
               <div id="verified_by-div">
                 <InputLabel id="exam-details-label">Verified By</InputLabel>
                 <MultilineInputField
