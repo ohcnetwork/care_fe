@@ -84,7 +84,7 @@ const AssetCreate = (props: AssetProps) => {
 
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState("");
-  const [asset_type, setAssetType] = useState<AssetType | "Select">("Select");
+  const [asset_type, setAssetType] = useState<AssetType>();
   const [asset_class, setAssetClass] = useState<AssetClass>();
   const [not_working_reason, setNotWorkingReason] = useState("");
   const [description, setDescription] = useState("");
@@ -168,7 +168,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "asset_type":
-          if (asset_type !== "EXTERNAL" && asset_type !== "INTERNAL") {
+          if (!asset_type) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -210,7 +210,7 @@ const AssetCreate = (props: AssetProps) => {
       setIsLoading(true);
       const data = {
         name: name,
-        asset_type: asset_type == "Select" ? "" : asset_type,
+        asset_type: asset_type,
         asset_class: asset_class,
         description: description,
         is_working: is_working,
@@ -322,22 +322,6 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
 
-  const renderAssetTypeOption = (
-    value: string,
-    description: string | undefined
-  ) => {
-    return (
-      <div className="p-2 hover:bg-slate-200 flex flex-col gap-1">
-        <p className={description && "font-medium"}>{value}</p>
-        {description && (
-          <p className="max-w-xs text-gray-900">
-            <i>{description}</i>
-          </p>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="px-6 pb-2">
       <PageTitle
@@ -383,27 +367,19 @@ const AssetCreate = (props: AssetProps) => {
                   margin="dense"
                   options={[
                     {
-                      id: "Select",
-                      value: renderAssetTypeOption("Select", undefined),
+                      id: "",
+                      name: "Select",
                     },
                     {
                       id: "EXTERNAL",
-                      value: renderAssetTypeOption(
-                        "External",
-                        "Asset is outside the facility premises."
-                      ),
+                      name: "OUTSIDE the facility premises.",
                     },
                     {
                       id: "INTERNAL",
-                      value: renderAssetTypeOption(
-                        "Internal",
-                        "Asset is inside the facility premises."
-                      ),
+                      name: "INSIDE the facility premises.",
                     },
                   ]}
-                  native={false}
-                  optionValue="value"
-                  renderValue={(value) => <span>{String(value)}</span>}
+                  optionValue="name"
                   value={asset_type}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setAssetType(e.target.value as AssetType)
