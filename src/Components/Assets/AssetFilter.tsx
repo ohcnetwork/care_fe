@@ -31,6 +31,9 @@ function AssetFilter(props: any) {
     filter.asset_type ? filter.asset_type : ""
   );
   const [asset_status, setAssetStatus] = useState<string>(filter.status || "");
+  const [asset_isworking, setAssetIsWorking] = useState<string>(
+    filter.is_working || ""
+  );
   const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
   const [locationId, setLocationId] = useState<string | "">(filter.location);
   const [qParams, _] = useQueryParams();
@@ -97,6 +100,7 @@ function AssetFilter(props: any) {
   const applyFilter = () => {
     const data = {
       facility: facilityId,
+      is_working: asset_isworking,
       asset_type: asset_type,
       status: asset_status,
       location: locationId,
@@ -186,6 +190,37 @@ function AssetFilter(props: any) {
             value={asset_type}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setAssetType(e.target.value)
+            }
+          />
+        </div>
+
+        <div className="w-full flex-none">
+          <span className="text-sm font-semibold">Asset Working</span>
+          <SelectField
+            id="asset-isworking"
+            fullWidth
+            name="asset-isworking"
+            placeholder=""
+            variant="outlined"
+            margin="dense"
+            options={[
+              {
+                id: "",
+                name: "Select",
+              },
+              {
+                id: "True",
+                name: "WORKING",
+              },
+              {
+                id: "False",
+                name: "NOT WORKING",
+              },
+            ]}
+            optionValue="name"
+            value={asset_isworking}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setAssetIsWorking(e.target.value)
             }
           />
         </div>
