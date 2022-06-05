@@ -10,6 +10,7 @@ import { WithStyles, withStyles } from "@material-ui/styles";
 
 interface ConfirmDialogProps {
   name: string;
+  show: boolean;
   handleCancel: () => void;
   handleOk: () => void;
 }
@@ -34,7 +35,7 @@ const BedDeleteDialog = (
   };
   return (
     <Dialog
-      open={true}
+      open={props.show}
       classes={{
         paper: classes.paper,
       }}

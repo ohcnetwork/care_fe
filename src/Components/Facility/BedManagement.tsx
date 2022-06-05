@@ -82,7 +82,7 @@ const BedRow = (props: BedRowProps) => {
       });
     }
     setBedData({ show: false, id: "", name: "" });
-    window.location.reload();
+    triggerRerender();
   };
 
   const handleDeleteCancel = () => {
@@ -232,13 +232,12 @@ const BedRow = (props: BedRowProps) => {
           </div>
         )}
       </td>
-      {bedData.show && (
-        <BedDeleteDialog
-          name={bedData.name}
-          handleCancel={handleDeleteCancel}
-          handleOk={handleDeleteConfirm}
-        />
-      )}
+      <BedDeleteDialog
+        name={bedData.name}
+        show={bedData.show}
+        handleCancel={handleDeleteCancel}
+        handleOk={handleDeleteConfirm}
+      />
     </tr>
   );
 };
