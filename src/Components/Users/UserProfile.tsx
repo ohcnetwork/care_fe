@@ -339,8 +339,8 @@ export default function UserProfile() {
     } else {
       setIsLoading(true);
       const form = {
-        username: username,
         old_password: changePasswordForm.old_password,
+        username: username,
         new_password: changePasswordForm.new_password_1,
       };
       reduxDispatch(updateUserPassword(form)).then((resp: any) => {
