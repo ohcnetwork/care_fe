@@ -297,6 +297,7 @@ const AssetsList = () => {
         {badge("Facility", facilityName, ["facility", "location"])}
         {badge("Asset Name", qParams.search, ["search"])}
         {badge("Location", locationName, ["location"])}
+        {badge("Asset Type", asset_type, ["asset_type"])}
         {badge("Status", qParams.status, ["status"])}
       </div>
       <div className="grow mt-10 bg-white">
