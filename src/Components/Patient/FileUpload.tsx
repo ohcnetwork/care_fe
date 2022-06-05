@@ -476,13 +476,11 @@ export const FileUpload = (props: FileUploadProps) => {
       .then(uploadfile)
       .catch(() => {
         setUploadStarted(false);
-      });
+      })
+      .then(fetchData(status));
 
     // setting the value of file name to empty
     setUploadFileName("");
-
-    // updating the sample report list
-    fetchData(status);
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
@@ -675,7 +673,6 @@ export const FileUpload = (props: FileUploadProps) => {
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
-
                   onClick={() => {
                     handleAudioUpload();
                   }}
