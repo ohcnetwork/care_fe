@@ -13,7 +13,6 @@ import {
 import Popover from "@material-ui/core/Popover";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
-import { makeStyles } from "@material-ui/styles";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";

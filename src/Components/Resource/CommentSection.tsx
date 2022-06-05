@@ -12,10 +12,10 @@ interface CommentSectionProps {
 }
 const CommentSection = (props: CommentSectionProps) => {
   const dispatch: any = useDispatch();
-  let initialData: any = [];
+  const initialData: any = [];
   const [comments, setComments] = useState(initialData);
   const [commentBox, setCommentBox] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -30,7 +30,7 @@ const CommentSection = (props: CommentSectionProps) => {
 
   const fetchData = useCallback(
     async (status: statusType = { aborted: false }) => {
-      setIsLoading(true);
+      //setIsLoading(true);
       const res = await dispatch(
         getResourceComments(props.id, { limit, offset })
       );
@@ -39,7 +39,7 @@ const CommentSection = (props: CommentSectionProps) => {
           setComments(res.data?.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
+        //setIsLoading(false);
       }
     },
     [props.id, dispatch, offset]
@@ -56,7 +56,7 @@ const CommentSection = (props: CommentSectionProps) => {
     const payload = {
       comment: commentBox,
     };
-    dispatch(addResourceComments(props.id, payload)).then((res: any) => {
+    dispatch(addResourceComments(props.id, payload)).then(() => {
       Notification.Success({ msg: "Comment added successfully" });
       fetchData();
     });
@@ -82,7 +82,10 @@ const CommentSection = (props: CommentSectionProps) => {
       </div>
       <div className=" w-full">
         {comments.map((comment: any) => (
-          <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
+          <div
+            key={Number(new Date())}
+            className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+          >
             <div className="flex  w-full ">
               <p className="text-justify">{comment.comment}</p>
             </div>

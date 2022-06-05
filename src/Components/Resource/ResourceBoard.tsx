@@ -4,10 +4,8 @@ import {
   listResourceRequests,
   downloadResourceRequests,
 } from "../../Redux/actions";
-import Button from "@material-ui/core/Button";
 import { navigate } from "raviger";
 import moment from "moment";
-import { Modal } from "@material-ui/core";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
@@ -108,10 +106,10 @@ export default function ResourceBoard({
     });
   };
 
-  let boardFilter = (filter: string) => {
+  const boardFilter = (filter: string) => {
     return data
       .filter(({ status }) => status === filter)
-      .map((resource: any, idx: number) => (
+      .map((resource: any) => (
         <div key={`resource_${resource.id}`} className="w-full mt-2 ">
           <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
             <div className={"p-4 h-full flex flex-col justify-between"}>

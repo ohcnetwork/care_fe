@@ -348,7 +348,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                                   position: data?.position,
                                 },
                               },
-                              currentPreset?.id
+                              currentPreset.id
                             )
                           );
                           if (response && response.status === 200) {

@@ -17,7 +17,7 @@ import ListFilter from "./ListFilter";
 import Pagination from "../Common/Pagination";
 import { Modal, Button } from "@material-ui/core";
 
-import { limit, formatFilter, badge } from "./Commons";
+import { limit, formatFilter } from "./Commons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -56,7 +56,7 @@ export default function ListView() {
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-ALL`)?.click();
+    document.getElementById("shiftRequests-ALL")?.click();
   };
 
   const updateQuery = (filter: any) => {
@@ -145,7 +145,7 @@ export default function ListView() {
     localStorage.setItem("shift-filters", JSON.stringify(local));
   };
 
-  let showShiftingCardList = (data: any) => {
+  const showShiftingCardList = (data: any) => {
     if (data && !data.length) {
       return (
         <div className="flex flex-1 justify-center text-gray-600 mt-64">
@@ -437,7 +437,7 @@ export default function ListView() {
         filename={`shift-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`shiftRequests-ALL`}
+        id={"shiftRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

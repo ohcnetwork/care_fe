@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import loadable from "@loadable/component";
-import { InputSearchBox } from "../Common/SearchBox";
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
 import moment from "moment";
@@ -13,7 +12,6 @@ import {
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import Pagination from "../Common/Pagination";
-import { Modal, Button } from "@material-ui/core";
 
 import { limit, formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
@@ -33,10 +31,10 @@ export default function ListView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [modalFor, setModalFor] = useState({
-    externalId: undefined,
-    loading: false,
-  });
+  // const [modalFor, setModalFor] = useState({
+  //   externalId: undefined,
+  //   loading: false,
+  // });
 
   const local = useMemo(
     () => JSON.parse(localStorage.getItem("resource-filters") || "{}"),
@@ -58,7 +56,7 @@ export default function ListView() {
       downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`resourceRequests-ALL`)?.click();
+    document.getElementById("resourceRequests-ALL")?.click();
   };
 
   const updateQuery = (filter: any) => {
@@ -127,7 +125,7 @@ export default function ListView() {
     offset,
   ]);
 
-  let showResourceCardList = (data: any) => {
+  const showResourceCardList = (data: any) => {
     if (data && !data.length) {
       return (
         <div className="flex flex-1 justify-center text-gray-600 mt-64">
@@ -322,7 +320,7 @@ export default function ListView() {
         filename={`resource-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`resourceRequests-ALL`}
+        id={"resourceRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

@@ -241,7 +241,7 @@ const LiveFeed = (props: any) => {
                                     position: data?.position,
                                   },
                                 },
-                                currentPreset?.id
+                                currentPreset.id
                               )
                             );
                             if (response && response.status === 200) {

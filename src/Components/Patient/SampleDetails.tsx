@@ -1,4 +1,4 @@
-import { Card, CardContent, Box, Button } from "@material-ui/core";
+import { Card, CardContent, Button } from "@material-ui/core";
 import moment from "moment";
 import loadable from "@loadable/component";
 import { useCallback, useState } from "react";
@@ -18,6 +18,7 @@ interface SampleDetailsProps {
 }
 
 export const SampleDetails = (props: SampleDetailsProps) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id, patientId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -368,7 +369,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             {sampleDetails.doctor_name && (
               <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
-                  Doctor's Name:{" "}
+                  Doctor&apos;s Name:{" "}
                 </span>
                 {sampleDetails.doctor_name}
               </div>
