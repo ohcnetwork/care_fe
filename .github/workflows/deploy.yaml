@@ -288,7 +288,6 @@ jobs:
           cd kube/deployments/
           sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
           kubectl apply -f care-fe.yaml
-
   deploy-production-manipur:
     needs: build-production
     name: Deploy to GKE Manipur
