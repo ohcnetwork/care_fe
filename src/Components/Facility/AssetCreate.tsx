@@ -372,11 +372,11 @@ const AssetCreate = (props: AssetProps) => {
                     },
                     {
                       id: "EXTERNAL",
-                      name: "EXTERNAL",
+                      name: "Asset is outside the facility premises",
                     },
                     {
                       id: "INTERNAL",
-                      name: "INTERNAL",
+                      name: "Asset is inside the facility premises",
                     },
                   ]}
                   optionValue="name"
