@@ -72,7 +72,7 @@ export const DailyRoundsList = (props: any) => {
         itemData.last_updated_by_telemedicine;
 
       return (
-        <div key={`daily_round_${idx}`} className="w-ful">
+        <div key={`daily_round_${idx}`} className="w-full">
           <div
             className={`block border rounded-lg ${
               telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
