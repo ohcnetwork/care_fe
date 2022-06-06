@@ -669,6 +669,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
+
                   onClick={() => {
                     handleAudioUpload();
                   }}
