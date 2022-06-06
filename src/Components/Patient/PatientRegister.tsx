@@ -25,11 +25,9 @@ import {
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
-  //DESIGNATION_HEALTH_CARE_WORKER,
   VACCINES,
 } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
-//import statesList from "../../Common/static/states.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createPatient,
@@ -63,12 +61,6 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const debounce = require("lodash.debounce");
-
-// const placesList = countryList.concat(
-//   statesList.filter((i: string) => i !== "Kerala")
-// );
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -103,7 +95,7 @@ const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 
 const testType = [...TEST_TYPE];
-//const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
+
 const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
@@ -854,13 +846,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       dispatch({ type: "set_form", form });
     }
   };
-
-  // const handleCheckboxFieldChange = (e: any) => {
-  //   const form = { ...state.form };
-  //   const { checked, name } = e.target;
-  //   form[name] = checked;
-  //   dispatch({ type: "set_form", form });
-  // };
 
   const handleMedicalCheckboxChange = (e: any, id: number) => {
     const form = { ...state.form };
