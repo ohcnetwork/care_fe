@@ -485,7 +485,7 @@ export const PatientManager = (props: any) => {
           onClick={() => navigate(patientUrl)}
           className={
             "w-full pb-2 cursor-pointer border-b-4 md:flex justify-between items-center mb-3 " +
-            (patient.disease_status == "POSITIVE" ? "bg-red-50" : "")
+            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
           <div className="px-4  flex gap-2">
