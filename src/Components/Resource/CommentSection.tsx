@@ -56,6 +56,12 @@ const CommentSection = (props: CommentSectionProps) => {
     const payload = {
       comment: commentBox,
     };
+    if (!/\S+/.test(commentBox)) {
+      Notification.Error({
+        msg: "Comment Should Contain At Least 1 Character",
+      });
+      return;
+    }
     dispatch(addResourceComments(props.id, payload)).then((_: any) => {
       Notification.Success({ msg: "Comment added successfully" });
       fetchData();
