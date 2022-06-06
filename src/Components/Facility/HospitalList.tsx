@@ -37,7 +37,7 @@ import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -51,13 +51,12 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     heading: {
       fontSize: theme.typography.pxToRem(15),
-      fontWeight: theme.typography.fontWeightRegular,
     },
   })
 );
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const HospitalListPage = (props: any) => {
+export const HospitalList = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
   const classes = useStyles();
   const dispatchAction: any = useDispatch();
@@ -84,7 +83,7 @@ const HospitalListPage = (props: any) => {
   const [modalFor, setModalFor] = useState(undefined);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
-  const { t } = props;
+  const { t } = useTranslation();
   const limit = 14;
 
   const fetchData = useCallback(
@@ -319,14 +318,20 @@ const HospitalListPage = (props: any) => {
       facility: id,
       message: notifyMessage,
     };
-    const res = await dispatchAction(sendNotificationMessages(data));
-    if (res && res.status == 204) {
-      Notification.Success({
-        msg: "Facility Notified",
-      });
-      setModalFor(undefined);
+    if (data.message.trim().length >= 1) {
+      const res = await dispatchAction(sendNotificationMessages(data));
+      if (res && res.status == 204) {
+        Notification.Success({
+          msg: "Facility Notified",
+        });
+        setModalFor(undefined);
+      } else {
+        Notification.Error({ msg: "Something went wrong..." });
+      }
     } else {
-      Notification.Error({ msg: "Something went wrong..." });
+      Notification.Error({
+        msg: "Notification should contain atleast 1 character.",
+      });
     }
   };
 
@@ -343,7 +348,7 @@ const HospitalListPage = (props: any) => {
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="flex ">
-              <div className="md:flex hidden w-32 self-stretch flex-shrink-0 bg-gray-300 items-center justify-center">
+              <div className="md:flex hidden w-32 self-stretch shrink-0 bg-gray-300 items-center justify-center">
                 {facility.cover_image_url ? (
                   <img
                     src={facility.cover_image_url}
@@ -393,7 +398,7 @@ const HospitalListPage = (props: any) => {
                   <div>
                     {userType !== "Staff" ? (
                       <button
-                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                         onClick={(_) => setModalFor(facility.id)}
                       >
                         <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
@@ -456,14 +461,14 @@ const HospitalListPage = (props: any) => {
                   <div>
                     <Link
                       href={`/facility/${facility.id}`}
-                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     >
                       <i className="fas fa-hospital mr-2 text-primary-500"></i>
                       {t("Facility")}
                     </Link>
                     <Link
                       href={`/facility/${facility.id}/patients`}
-                      className="ml-2 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      className="ml-2 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     >
                       <i className="fas fa-user-injured text-primary-500 mr-2"></i>
                       {t("Patients")}
@@ -504,7 +509,7 @@ const HospitalListPage = (props: any) => {
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           onClick={() => navigate("/facility/create")}
         >
           <i className="fas fa-plus text-3xl"></i>
@@ -529,7 +534,7 @@ const HospitalListPage = (props: any) => {
 
         <div className="flex justify-end w-full mt-4">
           <div>
-            <Accordion className="mt-2 lg:mt-0 md:mt-0">
+            <Accordion className="mt-10 lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"
@@ -735,4 +740,3 @@ const HospitalListPage = (props: any) => {
     </div>
   );
 };
-export const HospitalList = withTranslation()(HospitalListPage);

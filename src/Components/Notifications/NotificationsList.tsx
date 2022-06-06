@@ -269,11 +269,11 @@ export default function ResultList({
           <div className="text-lg font-bold">
             {getNotificationTitle(result.event)}
           </div>
-          <div className="text-sm">{result.message}</div>
-          <div className="text-xs">
+          <div className="text-sm py-1">{result.message}</div>
+          <div className="text-xs py-1">
             {moment(result.created_date).format("lll")}
           </div>
-          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0">
+          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0">
             <i className="fas fa-eye mr-2 text-primary-500" />
             Visit Link
           </a>
@@ -338,13 +338,13 @@ export default function ResultList({
           expanded && "w-60"
         )}
       >
-        <div className="flex-shrink-0 flex items-center justify-center w-10 h-9">
+        <div className="shrink-0 flex items-center justify-center w-10 h-9">
           <i className={clsx("fas fa-bell", "text-lg")}></i>
         </div>
 
         <div
           className={clsx(
-            "transition-all text-left duration-300 whitespace-no-wrap",
+            "transition-all text-left duration-300 whitespace-nowrap",
             expanded ? "w-60" : "w-0"
           )}
         >
@@ -371,7 +371,7 @@ export default function ResultList({
                       setUnreadCount(0);
                       setOffset(0);
                     }}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
                   >
                     <i className="fa-fw fas fa-sync cursor-pointer mr-2" />{" "}
                     Reload
@@ -392,7 +392,7 @@ export default function ResultList({
                 <div>
                   <button
                     onClick={handleSubscribeClick}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
                     disabled={isSubscribing}
                   >
                     {isSubscribing && (

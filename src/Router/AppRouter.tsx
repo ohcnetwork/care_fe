@@ -46,7 +46,6 @@ import Investigation from "../Components/Facility/Investigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import AssetCreate from "../Components/Facility/AssetCreate";
-import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
@@ -66,15 +65,12 @@ import { Feed } from "../Components/Facility/Consultations/Feed";
 import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
+import Error404 from "../Components/ErrorPages/404";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
 const routes = {
-  "/hub": () => (
-    <>
-      <HubDashboard />
-    </>
-  ),
+  "/hub": () => <HubDashboard />,
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
@@ -361,8 +357,9 @@ const routes = {
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
-    ({ patientId, consultationId }: any) => (
+    ({ facilityId, patientId, consultationId }: any) => (
       <TreatmentSummary
+        facilityId={facilityId}
         consultationId={consultationId}
         patientId={patientId}
         dailyRoundsListData={[]}
@@ -390,11 +387,12 @@ const routes = {
   ),
 };
 
-const AppRouter = () => {
+
+export default function AppRouter() {
   useRedirect("/", "/facility");
   useRedirect("/teleicu", "/teleicu/facility");
   useRedirect("/user", "/users");
-  const pages = useRoutes(routes);
+  const pages = useRoutes(routes) || <Error404 />;
   const path = usePath();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsListOpen, setIsNotificationsListOpen] = useState(false);
@@ -415,7 +413,7 @@ const AppRouter = () => {
       />
 
       <div className="flex flex-col w-full flex-1 overflow-hidden">
-        <div className="flex md:hidden relative z-10 flex-shrink-0 h-16 bg-white shadow">
+        <div className="flex md:hidden relative z-10 shrink-0 h-16 bg-white shadow">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:bg-gray-100 focus:text-gray-600 md:hidden"
@@ -447,7 +445,7 @@ const AppRouter = () => {
           id="pages"
           className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none"
         >
-          <div className="max-w-8xl mx-auto px-5 py-3">{pages}</div>
+          <div className="max-w-8xl mx-auto px-3 py-3">{pages}</div>
         </main>
       </div>
       <div className="absolute bottom-5 right-10 cursor-pointer">
@@ -465,5 +463,4 @@ const AppRouter = () => {
       </div>
     </div>
   );
-};
-export default withTranslation()(AppRouter);
+}
