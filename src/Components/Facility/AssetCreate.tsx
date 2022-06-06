@@ -405,11 +405,11 @@ const AssetCreate = (props: AssetProps) => {
                     },
                     {
                       id: "ONVIF",
-                      name: "ONVIF",
+                      name: "ONVIF Camera",
                     },
                     {
                       id: "HL7MONITOR",
-                      name: "HL7 Monitor",
+                      name: "HL7 Vitals Monitor",
                     },
                   ]}
                   optionValue="name"
