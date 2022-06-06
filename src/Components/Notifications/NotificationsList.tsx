@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   getNotifications,
+  markNotificationAsRead,
   getUserPnconfig,
   updateUserPnconfig,
   getPublicKey,
@@ -12,6 +13,7 @@ import { SelectField } from "../Common/HelperInputFields";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
+import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
@@ -19,12 +21,111 @@ import { useTranslation } from "react-i18next";
 
 const RESULT_LIMIT = 14;
 
-interface Props {
+interface NotificationProps {
+  notification: any;
+  onClickCB?: () => void;
+  setShowNotifications: (showNotifications: boolean) => void;
+}
+
+const Notification = ({
+  notification,
+  onClickCB,
+  setShowNotifications,
+}: NotificationProps) => {
+  const dispatch: any = useDispatch();
+  const [result, setResult] = useState(notification);
+  const [isMarkingAsRead, setIsMarkingAsRead] = useState(false);
+
+  const resultUrl = (event: string, data: any) => {
+    switch (event) {
+      case "PATIENT_CREATED":
+        return `/facility/${data.facility}/patient/${data.patient}`;
+      case "PATIENT_UPDATED":
+        return `/facility/${data.facility}/patient/${data.patient}`;
+      case "PATIENT_CONSULTATION_CREATED":
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}`;
+      case "PATIENT_CONSULTATION_UPDATED":
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}`;
+      case "PATIENT_CONSULTATION_UPDATE_CREATED":
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
+      case "PATIENT_CONSULTATION_UPDATE_UPDATED":
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
+      case "INVESTIGATION_SESSION_CREATED":
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
+      case "MESSAGE":
+        return "/notice_board/";
+      default:
+        return "#";
+    }
+  };
+
+  const getNotificationTitle = (id: string) =>
+    NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.text;
+
+  const handleMarkAsRead = async () => {
+    setIsMarkingAsRead(true);
+    await dispatch(markNotificationAsRead(result.id));
+    setResult({ ...result, read_at: new Date() });
+    setIsMarkingAsRead(false);
+  };
+
+  return (
+    <div
+      key={`usr_${result.id}`}
+      onClick={() => {
+        handleMarkAsRead();
+        navigate(resultUrl(result.event, result.caused_objects));
+        onClickCB && onClickCB();
+        setShowNotifications(false);
+      }}
+      className={clsx(
+        "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer",
+        result.read_at && "text-gray-500"
+      )}
+    >
+      <div className="text-lg font-bold">
+        {getNotificationTitle(result.event)}
+      </div>
+      <div className="text-sm">{result.message}</div>
+      <div className="text-xs text-right">
+        {moment(result.created_date).format("lll")}
+      </div>
+      <div className="mt-2 gap-2 flex flex-row-reverse items-center">
+        <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
+          <i className="fas fa-eye mr-2 text-primary-500" />
+          Visit Link
+        </button>
+        {!result.read_at && (
+          <button
+            className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+            disabled={isMarkingAsRead}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleMarkAsRead();
+            }}
+          >
+            {isMarkingAsRead ? (
+              <Spinner />
+            ) : (
+              <i className="fa-solid fa-check mr-2 text-primary-500" />
+            )}
+            Mark as Read
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+interface ResultListProps {
   expanded: boolean;
   onClickCB?: () => void;
 }
 
-export default function ResultList({ expanded = false, onClickCB }: Props) {
+export default function ResultList({
+  expanded = false,
+  onClickCB,
+}: ResultListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
@@ -37,7 +138,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
-
+  const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
 
@@ -102,7 +203,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
           .then(function (subscription) {
             subscription
               ?.unsubscribe()
-              .then(async function (_successful) {
+              .then(async function () {
                 const data = {
                   pf_endpoint: "",
                   pf_p256dh: "",
@@ -195,60 +296,17 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
   //   updateQuery({ page, limit });
   // };
 
-  const resultUrl = (event: string, data: any) => {
-    switch (event) {
-      case "PATIENT_CREATED":
-        return `/facility/${data.facility}/patient/${data.patient}`;
-      case "PATIENT_UPDATED":
-        return `/facility/${data.facility}/patient/${data.patient}`;
-      case "PATIENT_CONSULTATION_CREATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}`;
-      case "PATIENT_CONSULTATION_UPDATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}`;
-      case "PATIENT_CONSULTATION_UPDATE_CREATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
-      case "PATIENT_CONSULTATION_UPDATE_UPDATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
-      case "INVESTIGATION_SESSION_CREATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
-      case "MESSAGE":
-        return "/notice_board/";
-      default:
-        return "#";
-    }
+  const handleMarkAllAsRead = async () => {
+    setIsMarkingAllAsRead(true);
+    await Promise.all(
+      data.map(async (notification) => {
+        return await dispatch(markNotificationAsRead(notification.id));
+      })
+    );
+    setReload(!reload);
+    setIsMarkingAllAsRead(false);
   };
 
-  const getNotificationTitle = (id: string) =>
-    NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.text;
-
-  let resultList: any[] = [];
-  if (data && data.length) {
-    resultList = data.map((result: any, _idx: number) => {
-      return (
-        <div
-          key={`usr_${result.id}`}
-          onClick={() => {
-            navigate(resultUrl(result.event, result.caused_objects));
-            onClickCB && onClickCB();
-            setShowNotifications(false);
-          }}
-          className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
-        >
-          <div className="text-lg font-bold">
-            {getNotificationTitle(result.event)}
-          </div>
-          <div className="text-sm py-1">{result.message}</div>
-          <div className="text-xs py-1">
-            {moment(result.created_date).format("lll")}
-          </div>
-          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0">
-            <i className="fas fa-eye mr-2 text-primary-500" />
-            Visit Link
-          </a>
-        </div>
-      );
-    });
-  }
   if (!offset && isLoading) {
     manageResults = (
       <div className="flex items-center justify-center">
@@ -258,7 +316,16 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
   } else if (data && data.length) {
     manageResults = (
       <>
-        {resultList}
+        {data.map((result: any) => {
+          return (
+            <Notification
+              key={result.id}
+              notification={result}
+              onClickCB={onClickCB}
+              setShowNotifications={setShowNotifications}
+            />
+          );
+        })}
         {isLoading && (
           <div className="flex items-center justify-center">
             <CircularProgress color="primary" />
@@ -359,32 +426,26 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
                     className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
                     disabled={isSubscribing}
                   >
-                    {isSubscribing && (
-                      <svg
-                        className="animate-spin h-5 w-5 mr-3"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-75"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="#f1edf7"
-                          fill="white"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className=""
-                          fill="white"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                    )}
+                    {isSubscribing && <Spinner />}
                     {getButtonText()}
                   </button>
                 </div>
               </div>
-              <div className="font-bold text-xl mt-4">Notifications</div>
+              <div className="flex justify-between items-center">
+                <div className="font-bold text-xl mt-4">Notifications</div>
+                <button
+                  className="inline-flex items-center font-semibold mt-4 p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                  disabled={isMarkingAllAsRead}
+                  onClick={handleMarkAllAsRead}
+                >
+                  {isMarkingAllAsRead ? (
+                    <Spinner />
+                  ) : (
+                    <i className="fa-solid fa-check-double mr-2 text-primary-500" />
+                  )}
+                  Mark All as Read
+                </button>
+              </div>
             </div>
 
             <div>
