@@ -65,6 +65,8 @@ import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 import Error404 from "../Components/ErrorPages/404";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -311,9 +313,15 @@ const routes = {
     localStorage.getItem("defaultShiftView") === "list" ? (
       <ShiftListView />
     ) : (
-      <ShiftBoardView />
+      <DndProvider backend={HTML5Backend}>
+        <ShiftBoardView />
+      </DndProvider>
     ),
-  "/shifting/board-view": () => <ShiftBoardView />,
+  "/shifting/board-view": () => (
+    <DndProvider backend={HTML5Backend}>
+      <ShiftBoardView />
+    </DndProvider>
+  ),
   "/shifting/list-view": () => <ShiftListView />,
   "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
   "/shifting/:id/update": ({ id }: any) => <ShiftDetailsUpdate id={id} />,
