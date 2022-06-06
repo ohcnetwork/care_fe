@@ -15,7 +15,6 @@ export default function TeleICUPatientInfoCard({
   patient,
 }: ITeleICUPatientInfoCardProps) {
   const [open, setOpen] = useState(false);
-  // console.log(patient);
   return (
     <section className="flex items-stretch my-2 lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2">
       <Modal
