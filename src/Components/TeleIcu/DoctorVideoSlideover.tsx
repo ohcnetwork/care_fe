@@ -54,7 +54,7 @@ export default function DoctorVideoSlideover(props: {
             </span>
           </button>
         </div>
-        <ul className="p-3 list-none" id="options" role="listbox">
+        <ul className="py-3 list-none" id="options" role="listbox">
           {doctors
             .filter((user) => user.alt_phone_number)
             .sort((a, b) => {
