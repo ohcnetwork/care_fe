@@ -15,9 +15,9 @@ import {
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import Pagination from "../Common/Pagination";
-import { Modal, Button } from "@material-ui/core";
+import { Modal, Button, CircularProgress } from "@material-ui/core";
 
-import { limit, formatFilter, badge } from "./Commons";
+import { limit, formatFilter } from "./Commons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -34,6 +34,8 @@ export default function ListView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -52,11 +54,15 @@ export default function ListView() {
   }, []);
 
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-ALL`)?.click();
+    document.getElementById("shiftRequests-ALL")?.click();
   };
 
   const updateQuery = (filter: any) => {
@@ -145,7 +151,7 @@ export default function ListView() {
     localStorage.setItem("shift-filters", JSON.stringify(local));
   };
 
-  let showShiftingCardList = (data: any) => {
+  const showShiftingCardList = (data: any) => {
     if (data && !data.length) {
       return (
         <div className="flex flex-1 justify-center text-gray-600 mt-64">
@@ -155,7 +161,7 @@ export default function ListView() {
     }
 
     return data.map((shift: any) => (
-      <div key={`shift_${shift.id}`} className="w-1/2 mt-6 md:px-4">
+      <div key={`shift_${shift.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
         <div className="overflow-hidden shadow rounded-lg bg-white h-full">
           <div
             className={
@@ -172,13 +178,13 @@ export default function ListView() {
                 </div>
                 <div>
                   {shift.emergency && (
-                    <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                    <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
                       Emergency
                     </span>
                   )}
                 </div>
               </div>
-              <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+              <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
                 <div className="sm:col-span-1">
                   <dt
                     title="Shifting status"
@@ -346,15 +352,19 @@ export default function ListView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="flex items-end justify-between px-4">
+      <div className="md:flex md:items-end md:justify-between px-4">
         <PageTitle
           title={"Shifting"}
           hideBack={true}
           componentRight={
-            <GetAppIcon
-              className="cursor-pointer mt-2 ml-2"
-              onClick={triggerDownload}
-            />
+            downloadLoading ? (
+              <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
+            ) : (
+              <GetAppIcon
+                className="cursor-pointer mt-2 ml-2"
+                onClick={triggerDownload}
+              />
+            )
           }
           breadcrumbs={false}
         />
@@ -370,7 +380,7 @@ export default function ListView() {
         <div className="w-32">
           {/* dummy div to align space as per board view */}
         </div>
-        <div>
+        <div className="my-2 md:my-0">
           <button
             className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
             onClick={onBoardViewBtnClick}
@@ -398,7 +408,7 @@ export default function ListView() {
         local={local}
         updateFilter={updateFilter}
       />
-      <div className="px-4">
+      <div className="px-1">
         {isLoading ? (
           <Loading />
         ) : (
@@ -437,7 +447,7 @@ export default function ListView() {
         filename={`shift-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`shiftRequests-ALL`}
+        id={"shiftRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
