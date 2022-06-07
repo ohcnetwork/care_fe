@@ -61,7 +61,7 @@ export default function TeleICUPatientInfoCard({
           <div className="text-sm flex flex-wrap items-center">
             {!patient.last_consultation?.current_bed ? (
               <button
-                className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
+                className="btn btn-primary text-sm p-2"
                 onClick={() => setOpen(true)}
               >
                 Assign Bed
@@ -72,7 +72,7 @@ export default function TeleICUPatientInfoCard({
                   {patient.last_consultation?.current_bed?.bed_object?.name}
                 </span>
                 <button
-                  className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
+                  className="btn btn-primary text-sm p-2"
                   onClick={() => setOpen(true)}
                 >
                   Switch Bed

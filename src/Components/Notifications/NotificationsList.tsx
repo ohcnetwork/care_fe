@@ -237,8 +237,8 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
           <div className="text-lg font-bold">
             {getNotificationTitle(result.event)}
           </div>
-          <div className="text-sm">{result.message}</div>
-          <div className="text-xs">
+          <div className="text-sm py-1">{result.message}</div>
+          <div className="text-xs py-1">
             {moment(result.created_date).format("lll")}
           </div>
           <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0">
@@ -307,7 +307,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
 
         <div
           className={clsx(
-            "transition-all text-left duration-300 whitespace-no-wrap",
+            "transition-all text-left duration-300 whitespace-nowrap",
             expanded ? "w-60" : "w-0"
           )}
         >
