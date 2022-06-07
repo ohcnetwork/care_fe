@@ -209,11 +209,11 @@ function AssetFilter(props: any) {
                 name: "Select",
               },
               {
-                id: "True",
+                id: "WORKING",
                 name: "WORKING",
               },
               {
-                id: "False",
+                id: "NOTWORKING",
                 name: "NOT WORKING",
               },
             ]}
