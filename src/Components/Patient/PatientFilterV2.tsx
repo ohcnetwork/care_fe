@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   SelectField,
-  MultiSelectField,
   TextInputField,
   AutoCompleteAsyncField,
 } from "../Common/HelperInputFields";
@@ -12,7 +11,6 @@ import {
   FACILITY_TYPES,
   DISEASE_STATUS,
   PATIENT_FILTER_CATEGORY,
-  PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
   KASP_ENABLED,
 } from "../../Common/constants";
@@ -86,10 +84,6 @@ export default function PatientFilterV2(props: any) {
       filter.last_consultation_discharge_date_before || null,
     last_consultation_discharge_date_after:
       filter.last_consultation_discharge_date_after || null,
-    last_consultation_admitted_to_list:
-      filter.last_consultation_admitted_to_list
-        ? filter.last_consultation_admitted_to_list.split(",")
-        : [],
     srf_id: filter.srf_id || null,
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
@@ -135,7 +129,6 @@ export default function PatientFilterV2(props: any) {
     last_consultation_admission_date_after: null,
     last_consultation_discharge_date_before: null,
     last_consultation_discharge_date_after: null,
-    last_consultation_admitted_to_list: [],
     srf_id: "",
     number_of_doses: null,
     covin_id: "",
@@ -279,7 +272,6 @@ export default function PatientFilterV2(props: any) {
       last_consultation_admission_date_after,
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
-      last_consultation_admitted_to_list,
       number_of_doses,
       covin_id,
       srf_id,
@@ -362,8 +354,6 @@ export default function PatientFilterV2(props: any) {
         (disease_status == "Show All" ? "" : disease_status) || "",
       age_min: age_min || "",
       age_max: age_max || "",
-      last_consultation_admitted_to_list:
-        last_consultation_admitted_to_list || [],
       srf_id: srf_id || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
@@ -671,18 +661,6 @@ export default function PatientFilterV2(props: any) {
               />
             </div>
           </div>
-        </div>
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">
-            Last Admitted to (Bed Type)
-          </span>
-          <MultiSelectField
-            name="last_consultation_admitted_to_list"
-            variant="outlined"
-            value={filterState.last_consultation_admitted_to_list}
-            options={[...PATIENT_FILTER_ADMITTED_TO]}
-            onChange={handleMultiSelectChange}
-          />
         </div>
         <div className="w-full flex-none">
           <DateRangePicker
