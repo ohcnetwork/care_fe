@@ -19,6 +19,9 @@ import {
   InputLabel,
   Radio,
   RadioGroup,
+  Tooltip,
+  useMediaQuery,
+  useTheme,
 } from "@material-ui/core";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
@@ -30,7 +33,12 @@ import {
   PhoneNumberField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
-import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
+import {
+  AssetClass,
+  assetClasses,
+  AssetData,
+  AssetType,
+} from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
 import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
@@ -103,6 +111,9 @@ const AssetCreate = (props: AssetProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [qrCodeId, setQrCodeId] = useState("");
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down(768));
 
   useEffect(() => {
     setIsLoading(true);
@@ -322,6 +333,20 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
 
+  const renderAssetTypeHintLabel = (asset_type: AssetType) => {
+    return (
+      <i>
+        Asset is <b>{asset_type === "INTERNAL" ? "inside" : "outside"}</b> the
+        facility premises.
+      </i>
+    );
+  };
+
+  const assetClassOptions = [
+    { id: "", description: "Select" },
+    ...assetClasses,
+  ];
+
   return (
     <div className="px-6 pb-2">
       <PageTitle
@@ -358,34 +383,47 @@ const AssetCreate = (props: AssetProps) => {
                 <InputLabel htmlFor="asset-type" id="name=label" required>
                   Asset Type
                 </InputLabel>
-                <SelectField
-                  id="asset-type"
-                  fullWidth
+                <RadioGroup
+                  aria-label="asset_type"
                   name="asset_type"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  options={[
-                    {
-                      id: "",
-                      name: "Select",
-                    },
-                    {
-                      id: "EXTERNAL",
-                      name: "Asset is outside the facility premises",
-                    },
-                    {
-                      id: "INTERNAL",
-                      name: "Asset is inside the facility premises",
-                    },
-                  ]}
-                  optionValue="name"
                   value={asset_type}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setAssetType(e.target.value as AssetType)
+                  onChange={(e) =>
+                    setAssetType(e.target.value as AssetType | undefined)
                   }
-                  errors={state.errors.asset_type}
-                />
+                  className="flex flex-col justify-center mt-2"
+                >
+                  <Box display="flex" flexDirection="row">
+                    {(["INTERNAL", "EXTERNAL"] as AssetType[]).map((type) => {
+                      const child = (
+                        <FormControlLabel
+                          key={type}
+                          value={type}
+                          control={<Radio />}
+                          label={type}
+                        />
+                      );
+                      if (isMobile) return child;
+                      return (
+                        <Tooltip
+                          key={type}
+                          title={
+                            <div className="text-sm">
+                              {renderAssetTypeHintLabel(type)}
+                            </div>
+                          }
+                        >
+                          {child}
+                        </Tooltip>
+                      );
+                    })}
+                  </Box>
+                </RadioGroup>
+                <div className="text-gray-800">
+                  {asset_type &&
+                    isMobile &&
+                    renderAssetTypeHintLabel(asset_type)}
+                </div>
+                <ErrorHelperText error={state.errors.asset_type} />
               </div>
               <div>
                 <InputLabel htmlFor="asset-class" id="name=label">
@@ -398,21 +436,8 @@ const AssetCreate = (props: AssetProps) => {
                   placeholder=""
                   variant="outlined"
                   margin="dense"
-                  options={[
-                    {
-                      id: "",
-                      name: "Select",
-                    },
-                    {
-                      id: "ONVIF",
-                      name: "ONVIF Camera",
-                    },
-                    {
-                      id: "HL7MONITOR",
-                      name: "HL7 Vitals Monitor",
-                    },
-                  ]}
-                  optionValue="name"
+                  options={assetClassOptions}
+                  optionValue="description"
                   value={asset_class}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setAssetClass(e.target.value as AssetClass)
