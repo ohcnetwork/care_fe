@@ -608,7 +608,13 @@ const AssetCreate = (props: AssetProps) => {
                 color="primary"
                 variant="outlined"
                 type="button"
-                onClick={() => goBack()}
+                onClick={() =>
+                  navigate(
+                    `${
+                      assetId ? `/assets/${assetId}` : `/facility/${facilityId}`
+                    }`
+                  )
+                }
                 startIcon={<CancelOutlineIcon>cancel</CancelOutlineIcon>}
               >
                 Cancel
