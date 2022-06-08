@@ -275,7 +275,7 @@ export default function ResultList() {
         <tr key={`usr_${result.id}`} className="bg-white">
           <td
             onClick={() => navigate(resultUrl)}
-            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-900"
+            className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900"
           >
             <div className="flex">
               <a
@@ -288,12 +288,12 @@ export default function ResultList() {
               </a>
             </div>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             <span className="text-gray-900 font-medium">
               {result.test_type}
             </span>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
               {result.result}
             </span>
@@ -303,10 +303,10 @@ export default function ResultList() {
               </span>
             ) : null}
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             {result.result_date || "-"}
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             <Button
               variant="outlined"
               color="primary"

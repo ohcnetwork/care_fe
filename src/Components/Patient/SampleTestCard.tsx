@@ -8,6 +8,7 @@ import { SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
+import _ from "lodash";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -34,7 +35,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
     status: number,
     result: number
   ) => {
-    let sampleData: any = {
+    const sampleData: any = {
       id: sample.id,
       status,
       consultation: sample.consultation,
@@ -72,7 +73,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
     <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4">
       <CardContent>
         <div
-          onClick={(e) =>
+          onClick={(_e) =>
             navigate(
               `/facility/${facilityId}/patient/${patientId}/sample/${itemData.id}`
             )
@@ -81,11 +82,11 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         >
           <div>
             <span className="text-gray-700">Status: </span>
-            {itemData.status}
+            {_.startCase(_.camelCase(itemData.status))}
           </div>
           <div>
             <span className="text-gray-700">Result: </span>
-            {itemData.result}
+            {_.startCase(_.camelCase(itemData.result))}
           </div>
           <div className="md:col-span-2">
             <span className="text-gray-700">Sample Type: </span>
@@ -156,13 +157,13 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         <div className="mt-4 flex flex-wrap justify-between w-full">
           <button
             onClick={(e) => navigate(`/sample/${itemData.id}`)}
-            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
           >
             Sample Report
           </button>
           <button
             onClick={(e) => showUpdateStatus(itemData)}
-            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
           >
             UPDATE SAMPLE TEST STATUS
           </button>

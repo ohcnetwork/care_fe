@@ -29,13 +29,13 @@ let make = (~prescriptions) => {
                 <tbody> {Js.Array.mapi((p, index) => {
                     <tr className="bg-white" key={string_of_int(index)}>
                       <td
-                        className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                        className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
                         {str(Prescription__Prescription.medicine(p))}
                       </td>
-                      <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                         {str(Prescription__Prescription.dosage(p))}
                       </td>
-                      <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                         {str(string_of_int(Prescription__Prescription.days(p)))}
                       </td>
                     </tr>
