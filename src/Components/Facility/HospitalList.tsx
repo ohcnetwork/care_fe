@@ -79,7 +79,7 @@ const HospitalListPage = (props: any) => {
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
-  const rootState: any = useSelector((rootState) => rootState);
+  const rootState: any = useSelector((rootState: any) => rootState);
   const { currentUser } = rootState;
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
