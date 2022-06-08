@@ -477,7 +477,7 @@ export const FileUpload = (props: FileUploadProps) => {
       .catch(() => {
         setUploadStarted(false);
       })
-      .then(fetchData(status));
+      .then(fetchData(status).then(() => {}));
 
     // setting the value of file name to empty
     setUploadFileName("");
