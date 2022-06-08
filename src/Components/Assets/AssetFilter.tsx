@@ -127,10 +127,10 @@ function AssetFilter(props: any) {
           Apply
         </button>
       </div>
-      <div className="w-64 flex-none mt-2">
+      <div className="w-full flex-none mt-2">
         <div className="font-light text-md mt-2">Filter By:</div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none mt-2">
           <span className="text-sm font-semibold">Facility</span>
           <FacilitySelect
             name="Facilities"
@@ -144,7 +144,7 @@ function AssetFilter(props: any) {
           />
         </div>
         {facilityId && (
-          <div className="w-64 flex-none">
+          <div className="w-full flex-none">
             <span className="text-sm font-semibold">Location</span>
             <LocationSelect
               name="Facilities"
@@ -159,7 +159,7 @@ function AssetFilter(props: any) {
             />
           </div>
         )}
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Asset Type</span>
           <SelectField
             id="asset-type"
@@ -190,7 +190,7 @@ function AssetFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Asset Status</span>
           <SelectField
             id="asset-status"

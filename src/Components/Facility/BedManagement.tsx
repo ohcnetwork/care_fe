@@ -4,8 +4,6 @@ import { useDispatch } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  listFacilityAssetLocation,
-  updateFacilityAssetLocation,
   getAnyFacility,
   listFacilityBeds,
   updateFacilityBed,
@@ -282,7 +280,7 @@ export const BedManagement = (props: BedManagementProps) => {
           colSpan={3}
           className="px-5 py-5 border-b border-gray-200 text-center"
         >
-          <p className="text-gray-500 whitespace-no-wrap">
+          <p className="text-gray-500 whitespace-nowrap">
             No beds available in this location
           </p>
         </td>
@@ -336,7 +334,10 @@ export const BedManagement = (props: BedManagementProps) => {
         title="Bed Management"
         hideBack={false}
         className="mx-3 md:mx-8"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [locationId]: { style: "pointer-events-none" },
+        }}
       />
       <div className="container mx-auto px-4 py-4 md:my-8 sm:px-8">
         <Button

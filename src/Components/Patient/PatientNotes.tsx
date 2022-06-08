@@ -84,7 +84,13 @@ const PatientNotes = (props: PatientNotesProps) => {
     const payload = {
       note: noteField,
     };
-    dispatch(addPatientNote(props.patientId, payload)).then((res: any) => {
+    if (!/\S+/.test(noteField)) {
+      Notification.Error({
+        msg: "Note Should Contain At Least 1 Character",
+      });
+      return;
+    }
+    dispatch(addPatientNote(props.patientId, payload)).then(() => {
       Notification.Success({ msg: "Note added successfully" });
       fetchData();
     });
@@ -123,7 +129,10 @@ const PatientNotes = (props: PatientNotesProps) => {
         <h3 className="text-lg">Added Notes</h3>
         <div className="w-full">
           {state.notes.map((note: any) => (
-            <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
+            <div
+              key={note.id}
+              className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+            >
               <div className="flex  w-full ">
                 <p className="text-justify">{note.note}</p>
               </div>

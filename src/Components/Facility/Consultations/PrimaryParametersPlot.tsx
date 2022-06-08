@@ -9,7 +9,6 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const PrimaryParametersPlot = (props: any) => {
-  const { consultationId } = props;
   const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,7 +35,7 @@ export const PrimaryParametersPlot = (props: any) => {
               "rhythm_detail",
             ],
           },
-          { consultationId }
+          props.consultationId
         )
       );
       if (!status.aborted) {
@@ -46,14 +45,14 @@ export const PrimaryParametersPlot = (props: any) => {
         }
       }
     },
-    [consultationId, dispatch, currentPage]
+    [props.consultationId, dispatch, currentPage]
   );
 
   useAbortableEffect(
     (status: statusType) => {
       fetchDailyRounds(status);
     },
-    [consultationId, currentPage]
+    [props.consultationId, currentPage]
   );
 
   const handlePagination = (page: number) => {

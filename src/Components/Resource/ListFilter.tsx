@@ -196,7 +196,7 @@ export default function ListFilter(props: any) {
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
         {props.showResourceStatus && (
-          <div className="w-64 flex-none">
+          <div className="w-full flex-none">
             <span className="text-sm font-semibold">Status</span>
             <SelectField
               name="status"
@@ -210,7 +210,7 @@ export default function ListFilter(props: any) {
             />
           </div>
         )}
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Origin facility</span>
           <div className="">
             {isOriginLoading ? (
@@ -228,7 +228,7 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">
             Resource approving facility
           </span>
@@ -248,7 +248,7 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Assigned facility</span>
           <div className="">
             {isAssignedLoading ? (
@@ -279,7 +279,7 @@ export default function ListFilter(props: any) {
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
         </div> */}
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Ordering</span>
           <SelectField
             name="ordering"
@@ -294,7 +294,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Is emergency case</span>
           <SelectField
             name="emergency"
@@ -308,7 +308,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <DateRangePicker
             startDate={getDate(filterState.created_date_after)}
             endDate={getDate(filterState.created_date_before)}
