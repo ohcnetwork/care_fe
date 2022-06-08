@@ -484,7 +484,7 @@ export const PatientManager = (props: any) => {
           key={`usr_${patient.id}`}
           onClick={() => navigate(patientUrl)}
           className={
-            "w-full cursor-pointer border-b-4 md:flex justify-between items-center  " +
+            "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 " +
             (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
