@@ -387,9 +387,7 @@ const AssetCreate = (props: AssetProps) => {
                   aria-label="asset_type"
                   name="asset_type"
                   value={asset_type}
-                  onChange={(e) =>
-                    setAssetType(e.target.value as AssetType | undefined)
-                  }
+                  onChange={(e) => setAssetType(e.target.value as AssetType)}
                   className="flex flex-col justify-center mt-2"
                 >
                   <Box display="flex" flexDirection="row">
