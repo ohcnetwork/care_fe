@@ -92,7 +92,7 @@ export default function BoardView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="w-full flex items-center justify-between space-x-4">
+      <div className="w-full flex-col md:flex-row flex items-center justify-between space-x-4">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
             title={"Resource"}
