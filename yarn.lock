@@ -1677,7 +1677,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cypress/request@npm:^2.88.10, @cypress/request@npm:^2.88.5":
+"@cypress/request@npm:^2.88.10":
   version: 2.88.10
   resolution: "@cypress/request@npm:2.88.10"
   dependencies:
@@ -3776,13 +3776,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sinonjs__fake-timers@npm:^6.0.2":
-  version: 6.0.4
-  resolution: "@types/sinonjs__fake-timers@npm:6.0.4"
-  checksum: 200cb24235409964269465e8a94ad735ec8bab98f3b2405cd6351fa6f6399be268cbbd4e824c9d361d9431ae11070cff4c3b6400b18aff03cb7933985853c0c9
-  languageName: node
-  linkType: hard
-
 "@types/sizzle@npm:^2.3.2":
   version: 2.3.3
   resolution: "@types/sizzle@npm:2.3.3"
@@ -5580,7 +5573,7 @@ __metadata:
     bs-webapi: ^0.19.0
     clsx: ^1.1.1
     cross-env: ^7.0.3
-    cypress: ^7.5.0
+    cypress: ^10.0.3
     date-fns: ^2.16.1
     date-fns-tz: ^1.0.10
     echarts: ^5.1.2
@@ -5850,7 +5843,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cli-table3@npm:~0.6.0, cli-table3@npm:~0.6.1":
+"cli-table3@npm:~0.6.1":
   version: 0.6.2
   resolution: "cli-table3@npm:0.6.2"
   dependencies:
@@ -6676,23 +6669,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cypress@npm:^7.5.0":
-  version: 7.7.0
-  resolution: "cypress@npm:7.7.0"
+"cypress@npm:^10.0.3":
+  version: 10.0.3
+  resolution: "cypress@npm:10.0.3"
   dependencies:
-    "@cypress/request": ^2.88.5
+    "@cypress/request": ^2.88.10
     "@cypress/xvfb": ^1.2.4
     "@types/node": ^14.14.31
-    "@types/sinonjs__fake-timers": ^6.0.2
+    "@types/sinonjs__fake-timers": 8.1.1
     "@types/sizzle": ^2.3.2
     arch: ^2.2.0
     blob-util: ^2.0.2
     bluebird: ^3.7.2
+    buffer: ^5.6.0
     cachedir: ^2.3.0
     chalk: ^4.1.0
     check-more-types: ^2.24.0
     cli-cursor: ^3.1.0
-    cli-table3: ~0.6.0
+    cli-table3: ~0.6.1
     commander: ^5.1.0
     common-tags: ^1.8.0
     dayjs: ^1.10.4
@@ -6711,19 +6705,19 @@ __metadata:
     listr2: ^3.8.3
     lodash: ^4.17.21
     log-symbols: ^4.0.0
-    minimist: ^1.2.5
+    minimist: ^1.2.6
     ospath: ^1.2.2
     pretty-bytes: ^5.6.0
-    ramda: ~0.27.1
+    proxy-from-env: 1.0.0
     request-progress: ^3.0.0
+    semver: ^7.3.2
     supports-color: ^8.1.1
     tmp: ~0.2.1
     untildify: ^4.0.0
-    url: ^0.11.0
     yauzl: ^2.10.0
   bin:
     cypress: bin/cypress
-  checksum: 8ad8700d448949941801b6ff25549ef93e593b659b1605a936a8021032acb50f1849c9b8f8d1ba7df713de803b8203a1978231ccd0443f2e819bd9cf1b23d562
+  checksum: b65ed7aba0b767b760d6b3103c5d93d4ba78c195650c0ffed5af0d26454fe35455b17c452882db6826bc88245e75925c5f6c333ae962d5813a4db274ab7fd55f
   languageName: node
   linkType: hard
 
@@ -14623,13 +14617,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"punycode@npm:1.3.2":
-  version: 1.3.2
-  resolution: "punycode@npm:1.3.2"
-  checksum: b8807fd594b1db33335692d1f03e8beeddde6fda7fbb4a2e32925d88d20a3aa4cd8dcc0c109ccaccbd2ba761c208dfaaada83007087ea8bfb0129c9ef1b99ed6
-  languageName: node
-  linkType: hard
-
 "punycode@npm:^2.1.0, punycode@npm:^2.1.1":
   version: 2.1.1
   resolution: "punycode@npm:2.1.1"
@@ -14680,13 +14667,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"querystring@npm:0.2.0":
-  version: 0.2.0
-  resolution: "querystring@npm:0.2.0"
-  checksum: 8258d6734f19be27e93f601758858c299bdebe71147909e367101ba459b95446fbe5b975bf9beb76390156a592b6f4ac3a68b6087cea165c259705b8b4e56a69
-  languageName: node
-  linkType: hard
-
 "querystring@npm:^0.2.1":
   version: 0.2.1
   resolution: "querystring@npm:0.2.1"
@@ -14714,13 +14694,6 @@ __metadata:
   dependencies:
     performance-now: ^2.1.0
   checksum: 50ba284e481c8185dbcf45fc4618ba3aec580bb50c9121385d5698cb6012fe516d2015b1df6dd407a7b7c58d44be8086108236affbce1861edd6b44637c8cd52
-  languageName: node
-  linkType: hard
-
-"ramda@npm:~0.27.1":
-  version: 0.27.2
-  resolution: "ramda@npm:0.27.2"
-  checksum: 28d6735dd1eea1a796c56cf6111f3673c6105bbd736e521cdd7826c46a18eeff337c2dba4668f6eed990d539b9961fd6db19aa46ccc1530ba67a396c0a9f580d
   languageName: node
   linkType: hard
 
@@ -17897,16 +17870,6 @@ __metadata:
   version: 2.0.5
   resolution: "url-join@npm:2.0.5"
   checksum: 5c935cc99e5bfd7150302420db4eff9830d117be5ea3edf4b2d9e30a51484bc422e94fd9f2fba78192a75cebe2663735af716e07ec094b9a5f24c75046644c73
-  languageName: node
-  linkType: hard
-
-"url@npm:^0.11.0":
-  version: 0.11.0
-  resolution: "url@npm:0.11.0"
-  dependencies:
-    punycode: 1.3.2
-    querystring: 0.2.0
-  checksum: 50d100d3dd2d98b9fe3ada48cadb0b08aa6be6d3ac64112b867b56b19be4bfcba03c2a9a0d7922bfd7ac17d4834e88537749fe182430dfd9b68e520175900d90
   languageName: node
   linkType: hard
 

@@ -9,7 +9,7 @@ class facility {
   }
 
   static update(facility) {
-    cy.get("[id=update-facility").click();
+    cy.get("[id=update-facility]").click();
     cy.url().should("include", "update");
     this.fillForm(facility);
     cy.get("[id=facility-save]").should("exist").click();
