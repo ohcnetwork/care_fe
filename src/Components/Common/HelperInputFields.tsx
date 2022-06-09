@@ -522,6 +522,7 @@ export const AutoCompleteMultiField = (props: any) => {
 
 export const AutoCompleteAsyncField = (props: any) => {
   const {
+    name,
     margin,
     options,
     label,
@@ -563,6 +564,7 @@ export const AutoCompleteAsyncField = (props: any) => {
         renderInput={(params: any) => (
           <TextField
             {...params}
+            name={name}
             variant={variant}
             margin={margin || "normal"}
             label={label}

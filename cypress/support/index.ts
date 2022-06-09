@@ -16,5 +16,14 @@
 // Import commands.js using ES2015 syntax:
 import "./commands";
 
+declare namespace Cypress {
+  interface Chainable<Subject = any> {
+    login(username: string, password: string): Chainable<Subject>;
+    verifyNotification(msg: string): Chainable<Subject>;
+    saveLocalStorage(): Chainable<Subject>;
+    restoreLocalStorage(): Chainable<Subject>;
+  }
+}
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

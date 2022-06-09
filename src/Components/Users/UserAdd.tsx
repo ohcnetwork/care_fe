@@ -554,6 +554,7 @@ export const UserAdd = (props: UserProps) => {
 
               <div>
                 <PhoneNumberField
+                  placeholder="phone_number"
                   label="Phone Number*"
                   value={state.form.phone_number}
                   onChange={(value: any) =>
@@ -575,6 +576,7 @@ export const UserAdd = (props: UserProps) => {
 
               <div>
                 <PhoneNumberField
+                  placeholder="whatsapp_number"
                   label="Whatsapp Number"
                   value={state.form.alt_phone_number}
                   onChange={(value: any) =>
@@ -650,6 +652,7 @@ export const UserAdd = (props: UserProps) => {
               <div>
                 <InputLabel>Date of birth*</InputLabel>
                 <DateInputField
+                  name="dob"
                   fullWidth={true}
                   value={state.form.date_of_birth}
                   onChange={(date) => handleDateChange(date, "date_of_birth")}
