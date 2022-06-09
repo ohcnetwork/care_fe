@@ -10,6 +10,8 @@ export interface AssetLocationObject {
   };
 }
 
+export type AssetType = "INTERNAL" | "EXTERNAL";
+
 export interface AssetData {
   id: string;
   name: string;
