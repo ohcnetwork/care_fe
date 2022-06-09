@@ -72,22 +72,12 @@ export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
 }
 
 // Type Declarations
-type TextFieldPropsExtended = TextFieldProps & { errors: string };
+type TextFieldPropsExtended = TextFieldProps & { errors: string; min?: string };
 type ActionTextFieldProps = TextFieldPropsExtended & {
   actionIcon?: React.ReactElement;
   action?: () => void;
 };
-// type Option = { text: string; score: number };
-// interface InputProps {
-//   options: Array<Option>;
-//   onChange: (
-//     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-//     index: number
-//   ) => void;
-//   handleDeleteOption: (index: number) => void;
-//   errors: Array<Option>;
-//   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-// }
+
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
   onChange: (
@@ -100,13 +90,6 @@ interface DateInputFieldProps extends DatePickerProps {
   disabled?: boolean;
   margin?: "none" | "dense" | "normal";
 }
-// interface TimeInputFieldProps {
-//   value: string;
-//   onChange: (
-//     date: MaterialUiPickersDate,
-//     value?: string | null | undefined
-//   ) => void;
-// }
 
 interface CheckboxProps extends Omit<FormControlLabelProps, "control"> {
   label: string;
@@ -119,8 +102,11 @@ interface OptionsProps {
 }
 
 export const TextInputField = (props: TextFieldPropsExtended) => {
-  const { onChange, type, errors, onKeyDown } = props;
+  const { onChange, type, errors, onKeyDown, min } = props;
   const inputType = type === "number" || type === "float" ? "text" : type;
+  const minDateprops = {
+    min: min,
+  };
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (typeof onChange !== "function") {
       return;
@@ -144,6 +130,7 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
       <TextField
         {...props}
         fullWidth
+        inputProps={minDateprops}
         type={inputType}
         onChange={handleChange}
         onKeyDown={handleKeyDown}

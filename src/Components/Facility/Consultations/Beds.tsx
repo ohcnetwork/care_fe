@@ -64,65 +64,32 @@ const Beds = (props: BedsProps) => {
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    const current_start_Date: any = new Date(
-      currentstartDate
-    ).toLocaleDateString();
-    const current_start_Time: any = new Date(
-      currentstartDate
-    ).toLocaleTimeString();
     if (!bed?.id)
       return Notification.Error({
         msg: "Please select a bed first..!",
       });
-    if (
-      check_DateTime_BeforeOrAfter(currentstartDate, startDate) ||
-      currentstartDate === ""
-    ) {
-      const res: any = await Promise.resolve(
-        dispatch(
-          createConsultationBed(
-            { start_date: startDate },
-            consultationId,
-            bed?.id
-          )
+
+    const res: any = await Promise.resolve(
+      dispatch(
+        createConsultationBed(
+          { start_date: startDate },
+          consultationId,
+          bed?.id
         )
-      );
-      if (res && res.status === 201) {
-        Notification.Success({
-          msg: "Bed allocated successfully",
-        });
-        window.location.reload();
-      } else {
-        Notification.Error({
-          msg: "Something went wrong..!",
-        });
-      }
+      )
+    );
+    if (res && res.status === 201) {
+      Notification.Success({
+        msg: "Bed allocated successfully",
+      });
+      window.location.reload();
     } else {
       Notification.Error({
-        msg: `Invalid Date !! Please choose a date after ${current_start_Date} and ${current_start_Time}.`,
+        msg: "Something went wrong..!",
       });
     }
   };
-
-  const check_DateTime_BeforeOrAfter = (
-    currentstartDate: string,
-    startDate: string
-  ) => {
-    const current_start_Date: any = new Date(currentstartDate).getTime();
-    const start_Date: any = new Date(startDate).getTime();
-    console.log(
-      current_start_Date,
-      start_Date,
-      current_start_Date - start_Date
-    );
-    if (start_Date - current_start_Date > 0) {
-      return true;
-    }
-    return false;
-  };
-
   if (isLoading) return <Loading />;
-
   return (
     <div>
       <h3 className="mb-4 text-lg">Move to a new bed: </h3>
@@ -151,6 +118,7 @@ const Beds = (props: BedsProps) => {
               margin="dense"
               type="datetime-local"
               value={startDate}
+              min={currentstartDate.split("+")[0]}
               onChange={(e) => setStartDate(e.target.value)}
               errors=""
             />
