@@ -318,14 +318,20 @@ export const HospitalList = (props: any) => {
       facility: id,
       message: notifyMessage,
     };
-    const res = await dispatchAction(sendNotificationMessages(data));
-    if (res && res.status == 204) {
-      Notification.Success({
-        msg: "Facility Notified",
-      });
-      setModalFor(undefined);
+    if (data.message.trim().length >= 1) {
+      const res = await dispatchAction(sendNotificationMessages(data));
+      if (res && res.status == 204) {
+        Notification.Success({
+          msg: "Facility Notified",
+        });
+        setModalFor(undefined);
+      } else {
+        Notification.Error({ msg: "Something went wrong..." });
+      }
     } else {
-      Notification.Error({ msg: "Something went wrong..." });
+      Notification.Error({
+        msg: "Notification should contain atleast 1 character.",
+      });
     }
   };
 
@@ -528,7 +534,7 @@ export const HospitalList = (props: any) => {
 
         <div className="flex justify-end w-full mt-4">
           <div>
-            <Accordion className="mt-2 lg:mt-0 md:mt-0">
+            <Accordion className="mt-10 lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"

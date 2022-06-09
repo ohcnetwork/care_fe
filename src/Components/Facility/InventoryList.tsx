@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getInventorySummary, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
+import { RoleButton } from "../Common/RoleButton";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -166,16 +167,20 @@ export default function InventoryList(props: any) {
         <div className="py-4 md:py-8">
           <div className="flex flex-col md:flex-row items-center">
             <div className="mt-2">
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() =>
+              <RoleButton
+                materialButtonProps={{
+                  variant: "contained",
+                  color: "primary",
+                  size: "small",
+                }}
+                handleClickCB={() =>
                   navigate(`/facility/${facilityId}/inventory/add`)
                 }
+                disableFor="readOnly"
+                buttonType="materialUI"
               >
                 Add Inventory
-              </Button>
+              </RoleButton>
             </div>
             <div className="mt-2">
               <Button
