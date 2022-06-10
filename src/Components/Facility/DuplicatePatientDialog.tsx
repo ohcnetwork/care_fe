@@ -51,6 +51,8 @@ const columns = [
   },
 ];
 
+const tdClass = "border border-gray-400 p-2 text-left";
+
 const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
   const { patientList, handleOk, handleCancel, classes, isNew } = props;
   const [action, setAction] = useState("");
@@ -68,19 +70,18 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
         className=" font-semibold text-3xl"
         id="font-semibold text-3xl"
       >
-        Patient Record Found
+        Patient Records Found
       </DialogTitle>
       <DialogContent>
         <div className="grid gap-4 grid-cols-1">
           <div>
             <p className="leading-relaxed text-sm">
-              Please transfer / Admit the patient record to your facility by
-              selecting the patient from the following list of suspect's
-              registered with{" "}
-              <span className="font-bold">{patientList[0].phone_number}</span>{" "}
+              It appears that there are patient records that contain the same phone number as the one you just entered. (
+              <span className="font-bold">{patientList[0].phone_number}</span>)
             </p>
           </div>
           <div>
+            {/* Removed as we have to move on from material UI
             <Paper variant="outlined" style={{ height: 200, width: "100%" }}>
               <VirtualizedTable
                 rowCount={patientList.length}
@@ -88,10 +89,49 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
                 columns={columns}
               />
             </Paper>
+            */}
+            <div className="max-h-[200px] overflow-auto rounded border border-y-gray-400">
+              <table className="w-full relative border-collapse">
+                <thead>
+                  <tr className="border-separate">
+                    {
+                      ["Patient Name and ID", "Gender"].map((heading, i)=>(
+                        <th key={i} className={tdClass + " sticky top-0 bg-white/90"}>
+                          {heading}
+                        </th>
+                      ))
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    patientList.map((patient, i)=>{
+                      return (
+                        <tr key={i}>
+                          <td className={tdClass}>
+                            <div className="font-semibold">
+                              {patient.name}
+                            </div>
+                            <div className="text-xs break-words">
+                              ID : {patient.patient_id}
+                            </div>
+                          </td>
+                          <td className={tdClass}>
+                            {patient.gender}
+                          </td>
+                        </tr>
+
+                      )
+                    })
+                  }
+                </tbody>
+              </table>
+            </div>
+            
           </div>
           <div>
             <InputLabel className="mb-2">
-              Please select one option to continue or click Cancel
+              Please select one option to continue or click cancel
             </InputLabel>
             <RadioGroup
               name="confirm_action"
@@ -113,9 +153,9 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
                   label="I confirm that the suspect / patient i want to create is not on the list."
                 />
                 <p>
-                  Please contact your district care coordinator or the shifting
-                  facility or the patient if you are not sure about the date of
-                  birth of the patient you want to admit.
+                  Please contact your district care coordinator, the shifting
+                  facility or the patient themselves if you are not sure about the patient's date of
+                  birth.
                 </p>
               </Box>
             </RadioGroup>
