@@ -20,7 +20,7 @@ import Box from "@mui/material/Box";
 import FormControl from "@mui/material/FormControl";
 import { NativeSelectInputProps } from "@mui/material/NativeSelect/NativeSelectInput";
 import { SelectProps } from "@mui/material/Select";
-import Autocomplete from "@mui/lab/Autocomplete";
+import { Autocomplete } from "@mui/material";
 import { DatePicker, DateTimePicker, TimePicker } from "@mui/x-date-pickers";
 // import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { debounce } from "lodash";
@@ -219,7 +219,6 @@ export const DateTimeFiled = (props: any) => {
     </LocalizationProvider>
   );
 };
-
 
 export const DateInputField = (props: any) => {
   const { value, onChange, label, errors, disabled, ...restProps } = props;
@@ -539,10 +538,9 @@ export const AutoCompleteAsyncField = (props: any) => {
         noOptionsText={noOptionsText}
         isOptionEqualToValue={getOptionSelected}
         getOptionLabel={getOptionLabel}
-        renderOption={(props: any, option: any) => [
-          props,
-          renderOption(option),
-        ]}
+        renderOption={(props, option) => (
+          <li {...props}>{renderOption(option)}</li>
+        )}
         filterOptions={filterOptions}
         className={className}
         renderInput={(params: any) => (
