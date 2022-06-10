@@ -4,7 +4,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Paper,
   FormControlLabel,
   Radio,
   Box,
@@ -13,9 +12,7 @@ import {
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { WithStyles, withStyles } from "@material-ui/styles";
-import React, { useState } from "react";
-import { CheckboxField } from "../Common/HelperInputFields";
-import { VirtualizedTable } from "../Common/VirtualizedTable";
+import { useState } from "react";
 import { DupPatientModel } from "./models";
 
 interface Props {
@@ -31,25 +28,6 @@ const styles = {
     "min-width": "400px",
   },
 };
-
-const columns = [
-  {
-    width: 120,
-    label: "Patient ID",
-    dataKey: "patient_id",
-  },
-  {
-    width: 200,
-    flexGrow: 1,
-    label: "Name",
-    dataKey: "name",
-  },
-  {
-    width: 120,
-    label: "Gender",
-    dataKey: "gender",
-  },
-];
 
 const tdClass = "border border-gray-400 p-2 text-left";
 
@@ -81,15 +59,6 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
             </p>
           </div>
           <div>
-            {/* Removed as we have to move on from material UI
-            <Paper variant="outlined" style={{ height: 200, width: "100%" }}>
-              <VirtualizedTable
-                rowCount={patientList.length}
-                rowGetter={({ index }: any) => patientList[index]}
-                columns={columns}
-              />
-            </Paper>
-            */}
             <div className="max-h-[200px] overflow-auto rounded border border-y-gray-400">
               <table className="w-full relative border-collapse">
                 <thead>
@@ -159,12 +128,6 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
                 </p>
               </Box>
             </RadioGroup>
-            {/* <CheckboxField
-                            checked={confirm}
-                            onChange={(e: any) => setConfirm(e.target.checked)}
-                            name="confirm"
-                            label="I confirm that I'm registering a different suspect / patient"
-                        /> */}
           </div>
         </div>
       </DialogContent>
