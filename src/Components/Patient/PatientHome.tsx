@@ -30,6 +30,7 @@ import { ErrorHelperText } from "../Common/HelperInputFields";
 import Modal from "@material-ui/core/Modal";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import { RoleButton } from "../Common/RoleButton";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -288,7 +289,7 @@ export const PatientHome = (props: any) => {
     setSelectedStatus({ status, sample });
     setAlertMessage({
       show: true,
-      message: "Are you sure you want to sent the sample to Collection Centre?",
+      message: "Are you sure you want to send the sample to Collection Centre?",
       title: "Confirm",
     });
   };
@@ -731,36 +732,40 @@ export const PatientHome = (props: any) => {
                   </div>
                 )}
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={!patientData.is_active}
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/update`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     <i className="fas fa-pencil-alt mr-2" />
                     Update Details
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !consultationListData ||
                       !consultationListData.length ||
                       !patientData.is_active
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       handlePatientTransfer(!patientData.allow_transfer)
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     <i className="fas fa-lock mr-2" />
                     {patientData.allow_transfer
                       ? "Disable Transfer"
                       : "Allow Transfer"}
-                  </button>
+                  </RoleButton>
                 </div>
               </div>
             </div>
@@ -1189,6 +1194,15 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Medical
               </div>
+              {/* No medical data found */}
+              {!patientData.present_health &&
+                !patientData.allergies &&
+                !patientData.ongoing_medication &&
+                !patientData.is_antenatal && (
+                  <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
+                    No Medical History Available
+                  </div>
+                )}
               <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
                 {patientData.present_health && (
                   <div className="sm:col-span-1">
@@ -1275,36 +1289,40 @@ export const PatientHome = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${id}/shift/new`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     SHIFT PATIENT
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/sample-test`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Request Sample Test
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
                   <button
@@ -1319,13 +1337,13 @@ export const PatientHome = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     onClick={() => setOpenAssignVolunteerDialog(true)}
                     disabled={false}
                   >
                     Assign to a volunteer
-                  </button>
+                  </RoleButton>
                 </div>
               </div>
             </div>

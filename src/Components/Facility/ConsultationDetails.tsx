@@ -328,7 +328,7 @@ export const ConsultationDetails = (props: any) => {
   }
 
   const tabButtonClasses = (selected: boolean) =>
-    `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold ${
+    `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
