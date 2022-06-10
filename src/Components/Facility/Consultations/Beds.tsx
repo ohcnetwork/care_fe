@@ -17,7 +17,6 @@ import moment from "moment";
 
 const formatDateTime: () => string = () => {
   const current = new Date();
-  console.log(current);
   const yyyy = String(current.getFullYear()).padStart(4, "0");
   const mm = String(current.getMonth() + 1).padStart(2, "0");
   const dd = String(current.getDate()).padStart(2, "0");
