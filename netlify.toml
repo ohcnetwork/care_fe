@@ -14,6 +14,7 @@ command = "CI='' yarn run build"
 
 [build.environment]
 NODE_VERSION = "16"
+YARN_VERSION = "3.2.1"
 NPM_FLAGS = "--version"
 
 [[plugins]]
