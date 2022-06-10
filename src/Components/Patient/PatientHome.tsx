@@ -35,6 +35,7 @@ import { validateEmailAddress } from "../../Common/validation";
 import Modal from "@material-ui/core/Modal";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import { RoleButton } from "../Common/RoleButton";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -900,36 +901,40 @@ export const PatientHome = (props: any) => {
                   </div>
                 )}
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={!patientData.is_active}
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/update`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     <i className="fas fa-pencil-alt mr-2" />
                     Update Details
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !consultationListData ||
                       !consultationListData.length ||
                       !patientData.is_active
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       handlePatientTransfer(!patientData.allow_transfer)
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     <i className="fas fa-lock mr-2" />
                     {patientData.allow_transfer
                       ? "Disable Transfer"
                       : "Allow Transfer"}
-                  </button>
+                  </RoleButton>
                 </div>
               </div>
             </div>
@@ -1444,36 +1449,40 @@ export const PatientHome = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${id}/shift/new`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     SHIFT PATIENT
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/sample-test`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Request Sample Test
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
                   <button
@@ -1488,33 +1497,38 @@ export const PatientHome = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
-                    onClick={handleClickOpen}
+                    handleClickCB={handleClickOpen}
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Discharge Summary
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
-                    onClick={handleDischageClickOpen}
+                    handleClickCB={handleDischageClickOpen}
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Discharge from CARE
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
-                    onClick={() => setOpenAssignVolunteerDialog(true)}
-                    disabled={false}
+                    handleClickCB={() => setOpenAssignVolunteerDialog(true)}
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Assign to a volunteer
-                  </button>
+                  </RoleButton>
                 </div>
               </div>
             </div>
