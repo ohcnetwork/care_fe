@@ -11,14 +11,15 @@ import {
 } from "../../Redux/actions";
 import { Badge } from "../Patient/ManagePatients";
 import { AssetData } from "./AssetTypes";
+import { getAsset } from "../../Redux/actions";
 import React, { useState, useCallback, useEffect } from "react";
 import { navigate, useQueryParams } from "raviger";
 import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
-import { FacilityModel } from "../Facility/models";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
 
@@ -32,7 +33,7 @@ interface qParamModel {
   status?: string;
 }
 
-const AssetsList = (props: any) => {
+const AssetsList = () => {
   const [qParams, setQueryParams] = useQueryParams();
   const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -211,6 +212,21 @@ const AssetsList = (props: any) => {
     }
   };
 
+  const checkValidAssetId = async (assetId: any) => {
+    const assetData: any = await dispatch(getAsset(assetId));
+    try {
+      if (assetData.data) {
+        navigate(`/assets/${assetId}`);
+      }
+    } catch (err) {
+      console.log(err);
+      setIsLoading(false);
+      Notification.Error({
+        msg: "Invalid QR code scanned !!!",
+      });
+    }
+  };
+
   if (isLoading) return <Loading />;
   if (isScannerActive)
     return (
@@ -226,8 +242,7 @@ const AssetsList = (props: any) => {
           onScan={async (value: any) => {
             if (value) {
               const assetId = await getAssetIdFromQR(value);
-              setIsLoading(false);
-              navigate(`/assets/${assetId ?? value}`);
+              checkValidAssetId(assetId ?? value);
             }
           }}
           onError={(e: any) =>
@@ -251,9 +266,16 @@ const AssetsList = (props: any) => {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Assets
               </dt>
-              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                {totalCount}
-              </dd>
+              {/* Show spinner until count is fetched from server */}
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
             </dl>
           </div>
         </div>
@@ -293,7 +315,7 @@ const AssetsList = (props: any) => {
         {badge("Asset Type", asset_type, ["asset_type"])}
         {badge("Status", qParams.status, ["status"])}
       </div>
-      <div className="flex-grow mt-10 bg-white">
+      <div className="grow mt-10 bg-white">
         <div className="p-8">
           <div className="flex flex-wrap md:-mx-4">
             {assetsExist ? (

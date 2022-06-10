@@ -60,7 +60,7 @@ export default function TeleICUPatientPage({
               onClick={() => setShowDoctors(true)}
               className="btn m-1 btn-primary hover:text-white"
             >
-              Doctor Video
+              Doctor Connect
             </button>
             {patient.last_consultation?.id && (
               <Link

@@ -133,11 +133,11 @@ export const ConsultationDetails = (props: any) => {
         if (dailyRounds?.data?.results?.length && current_bed) {
           const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
           if (bedAssets?.data?.results?.length) {
-            const { camera_address, camera_access_key, middleware_hostname } =
+            const { local_ip_address, camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
-              hostname: camera_address,
+              hostname: local_ip_address,
               username: camera_access_key.split(":")[0],
               password: camera_access_key.split(":")[1],
               port: 80,
@@ -150,7 +150,7 @@ export const ConsultationDetails = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch]
+    [consultationId, dispatch, patientData.is_vaccinated]
   );
 
   useAbortableEffect((status: statusType) => {
@@ -162,12 +162,12 @@ export const ConsultationDetails = (props: any) => {
   }
 
   const tabButtonClasses = (selected: boolean) =>
-    `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold ${
+    `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
   return (
-    <div>
+    <div className="relative">
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap">
           <PageTitle
@@ -175,24 +175,25 @@ export const ConsultationDetails = (props: any) => {
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
-
-          <div className="flex items-start justify-start sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
-            <div className="px-2">
-              <button
-                onClick={() => setShowDoctors(true)}
-                className="btn m-1 btn-primary hover:text-white"
-              >
-                Doctor Video
-              </button>
-              {patientData.last_consultation?.id && (
-                <Link
-                  href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+          <div className="lg:absolute right-0 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+            {patientData.is_active && (
+              <div className="px-2">
+                <button
+                  onClick={() => setShowDoctors(true)}
                   className="btn m-1 btn-primary hover:text-white"
                 >
-                  Camera Feed
-                </Link>
-              )}
-            </div>
+                  Doctor Connect
+                </button>
+                {patientData.last_consultation?.id && (
+                  <Link
+                    href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                    className="btn m-1 btn-primary hover:text-white"
+                  >
+                    Camera Feed
+                  </Link>
+                )}
+              </div>
+            )}
             <div className="px-2">
               <Link
                 href={`/facility/${patientData.facility}/patient/${patientData.id}`}
@@ -201,7 +202,7 @@ export const ConsultationDetails = (props: any) => {
                 Patient Details
               </Link>
               <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes/`}
+                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
                 className="btn m-1 btn-primary hover:text-white"
               >
                 Doctor&apos;s Notes
@@ -213,7 +214,11 @@ export const ConsultationDetails = (props: any) => {
           <div className="border rounded-lg bg-white shadow h-full text-black p-4 w-full">
             <div>
               <div className="flex md:flex-row flex-col md:items-center">
-                <div className="text-sm md:mt-2 md:pl-2">
+                <div className="text-2xl md:mt-2 font-semibold">
+                  <i
+                    className="text-gray-500 fas fa-hospital text-2xl"
+                    aria-hidden="true"
+                  ></i>{" "}
                   {consultationData.facility_name}
                 </div>
               </div>
@@ -289,15 +294,6 @@ export const ConsultationDetails = (props: any) => {
             </div>
 
             <div className="mt-2">
-              {consultationData.other_symptoms && (
-                <div className="capitalize">
-                  <span className="font-semibold leading-relaxed">
-                    Other Symptoms:{" "}
-                  </span>
-                  {consultationData.other_symptoms}
-                </div>
-              )}
-
               {consultationData.diagnosis && (
                 <div className="text-sm w-full">
                   <span className="font-semibold leading-relaxed">
@@ -363,6 +359,14 @@ export const ConsultationDetails = (props: any) => {
                       <div className="capitalize">
                         {consultationData.symptoms_text || "-"}
                       </div>
+                      {consultationData.other_symptoms && (
+                        <div className="capitalize">
+                          <span className="font-semibold leading-relaxed">
+                            Other Symptoms:{" "}
+                          </span>
+                          {consultationData.other_symptoms}
+                        </div>
+                      )}
                       <span className="font-semibold leading-relaxed text-gray-800 text-xs">
                         from{" "}
                         {moment(consultationData.symptoms_onset_date).format(
@@ -496,8 +500,8 @@ export const ConsultationDetails = (props: any) => {
                       Lines and Catheters
                     </h3>
                     <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.lines?.map((line: any, i: number) => (
-                        <div className="mt-4" key={i}>
+                      {consultationData.lines?.map((line: any, idx: number) => (
+                        <div key={idx} className="mt-4">
                           <h5>{line.type}</h5>
                           <p className="text-justify break-word">
                             Details:
@@ -655,13 +659,13 @@ export const ConsultationDetails = (props: any) => {
                           {consultationData.discharge_advice.map(
                             (med: any, index: number) => (
                               <tr className="bg-white" key={index}>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
                                   {med.medicine}
                                 </td>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                   {med.dosage}
                                 </td>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                   {med.days}
                                 </td>
                               </tr>

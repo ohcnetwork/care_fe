@@ -4,10 +4,9 @@ import {
   listResourceRequests,
   downloadResourceRequests,
 } from "../../Redux/actions";
-import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate } from "raviger";
 import moment from "moment";
-import { Modal } from "@material-ui/core";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
@@ -44,6 +43,8 @@ export default function ResourceBoard({
   const [downloadFile, setDownloadFile] = useState("");
   const [totalCount, setTotalCount] = useState();
   const [currentPage, setCurrentPage] = useState(1);
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [isLoading, setIsLoading] = useState({ board: false, more: false });
 
   const fetchData = () => {
@@ -63,12 +64,16 @@ export default function ResourceBoard({
     });
   };
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       downloadResourceRequests({
         ...formatFilter({ ...filterProp, status: board }),
         csv: 1,
       })
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById(`resourceRequests-${board}`)?.click();
   };
@@ -108,10 +113,10 @@ export default function ResourceBoard({
     });
   };
 
-  let boardFilter = (filter: string) => {
+  const boardFilter = (filter: string) => {
     return data
       .filter(({ status }) => status === filter)
-      .map((resource: any, idx: number) => (
+      .map((resource: any) => (
         <div key={`resource_${resource.id}`} className="w-full mt-2 ">
           <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
             <div className={"p-4 h-full flex flex-col justify-between"}>
@@ -122,13 +127,13 @@ export default function ResourceBoard({
                   </div>
                   <div>
                     {resource.emergency && (
-                      <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                      <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
                         Emergency
                       </span>
                     )}
                   </div>
                 </div>
-                <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+                <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
                   <div className="sm:col-span-1">
                     <dt
                       title=" Origin facility"
@@ -217,12 +222,19 @@ export default function ResourceBoard({
       ));
   };
   return (
-    <div className="bg-gray-200 mr-2 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
+    <div className="bg-gray-200 mr-2 shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
       <div className="sticky top-0 pt-2 bg-gray-200 rounded">
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">
             {renderBoardTitle(board)}{" "}
-            <GetAppIcon className="cursor-pointer" onClick={triggerDownload} />
+            {downloadLoading ? (
+              <CircularProgress className="w-6 h-6 ml-2 text-black" />
+            ) : (
+              <GetAppIcon
+                className="cursor-pointer"
+                onClick={triggerDownload}
+              />
+            )}
           </h3>
           <span className="rounded-lg ml-2 bg-primary-500 text-white px-2">
             {totalCount || "0"}

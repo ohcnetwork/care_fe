@@ -35,6 +35,7 @@ import { validateEmailAddress } from "../../Common/validation";
 import Modal from "@material-ui/core/Modal";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import { RoleButton } from "../Common/RoleButton";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -453,7 +454,7 @@ export const PatientHome = (props: any) => {
     setSelectedStatus({ status, sample });
     setAlertMessage({
       show: true,
-      message: "Are you sure you want to sent the sample to Collection Centre?",
+      message: "Are you sure you want to send the sample to Collection Centre?",
       title: "Confirm",
     });
   };
@@ -562,14 +563,13 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={"Covid Suspect Details"}
+          title={"Patient Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
             [id]: { name: patientData?.name },
           }}
         />
-
         <div className="relative mt-2">
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
@@ -901,36 +901,40 @@ export const PatientHome = (props: any) => {
                   </div>
                 )}
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={!patientData.is_active}
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/update`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     <i className="fas fa-pencil-alt mr-2" />
                     Update Details
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !consultationListData ||
                       !consultationListData.length ||
                       !patientData.is_active
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       handlePatientTransfer(!patientData.allow_transfer)
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     <i className="fas fa-lock mr-2" />
                     {patientData.allow_transfer
                       ? "Disable Transfer"
                       : "Allow Transfer"}
-                  </button>
+                  </RoleButton>
                 </div>
               </div>
             </div>
@@ -938,7 +942,7 @@ export const PatientHome = (props: any) => {
         </section>
         <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
           <div
-            className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
+            className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2 cursor-pointer"
             onClick={() => {
               setShowShifts(!showShifts);
               setIsShiftClicked(true);
@@ -972,13 +976,13 @@ export const PatientHome = (props: any) => {
                         <div className="flex justify-between mt-1">
                           <div>
                             {shift.emergency && (
-                              <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                              <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
                                 Emergency
                               </span>
                             )}
                           </div>
                         </div>
-                        <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+                        <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
                           <div className="sm:col-span-1">
                             <dt
                               title="Shifting status"
@@ -1359,6 +1363,15 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Medical
               </div>
+              {/* No medical data found */}
+              {!patientData.present_health &&
+                !patientData.allergies &&
+                !patientData.ongoing_medication &&
+                !patientData.is_antenatal && (
+                  <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
+                    No Medical History Available
+                  </div>
+                )}
               <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
                 {patientData.present_health && (
                   <div className="sm:col-span-1">
@@ -1445,43 +1458,47 @@ export const PatientHome = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${id}/shift/new`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     SHIFT PATIENT
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
-                    onClick={() =>
+                    handleClickCB={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/sample-test`
                       )
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Request Sample Test
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
                   <button
                     className="btn btn-primary w-full"
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/notes/`
+                        `/facility/${patientData?.facility}/patient/${id}/notes`
                       )
                     }
                   >
@@ -1489,33 +1506,38 @@ export const PatientHome = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
-                    onClick={handleClickOpen}
+                    handleClickCB={handleClickOpen}
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Discharge Summary
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
-                    onClick={handleDischageClickOpen}
+                    handleClickCB={handleDischageClickOpen}
                     disabled={
                       !patientData.is_active ||
                       !(patientData?.last_consultation?.facility == facilityId)
                     }
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Discharge from CARE
-                  </button>
+                  </RoleButton>
                 </div>
                 <div>
-                  <button
+                  <RoleButton
                     className="btn btn-primary w-full"
-                    onClick={() => setOpenAssignVolunteerDialog(true)}
-                    disabled={false}
+                    handleClickCB={() => setOpenAssignVolunteerDialog(true)}
+                    disableFor="readOnly"
+                    buttonType="html"
                   >
                     Assign to a volunteer
-                  </button>
+                  </RoleButton>
                 </div>
               </div>
             </div>
@@ -1758,7 +1780,7 @@ export const PatientHome = (props: any) => {
 
       <div>
         <PageTitle
-          title="Sample Test History"
+          title="Patient Details"
           hideBack={true}
           breadcrumbs={false}
         />

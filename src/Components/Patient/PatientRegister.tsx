@@ -73,7 +73,6 @@ interface medicalHistoryModel {
 }
 
 const medicalHistoryTypes = MEDICAL_HISTORY_CHOICES.filter((i) => i.id !== 1);
-
 const medicalHistoryChoices = medicalHistoryTypes.reduce(
   (acc: Array<{ [x: string]: string }>, cur) => [
     ...acc,
@@ -81,7 +80,6 @@ const medicalHistoryChoices = medicalHistoryTypes.reduce(
   ],
   []
 );
-
 const genderTypes = [
   {
     id: 0,
@@ -89,13 +87,9 @@ const genderTypes = [
   },
   ...GENDER_TYPES,
 ];
-
 const diseaseStatus = [...DISEASE_STATUS];
-
 const bloodGroups = [...BLOOD_GROUPS];
-
 const testType = [...TEST_TYPE];
-
 const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
@@ -232,10 +226,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   }, [careExtId]);
 
-  const headerText = !id
-    ? "Add Details of Covid Suspect / Patient"
-    : "Update Covid Suspect / Patient Details";
-  const buttonText = !id ? "Add Covid Suspect / Patient" : "Save Details";
+  const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
+  const buttonText = !id ? "Add Patient" : "Save Details";
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -1974,7 +1966,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             Allergies
                           </InputLabel>
                           <MultilineInputField
-                            rows={3}
+                            rows={1}
                             id="allergies"
                             name="allergies"
                             variant="outlined"

@@ -33,6 +33,7 @@ import {
 import {
   createDailyReport,
   getConsultationDailyRoundsDetails,
+  getDailyReport,
   updateDailyReport,
   getPatient,
 } from "../../Redux/actions";
@@ -108,6 +109,7 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [hasPreviousLog, setHasPreviousLog] = useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
@@ -158,6 +160,25 @@ export const DailyRounds = (props: any) => {
     }
     fetchPatientName();
   }, [dispatchAction, patientId]);
+
+  useEffect(() => {
+    async function fetchHasPreviousLog() {
+      if (consultationId) {
+        const res = await dispatchAction(
+          getDailyReport({ limit: 1, offset: 0 }, { consultationId })
+        );
+        setHasPreviousLog(res.data.count > 0);
+        dispatch({
+          type: "set_form",
+          form: {
+            ...state.form,
+            clone_last: res.data.count > 0 ? "true" : "false",
+          },
+        });
+      }
+    }
+    fetchHasPreviousLog();
+  }, [dispatchAction, consultationId]);
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -265,7 +286,7 @@ export const DailyRounds = (props: any) => {
           data = {
             ...data,
             bp:
-              state.form.bp.systolic && state.form.bp.diastolic
+              state.form.bp && state.form.bp.systolic && state.form.bp.diastolic
                 ? {
                     systolic: Number(state.form.bp.systolic),
                     diastolic: Number(state.form.bp.diastolic),
@@ -277,14 +298,14 @@ export const DailyRounds = (props: any) => {
                     ),
                   }
                 : undefined,
-            pulse: Number(state.form.pulse),
+            pulse: state.form.pulse,
             resp: Number(state.form.resp),
             temperature: state.form.tempInCelcius
               ? celciusToFahrenheit(state.form.temperature)
               : state.form.temperature,
             rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
-            ventilator_spo2: Number(state.form.ventilator_spo2),
+            ventilator_spo2: state.form.ventilator_spo2,
           };
         }
       } else {
@@ -507,7 +528,7 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
               </div>
-              {!id && (
+              {!id && hasPreviousLog && (
                 <div id="clone_last-div" className="mt-4">
                   <InputLabel id="clone_last">
                     Do you want to copy Values from Previous Log?
@@ -881,7 +902,7 @@ export const DailyRounds = (props: any) => {
                                 )}
                           </InputLabel>
                           <div className="flex flex-row">
-                            <div className="flex-grow mr-2">
+                            <div className="grow mr-2">
                               <AutoCompleteAsyncField
                                 name="temperature"
                                 multiple={false}

@@ -37,6 +37,9 @@ const AssetConfigure = (props: AssetConfigureProps) => {
   const [bed, setBed] = React.useState<BedModel>({});
   const [newPreset, setNewPreset] = React.useState("");
   const dispatch = useDispatch();
+  const [refreshPresetsHash, setRefreshPresetsHash] = React.useState(
+    Number(new Date())
+  );
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -54,7 +57,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
           setLocation(assetData.data.meta?.location);
           setMiddlewareHostname(assetData.data.meta?.middleware_hostname);
           setCameraType(assetData.data.meta?.camera_type);
-          setCameraAddress(assetData.data.meta?.camera_address);
+          setCameraAddress(assetData.data.meta?.local_ip_address);
           setCameraAccessKey(assetData.data.meta?.camera_access_key);
         }
       }
@@ -77,7 +80,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
         location: location,
         middleware_hostname: middlewareHostname,
         camera_type: cameraType,
-        camera_address: cameraAddress,
+        local_ip_address: cameraAddress,
         camera_access_key: cameraAccessKey,
       },
     };
@@ -120,6 +123,8 @@ const AssetConfigure = (props: AssetConfigureProps) => {
         Notification.Success({
           msg: "Preset Added Successfully",
         });
+        setNewPreset("");
+        setRefreshPresetsHash(Number(new Date()));
       } else {
         Notification.Error({
           msg: "Something went wrong..!",
@@ -256,6 +261,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
           newPreset={newPreset}
           setNewPreset={setNewPreset}
           addPreset={addPreset}
+          refreshPresetsHash={refreshPresetsHash}
         />
       ) : asset?.meta?.asset_type === "HL7MONITOR" ? (
         <MonitorConfigure asset={asset as AssetData} />
