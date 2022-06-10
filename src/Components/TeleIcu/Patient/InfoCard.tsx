@@ -23,6 +23,7 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
               facilityId={patient?.facility}
               patientId={patient?.id}
               consultationId={patient?.last_consultation?.id}
+              smallLoader={true}
             />
           ) : (
             <div>Invalid Patient Data</div>
