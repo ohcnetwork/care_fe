@@ -1968,7 +1968,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             Allergies
                           </InputLabel>
                           <MultilineInputField
-                            rows={3}
+                            rows={1}
                             id="allergies"
                             name="allergies"
                             variant="outlined"
