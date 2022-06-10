@@ -62,6 +62,8 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
+const debounce = require("lodash.debounce");
+
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
 }
