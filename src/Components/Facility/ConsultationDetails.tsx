@@ -37,6 +37,7 @@ import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
 import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
 import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
 import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
+import Error404 from "../ErrorPages/404";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -166,7 +167,7 @@ export const ConsultationDetails = (props: any) => {
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
-  return (
+  return consultationData.facility_name && patientData.facility ? (
     <div className="relative">
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap">
@@ -823,6 +824,10 @@ export const ConsultationDetails = (props: any) => {
         show={showDoctors}
         setShow={setShowDoctors}
       />
+    </div>
+  ) : (
+    <div>
+      <Error404 />
     </div>
   );
 };

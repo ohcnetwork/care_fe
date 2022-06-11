@@ -27,6 +27,7 @@ import {
 } from "./models";
 import moment from "moment";
 import { RoleButton, roleType } from "../Common/RoleButton";
+import Error404 from "../ErrorPages/404";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -36,6 +37,7 @@ export const FacilityHome = (props: any) => {
   const [facilityData, setFacilityData] = useState<FacilityModel>({});
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
+  const [isErrorPage, setErrorPage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
 
@@ -53,29 +55,34 @@ export const FacilityHome = (props: any) => {
           dispatch(listDoctor({}, { facilityId })),
           dispatch(getTriageInfo({ facilityId })),
         ]);
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (!facilityRes.data) {
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        } else {
-          setFacilityData(facilityRes.data);
-          if (capacityRes && capacityRes.data) {
-            setCapacityData(capacityRes.data.results);
-          }
-          if (doctorRes && doctorRes.data) {
-            setDoctorData(doctorRes.data.results);
-          }
-          if (
-            triageRes &&
-            triageRes.data &&
-            triageRes.data.results &&
-            triageRes.data.results.length
-          ) {
-            setPatientStatsData(triageRes.data.results);
+      try {
+        if (!status.aborted) {
+          setIsLoading(false);
+          if (!facilityRes.data) {
+            Notification.Error({
+              msg: "Something went wrong..!",
+            });
+          } else {
+            setFacilityData(facilityRes.data);
+            if (capacityRes && capacityRes.data) {
+              setCapacityData(capacityRes.data.results);
+            }
+            if (doctorRes && doctorRes.data) {
+              setDoctorData(doctorRes.data.results);
+            }
+            if (
+              triageRes &&
+              triageRes.data &&
+              triageRes.data.results &&
+              triageRes.data.results.length
+            ) {
+              setPatientStatsData(triageRes.data.results);
+            }
           }
         }
+      } catch (e) {
+        console.log(e);
+        setErrorPage(true);
       }
     },
     [dispatch, facilityId]
@@ -176,8 +183,7 @@ export const FacilityHome = (props: any) => {
       </tr>
     );
   });
-
-  return (
+  return !isErrorPage && facilityData ? (
     <div className="px-2 pb-2">
       <PageTitle
         title={facilityData.name || "Facility"}
@@ -200,6 +206,7 @@ export const FacilityHome = (props: any) => {
           <button onClick={handleDeleteClose} className="btn btn-primary">
             Cancel
           </button>
+
           <button
             onClick={handleDeleteSubmit}
             id="facility-delete-confirm"
@@ -465,6 +472,10 @@ export const FacilityHome = (props: any) => {
           </div>
         </div>
       </div>
+    </div>
+  ) : (
+    <div>
+      <Error404 />
     </div>
   );
 };
