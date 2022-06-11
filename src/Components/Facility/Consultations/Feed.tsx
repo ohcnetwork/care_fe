@@ -272,7 +272,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   return (
     <div
-      className="px-2 flex flex-col gap-4 overflow-hidden w-full"
+      className="px-2 flex flex-col gap-4 w-full"
       style={{ height: "90vh", maxHeight: "860px" }}
     >
       <div className="flex items-center flex-wrap justify-between gap-2">
@@ -323,8 +323,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
       </div>
-      <div className="px-3 mt-4">
-        <div className="lg:flex items-start gap-8">
+      <div>
+        <div className="lg:flex items-start gap-8 mb-4">
           <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
             <video
               id="mse-video"
@@ -380,48 +380,51 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               )}
             </div>
           </div>
-          <div className="mt-8 lg:mt-0 shrink-0 md:flex lg:flex-col items-stretch">
+          <div className="mt-8 lg:mt-0 shrink-0 md:flex lg:flex-col ">
             <div className="pb-3 hideonmobilescreen">
               <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
             </div>
-            {cameraPTZ.map((option) => {
-              const shortcutKeyDescription =
-                option.shortcutKey &&
-                option.shortcutKey
-                  .join(" + ")
-                  .replace("Control", "Ctrl")
-                  .replace("ArrowUp", "↑")
-                  .replace("ArrowDown", "↓")
-                  .replace("ArrowLeft", "←")
-                  .replace("ArrowRight", "→");
+            <div className="md:flex lg:flex-col flex-1 rounded-xl overflow-auto">
+              {cameraPTZ.map((option) => {
+                const shortcutKeyDescription =
+                  option.shortcutKey &&
+                  option.shortcutKey
+                    .join(" + ")
+                    .replace("Control", "Ctrl")
+                    .replace("ArrowUp", "↑")
+                    .replace("ArrowDown", "↓")
+                    .replace("ArrowLeft", "←")
+                    .replace("ArrowRight", "→");
 
-              return (
-                <Tooltip
-                  key={option.action}
-                  placement="left"
-                  arrow={true}
-                  title={
-                    <span className="text-sm font-semibold">
-                      {`${option.label}  (${shortcutKeyDescription})`}
-                    </span>
-                  }
-                >
-                  <button
-                    className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
-                    onClick={option.callback}
-                  >
-                    <span className="sr-only">{option.label}</span>
-                    {option.icon ? (
-                      <i className={`${option.icon} md:p-2`} />
-                    ) : (
-                      <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
-                        {option.value}x
+                return (
+                  <Tooltip
+                    key={option.action}
+                    placement="left"
+                    arrow={true}
+                    title={
+                      <span className="text-sm font-semibold">
+                        {`${option.label}  (${shortcutKeyDescription})`}
                       </span>
-                    )}
-                  </button>
-                </Tooltip>
-              );
-            })}
+                    }
+                  >
+                    <button
+                      className="bg-green-100 hover:bg-green-200 border border-green-100 w-[50px] h-[50px] inline-flex justify-center items-center"
+                      onClick={option.callback}
+                    >
+                      <span className="sr-only">{option.label}</span>
+                      {option.icon ? (
+                        <i className={`${option.icon} md:p-2`} />
+                      ) : (
+                        <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                          {option.value}x
+                        </span>
+                      )}
+                    </button>
+                  </Tooltip>
+                );
+              })}
+            </div>
+            
           </div>
         </div>
       </div>
@@ -495,9 +498,6 @@ export const FeedCameraPTZHelpButton = (props: {
       <button
         key="option.action"
         className="rounded p-2"
-        onClick={() => {
-          // TODO
-        }}
       >
         <i className={"fa fa-circle-question md:p-2"} />
       </button>
