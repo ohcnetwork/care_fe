@@ -90,8 +90,8 @@ export const HospitalList = (props: any) => {
     undefined
   );
 
-  // const { t } = props;
   const { t } = useTranslation();
+
   const limit = 14;
 
   const fetchData = useCallback(
@@ -380,7 +380,7 @@ export const HospitalList = (props: any) => {
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="flex ">
               <div
-                className="group md:flex hidden w-32 self-stretch flex-shrink-0 bg-gray-300 hover:bg-gray-500 cursor-pointer hover:fas hover:fa-pen items-center justify-center"
+                className="group md:flex hidden w-32 self-stretch shrink-0 bg-gray-300 hover:bg-gray-500 cursor-pointer items-center justify-center"
                 onClick={(e: React.MouseEvent<HTMLElement>) => {
                   setModalFor(`${facility.id}-image`);
                 }}
