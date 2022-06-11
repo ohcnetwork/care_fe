@@ -65,14 +65,19 @@ export default function TeleICUPatientInfoCard({
             <span>{patient.gender}</span>
           </p>
           <div className="text-sm flex flex-wrap items-center">
-            <button
-              className="btn btn-primary text-sm p-2"
-              onClick={() => setOpen(true)}
-            >
-              {!patient.last_consultation?.current_bed
-                ? "Assign Bed"
-                : "Switch Bed"}
-            </button>
+            {patient.is_active ? (
+              <button
+                className="btn btn-primary text-sm p-2"
+                onClick={() => setOpen(true)}
+              >
+                {!patient.last_consultation?.current_bed
+                  ? "Assign Bed"
+                  : "Switch Bed"}
+              </button>
+            ) : (
+              ""
+            )}
+
             {patient.blood_group ? (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
