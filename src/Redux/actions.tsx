@@ -221,6 +221,9 @@ export const updateFacilityBed = (
       external_id,
     }
   );
+export const deleteFacilityBed = (external_id: string) => {
+  return fireRequest("deleteFacilityBed", [], {}, { external_id });
+};
 
 // Consultation Beds
 export const listConsultationBeds = (params: object) =>
