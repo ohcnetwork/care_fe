@@ -84,17 +84,14 @@ export const HospitalList = (props: any) => {
   const [notifyMessage, setNotifyMessage] = useState("");
   const [modalFor, setModalFor] = useState<any>(undefined);
   const [downloadLoading, setDownloadLoading] = useState(false);
-<<<<<<< HEAD
   const [imageFileName, setImageFileName] =
     useState<string>("No image selected");
   const [uploadedImage, setUploadedImage] = useState<File | undefined>(
     undefined
   );
 
-  const { t } = props;
-=======
+  // const { t } = props;
   const { t } = useTranslation();
->>>>>>> 6da55e4d9109bc308458bf27c961afab911b0e55
   const limit = 14;
 
   const fetchData = useCallback(
