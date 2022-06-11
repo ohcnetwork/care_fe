@@ -484,11 +484,11 @@ export const PatientManager = (props: any) => {
           key={`usr_${patient.id}`}
           onClick={() => navigate(patientUrl)}
           className={
-            "w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3 " +
-            (patient.disease_status == "POSITIVE" ? "bg-red-50" : "")
+            "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 " +
+            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
-          <div className="px-4  flex gap-2">
+          <div className="px-4  flex gap-2 w-full">
             {patient?.last_consultation &&
               patient?.last_consultation?.current_bed && (
                 <div className="w-32 self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
@@ -522,19 +522,19 @@ export const PatientManager = (props: any) => {
               {patient.facility_object && (
                 <div className="font-normal text-sm">
                   {patient.facility_object.name},
-                  <span className="text-xs ml-2">
+                  <span className="text-xs ml-1">
                     Updated at: {moment(patient.modified_date).format("lll")}
                   </span>
+                  <br />
                   {patient.review_time && (
                     <span
                       className={
-                        "m-1 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
+                        "m-1 inline-block items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
                         (moment().isBefore(patient.review_time)
                           ? " bg-gray-100"
                           : "rounded p-1 bg-red-400 text-white")
                       }
                     >
-                      <i className="mr-2 text-md fas fa-clock"></i>
                       {(moment().isBefore(patient.review_time)
                         ? "Review at: "
                         : "Review Missed: ") +
@@ -545,8 +545,8 @@ export const PatientManager = (props: any) => {
               )}
             </div>
           </div>
-          <div className="md:flex">
-            <div className="md:flex flex-wrap justify-end">
+          <div className="flex w-full">
+            <div className="flex flex-wrap flex-row justify-start">
               {patient.allow_transfer ? (
                 <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
               ) : (
@@ -605,9 +605,9 @@ export const PatientManager = (props: any) => {
                 </span>
               )}
             </div>
-            <div className="px-2">
-              <div className="btn btn-default bg-white">Details</div>
-            </div>
+          </div>
+          <div className="px-2">
+            <div className="btn btn-default bg-white">Details</div>
           </div>
         </div>
       );
@@ -643,7 +643,7 @@ export const PatientManager = (props: any) => {
   }
 
   return (
-    <div className="px-6">
+    <div className="px-2">
       {showDialog && (
         <FacilitiesSelectDialogue
           setSelected={(e) => setSelectedFacility(e)}
@@ -660,8 +660,8 @@ export const PatientManager = (props: any) => {
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
       <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="title-text flex align-center">
-          <div>
+        <div className="title-text sm:flex align-center">
+          <div className="text-center">
             <Button
               color="primary"
               size="small"
@@ -738,9 +738,9 @@ export const PatientManager = (props: any) => {
         </div>
         <div>
           <div>
-            <div className="flex items-end gap-2 mb-2">
+            <div className="md:flex items-end gap-2 mb-2">
               <button
-                className="btn btn-primary-ghost md:mt-7 "
+                className="btn btn-primary-ghost w-full mt-2 md:mt-7 "
                 onClick={(_) => setShowFilters((show) => !show)}
               >
                 <svg
@@ -775,7 +775,7 @@ export const PatientManager = (props: any) => {
                 <span>Advanced Filters</span>
               </button>
               <button
-                className="btn-primary btn md:mt-7 w-full md:w-fit"
+                className="btn-primary btn md:mt-7 mt-2 w-full md:w-fit"
                 onClick={() => {
                   if (facilityId) {
                     navigate(`/facility/${facilityId}/patient`);
