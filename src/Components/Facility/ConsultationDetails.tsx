@@ -50,7 +50,7 @@ export const ConsultationDetails = (props: any) => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
-
+  const [isErrorPage, setErrorPage] = useState(false);
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
   );
@@ -128,6 +128,8 @@ export const ConsultationDetails = (props: any) => {
             };
             setPatientData(data);
           }
+        } else {
+          setErrorPage(true);
         }
         const current_bed = (res as ConsultationModel)?.current_bed?.bed_object
           ?.id;
@@ -161,13 +163,16 @@ export const ConsultationDetails = (props: any) => {
   if (isLoading) {
     return <Loading />;
   }
+  if (isErrorPage) {
+    return <Error404 />;
+  }
 
   const tabButtonClasses = (selected: boolean) =>
     `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
-  return consultationData.facility_name && patientData.facility ? (
+  return (
     <div className="relative">
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap">
@@ -824,10 +829,6 @@ export const ConsultationDetails = (props: any) => {
         show={showDoctors}
         setShow={setShowDoctors}
       />
-    </div>
-  ) : (
-    <div>
-      <Error404 />
     </div>
   );
 };

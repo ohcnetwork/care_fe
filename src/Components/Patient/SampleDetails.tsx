@@ -9,6 +9,7 @@ import { FlowModel, SampleTestModel } from "./models";
 import { FileUpload } from "./FileUpload";
 import { navigate } from "raviger";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
+import Error404 from "../ErrorPages/404";
 import _ from "lodash";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -22,6 +23,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
   const { id } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [isErrorPage, setErrorPage] = useState(false);
   const [sampleDetails, setSampleDetails] = useState<SampleTestModel>({});
 
   const fetchData = useCallback(
@@ -31,6 +33,8 @@ export const SampleDetails = (props: SampleDetailsProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           setSampleDetails(res.data);
+        } else {
+          setErrorPage(true);
         }
         setIsLoading(false);
       }
@@ -292,6 +296,9 @@ export const SampleDetails = (props: SampleDetailsProps) => {
 
   if (isLoading) {
     return <Loading />;
+  }
+  if (isErrorPage) {
+    return <Error404 />;
   }
 
   return (

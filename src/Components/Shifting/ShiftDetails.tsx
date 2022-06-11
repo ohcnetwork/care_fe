@@ -21,6 +21,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import ReactDOM from "react-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import CommentSection from "./CommentsSection";
+import Error404 from "../ErrorPages/404";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -32,6 +33,7 @@ export default function ShiftDetails(props: { id: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isErrorPage, setErrorPage] = useState(false);
   const [openDeleteShiftDialog, setOpenDeleteShiftDialog] =
     React.useState(false);
 
@@ -42,6 +44,8 @@ export default function ShiftDetails(props: { id: string }) {
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data);
+        } else {
+          setErrorPage(true);
         }
         setIsLoading(false);
       }
@@ -556,6 +560,9 @@ export default function ShiftDetails(props: { id: string }) {
 
   if (isLoading) {
     return <Loading />;
+  }
+  if (isErrorPage) {
+    return <Error404 />;
   }
 
   return (

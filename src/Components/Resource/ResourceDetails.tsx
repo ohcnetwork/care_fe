@@ -19,6 +19,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
 import CommentSection from "./CommentSection";
+import Error404 from "../ErrorPages/404";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -28,6 +29,7 @@ export default function ResourceDetails(props: { id: string }) {
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
+  const [isErrorPage, setErrorPage] = useState(false);
 
   const [openDeleteResourceDialog, setOpenDeleteResourceDialog] =
     React.useState(false);
@@ -39,6 +41,8 @@ export default function ResourceDetails(props: { id: string }) {
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data);
+        } else {
+          setErrorPage(true);
         }
         setIsLoading(false);
       }
@@ -235,6 +239,9 @@ export default function ResourceDetails(props: { id: string }) {
 
   if (isLoading) {
     return <Loading />;
+  }
+  if (isErrorPage) {
+    return <Error404 />;
   }
 
   return (

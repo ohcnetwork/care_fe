@@ -11,6 +11,7 @@ import { getAsset, listAssetTransaction } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
+import Error404 from "../ErrorPages/404";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -30,6 +31,7 @@ const AssetManage = (props: AssetManageProps) => {
     ReactElement | ReactElement[]
   >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isErrorPage, setErrorPage] = useState<boolean>(false);
   const dispatch = useDispatch();
   const limit = 14;
 
@@ -40,17 +42,22 @@ const AssetManage = (props: AssetManageProps) => {
         dispatch(getAsset(assetId)),
         dispatch(listAssetTransaction({ asset: assetId, limit, offset })),
       ]);
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (!assetData.data)
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        else {
-          setAsset(assetData.data);
-          setTransactions(transactionsData.data.results);
-          setTotalCount(transactionsData.data.count);
+      try {
+        if (!status.aborted) {
+          setIsLoading(false);
+          if (!assetData.data)
+            Notification.Error({
+              msg: "Something went wrong..!",
+            });
+          else {
+            setAsset(assetData.data);
+            setTransactions(transactionsData.data.results);
+            setTotalCount(transactionsData.data.count);
+          }
         }
+      } catch (e) {
+        console.log(e);
+        setErrorPage(true);
       }
     },
     [dispatch, assetId, offset]
@@ -168,6 +175,7 @@ const AssetManage = (props: AssetManageProps) => {
   }, [transactions]);
 
   if (isLoading) return <Loading />;
+  if (isErrorPage) return <Error404 />;
   if (isPrintMode) return <PrintPreview />;
   return (
     <div className="px-2 pb-2">

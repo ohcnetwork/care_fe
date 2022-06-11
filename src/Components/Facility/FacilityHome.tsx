@@ -115,6 +115,9 @@ export const FacilityHome = (props: any) => {
   if (isLoading) {
     return <Loading />;
   }
+  if (isErrorPage) {
+    return <Error404 />;
+  }
 
   let capacityList: any = null;
   if (!capacityData || !capacityData.length) {
@@ -183,7 +186,8 @@ export const FacilityHome = (props: any) => {
       </tr>
     );
   });
-  return !isErrorPage && facilityData ? (
+
+  return (
     <div className="px-2 pb-2">
       <PageTitle
         title={facilityData.name || "Facility"}
@@ -472,10 +476,6 @@ export const FacilityHome = (props: any) => {
           </div>
         </div>
       </div>
-    </div>
-  ) : (
-    <div>
-      <Error404 />
     </div>
   );
 };
