@@ -223,7 +223,7 @@ export default function ListFilter(props: any) {
       </div>
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Lsg</span>
           <AutoCompleteAsyncField
             multiple={true}
@@ -245,7 +245,7 @@ export default function ListFilter(props: any) {
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Ward</span>
           <AutoCompleteAsyncField
             multiple={true}
@@ -266,7 +266,7 @@ export default function ListFilter(props: any) {
           />
         </div>
       </div>
-      <div className="w-64 flex-none">
+      <div className="w-full flex-none">
         <DateRangePicker
           startDate={getDate(filterState.created_date_after)}
           endDate={getDate(filterState.created_date_before)}
@@ -283,7 +283,7 @@ export default function ListFilter(props: any) {
           size="small"
         />
       </div>
-      <div className="w-64 flex-none">
+      <div className="w-full flex-none">
         <DateRangePicker
           startDate={getDate(filterState.result_date_after)}
           endDate={getDate(filterState.result_date_before)}
@@ -296,7 +296,7 @@ export default function ListFilter(props: any) {
           size="small"
         />
       </div>
-      <div className="w-64 flex-none">
+      <div className="w-full flex-none">
         <DateRangePicker
           startDate={getDate(filterState.sample_collection_date_after)}
           endDate={getDate(filterState.sample_collection_date_before)}
@@ -313,7 +313,7 @@ export default function ListFilter(props: any) {
           size="small"
         />
       </div>
-      <div className="w-64 flex-none">
+      <div className="w-full flex-none">
         <span className="text-sm font-semibold">SRF ID</span>
         <TextInputField
           id="srf_id"

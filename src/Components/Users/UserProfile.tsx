@@ -21,6 +21,12 @@ import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../Common/LanguageSelector";
 import Switch from "@material-ui/core/Switch";
+import {
+  ProfileLabel,
+  LabelValueCard,
+  ProfileValue,
+  ValueBadge,
+} from "./ProfileComponents";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -319,7 +325,7 @@ export default function UserProfile() {
               <button
                 onClick={(_) => setShowEdit(!showEdit)}
                 type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
+                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:ring-primary focus:border-primary-700 active:bg-primary-700 mt-4"
               >
                 {showEdit ? "Cancel" : "Edit User Profile"}
               </button>
@@ -328,119 +334,64 @@ export default function UserProfile() {
           <div className="mt-5 md:mt-0 md:col-span-2">
             {!showEdit && (
               <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
-                <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Username
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.username || "-"}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Contact No
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.phone_number || "-"}
-                    </dd>
-                  </div>
-
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Whatsapp No
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.alt_phone_number || "-"}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Email address
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.email || "-"}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      First Name
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.first_name || "-"}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Last Name
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.last_name || "-"}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Age
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.age || "-"}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Verification Status
-                    </dt>
-                    {details.verified && (
-                      <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-white">
-                        Verified
-                      </dd>
-                    )}
+                <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                  <LabelValueCard>
+                    <ProfileLabel text="Username" />
+                    <ProfileValue text={details.username} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="Contact No" />
+                    <ProfileValue text={details.phone_number} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="Whatsapp No" />
+                    <ProfileValue text={details.alt_phone_number} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="Email address" />
+                    <ProfileValue text={details.email} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="First Name" />
+                    <ProfileValue text={details.first_name} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="Last Name" />
+                    <ProfileValue text={details.last_name} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="Age" />
+                    <ProfileValue text={details.age} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="Verification Status" />
+                    {details.verified && <ValueBadge text="Verified" />}
                     {!details.verified && (
-                      <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      <dd className="mt-2 mb-1 text-sm leading-5 text-gray-900">
                         Not Verified
                       </dd>
                     )}
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Access Level
-                    </dt>
-                    <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-white">
-                      {details.user_type || "-"}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Gender
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.gender || "-"}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Local Body
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.local_body_object?.name || "-"}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      District
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.district_object?.name || "-"}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      State
-                    </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.state_object?.name || "-"}
-                    </dd>
-                  </div>
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="Access Level" />
+                    <ValueBadge text={details.user_type} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="Gender" />
+                    <ProfileValue text={details.gender} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="Local Body" />
+                    <ProfileValue text={details.local_body_object?.name} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="District" />
+                    <ProfileValue text={details.district_object?.name} />
+                  </LabelValueCard>
+                  <LabelValueCard>
+                    <ProfileLabel text="State" />
+                    <ProfileValue text={details.state_object?.name} />
+                  </LabelValueCard>
                 </dl>
               </div>
             )}
@@ -462,7 +413,7 @@ export default function UserProfile() {
                           variant="outlined"
                           margin="dense"
                           type="text"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                           value={states.form.firstName}
                           onChange={handleChangeInput}
                           errors={states.errors.firstName}
@@ -480,7 +431,7 @@ export default function UserProfile() {
                           name="lastName"
                           variant="outlined"
                           margin="dense"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                           type="text"
                           value={states.form.lastName}
                           onChange={handleChangeInput}
@@ -497,7 +448,7 @@ export default function UserProfile() {
                         </label>
                         <TextInputField
                           name="age"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                           variant="outlined"
                           margin="dense"
                           value={states.form.age}

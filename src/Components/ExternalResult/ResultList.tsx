@@ -275,25 +275,25 @@ export default function ResultList() {
         <tr key={`usr_${result.id}`} className="bg-white">
           <td
             onClick={() => navigate(resultUrl)}
-            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-900"
+            className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900"
           >
             <div className="flex">
               <a
                 href="#"
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
-                <p className="text-cool-gray-500 group-hover:text-cool-gray-900 transition ease-in-out duration-150">
+                <p className="text-gray-500 group-hover:text-gray-900 transition ease-in-out duration-150">
                   {result.name} - {result.age} {result.age_in}
                 </p>
               </a>
             </div>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-            <span className="text-cool-gray-900 font-medium">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+            <span className="text-gray-900 font-medium">
               {result.test_type}
             </span>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
               {result.result}
             </span>
@@ -303,10 +303,10 @@ export default function ResultList() {
               </span>
             ) : null}
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             {result.result_date || "-"}
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             <Button
               variant="outlined"
               color="primary"
@@ -493,27 +493,27 @@ export default function ResultList() {
         {badge("SRF ID", qParams.srf_id, "srf_id")}
       </div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-        <table className="min-w-full divide-y divide-cool-gray-200">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Test Type
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wide">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wide">
                 Status
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Result Date
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Create Patient
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-cool-gray-200">
+          <tbody className="bg-white divide-y divide-gray-200">
             {manageResults}
           </tbody>
         </table>

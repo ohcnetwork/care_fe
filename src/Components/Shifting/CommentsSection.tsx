@@ -40,9 +40,9 @@ const CommentSection = (props: CommentSectionProps) => {
     const payload = {
       comment: commentBox,
     };
-    if (commentBox.length < 1) {
+    if (!/\S+/.test(commentBox)) {
       Notification.Error({
-        msg: "Comment Should Contain At Least 1 Characters",
+        msg: "Comment Should Contain At Least 1 Character",
       });
       return;
     }

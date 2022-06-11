@@ -4,7 +4,19 @@
   "[rescript]": {
     "editor.defaultFormatter": "chenglou92.rescript-vscode"
   },
+<<<<<<< HEAD
   "[dotenv]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
   }
+=======
+  "debug.allowBreakpointsEverywhere": true,
+  "files.exclude": {
+    "**/.vscode": true,
+    "compile_commands.json": true,
+    "*.hrccproj": true,
+    "*.sln": true,
+    "*.suo": true
+  },
+  "files.autoGuessEncoding": true
+>>>>>>> 6da55e4d9109bc308458bf27c961afab911b0e55
 }

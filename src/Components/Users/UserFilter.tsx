@@ -86,75 +86,83 @@ export default function UserFilter(props: any) {
 
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">First Name</span>
           <div className="flex justify-between">
-            <TextInputField
-              id="first_name"
-              name="first_name"
-              variant="outlined"
-              margin="dense"
-              errors=""
-              value={filterState.first_name}
-              onChange={handleChange}
-              label="First Name"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-            />
+            <div className="w-full">
+              <TextInputField
+                id="first_name"
+                name="first_name"
+                variant="outlined"
+                margin="dense"
+                errors=""
+                value={filterState.first_name}
+                onChange={handleChange}
+                label="First Name"
+                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Last Name</span>
           <div className="flex justify-between">
-            <TextInputField
-              id="last_name"
-              name="last_name"
-              variant="outlined"
-              margin="dense"
-              errors=""
-              value={filterState.last_name}
-              onChange={handleChange}
-              label="Last Name"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-            />
+            <div className="w-full">
+              <TextInputField
+                id="last_name"
+                name="last_name"
+                variant="outlined"
+                margin="dense"
+                errors=""
+                value={filterState.last_name}
+                onChange={handleChange}
+                label="Last Name"
+                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Phone Number</span>
           <div className="flex justify-between">
-            <TextInputField
-              id="phone_number"
-              name="phone_number"
-              variant="outlined"
-              margin="dense"
-              errors=""
-              value={filterState.phone_number}
-              onChange={handleChange}
-              label="Phone Number"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-            />
+            <div className="w-full">
+              <TextInputField
+                id="phone_number"
+                name="phone_number"
+                variant="outlined"
+                margin="dense"
+                errors=""
+                value={filterState.phone_number}
+                onChange={handleChange}
+                label="Phone Number"
+                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Alt Phone Number</span>
           <div className="flex justify-between">
-            <TextInputField
-              id="alt_phone_number"
-              name="alt_phone_number"
-              variant="outlined"
-              margin="dense"
-              errors=""
-              value={filterState.alt_phone_number}
-              onChange={handleChange}
-              label="Alt Phone Number"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-            />
+            <div className="w-full">
+              <TextInputField
+                id="alt_phone_number"
+                name="alt_phone_number"
+                variant="outlined"
+                margin="dense"
+                errors=""
+                value={filterState.alt_phone_number}
+                onChange={handleChange}
+                label="Alt Phone Number"
+                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="">
+        <div className="w-full flex-none">
           <div className="text-sm font-semibold">Role</div>
           <SelectField
             name="user_type"

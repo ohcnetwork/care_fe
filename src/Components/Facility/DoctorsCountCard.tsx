@@ -2,6 +2,7 @@ import React from "react";
 import { navigate } from "raviger";
 import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
+import { RoleButton } from "../Common/RoleButton";
 
 interface DoctorsCountProps extends DoctorModal {
   facilityId: number;
@@ -15,14 +16,16 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
       <div className="flex flex-col items-center shadow rounded-lg p-4 h-full justify-between">
         <div className="text-bold text-3xl mt-2">{props.count}</div>
         <div className="font-semibold text-md mt-2">{area} Doctors</div>
-        <div
+        <RoleButton
           className="btn btn-default"
-          onClick={() =>
+          handleClickCB={() =>
             navigate(`/facility/${props.facilityId}/doctor/${props.area}`)
           }
+          disableFor="readOnly"
+          buttonType="html"
         >
           Edit
-        </div>
+        </RoleButton>
       </div>
     </div>
   );
