@@ -90,7 +90,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   const validStatusChoices = statusChoices.filter(
     (i) => status && statusFlow[status] && statusFlow[status].includes(i.text)
   );
-  
+
   useEffect(() => {
     const form = { ...state.form };
     form.status = currentStatus?.id;
@@ -156,6 +156,13 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
       });
   };
 
+  const handleEscKeyPress = (event: any) => {
+    if (event.key === "Escape") {
+      console.log("esc key pressed");
+      dispatch({ type: "set_form", form: initForm });
+    }
+  };
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
@@ -198,7 +205,10 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
         Update Sample Test Status
       </DialogTitle>
       <DialogContent>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+        <div
+          onKeyPress={handleEscKeyPress}
+          className="grid gap-4 grid-cols-1 md:grid-cols-3"
+        >
           <div className="font-semibold leading-relaxed">Current Status :</div>
           <div className="md:col-span-2">{currentStatus?.desc}</div>
           <div className="font-semibold leading-relaxed">New Status :</div>
@@ -272,7 +282,9 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
         </div>
       </DialogContent>
       <DialogActions style={{ justifyContent: "space-between" }}>
-        <Button onClick={cancelClicked}>Cancel</Button>
+        <Button onClick={cancelClicked} onKeyPress={handleEscKeyPress}>
+          Cancel
+        </Button>
         <Button
           onClick={okClicked}
           color="primary"
