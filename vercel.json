@@ -5,7 +5,7 @@
             "destination": "https://careapi.coronasafe.in/api/:path*"
         },
         {
-            "source": "/*",
+            "source": "/:path*",
             "destination": "/index.html"
         }
     ]
