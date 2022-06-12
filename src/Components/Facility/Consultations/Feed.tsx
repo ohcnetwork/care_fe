@@ -272,13 +272,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   return (
     <div
-      className="px-2 flex flex-col gap-4 w-full"
-      style={{ height: "90vh", maxHeight: "860px" }}
+      className="px-2 flex flex-col h-[calc(100vh-40px)]"
     >
-      <div className="flex items-center flex-wrap justify-between gap-2">
+      <div className="flex items-center flex-wrap justify-between">
         <PageTitle
           title={
-            "Patient Details | " +
+            "Patient Camera Feed | " +
             (bedPresets?.[0]?.asset_object?.location_object?.name ?? "")
           }
           breadcrumbs={false}
@@ -323,6 +322,114 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
       </div>
+      <div className="flex flex-col lg:flex-row items-start gap-4 md:justify-center grow">
+        <div className="bg-gray-200 rounded-xl overflow-hidden relative w-full md:h-full md:w-auto">
+          <video
+            id="mse-video"
+            autoPlay
+            muted
+            playsInline
+            className="h-full w-full z-10"
+            ref={liveFeedPlayerRef}
+          />
+          {loading && (
+            <div className="absolute right-0 top-0 p-4 bg-white bg-opacity-75 rounded-bl">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
+                <p className="text-base font-bold">{loading}</p>
+              </div>
+            </div>
+          )}
+          {/* { streamStatus > 0 && */}
+          <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center">
+            {streamStatus === StreamStatus.Offline && (
+              <div className="text-center">
+                <p className="font-bold text-black">
+                  STATUS: <span className="text-red-600">OFFLINE</span>
+                </p>
+                <p className="font-semibold text-black">
+                  Feed is currently not live.
+                </p>
+                <p className="font-semibold text-black">
+                  Click refresh button to try again.
+                </p>
+              </div>
+            )}
+            {streamStatus === StreamStatus.Stop && (
+              <div className="text-center">
+                <p className="font-bold text-black">
+                  STATUS: <span className="text-red-600">STOPPED</span>
+                </p>
+                <p className="font-semibold text-black">Feed is Stooped.</p>
+                <p className="font-semibold text-black">
+                  Click refresh button to start feed.
+                </p>
+              </div>
+            )}
+            {streamStatus === StreamStatus.Loading && (
+              <div className="text-center">
+                <p className="font-bold text-black">
+                  STATUS: <span className="text-red-600"> LOADING</span>
+                </p>
+                <p className="font-semibold text-black">
+                  Fetching latest feed.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col flex-grow-0 flex-shrink-0 max-w-full md:max-w-[202px]">
+          <div className="pb-3 hideonmobilescreen">
+            <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+          </div>
+          <div className="flex flex-wrap  rounded-xl overflow-auto bg-primary-100 border border-primary-200">
+            {cameraPTZ.map((option) => {
+              const shortcutKeyDescription =
+                option.shortcutKey &&
+                option.shortcutKey
+                  .join(" + ")
+                  .replace("Control", "Ctrl")
+                  .replace("ArrowUp", "↑")
+                  .replace("ArrowDown", "↓")
+                  .replace("ArrowLeft", "←")
+                  .replace("ArrowRight", "→");
+              return (
+                <Tooltip
+                  key={option.action}
+                  placement="left"
+                  arrow={true}
+                  title={
+                    <span className="text-sm font-semibold">
+                      {`${option.label}  (${shortcutKeyDescription})`}
+                    </span>
+                  }
+                >
+                  <button
+                    className="bg-primary-100 hover:bg-primary-200 border border-green-100 w-[50px] h-[50px] inline-flex justify-center items-center"
+                    onClick={option.callback}
+                  >
+                    <span className="sr-only">{option.label}</span>
+                    {option.icon ? (
+                      <i className={`${option.icon} md:p-2`} />
+                    ) : (
+                      <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                        {option.value}x
+                      </span>
+                    )}
+                  </button>
+                </Tooltip>
+              );
+            })}
+          </div>
+          <div className="mt-4">
+            <span className="text-lg font-semibold">
+              Monitor Readings
+            </span>
+            {/* DISPLAY MONITOR READINGS FROM IMAGE RECOGNITION HERE */}
+          </div>
+        </div>
+      </div>
+      {/*
       <div>
         <div className="lg:flex items-start gap-8 mb-4">
           <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
@@ -342,7 +449,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                 </div>
               </div>
             )}
-            {/* { streamStatus > 0 && */}
+            {/* { streamStatus > 0 && }
             <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center">
               {streamStatus === StreamStatus.Offline && (
                 <div className="text-center">
@@ -428,6 +535,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
       </div>
+          */}
     </div>
   );
 };
