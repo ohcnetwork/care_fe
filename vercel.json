@@ -2,7 +2,8 @@
     "rewrites": [
         {
             "source": "/api/:path*",
-            "destination": "https://careapi.coronasafe.in/api/:path*"
+            "destination": "https://careapi.coronasafe.in/api/:path*",
+            "force": "true"
         },
         {
             "source": "/:path*",
