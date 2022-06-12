@@ -1,55 +1,21 @@
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  externalResultUploadCsv,
-  getAllLocalBodyByDistrict,
-} from "../../Redux/actions";
+import { externalResultUploadCsv } from "../../Redux/actions";
 import CSVReader from "react-csv-reader";
-import {
-  MultilineInputField,
-  PhoneNumberField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
-import { ExternalResultLocalbodySelector } from "./ExternalResultLocalbodySelector";
-import StateManager from "react-select";
-const get = require("lodash.get");
-const Loading = loadable(() => import("../Common/Loading"));
+import * as Notification from "../../Utils/Notifications.js";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ExternalResultUpload() {
   const dispatch: any = useDispatch();
-  const [uploadFile, setUploadFile] = useState("");
   // for disabling save button once clicked
   const [loading, setLoading] = useState(false);
   const [csvData, setCsvData] = useState(new Array<any>());
   const [errors, setErrors] = useState<any>({});
-  const initalState = { loading: false, lsgs: new Array<any>() };
-  const [state, setState] = useState(initalState);
-  const handleForce = (data: any, fileInfo: any) => {
+  const handleForce = (data: any) => {
     setCsvData(data);
   };
-
-  // const fetchLSG = useCallback(
-  //   async (status: statusType) => {
-  //     setState({ ...state, loading: true });
-  //     let id = 7
-  //     const res = await dispatch(getAllLocalBodyByDistrict({ id }));
-  //     if (!status.aborted) {
-  //       if (res && res.data) {
-  //         setState({ loading: false, lsgs: res.data.results });
-  //       }
-  //     }
-  //   },
-  //   [dispatch]
-  // );
-
-  // useAbortableEffect((status: statusType) => {
-  //   fetchLSG(status);
-  // }, []);
 
   const papaparseOptions = {
     header: true,
@@ -63,20 +29,30 @@ export default function ExternalResultUpload() {
     e.preventDefault();
     setLoading(true);
     const valid = true;
-    const data = {
-      sample_tests: csvData,
-    };
+    if (csvData.length !== 0) {
+      const data = {
+        sample_tests: csvData,
+      };
 
-    if (valid) {
-      setErrors({});
-      dispatch(externalResultUploadCsv(data)).then((resp: any) => {
-        if (resp && resp.status === 202) {
-          setLoading(false);
-          navigate("/external_results");
-        } else {
-          setErrors(resp.data);
-        }
+      if (valid) {
+        setErrors({});
+        dispatch(externalResultUploadCsv(data)).then((resp: any) => {
+          if (resp && resp.status === 202) {
+            setLoading(false);
+            navigate("/external_results");
+          } else {
+            setErrors(resp.data);
+            setLoading(false);
+          }
+        });
+      } else {
+        setLoading(false);
+      }
+    } else {
+      Notification.Error({
+        msg: "Please Upload A CSV file !!!",
       });
+      setLoading(false);
     }
   };
 
@@ -133,11 +109,6 @@ export default function ExternalResultUpload() {
                       </div>
                     )}
                   </div>
-                  {/* <div>
-                      {
-                        !state.loading && <ExternalResultLocalbodySelector lsgs={state.lsgs} />
-                      }
-                    </div> */}
                 </div>
               );
             })}
