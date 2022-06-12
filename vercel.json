@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "https://careapi.coronasafe.in/api/:path*"
+        },
+        {
+            "source": "/*",
+            "destination": "/index.html"
+        }
+    ]
+}
