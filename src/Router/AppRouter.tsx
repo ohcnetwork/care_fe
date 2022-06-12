@@ -329,10 +329,16 @@ const routes = {
     localStorage.getItem("defaultResourceView") === "list" ? (
       <ResourceListView />
     ) : (
-      <ResourceBoardView />
+      <DndProvider backend={HTML5Backend}>
+        <ResourceBoardView />
+      </DndProvider>
     ),
 
-  "/resource/board-view": () => <ResourceBoardView />,
+  "/resource/board-view": () => (
+    <DndProvider backend={HTML5Backend}>
+      <ResourceBoardView />
+    </DndProvider>
+  ),
   "/resource/list-view": () => <ResourceListView />,
   "/resource/:id": ({ id }: any) => <ResourceDetails id={id} />,
   "/resource/:id/update": ({ id }: any) => <ResourceDetailsUpdate id={id} />,

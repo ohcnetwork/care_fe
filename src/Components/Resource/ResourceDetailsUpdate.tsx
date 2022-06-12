@@ -11,7 +11,7 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getResourceDetails,
@@ -78,6 +78,7 @@ const goBack = () => {
 
 export const ResourceDetailsUpdate = (props: resourceProps) => {
   const dispatchAction: any = useDispatch();
+  const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
   const [assignedQuantity, setAssignedQuantity] = useState(0);
   const [requestTitle, setRequestTitle] = useState("");
@@ -123,7 +124,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   }, [dispatchAction, state.form.assigned_to]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
       if (!state.form[field] || !state.form[field].length) {
@@ -156,7 +157,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async () => {
     const validForm = validateForm();
 
     if (validForm) {
@@ -203,12 +204,14 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         if (res && res.data) {
           setRequestTitle(res.data.title);
           setAssignedQuantity(res.data.assigned_quantity);
-          dispatch({ type: "set_form", form: res.data });
+          const d = res.data;
+          d["status"] = qParams.status || res.data.status;
+          dispatch({ type: "set_form", form: d });
         }
         setIsLoading(false);
       }
     },
-    [props.id, dispatchAction]
+    [props.id, dispatchAction, qParams.status]
   );
 
   useAbortableEffect(
@@ -379,7 +382,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
-                  onClick={(e) => handleSubmit(e)}
+                  onClick={handleSubmit}
                   startIcon={
                     <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                   }
