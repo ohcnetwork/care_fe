@@ -246,8 +246,7 @@ const AssetCreate = (props: AssetProps) => {
   const parseAssetId = (assetUrl: string) => {
     try {
       const assetId = parseQueryParams(assetUrl);
-      // QR Maybe searchParams "asset" or "assetQR"
-      if (assetId) {
+      if (assetId != null) {
         setQrCodeId(assetId);
         setIsScannerActive(false);
         return;

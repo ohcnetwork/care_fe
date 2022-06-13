@@ -200,11 +200,13 @@ const AssetsList = () => {
       setIsScannerActive(false);
       const assetId = parseQueryParams(assetUrl);
 
-      if (assetId) {
+      if (assetId != null) {
         const { data }: any = await dispatch(
           listAssets({ qr_code_id: assetId })
         );
-        return data.results.length ? data.results[0].id : assetId;
+        return data.results[0].id;
+      } else {
+        return assetId;
       }
     } catch (err) {
       console.log(err);
