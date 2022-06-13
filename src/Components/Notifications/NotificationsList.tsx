@@ -5,7 +5,7 @@ import {
   getNotifications,
   getUserPnconfig,
   updateUserPnconfig,
-  getPublicKey,
+  // getPublicKey,
 } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { SelectField } from "../Common/HelperInputFields";
@@ -132,12 +132,16 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
 
   async function subscribe() {
     setIsSubscribing(true);
-    const response: any = await dispatch(getPublicKey());
-    const public_key = response.data.public_key;
+    // const response: any = await dispatch(getPublicKey());
+    // const public_key = response.data.public_key;
+
+    const public_key =
+      "BBooqYviKrvueIvoGfafBr_tqOSNFHbaDvXA71jL6KtcttsBg4euANGgwfb4uM-kCvAaV3_NQw5yiGOjAaPieco";
+
     const sw = await navigator.serviceWorker.ready;
     const push = await sw.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: encodeURIComponent(public_key),
+      applicationServerKey: public_key,
     });
     const p256dh = btoa(
       String.fromCharCode.apply(
@@ -157,6 +161,8 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
       pf_p256dh: p256dh,
       pf_auth: auth,
     };
+
+    console.log(data);
 
     const res = await dispatch(
       updateUserPnconfig(data, { username: username })
