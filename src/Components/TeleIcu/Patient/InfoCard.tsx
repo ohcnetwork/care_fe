@@ -1,5 +1,4 @@
 import { Link } from "raviger";
-import { GENDER } from "../../../Common/constants";
 import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { RightArrowIcon } from "../Icons/ArrowIcon";
@@ -15,11 +14,14 @@ export default function TeleICUPatientInfoCard({
   patient,
 }: ITeleICUPatientInfoCardProps) {
   const [open, setOpen] = useState(false);
-  console.log(patient);
   return (
     <section className="flex items-stretch my-2 lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2">
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <div className="bg-white md:w-4/5 p-4 mx-auto ">
+      <Modal
+        className="top-1/2 md:left-40 md:top-1/4 flex items-center justify-center"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        <div className="bg-white md:w-4/5 p-4 mx-auto">
           {patient?.facility &&
           patient?.id &&
           patient?.last_consultation?.id ? (
@@ -27,6 +29,7 @@ export default function TeleICUPatientInfoCard({
               facilityId={patient?.facility}
               patientId={patient?.id}
               consultationId={patient?.last_consultation?.id}
+              smallLoader={true}
             />
           ) : (
             <div>Invalid Patient Data</div>
@@ -34,13 +37,16 @@ export default function TeleICUPatientInfoCard({
         </div>
       </Modal>
       <div className="bg-white border-b p-5 flex items-center lg:w-7/12 w-full">
-        {patient.blood_group && (
-          <div className="flex flex-col items-center ">
-            <div className="text-2xl border border-gray-300 rounded-full font-semibold items-center m-2 h-20 w-20 flex justify-center">
-              {patient.blood_group === "UNKNOWN" ? "?" : patient.blood_group}
-            </div>
-            <span className="font-light text-primary-600 text-xs mr-1">
-              Blood Group
+        {patient?.last_consultation && patient?.last_consultation?.current_bed && (
+          <div className="w-32 self-stretch flex-shrink-0 border-2 text-lg flex flex-col items-center justify-center rounded-md">
+            <span className="text-center text-gray-900 text-sm">
+              {
+                patient?.last_consultation?.current_bed?.bed_object
+                  ?.location_object?.name
+              }
+            </span>
+            <span className="text-md font-bold">
+              {patient?.last_consultation?.current_bed?.bed_object.name}
             </span>
           </div>
         )}
@@ -56,29 +62,27 @@ export default function TeleICUPatientInfoCard({
           <p className="text-sm sm:text-base my-1 ml-1 text-primary-800">
             <span>{patient.age} years</span>
             <span className="mx-2">•</span>
-            <span>{patient.gender && GENDER[patient.gender]}</span>
+            <span>{patient.gender}</span>
           </p>
           <div className="text-sm flex flex-wrap items-center">
-            {!patient.last_consultation?.current_bed ? (
-              <button
-                className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
-                onClick={() => setOpen(true)}
-              >
-                Assign Bed
-              </button>
-            ) : (
+            <button
+              className="btn btn-primary text-sm p-2"
+              onClick={() => setOpen(true)}
+            >
+              {!patient.last_consultation?.current_bed
+                ? "Assign Bed"
+                : "Switch Bed"}
+            </button>
+            {patient.blood_group ? (
               <div className="m-1">
-                <span className="sm:text-base font-semibold text-sm mr-2">
-                  {patient.last_consultation?.current_bed?.bed_object?.name}
+                <span className="font-light text-primary-600 text-sm mr-1">
+                  Blood group
                 </span>
-                <button
-                  className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
-                  onClick={() => setOpen(true)}
-                >
-                  Switch Bed
-                </button>
+                <span className="sm:text-base font-semibold text-sm mr-2">
+                  {patient.blood_group}
+                </span>
               </div>
-            )}
+            ) : null}
             {(patient.last_consultation?.weight || false) && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
