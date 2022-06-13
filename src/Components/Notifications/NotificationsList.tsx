@@ -130,6 +130,21 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
       });
   };
 
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
   async function subscribe() {
     setIsSubscribing(true);
     const response = await dispatch(getPublicKey());
@@ -137,7 +152,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
     const sw = await navigator.serviceWorker.ready;
     const push = await sw.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: public_key,
+      applicationServerKey: urlBase64ToUint8Array(public_key),
     });
     const p256dh = btoa(
       String.fromCharCode.apply(
@@ -190,10 +205,6 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
     }
     intialSubscriptionState();
   }, [dispatch, reload, showNotifications, offset, eventFilter, isSubscribed]);
-
-  // const handlePagination = (page: number, limit: number) => {
-  //   updateQuery({ page, limit });
-  // };
 
   const resultUrl = (event: string, data: any) => {
     switch (event) {
@@ -314,17 +325,6 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
           {t("Notifications")}
         </div>
       </button>
-      {/* <button
-        onClick={() => setShowNotifications(!showNotifications)}
-        className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
-      >
-        <i
-          className={
-            "fas fa-bell text-primary-400 mr-3 text-lg group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"
-          }
-        ></i>
-        Notifications
-      </button> */}
 
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
         <div className="bg-white h-full">
