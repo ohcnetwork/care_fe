@@ -1,6 +1,10 @@
 import ReactDOM from "react-dom";
 import reducer from "../src/Redux/Reducer";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import {
+  createTheme,
+  ThemeProvider,
+  experimental_sx as sx,
+} from "@mui/material/styles";
 import App from "./App";
 import "./i18n";
 import { applyMiddleware, createStore } from "redux";
@@ -24,6 +28,16 @@ const theme = createTheme({
     },
     secondary: {
       main: "#e0e0e0",
+    },
+  },
+  components: {
+    MuiOutlinedInput: {
+      styleOverrides: {
+        input: sx({
+          pt: "10.5px",
+          pb: "10.5px",
+        }),
+      },
     },
   },
 });
