@@ -1,7 +1,7 @@
 import { Button, CircularProgress, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
-import React, { Fragment, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES } from "../../Common/constants";
 import loadable from "@loadable/component";
@@ -179,6 +179,11 @@ export const PatientHome = (props: any) => {
   };
 
   const handleAssignedVolunteer = () => {
+    if (!assignedVolunteerObject) {
+      Notification.Error({ msg: "Please select a volunteer." });
+      return;
+    }
+
     dispatch(
       patchPatient(
         {
