@@ -147,12 +147,14 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
 
   async function subscribe() {
     setIsSubscribing(true);
-    const response = await dispatch(getPublicKey());
+    const response: any = await dispatch(getPublicKey());
     const public_key = response.data.public_key;
     const sw = await navigator.serviceWorker.ready;
     const push = await sw.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(public_key),
+      applicationServerKey: urlBase64ToUint8Array(
+        new Buffer(public_key).toString("base64")
+      ),
     });
     const p256dh = btoa(
       String.fromCharCode.apply(
