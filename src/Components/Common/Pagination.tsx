@@ -73,15 +73,15 @@ const Pagination = (props: PaginationProps) => {
     const totalPage = Math.ceil(data.totalCount / rowsPerPage);
 
     switch (action) {
-      case "prev":
+      case "<":
         newPage = currentPage - 1;
         break;
 
-      case "next":
+      case ">":
         newPage = currentPage + 1;
         break;
 
-      case "last":
+      case ">>>":
         newPage = totalPage;
         break;
 
