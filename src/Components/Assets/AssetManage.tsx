@@ -124,25 +124,25 @@ const AssetManage = (props: AssetManageProps) => {
     if (txns.length > 0) {
       setTransactionDetails(
         transactions.map((transaction: AssetTransaction) => (
-          <tr>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
+          <tr key={`transaction_id_${transaction.id}`}>
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">
                 {transaction.from_location.name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">
                 {transaction.to_location.name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">
                 {transaction.performed_by.first_name}{" "}
                 {transaction.performed_by.last_name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">
                 {moment(transaction.modified_date).format("lll")}
               </span>
             </td>
@@ -153,7 +153,7 @@ const AssetManage = (props: AssetManageProps) => {
       setTransactionDetails(
         <tr>
           <td
-            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-500 text-center"
+            className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500 text-center"
             colSpan={4}
           >
             <h5>No Transactions Found</h5>
@@ -176,38 +176,64 @@ const AssetManage = (props: AssetManageProps) => {
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
       <div className="bg-white rounded-lg md:p-6 p-3 shadow">
+        <div className="text-2xl font-semibold mb-4">{asset?.name}</div>
         <div className="md:flex justify-between">
           <div className="mb-2">
-            <div className="text-xl font-semibold">{asset?.name}</div>
-            <Typography>Location : {asset?.location_object.name}</Typography>
-            <Typography>
-              Facility : {asset?.location_object.facility.name}
-            </Typography>
-            <Typography>Serial Number : {asset?.serial_number}</Typography>
-            <Typography>Status : {status(asset?.status)}</Typography>
-            <Typography>
-              Warranty Details : {asset?.warranty_details}
-            </Typography>
-            <Typography>Type : {asset?.asset_type}</Typography>
-            <Typography>
-              Working status : {working_status(asset?.is_working)}
-            </Typography>
-            {!asset?.is_working && (
-              <Typography>
-                Not working reason : {asset?.not_working_reason}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Typography className="flex flex-col">
+                <span className="font-bold">Location</span>
+                <span>{asset?.location_object.name || "--"}</span>
               </Typography>
-            )}
-            <Typography>Vendor Name : {asset?.vendor_name}</Typography>
-            <Typography>
-              Customer Support Name : {asset?.support_name}
-            </Typography>
-            <Typography>
-              Contact Phone Number : {asset?.support_phone}
-            </Typography>
-            <Typography>Contact Email : {asset?.support_email}</Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Facility</span>
+                <span>{asset?.location_object.facility.name || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Serial Number</span>
+                <span>{asset?.serial_number || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Warranty Details</span>
+                <span>{asset?.warranty_details || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Type</span>
+                <span>{asset?.asset_type || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Vendor Name</span>
+                <span>{asset?.vendor_name || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Customer Support Name</span>
+                <span>{asset?.support_name || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Contact Phone Number</span>
+                <span>{asset?.support_phone || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Contact Email</span>
+                <span>{asset?.support_email || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Status</span>
+                <span>{status(asset?.status)}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Working status</span>
+                <span>{working_status(asset?.is_working)}</span>
+              </Typography>
+              {!asset?.is_working && (
+                <Typography className="flex flex-col">
+                  <span className="font-bold">Not working reason</span>
+                  <span>{asset?.not_working_reason || "--"}</span>
+                </Typography>
+              )}
+            </div>
           </div>
-          <div className="flex flex-col">
-            <div className="mb-1">
+          <div className="flex mt-2 flex-col gap-1">
+            <div className="mb-3 flex justify-center">
               <QRCode
                 bgColor="#FFFFFF"
                 fgColor="#000000"
@@ -215,13 +241,13 @@ const AssetManage = (props: AssetManageProps) => {
                 size={128}
                 value={asset?.id || ""}
               />
-              <button
-                className="btn btn-primary mt-2 w-full"
-                onClick={() => setIsPrintMode(true)}
-              >
-                Print QR
-              </button>
             </div>
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsPrintMode(true)}
+            >
+              Print QR
+            </button>
             <button
               onClick={() =>
                 navigate(
@@ -237,7 +263,7 @@ const AssetManage = (props: AssetManageProps) => {
             <button
               onClick={() => navigate(`/assets/${asset?.id}/configure`)}
               id="update-asset"
-              className="btn-primary btn mt-1"
+              className="btn-primary btn"
             >
               <i className="fas fa-cog text-white mr-2"></i>
               Configure Asset
@@ -248,24 +274,24 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="bg-white rounded-lg md:p-6 p-3 shadow mt-2">
         <div className="text-xl font-semibold">Transaction History</div>
         <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-          <table className="min-w-full divide-y divide-cool-gray-200">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
-                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Moved from
                 </th>
-                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Moved to
                 </th>
-                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Moved By
                 </th>
-                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Moved On
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-cool-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200">
               {transactionDetails}
             </tbody>
           </table>

@@ -1,13 +1,11 @@
+import React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useAbortableEffect, statusType } from "../../Common/utils";
 import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
-import {
-  getPermittedFacility,
-  getFacilityAssetLocation,
-} from "../../Redux/actions";
+import { getAnyFacility, getFacilityAssetLocation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField } from "../Common/HelperInputFields";
 import { LocationSelect } from "../Common/LocationSelect";
@@ -47,14 +45,14 @@ function AssetFilter(props: any) {
     closeFilter();
     const searchQuery = qParams?.search && `?search=${qParams?.search}`;
     if (searchQuery) navigate(`/assets${searchQuery}`);
-    else navigate(`/assets`);
+    else navigate("/assets");
   }, [qParams]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
       if (facilityId) {
         const [facilityData]: any = await Promise.all([
-          dispatch(getPermittedFacility(facilityId)),
+          dispatch(getAnyFacility(facilityId)),
         ]);
         if (!status.aborted) {
           if (!facilityData?.data)
@@ -129,10 +127,10 @@ function AssetFilter(props: any) {
           Apply
         </button>
       </div>
-      <div className="w-64 flex-none mt-2">
+      <div className="w-full flex-none mt-2">
         <div className="font-light text-md mt-2">Filter By:</div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none mt-2">
           <span className="text-sm font-semibold">Facility</span>
           <FacilitySelect
             name="Facilities"
@@ -141,12 +139,12 @@ function AssetFilter(props: any) {
             }
             selected={facility}
             errors=""
-            showAll={false}
+            showAll
             multiple={false}
           />
         </div>
         {facilityId && (
-          <div className="w-64 flex-none">
+          <div className="w-full flex-none">
             <span className="text-sm font-semibold">Location</span>
             <LocationSelect
               name="Facilities"
@@ -161,7 +159,7 @@ function AssetFilter(props: any) {
             />
           </div>
         )}
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Asset Type</span>
           <SelectField
             id="asset-type"
@@ -192,7 +190,7 @@ function AssetFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Asset Status</span>
           <SelectField
             id="asset-status"

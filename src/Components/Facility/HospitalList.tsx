@@ -1,7 +1,9 @@
-import { navigate, useQueryParams } from "raviger";
-import React, { useCallback, useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Link, navigate, useQueryParams } from "raviger";
+import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+
 import {
   DOWNLOAD_TYPES,
   FACILITY_TYPES,
@@ -20,7 +22,7 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
-import { CircularProgress, InputLabel, TextField } from "@material-ui/core";
+import { InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -28,15 +30,14 @@ import { CSVLink } from "react-csv";
 import moment from "moment";
 import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import SwipeableViews from "react-swipeable-views";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -50,13 +51,12 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     heading: {
       fontSize: theme.typography.pxToRem(15),
-      fontWeight: theme.typography.fontWeightRegular,
     },
   })
 );
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const HospitalListPage = (props: any) => {
+export const HospitalList = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
   const classes = useStyles();
   const dispatchAction: any = useDispatch();
@@ -81,7 +81,9 @@ const HospitalListPage = (props: any) => {
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
   const [modalFor, setModalFor] = useState(undefined);
-  const { t } = props;
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const { t } = useTranslation();
   const limit = 14;
 
   const fetchData = useCallback(
@@ -204,25 +206,41 @@ const HospitalListPage = (props: any) => {
   };
 
   const handleDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatchAction(downloadFacility());
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById("facilityDownloader")?.click();
   };
 
   const handleCapacityDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const cap = await dispatchAction(downloadFacilityCapacity());
+    // file ready to download
+    setDownloadLoading(false);
     setCapacityDownloadFile(cap.data);
     document.getElementById("capacityDownloader")?.click();
   };
 
   const handleDoctorsDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const doc = await dispatchAction(downloadFacilityDoctors());
+    // file ready to download
+    setDownloadLoading(false);
     setDoctorsDownloadFile(doc.data);
     document.getElementById("doctorsDownloader")?.click();
   };
 
   const handleTriageDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const tri = await dispatchAction(downloadFacilityTriage());
+    // file ready to download
+    setDownloadLoading(false);
     setTriageDownloadFile(tri.data);
     document.getElementById("triageDownloader")?.click();
   };
@@ -300,14 +318,20 @@ const HospitalListPage = (props: any) => {
       facility: id,
       message: notifyMessage,
     };
-    const res = await dispatchAction(sendNotificationMessages(data));
-    if (res && res.status == 204) {
-      Notification.Success({
-        msg: "Facility Notified",
-      });
-      setModalFor(undefined);
+    if (data.message.trim().length >= 1) {
+      const res = await dispatchAction(sendNotificationMessages(data));
+      if (res && res.status == 204) {
+        Notification.Success({
+          msg: "Facility Notified",
+        });
+        setModalFor(undefined);
+      } else {
+        Notification.Error({ msg: "Something went wrong..." });
+      }
     } else {
-      Notification.Error({ msg: "Something went wrong..." });
+      Notification.Error({
+        msg: "Notification should contain atleast 1 character.",
+      });
     }
   };
 
@@ -323,48 +347,41 @@ const HospitalListPage = (props: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
-            <div className="h-full flex flex-col justify-between">
-              <div className="px-6 py-4">
-                {facility.kasp_empanelled && (
-                  <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-                    {KASP_STRING}
-                  </div>
+            <div className="flex ">
+              <div className="md:flex hidden w-32 self-stretch shrink-0 bg-gray-300 items-center justify-center">
+                {facility.cover_image_url ? (
+                  <img
+                    src={facility.cover_image_url}
+                    alt="Facility"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                 )}
-                <div className="inline-flex float-right items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
-                  {facility.facility_type}
-                </div>
-                <div className="font-black text-2xl capitalize mt-2">
-                  {facility.name}
-                </div>
-                <div className="mt-2 flex justify-between">
-                  <div className="flex flex-col">
-                    <div className="text-gray-500 leading-relaxed font-light">
-                      {t("Location")}:
-                    </div>
-                    <div className="font-semibold">
-                      {facility.local_body_object?.name}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col">
-                    <div className="text-gray-500 leading-relaxed font-light">
-                      {t("Ward")}:
-                    </div>
-
-                    {facility.ward_object && (
-                      <div className="font-semibold">
-                        {facility.ward_object?.number +
-                          ", " +
-                          facility.ward_object?.name || "-"}
+              </div>
+              <div className="h-full">
+                <div className="h-full flex flex-col justify-between">
+                  <div className="pl-4 md:pl-2 pr-4 py-2">
+                    {facility.kasp_empanelled && (
+                      <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
+                        {KASP_STRING}
                       </div>
                     )}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-2 bg-gray-50 border-t px-6 py-2">
-                <div className="flex py-4 justify-between">
-                  <div>
-                    <div className="text-gray-500 leading-relaxed">Phone:</div>
+                    <div className="font-black text-xl capitalize">
+                      {facility.name}
+                    </div>
+                    <div className="block">
+                      <div className="inline-flex items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                        {facility.facility_type}
+                      </div>
+                    </div>
+                    <div className="mt-2 flex justify-between">
+                      <div className="flex flex-col">
+                        <div className="font-semibold">
+                          {facility.local_body_object?.name}
+                        </div>
+                      </div>
+                    </div>
                     <a
                       href={`tel:${facility.phone_number}`}
                       className="font-semibold"
@@ -372,13 +389,20 @@ const HospitalListPage = (props: any) => {
                       {facility.phone_number || "-"}
                     </a>
                   </div>
-                  <span className="inline-flex rounded-md shadow-sm">
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 border-t px-2 md:px-6 py-2">
+              <div className="flex py-4 justify-between">
+                <div className="flex justify-between w-full">
+                  <div>
                     {userType !== "Staff" ? (
                       <button
-                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
+                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                         onClick={(_) => setModalFor(facility.id)}
                       >
-                        <i className="far fa-comment-dots mr-1"></i> Notify
+                        <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
+                        <span className="md:block hidden">Notify</span>
                       </button>
                     ) : (
                       <></>
@@ -391,7 +415,13 @@ const HospitalListPage = (props: any) => {
                       className=""
                     >
                       <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                        <div className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content">
+                        <form
+                          onSubmit={(event: any) => {
+                            event.preventDefault();
+                            handleNotifySubmit(modalFor);
+                          }}
+                          className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
+                        >
                           <div className="mb-4">
                             <h1 className="text-2xl">
                               Notify: {facility.name}
@@ -402,6 +432,7 @@ const HospitalListPage = (props: any) => {
                               id="NotifyModalMessageInput"
                               rows={6}
                               multiline
+                              required
                               className="w-full border p-2 max-h-64"
                               onChange={(e) => setNotifyMessage(e.target.value)}
                               placeholder="Type your message..."
@@ -410,29 +441,39 @@ const HospitalListPage = (props: any) => {
                           </div>
                           <div className="flex flex-row justify-end">
                             <button
+                              type="button"
                               className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
                               onClick={(_) => setModalFor(undefined)}
                             >
                               Cancel
                             </button>
                             <button
+                              type="submit"
                               className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
-                              onClick={(_) => handleNotifySubmit(modalFor)}
                             >
                               Send Notification
                             </button>
                           </div>
-                        </div>
+                        </form>
                       </div>
                     </Modal>
-                    <button
-                      type="button"
-                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                      onClick={() => navigate(`/facility/${facility.id}`)}
+                  </div>
+                  <div>
+                    <Link
+                      href={`/facility/${facility.id}`}
+                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     >
-                      {t("View Facility")}
-                    </button>
-                  </span>
+                      <i className="fas fa-hospital mr-2 text-primary-500"></i>
+                      {t("Facility")}
+                    </Link>
+                    <Link
+                      href={`/facility/${facility.id}/patients`}
+                      className="ml-2 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    >
+                      <i className="fas fa-user-injured text-primary-500 mr-2"></i>
+                      {t("Patients")}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -468,7 +509,7 @@ const HospitalListPage = (props: any) => {
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           onClick={() => navigate("/facility/create")}
         >
           <i className="fas fa-plus text-3xl"></i>
@@ -493,7 +534,7 @@ const HospitalListPage = (props: any) => {
 
         <div className="flex justify-end w-full mt-4">
           <div>
-            <Accordion className="mt-2 lg:mt-0 md:mt-0">
+            <Accordion className="mt-10 lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"
@@ -521,30 +562,38 @@ const HospitalListPage = (props: any) => {
                         setdownloadSelect(e.target.value);
                       }}
                     />
-                    <button
-                      className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
-                      onClick={handleDownloader}
-                    >
-                      <svg
-                        className="h-6 w-6"
-                        viewBox="0 0 16 16"
-                        fill="white"
-                        xmlns="http://www.w3.org/2000/svg"
+
+                    {downloadLoading ? (
+                      <div className="px-2 ml-2 my-2 pt-1 rounded">
+                        <CircularProgress className="text-primary-600 w-6 h-6" />
+                      </div>
+                    ) : (
+                      <button
+                        className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
+                        onClick={handleDownloader}
+                        disabled={downloadLoading}
                       >
-                        <path
-                          fillRule="evenodd"
-                          d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
-                        />
-                        <path
-                          fillRule="evenodd"
-                          d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
-                        />
-                        <path
-                          fillRule="evenodd"
-                          d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          className="h-6 w-6"
+                          viewBox="0 0 16 16"
+                          fill="white"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
+                          />
+                          <path
+                            fillRule="evenodd"
+                            d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
+                          />
+                          <path
+                            fillRule="evenodd"
+                            d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
+                          />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="hidden">
@@ -590,9 +639,16 @@ const HospitalListPage = (props: any) => {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Facilities
               </dt>
-              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                {totalCount}
-              </dd>
+              {/* Show spinner until cound is fetched from server */}
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
             </dl>
           </div>
         </div>
@@ -678,10 +734,9 @@ const HospitalListPage = (props: any) => {
             "kasp_empanelled"
           )}
       </div>
-      <div className="mt-4">
+      <div className="mt-4 pb-24">
         <div>{manageFacilities}</div>
       </div>
     </div>
   );
 };
-export const HospitalList = withTranslation()(HospitalListPage);

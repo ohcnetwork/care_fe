@@ -176,6 +176,10 @@ const routes: Routes = {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PUT",
   },
+  partialUpdateAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "PATCH",
+  },
 
   // Facility Beds
   listFacilityBeds: {
@@ -192,6 +196,29 @@ const routes: Routes = {
   },
   updateFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
+    method: "PUT",
+  },
+  deleteFacilityBed: {
+    path: "/api/v1/bed/{external_id}/",
+    method: "DELETE",
+  },
+
+  // Consultation beds
+
+  listConsultationBeds: {
+    path: "/api/v1/consultationbed/",
+    method: "GET",
+  },
+  createConsultationBed: {
+    path: "/api/v1/consultationbed/",
+    method: "POST",
+  },
+  getConsultationBed: {
+    path: "/api/v1/consultationbed/{external_id}/",
+    method: "GET",
+  },
+  updateConsultationBed: {
+    path: "/api/v1/consultationbed/{external_id}/",
     method: "PUT",
   },
 
@@ -234,7 +261,7 @@ const routes: Routes = {
     path: "/api/v1/consultation/{id}/",
   },
   updateConsultation: {
-    path: "/api/v1/consultation",
+    path: "/api/v1/consultation/{id}/",
     method: "PUT",
   },
   partialUpdateConsultation: {

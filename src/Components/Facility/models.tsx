@@ -25,6 +25,7 @@ export interface FacilityModel {
   id?: number;
   name?: string;
   district?: number;
+  cover_image_url?: string;
   facility_type?: string;
   address?: string;
   location?: {
@@ -109,6 +110,8 @@ export interface ConsultationModel {
   ett_tt?: number;
   cuff_pressure?: number;
   lines?: any;
+  last_daily_round?: any;
+  current_bed?: CurrentBed;
 }
 export interface PatientStatsModel {
   id?: number;
@@ -167,4 +170,16 @@ export interface BedModel {
     name: string;
   };
   location?: string;
+}
+
+export interface CurrentBed {
+  id: string;
+  consultation: string;
+  bed?: string;
+  bed_object: BedModel;
+  created_date: string;
+  modified_date: string;
+  start_date: string;
+  end_date: string;
+  meta: Record<string, any>;
 }

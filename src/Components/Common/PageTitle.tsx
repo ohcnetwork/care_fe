@@ -1,6 +1,7 @@
 import React from "react";
 import { navigate } from "raviger";
 import Breadcrumbs from "./Breadcrumbs";
+import PageHeadTitle from "./PageHeadTitle";
 
 interface PageTitleProps {
   title: string;
@@ -14,13 +15,13 @@ interface PageTitleProps {
   };
 }
 
-const PageTitle = (props: PageTitleProps) => {
+export default function PageTitle(props: PageTitleProps) {
   const {
     title,
     hideBack,
     backUrl,
     className = "",
-    componentRight = () => <></>,
+    componentRight = <></>,
     breadcrumbs = true,
     crumbsReplacements = {},
   } = props;
@@ -34,6 +35,7 @@ const PageTitle = (props: PageTitleProps) => {
   // 'px-3 md:px-8'
   return (
     <div className={`pt-4 mb-4 ${className}`}>
+      <PageHeadTitle title={title} />
       <div className="flex items-center">
         {!hideBack && (
           <button onClick={goBack}>
@@ -50,6 +52,4 @@ const PageTitle = (props: PageTitleProps) => {
       </div>
     </div>
   );
-};
-
-export default PageTitle;
+}

@@ -1,18 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { postLogin } from "../../Redux/actions";
 import { navigate } from "raviger";
-import { CardActions, CardContent, Grid } from "@material-ui/core";
+import {
+  CardActions,
+  CardContent,
+  Grid,
+  CircularProgress,
+} from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LanguageSelector from "../Common/LanguageSelector";
-const get = require("lodash.get");
+import { RECAPTCHA_SITE_KEY } from "../../Common/env";
+import get from "lodash.get";
 
-const LoginPage = (props: any) => {
+export const Login = (props: any) => {
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
@@ -23,8 +29,10 @@ const LoginPage = (props: any) => {
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const captchaKey = "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN";
-  const { t } = props;
+  const captchaKey = RECAPTCHA_SITE_KEY ?? "";
+  const { t } = useTranslation();
+  // display spinner while login is under progress
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
@@ -67,20 +75,43 @@ const LoginPage = (props: any) => {
     return form;
   };
 
+  // set loading to false when component is dismounted
+  useEffect(() => {
+    return () => {
+      setLoading(false);
+    };
+  }, []);
+
   const handleSubmit = (e: any) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
+      // replaces button with spinner
+      setLoading(true);
+
       dispatch(postLogin(valid)).then((resp: any) => {
         const res = get(resp, "data", null);
         const statusCode = get(resp, "status", "");
         if (res && statusCode === 429) {
           setCaptcha(true);
+          // captcha displayed set back to login button
+          setLoading(false);
         } else if (res && statusCode === 200) {
           localStorage.setItem("care_access_token", res.access);
           localStorage.setItem("care_refresh_token", res.refresh);
-          navigate("/facility");
+
+          if (
+            window.location.pathname === "/" ||
+            window.location.pathname === "/login"
+          ) {
+            navigate("/facility");
+          } else {
+            navigate(window.location.pathname.toString());
+          }
           window.location.reload();
+        } else {
+          // error from server set back to login button
+          setLoading(false);
         }
       });
     }
@@ -127,7 +158,7 @@ const LoginPage = (props: any) => {
                 variant="outlined"
                 margin="dense"
                 autoFocus={true}
-                InputLabelProps={{ shrink: !!form.username }}
+                InputLabelProps={{ shrink: true }}
                 value={form.username}
                 onChange={handleChange}
                 errors={errors.username}
@@ -141,7 +172,7 @@ const LoginPage = (props: any) => {
                   variant="outlined"
                   margin="dense"
                   autoComplete="off"
-                  InputLabelProps={{ shrink: !!form.password }}
+                  InputLabelProps={{ shrink: true }}
                   value={form.password}
                   onChange={handleChange}
                   errors={errors.password}
@@ -180,12 +211,18 @@ const LoginPage = (props: any) => {
                   </a>
                 </div>
 
-                <button
-                  className="w-full bg-primary-500 btn text-white"
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  {t("login")}
-                </button>
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <CircularProgress className="text-primary-500" />
+                  </div>
+                ) : (
+                  <button
+                    type="submit"
+                    className="w-full bg-primary-500 btn text-white"
+                  >
+                    {t("login")}
+                  </button>
+                )}
               </Grid>
             </CardActions>
           </form>
@@ -194,5 +231,3 @@ const LoginPage = (props: any) => {
     </div>
   );
 };
-
-export const Login = withTranslation()(LoginPage);

@@ -146,6 +146,16 @@ export const getAssetBed = (
     { asset: asset_external_id, bed: bed_id },
     { external_id }
   );
+export const partialUpdateAssetBed = (params: object, asset_id: string) =>
+  fireRequest(
+    "partialUpdateAssetBed",
+    [],
+    { ...params },
+    {
+      external_id: asset_id,
+    }
+  );
+
 export const updateAssetBed = (
   params: object,
   asset_external_id: string,
@@ -197,6 +207,50 @@ export const updateFacilityBed = (
     "updateFacilityBed",
     [],
     { ...params, facility: facility_external_id, location: location_id },
+    {
+      external_id,
+    }
+  );
+export const deleteFacilityBed = (external_id: string) => {
+  return fireRequest("deleteFacilityBed", [], {}, { external_id });
+};
+
+// Consultation Beds
+export const listConsultationBeds = (params: object) =>
+  fireRequest("listConsultationBeds", [], params, {});
+export const createConsultationBed = (
+  params: object,
+  consultation_id: number,
+  bed_id: string
+) =>
+  fireRequest(
+    "createConsultationBed",
+    [],
+    { ...params, consultation: consultation_id, bed: bed_id },
+    {}
+  );
+
+export const getConsultationBed = (
+  consultation_external_id: string,
+  bed_id: string,
+  external_id: string
+) =>
+  fireRequest(
+    "getConsultationBed",
+    [],
+    { consultation: consultation_external_id, bed: bed_id },
+    { external_id }
+  );
+export const updateConsultationBed = (
+  params: object,
+  consultation_external_id: string,
+  external_id: string,
+  bed_id: string
+) =>
+  fireRequest(
+    "updateConsultationBed",
+    [],
+    { ...params, consultation: consultation_external_id, bed: bed_id },
     {
       external_id,
     }
@@ -407,7 +461,7 @@ export const getConsultation = (id: number) => {
   return fireRequest("getConsultation", [], {}, { id: id });
 };
 export const updateConsultation = (id: number, params: object) => {
-  return fireRequest("updateConsultation", [id], params);
+  return fireRequest("updateConsultation", [], params, { id: id });
 };
 //Inventory
 export const getItems = (params: object) => {
@@ -473,7 +527,7 @@ export const deleteShiftRecord = (id: string) => {
   return fireRequest("deleteShiftRecord", [id], {});
 };
 export const listShiftRequests = (params: object, key: string) => {
-  return fireRequest(`listShiftRequests`, [], params, null, key);
+  return fireRequest("listShiftRequests", [], params, null, key);
 };
 export const getShiftDetails = (pathParam: object) => {
   return fireRequest("getShiftDetails", [], {}, pathParam);
@@ -618,7 +672,7 @@ export const deleteResourceRecord = (id: string) => {
   return fireRequest("deleteResourceRecord", [id], {});
 };
 export const listResourceRequests = (params: object, key: string) => {
-  return fireRequest(`listResourceRequests`, [], params, null, key);
+  return fireRequest("listResourceRequests", [], params, null, key);
 };
 export const getResourceDetails = (pathParam: object) => {
   return fireRequest("getResourceDetails", [], {}, pathParam);

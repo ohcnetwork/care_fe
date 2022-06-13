@@ -6,8 +6,10 @@ export interface statusType {
   aborted?: boolean;
 }
 
+type AbortableFunction = (status: statusType) => any;
+
 export const useAbortableEffect = (
-  effect: Function,
+  effect: AbortableFunction,
   dependencies: Array<any>
 ) => {
   const status: statusType = {}; // mutable status object
@@ -40,4 +42,14 @@ export const parseOptionId: (
     })
     .map((option) => option.text);
   return textArray.join(", ");
+};
+
+export const getDimensionOrDash = (
+  value: number | string | null | undefined,
+  unit: string
+) => {
+  if (value === undefined || value === null || value === 0 || value === "0") {
+    return "-";
+  }
+  return value + unit;
 };

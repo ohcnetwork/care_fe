@@ -10,6 +10,7 @@ type rhythm =
   | IrRegular
 
 export type t = {
+  pain: option<int>,
   bp: option<bp>,
   pulse: option<int>,
   temperature: option<float>,
@@ -48,7 +49,8 @@ let rhythmToString = rhythm => {
   }
 }
 
-let make = (~bp, ~pulse, ~temperature, ~resp, ~rhythm, ~rhythmDetails) => {
+let make = (~pain, ~bp, ~pulse, ~temperature, ~resp, ~rhythm, ~rhythmDetails) => {
+  pain: pain,
   bp: bp,
   pulse: pulse,
   temperature: temperature,
@@ -64,6 +66,7 @@ let makeBPFromJs = bp => {
 }
 let makeFromJs = dailyRound => {
   make(
+    ~pain=dailyRound["pain"]->Js.Nullable.toOption,
     ~bp=makeBPFromJs(dailyRound["bp"]),
     ~pulse=dailyRound["pulse"]->Js.Nullable.toOption,
     ~temperature=dailyRound["temperature"]->Js.Nullable.toOption,
@@ -73,6 +76,7 @@ let makeFromJs = dailyRound => {
   )
 }
 
+let pain = t => t.pain
 let bp = t => t.bp
 let systolic = bp => bp.systolic
 let diastolic = bp => bp.diastolic

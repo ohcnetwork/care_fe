@@ -6,6 +6,7 @@ import { getMinQuantity, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { Button, ButtonBase } from "@material-ui/core";
 import { navigate } from "raviger";
+import { RoleButton } from "../Common/RoleButton";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -72,29 +73,31 @@ export default function MinQuantityList(props: any) {
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
           <div className="flex items-center">
             <div className="ml-3">
-              <p className="text-gray-900 whitespace-no-wrap">
+              <p className="text-gray-900 whitespace-nowrap">
                 {inventoryItem.item_object?.name}
               </p>
             </div>
           </div>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <p className="text-gray-900 whitespace-no-wrap lowercase">
+          <p className="text-gray-900 whitespace-nowrap lowercase">
             {inventoryItem.min_quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <Button
+          <RoleButton
             className="ml-2 bg-primary-400 hover:bg-primary-600"
-            onClick={() =>
+            handleClickCB={() =>
               navigate(
                 `/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`
               )
             }
+            disableFor="readOnly"
+            buttonType="materialUI"
           >
             UPDATE
-          </Button>
+          </RoleButton>
         </td>
       </tr>
     ));
@@ -105,7 +108,7 @@ export default function MinQuantityList(props: any) {
           colSpan={3}
           className="px-5 py-5 border-b border-gray-200 text-center"
         >
-          <p className="text-gray-500 whitespace-no-wrap">
+          <p className="text-gray-500 whitespace-nowrap">
             No item with minimum quantity set
           </p>
         </td>
@@ -158,23 +161,32 @@ export default function MinQuantityList(props: any) {
         className="mx-3 md:mx-8"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
-          min_quantity: { name: "" },
-          list: { name: "min quantity" },
+          min_quantity: {
+            name: "Min Quantity",
+            uri: `/facility/${facilityId}/inventory/min_quantity/list`,
+          },
+          list: {
+            style: "pointer-events-none",
+          },
         }}
       />
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
-          <Button
+          <RoleButton
             className="ml-2"
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() =>
+            materialButtonProps={{
+              variant: "contained",
+              color: "primary",
+              size: "small",
+            }}
+            handleClickCB={() =>
               navigate(`/facility/${facilityId}/inventory/min_quantity/set`)
             }
+            disableFor="readOnly"
+            buttonType="materialUI"
           >
             Set Min Quantity
-          </Button>
+          </RoleButton>
           {inventoryItem}
         </div>
       </div>

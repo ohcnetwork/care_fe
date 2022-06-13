@@ -7,18 +7,21 @@ external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => 
 
 let fahrenheitToCelcius = (temp: option<float>) => {
   switch temp {
-    |Some(x) => Js.Float.toFixedWithPrecision((x -. 32.0) *. (5.0 /. 9.0), ~digits=2)->Belt.Float.fromString
-    |None => None
+  | Some(x) =>
+    Js.Float.toFixedWithPrecision((x -. 32.0) *. (5.0 /. 9.0), ~digits=2)->Belt.Float.fromString
+  | None => None
   }
 }
 let celciusToFahrenheit = (temp: option<float>) => {
   switch temp {
-    |Some(x) => Js.Float.toFixedWithPrecision((x *. 9.0) /. 5.0 +. 32.0, ~digits=2)->Belt.Float.fromString
-    |None => None
+  | Some(x) =>
+    Js.Float.toFixedWithPrecision(x *. 9.0 /. 5.0 +. 32.0, ~digits=2)->Belt.Float.fromString
+  | None => None
   }
 }
 
 type state = {
+  pain: option<int>,
   systolic: option<int>,
   diastolic: option<int>,
   pulse: option<int>,
@@ -32,6 +35,7 @@ type state = {
 }
 
 type action =
+  | SetPain(int)
   | SetSystolic(int)
   | SetDiastolic(int)
   | SetPulse(int)
@@ -45,6 +49,11 @@ type action =
 
 let reducer = (state, action) => {
   switch action {
+  | SetPain(pain) => {
+      ...state,
+      pain: Some(pain),
+      dirty: true,
+    }
   | SetSystolic(systolic) => {
       ...state,
       systolic: Some(systolic),
@@ -63,7 +72,9 @@ let reducer = (state, action) => {
     }
   | ToggleTemperatureUnit => {
       ...state,
-      temperature: state.tempInCelcius ? state.temperature->celciusToFahrenheit : state.temperature->fahrenheitToCelcius,
+      temperature: state.tempInCelcius
+        ? state.temperature->celciusToFahrenheit
+        : state.temperature->fahrenheitToCelcius,
       tempInCelcius: !state.tempInCelcius,
     }
   | SetResp(resp) => {
@@ -86,6 +97,7 @@ let initialState = hdp => {
   let bp = HemodynamicParameters.bp(hdp)
 
   {
+    pain: HemodynamicParameters.pain(hdp),
     systolic: Belt.Option.map(bp, HemodynamicParameters.systolic),
     diastolic: Belt.Option.map(bp, HemodynamicParameters.diastolic),
     pulse: HemodynamicParameters.pulse(hdp),
@@ -119,8 +131,13 @@ let makePayload = state => {
     Js.Dict.set(payload, "bp", Js.Json.object_(makeBpPayload(systolic, diastolic)))
   | (_, _) => ()
   }
+  DictUtils.setOptionalNumber("pain", state.pain, payload)
   DictUtils.setOptionalNumber("pulse", state.pulse, payload)
-  DictUtils.setOptionalFloat("temperature", state.tempInCelcius ? state.temperature->celciusToFahrenheit : state.temperature, payload)
+  DictUtils.setOptionalFloat(
+    "temperature",
+    state.tempInCelcius ? state.temperature->celciusToFahrenheit : state.temperature,
+    payload,
+  )
   DictUtils.setOptionalNumber("resp", state.resp, payload)
   Js.Dict.set(payload, "rhythm", Js.Json.string(HemodynamicParameters.encodeRhythm(state.rhythm)))
   DictUtils.setOptionalString("rhythm_detail", state.rhythmDetails, payload)
@@ -162,6 +179,28 @@ let meanArterialPressure = state => {
   | (_, _) => 0.0
   }
 }
+
+let getPainStatus = val => {
+  if val == 0.0 {
+    ("No Pain", "#059669")
+  } else if val < 4.0 {
+    ("Minute", "#ff3f00")
+  } else if val < 8.0 {
+    ("Moderate", "#ff002c")
+  } else {
+    ("Severe", "#de000c")
+  }
+}
+
+let isInvalidInputInt = (min, max, val) => {
+  let value = Js.Option.getWithDefault(min, val)
+  if value < min || value > max {
+    Some("Input outside range")
+  } else {
+    None
+  }
+}
+
 @react.component
 let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(hemodynamicParameter))
@@ -214,23 +253,20 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
       />
       <Slider
         title={"Temperature"}
-        titleNeighbour={
-          <div
-            className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-            onClick={_ => ToggleTemperatureUnit->send}
-          >
-            <span className="text-blue-700">
-              {state.tempInCelcius ? "C"->str : "F"->str}
-            </span>
-          </div>
-        }
+        titleNeighbour={<div
+          className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+          onClick={_ => ToggleTemperatureUnit->send}>
+          <span className="text-blue-700"> {state.tempInCelcius ? "C"->str : "F"->str} </span>
+        </div>}
         start={state.tempInCelcius ? "35" : "95"}
         end={state.tempInCelcius ? "41" : "106"}
         interval={"10"}
         step={0.1}
         value={Belt.Option.mapWithDefault(state.temperature, "", Js.Float.toString)}
         setValue={s => send(SetTemperature(float_of_string(s)))}
-        getLabel={state.tempInCelcius ? getStatus(36.4, "Low", 37.5, "High") : getStatus(97.6, "Low", 99.6, "High")}
+        getLabel={state.tempInCelcius
+          ? getStatus(36.4, "Low", 37.5, "High")
+          : getStatus(97.6, "Low", 99.6, "High")}
       />
       <Slider
         title={"Respiratory Rate (bpm)"}
@@ -241,6 +277,17 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         value={Belt.Option.mapWithDefault(state.resp, "", string_of_int)}
         setValue={s => send(SetResp(int_of_string(s)))}
         getLabel={getStatus(12.0, "Low", 16.0, "High")}
+      />
+      <Slider
+        title={"Pain Scale"}
+        start={"0"}
+        end={"10"}
+        interval={"1"}
+        step={1.0}
+        value={Belt.Option.mapWithDefault(state.pain, "", string_of_int)}
+        setValue={s => send(SetPain(int_of_string(s)))}
+        getLabel={val => getPainStatus(val)}
+        hasError={isInvalidInputInt(0, 10, state.pain)}
       />
       <div className="w-full mb-10 px-3">
         <label className="block mb-2 font-bold"> {str("Rhythm")} </label>

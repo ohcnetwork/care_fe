@@ -51,7 +51,7 @@ export const NursingPlot = (props: any) => {
 
   const data = Object.entries(results).map((key: any) => {
     return {
-      date: moment(key[0]).format("LLL"),
+      date: moment(key[0]).format("lll"),
       nursing: key[1]["nursing"],
     };
   });
@@ -74,24 +74,32 @@ export const NursingPlot = (props: any) => {
 
   return (
     <div>
-      <div className="grid md:grid-cols-full gap-4">
+      <div className="">
         <div>
-          <div className="space-y-2">
+          <div className="flex flex-row overflow-x-scroll">
             {NURSING_CARE_FIELDS.map(
               (f: any) =>
                 filterEmpty(f) && (
-                  <div
-                    key={f.desc}
-                    className="p-4 bg-white border rounded-lg shadow"
-                  >
-                    <div className="text-xl font-semibold">{f.desc}</div>
-                    <div className="space-y-2">
+                  <div key={f.desc} className="m-2 w-3/4">
+                    <div className="sticky top-0 pt-2  rounded z-10">
+                      <div className="flex justify-between p-4 mx-2 rounded bg-gray-200 border items-center">
+                        <h3 className="text-sm flex items-center h-8">
+                          {f.desc}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className=" m-2">
                       {dataToDisplay
                         .filter((i: any) => i.procedure === f.text)
                         .map((care: any, index: number) => (
-                          <div key={index}>
-                            <div className="text-sm font-semibold">{`- ${care.date}`}</div>
-                            <div className="text-cool-gray-800 pl-2">
+                          <div
+                            key={index}
+                            className="w-full my-2 p-4 divide-y bg-white border rounded-lg shadow"
+                          >
+                            <div className="text-xs font-semibold">
+                              {care.date}
+                            </div>
+                            <div className="text-sm py-2">
                               {care.description}
                             </div>
                           </div>

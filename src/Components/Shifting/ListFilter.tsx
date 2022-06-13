@@ -11,6 +11,7 @@ import {
   DISEASE_STATUS,
   KASP_STRING,
   BREATHLESSNESS_LEVEL,
+  KASP_ENABLED,
 } from "../../Common/constants";
 import moment from "moment";
 import { getAnyFacility, getUserList } from "../../Redux/actions";
@@ -30,7 +31,7 @@ function useMergeState(initialState: any) {
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter, local } = props;
+  const { filter, onChange, closeFilter, local } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
@@ -157,7 +158,8 @@ export default function ListFilter(props: any) {
   };
 
   const handleChange = (event: any) => {
-    let { name, value } = event.target;
+    const { name } = event.target;
+    let { value } = event.target;
 
     if (value === "--") {
       value = "";
@@ -263,7 +265,7 @@ export default function ListFilter(props: any) {
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
         {props.showShiftingStatus && (
-          <div className="w-64 flex-none">
+          <div className="w-full flex-none">
             <span className="text-sm font-semibold">Status</span>
             <SelectField
               name="status"
@@ -277,7 +279,7 @@ export default function ListFilter(props: any) {
             />
           </div>
         )}
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Origin facility</span>
           <div className="">
             {isOriginLoading ? (
@@ -295,7 +297,7 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">
             Shifting approving facility
           </span>
@@ -317,7 +319,7 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Assigned facility</span>
           <div className="">
             {isAssignedLoading ? (
@@ -335,7 +337,7 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Assigned To</span>
           <div className="">
             {isAssignedUserLoading ? (
@@ -365,7 +367,7 @@ export default function ListFilter(props: any) {
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
         </div> */}
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Ordering</span>
           <SelectField
             name="ordering"
@@ -380,7 +382,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Is emergency case</span>
           <SelectField
             name="emergency"
@@ -394,21 +396,23 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Is {KASP_STRING}</span>
-          <SelectField
-            name="is_kasp"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.is_kasp}
-            options={["--", "yes", "no"]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
+        {KASP_ENABLED && (
+          <div className="w-full flex-none">
+            <span className="text-sm font-semibold">Is {KASP_STRING}</span>
+            <SelectField
+              name="is_kasp"
+              variant="outlined"
+              margin="dense"
+              optionArray={true}
+              value={filterState.is_kasp}
+              options={["--", "yes", "no"]}
+              onChange={handleChange}
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            />
+          </div>
+        )}
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Is upshift case</span>
           <SelectField
             name="is_up_shift"
@@ -422,7 +426,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Disease Status</span>
           <SelectField
             name="disease_status"
@@ -436,7 +440,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Is Antenatal</span>
           <SelectField
             name="is_antenatal"
@@ -450,7 +454,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Breathlessness Level</span>
           <SelectField
             name="breathlessness_level"
@@ -464,7 +468,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Patient Phone Number</span>
           <TextInputField
             name="patient_phone_number"
@@ -476,7 +480,7 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <DateRangePicker
             startDate={getDate(filterState.created_date_after)}
             endDate={getDate(filterState.created_date_before)}

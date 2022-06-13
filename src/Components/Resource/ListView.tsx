@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import loadable from "@loadable/component";
-import { InputSearchBox } from "../Common/SearchBox";
+// import { InputSearchBox } from "../Common/SearchBox";
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
 import moment from "moment";
@@ -13,7 +13,8 @@ import {
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import Pagination from "../Common/Pagination";
-import { Modal, Button } from "@material-ui/core";
+// import { Modal, Button } from "@material-ui/core";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { limit, formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
@@ -33,10 +34,17 @@ export default function ListView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [modalFor, setModalFor] = useState({
-    externalId: undefined,
-    loading: false,
-  });
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  // const [modalFor, setModalFor] = useState({
+  //   externalId: undefined,
+  //   loading: false,
+  // });
+
+  const local = useMemo(
+    () => JSON.parse(localStorage.getItem("resource-filters") || "{}"),
+    []
+  );
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
@@ -44,12 +52,20 @@ export default function ListView() {
     setShowFilters(false);
   };
 
+  useEffect(() => {
+    applyFilter(local);
+  }, []);
+
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
-    document.getElementById(`resourceRequests-ALL`)?.click();
+    document.getElementById("resourceRequests-ALL")?.click();
   };
 
   const updateQuery = (filter: any) => {
@@ -76,8 +92,9 @@ export default function ListView() {
   };
 
   const appliedFilters = formatFilter(qParams);
-  const updateFilter = (params: any) => {
+  const updateFilter = (params: any, local: any) => {
     updateQuery(params);
+    localStorage.setItem("resource-filters", JSON.stringify(local));
   };
 
   const refreshList = () => {
@@ -117,7 +134,7 @@ export default function ListView() {
     offset,
   ]);
 
-  let showResourceCardList = (data: any) => {
+  const showResourceCardList = (data: any) => {
     if (data && !data.length) {
       return (
         <div className="flex flex-1 justify-center text-gray-600 mt-64">
@@ -127,7 +144,10 @@ export default function ListView() {
     }
 
     return data.map((resource: any) => (
-      <div key={`resource_${resource.id}`} className="w-1/2 mt-6 md:px-4">
+      <div
+        key={`resource_${resource.id}`}
+        className="w-full md:w-1/2 mt-6 md:px-4"
+      >
         <div className="overflow-hidden shadow rounded-lg bg-white h-full">
           <div className={"p-4 h-full flex flex-col justify-between"}>
             <div>
@@ -137,13 +157,13 @@ export default function ListView() {
                 </div>
                 <div>
                   {resource.emergency && (
-                    <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                    <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
                       Emergency
                     </span>
                   )}
                 </div>
               </div>
-              <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+              <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
                 <div className="sm:col-span-1">
                   <dt
                     title="Resource status"
@@ -228,15 +248,19 @@ export default function ListView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="flex items-end justify-between px-4">
+      <div className="md:flex md:items-end md:justify-between px-4">
         <PageTitle
           title={"Resource"}
           hideBack={true}
           componentRight={
-            <GetAppIcon
-              className="cursor-pointer ml-2 mt-2"
-              onClick={triggerDownload}
-            />
+            downloadLoading ? (
+              <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
+            ) : (
+              <GetAppIcon
+                className="cursor-pointer ml-2 mt-2"
+                onClick={triggerDownload}
+              />
+            )
           }
           breadcrumbs={false}
         />
@@ -244,7 +268,7 @@ export default function ListView() {
         <div className="w-32">
           {/* dummy div to align space as per board view */}
         </div>
-        <div>
+        <div className="my-2 md:my-0">
           <button
             className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
             onClick={onBoardViewBtnClick}
@@ -267,9 +291,13 @@ export default function ListView() {
         </div>
       </div>
 
-      <BadgesList appliedFilters={appliedFilters} updateFilter={updateFilter} />
+      <BadgesList
+        appliedFilters={appliedFilters}
+        local={local}
+        updateFilter={updateFilter}
+      />
 
-      <div className="px-4">
+      <div className="px-1">
         {isLoading ? (
           <Loading />
         ) : (
@@ -308,12 +336,13 @@ export default function ListView() {
         filename={`resource-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`resourceRequests-ALL`}
+        id={"resourceRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
           <ListFilter
             filter={qParams}
+            local={local}
             showResourceStatus={true}
             onChange={applyFilter}
             closeFilter={() => setShowFilters(false)}

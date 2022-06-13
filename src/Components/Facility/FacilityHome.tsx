@@ -1,4 +1,3 @@
-import { Button, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -27,6 +26,7 @@ import {
   PatientStatsModel,
 } from "./models";
 import moment from "moment";
+import { RoleButton, roleType } from "../Common/RoleButton";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -143,7 +143,7 @@ export const FacilityHome = (props: any) => {
   let stats = patientStatsData.map((data: PatientStatsModel, index) => {
     return (
       <tr className="border" key={index}>
-        <td className="border px-4 py-2 whitespace-no-wrap">
+        <td className="border px-4 py-2 whitespace-nowrap">
           {data.entry_date || "0"}
         </td>
         <td className="border px-4 py-2 text-center">
@@ -162,14 +162,16 @@ export const FacilityHome = (props: any) => {
           {data.num_patient_confirmed_positive || "0"}
         </td>
         <td className="border px-4 py-2">
-          <button
+          <RoleButton
             className="btn btn-default"
-            onClick={() =>
+            handleClickCB={() =>
               navigate(`/facility/${facilityId}/triage/${data.id}`)
             }
+            disableFor="readOnly"
+            buttonType="html"
           >
             Edit
-          </button>
+          </RoleButton>
         </td>
       </tr>
     );
@@ -207,70 +209,103 @@ export const FacilityHome = (props: any) => {
           </button>
         </DialogActions>
       </Dialog>
-      <div className="bg-white rounded-lg md:p-6 p-3 shadow">
-        <div className="md:flex justify-between">
-          <div>
-            <div className="text-xl font-semibold">{facilityData.name}</div>
-            <Typography>Address : {facilityData.address}</Typography>
-            <Typography>Phone : {facilityData.phone_number}</Typography>
-            <Typography>
-              District : {facilityData?.district_object?.name}
-            </Typography>
-            <Typography>
-              Local Body : {facilityData?.local_body_object?.name}
-            </Typography>
-            <Typography>
-              Last Updated:{" "}
-              {
-                // @ts-ignore
-                facilityData?.modified_date &&
-                  // @ts-ignore
-                  moment(facilityData?.modified_date).fromNow()
-              }
-            </Typography>
-            {facilityData?.ward_object && (
-              <Typography>
-                Ward :
-                {facilityData?.ward_object?.number +
-                  ", " +
-                  facilityData?.ward_object?.name}
-              </Typography>
-            )}
-            <div className="grid grid-cols-5">
-              <div className="border"></div>
-              <div className="border font-semibold">Liquid</div>
-              <div className="border font-semibold">B</div>
-              <div className="border font-semibold">C</div>
-              <div className="border font-semibold">D</div>
-              <div className="border font-semibold">Capacity</div>
-              <div className="border">{facilityData.oxygen_capacity}</div>
-              <div className="border">{facilityData.type_b_cylinders}</div>
-              <div className="border">{facilityData.type_c_cylinders}</div>
-              <div className="border">{facilityData.type_d_cylinders}</div>
-              <div className="border font-semibold">Expected</div>
-              <div className="border">
-                {facilityData.expected_oxygen_requirement}
+      <div className="bg-white rounded-lg p-3 md:p-6 shadow">
+        <div className="md:flex justify-between gap-2">
+          <div className="md:flex flex-col justify-between">
+            <div className="flex flex-col flex-1 gap-3">
+              <div>
+                <h1 className="text-4xl font-bold">{facilityData.name}</h1>
+                <p className="text-xl text-gray-700">
+                  Last updated{" "}
+                  {
+                    // @ts-ignore
+                    facilityData?.modified_date &&
+                      // @ts-ignore
+                      moment(facilityData?.modified_date).fromNow()
+                  }
+                </p>
               </div>
-              <div className="border">
-                {facilityData.expected_type_b_cylinders}
-              </div>
-              <div className="border">
-                {facilityData.expected_type_c_cylinders}
-              </div>
-              <div className="border">
-                {facilityData.expected_type_d_cylinders}
+              <div className="flex items-center flex-1">
+                <div className="grid grid-cols-1  lg:grid-cols-2 gap-4 mb-6 md:mb-0 w-full">
+                  <div className="md:flex flex-col justify-between lg:flex-1 min-w-[300px]">
+                    <div className="mb-4">
+                      <h1 className="text-lg font-bold">Address</h1>
+                      <p className="text-lg">{facilityData.address}</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <h1 className="text-lg font-bold">Phone Number</h1>
+                        <a
+                          href={`tel:${facilityData.phone_number}`}
+                          className="block text-lg font-normal"
+                        >
+                          {facilityData.phone_number}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="lg:flex-1 min-w-[300px] md:flex flex-col justify-between">
+                    <div className="mb-4">
+                      <h1 className="text-lg font-bold">Local Body</h1>
+                      <p className="text-lg">
+                        {facilityData?.local_body_object?.name}
+                      </p>
+                    </div>
+                    <div className="flex gap-4">
+                      <div>
+                        <h1 className="text-lg font-bold">Ward</h1>
+                        <p className="text-lg">
+                          {facilityData?.ward_object?.number +
+                            ", " +
+                            facilityData?.ward_object?.name}
+                        </p>
+                      </div>
+                      <div>
+                        <h1 className="text-lg font-bold">District</h1>
+                        <p className="text-lg">
+                          {facilityData?.district_object?.name}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+            <div className="mt-2">
+              <RoleButton
+                className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
+                handleClickCB={() =>
+                  navigate(`/facility/${facilityId}/patient`)
+                }
+                data-testid="add-patient-button"
+                disableFor="readOnly"
+                buttonType="html"
+              >
+                <i className="fas fa-plus text-white mr-2"></i>
+                Add Details of a Patient
+              </RoleButton>
+
+              <button
+                className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
+                onClick={() => navigate(`/facility/${facilityId}/patients`)}
+              >
+                <i className="fas fa-user-injured text-white mr-2"></i>
+                View Patients
+              </button>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <button
+          <div className="flex flex-col mt-2 md:mt-4">
+            <RoleButton
               id="update-facility"
               className="btn-primary btn"
-              onClick={() => navigate(`/facility/${facilityId}/update`)}
+              handleClickCB={() => navigate(`/facility/${facilityId}/update`)}
+              disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-pencil-alt text-white mr-2"></i>
               Update Facility
-            </button>
+            </RoleButton>
             <button
               className="btn-primary btn mt-2"
               onClick={() => navigate(`/facility/${facilityId}/inventory`)}
@@ -285,20 +320,28 @@ export const FacilityHome = (props: any) => {
               <i className="fas fa-map-marker-alt text-white mr-2"></i>
               Location Management
             </button>
-            <button
+            <RoleButton
               className="btn-primary btn mt-2"
-              onClick={() => navigate(`/facility/${facilityId}/resource/new`)}
+              handleClickCB={() =>
+                navigate(`/facility/${facilityId}/resource/new`)
+              }
+              disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Resource Request
-            </button>
-            <button
+            </RoleButton>
+            <RoleButton
               className="btn-primary btn mt-2"
-              onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
+              handleClickCB={() =>
+                navigate(`/facility/${facilityId}/assets/new`)
+              }
+              disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-plus-circle text-white mr-2"></i>
               Create Asset
-            </button>
+            </RoleButton>
             <button
               className="btn-primary btn mt-2"
               onClick={() => navigate(`/assets?facility=${facilityId}`)}
@@ -319,61 +362,90 @@ export const FacilityHome = (props: any) => {
             )}
           </div>
         </div>
-        <div>
-          <button
-            className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
-            onClick={() => navigate(`/facility/${facilityId}/patient`)}
-            data-testid="add-patient-button"
-          >
-            <i className="fas fa-plus text-white mr-2"></i>
-            Add Details of a Patient
-          </button>
+        <div className="mt-6">
+          <h1 className="text-xl font-semibold mb-6 pb-4 md:border-b">
+            Information on Oxygen
+          </h1>
 
-          <button
-            className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
-            onClick={() => navigate(`/facility/${facilityId}/patients`)}
-          >
-            <i className="fas fa-user-injured text-white mr-2"></i>
-            View Patients
-          </button>
+          <div className="grid grid-cols-5 mb-6 max-w-2xl p-0 bg-white break-all">
+            <div className="border p-2"></div>
+            <div className="border p-2 text-right font-semibold">Liquid</div>
+            <div className="border p-2 text-right font-semibold">B</div>
+            <div className="border p-2 text-right font-semibold">C</div>
+            <div className="border p-2 text-right font-semibold">D</div>
+            <div className="border p-2 font-semibold">Capacity</div>
+            <div className="border p-2 text-right ">
+              {facilityData.oxygen_capacity}
+            </div>
+            <div className="border p-2 text-right ">
+              {facilityData.type_b_cylinders}
+            </div>
+            <div className="border p-2 text-right ">
+              {facilityData.type_c_cylinders}
+            </div>
+            <div className="border p-2 text-right ">
+              {facilityData.type_d_cylinders}
+            </div>
+            <div className="border p-2 font-semibold">
+              Daily Expected Consumption
+            </div>
+            <div className="border p-2 text-right">
+              {facilityData.expected_oxygen_requirement}
+            </div>
+            <div className="border p-2 text-right">
+              {facilityData.expected_type_b_cylinders}
+            </div>
+            <div className="border p-2 text-right">
+              {facilityData.expected_type_c_cylinders}
+            </div>
+            <div className="border p-2 text-right">
+              {facilityData.expected_type_d_cylinders}
+            </div>
+          </div>
         </div>
         <div className="mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
             <div className="font-semibold text-xl">Bed Capacity</div>
-            <button
+            <RoleButton
               className="btn-primary btn w-full md:w-auto"
-              onClick={() => navigate(`/facility/${facilityId}/bed`)}
+              handleClickCB={() => navigate(`/facility/${facilityId}/bed`)}
+              disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-bed text-white mr-2"></i>
               Add More Bed Types
-            </button>
+            </RoleButton>
           </div>
           <div className="mt-4 flex flex-wrap">{capacityList}</div>
         </div>
         <div className="mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
             <div className="font-semibold text-xl">Doctors List</div>
-            <button
+            <RoleButton
               className="btn-primary btn w-full md:w-auto"
-              onClick={() => navigate(`/facility/${facilityId}/doctor`)}
+              handleClickCB={() => navigate(`/facility/${facilityId}/doctor`)}
               disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
+              disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-user-md text-white mr-2"></i>
               Add Doctor Types
-            </button>
+            </RoleButton>
           </div>
           <div className="mt-4 flex flex-wrap">{doctorList}</div>
         </div>
         <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
             <div className="font-semibold text-xl">Corona Triage</div>
-            <button
+            <RoleButton
               className="btn-primary btn w-full md:w-auto"
-              onClick={() => navigate(`/facility/${facilityId}/triage`)}
+              handleClickCB={() => navigate(`/facility/${facilityId}/triage`)}
+              disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-notes-medical text-white mr-2"></i>
               Add Triage
-            </button>
+            </RoleButton>
           </div>
           <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
             <table className="min-w-full border-2 rounded overflow-hidden">

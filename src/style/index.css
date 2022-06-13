@@ -63,7 +63,7 @@ h6 {
 }
 
 .btn {
-  @apply inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
+  @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
 }
 
 .btn:focus {
@@ -84,11 +84,6 @@ a:hover {
   @apply text-blue-600;
 }
 
-a[href^="tel:"]:before {
-  content: "\260e";
-  @apply mr-1;
-}
-
 .bg-primary {
   background-image: linear-gradient(
     135deg,
@@ -104,7 +99,7 @@ button:focus {
 }
 
 .btn {
-  @apply inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
+  @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
 }
 
 .btn:focus {
@@ -237,7 +232,8 @@ button:disabled:focus,
 .button-xl {
   @apply py-2 px-6 text-base h-12;
 }
-@import "tailwindcss/utilities";
+
+@tailwind utilities;
 
 .multiselect-dropdown__search-dropdown {
   max-height: 20rem;
@@ -252,7 +248,7 @@ button:disabled:focus,
 /* Radio */
 
 .radio-label {
-  @apply select-none .cursor-pointer;
+  @apply select-none cursor-pointer;
 }
 
 .radio-label span {
@@ -305,7 +301,7 @@ button:disabled:focus,
 /* Checkbox */
 
 .checkbox__label {
-  @apply select-none .cursor-pointer;
+  @apply select-none cursor-pointer;
 }
 
 .checkbox__label span {
@@ -407,3 +403,20 @@ button:disabled,
     background-position: 1000px 0;
   }
 }
+
+.feed-aspect-ratio {
+  aspect-ratio: 16/9;
+}
+
+/* .player-wrapper {
+  width: auto;
+  height: auto;
+}
+.react-player {
+  aspect-ratio: 16/9;
+  position: relative;
+}
+
+.react-player > div {
+  position: absolute;
+} */

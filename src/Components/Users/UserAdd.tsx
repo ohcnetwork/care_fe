@@ -10,12 +10,13 @@ import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
-import React, { useCallback, useReducer, useState } from "react";
+import { useCallback, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateEmailAddress,
+  validateName,
   validatePassword,
   validateUsername,
 } from "../../Common/validation";
@@ -34,9 +35,11 @@ import {
   SelectField,
   TextInputField,
   MultiSelectField,
+  CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
+import { Cancel, CheckCircle } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -129,6 +132,8 @@ export const UserAdd = (props: UserProps) => {
   const [selectedFacility, setSelectedFacility] = useState<
     FacilityModel[] | null
   >([]);
+  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
+  const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -139,6 +144,9 @@ export const UserAdd = (props: UserProps) => {
   const userType = currentUser.data.user_type;
 
   const userIndex = USER_TYPES.indexOf(userType);
+
+  const defaultAllowedUserTypes = USER_TYPES.slice(0, userIndex + 1);
+
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : userType === "StaffReadOnly"
@@ -149,12 +157,19 @@ export const UserAdd = (props: UserProps) => {
     ? ["StaffReadOnly", "DistrictReadOnlyAdmin", "StateReadOnlyAdmin"]
     : userType === "Pharmacist"
     ? ["Pharmacist"]
-    : USER_TYPES.slice(0, userIndex + 1);
+    : // Exception to allow Staff to Create Doctors
+    userType === "Staff"
+    ? ["Doctor", ...defaultAllowedUserTypes]
+    : defaultAllowedUserTypes;
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
   const showLocalbody = !(
-    state.form.user_type === "Staff" || state.form.user_type === "StaffReadOnly"
+    state.form.user_type === "Pharmacist" ||
+    state.form.user_type === "Volunteer" ||
+    state.form.user_type === "Doctor" ||
+    state.form.user_type === "Staff" ||
+    state.form.user_type === "StaffReadOnly"
   );
 
   const fetchDistricts = useCallback(
@@ -246,7 +261,7 @@ export const UserAdd = (props: UserProps) => {
       }
       setIsStateLoading(false);
     },
-    [dispatchAction]
+    [dispatchAction, username]
   );
 
   useAbortableEffect(
@@ -264,7 +279,7 @@ export const UserAdd = (props: UserProps) => {
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[name] = value;
     if (name === "username") {
       form[name] = value.toLowerCase();
@@ -289,6 +304,11 @@ export const UserAdd = (props: UserProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  useAbortableEffect(() => {
+    phoneIsWhatsApp &&
+      handleValueChange(state.form.phone_number, "alt_phone_number");
+  }, [phoneIsWhatsApp, state.form.phone_number]);
+
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
     const form = { ...state.form };
@@ -306,7 +326,7 @@ export const UserAdd = (props: UserProps) => {
   };
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
@@ -325,6 +345,19 @@ export const UserAdd = (props: UserProps) => {
         case "user_type":
           if (!state.form[field]) {
             errors[field] = "Please select the User Type";
+            invalidForm = true;
+          }
+          return;
+        case "first_name":
+        case "last_name":
+          if (!state.form[field]) {
+            errors[field] = `${field
+              .split("_")
+              .map((word) => word[0].toUpperCase() + word.slice(1))
+              .join(" ")} is required`;
+            invalidForm = true;
+          } else if (!validateName(state.form[field])) {
+            errors[field] = "Please enter a valid name";
             invalidForm = true;
           }
           return;
@@ -364,11 +397,13 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "phone_number":
+          // eslint-disable-next-line no-case-declarations
           const phoneNumber = parsePhoneNumberFromString(
             state.form[field],
             "IN"
           );
-          let is_valid: boolean = false;
+          // eslint-disable-next-line no-case-declarations
+          let is_valid = false;
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
           }
@@ -379,7 +414,8 @@ export const UserAdd = (props: UserProps) => {
           return;
 
         case "alt_phone_number":
-          let alt_is_valid: boolean = false;
+          // eslint-disable-next-line no-case-declarations
+          let alt_is_valid = false;
           if (state.form[field] && state.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               state.form[field],
@@ -526,6 +562,15 @@ export const UserAdd = (props: UserProps) => {
                   errors={state.errors.phone_number}
                   onlyIndia={true}
                 />
+                <CheckboxField
+                  checked={phoneIsWhatsApp}
+                  onChange={(_, checked) => {
+                    setPhoneIsWhatsApp(checked);
+                    !checked && handleValueChange("+91", "alt_phone_number");
+                  }}
+                  label="Is the phone number a WhatsApp number?"
+                  className="font-bold"
+                />
               </div>
 
               <div>
@@ -535,12 +580,13 @@ export const UserAdd = (props: UserProps) => {
                   onChange={(value: any) =>
                     handleValueChange(value, "alt_phone_number")
                   }
+                  disabled={phoneIsWhatsApp}
                   errors={state.errors.alt_phone_number}
                   onlyIndia={true}
                 />
               </div>
 
-              <div className="col-span-2">
+              <div className="md:col-span-2">
                 <InputLabel>Facilities</InputLabel>
                 {userType === "Staff" || userType === "StaffReadOnly" ? (
                   <MultiSelectField
@@ -568,12 +614,37 @@ export const UserAdd = (props: UserProps) => {
                 <TextInputField
                   fullWidth
                   name="username"
+                  autoComplete="new-username"
                   variant="outlined"
                   margin="dense"
-                  value={state.form.username}
                   onChange={handleChange}
                   errors={state.errors.username}
+                  onFocus={() => setUsernameInputInFocus(true)}
+                  onBlur={() => setUsernameInputInFocus(false)}
                 />
+
+                {usernameInputInFocus && (
+                  <div className="pl-2 text-small text-gray-500">
+                    <div>
+                      {state.form.username?.length < 2 ? (
+                        <Cancel fontSize="inherit" color="error" />
+                      ) : (
+                        <CheckCircle fontSize="inherit" color="primary" />
+                      )}{" "}
+                      username should be atleast 2 characters long
+                    </div>
+                    <div>
+                      {!/[^.@+_-]/.test(
+                        state.form.username[state.form.username?.length - 1]
+                      ) ? (
+                        <Cancel fontSize="inherit" color="error" />
+                      ) : (
+                        <CheckCircle fontSize="inherit" color="primary" />
+                      )}{" "}
+                      {"username can't end with ^ . @ + _ -"}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -595,6 +666,7 @@ export const UserAdd = (props: UserProps) => {
                 <TextInputField
                   fullWidth
                   name="password"
+                  autoComplete="new-password"
                   type="password"
                   variant="outlined"
                   margin="dense"
@@ -612,6 +684,7 @@ export const UserAdd = (props: UserProps) => {
                   type="password"
                   variant="outlined"
                   margin="dense"
+                  autoComplete="off"
                   value={state.form.c_password}
                   onChange={handleChange}
                   errors={state.errors.c_password}
@@ -619,7 +692,7 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <InputLabel>First name</InputLabel>
+                <InputLabel>First name*</InputLabel>
                 <TextInputField
                   fullWidth
                   name="first_name"
@@ -632,7 +705,7 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <InputLabel>Last name</InputLabel>
+                <InputLabel>Last name*</InputLabel>
                 <TextInputField
                   fullWidth
                   name="last_name"

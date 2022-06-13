@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import loadable from "@loadable/component";
 import Box from "@material-ui/core/Box";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles, Theme, useTheme } from "@material-ui/core/styles";
@@ -12,11 +14,11 @@ import React, { useEffect, useState, useCallback } from "react";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import {
   getAllPatient,
   getDistrict,
   getLocalBody,
-  getPermittedFacility,
   getAnyFacility,
 } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
@@ -34,7 +36,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { every } from "lodash";
+import { FacilityModel } from "../Facility/models";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -115,6 +117,10 @@ export const PatientManager = (props: any) => {
   const [DownloadFile, setDownloadFile] = useState("");
   const [qParams, setQueryParams] = useQueryParams();
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
+    name: "",
+  });
+  const [showDialog, setShowDialog] = useState(false);
 
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
@@ -353,8 +359,8 @@ export const PatientManager = (props: any) => {
   const fetchFacilityBadgeName = useCallback(
     async (status: statusType) => {
       const res =
-        qParams.facility &&
-        (await dispatch(getPermittedFacility(qParams.facility)));
+        qParams.facility && (await dispatch(getAnyFacility(qParams.facility)));
+
       if (!status.aborted) {
         setFacilityBadgeName(res?.data?.name);
       }
@@ -465,60 +471,82 @@ export const PatientManager = (props: any) => {
   let patientList: any[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
-      const patientUrl = patient.facility
-        ? `/facility/${patient.facility}/patient/${patient.id}`
-        : `/patient/${patient.id}`;
+      let patientUrl = "";
+      if (patient.last_consultation) {
+        patientUrl = `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation.id}`;
+      } else if (patient.facility) {
+        patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
+      } else {
+        patientUrl = `/patient/${patient.id}`;
+      }
       return (
         <div
           key={`usr_${patient.id}`}
           onClick={() => navigate(patientUrl)}
           className={
-            "w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3 " +
-            (patient.disease_status == "POSITIVE" ? "bg-red-50" : "")
+            "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 " +
+            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
-          <div className="px-4 md:w-1/2">
-            <div className="md:flex justify-between w-full">
-              <div className="text-xl font-normal capitalize">
-                {patient.name} - {patient.age}
-                {patient.action && patient.action != 10 && (
-                  <span className="font-semibold ml-2">
-                    -{" "}
+          <div className="px-4  flex gap-2 w-full">
+            {patient?.last_consultation &&
+              patient?.last_consultation?.current_bed && (
+                <div className="w-32 self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
+                  <span className="text-center text-gray-900 text-sm">
                     {
-                      TELEMEDICINE_ACTIONS.find((i) => i.id === patient.action)
-                        ?.desc
+                      patient?.last_consultation?.current_bed?.bed_object
+                        ?.location_object?.name
                     }
                   </span>
-                )}
+                  <span className="text-md font-bold">
+                    {patient?.last_consultation?.current_bed?.bed_object.name}
+                  </span>
+                </div>
+              )}
+            <div>
+              <div className="md:flex justify-between w-full">
+                <div className="text-xl font-normal capitalize">
+                  {patient.name} - {patient.age}
+                  {patient.action && patient.action != 10 && (
+                    <span className="font-semibold ml-2">
+                      -{" "}
+                      {
+                        TELEMEDICINE_ACTIONS.find(
+                          (i) => i.id === patient.action
+                        )?.desc
+                      }
+                    </span>
+                  )}
+                </div>
               </div>
+              {patient.facility_object && (
+                <div className="font-normal text-sm">
+                  {patient.facility_object.name},
+                  <span className="text-xs ml-1">
+                    Updated at: {moment(patient.modified_date).format("lll")}
+                  </span>
+                  <br />
+                  {patient.review_time && (
+                    <span
+                      className={
+                        "m-1 inline-block items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
+                        (moment().isBefore(patient.review_time)
+                          ? " bg-gray-100"
+                          : "rounded p-1 bg-red-400 text-white")
+                      }
+                    >
+                      {(moment().isBefore(patient.review_time)
+                        ? "Review at: "
+                        : "Review Missed: ") +
+                        moment(patient.review_time).format("lll")}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
-            {patient.facility_object && (
-              <div className="font-normal text-sm">
-                {patient.facility_object.name},
-                <span className="text-xs ml-2">
-                  Updated at: {moment(patient.modified_date).format("lll")}
-                </span>
-                {patient.review_time && (
-                  <span
-                    className={
-                      "m-1 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
-                      (moment().isBefore(patient.review_time)
-                        ? " bg-gray-100"
-                        : "rounded p-1 bg-red-400 text-white")
-                    }
-                  >
-                    <i className="mr-2 text-md fas fa-clock"></i>
-                    {(moment().isBefore(patient.review_time)
-                      ? "Review at: "
-                      : "Review Missed: ") +
-                      moment(patient.review_time).format("lll")}
-                  </span>
-                )}
-              </div>
-            )}
           </div>
-          <div className="md:flex">
-            <div className="md:flex flex-wrap justify-end">
+          <div className="flex w-full">
+            <div className="flex flex-wrap flex-row justify-start">
               {patient.allow_transfer ? (
                 <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
               ) : (
@@ -577,9 +605,9 @@ export const PatientManager = (props: any) => {
                 </span>
               )}
             </div>
-            <div className="px-2">
-              <div className="btn btn-default bg-white">Details</div>
-            </div>
+          </div>
+          <div className="px-2">
+            <div className="btn btn-default bg-white">Details</div>
           </div>
         </div>
       );
@@ -615,7 +643,15 @@ export const PatientManager = (props: any) => {
   }
 
   return (
-    <div className="px-6">
+    <div className="px-2">
+      {showDialog && (
+        <FacilitiesSelectDialogue
+          setSelected={(e) => setSelectedFacility(e)}
+          selectedFacility={selectedFacility}
+          handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+          handleCancel={() => setShowDialog(false)}
+        />
+      )}
       <PageTitle
         title="Patients"
         hideBack={!facilityId}
@@ -624,8 +660,8 @@ export const PatientManager = (props: any) => {
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
       <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="title-text flex align-center">
-          <div>
+        <div className="title-text sm:flex align-center">
+          <div className="text-center">
             <Button
               color="primary"
               size="small"
@@ -665,9 +701,16 @@ export const PatientManager = (props: any) => {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Patients
               </dt>
-              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                {totalCount}
-              </dd>
+              {/* Show spinner until count is fetched from server */}
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
             </dl>
           </div>
         </div>
@@ -695,9 +738,9 @@ export const PatientManager = (props: any) => {
         </div>
         <div>
           <div>
-            <div className="flex items-start mb-2">
+            <div className="md:flex items-end gap-2 mb-2">
               <button
-                className="btn btn-primary-ghost md:mt-7 "
+                className="btn btn-primary-ghost w-full mt-2 md:mt-7 "
                 onClick={(_) => setShowFilters((show) => !show)}
               >
                 <svg
@@ -730,6 +773,20 @@ export const PatientManager = (props: any) => {
                   </line>
                 </svg>
                 <span>Advanced Filters</span>
+              </button>
+              <button
+                className="btn-primary btn md:mt-7 mt-2 w-full md:w-fit"
+                onClick={() => {
+                  if (facilityId) {
+                    navigate(`/facility/${facilityId}/patient`);
+                  } else {
+                    setShowDialog(true);
+                  }
+                }}
+                data-testid="add-patient-button"
+              >
+                <i className="fas fa-plus mr-2 text-white"></i>
+                Add Details of a Patient
               </button>
             </div>
           </div>

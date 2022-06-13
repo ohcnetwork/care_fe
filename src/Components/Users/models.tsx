@@ -4,7 +4,7 @@ export interface UserModel {
   first_name?: string;
   last_name?: string;
   email?: string;
-  user_type?: number;
+  user_type?: number | string;
   local_body?: number;
   district?: number;
   state?: number;
