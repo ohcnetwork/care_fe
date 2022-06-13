@@ -130,11 +130,6 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
       });
   };
 
-  function addPadding(base64String: string) {
-    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    return (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  }
-
   async function subscribe() {
     setIsSubscribing(true);
     const response: any = await dispatch(getPublicKey());
@@ -142,7 +137,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
     const sw = await navigator.serviceWorker.ready;
     const push = await sw.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: addPadding(public_key),
+      applicationServerKey: encodeURIComponent(public_key),
     });
     const p256dh = btoa(
       String.fromCharCode.apply(
