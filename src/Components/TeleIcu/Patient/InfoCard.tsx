@@ -21,7 +21,7 @@ export default function TeleICUPatientInfoCard({
         open={open}
         onClose={() => setOpen(false)}
       >
-        <div className="bg-white h-screen md:h-auto md:w-[800px] md:max-h-[90vh] overflow-auto p-4 mx-auto md:rounded-xl">
+        <div className="bg-white h-screen w-screen md:h-auto md:w-[800px] md:max-h-[90vh] overflow-auto p-4 mx-auto md:rounded-xl">
           {patient?.facility &&
           patient?.id &&
           patient?.last_consultation?.id ? (
