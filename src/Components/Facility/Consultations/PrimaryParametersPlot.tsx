@@ -35,7 +35,7 @@ export const PrimaryParametersPlot = (props: any) => {
               "rhythm_detail",
             ],
           },
-          props.consultationId
+          { consultationId: props.consultationId }
         )
       );
       if (!status.aborted) {
