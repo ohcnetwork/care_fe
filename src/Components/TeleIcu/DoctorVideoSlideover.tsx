@@ -19,7 +19,10 @@ export default function DoctorVideoSlideover(props: {
       if (facilityId) {
         const res = await dispatchAction(getFacilityUsers(facilityId));
         if (res && res.data) {
-          setDoctors(res.data);
+          setDoctors(res.data.filter((user : any) => user.alt_phone_number)
+          .sort((a : any, b : any) => {
+            return Number(a.last_login) - Number(b.last_login);
+          }));
         }
       } else {
         setDoctors([]);
@@ -52,79 +55,100 @@ export default function DoctorVideoSlideover(props: {
             </span>
           </button>
         </div>
-        <ul
-          className="max-h-96 scroll-py-3 overflow-y-auto p-3 list-none"
-          id="options"
-          role="listbox"
-        >
-          {doctors
-            .filter((user) => user.alt_phone_number)
-            .sort((a, b) => {
-              return Number(a.last_login) - Number(b.last_login);
-            })
-            .map((doctor) => {
-              const icon =
-                doctor.user_type === "Doctor"
-                  ? "fa-user-doctor "
-                  : " fa-user-nurse";
-              return (
-                <li
-                  key={doctor.id}
-                  className={
-                    "mt-2 group cursor-default select-none rounded-xl p-3 " +
-                    (doctor.alt_phone_number
-                      ? "cursor-pointer bg-green-100 hover:bg-green-200"
-                      : "cursor-not-allowed pointer-events-none bg-gray-400 ")
-                  }
-                  id="option-1"
-                  role="option"
-                  tabIndex={-1}
-                >
-                  <a
-                    href={
-                      doctor.alt_phone_number
-                        ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
-                            doctor.alt_phone_number
-                          )}`
-                        : "#"
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex"
-                  >
-                    <div className="flex h-10 w-10 flex-none items-center justify-center">
-                      {
-                        // Show online icon based on last_login
-                        doctor.last_login &&
-                        Number(new Date()) -
-                          Number(new Date(doctor.last_login)) <
-                          60000 ? (
-                          <i
-                            className={`fa-solid text-xl text-green-600 ${icon}`}
-                          ></i>
-                        ) : (
-                          <i
-                            className={`fa-solid text-2xl text-gray-600 ${icon}`}
-                          ></i>
-                        )
-                      }
-                    </div>
-                    <div className="ml-4 flex-auto">
-                      <p className="text-sm font-medium text-gray-700">
-                        {doctor.first_name} {doctor.last_name} -{" "}
-                        {doctor.user_type}
-                      </p>
-                      <p className="text-sm text-gray-500 flex gap-2 divide-gray-800">
-                        <span>{doctor.alt_phone_number}</span>
-                        <span>{moment(doctor.last_login).fromNow()}</span>
-                      </p>
-                    </div>
-                  </a>
-                </li>
-              );
-            })}
-        </ul>
+        {
+          [
+            ["Doctors", "Doctor"],
+            ["Staff", "Staff"]
+          ].map((type, i)=>(
+            <div key={i} className="mb-4">
+              <div>
+                <span className="text-lg font-semibold">
+                  {type[0]}
+                </span>
+              </div>
+
+              <ul
+                className="max-h-96 scroll-py-3 overflow-y-auto list-none"
+                id="options"
+                role="listbox"
+              >
+                {doctors
+                  .filter((doc)=>doc.user_type === type[1])
+                  .map((doctor) => {
+                    return (
+                      <UserListItem user={doctor}/>
+                    );
+                  })
+                }
+              </ul>
+            </div>
+          ))
+        }
       </div>
     </SlideOver>
   );
+}
+
+function UserListItem(props : {user : UserModel}){
+  const user = props.user;
+  const icon =
+    user.user_type === "Doctor"
+      ? "fa-user-doctor "
+      : " fa-user-nurse";
+  return (
+    <li>
+      <li
+        key={user.id}
+        className={
+          "mt-2 group cursor-default select-none rounded-xl p-3 " +
+          (user.alt_phone_number
+            ? "cursor-pointer border border-gray-400 transition hover:border-green-500 hover:bg-green-50"
+            : "cursor-not-allowed pointer-events-none bg-gray-400 ")
+        }
+        id="option-1"
+        role="option"
+        tabIndex={-1}
+      >
+        <a
+          href={
+            user.alt_phone_number
+              ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
+                  user.alt_phone_number
+                )}`
+              : "#"
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex"
+        >
+          <div className="flex h-10 w-10 flex-none items-center justify-center">
+            {
+              // Show online icon based on last_login
+              user.last_login &&
+              Number(new Date()) -
+                Number(new Date(user.last_login)) <
+                60000 ? (
+                <i
+                  className={`fa-solid text-xl text-green-600 ${icon}`}
+                ></i>
+              ) : (
+                <i
+                  className={`fa-solid text-2xl text-gray-600 ${icon}`}
+                ></i>
+              )
+            }
+          </div>
+          <div className="ml-4 flex-auto">
+            <p className="text-sm font-medium text-gray-700">
+              {user.first_name} {user.last_name}
+            </p>
+            <p className="text-sm text-gray-500 flex gap-2 divide-gray-800">
+              <span>{user.alt_phone_number}</span>
+              <span>{moment(user.last_login).fromNow()}</span>
+            </p>
+          </div>
+        </a>
+      </li>
+    </li>
+  )
 }
