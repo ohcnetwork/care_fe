@@ -15,7 +15,7 @@ import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-
+import clsx from "clsx";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -415,9 +415,10 @@ export default function ResultList() {
               Upload List
             </div>
             <div
-              className={`btn btn-primary ${
-                downloadLoading ? "pointer-events-none" : ""
-              }`}
+              className={clsx(
+                "btn btn-primary",
+                downloadLoading && "pointer-events-none"
+              )}
               onClick={triggerDownload}
             >
               <span className="flex flex-row justify-center">
