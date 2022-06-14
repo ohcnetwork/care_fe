@@ -162,11 +162,11 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
       pf_auth: auth,
     };
 
-    console.log(data);
-
     const res = await dispatch(
       updateUserPnconfig(data, { username: username })
     );
+
+    console.log(data, "\n", res);
 
     if (res.status >= 200 && res.status <= 300) {
       setIsSubscribed("SubscribedOnThisDevice");
