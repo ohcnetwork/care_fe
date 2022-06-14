@@ -26,13 +26,6 @@ YARN_CACHE_FOLDER = "/opt/buildhome/.yarn_cache"
 [[plugins]]
 package = "/.netlify/netlify-plugin-yarn"
 
-[build.environment]
-NODE_VERSION = "16"
-NPM_FLAGS = "--version"
-
-[[plugins]]
-package = "/.netlify/netlify-plugin-yarn"
-
 [[redirects]]
 from = "/api/*"
 to = "https://careapi.coronasafe.in/api/:splat"
