@@ -4,7 +4,11 @@ import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import loadable from "@loadable/component";
-import { listAssetBeds, partialUpdateAssetBed } from "../../../Redux/actions";
+import {
+  listAssetBeds,
+  partialUpdateAssetBed,
+  deleteAssetBed,
+} from "../../../Redux/actions";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { getCameraPTZ } from "../../../Common/constants";
 import {
@@ -83,6 +87,22 @@ const LiveFeed = (props: any) => {
       ...page,
       count: bedAssets?.data?.count,
     });
+  };
+
+  const deletePreset = async (id: any) => {
+    const shouldProceed = window.confirm(
+      "Are you sure you want to delete this preset?"
+    );
+    if (!shouldProceed) {
+      return;
+    }
+    const res = await dispatch(deleteAssetBed(id));
+    if (res?.status === 204) {
+      Notification.Success({ msg: "Preset deleted successfully" });
+      getBedPresets(cameraAsset.id);
+    } else {
+      Notification.Error({ msg: "Failed to delete preset" });
+    }
   };
 
   const gotoBedPreset = (preset: any) => {
@@ -396,26 +416,35 @@ const LiveFeed = (props: any) => {
                 ) : (
                   <>
                     {bedPresets?.map((preset: any, index: number) => (
-                      <button
-                        key={preset.id}
-                        className="flex flex-col bg-green-100 border border-white rounded-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
-                        onClick={() => {
-                          setLoading("Moving");
-                          gotoBedPreset(preset);
-                          setCurrentPreset(preset);
-                          getBedPresets(cameraAsset?.id);
-                          getPresets({});
-                        }}
-                      >
-                        <span className="justify-start text-xs font-semibold">
-                          {preset.bed_object.name}
-                        </span>
-                        <span className="mx-auto">
-                          {preset.meta.preset_name
-                            ? preset.meta.preset_name
-                            : `Unnamed Preset ${index + 1}`}
-                        </span>
-                      </button>
+                      <div className="flex flex-col">
+                        <button
+                          key={preset.id}
+                          className="flex flex-col bg-green-100 border border-white rounded-t-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
+                          onClick={() => {
+                            setLoading("Moving");
+                            gotoBedPreset(preset);
+                            setCurrentPreset(preset);
+                            getBedPresets(cameraAsset?.id);
+                            getPresets({});
+                          }}
+                        >
+                          <span className="justify-start text-xs font-semibold">
+                            {preset.bed_object.name}
+                          </span>
+                          <span className="mx-auto">
+                            {preset.meta.preset_name
+                              ? preset.meta.preset_name
+                              : `Unnamed Preset ${index + 1}`}
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => deletePreset(preset.id)}
+                          className="text-red-800 text-sm py-1 bg-red-200 justify-center items-center gap-2 flex hover:bg-red-800 hover:text-red-200 rounded-b-md"
+                        >
+                          <i className="fa-solid fa-trash-can"></i>
+                          <span>Delete</span>
+                        </button>
+                      </div>
                     ))}
                     <button
                       className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
