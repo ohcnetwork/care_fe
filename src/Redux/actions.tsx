@@ -75,7 +75,7 @@ export const getAnyFacility = (id: number | string, key?: string) => {
   return fireRequest("getAnyFacility", [], {}, { id: id }, key);
 };
 
-export const getFacilityUsers = (id: string) => {
+export const getFacilityUsers = (id: string, params? : any) => {
   return fireRequest("getFacilityUsers", [], {}, { facility_id: id });
 };
 export const getOnlineDoctors = () => {
