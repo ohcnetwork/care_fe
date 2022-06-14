@@ -45,13 +45,13 @@ export default function DoctorVideoSlideover(props: {
             </p>
           </div>
           <button
-            className="text-gray-600 hover:text-gray-800 border border-gray-600 py-2 px-4"
+            className="text-gray-600 hover:text-gray-800 border border-gray-400 rounded-xl py-2 px-4"
             onClick={() => setShow(false)}
           >
             {/* Times Icon */}
             <span>
               <i className="fas fa-times mr-2"></i>
-              Cancel
+              Close
             </span>
           </button>
         </div>
