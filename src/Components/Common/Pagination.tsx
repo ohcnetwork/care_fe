@@ -127,13 +127,13 @@ const Pagination = (props: PaginationProps) => {
     <div className="mx-auto mb-4">
       <div className="flex-1 flex justify-between sm:hidden">
         <div
-          onClick={() => handleChangePage("prev")}
+          onClick={() => handleChangePage("<")}
           className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
         >
           Previous
         </div>
         <div
-          onClick={() => handleChangePage("next")}
+          onClick={() => handleChangePage(">")}
           className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
         >
           Next
