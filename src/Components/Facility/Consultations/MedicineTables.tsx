@@ -1,17 +1,14 @@
 import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-// import { NURSING_CARE_FIELDS } from "../../../Common/constants";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const MedicineTables = (props: any) => {
-  // eslint-disable-next-line
   const { facilityId, patientId, consultationId } = props;
   const dispatch: any = useDispatch();
-  // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -103,13 +100,13 @@ export const MedicineTables = (props: any) => {
                               {results[k].medication_given.map(
                                 (med: any, index: number) => (
                                   <tr className="bg-white" key={index}>
-                                    <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
                                       {med.medicine}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                       {med.dosage}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                       {med.days}
                                     </td>
                                   </tr>
