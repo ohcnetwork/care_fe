@@ -61,7 +61,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -89,6 +89,7 @@ const genderTypes = [
   },
   ...GENDER_TYPES,
 ];
+
 const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
@@ -98,6 +99,7 @@ const initForm: any = {
   name: "",
   age: "",
   gender: "",
+  occupation: "",
   phone_number: "",
   emergency_phone_number: "",
   blood_group: "",
@@ -306,6 +308,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       form["gender"] = res.data.gender
         ? parseGenderFromExt(res.data.gender, state.form.gender)
         : state.form.gender;
+      form["occupation"] = res.data.occupation;
       form["srf_id"] = res.data.srf_id ? res.data.srf_id : state.form.srf_id;
 
       form["state"] = res.data.district_object
@@ -362,6 +365,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ...res.data,
             nationality: res.data.nationality ? res.data.nationality : "India",
             gender: res.data.gender ? res.data.gender : "",
+            occupation: res.data.occupation ? res.data.occupation : "",
             cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
@@ -489,7 +493,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     }
     fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  }, [dispatchAction, facilityId, id]);
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -502,6 +506,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "address":
         case "name":
         case "gender":
+          if (!state.form[field]) {
+            errors[field] = "Field is required";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "occupation":
           if (!state.form[field]) {
             errors[field] = "Field is required";
             if (!error_div) error_div = field;
@@ -715,6 +726,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
         gender: Number(state.form.gender),
+        occupation: state.form.occupation,
         nationality: state.form.nationality,
         is_antenatal: state.form.is_antenatal,
 
@@ -1107,6 +1119,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             options={genderTypes}
                             onChange={handleChange}
                             errors={state.errors.gender}
+                          />
+                        </div>
+                        <div data-testid="occupation" id="occupation-div">
+                          <InputLabel
+                            htmlFor="occupation"
+                            id="occupation-label"
+                            required
+                          >
+                            Occupation
+                          </InputLabel>
+                          <TextInputField
+                            id="occupation"
+                            name="occupation"
+                            variant="outlined"
+                            margin="dense"
+                            type="text"
+                            value={state.form.occupation}
+                            onChange={handleChange}
+                            errors={state.errors.occupation}
                           />
                         </div>
 
