@@ -454,7 +454,7 @@ export default function ResultList() {
           "sample_collection_date_after"
         )}
         {badge("SRF ID", qParams.srf_id, "srf_id")}
-      </div>
+      </div>   
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-t-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>

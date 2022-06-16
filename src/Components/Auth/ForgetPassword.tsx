@@ -6,10 +6,10 @@ import { useDispatch } from "react-redux";
 import { postForgotPassword } from "../../Redux/actions";
 import { TextInputField } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 const Loading = loadable(() => import("../Common/Loading"));
 
-const ForgotPasswordPage = (props: any) => {
+export const ForgotPassword = (props: any) => {
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
@@ -19,7 +19,7 @@ const ForgotPasswordPage = (props: any) => {
   const [errors, setErrors] = useState(initErr);
   const [disableBtn, setDisableBtn] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
-  const { t } = props;
+  const { t } = useTranslation();
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
@@ -125,5 +125,3 @@ const ForgotPasswordPage = (props: any) => {
     </div>
   );
 };
-
-export const ForgotPassword = withTranslation()(ForgotPasswordPage);
