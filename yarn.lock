@@ -1820,6 +1820,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@headlessui/react@npm:^1.6.4":
+  version: 1.6.4
+  resolution: "@headlessui/react@npm:1.6.4"
+  peerDependencies:
+    react: ^16 || ^17 || ^18
+    react-dom: ^16 || ^17 || ^18
+  checksum: f24dd2f5bd4de5954b2fd40998627b58a650a874894a90f96320ae5bad1b961a140e85ce821b92dc8cbed0628523df57ae9533137467d867788eac907bd396d7
+  languageName: node
+  linkType: hard
+
 "@humanwhocodes/config-array@npm:^0.5.0":
   version: 0.5.0
   resolution: "@humanwhocodes/config-array@npm:0.5.0"
@@ -5531,6 +5541,7 @@ __metadata:
     "@babel/core": ^7.14.3
     "@date-io/date-fns": ^1.3.13
     "@glennsl/bs-json": ^5.0.3
+    "@headlessui/react": ^1.6.4
     "@loadable/component": ^5.15.0
     "@material-ui/core": ^4.11.4
     "@material-ui/icons": ^4.11.2
