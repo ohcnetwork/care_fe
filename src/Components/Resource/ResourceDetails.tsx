@@ -289,10 +289,10 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
           )}
           <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
-            <div className="flex justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between mb-4">
               <div className="text-xl font-semibold">{data.title || "--"}</div>
               <div>
-                <div className="mt-2">
+                <div className="mt-4 sm:mt-2">
                   <Button
                     fullWidth
                     variant="contained"
