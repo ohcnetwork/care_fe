@@ -600,6 +600,7 @@ const AssetCreate = (props: AssetProps) => {
                 startIcon={
                   <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                 }
+                className="w-full sm:w-auto"
               >
                 {assetId ? "Update" : "Create"}
               </Button>
@@ -616,6 +617,7 @@ const AssetCreate = (props: AssetProps) => {
                   )
                 }
                 startIcon={<CancelOutlineIcon>cancel</CancelOutlineIcon>}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
