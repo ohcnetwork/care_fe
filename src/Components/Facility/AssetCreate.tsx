@@ -590,7 +590,7 @@ const AssetCreate = (props: AssetProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-start gap-x-4">
+            <div className="flex justify-center sm:justify-start gap-x-4 gap-y-2 flex-wrap">
               <Button
                 id="asset-create"
                 color="primary"
