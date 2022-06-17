@@ -34,6 +34,7 @@ import {
 import {
   createDailyReport,
   getConsultationDailyRoundsDetails,
+  getDailyReport,
   updateDailyReport,
   getPatient,
 } from "../../Redux/actions";
@@ -110,6 +111,7 @@ export const DailyRounds = (props: any) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [prevReviewTime, setPreviousReviewTime] = useState("");
+  const [hasPreviousLog, setHasPreviousLog] = useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
@@ -161,6 +163,25 @@ export const DailyRounds = (props: any) => {
     }
     fetchPatientName();
   }, [dispatchAction, patientId]);
+
+  useEffect(() => {
+    async function fetchHasPreviousLog() {
+      if (consultationId) {
+        const res = await dispatchAction(
+          getDailyReport({ limit: 1, offset: 0 }, { consultationId })
+        );
+        setHasPreviousLog(res.data.count > 0);
+        dispatch({
+          type: "set_form",
+          form: {
+            ...state.form,
+            clone_last: res.data.count > 0 ? "true" : "false",
+          },
+        });
+      }
+    }
+    fetchHasPreviousLog();
+  }, [dispatchAction, consultationId]);
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -522,7 +543,7 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
               </div>
-              {!id && (
+              {!id && hasPreviousLog && (
                 <div id="clone_last-div" className="mt-4">
                   <InputLabel id="clone_last">
                     Do you want to copy Values from Previous Log?

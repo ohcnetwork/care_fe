@@ -7,6 +7,7 @@ import {
   getAnyFacility,
   listFacilityBeds,
   updateFacilityBed,
+  deleteFacilityBed,
 } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
@@ -20,6 +21,8 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
+import BedDeleteDialog from "./BedDeleteDialog";
+
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -55,6 +58,34 @@ const BedRow = (props: BedRowProps) => {
   const [descField, setDescField] = useState(description);
   const [bedTypeField, setBedTypeField] = useState(bedType);
   const [isLoading, setIsLoading] = useState(false);
+  const [bedData, setBedData] = useState<{
+    show: boolean;
+    id: string;
+    name: string;
+  }>({ show: false, id: "", name: "" });
+
+  const handleDelete = (name: string, id: string) => {
+    setBedData({
+      show: true,
+      id,
+      name,
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const res = await dispatchAction(deleteFacilityBed(id));
+    if (res && res.status == 204) {
+      Notification.Success({
+        msg: "Bed deleted successfully",
+      });
+    }
+    setBedData({ show: false, id: "", name: "" });
+    triggerRerender();
+  };
+
+  const handleDeleteCancel = () => {
+    setBedData({ show: false, id: "", name: "" });
+  };
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -174,22 +205,37 @@ const BedRow = (props: BedRowProps) => {
             </Button>
           </div>
         ) : (
-          <Button
-            color="inherit"
-            variant="contained"
-            type="submit"
-            size="small"
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "#24a0ed",
-              color: "white",
-            }}
-            onClick={() => setIsEditable(true)}
-          >
-            EDIT
-          </Button>
+          <div>
+            <Button
+              color="inherit"
+              variant="contained"
+              type="submit"
+              size="small"
+              className="fml-auto bg-[#24a0ed] text-white mx-2"
+              onClick={() => setIsEditable(true)}
+            >
+              <i className="fas fa-pencil-alt text-white mr-2"></i>
+              EDIT
+            </Button>
+            <Button
+              id="bed-delete"
+              className="btn-danger btn ml-auto text-white mx-2 px-2"
+              type="submit"
+              size="small"
+              onClick={() => handleDelete(name, id)}
+            >
+              <i className="fas fa-trash text-white mr-2"></i>
+              Delete
+            </Button>
+          </div>
         )}
       </td>
+      <BedDeleteDialog
+        name={bedData.name}
+        show={bedData.show}
+        handleCancel={handleDeleteCancel}
+        handleOk={handleDeleteConfirm}
+      />
     </tr>
   );
 };
