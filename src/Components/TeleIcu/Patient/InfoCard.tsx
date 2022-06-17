@@ -4,6 +4,7 @@ import { PatientModel } from "../../Patient/models";
 import { RightArrowIcon } from "../Icons/ArrowIcon";
 import { Modal } from "@material-ui/core";
 import Beds from "../../Facility/Consultations/Beds";
+import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
 import { useState } from "react";
 
 export interface ITeleICUPatientInfoCardProps {
@@ -21,7 +22,11 @@ export default function TeleICUPatientInfoCard({
         open={open}
         onClose={() => setOpen(false)}
       >
-        <div className="bg-white md:w-4/5 p-4 mx-auto">
+        <div className="relative bg-white md:w-4/5 p-4 mx-auto">
+          <CloseRoundedIcon
+            onClick={() => setOpen(false)}
+            className="absolute z-20 top-3 right-3 cursor-pointer"
+          />
           {patient?.facility &&
           patient?.id &&
           patient?.last_consultation?.id ? (
