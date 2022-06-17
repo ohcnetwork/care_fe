@@ -496,7 +496,7 @@ export const ConsultationDetails = (props: any) => {
             </div>
 
             <div className="flex px-4 flex-col md:flex-row">
-              <div className="flex">
+              <div className="flex w-3/4">
                 {/*consultationData.other_symptoms && (
                   <div className="capitalize">
                     <span className="font-semibold leading-relaxed">
@@ -524,23 +524,29 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex-1 flex-col md:flex-row text-right space-x-2 space-y-2">
-                <button className="btn btn-primary" onClick={handleClickOpen}>
-                  <i className="fas fa-clipboard-list"></i>
-                  &nbsp; Discharge Summary
-                </button>
-
-                <button
-                  className="btn btn-primary"
-                  onClick={handleDischageClickOpen}
-                  disabled={
-                    !patientData.is_active ||
-                    patientData.last_consultation?.facility !== facilityId
-                  }
-                >
-                  <i className="fas fa-hospital-user"></i>
-                  &nbsp; Discharge from CARE
-                </button>
+              <div className="flex flex-col text-right mt-6 md:mt-0 md:flex-row md:space-x-0 lg:space-x-2 space-y-2 md:space-y-0">
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={handleClickOpen}
+                  >
+                    <i className="fas fa-clipboard-list"></i>
+                    &nbsp; Discharge Summary
+                  </button>
+                </div>
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={handleDischageClickOpen}
+                    disabled={
+                      !patientData.is_active ||
+                      patientData.last_consultation?.facility !== facilityId
+                    }
+                  >
+                    <i className="fas fa-hospital-user"></i>
+                    &nbsp; Discharge from CARE
+                  </button>
+                </div>
               </div>
             </div>
             <div className="flex md:flex-row flex-col gap-2 justify-between p-4">
