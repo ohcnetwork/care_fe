@@ -369,18 +369,18 @@ const AssetCreate = (props: AssetProps) => {
                 <InputLabel htmlFor="asset-type" id="name=label" required>
                   Asset Type
                 </InputLabel>
-                <div className="py-2">
+                <div className="my-2">
                   <SelectMenu
                     options={[
                       {
                         title: "Internal",
                         description: "Asset is inside the facility premises.",
-                        value: "INTERNAL" as AssetType,
+                        value: "INTERNAL",
                       },
                       {
                         title: "External",
                         description: "Asset is outside the facility premises.",
-                        value: "EXTERNAL" as AssetType,
+                        value: "EXTERNAL",
                       },
                     ]}
                     selected={asset_type}
@@ -393,21 +393,17 @@ const AssetCreate = (props: AssetProps) => {
                 <InputLabel htmlFor="asset-class" id="name=label">
                   Asset Class
                 </InputLabel>
-                <SelectField
-                  id="asset-class"
-                  fullWidth
-                  name="asset_class"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  options={assetClassOptions}
-                  optionValue="description"
-                  value={asset_class}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setAssetClass(e.target.value as AssetClass)
-                  }
-                  errors={state.errors.asset_class}
-                />
+                <div className="my-2">
+                  <SelectMenu
+                    options={[
+                      { title: "Select", value: undefined },
+                      { title: "ONVIF Camera", value: "ONVIF" },
+                      { title: "HL7 Vitals Monitor", value: "HL7MONITOR" },
+                    ]}
+                    selected={asset_class}
+                    onSelect={setAssetClass}
+                  />
+                </div>
               </div>
               <div>
                 <InputLabel htmlFor="location" id="name=label" required>
