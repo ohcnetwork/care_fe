@@ -524,7 +524,7 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col text-right mt-6 md:mt-0 md:flex-row md:space-x-0 lg:space-x-2 space-y-2 md:space-y-0">
+              <div className="flex flex-col text-right mt-6 md:mt-0 md:flex-row gap-x-2 gap-y-2">
                 <div>
                   <button
                     className="btn btn-primary w-full"
