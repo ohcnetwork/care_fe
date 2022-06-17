@@ -1392,43 +1392,53 @@ export const PatientHome = (props: any) => {
         </div>
       </Dialog>
 
-      <div>
-        <PageTitle
-          title="Consultation History"
-          hideBack={true}
-          breadcrumbs={false}
-        />
-        {consultationList}
-        {!isConsultationLoading && totalConsultationCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentConsultationPage}
-              defaultPerPage={limit}
-              data={{ totalCount: totalConsultationCount }}
-              onChange={handleConsultationPagination}
+      <section className="md:flex mt-4 space-y-2">
+        <div className="mx-2 w-full">
+          <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+            <PageTitle
+              title="Consultation History"
+              hideBack={true}
+              breadcrumbs={false}
             />
+            {consultationList}
+            {!isConsultationLoading && totalConsultationCount > limit && (
+              <div className="mt-4 flex w-full justify-center">
+                <Pagination
+                  cPage={currentConsultationPage}
+                  defaultPerPage={limit}
+                  data={{ totalCount: totalConsultationCount }}
+                  onChange={handleConsultationPagination}
+                />
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      </section>
 
-      <div>
-        <PageTitle
-          title="Sample Test History"
-          hideBack={true}
-          breadcrumbs={false}
-        />
-        {sampleList}
-        {!isSampleLoading && totalSampleListCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentSampleListPage}
-              defaultPerPage={limit}
-              data={{ totalCount: totalSampleListCount }}
-              onChange={handleSampleListPagination}
-            />
+      <section className="md:flex mt-4 space-y-2">
+        <div className="mx-2 w-full">
+          <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+            <div>
+              <PageTitle
+                title="Sample Test History"
+                hideBack={true}
+                breadcrumbs={false}
+              />
+              {sampleList}
+              {!isSampleLoading && totalSampleListCount > limit && (
+                <div className="mt-4 flex w-full justify-center">
+                  <Pagination
+                    cPage={currentSampleListPage}
+                    defaultPerPage={limit}
+                    data={{ totalCount: totalSampleListCount }}
+                    onChange={handleSampleListPagination}
+                  />
+                </div>
+              )}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      </section>
     </div>
   );
 };
