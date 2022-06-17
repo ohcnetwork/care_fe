@@ -44,6 +44,7 @@ import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
+import SelectMenu from "../Common/components/SelectMenu";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError: any = {
@@ -333,15 +334,6 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
 
-  const renderAssetTypeHintLabel = (asset_type: AssetType) => {
-    return (
-      <i>
-        Asset is <b>{asset_type === "INTERNAL" ? "inside" : "outside"}</b> the
-        facility premises.
-      </i>
-    );
-  };
-
   const assetClassOptions = [
     { id: "", description: "Select" },
     ...assetClasses,
@@ -383,43 +375,23 @@ const AssetCreate = (props: AssetProps) => {
                 <InputLabel htmlFor="asset-type" id="name=label" required>
                   Asset Type
                 </InputLabel>
-                <RadioGroup
-                  aria-label="asset_type"
-                  name="asset_type"
-                  value={asset_type}
-                  onChange={(e) => setAssetType(e.target.value as AssetType)}
-                  className="flex flex-col justify-center mt-2"
-                >
-                  <Box display="flex" flexDirection="row">
-                    {(["INTERNAL", "EXTERNAL"] as AssetType[]).map((type) => {
-                      const child = (
-                        <FormControlLabel
-                          key={type}
-                          value={type}
-                          control={<Radio />}
-                          label={type}
-                        />
-                      );
-                      if (isMobile) return child;
-                      return (
-                        <Tooltip
-                          key={type}
-                          title={
-                            <div className="text-sm">
-                              {renderAssetTypeHintLabel(type)}
-                            </div>
-                          }
-                        >
-                          {child}
-                        </Tooltip>
-                      );
-                    })}
-                  </Box>
-                </RadioGroup>
-                <div className="text-gray-800">
-                  {asset_type &&
-                    isMobile &&
-                    renderAssetTypeHintLabel(asset_type)}
+                <div className="py-2">
+                  <SelectMenu
+                    options={[
+                      {
+                        title: "Internal",
+                        description: "Asset is inside the facility premises.",
+                        value: "INTERNAL" as AssetType,
+                      },
+                      {
+                        title: "External",
+                        description: "Asset is outside the facility premises.",
+                        value: "EXTERNAL" as AssetType,
+                      },
+                    ]}
+                    selected={asset_type}
+                    onSelect={setAssetType}
+                  />
                 </div>
                 <ErrorHelperText error={state.errors.asset_type} />
               </div>
