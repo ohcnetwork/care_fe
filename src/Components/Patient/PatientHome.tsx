@@ -1418,24 +1418,22 @@ export const PatientHome = (props: any) => {
       <section className="md:flex mt-4 space-y-2">
         <div className="mx-2 w-full">
           <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-            <div>
-              <PageTitle
-                title="Sample Test History"
-                hideBack={true}
-                breadcrumbs={false}
-              />
-              {sampleList}
-              {!isSampleLoading && totalSampleListCount > limit && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Pagination
-                    cPage={currentSampleListPage}
-                    defaultPerPage={limit}
-                    data={{ totalCount: totalSampleListCount }}
-                    onChange={handleSampleListPagination}
-                  />
-                </div>
-              )}
-            </div>
+            <PageTitle
+              title="Sample Test History"
+              hideBack={true}
+              breadcrumbs={false}
+            />
+            {sampleList}
+            {!isSampleLoading && totalSampleListCount > limit && (
+              <div className="mt-4 flex w-full justify-center">
+                <Pagination
+                  cPage={currentSampleListPage}
+                  defaultPerPage={limit}
+                  data={{ totalCount: totalSampleListCount }}
+                  onChange={handleSampleListPagination}
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>
