@@ -4,7 +4,6 @@ import SessionRouter from "./Router/SessionRouter";
 import AppRouter from "./Router/AppRouter";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentUser } from "./Redux/actions";
-import "./App.css";
 import { useAbortableEffect, statusType } from "./Common/utils";
 import axios from "axios";
 
