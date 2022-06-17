@@ -30,12 +30,7 @@ import {
   PhoneNumberField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
-import {
-  AssetClass,
-  assetClasses,
-  AssetData,
-  AssetType,
-} from "../Assets/AssetTypes";
+import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
 import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
@@ -327,11 +322,6 @@ const AssetCreate = (props: AssetProps) => {
         <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
       </div>
     );
-
-  const assetClassOptions = [
-    { id: "", description: "Select" },
-    ...assetClasses,
-  ];
 
   return (
     <div className="px-6 pb-2">
