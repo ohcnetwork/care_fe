@@ -19,9 +19,6 @@ import {
   InputLabel,
   Radio,
   RadioGroup,
-  Tooltip,
-  useMediaQuery,
-  useTheme,
 } from "@material-ui/core";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
@@ -112,9 +109,6 @@ const AssetCreate = (props: AssetProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [qrCodeId, setQrCodeId] = useState("");
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down(768));
 
   useEffect(() => {
     setIsLoading(true);
