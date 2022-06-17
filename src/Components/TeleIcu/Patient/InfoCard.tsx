@@ -12,11 +12,10 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
   const patient = props.patient;
   const ip_no = props.ip_no;
 
-  console.log(patient);
   return (
     <section className="flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
       <Modal open={open} onClose={() => setOpen(false)}>
-        <div className="bg-white md:w-4/5 p-4 mx-auto">
+        <div className="relative bg-white md:w-4/5 p-4 mx-auto">
           <CloseRoundedIcon
             onClick={() => setOpen(false)}
             className="absolute z-20 top-3 right-3 cursor-pointer"
