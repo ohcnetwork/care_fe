@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import { CameraPTZ, getCameraPTZ } from "../../../Common/constants";
-import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
+import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import {
   ICameraAssetState,
   StreamStatus,
@@ -21,6 +21,7 @@ import { ConsultationModel } from "../models";
 import * as Notification from "../../../Utils/Notifications.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import { Tooltip } from "@material-ui/core";
+import FeedButton from "./FeedButton";
 
 interface IFeedProps {
   facilityId: string;
@@ -31,6 +32,9 @@ const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
 export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const dispatch: any = useDispatch();
+
+  const videoWrapper = useRef<HTMLDivElement>(null);
+
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
     hostname: "",
     id: "",
@@ -46,6 +50,28 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
+
+  const [cameraState, setCameraState] = useState<PTZState | null>(null);
+
+  useEffect(()=>{
+    if(cameraState){
+      setCameraState({
+        ...cameraState,
+        precision : precision
+      });
+    }
+    
+  },[precision])
+
+  useEffect(()=>{
+    let timeout = setTimeout(()=>{
+      setCameraState({
+        ...cameraConfig.position, 
+        precision : cameraState?.precision
+      })
+    }, 5000)
+    return (()=>clearTimeout(timeout))
+  },[cameraState])
 
   const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
   const fetchData = useCallback(
@@ -87,6 +113,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             });
             setCameraMiddlewareHostname(middleware_hostname);
             setCameraConfig(bedAssets.data.results[0].meta);
+            setCameraState({...bedAssets.data.results[0].meta.position, precision : 1})
           }
         }
 
@@ -95,6 +122,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     [consultationId, dispatch]
   );
+
+  useEffect(()=>{
+    console.log(cameraConfig);
+  },[cameraConfig])
 
   const middlewareHostname =
     cameraMiddlewareHostname || "dev_middleware.coronasafe.live";
@@ -212,7 +243,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
-      screenfull.request(liveFeedPlayerRef.current);
+      !screenfull.isFullscreen ? 
+      screenfull.request(videoWrapper.current ? videoWrapper.current : liveFeedPlayerRef.current) :
+      screenfull.exit();
     },
     updatePreset: (option) => {
       getCameraStatus({
@@ -272,8 +305,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   return (
     <div
-      className="px-2 flex flex-col gap-4 overflow-hidden w-full"
-      style={{ height: "90vh", maxHeight: "860px" }}
+      className="px-2 flex flex-col h-[calc(100vh-1.5rem)]"
     >
       <div className="flex items-center flex-wrap justify-between gap-2">
         <PageTitle
@@ -323,7 +355,202 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
       </div>
-      <div className="px-3 mt-4">
+      <div className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative" ref={videoWrapper}>
+        <video
+          id="mse-video"
+          autoPlay
+          muted
+          playsInline
+          className="max-h-full max-w-full"
+          ref={liveFeedPlayerRef}
+        />
+        {loading && (
+          <div className="absolute inset-x-0 top-2 text-center flex items-center justify-center">
+            <div className="inline-flex items-center rounded p-4 gap-2 bg-white/70">
+              <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
+              <p className="text-base font-bold">{loading}</p>
+            </div>
+          </div>
+        )}
+        {cameraState && (
+          <div className="absolute left-3 bottom-3 rounded-xl text-xs p-4 flex flex-col text-black bg-white/40">
+            {
+              Object.keys(cameraState).map((key,i)=>{
+                const val = cameraState[key as keyof PTZState];
+                return (
+                  <div key={i}>
+                    <b>
+                      {key} : 
+                    </b> {(Math.round(val * 100000) / 100000).toFixed(5)} 
+                  </div>
+                )
+              })
+            }
+          </div>
+        )}
+        <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center text-white">
+          {streamStatus === StreamStatus.Offline && (
+            <div className="text-center">
+              <p className="font-bold">
+                STATUS: <span className="text-red-600">OFFLINE</span>
+              </p>
+              <p className="font-semibold ">
+                Feed is currently not live.
+              </p>
+              <p className="font-semibold ">
+                Click refresh button to try again.
+              </p>
+            </div>
+          )}
+          {streamStatus === StreamStatus.Stop && (
+            <div className="text-center">
+              <p className="font-bold">
+                STATUS: <span className="text-red-600">STOPPED</span>
+              </p>
+              <p className="font-semibold ">Feed is Stooped.</p>
+              <p className="font-semibold ">
+                Click refresh button to start feed.
+              </p>
+            </div>
+          )}
+          {streamStatus === StreamStatus.Loading && (
+            <div className="text-center">
+              <p className="font-bold ">
+                STATUS: <span className="text-red-600"> LOADING</span>
+              </p>
+              <p className="font-semibold ">
+                Fetching latest feed.
+              </p>
+            </div>
+          )}
+        </div>
+        <div className="absolute bottom-8 right-[calc(158px+2rem)] z-20 flex justify-center items-center gap-4">
+          <FeedButton
+            camProp={cameraPTZ[6]}
+            styleType="PLAIN"
+            clickAction={()=>{
+              cameraPTZ[6].callback();
+              if(cameraState){
+                const val = cameraState.zoom;
+                const newVal = val > 0 ? val - 0.1 : val;
+                setCameraState({
+                  ...cameraState,
+                  zoom : newVal
+                })
+              }
+            }}
+          />
+          <input 
+            type="range" 
+            min="10" 
+            max="20"
+            value={10}
+            className=""
+          />
+          <FeedButton
+            camProp={cameraPTZ[5]}
+            styleType="PLAIN"
+            clickAction={()=>{
+              cameraPTZ[5].callback();
+              if(cameraState){
+                const val = cameraState.zoom;
+                const newVal = val < 1 ? (val + 0.1) : val;
+                setCameraState({
+                  ...cameraState,
+                  zoom : newVal
+                })
+              }
+            }}
+          />
+        </div>
+        <div className="absolute top-8 right-8 z-10 flex flex-col gap-4">
+          {
+            [10,9,7].map((button, i)=>{
+              const option = cameraPTZ[button];
+              return (
+                <FeedButton
+                  camProp={option}
+                  styleType="CHHOTUBUTTON"
+                  clickAction={()=>cameraPTZ[button].callback()}
+                />
+              )
+            })
+          }
+        </div>
+        <div className="absolute bottom-8 right-8 z-20">
+            <FeedButton
+              camProp={cameraPTZ[4]}
+              styleType="CHHOTUBUTTON"
+              clickAction={()=>cameraPTZ[4].callback()}
+            />
+        </div>
+        <div className="absolute bottom-8 right-8 grid grid-rows-3 grid-flow-col gap-1 z-10">
+          {
+            ([
+              false,
+              cameraPTZ[2],
+              false,
+              cameraPTZ[0],
+              false,
+              cameraPTZ[1],
+              false,
+              cameraPTZ[3],
+              false
+            ]).map((c, i)=>{
+
+              let out = (
+                <div className="w-[60px] h-[60px]" key={i}>
+
+                </div>
+              );
+              if(c){
+                const button = c as any;
+                out = (
+                  <FeedButton
+                    camProp={button}
+                    styleType="BUTTON"
+                    clickAction={()=>{
+                      button.callback();
+                      if(cameraState){
+                        let x = cameraState.x;
+                        let y = cameraState.y;
+                        switch (button.action) {
+                          case "left":
+                            x += (-0.1 / cameraState.precision)
+                            console.log(x);
+                            break;
+                          
+                          case "right":
+                            x += (0.1 / cameraState.precision)
+                            break;
+                          
+                          case "down":
+                            y += (-0.1 / cameraState.precision)
+                            break;
+                          
+                          case "up":
+                            y += (0.1 / cameraState.precision)
+                            break;
+
+                          default:
+                            break;
+                        }
+
+                        
+                        setCameraState({...cameraState, x : x, y : y});
+                      }
+                    }}
+                  />
+                )
+              }
+
+              return out;
+            })
+          }
+        </div>
+      </div>
+      {/*
+      <div className="">
         <div className="lg:flex items-start gap-8">
           <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
             <video
@@ -342,7 +569,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                 </div>
               </div>
             )}
-            {/* { streamStatus > 0 && */}
+            {/* { streamStatus > 0 && /}
             <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center">
               {streamStatus === StreamStatus.Offline && (
                 <div className="text-center">
@@ -425,7 +652,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
       </div>
+       */}
     </div>
+     
   );
 };
 

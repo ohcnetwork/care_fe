@@ -14,6 +14,13 @@ interface PTZPayload {
   zoom: number;
 }
 
+export interface PTZState {
+  x : number,
+  y : number,
+  zoom : number,
+  precision : number
+}
+
 interface UseMSEMediaPlayerOption {
   config: IAsset;
 }
