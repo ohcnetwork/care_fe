@@ -72,7 +72,7 @@
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
     "moment": "^2.29.1",
-    "qrcode.react": "^1.0.1",
+    "qrcode.react": "^3.0.2",
     "querystring": "^0.2.1",
     "raviger": "^1.6.0",
     "react": "18.1.0",
