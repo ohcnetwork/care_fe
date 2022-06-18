@@ -74,17 +74,14 @@ export const AddLocationForm = (props: LocationFormProps) => {
     );
     setIsLoading(false);
     if (res && (res.status === 201 || res.status === 200)) {
-      if (locationId) {
-        navigate(`/facility/${facilityId}/location`);
-        Notification.Success({
-          msg: "Location updated successfully",
-        });
-      } else {
-        navigate(`/facility/${facilityId}/location/${res.data.id}/beds/add`);
-        Notification.Success({
-          msg: "Location created successfully",
-        });
-      }
+      const notificationMessage = locationId
+        ? "Location updated successfully"
+        : "Location created successfully";
+
+      navigate(`/facility/${facilityId}/location`);
+      Notification.Success({
+        msg: notificationMessage,
+      });
     }
   };
 
@@ -93,16 +90,16 @@ export const AddLocationForm = (props: LocationFormProps) => {
   }
 
   return (
-    <div className="px-2">
+    <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle
         title={headerText}
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
-      <div className="mt-4">
+      <div className="mt-10">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="mt-2 grid gap-4 grid-cols-1">
                 <div>
                   <InputLabel id="name">Name *</InputLabel>
                   <TextInputField
