@@ -43,7 +43,7 @@ export enum StreamStatus {
 interface UseMSEMediaPlayerReturnType {
   absoluteMove: (payload: PTZPayload, options: IOptions) => void;
   relativeMove: (payload: PTZPayload, options: IOptions) => void;
-  getPTZPayload: (action: PTZ, precision?: number) => PTZPayload;
+  getPTZPayload: (action: PTZ, precision?: number, value? : number) => PTZPayload;
   getCameraStatus: (options: IOptions) => void;
   getPresets: (options: IOptions) => void;
   gotoPreset: (payload: IGotoPresetPayload, options: IOptions) => void;
@@ -130,11 +130,11 @@ const relativeMove =
       .catch((err: any) => options?.onError && options.onError(err));
   };
 
-export const getPTZPayload = (action: PTZ, precision = 1): PTZPayload => {
+export const getPTZPayload = (action: PTZ, precision = 1, value? : number): PTZPayload => {
   let x = 0;
   let y = 0;
   let zoom = 0;
-  const delta = 0.1 / Math.max(1, precision);
+  const delta = !value ? (0.1 / Math.max(1, precision)) : value;
   switch (action) {
     case PTZ.Up:
       y = delta;
@@ -149,10 +149,10 @@ export const getPTZPayload = (action: PTZ, precision = 1): PTZPayload => {
       x = delta;
       break;
     case PTZ.ZoomIn:
-      zoom = 0.1;
+      zoom = delta;
       break;
     case PTZ.ZoomOut:
-      zoom = -0.1;
+      zoom = -delta;
       break;
   }
 

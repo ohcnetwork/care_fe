@@ -69,6 +69,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         ...cameraConfig.position, 
         precision : cameraState?.precision
       })
+      setCamTimeout(0);
     }, 5000)
     return (()=>clearTimeout(timeout))
   },[cameraState])
@@ -137,6 +138,20 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<string | undefined>(undefined);
+  const [camTimeout, setCamTimeout] = useState<number>(0);
+  useEffect(()=>{
+    let timeout = setTimeout(()=>{
+      if(cameraState){
+        cameraPTZ[5].callback(camTimeout - cameraState.zoom)
+        setCameraState({
+          ...cameraState,
+          zoom : camTimeout
+        })
+      }
+     
+    },1000);
+    return (()=>clearTimeout(timeout))
+  }, [camTimeout])
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
     StreamStatus.Offline
   );
@@ -225,7 +240,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     }
   }, [bedPresets, streamStatus]);
 
-  const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
+  const cameraPTZActionCBs: { [key: string]: (option: any, value? : any) => void } = {
     precision: () => {
       setPrecision((precision: number) =>
         precision === 16 ? 1 : precision * 2
@@ -277,9 +292,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         },
       });
     },
-    other: (option) => {
+    other: (option, value) => {
       setLoading(option.loadingLabel);
-      relativeMove(getPTZPayload(option.action, precision), {
+      relativeMove(getPTZPayload(option.action, precision, value), {
         onSuccess: () => setLoading(undefined),
       });
     },
@@ -290,7 +305,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       cameraPTZActionCBs[
         cameraPTZActionCBs[option.action] ? option.action : "other"
       ];
-    return { ...option, callback: () => cb(option) };
+    return { ...option, callback: (value? : any) => cb(option, value) };
   });
 
   // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
@@ -355,7 +370,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
       </div>
-      <div className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative" ref={videoWrapper}>
+      <div className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden" ref={videoWrapper}>
         <video
           id="mse-video"
           autoPlay
@@ -372,7 +387,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             </div>
           </div>
         )}
-        {cameraState && (
+        {/*cameraState && (
           <div className="absolute left-3 bottom-3 rounded-xl text-xs p-4 flex flex-col text-black bg-white/40">
             {
               Object.keys(cameraState).map((key,i)=>{
@@ -387,7 +402,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               })
             }
           </div>
-        )}
+        )*/}
         <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center text-white">
           {streamStatus === StreamStatus.Offline && (
             <div className="text-center">
@@ -424,6 +439,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             </div>
           )}
         </div>
+        {/* zoom slider (broken)
         <div className="absolute bottom-8 right-[calc(158px+2rem)] z-20 flex justify-center items-center gap-4">
           <FeedButton
             camProp={cameraPTZ[6]}
@@ -432,7 +448,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               cameraPTZ[6].callback();
               if(cameraState){
                 const val = cameraState.zoom;
-                const newVal = val > 0 ? val - 0.1 : val;
+                const newVal = val > 0 ? (val - (0.1 / Math.max(1, precision))) : val;
                 setCameraState({
                   ...cameraState,
                   zoom : newVal
@@ -441,11 +457,20 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             }}
           />
           <input 
-            type="range" 
-            min="10" 
-            max="20"
-            value={10}
+            type="range"
+            id="feed-range"
+            min="0" 
+            max="100"
+            value={camTimeout *100}
             className=""
+            onChange={(e)=>{
+              
+              if(cameraState){
+                const zoomval = (parseInt(e.target.value) / 100);
+                setCamTimeout(zoomval)
+                
+              }
+            }}
           />
           <FeedButton
             camProp={cameraPTZ[5]}
@@ -454,7 +479,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               cameraPTZ[5].callback();
               if(cameraState){
                 const val = cameraState.zoom;
-                const newVal = val < 1 ? (val + 0.1) : val;
+                const newVal = val < 1 ? (val + (0.1 / Math.max(1, precision))) : val;
                 setCameraState({
                   ...cameraState,
                   zoom : newVal
@@ -462,10 +487,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               }
             }}
           />
+          
         </div>
+        */}
         <div className="absolute top-8 right-8 z-10 flex flex-col gap-4">
           {
-            [10,9,7].map((button, i)=>{
+            [10,9,7,5,6].map((button, i)=>{
               const option = cameraPTZ[button];
               return (
                 <FeedButton
@@ -549,110 +576,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           }
         </div>
       </div>
-      {/*
-      <div className="">
-        <div className="lg:flex items-start gap-8">
-          <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
-            <video
-              id="mse-video"
-              autoPlay
-              muted
-              playsInline
-              className="h-full w-full z-10"
-              ref={liveFeedPlayerRef}
-            ></video>
-            {loading && (
-              <div className="absolute right-0 top-0 p-4 bg-white bg-opacity-75 rounded-bl">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
-                  <p className="text-base font-bold">{loading}</p>
-                </div>
-              </div>
-            )}
-            {/* { streamStatus > 0 && /}
-            <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center">
-              {streamStatus === StreamStatus.Offline && (
-                <div className="text-center">
-                  <p className="font-bold text-black">
-                    STATUS: <span className="text-red-600">OFFLINE</span>
-                  </p>
-                  <p className="font-semibold text-black">
-                    Feed is currently not live.
-                  </p>
-                  <p className="font-semibold text-black">
-                    Click refresh button to try again.
-                  </p>
-                </div>
-              )}
-              {streamStatus === StreamStatus.Stop && (
-                <div className="text-center">
-                  <p className="font-bold text-black">
-                    STATUS: <span className="text-red-600">STOPPED</span>
-                  </p>
-                  <p className="font-semibold text-black">Feed is Stooped.</p>
-                  <p className="font-semibold text-black">
-                    Click refresh button to start feed.
-                  </p>
-                </div>
-              )}
-              {streamStatus === StreamStatus.Loading && (
-                <div className="text-center">
-                  <p className="font-bold text-black">
-                    STATUS: <span className="text-red-600"> LOADING</span>
-                  </p>
-                  <p className="font-semibold text-black">
-                    Fetching latest feed.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="mt-8 lg:mt-0 shrink-0 md:flex lg:flex-col items-stretch">
-            <div className="pb-3 hideonmobilescreen">
-              <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
-            </div>
-            {cameraPTZ.map((option) => {
-              const shortcutKeyDescription =
-                option.shortcutKey &&
-                option.shortcutKey
-                  .join(" + ")
-                  .replace("Control", "Ctrl")
-                  .replace("ArrowUp", "↑")
-                  .replace("ArrowDown", "↓")
-                  .replace("ArrowLeft", "←")
-                  .replace("ArrowRight", "→");
-
-              return (
-                <Tooltip
-                  key={option.action}
-                  placement="left"
-                  arrow={true}
-                  title={
-                    <span className="text-sm font-semibold">
-                      {`${option.label}  (${shortcutKeyDescription})`}
-                    </span>
-                  }
-                >
-                  <button
-                    className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
-                    onClick={option.callback}
-                  >
-                    <span className="sr-only">{option.label}</span>
-                    {option.icon ? (
-                      <i className={`${option.icon} md:p-2`} />
-                    ) : (
-                      <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
-                        {option.value}x
-                      </span>
-                    )}
-                  </button>
-                </Tooltip>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-       */}
     </div>
      
   );

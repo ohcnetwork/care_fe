@@ -785,3 +785,35 @@ button:disabled,
             display: none;
         }
   }
+
+
+/*
+  Range Sliders for Camera Feed
+*/
+
+#feed-range {
+  -webkit-appearance: none;
+  margin: 18px 0;
+  width: 100%;
+}
+#feed-range:focus {
+  outline: none;
+}
+#feed-range::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 1px;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 5px;
+}
+#feed-range::-webkit-slider-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 3px;
+  border: 1px solid white;
+  background: black;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -8px;
+  border-radius: 50%;
+}
