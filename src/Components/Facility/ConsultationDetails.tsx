@@ -242,7 +242,6 @@ export const ConsultationDetails = (props: any) => {
     setDischargeSummaryForm({ email: currentUser.data.email });
   };
 
-
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -416,7 +415,7 @@ export const ConsultationDetails = (props: any) => {
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap">
           <PageTitle
-            title="Patient Details"
+            title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
@@ -457,7 +456,10 @@ export const ConsultationDetails = (props: any) => {
         </nav>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black w-full">
-            <TeleICUPatientInfoCard patient={patientData} ip_no ={consultationData.ip_no}/>
+            <TeleICUPatientInfoCard
+              patient={patientData}
+              ip_no={consultationData.ip_no}
+            />
 
             <div className="flex md:flex-row flex-col justify-between border-t px-4 pt-5">
               {consultationData.admitted_to && (
@@ -525,8 +527,7 @@ export const ConsultationDetails = (props: any) => {
               <div className="flex-1 text-right">
                 <button className="btn btn-primary" onClick={handleClickOpen}>
                   <i className="fas fa-clipboard-list"></i>
-                  &nbsp;
-                  Discharge Summary
+                  &nbsp; Discharge Summary
                 </button>
 
                 <button
@@ -538,8 +539,7 @@ export const ConsultationDetails = (props: any) => {
                   }
                 >
                   <i className="fas fa-hospital-user"></i>
-                  &nbsp;
-                  Discharge from CARE
+                  &nbsp; Discharge from CARE
                 </button>
               </div>
             </div>
