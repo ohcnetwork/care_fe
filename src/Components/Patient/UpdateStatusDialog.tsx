@@ -158,8 +158,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
 
   const handleEscKeyPress = (event: any) => {
     if (event.key === "Escape") {
-      console.log("esc key pressed");
-      dispatch({ type: "set_form", form: initForm });
+      cancelClicked();
     }
   };
 
@@ -200,15 +199,13 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
       classes={{
         paper: classes.paper,
       }}
+      onKeyDown={(e) => handleEscKeyPress(e)}
     >
       <DialogTitle id="test-sample-title">
         Update Sample Test Status
       </DialogTitle>
       <DialogContent>
-        <div
-          onKeyPress={handleEscKeyPress}
-          className="grid gap-4 grid-cols-1 md:grid-cols-3"
-        >
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
           <div className="font-semibold leading-relaxed">Current Status :</div>
           <div className="md:col-span-2">{currentStatus?.desc}</div>
           <div className="font-semibold leading-relaxed">New Status :</div>
@@ -282,9 +279,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
         </div>
       </DialogContent>
       <DialogActions style={{ justifyContent: "space-between" }}>
-        <Button onClick={cancelClicked} onKeyPress={handleEscKeyPress}>
-          Cancel
-        </Button>
+        <Button onClick={cancelClicked}>Cancel</Button>
         <Button
           onClick={okClicked}
           color="primary"
