@@ -2,8 +2,8 @@
 publish = "build/"
 command = "CI='' npm run build"
 
-[build.environment]
-NPM_FLAGS = "--legacy-peer-deps"
+## [build.environment]
+## NPM_FLAGS = "--legacy-peer-deps"
 
 ## Yarn 3 cache does not work out of the box as of Jan 2022. Context:
 ## https://github.com/netlify/build/issues/1535#issuecomment-1021947989
