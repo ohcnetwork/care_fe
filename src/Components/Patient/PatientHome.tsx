@@ -96,7 +96,7 @@ export const PatientHome = (props: any) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
   const handleAssignedVolunteer = () => {
-    if (!assignedVolunteerObject) {
+    if (!assignedVolunteerObject || !patientData) {
       Notification.Error({ msg: "Please select a volunteer." });
       return;
     }

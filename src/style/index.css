@@ -236,7 +236,7 @@ button:disabled:focus,
 @tailwind utilities;
 
 .multiselect-dropdown__search-dropdown {
-  max-height: 20rem;
+  max-height: 15rem;
   overflow: auto;
 }
 

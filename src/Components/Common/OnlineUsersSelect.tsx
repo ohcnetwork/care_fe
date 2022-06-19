@@ -80,22 +80,24 @@ export const OnlineUsersSelect = (props: Props) => {
         </label>
         <div className="relative">
           <span className="inline-block w-full rounded-md shadow-sm">
-            <button
+            <div
               onClick={(_) => setDropdownExpand(true)}
-              type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-labelledby="listbox-label"
-              className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:ring-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+              className="cursor-default relative w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-left transition ease-in-out duration-150 sm:text-sm sm:leading-5"
             >
               <input
                 ref={searchFieldRef}
                 name="searchTerm"
                 type="text"
                 placeholder="Search by name or username"
-                className={classNames("py-2 pl-3 w-full outline-none", {
-                  hidden: !isDropdownExpanded,
-                })}
+                className={classNames(
+                  "py-2 px-1 w-full border-none outline-0 focus:outline-0 ring-0",
+                  {
+                    hidden: !isDropdownExpanded,
+                  }
+                )}
                 value={searchTerm}
                 onChange={(e) =>
                   setState({ ...state, searchTerm: e.target.value })
@@ -137,22 +139,7 @@ export const OnlineUsersSelect = (props: Props) => {
                   Clear
                 </div>
               </div>
-              <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <svg
-                  className="h-5 w-5 text-gray-400"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    d="M7 7l3-3 3 3m0 6l-3 3-3-3"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-            </button>
+            </div>
           </span>
           {isDropdownExpanded && (
             <div
@@ -162,57 +149,68 @@ export const OnlineUsersSelect = (props: Props) => {
               className="multiselect-dropdown__search-dropdown w-full border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50"
             >
               {!loading ? (
-                users.map((user: UserModel) => {
-                  return (
-                    <button
-                      key={user.id}
-                      onClick={(_) => {
-                        setDropdownExpand(false);
-                        onSelect(user);
-                        setState({
-                          ...state,
-                          searchTerm: "",
-                        });
-                      }}
-                      id="listbox-item-0"
-                      role="option"
-                      className="flex text-xs py-1 items-center justify-between w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span
-                          aria-label="Online"
-                          className={
-                            "shrink-0 inline-block h-2 w-2 rounded-full " +
-                            (moment()
-                              .subtract(5, "minutes")
-                              .isBefore(user.last_login)
-                              ? "bg-primary-400"
-                              : "bg-gray-300")
-                          }
-                        ></span>
-                        <span className="font-normal block truncate">
-                          {user.first_name} {user.last_name}
-                        </span>
-                      </div>
-                      {user.id?.toString() == userId && (
-                        <span className="flex items-center">
-                          <svg
-                            className="h-5 w-5"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </span>
-                      )}
-                    </button>
-                  );
-                })
+                users.length == 0 ? (
+                  <div className="text-center">No users found</div>
+                ) : (
+                  users.map((user: UserModel) => {
+                    return (
+                      <button
+                        key={user.id}
+                        onClick={(_) => {
+                          setDropdownExpand(false);
+                          onSelect(user);
+                          setState({
+                            ...state,
+                            searchTerm: "",
+                          });
+                        }}
+                        id="listbox-item-0"
+                        role="option"
+                        className={`flex text-xs py-1 my-1 rounded items-center justify-between w-full focus:outline-none 
+                      ${
+                        user.id?.toString() == userId
+                          ? "bg-primary-200"
+                          : "hover:bg-primary-100"
+                      }`}
+                      >
+                        <div
+                          className={"flex items-center space-x-3 py-1 pl-2"}
+                        >
+                          <span
+                            aria-label="Online"
+                            className={
+                              "shrink-0 inline-block h-2 w-2 rounded-full " +
+                              (moment()
+                                .subtract(5, "minutes")
+                                .isBefore(user.last_login)
+                                ? "bg-primary-400"
+                                : "bg-gray-300")
+                            }
+                          ></span>
+                          <span className="font-normal block truncate">
+                            {user.first_name} {user.last_name}
+                          </span>
+                        </div>
+                        {user.id?.toString() == userId && (
+                          <span className="flex items-center pr-2">
+                            <svg
+                              className="h-5 w-5"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })
+                )
               ) : (
                 <div className="w-1/12 mx-auto">
                   <CircularProgress />
