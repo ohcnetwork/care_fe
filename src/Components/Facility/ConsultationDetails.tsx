@@ -414,7 +414,7 @@ export const ConsultationDetails = (props: any) => {
         </DialogActions>
       </Dialog>
       <div className="px-2 pb-2">
-        <nav className="flex justify-between flex-wrap">
+        <nav className="flex justify-between flex-wrap relative">
           <PageTitle
             title="Patient Details"
             className="sm:m-0 sm:p-0"
