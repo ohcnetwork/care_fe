@@ -457,7 +457,7 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (status: any) => {
     const f = file;
     if (f === undefined) return;
     const category = "UNSPECIFIED";
@@ -476,7 +476,11 @@ export const FileUpload = (props: FileUploadProps) => {
       .then(uploadfile)
       .catch(() => {
         setUploadStarted(false);
-      });
+      })
+      .then(fetchData(status).then(() => {}));
+
+    // setting the value of file name to empty
+    setUploadFileName("");
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
@@ -669,7 +673,6 @@ export const FileUpload = (props: FileUploadProps) => {
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
-
                   onClick={() => {
                     handleAudioUpload();
                   }}
@@ -719,7 +722,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                         }
                         onClick={() => {
-                          handleUpload();
+                          handleUpload({ status });
                         }}
                       >
                         Upload
