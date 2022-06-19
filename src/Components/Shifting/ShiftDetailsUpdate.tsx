@@ -68,6 +68,9 @@ const requiredFields: any = {
   preferred_vehicle_choice: {
     errorText: "Please Preferred Vehicle Type",
   },
+  reason: {
+    errorText: "Reason for shift can not be empty.",
+  },
 };
 
 const initError = Object.assign(
@@ -108,9 +111,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         return state;
     }
   };
-
   const [state, dispatch] = useReducer(shiftFormReducer, initialState);
-
   useEffect(() => {
     async function fetchData() {
       if (state.form.assigned_to) {
@@ -133,12 +134,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     let errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
-      if (!state.form[field] || !state.form[field].length) {
+      let fieldType = typeof state.form[field];
+      if (
+        !state.form[field] || fieldType === "object"
+          ? !state.form[field]?.name
+          : !state.form[field].length
+      ) {
         errors[field] = requiredFields[field].errorText;
         isInvalidForm = true;
       }
     });
-
     dispatch({ type: "set_error", errors });
     return isInvalidForm;
   };
@@ -166,7 +171,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const handleSubmit = async (e: any) => {
     const validForm = validateForm();
 
-    if (validForm) {
+    if (!validForm) {
       setIsLoading(true);
 
       const data: any = {
@@ -276,7 +281,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 </div>
               </div>
               <div>
-                <InputLabel>Name of shifting approving facility</InputLabel>
+                <InputLabel>Name of shifting approving facility*</InputLabel>
                 <FacilitySelect
                   multiple={false}
                   name="shifting_approving_facility"
@@ -285,7 +290,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   setSelected={(obj) =>
                     setFacility(obj, "shifting_approving_facility_object")
                   }
-                  errors={state.errors.shifting_approving_facility}
+                  errors={state.errors.shifting_approving_facility_object}
                 />
               </div>
 
@@ -300,7 +305,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   setSelected={(obj) =>
                     setFacility(obj, "assigned_facility_object")
                   }
-                  errors={state.errors.assigned_facility}
+                  errors={state.errors.assigned_facility_object}
                 />
               </div>
 
@@ -378,19 +383,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 </RadioGroup>
                 <ErrorHelperText error={state.errors.is_up_shift} />
               </div>
-              {/*
-                            <div>
-                                <InputLabel>Vehicle preference</InputLabel>
-                                <TextInputField
-                                    fullWidth
-                                    name="vehicle_preference"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.vehicle_preference}
-                                    onChange={handleChange}
-                                    errors={state.errors.vehicle_preference}
-                                />
-                            </div> */}
               <div className="md:col-span-1">
                 <InputLabel>Preferred Vehicle*</InputLabel>
                 <SelectField
@@ -402,6 +394,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   options={["", ...vehicleOptions]}
                   onChange={handleChange}
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  errors={state.errors.preferred_vehicle_choice}
                 />
               </div>
               <div className="md:col-span-1">
@@ -415,6 +408,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   options={["", ...facilityOptions]}
                   onChange={handleChange}
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  errors={state.errors.assigned_facility_type}
                 />
               </div>
               <div className="md:col-span-1">
@@ -444,7 +438,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   errors={state.errors.reason}
                 />
               </div>
-
               <div className="md:col-span-2">
                 <InputLabel>Any other comments</InputLabel>
                 <MultilineInputField
@@ -459,7 +452,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   errors={state.errors.comments}
                 />
               </div>
-
               <div className="md:col-span-2 flex justify-between mt-4">
                 <Button color="default" variant="contained" onClick={goBack}>
                   Cancel

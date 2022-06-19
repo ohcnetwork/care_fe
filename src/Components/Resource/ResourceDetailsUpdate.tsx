@@ -57,8 +57,11 @@ const requiredFields: any = {
   approving_facility_object: {
     errorText: "Resource approving facility can not be empty.",
   },
-  assigned_facility_type: {
-    errorText: "Please Select Facility Type",
+  title: {
+    errorText: "Request title cannot be empty",
+  },
+  reason: {
+    errorText: "Description of request cannot be empty",
   },
 };
 
@@ -126,7 +129,12 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     let errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
-      if (!state.form[field] || !state.form[field].length) {
+      let fieldType = typeof state.form[field];
+      if (
+        !state.form[field] || fieldType === "object"
+          ? !state.form[field]?.name
+          : !state.form[field].length
+      ) {
         errors[field] = requiredFields[field].errorText;
         isInvalidForm = true;
       }
@@ -159,7 +167,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   const handleSubmit = async (e: any) => {
     const validForm = validateForm();
 
-    if (validForm) {
+    if (!validForm) {
       setIsLoading(true);
 
       const data = {
@@ -271,7 +279,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                   setSelected={(obj) =>
                     setFacility(obj, "approving_facility_object")
                   }
-                  errors={state.errors.approving_facility}
+                  errors={state.errors.approving_facility_object}
                 />
               </div>
 

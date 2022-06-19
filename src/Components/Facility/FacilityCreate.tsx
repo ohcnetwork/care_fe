@@ -334,7 +334,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       switch (field) {
         case "name":
         case "address":
-          if (!state.form[field]) {
+          if (!state.form[field].trim()) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
