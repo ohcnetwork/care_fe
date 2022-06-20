@@ -61,6 +61,7 @@ export default function ResultList() {
     wardList: [],
   });
   let manageResults: any = null;
+  let pagination: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
     localStorage.getItem("lsg-ward-data") ||
@@ -332,11 +333,11 @@ export default function ResultList() {
       </tr>
     );
   } else if (data && data.length) {
-    manageResults = (
+    manageResults = <>{resultList}</>;
+    pagination = (
       <>
-        {resultList}
         {totalCount > RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center">
+          <div className="mt-4 w-full flex justify-center items-center">
             <Pagination
               cPage={qParams.page}
               defaultPerPage={RESULT_LIMIT}
@@ -517,6 +518,7 @@ export default function ResultList() {
             {manageResults}
           </tbody>
         </table>
+        <div className="bg-white divide-y divide-gray-200">{pagination}</div>
       </div>
       <CSVLink
         data={downloadFile}

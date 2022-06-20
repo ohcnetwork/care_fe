@@ -105,9 +105,9 @@
   },
   "scripts": {
     "build:react": "DISABLE_ESLINT_PLUGIN='true' cross-env NODE_ENV=production react-scripts build",
-    "build": "INLINE_RUNTIME_CHUNK=false yarn run re:build && yarn run generate-build-meta && yarn run build:react",
+    "build": "INLINE_RUNTIME_CHUNK=false npm run re:build && npm run generate-build-meta && npm run build:react",
     "start:react": "cross-env PORT=4000 react-scripts start",
-    "start": "yarn run re:build && yarn start:react",
+    "start": "npm run re:build && run-p start:react",
     "start:Dev": "cross-env NODE_ENV=production http-server dist",
     "re:build": "rescript clean && rescript build",
     "re:watch": "rescript clean && rescript build -w",
@@ -245,5 +245,7 @@
       "react-app"
     ]
   },
-  "packageManager": "yarn@3.2.1"
+  "engines": {
+    "node": "16.x"
+  }
 }

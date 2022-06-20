@@ -111,7 +111,7 @@ export const PatientManager = (props: any) => {
   const theme = useTheme();
   const dispatch: any = useDispatch();
 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
@@ -468,6 +468,16 @@ export const PatientManager = (props: any) => {
       });
   };
 
+  const showReviewAlert = (patient: any) => {
+    return (
+      patient.review_time &&
+      !patient.last_consultation?.discharge_date &&
+      moment(patient.review_time).isAfter(
+        patient.last_consultation?.last_daily_round?.modified_date
+      )
+    );
+  };
+
   let patientList: any[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
@@ -484,8 +494,8 @@ export const PatientManager = (props: any) => {
           key={`usr_${patient.id}`}
           onClick={() => navigate(patientUrl)}
           className={
-            "w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3 " +
-            (patient.disease_status == "POSITIVE" ? "bg-red-50" : "")
+            "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 " +
+            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
           <div className="px-4  flex gap-2 w-full">
@@ -525,8 +535,7 @@ export const PatientManager = (props: any) => {
                   <span className="text-xs ml-1">
                     Updated at: {moment(patient.modified_date).format("lll")}
                   </span>
-                  <br />
-                  {patient.review_time && (
+                  {showReviewAlert(patient) && (
                     <span
                       className={
                         "m-1 inline-block items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
