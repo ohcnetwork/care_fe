@@ -399,8 +399,7 @@ export const FacilityHome = (props: any) => {
                 <tr className="border">
                   <th className="border px-4 py-2">
                     Daily Expected Consumption
-                  </th>{" "}
-                  modified_date?: string; created_date?: string;
+                  </th>
                   <td className="border px-4 py-2 text-center">
                     {facilityData.expected_oxygen_requirement}
                   </td>
