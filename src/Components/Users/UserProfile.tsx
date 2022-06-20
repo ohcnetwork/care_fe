@@ -122,7 +122,7 @@ export default function UserProfile() {
               .filter((el) => {
                 return el.text === res.data.gender;
               })[0]
-              .id.toString(),
+              ?.id.toString(),
             email: res.data.email,
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
