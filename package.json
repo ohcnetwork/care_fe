@@ -15,7 +15,7 @@
     "coronasafe Contributors"
   ],
   "homepage": "https://care.coronasafe.in",
-  "proxy": "https://careapi.coronasafe.in",
+  "proxy": "http://165.232.184.165:9000",
   "main": "./src/index.tsx",
   "keywords": [
     "Coronasafe",

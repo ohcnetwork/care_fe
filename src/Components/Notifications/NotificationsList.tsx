@@ -5,7 +5,7 @@ import {
   getNotifications,
   getUserPnconfig,
   updateUserPnconfig,
-  // getPublicKey,
+  getPublicKey,
 } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { SelectField } from "../Common/HelperInputFields";
@@ -132,11 +132,8 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
 
   async function subscribe() {
     setIsSubscribing(true);
-    // const response: any = await dispatch(getPublicKey());
-    // const public_key = response.data.public_key;
-
-    const public_key =
-      "BBooqYviKrvueIvoGfafBr_tqOSNFHbaDvXA71jL6KtcttsBg4euANGgwfb4uM-kCvAaV3_NQw5yiGOjAaPieco";
+    const response: any = await dispatch(getPublicKey());
+    const public_key = response.data.public_key;
 
     const sw = await navigator.serviceWorker.ready;
     const push = await sw.pushManager.subscribe({
@@ -166,7 +163,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
       updateUserPnconfig(data, { username: username })
     );
 
-    console.log(data, "\n", res);
+    console.log({ public_key, data, res });
 
     if (res.status >= 200 && res.status <= 300) {
       setIsSubscribed("SubscribedOnThisDevice");
