@@ -12,10 +12,16 @@ command = "CI='' yarn run build"
 ## YARN_ENABLE_GLOBAL_CACHE = "true"
 ## YARN_GLOBAL_FOLDER = "/opt/buildhome/.yarn_cache"
 
+## [build.environment]
+## NODE_VERSION = "16"
+## YARN_VERSION = "3.2.1"
+## NPM_FLAGS = "--version"
+
 [build.environment]
 NODE_VERSION = "16"
 YARN_VERSION = "3.2.1"
-NPM_FLAGS = "--version"
+YARN_FLAGS = "--mode=update-lockfile"
+YARN_CACHE_FOLDER = "/opt/buildhome/.yarn_cache"
 
 [[plugins]]
 package = "/.netlify/netlify-plugin-yarn"
