@@ -19,7 +19,9 @@ export default function DoctorVideoSlideover(props: {
       if (facilityId) {
         const res = await dispatchAction(getFacilityUsers(facilityId));
         if (res && res.data) {
-          setDoctors(res.data);
+          setDoctors(
+            res.data.filter((user: UserModel) => user.user_type === "Doctor")
+          );
         }
       } else {
         setDoctors([]);
@@ -52,11 +54,7 @@ export default function DoctorVideoSlideover(props: {
             </span>
           </button>
         </div>
-        <ul
-          className="max-h-96 scroll-py-3 overflow-y-auto p-3 list-none"
-          id="options"
-          role="listbox"
-        >
+        <ul className="py-3 list-none" id="options" role="listbox">
           {doctors
             .filter((user) => user.alt_phone_number)
             .sort((a, b) => {

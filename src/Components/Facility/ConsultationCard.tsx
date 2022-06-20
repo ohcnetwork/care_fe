@@ -4,6 +4,7 @@ import moment from "moment";
 import React from "react";
 import { ConsultationModel } from "./models";
 import { KASP_STRING } from "../../Common/constants";
+import { RoleButton } from "../Common/RoleButton";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -119,16 +120,18 @@ export const ConsultationCard = (props: ConsultationProps) => {
               View / Upload Consultation Files
             </button>
             {isLastConsultation && (
-              <button
+              <RoleButton
                 className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-                onClick={() =>
+                handleClickCB={() =>
                   navigate(
                     `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`
                   )
                 }
+                disableFor="readOnly"
+                buttonType="html"
               >
                 Add Consultation Updates
-              </button>
+              </RoleButton>
             )}
           </div>
         </Grid>

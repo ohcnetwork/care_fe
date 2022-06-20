@@ -457,7 +457,7 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (status: any) => {
     const f = file;
     if (f === undefined) return;
     const category = "UNSPECIFIED";
@@ -476,7 +476,11 @@ export const FileUpload = (props: FileUploadProps) => {
       .then(uploadfile)
       .catch(() => {
         setUploadStarted(false);
-      });
+      })
+      .then(fetchData(status).then(() => {}));
+
+    // setting the value of file name to empty
+    setUploadFileName("");
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
@@ -669,7 +673,6 @@ export const FileUpload = (props: FileUploadProps) => {
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
-
                   onClick={() => {
                     handleAudioUpload();
                   }}
@@ -719,7 +722,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                         }
                         onClick={() => {
-                          handleUpload();
+                          handleUpload({ status });
                         }}
                       >
                         Upload
@@ -738,9 +741,15 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={true}
         breadcrumbs={false}
       />
-      {uploadedFiles &&
-        uploadedFiles.length > 0 &&
-        uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))}
+      {uploadedFiles && uploadedFiles.length > 0 ? (
+        uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))
+      ) : (
+        <div className="mt-4 border bg-white shadow rounded-lg p-4">
+          <div className="font-bold text-gray-500 text-3xl flex justify-center items-center">
+            {"No Data Found"}
+          </div>
+        </div>
+      )}
       {totalCount > limit && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination
