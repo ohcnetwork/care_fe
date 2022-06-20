@@ -69,6 +69,22 @@ export default function ExternalResultUpload() {
             <div className="mt-2 sm:mt-0 sm:col-span-2">
               <div className="mx-auto max-w-lg flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                 <div className="text-center">
+                  <span className="flex justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-12 w-12 text-gray-700 mb-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </span>
                   <CSVReader
                     cssClass="react-csv-input"
                     label="Select a CSV file in the specified format"
@@ -114,7 +130,7 @@ export default function ExternalResultUpload() {
             })}
           </div>
           <div className=""></div>
-          <div className="mt-2">
+          <div className="mt-2 text-center">
             <button
               disabled={loading}
               className="btn btn-primary"
