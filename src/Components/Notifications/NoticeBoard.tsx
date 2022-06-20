@@ -8,7 +8,7 @@ import Loading from "../Common/Loading";
 
 export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
-  const [loading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export const NoticeBoard: any = () => {
     );
   }
 
-  if (loading) return <Loading />;
+  if (isLoading) return <Loading />;
   return (
     <div className="px-5">
       <PageTitle title="Notice Board" breadcrumbs={false} />
