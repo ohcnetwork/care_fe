@@ -236,7 +236,7 @@ const TreatmentSummary = (props: any) => {
                 <b>Diagnosis :</b>
                 <div className="mx-5">
                   <div>
-                    <b>History of present illness :</b>
+                    <b>Existing Medication :</b>
                     {consultationData.existing_medication
                       ? consultationData.existing_medication
                       : "    ---"}
