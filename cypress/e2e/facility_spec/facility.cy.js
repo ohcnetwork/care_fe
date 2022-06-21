@@ -36,7 +36,7 @@ class facility {
     expected_type_d_cylinders,
     kasp_empanelled,
   }) {
-    cy.get("[data-test=facility-type] select").should("exist").select(type);
+    cy.get("[data-test=facility-type]").should("exist").type(type);
     cy.get("[id=facility-name]").should("exist").type(name);
     cy.get("[data-test=facility-state] select").should("exist").select(state);
     cy.get("[data-test=facility-district] select")
@@ -87,10 +87,6 @@ class facility {
       .should("exist")
       .clear()
       .type(expected_type_d_cylinders);
-
-    cy.get(`[id=facility-kasp-empanelled] input[value=${kasp_empanelled}]`)
-      .should("exist")
-      .check();
 
     cy.get("[id=facility-location-button]").click();
     cy.get("body").click();
@@ -160,7 +156,7 @@ describe("Facility", () => {
   it("updates facility", () => {
     cy.visit(current_url);
     facility.update({
-      type: "Educational Inst",
+      type: "Private Hosp",
       name: " update",
       state: "1",
       district: "7",
