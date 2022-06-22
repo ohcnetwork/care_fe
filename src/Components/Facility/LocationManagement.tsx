@@ -1,7 +1,6 @@
 import React, { useCallback, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
-import { Button, CircularProgress } from "@material-ui/core";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   listFacilityAssetLocation,
@@ -17,7 +16,6 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
-import classNames from "classnames";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -41,30 +39,44 @@ const LocationRow = (props: LocationRowProps) => {
   const [nameField, setNameField] = useState(name);
   const [descField, setDescField] = useState(description);
   const [isLoading, setIsLoading] = useState(false);
+  const [errMsg, setErrMsg] = useState("");
+
+  const validateForm = () => {
+    if (nameField.trim().length === 0) {
+      setErrMsg("Name is required");
+      return false;
+    }
+    setErrMsg("");
+    return true;
+  };
 
   const handleSave = async () => {
     setIsLoading(true);
-    const res = await dispatchAction(
-      updateFacilityAssetLocation(
-        { name: nameField, description: descField },
-        facilityId,
-        id
-      )
-    );
-    setIsLoading(false);
+    if (validateForm()) {
+      const res = await dispatchAction(
+        updateFacilityAssetLocation(
+          { name: nameField, description: descField },
+          facilityId,
+          id
+        )
+      );
+      setIsLoading(false);
 
-    if (res && res.status === 200) {
-      Notification.Success({
-        msg: "Location updated successfully",
-      });
+      if (res && res.status === 200) {
+        Notification.Success({
+          msg: "Location updated successfully",
+        });
+      } else {
+        Notification.Error({
+          msg: "Location update failed",
+        });
+      }
+      setIsEditable(false);
+      triggerRerender();
+      // window.location.reload();
     } else {
-      Notification.Error({
-        msg: "Location update failed",
-      });
+      setIsLoading(false);
     }
-    setIsEditable(false);
-    triggerRerender();
-    // window.location.reload();
   };
 
   const handleCancel = () => {
@@ -84,10 +96,10 @@ const LocationRow = (props: LocationRowProps) => {
             type="text"
             value={nameField}
             onChange={(e) => setNameField(e.target.value)}
-            errors=""
+            errors={errMsg}
           />
         ) : (
-          <p className="text-gray-900">
+          <p className="text-base text-gray-900">
             {name.slice(0, 25) + (name.length > 25 ? "..." : "")}
           </p>
         )}
@@ -105,72 +117,76 @@ const LocationRow = (props: LocationRowProps) => {
             errors=""
           />
         ) : (
-          <p className="text-gray-900 lowercase">{description}</p>
+          <p className=" text-base text-gray-900 lowercase">{description}</p>
         )}
       </td>
       <td className="px-5 py-5 border-b border-gray-200 text-sm">
         {isEditable ? (
           <div className="flex space-x-2">
-            <Button
-              color={isLoading ? "default" : "primary"}
-              variant="contained"
+            {isLoading ? (
+              <button className="btn btn-primary">
+                <span>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </span>
+                SAVING...
+              </button>
+            ) : (
+              <button className="btn btn-primary" onClick={handleSave}>
+                SAVE
+              </button>
+            )}
+            <button
               type="submit"
-              size="small"
-              style={{ marginLeft: "auto" }}
-              onClick={handleSave}
-            >
-              <CircularProgress
-                size={20}
-                className={classNames("absolute z-10", { hidden: !isLoading })}
-              />
-              <p> SAVE </p>
-            </Button>
-            <Button
-              color="secondary"
-              variant="contained"
-              type="submit"
-              size="small"
-              style={{ marginLeft: "auto" }}
               onClick={handleCancel}
+              className="btn btn-danger"
             >
               CANCEL
-            </Button>
+            </button>
           </div>
         ) : (
-          <Button
-            color="inherit"
-            variant="contained"
+          <button
             type="submit"
-            size="small"
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "#24a0ed",
-              color: "white",
-            }}
             onClick={() => setIsEditable(true)}
+            className="btn btn-primary"
           >
+            <i
+              className="fas fa-pencil-alt text-white mr-2"
+              aria-hidden="true"
+            ></i>
             EDIT
-          </Button>
+          </button>
         )}
       </td>
       <td>
         {!isEditable && (
-          <Button
-            color="inherit"
-            variant="contained"
+          <button
             type="submit"
-            size="small"
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "#4A2310",
-              color: "white",
-            }}
+            className="btn btn-primary"
             onClick={() =>
               navigate(`/facility/${facilityId}/location/${id}/beds`)
             }
           >
-            Manage Beds
-          </Button>
+            <i className="fa-solid fa-bed text-white mr-2"></i>MANAGE BEDS
+          </button>
         )}
       </td>
     </tr>
@@ -247,7 +263,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
         id={locationItem.id || ""}
         facilityId={facilityId || ""}
         name={locationItem.name || ""}
-        description={locationItem.description || ""}
+        description={locationItem.description || "--"}
         triggerRerender={triggerRerender}
       />
     ));
@@ -315,14 +331,12 @@ export const LocationManagement = (props: LocationManagementProps) => {
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
       <div className="container mx-auto px-4 py-4 md:my-8 sm:px-8">
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
+        <button
+          className="btn btn-primary"
           onClick={() => navigate(`/facility/${facilityId}/location/add`)}
         >
-          Add Location
-        </Button>
+          <i className="fas fa-map-marker-alt text-white mr-2"></i>ADD LOCATION
+        </button>
         {location}
       </div>
     </div>
