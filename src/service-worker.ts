@@ -81,13 +81,12 @@ self.addEventListener("message", (event) => {
 // Any other custom service worker logic can go here.
 self.addEventListener("push", async function (event) {
   if (event.data) {
-    console.log(event.data, event.data.json());
-    const data = JSON.parse(event.data.json());
+    console.log(event.data, event.data.text());
+    const data = event.data.text();
 
     event.waitUntil(
       self.registration.showNotification("Care - CoronaSafe Network", {
-        body: data.title,
-        tag: data.external_id,
+        body: data,
       })
     );
   }
