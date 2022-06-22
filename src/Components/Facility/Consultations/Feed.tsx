@@ -325,7 +325,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       <div className="flex items-center flex-wrap justify-between gap-2">
         <PageTitle
           title={
-            "Patient Details | " +
+            "Camera Feed | " +
             (bedPresets?.[0]?.asset_object?.location_object?.name ?? "")
           }
           breadcrumbs={false}
@@ -503,6 +503,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               )
             })
           }
+          <div className="pl-3 hideonmobilescreen">
+            <FeedCameraPTZHelpButton
+              cameraPTZ={cameraPTZ}
+              tooltipPlacement="left"
+            />
+          </div>
         </div>
         <div className="absolute bottom-8 right-8 z-20">
             <FeedButton
@@ -619,7 +625,7 @@ export const FeedCameraPTZHelpButton = (props: {
                         className="font-mono shadow-md border-gray-500 border rounded-md p-1.5"
                       >
                         {isArrowKey ? (
-                          <i className={`fa-sm ${option.icon}`} />
+                          <i className={`fa-sm fas fa-${option.icon}`} />
                         ) : (
                           hotkey
                         )}
