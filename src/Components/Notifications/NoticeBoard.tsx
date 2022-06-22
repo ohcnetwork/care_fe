@@ -55,7 +55,12 @@ export const NoticeBoard: any = () => {
 
   return (
     <div className="flex flex-col">
-      <PageTitle title="Notice Board" breadcrumbs={false} />
+      <PageTitle
+        title="Notice Board"
+        hideBack={true}
+        className="mx-3 md:mx-8"
+        breadcrumbs={false}
+      />
       {notices}
     </div>
   );
