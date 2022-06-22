@@ -28,7 +28,7 @@ package = "/.netlify/netlify-plugin-yarn"
 
 [[redirects]]
 from = "/api/*"
-to = "http://165.232.184.165:9000/api/:splat"
+to = "https://careapi.coronasafe.in/api/:splat"
 status = 200
 force = true
 

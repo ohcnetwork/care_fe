@@ -2,7 +2,7 @@
     "rewrites": [
         {
           "source": "/api/(.*)",
-          "destination": "http://165.232.184.165:9000/api/$1"
+          "destination": "https://careapi.coronasafe.in/api/$1"
         },
         {
             "source": "/(.*)",
