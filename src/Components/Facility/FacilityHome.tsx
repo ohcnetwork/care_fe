@@ -7,7 +7,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
-import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
+import { BED_TYPES, DOCTOR_SPECIALIZATION, FACILITY_FEATURE_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getPermittedFacility,
@@ -242,6 +242,19 @@ export const FacilityHome = (props: any) => {
                         >
                           {facilityData.phone_number}
                         </a>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 mt-4">
+                      <div>
+                        <h1 className="text-lg font-bold">Features</h1>
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          {facilityData.features?.map((feature, i)=>(
+                            <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
+                              {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                            </div>
+                          ))}
+                        </div>
+                        
                       </div>
                     </div>
                   </div>
