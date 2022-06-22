@@ -24,7 +24,7 @@ NPM_FLAGS = "--legacy-peer-deps"
 
 [[redirects]]
 from = "/api/*"
-to = "https://careapi.coronasafe.in/api/:splat"
+to = "http://165.232.184.165:9000/api/:splat"
 status = 200
 force = true
 
