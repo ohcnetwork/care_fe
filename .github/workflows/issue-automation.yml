@@ -13,7 +13,7 @@ jobs:
     if: github.event_name == 'issues' && github.event.action == 'opened' || github.event.action == 'reopened'
     steps:
       - name: 'Move issue to "Triage"'
-        uses: leonsteinhaeuser/project-beta-automations@v1.0.1
+        uses: leonsteinhaeuser/project-beta-automations@v1.2.1
         with:
           gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           organization: coronasafe
@@ -26,7 +26,7 @@ jobs:
     if: github.event_name == 'issues' && github.event.action == 'closed'
     steps:
       - name: 'Moved issue to "Done"'
-        uses: leonsteinhaeuser/project-beta-automations@v1.0.1
+        uses: leonsteinhaeuser/project-beta-automations@v1.2.1
         with:
           gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           organization: coronasafe
@@ -39,8 +39,10 @@ jobs:
     if: github.event_name == 'issues' && github.event.action == 'assigned'
     steps:
       - name: 'Move issue to "In Progress"'
-        uses: alex-page/github-project-automation-plus@5bcba1c1c091a222584d10913e5c060d32c44044
+        uses: leonsteinhaeuser/project-beta-automations@v1.2.1
         with:
-          repo-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          project: Care
-          column: In Progress
+          gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          organization: coronasafe
+          project_id: 4
+          resource_node_id: ${{ github.event.issue.node_id }}
+          status_value: "In Progress"
