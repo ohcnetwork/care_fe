@@ -3,9 +3,15 @@ export const phonePreg = (phone: string) => {
   return pattern.test(phone);
 };
 
-export const validateLocationCoordinates = (location: string) => {
-  const pattern = /^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}/;
-  return pattern.test(location);
+const valueIsBetween = (val: number, a: number, b: number) =>
+  a <= val && val <= b;
+
+export const validateLatitude = (latitude: string) => {
+  return valueIsBetween(Number(latitude), -90, 90);
+};
+
+export const validateLongitude = (longitude: string) => {
+  return valueIsBetween(Number(longitude), -180, 180);
 };
 
 export const validateEmailAddress = (email: string) => {

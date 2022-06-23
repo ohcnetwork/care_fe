@@ -1815,6 +1815,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_result")
                               }
+                              min={state.form.date_of_test}
                               errors={state.errors.date_of_result}
                               inputVariant="outlined"
                               margin="dense"
