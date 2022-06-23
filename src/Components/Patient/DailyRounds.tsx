@@ -14,7 +14,6 @@ import loadable from "@loadable/component";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
-  CURRENT_HEALTH_CHANGE,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
@@ -81,8 +80,6 @@ const initialState = {
 };
 
 const symptomChoices = [...SYMPTOM_CHOICES];
-
-const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 
 const DailyRoundsFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
@@ -208,13 +205,12 @@ export const DailyRounds = (props: any) => {
         //     invalidForm = true;
         //   }
         //   return;
-        // case "resp":
-        //   if (state.form.resp === null) {
-        //     errors[field] = "Please enter a respiratory rate";
-        //     if (!error_div) error_div = field;
-        //     invalidForm = true;
-        //   }
-        //   return;
+        case "resp":
+          if (state.form.resp === null && state.form.clone_last !== "true") {
+            errors[field] = "Please enter a respiratory rate";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -279,7 +275,6 @@ export const DailyRounds = (props: any) => {
           other_details: state.form.other_details,
           consultation: consultationId,
           patient_category: state.form.category,
-          current_health: state.form.current_health,
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: state.form.action,
           review_time: state.form.review_time,
@@ -645,88 +640,6 @@ export const DailyRounds = (props: any) => {
                         />
                       </div>
                     )}
-
-                    {/* <div>
-                      <InputLabel id="category-label">Category</InputLabel>
-                      <SelectField
-                        name="category"
-                        variant="standard"
-                        value={state.form.patient_category}
-                        options={categoryChoices}
-                        onChange={handleChange}
-                        errors={state.errors.patient_category}
-                      />
-                    </div> */}
-
-                    <div>
-                      <InputLabel id="current-health-label">
-                        Current Health
-                      </InputLabel>
-                      <SelectField
-                        name="current_health"
-                        variant="standard"
-                        value={state.form.current_health}
-                        options={currentHealthChoices}
-                        onChange={handleChange}
-                        optionKey="text"
-                        optionValue="desc"
-                        errors={state.errors.current_health}
-                      />
-                    </div>
-                    {/* <div>
-                      <InputLabel id="asset-type">Bed</InputLabel>
-                      <BedSelect
-                        name="bed"
-                        setSelected={setBed}
-                        selected={bed}
-                        errors=""
-                        multiple={false}
-                        margin="dense"
-                        // location={state.form.}
-                        facility={facilityId}
-                      />
-                    </div> */}
-                    {/* <div className="flex-1" id="admitted_to-div">
-                      <InputLabel id="admitted-to-label">
-                        Admitted To *{" "}
-                      </InputLabel>
-                      <SelectField
-                        optionArray={true}
-                        name="admitted_to"
-                        variant="standard"
-                        value={state.form.admitted_to}
-                        options={admittedToChoices}
-                        onChange={handleChange}
-                        errors={state.errors.admitted_to}
-                      />
-                    </div> */}
-                    {/* <div className="flex-1" id="is_telemedicine-div">
-                      <InputLabel id="admitted-label">TeleICU</InputLabel>
-                      <RadioGroup
-                        aria-label="covid"
-                        name="is_teleicu"
-                        value={isTeleicu}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          setIsTeleicu(e.target.value);
-                        }}
-                        style={{ padding: "0px 5px" }}
-                      >
-                        <Box display="flex" flexDirection="row">
-                          <FormControlLabel
-                            value="true"
-                            control={<Radio />}
-                            label="Yes"
-                          />
-                          <FormControlLabel
-                            value="false"
-                            control={<Radio />}
-                            label="No"
-                          />
-                        </Box>
-                      </RadioGroup>
-                      <ErrorHelperText error={state.errors.is_telemedicine} />
-                    </div> */}
-
                     <div className="flex-1">
                       <InputLabel id="action-label">Action </InputLabel>
                       <NativeSelectField
@@ -740,31 +653,6 @@ export const DailyRounds = (props: any) => {
                       />
                       <ErrorHelperText error={state.errors.action} />
                     </div>
-                    {/* {
-                       === "true" && (
-                      <div className="">
-                        <InputLabel id="bed">Bed</InputLabel>
-                        <SelectField
-                          className=""
-                          name="bed"
-                          variant="standard"
-                          margin="dense"
-                          options={[
-                            { id: "", name: "Select Bed" },
-                            ...beds.map((bed: any) => {
-                              return {
-                                id: bed.id,
-                                name: `${bed.name} - ${bed.bed_type}`,
-                              };
-                            }),
-                          ]}
-                          optionValue="name"
-                          value={state.form.bed}
-                          onChange={handleChange}
-                          errors={state.errors.bed}
-                        />
-                      </div>
-                    )}*/}
                   </div>
                   <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
                     <div className="flex-1">
