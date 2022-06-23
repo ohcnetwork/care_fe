@@ -413,13 +413,13 @@ export const ConsultationDetails = (props: any) => {
         </DialogActions>
       </Dialog>
       <div className="px-2 pb-2">
-        <nav className="flex justify-between flex-wrap">
+        <nav className="flex justify-between flex-wrap relative">
           <PageTitle
             title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
-          <div className="lg:absolute right-0 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+          <div className="lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
               <div className="px-2">
                 <button
