@@ -579,6 +579,9 @@ export default function ManageUsers() {
         {qParams.user_type
           ? badge("Role", qParams.user_type, "user_type")
           : null}
+        {qParams.district_id
+          ? badge("District", qParams.district_id, "district_id")
+          : null}
       </div>
 
       <div className="px-3 md:px-8">

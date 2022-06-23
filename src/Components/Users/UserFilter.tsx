@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { USER_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
+import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -19,6 +20,8 @@ export default function UserFilter(props: any) {
     phone_number: filter.phone_number || "",
     alt_phone_number: filter.alt_phone_number || "",
     user_type: filter.user_type || "",
+    district_id: filter.district_id || "",
+    district_ref: filter.district_ref || null,
   });
 
   const clearFilterState = {
@@ -27,6 +30,7 @@ export default function UserFilter(props: any) {
     phone_number: "",
     alt_phone_number: "",
     user_type: "",
+    district_id: "",
   };
 
   const USER_TYPE_OPTIONS = [
@@ -48,15 +52,30 @@ export default function UserFilter(props: any) {
     setFilterState(filterData);
   };
 
+  const setFacility = (selected: any, name: string) => {
+    const filterData: any = { ...filterState };
+    filterData[`${name}_ref`] = selected;
+    filterData["district_id"] = (selected || {}).id;
+
+    setFilterState(filterData);
+  };
+
   const applyFilter = () => {
-    const { first_name, last_name, phone_number, alt_phone_number, user_type } =
-      filterState;
+    const {
+      first_name,
+      last_name,
+      phone_number,
+      alt_phone_number,
+      user_type,
+      district_id,
+    } = filterState;
     const data = {
       first_name: first_name || "",
       last_name: last_name || "",
       phone_number: phone_number || "",
       alt_phone_number: alt_phone_number || "",
       user_type: user_type || "",
+      district_id: district_id || "",
     };
     onChange(data);
   };
@@ -172,6 +191,18 @@ export default function UserFilter(props: any) {
             options={USER_TYPE_OPTIONS}
             onChange={handleChange}
             errors=""
+          />
+        </div>
+
+        <div className="w-9/12 flex-none">
+          <span className="text-sm font-semibold">District</span>
+          <DistrictSelect
+            multiple={false}
+            name="district"
+            selected={filterState.district_ref}
+            setSelected={(obj: any) => setFacility(obj, "district")}
+            className="shifting-page-filter-dropdown"
+            errors={""}
           />
         </div>
       </div>
