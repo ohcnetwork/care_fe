@@ -462,6 +462,14 @@ export const FacilityHome = (props: any) => {
               </thead>
               <tbody>{stats}</tbody>
             </table>
+            {stats.length === 0 && (
+              <div>
+                <hr />
+                <div className="p-4 text-xl text-gray-500 font-bold flex justify-center items-center">
+                  No Data Found
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
