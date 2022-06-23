@@ -102,7 +102,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     localStorage.removeItem("shift-filters");
     localStorage.removeItem("external-filters");
     localStorage.removeItem("lsg-ward-data");
-    navigate("/login");
+    navigate("/");
     window.location.reload();
   };
 
@@ -224,7 +224,8 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
                 expanded ? "w-60" : "w-0"
               )}
             >
-              {t("Dashboard")} <i className="fas fa-arrow-up-right-from-square text-xs"></i>
+              {t("Dashboard")}{" "}
+              <i className="fas fa-arrow-up-right-from-square text-xs"></i>
             </div>
           </a>
         </nav>
