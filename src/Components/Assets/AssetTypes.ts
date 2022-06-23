@@ -21,6 +21,7 @@ export interface AssetData {
   modified_date: string;
   serial_number: string;
   warranty_details: string;
+  asset_class: "ONVIF" | "HL7MONITOR";
   asset_type: "INTERNAL" | "EXTERNAL";
   location_object: AssetLocationObject;
   status: "ACTIVE" | "TRANSFER_IN_PROGRESS";
