@@ -671,8 +671,7 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               )}
 
-              {(consultationData.diagnosis ||
-                consultationData.operation ||
+              {(consultationData.operation ||
                 consultationData.special_instruction) && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
@@ -680,14 +679,6 @@ export const ConsultationDetails = (props: any) => {
                       Notes
                     </h3>
                     <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.diagnosis && (
-                        <div>
-                          <h5>Diagnosis</h5>
-                          <p className="text-justify break-words">
-                            {consultationData.diagnosis}
-                          </p>
-                        </div>
-                      )}
                       {consultationData.operation && (
                         <div className="mt-4">
                           <h5>Operation</h5>
