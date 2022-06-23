@@ -118,12 +118,11 @@ export default function UserProfile() {
             firstName: res.data.first_name,
             lastName: res.data.last_name,
             age: res.data.age,
-            gender:
-              genderTypes
-                .filter((el) => {
-                  return el.text === res.data.gender;
-                })[0]
-                ?.id.toString() || "3",
+            gender: genderTypes
+              .filter((el) => {
+                return el.text === res.data.gender;
+              })[0]
+              ?.id.toString(),
             email: res.data.email,
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
