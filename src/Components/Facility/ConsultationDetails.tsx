@@ -634,6 +634,20 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 </div>
               )}
+
+              {consultationData.existing_medication && (
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      History of Present Illness
+                    </h3>
+                    <div className="mt-2">
+                      {consultationData.existing_medication || "-"}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {consultationData.examination_details && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
