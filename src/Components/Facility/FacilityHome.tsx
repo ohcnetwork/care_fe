@@ -313,13 +313,15 @@ export const FacilityHome = (props: any) => {
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Inventory Management
             </button>
-            <button
+            <RoleButton
               className="btn-primary btn mt-2"
-              onClick={() => navigate(`/facility/${facilityId}/location`)}
+              handleClickCB={() => navigate(`/facility/${facilityId}/location`)}
+              disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-map-marker-alt text-white mr-2"></i>
               Location Management
-            </button>
+            </RoleButton>
             <RoleButton
               className="btn-primary btn mt-2"
               handleClickCB={() =>
@@ -462,6 +464,14 @@ export const FacilityHome = (props: any) => {
               </thead>
               <tbody>{stats}</tbody>
             </table>
+            {stats.length === 0 && (
+              <div>
+                <hr />
+                <div className="p-4 text-xl text-gray-500 font-bold flex justify-center items-center">
+                  No Data Found
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
