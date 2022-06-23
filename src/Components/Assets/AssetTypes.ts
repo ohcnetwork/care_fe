@@ -10,6 +10,9 @@ export interface AssetLocationObject {
   };
 }
 
+export type AssetType = "INTERNAL" | "EXTERNAL";
+export type AssetClass = "ONVIF" | "HL7MONITOR";
+
 export interface AssetData {
   id: string;
   name: string;
@@ -21,8 +24,8 @@ export interface AssetData {
   modified_date: string;
   serial_number: string;
   warranty_details: string;
-  asset_class: "ONVIF" | "HL7MONITOR";
-  asset_type: "INTERNAL" | "EXTERNAL";
+  asset_type: AssetType;
+  asset_class?: AssetClass;
   location_object: AssetLocationObject;
   status: "ACTIVE" | "TRANSFER_IN_PROGRESS";
   vendor_name: string;
