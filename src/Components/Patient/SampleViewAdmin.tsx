@@ -195,7 +195,7 @@ export default function SampleViewAdmin() {
         (i) => i.text === status
       )?.desc;
       return (
-        <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
+        <div key={`usr_${item.id}`} className="w-full lg:w-1/2 mt-6 lg:px-4">
           <div
             className={`block border rounded-lg bg-white shadow h-full hover:border-black text-black ${
               item.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
@@ -406,7 +406,7 @@ export default function SampleViewAdmin() {
           )
         }
       />
-      <div className="mt-5 md:grid md:grid-cols-1 gap-5">
+      <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
