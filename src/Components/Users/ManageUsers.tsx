@@ -482,7 +482,7 @@ export default function ManageUsers() {
 
       <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-4">
         <div className="bg-white overflow-hidden shadow col-span-1 rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
+          <div className="p-5 w-fit sm:p-6">
             <dl>
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Users
@@ -493,14 +493,14 @@ export default function ManageUsers() {
                   <CircularProgress className="text-primary-500" />
                 </dd>
               ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                <dd className="mt-4 text-5xl lg:text-5xl md:text-4xl leading-9 font-semibold text-gray-900">
                   {totalCount}
                 </dd>
               )}
             </dl>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row justify-between col-span-2 md:px-3 space-y-3 md:space-y-0 md:space-x-4 my-2">
+        <div className="flex flex-col lg:flex-row justify-between col-span-2 lg:px-3 space-y-3 lg:space-y-0 lg:space-x-4 my-2">
           <div className="w-full">
             <InputSearchBox
               search={onUserNameChange}
