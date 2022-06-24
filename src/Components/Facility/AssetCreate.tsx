@@ -355,51 +355,7 @@ const AssetCreate = (props: AssetProps) => {
                   errors={state.errors.name}
                 />
               </div>
-              <div>
-                <InputLabel htmlFor="asset-type" id="name=label" required>
-                  Asset Type
-                </InputLabel>
-                <div className="my-2">
-                  <SelectMenu
-                    options={[
-                      {
-                        title: "Select",
-                        description: "Select an Asset Type from the following",
-                        value: undefined,
-                      },
-                      {
-                        title: "Internal",
-                        description: "Asset is inside the facility premises.",
-                        value: "INTERNAL",
-                      },
-                      {
-                        title: "External",
-                        description: "Asset is outside the facility premises.",
-                        value: "EXTERNAL",
-                      },
-                    ]}
-                    selected={asset_type}
-                    onSelect={setAssetType}
-                  />
-                </div>
-                <ErrorHelperText error={state.errors.asset_type} />
-              </div>
-              <div>
-                <InputLabel htmlFor="asset-class" id="name=label">
-                  Asset Class
-                </InputLabel>
-                <div className="my-2">
-                  <SelectMenu
-                    options={[
-                      { title: "Select", value: undefined },
-                      { title: "ONVIF Camera", value: "ONVIF" },
-                      { title: "HL7 Vitals Monitor", value: "HL7MONITOR" },
-                    ]}
-                    selected={asset_class}
-                    onSelect={setAssetClass}
-                  />
-                </div>
-              </div>
+
               <div>
                 <InputLabel htmlFor="location" id="name=label" required>
                   Location
@@ -420,32 +376,8 @@ const AssetCreate = (props: AssetProps) => {
                   }
                   errors={state.errors.location}
                 />
-              </div>
-              <div>
-                <InputLabel htmlFor="is_working" id="name=label" required>
-                  Is Working
-                </InputLabel>
-                <RadioGroup
-                  aria-label="is_working"
-                  name="is_working"
-                  value={is_working}
-                  onChange={(e) => setIsWorking(e.target.value)}
-                  className="flex flex-col justify-center mt-2"
-                >
-                  <Box display="flex" flexDirection="row">
-                    <FormControlLabel
-                      value={"true"}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={"false"}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.is_working} />
+                {/* </div>
+              <div> */}
               </div>
               {is_working === "false" && (
                 <div>
@@ -584,6 +516,83 @@ const AssetCreate = (props: AssetProps) => {
                   }
                   errors={state.errors.support_email}
                 />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <InputLabel htmlFor="asset-type" id="name=label" required>
+                    Asset Type
+                  </InputLabel>
+                  <div className="my-2">
+                    <SelectMenu
+                      options={[
+                        {
+                          title: "Select",
+                          description:
+                            "Select an Asset Type from the following",
+                          value: undefined,
+                        },
+                        {
+                          title: "Internal",
+                          description: "Asset is inside the facility premises.",
+                          value: "INTERNAL",
+                        },
+                        {
+                          title: "External",
+                          description:
+                            "Asset is outside the facility premises.",
+                          value: "EXTERNAL",
+                        },
+                      ]}
+                      selected={asset_type}
+                      onSelect={setAssetType}
+                    />
+                  </div>
+                  <ErrorHelperText error={state.errors.asset_type} />
+                </div>
+                <div>
+                  <InputLabel htmlFor="asset-class" id="name=label">
+                    Asset Class
+                  </InputLabel>
+                  <div className="my-2">
+                    <SelectMenu
+                      options={[
+                        { title: "Select", value: undefined },
+                        { title: "ONVIF Camera", value: "ONVIF" },
+                        { title: "HL7 Vitals Monitor", value: "HL7MONITOR" },
+                      ]}
+                      selected={asset_class}
+                      onSelect={setAssetClass}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <InputLabel htmlFor="is_working" id="name=label" required>
+                    Is Working
+                  </InputLabel>
+                  <RadioGroup
+                    aria-label="is_working"
+                    name="is_working"
+                    value={is_working}
+                    onChange={(e) => setIsWorking(e.target.value)}
+                    className="flex flex-col justify-center mt-2"
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value={"true"}
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value={"false"}
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.is_working} />
+                </div>
+                {/* </div>
+              <div> */}
               </div>
               <div>
                 <InputLabel htmlFor="qr_code_id" id="name=label">
