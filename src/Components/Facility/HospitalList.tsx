@@ -90,26 +90,16 @@ export const HospitalList = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const params = qParams.search
-        ? {
-            limit,
-            offset,
-            search_text: qParams.search,
-            state: qParams.state,
-            district: qParams.district,
-            local_body: qParams.local_body,
-            facility_type: qParams.facility_type,
-            kasp_empanelled: qParams.kasp_empanelled,
-          }
-        : {
-            limit,
-            offset,
-            state: qParams.state,
-            district: qParams.district,
-            local_body: qParams.local_body,
-            facility_type: qParams.facility_type,
-            kasp_empanelled: qParams.kasp_empanelled,
-          };
+      const params = {
+        limit,
+        offset,
+        search_text: qParams.search || undefined,
+        state: qParams.state,
+        district: qParams.district,
+        local_body: qParams.local_body,
+        facility_type: qParams.facility_type,
+        kasp_empanelled: qParams.kasp_empanelled,
+      };
 
       const res = await dispatchAction(getPermittedFacilities(params));
       if (!status.aborted) {
@@ -201,9 +191,8 @@ export const HospitalList = (props: any) => {
     return facility_type?.text;
   };
 
-  const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ search }, { replace: true });
-    else setQueryParams({ search: "" }, { replace: true });
+  const onSearchSuspects = (value: string) => {
+    updateQuery({ search: value });
   };
 
   const handleDownload = async () => {
@@ -336,15 +325,9 @@ export const HospitalList = (props: any) => {
     }
   };
 
-  const kaspOptionValues = [
-    { id: "", text: "Not Selected" },
-    { id: "true", text: "Yes" },
-    { id: "false", text: "No" },
-  ];
-
   let facilityList: any[] = [];
   if (data && data.length) {
-    facilityList = data.map((facility: any, idx: number) => {
+    facilityList = data.map((facility: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
