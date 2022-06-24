@@ -37,7 +37,7 @@ export default function SelectMenu<T>(props: Props<T>) {
           <div className="relative">
             <Listbox.Button className="inline-flex shadow-sm rounded-md divide-x divide-primary-600">
               <div className="relative z-0 inline-flex shadow-sm rounded-md divide-x divide-primary-600">
-                <div className="relative inline-flex items-center bg-primary-500 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white">
+                <div className="relative inline-flex items-center bg-primary-500 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white hover:bg-primary-600 focus:outline-none focus:z-10">
                   {selected.value && (
                     <Check className="h-5 w-5" aria-hidden="true" />
                   )}
