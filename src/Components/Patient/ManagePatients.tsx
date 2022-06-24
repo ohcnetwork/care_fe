@@ -667,7 +667,7 @@ export const PatientManager = (props: any) => {
       <PageTitle
         title="Patients"
         hideBack={!facilityId}
-        className="mt-4"
+        className="mx-3 md:mx-8"
         breadcrumbs={!!facilityId}
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
