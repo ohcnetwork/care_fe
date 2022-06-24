@@ -363,6 +363,11 @@ const AssetCreate = (props: AssetProps) => {
                   <SelectMenu
                     options={[
                       {
+                        title: "Select",
+                        description: "Select an Asset Type from the following",
+                        value: undefined,
+                      },
+                      {
                         title: "Internal",
                         description: "Asset is inside the facility premises.",
                         value: "INTERNAL",
