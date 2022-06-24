@@ -86,6 +86,7 @@ export default function ManageUsers() {
         phone_number: qParams.phone_number,
         alt_phone_number: qParams.alt_phone_number,
         user_type: qParams.user_type,
+        district_id: qParams.district_id,
       };
       const res = await dispatch(getUserList(params));
       if (!status.aborted) {
@@ -106,6 +107,7 @@ export default function ManageUsers() {
       qParams.last_name,
       qParams.phone_number,
       qParams.alt_phone_number,
+      qParams.district_id,
     ]
   );
 
