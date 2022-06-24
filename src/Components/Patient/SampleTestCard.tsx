@@ -9,6 +9,7 @@ import { patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import _ from "lodash";
+import { RoleButton } from "../Common/RoleButton";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -161,12 +162,14 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           >
             Sample Report
           </button>
-          <button
-            onClick={(e) => showUpdateStatus(itemData)}
+          <RoleButton
+            handleClickCB={() => showUpdateStatus(itemData)}
             className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+            disableFor="readOnly"
+            buttonType="html"
           >
             UPDATE SAMPLE TEST STATUS
-          </button>
+          </RoleButton>
         </div>
       </CardContent>
       {statusDialog.show && (
