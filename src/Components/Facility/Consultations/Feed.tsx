@@ -490,7 +490,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           
         </div>
         */}
-        <div className="absolute top-8 right-8 z-10 flex flex-col gap-4">
+        <div className="absolute top-8 right-8 z-20 flex flex-col gap-4">
           {
             [10,9,7,5,6].map((button, i)=>{
               const option = cameraPTZ[button];
@@ -652,10 +652,7 @@ export const FeedCameraPTZHelpButton = (props: {
     >
       <button
         key="option.action"
-        className="rounded p-2"
-        onClick={() => {
-          // TODO
-        }}
+        className="rounded text-2xl text-white/40"
       >
         <i className={"fa fa-circle-question md:p-2"} />
       </button>

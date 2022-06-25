@@ -16,7 +16,7 @@ export default function FeedButton(props : {
           .replace("ArrowLeft", "←")
           .replace("ArrowRight", "→");
 
-    let buttonClass = "bg-white/30 rounded-full flex items-center text-black hover:bg-white/40 transition justify-center";
+    let buttonClass = "bg-white/50 rounded-full flex items-center text-black hover:bg-white/60 transition justify-center";
 
     switch (props.styleType) {
         case "BUTTON":
