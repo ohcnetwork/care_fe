@@ -352,10 +352,11 @@ export default function ListView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="md:flex md:items-end md:justify-between px-4">
+      <div className="md:flex md:items-center md:justify-between px-4">
         <PageTitle
           title={"Shifting"}
           hideBack={true}
+          className="mx-3 md:mx-8"
           componentRight={
             downloadLoading ? (
               <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />

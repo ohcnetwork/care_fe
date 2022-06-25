@@ -380,7 +380,7 @@ export default function SampleViewAdmin() {
   };
 
   return (
-    <div>
+    <div className="px-2">
       {statusDialog.show && (
         <UpdateStatusDialog
           sample={statusDialog.sample}

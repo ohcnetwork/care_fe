@@ -248,9 +248,10 @@ export default function ListView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="md:flex md:items-end md:justify-between px-4">
+      <div className="md:flex md:items-center md:justify-between px-4">
         <PageTitle
           title={"Resource"}
+          className="mx-3 md:mx-8"
           hideBack={true}
           componentRight={
             downloadLoading ? (

@@ -476,7 +476,7 @@ export default function ManageUsers() {
       <PageTitle
         title="User Management"
         hideBack={true}
-        className="mx-3 md:mx-8"
+        className="mx-3 md:mx-8 px-2"
         breadcrumbs={false}
       />
 
