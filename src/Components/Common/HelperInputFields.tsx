@@ -200,10 +200,10 @@ export const ActionTextInputField = (props: ActionTextFieldProps) => {
 };
 
 export const MultilineInputField = (props: TextFieldPropsExtended) => {
-  const { errors } = props;
+  const { errors, rows, ...restProps } = props;
   return (
     <div>
-      <TextField {...props} multiline fullWidth />
+      <TextField maxRows={rows} {...restProps} multiline fullWidth />
       <ErrorHelperText error={errors} />
     </div>
   );
