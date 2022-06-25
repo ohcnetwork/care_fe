@@ -318,7 +318,7 @@ export default function ManageUsers() {
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="flex lg:flex-row flex-col justify-between">
+                <div className="flex lg:flex-row gap-3 flex-col justify-between">
                   {user.username && (
                     <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit">
                       {user.username}
@@ -562,7 +562,7 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <div className="flex space-x-2 mt-2 mx-5 flex-wrap w-full col-span-3 space-y-1">
+      <div className="flex mt-2 mx-7 flex-wrap gap-2 items-center">
         {badge("Username", qParams.username, "username")}
         {badge("First Name", qParams.first_name, "first_name")}
         {badge("Last Name", qParams.last_name, "last_name")}
