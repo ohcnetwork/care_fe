@@ -122,7 +122,7 @@ const BedRow = (props: BedRowProps) => {
 
   return (
     <tr key={id}>
-      <td className="px-5 py-5 border-b border-gray-200 text-sm text-center">
+      <td className="px-5 py-5 border-b border-gray-200 text-sm text-left">
         {isEditable ? (
           <TextInputField
             name="name"
@@ -139,7 +139,7 @@ const BedRow = (props: BedRowProps) => {
           </p>
         )}
       </td>
-      <td className="px-5 py-5 border-b border-gray-200 text-sm text-center">
+      <td className="px-5 py-5 border-b border-gray-200 text-sm text-left">
         {isEditable ? (
           <MultilineInputField
             rows={2}
@@ -155,7 +155,7 @@ const BedRow = (props: BedRowProps) => {
           <p className="text-gray-900">{description}</p>
         )}
       </td>
-      <td className="px-5 py-5 border-b border-gray-200 text-sm text-center">
+      <td className="px-5 py-5 border-b border-gray-200 text-sm text-left">
         {isEditable ? (
           <SelectField
             name="name"
@@ -176,7 +176,7 @@ const BedRow = (props: BedRowProps) => {
           </p>
         )}
       </td>
-      <td className="flex justify-center border-b border-gray-200 text-sm">
+      <td className="flex justify-start border-b border-gray-200 text-sm">
         {isEditable ? (
           <div className="space-x-2 mt-8">
             <Button
@@ -341,16 +341,16 @@ export const BedManagement = (props: BedManagementProps) => {
           <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
             <thead>
               <tr>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-center text-xs font-semibold text-white uppercase tracking-wider">
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-center text-xs font-semibold text-white uppercase tracking-wider">
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-center text-xs font-semibold text-white uppercase tracking-wider">
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                   Bed Type
                 </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-center text-xs font-semibold text-white uppercase tracking-wider">
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                   Manage
                 </th>
               </tr>
