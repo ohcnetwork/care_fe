@@ -506,7 +506,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           <div className="pl-3 hideonmobilescreen">
             <FeedCameraPTZHelpButton
               cameraPTZ={cameraPTZ}
-              tooltipPlacement="left"
+              tooltipPlacement="left-end"
             />
           </div>
         </div>
@@ -654,7 +654,7 @@ export const FeedCameraPTZHelpButton = (props: {
         key="option.action"
         className="rounded text-2xl text-white/40"
       >
-        <i className={"fa fa-circle-question md:p-2"} />
+        <i className={"fa fa-circle-question"} />
       </button>
     </Tooltip>
   );
