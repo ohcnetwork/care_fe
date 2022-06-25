@@ -112,7 +112,7 @@ export const DailyRounds = (props: any) => {
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
-  const fetchpatient = useCallback(
+  const fetchRoundDetails = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(
@@ -138,10 +138,10 @@ export const DailyRounds = (props: any) => {
   useAbortableEffect(
     (status: statusType) => {
       if (id) {
-        fetchpatient(status);
+        fetchRoundDetails(status);
       }
     },
-    [dispatchAction, fetchpatient]
+    [dispatchAction, fetchRoundDetails]
   );
 
   useEffect(() => {
@@ -168,13 +168,13 @@ export const DailyRounds = (props: any) => {
           getDailyReport({ limit: 1, offset: 0 }, { consultationId })
         );
         setHasPreviousLog(res.data.count > 0);
-        dispatch({
+        dispatch((prev: any) => ({
           type: "set_form",
           form: {
-            ...state.form,
+            ...prev.form,
             clone_last: res.data.count > 0 ? "true" : "false",
           },
-        });
+        }));
       }
     }
     fetchHasPreviousLog();
@@ -183,7 +183,6 @@ export const DailyRounds = (props: any) => {
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
-    const error_div = "";
     Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "other_symptoms":
@@ -198,15 +197,12 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        // case "admitted_to":
-        //   if (!state.form.admitted_to && state.form.clone_last === "false") {
-        //     errors[field] = "Please select admitted to details";
-        //     if (!error_div) error_div = field;
-        //     invalidForm = true;
-        //   }
-        //   return;
         case "resp":
-          if (state.form.resp === null && state.form.clone_last !== "true") {
+          if (
+            state.form.resp === null &&
+            state.form.rounds_type === "NORMAL" &&
+            state.form.clone_last !== "true"
+          ) {
             errors[field] = "Please enter a respiratory rate";
             invalidForm = true;
           }
@@ -216,12 +212,7 @@ export const DailyRounds = (props: any) => {
       }
     });
     dispatch({ type: "set_error", errors });
-    return [!invalidForm, error_div];
-  };
-
-  const scrollTo = (id: any) => {
-    const element = document.querySelector(`#${id}-div`);
-    element?.scrollIntoView({ behavior: "smooth", block: "center" });
+    return !invalidForm;
   };
 
   const fahrenheitToCelcius = (x: any) => {
@@ -244,11 +235,8 @@ export const DailyRounds = (props: any) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const [validForm, error_div] = validateForm();
-    console.log(validForm, error_div);
-    if (!validForm) {
-      scrollTo(error_div);
-    } else {
+    const validForm = validateForm();
+    if (validForm) {
       setIsLoading(true);
       const baseData = {
         clone_last: state.form.clone_last === "true" ? true : false,

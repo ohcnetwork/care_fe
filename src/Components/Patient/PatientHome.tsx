@@ -1050,8 +1050,8 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Present Health
                     </div>
-                    <div className="my-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
-                      {patientData.ongoing_medication}
+                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                      {patientData.present_health}
                     </div>
                   </div>
                 )}
