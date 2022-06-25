@@ -78,7 +78,6 @@ type FormDetails = {
   referred_to: string;
   diagnosis: string;
   verified_by: string;
-  test_id: string;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
@@ -91,7 +90,6 @@ type FormDetails = {
   action: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
-  operation: string;
   special_instruction: string;
   review_time: number;
   weight: string;
@@ -120,7 +118,6 @@ const initForm: FormDetails = {
   referred_to: "",
   diagnosis: "",
   verified_by: "",
-  test_id: "",
   is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
@@ -133,7 +130,6 @@ const initForm: FormDetails = {
   action: "PENDING",
   assigned_to: "",
   assigned_to_object: null,
-  operation: "",
   special_instruction: "",
   review_time: 0,
   weight: "",
@@ -434,7 +430,6 @@ export const ConsultationForm = (props: any) => {
         discharge_advice: dischargeAdvice,
         patient: patientId,
         facility: facilityId,
-        test_id: state.form.test_id,
         referred_to:
           state.form.suggestion === "R" ? state.form.referred_to : undefined,
         consultation_notes: state.form.consultation_notes,
@@ -443,7 +438,6 @@ export const ConsultationForm = (props: any) => {
         review_time: state.form.review_time,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
-        operation: state.form.operation,
         special_instruction: state.form.special_instruction,
         weight: Number(state.form.weight),
         height: Number(state.form.height),
@@ -820,21 +814,6 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              {diseaseStatus !== "NEGATIVE" && (
-                <div id="test_id-div">
-                  <InputLabel id="refered-label">State Test ID</InputLabel>
-                  <TextInputField
-                    name="test_id"
-                    variant="outlined"
-                    margin="dense"
-                    type="string"
-                    InputLabelProps={{ shrink: !!state.form.test_id }}
-                    value={state.form.test_id}
-                    onChange={handleChange}
-                    errors={state.errors.test_id}
-                  />
-                </div>
-              )}
               <div id="verified_by-div">
                 <InputLabel id="exam-details-label">Verified By</InputLabel>
                 <MultilineInputField
@@ -972,23 +951,7 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-              <div id="operation-div" className="mt-2">
-                <InputLabel id="exam-details-label">Operation</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="operation"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.operation,
-                  }}
-                  value={state.form.operation}
-                  onChange={handleChange}
-                  errors={state.errors.operation}
-                />
-              </div>
+
               <div id="special_instruction-div" className="mt-2">
                 <InputLabel id="special-instruction-label">
                   Special Instructions
