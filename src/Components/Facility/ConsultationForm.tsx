@@ -305,13 +305,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        // case "category":
-        //   if (!state.form[field] || !state.form[field].length) {
-        //     errors[field] = "Please select the category";
-        //     if (!error_div) error_div = field;
-        //     invalidForm = true;
-        //   }
-        //   return;
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
