@@ -413,13 +413,13 @@ export const ConsultationDetails = (props: any) => {
         </DialogActions>
       </Dialog>
       <div className="px-2 pb-2">
-        <nav className="flex justify-between flex-wrap">
+        <nav className="flex justify-between flex-wrap relative">
           <PageTitle
-            title="Patient Details"
+            title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
-          <div className="right-0 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+          <div className="lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
               <div className="px-2">
                 <button
@@ -524,29 +524,23 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col text-right mt-6 md:mt-0 md:flex-row gap-x-2 gap-y-2">
-                <div>
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={handleClickOpen}
-                  >
-                    <i className="fas fa-clipboard-list"></i>
-                    &nbsp; Discharge Summary
-                  </button>
-                </div>
-                <div>
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={handleDischageClickOpen}
-                    disabled={
-                      !patientData.is_active ||
-                      patientData.last_consultation?.facility !== facilityId
-                    }
-                  >
-                    <i className="fas fa-hospital-user"></i>
-                    &nbsp; Discharge from CARE
-                  </button>
-                </div>
+              <div className="flex-1 text-right">
+                <button className="btn btn-primary" onClick={handleClickOpen}>
+                  <i className="fas fa-clipboard-list"></i>
+                  &nbsp; Discharge Summary
+                </button>
+
+                <button
+                  className="btn btn-primary ml-2"
+                  onClick={handleDischageClickOpen}
+                  disabled={
+                    !patientData.is_active ||
+                    patientData.last_consultation?.facility !== facilityId
+                  }
+                >
+                  <i className="fas fa-hospital-user"></i>
+                  &nbsp; Discharge from CARE
+                </button>
               </div>
             </div>
             <div className="flex md:flex-row flex-col gap-2 justify-between p-4">
@@ -640,6 +634,20 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 </div>
               )}
+
+              {consultationData.existing_medication && (
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      History of Present Illness
+                    </h3>
+                    <div className="mt-2">
+                      {consultationData.existing_medication || "-"}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {consultationData.examination_details && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
@@ -677,8 +685,7 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               )}
 
-              {(consultationData.diagnosis ||
-                consultationData.operation ||
+              {(consultationData.operation ||
                 consultationData.special_instruction) && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
@@ -686,14 +693,6 @@ export const ConsultationDetails = (props: any) => {
                       Notes
                     </h3>
                     <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.diagnosis && (
-                        <div>
-                          <h5>Diagnosis</h5>
-                          <p className="text-justify break-words">
-                            {consultationData.diagnosis}
-                          </p>
-                        </div>
-                      )}
                       {consultationData.operation && (
                         <div className="mt-4">
                           <h5>Operation</h5>
