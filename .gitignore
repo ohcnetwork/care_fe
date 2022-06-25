@@ -26,7 +26,6 @@ dist
 build
 .swp
 stats.json
-package-lock.json
 public/build-meta.json
 
 
@@ -48,3 +47,8 @@ src/style/index.css
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+
+# Using NPM
+# package-lock.json
+yarn.lock

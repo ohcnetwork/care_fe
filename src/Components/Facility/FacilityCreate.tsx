@@ -25,9 +25,10 @@ import {
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  validateLocationCoordinates,
   phonePreg,
   validatePincode,
+  validateLatitude,
+  validateLongitude,
 } from "../../Common/validation";
 import {
   createFacility,
@@ -369,13 +370,15 @@ export const FacilityCreate = (props: FacilityProps) => {
           }
           return;
         case "latitude":
+          if (!!state.form.latitude && !validateLatitude(state.form[field])) {
+            errors[field] = "Please enter valid latitude between -90 and 90.";
+            invalidForm = true;
+          }
+          return;
         case "longitude":
-          if (
-            !!state.form.latitude &&
-            !!state.form.longitude &&
-            !validateLocationCoordinates(state.form[field])
-          ) {
-            errors[field] = "Please enter valid coordinates";
+          if (!!state.form.longitude && !validateLongitude(state.form[field])) {
+            errors[field] =
+              "Please enter valid longitude between -180 and 180.";
             invalidForm = true;
           }
           return;
