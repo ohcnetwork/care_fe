@@ -148,7 +148,7 @@ export default function UpdateResult(props: any) {
   );
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
 
     Object.keys(state.form).forEach((field, i) => {

@@ -120,7 +120,7 @@ export const TriageForm = (props: triageFormProps) => {
   }, [dispatchAction, facilityId]);
 
   const validateForm = () => {
-    let errors = { ...initForm };
+    const errors = { ...initForm };
     let invalidForm = false;
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
@@ -179,7 +179,7 @@ export const TriageForm = (props: triageFormProps) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };

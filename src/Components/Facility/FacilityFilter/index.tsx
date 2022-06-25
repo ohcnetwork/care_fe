@@ -22,7 +22,7 @@ const selectStates = [{ id: 0, name: "Please select your state" }];
 const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
 function FacillityFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter } = props;
   const dispatchAction: any = useDispatch();
 
   const [isStateLoading, setIsStateLoading] = useState(false);

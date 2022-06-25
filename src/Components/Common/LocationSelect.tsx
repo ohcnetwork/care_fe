@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listFacilityAssetLocation } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import { AutoCompleteAsyncField } from "./HelperInputFields";
 import { AssetLocationObject } from "../Assets/AssetTypes";
 const debounce = require("lodash.debounce");
 interface LocationSelectProps {

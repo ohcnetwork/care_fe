@@ -91,7 +91,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
   const stopStream = (url: string | undefined) => {
     console.log("stop", url);
     if (url) {
-      let urlSegments = url.split("/");
+      const urlSegments = url.split("/");
       const id = urlSegments?.pop();
       axios
         .post(`https://${asset.meta.middleware_hostname}/stop`, {
@@ -156,7 +156,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
     if (!position) {
       getCameraStatus(asset);
     } else {
-      let data = {
+      const data = {
         x: 0,
         y: 0,
         zoom: 0,

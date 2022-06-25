@@ -19,7 +19,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
-const Loading = loadable(() => import("../../Components/Common/Loading"));
+const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface DoctorCapacityProps extends DoctorModal {
@@ -162,7 +162,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   }, [doctorTypes]);
 
   const validateData = () => {
-    let errors = { ...initForm };
+    const errors = { ...initForm };
     let invalidForm = false;
     Object.keys(state.form).forEach((field, i) => {
       if (!state.form[field]) {
@@ -179,7 +179,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };

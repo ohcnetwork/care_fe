@@ -122,7 +122,7 @@ export const SetInventoryForm = (props: any) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };

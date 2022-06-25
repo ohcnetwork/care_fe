@@ -37,6 +37,8 @@ public/build-meta.json
 *.gen
 .bsb.lock
 
+# Generated CSS file from Tailwind
+src/style/index.css
 # Yarn
 .pnp.*
 .yarn/*

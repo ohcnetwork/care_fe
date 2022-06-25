@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getUserList } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import { AutoCompleteAsyncField } from "./HelperInputFields";
 import { UserModel } from "../Users/models";
 const debounce = require("lodash.debounce");
 interface UserSelectProps {
@@ -28,7 +28,7 @@ export const UserSelect = (props: UserSelectProps) => {
   const [UserList, setUserList] = useState<Array<UserModel>>([]);
 
   const getPersonName = (user: any) => {
-    let personName = user.first_name + " " + user.last_name;
+    const personName = user.first_name + " " + user.last_name;
 
     return personName.trim().length > 0 ? personName : user.username;
   };

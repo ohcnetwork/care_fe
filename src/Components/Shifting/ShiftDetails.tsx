@@ -27,7 +27,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ShiftDetails(props: { id: string }) {
   const dispatch: any = useDispatch();
-  let initialData: any = {};
+  const initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
@@ -59,14 +59,14 @@ export default function ShiftDetails(props: { id: string }) {
   const handleShiftDelete = async () => {
     setOpenDeleteShiftDialog(true);
 
-    let res = await dispatch(deleteShiftRecord(props.id));
+    const res = await dispatch(deleteShiftRecord(props.id));
     if (res.status >= 200) {
       Notification.Success({
         msg: "Shifting record has been deleted successfully.",
       });
     }
 
-    navigate(`/shifting`);
+    navigate("/shifting");
   };
 
   const showCopyToclipBoard = (data: any) => {

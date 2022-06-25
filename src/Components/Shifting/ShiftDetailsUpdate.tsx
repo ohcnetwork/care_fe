@@ -130,7 +130,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   }, [dispatchAction, state.form.assigned_to]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
       if (!state.form[field] || !state.form[field].length) {

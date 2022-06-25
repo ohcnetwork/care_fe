@@ -1,5 +1,5 @@
 export const externalResultFormatter = (props: any) => {
-  let data = props.map((el: any) => {
+  const data = props.map((el: any) => {
     return {
       Id: el.id,
       Name: el.name,

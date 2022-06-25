@@ -20,7 +20,7 @@ const useMergeState = (initialState: any) => {
 };
 
 export default function UserFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter } = props;
 
   const [filterState, setFilterState] = useMergeState({
     status: filter.status || "",

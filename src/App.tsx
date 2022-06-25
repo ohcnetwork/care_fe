@@ -11,7 +11,7 @@ const Loading = loadable(() => import("./Components/Common/Loading"));
 
 const App: React.FC = () => {
   const dispatch: any = useDispatch();
-  const state: any = useSelector((state) => state);
+  const state: any = useSelector((state: any) => state);
   const { currentUser } = state;
   const [user, setUser] = useState(null);
 
@@ -35,7 +35,7 @@ const App: React.FC = () => {
         localStorage.setItem("care_refresh_token", resp.data.refresh);
       })
       .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
+        console.error("Error while refreshing", ex);
       });
   };
   useEffect(() => {

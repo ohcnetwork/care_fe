@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getFacilityUsers } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import { AutoCompleteAsyncField } from "./HelperInputFields";
 import { UserModel } from "../Users/models";
 
 export const UserSelect = (props: any) => {
@@ -20,7 +20,7 @@ export const UserSelect = (props: any) => {
   const [UserList, setUserList] = useState<Array<UserModel>>([]);
 
   const getPersonName = (user: any) => {
-    let personName = user.first_name + " " + user.last_name;
+    const personName = user.first_name + " " + user.last_name;
 
     return personName.trim().length > 0 ? personName : user.username;
   };

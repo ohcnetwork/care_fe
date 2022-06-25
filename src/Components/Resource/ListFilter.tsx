@@ -24,7 +24,7 @@ function useMergeState(initialState: any) {
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter, local } = props;
+  const { filter, onChange, closeFilter, local } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isResourceLoading, setResourceLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
@@ -108,7 +108,7 @@ export default function ListFilter(props: any) {
   };
 
   const handleChange = (event: any) => {
-    let { name, value } = event.target;
+    const { name, value } = event.target;
 
     const filterData: any = { ...filterState };
     filterData[name] = value;

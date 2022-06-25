@@ -285,7 +285,7 @@ export default function PrintDeathReport(props: { id: string }) {
       ) : (
         <div className="m-5 p-5 bg-gray-100 border rounded-xl shadow">
           <PageTitle
-            title={`Covid-19 Death Reporting : Form 1`}
+            title={"Covid-19 Death Reporting : Form 1"}
             crumbsReplacements={{
               [props.id]: { name: patientName },
               death_report: { style: "pointer-events-none" },
