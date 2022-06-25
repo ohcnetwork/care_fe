@@ -1178,7 +1178,7 @@ export const PatientHome = (props: any) => {
                       disabled={
                         !patientData.is_active ||
                         !(
-                          patientData?.last_consultation?.facility == facilityId
+                          patientData?.last_consultation?.facility === facilityId
                         )
                       }
                       handleClickCB={() =>
