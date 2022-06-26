@@ -3,7 +3,13 @@ import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { createFacilityBed, getAnyFacility } from "../../Redux/actions";
+import {
+  createFacilityBed,
+  getAnyFacility,
+  getFacilityAssetLocation,
+  getFacilityBed,
+  updateFacilityBed,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import {
   MultilineInputField,
@@ -21,34 +27,54 @@ const goBack = () => {
 interface BedFormProps {
   facilityId: string;
   locationId: string;
+  bedId?: string;
 }
 
 export const AddBedForm = (props: BedFormProps) => {
-  const { facilityId, locationId } = props;
+  const { facilityId, locationId, bedId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [bedType, setBedType] = useState<string>("");
   const [facilityName, setFacilityName] = useState("");
+  const [locationName, setLocationName] = useState("");
+  const [bedName, setBedName] = useState("");
   const [errors, setErrors] = useState({
     name: "",
     description: "",
     bedType: "",
   });
 
+  const headerText = !bedId ? "Add Bed" : "Update Bed";
+  const buttonText = !bedId ? "Add Bed" : "Update Bed";
+
   useEffect(() => {
-    async function fetchFacilityName() {
+    async function fetchFacilityLocationAndBed() {
+      setIsLoading(true);
       if (facilityId) {
         const res = await dispatchAction(getAnyFacility(facilityId));
-
         setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
       }
+      if (facilityId && locationId) {
+        const res = await dispatchAction(
+          getFacilityAssetLocation(facilityId, locationId)
+        );
+        setLocationName(res?.data?.name || "");
+      }
+      if (facilityId && locationId && bedId) {
+        const res = await dispatchAction(
+          getFacilityBed(facilityId, locationId, bedId)
+        );
+        setName(res?.data?.name || "");
+        setBedName(res?.data?.name || "");
+        setDescription(res?.data?.description || "");
+        setBedType(res?.data?.bed_type || "");
+      }
+      setIsLoading(false);
     }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+    fetchFacilityLocationAndBed();
+  }, [dispatchAction, facilityId, locationId]);
 
   const validateInputs = (data: {
     name: string;
@@ -82,12 +108,18 @@ export const AddBedForm = (props: BedFormProps) => {
     setIsLoading(true);
 
     const res = await dispatchAction(
-      createFacilityBed(data, facilityId, locationId)
+      bedId
+        ? updateFacilityBed(data, facilityId, bedId, locationId)
+        : createFacilityBed(data, facilityId, locationId)
     );
     setIsLoading(false);
-    if (res && res.status === 201) {
+    if (res && (res.status === 201 || res.status === 200)) {
+      const notificationMessage = bedId
+        ? "Bed updated successfully"
+        : "Bed created successfully";
+
       Notification.Success({
-        msg: "Bed created successfully",
+        msg: notificationMessage,
       });
     }
     goBack();
@@ -98,16 +130,28 @@ export const AddBedForm = (props: BedFormProps) => {
   }
 
   return (
-    <div className="px-2">
+    <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle
-        title="Add Bed"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+        title={headerText}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [locationId]: {
+            name: locationName,
+            uri: `/facility/${facilityId}/location`,
+          },
+          ...(bedId && {
+            [bedId]: {
+              name: bedName,
+              uri: `/facility/${facilityId}/location/${locationId}/beds`,
+            },
+          }),
+        }}
       />
-      <div className="mt-4">
+      <div className="mt-10">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="mt-2 grid gap-4 grid-cols-1">
                 <div>
                   <InputLabel id="name">Name*</InputLabel>
                   <TextInputField
@@ -133,50 +177,53 @@ export const AddBedForm = (props: BedFormProps) => {
                     errors={errors.description}
                   />
                 </div>
-              </div>
-              <div>
-                <InputLabel id="bedType">Bed Type*</InputLabel>
-                <SelectField
-                  id="bed-type"
-                  fullWidth
-                  name="bed_type"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  options={[
-                    {
-                      id: "",
-                      name: "Select",
-                    },
-                    ...LOCATION_BED_TYPES,
-                  ]}
-                  optionValue="name"
-                  value={bedType}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setBedType(e.target.value)
-                  }
-                  errors={errors.bedType}
-                />
-              </div>
-              <div className="flex justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={goBack}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  Add Bed
-                </Button>
+
+                <div>
+                  <InputLabel id="bedType">Bed Type*</InputLabel>
+                  <SelectField
+                    id="bed-type"
+                    fullWidth
+                    name="bed_type"
+                    placeholder=""
+                    variant="outlined"
+                    margin="dense"
+                    options={[
+                      {
+                        id: "",
+                        name: "Select",
+                      },
+                      ...LOCATION_BED_TYPES,
+                    ]}
+                    optionValue="name"
+                    value={bedType}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setBedType(e.target.value)
+                    }
+                    errors={errors.bedType}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+                  <Button
+                    color="default"
+                    variant="contained"
+                    type="button"
+                    onClick={goBack}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    type="submit"
+                    startIcon={
+                      <CheckCircleOutlineIcon></CheckCircleOutlineIcon>
+                    }
+                    onClick={(e) => handleSubmit(e)}
+                  >
+                    {buttonText}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </form>
