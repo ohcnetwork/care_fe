@@ -5,6 +5,7 @@ on:
       - opened
       - reopened
       - closed
+      - assigned
 jobs:
   issue_opened_and_reopened:
     name: issue_opened_and_reopened
@@ -12,7 +13,7 @@ jobs:
     if: github.event_name == 'issues' && github.event.action == 'opened' || github.event.action == 'reopened'
     steps:
       - name: 'Move issue to "Triage"'
-        uses: leonsteinhaeuser/project-beta-automations@v1.0.1
+        uses: leonsteinhaeuser/project-beta-automations@v1.2.1
         with:
           gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           organization: coronasafe
@@ -25,10 +26,23 @@ jobs:
     if: github.event_name == 'issues' && github.event.action == 'closed'
     steps:
       - name: 'Moved issue to "Done"'
-        uses: leonsteinhaeuser/project-beta-automations@v1.0.1
+        uses: leonsteinhaeuser/project-beta-automations@v1.2.1
         with:
           gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           organization: coronasafe
           project_id: 4
           resource_node_id: ${{ github.event.issue.node_id }}
           status_value: "Done"
+  issue_assigned:
+    name: issue_assigned
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'assigned'
+    steps:
+      - name: 'Move issue to "In Progress"'
+        uses: leonsteinhaeuser/project-beta-automations@v1.2.1
+        with:
+          gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          organization: coronasafe
+          project_id: 4
+          resource_node_id: ${{ github.event.issue.node_id }}
+          status_value: "In Progress"
