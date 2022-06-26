@@ -17,12 +17,9 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
+import { navigate } from "raviger";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const goBack = () => {
-  window.history.go(-1);
-};
 
 interface BedFormProps {
   facilityId: string;
@@ -118,11 +115,11 @@ export const AddBedForm = (props: BedFormProps) => {
         ? "Bed updated successfully"
         : "Bed created successfully";
 
+      navigate(`/facility/${facilityId}/location/${locationId}/beds`);
       Notification.Success({
         msg: notificationMessage,
       });
     }
-    goBack();
   };
 
   if (isLoading) {
@@ -208,7 +205,11 @@ export const AddBedForm = (props: BedFormProps) => {
                     color="default"
                     variant="contained"
                     type="button"
-                    onClick={goBack}
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/location/${locationId}/beds`
+                      )
+                    }
                   >
                     Cancel
                   </Button>
