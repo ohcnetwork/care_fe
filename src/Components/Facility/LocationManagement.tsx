@@ -5,6 +5,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { listFacilityAssetLocation, getAnyFacility } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
+import { RoleButton } from "../Common/RoleButton";
 import { LocationModel } from "./models";
 import { ReactElement } from "react";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -39,26 +40,30 @@ const LocationRow = (props: LocationRowProps) => {
       </div>
       <div className="md:flex">
         <div className="px-2 py-2 md:py-0">
-          <div
-            onClick={() =>
+          <RoleButton
+            className="btn btn-default bg-white"
+            handleClickCB={() =>
               navigate(`/facility/${facilityId}/location/${id}/update`)
             }
-            className="btn btn-default bg-white"
+            disableFor="readOnly"
+            buttonType="html"
           >
             <i className="fas fa-pencil-alt w-4 mr-2"></i>
             Edit
-          </div>
+          </RoleButton>
         </div>
         <div className="px-2 pb-2 md:py-0">
-          <div
-            onClick={() =>
+          <RoleButton
+            className="btn btn-default bg-white"
+            handleClickCB={() =>
               navigate(`/facility/${facilityId}/location/${id}/beds`)
             }
-            className="btn btn-default bg-white"
+            disableFor="readOnly"
+            buttonType="html"
           >
             <i className="fas fa-bed-pulse w-4 mr-2"></i>
             Manage Beds
-          </div>
+          </RoleButton>
         </div>
       </div>
     </div>
@@ -180,13 +185,17 @@ export const LocationManagement = (props: LocationManagementProps) => {
       />
       <div className="container mx-auto px-4 py-2 sm:px-8">
         <div className="flex justify-end">
-          <button
+          <RoleButton
             className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
-            onClick={() => navigate(`/facility/${facilityId}/location/add`)}
+            handleClickCB={() =>
+              navigate(`/facility/${facilityId}/location/add`)
+            }
+            disableFor="readOnly"
+            buttonType="html"
           >
             <i className="fas fa-plus mr-2"></i>
             Add New Location
-          </button>
+          </RoleButton>
         </div>
         {location}
       </div>
