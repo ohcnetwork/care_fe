@@ -88,7 +88,7 @@ const BedRow = (props: BedRowProps) => {
         <div className="md:flex justify-between w-full mt-2 mb-1">
           <p className="text-xl font-normal capitalize">{name}</p>
         </div>
-        <p className="text-sm text-ellipsis overflow-hidden">{description}</p>
+        <p className="text-sm break-all">{description}</p>
       </div>
       <div className="flex mt-6">
         <div className="px-2 py-2 w-full">
