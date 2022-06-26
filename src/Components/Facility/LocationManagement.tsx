@@ -33,7 +33,9 @@ const LocationRow = (props: LocationRowProps) => {
         <div className="md:flex justify-between w-full mb-2">
           <p className="text-xl font-normal capitalize">{name}</p>
         </div>
-        <p className="font-normal text-sm">{description}</p>
+        <p className="font-normal text-sm text-ellipsis overflow-hidden">
+          {description}
+        </p>
       </div>
       <div className="md:flex">
         <div className="px-2 py-2 md:py-0">
