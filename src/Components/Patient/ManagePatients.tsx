@@ -502,20 +502,6 @@ export const PatientManager = (props: any) => {
           }
         >
           <div className="px-4  flex gap-2 w-full">
-            {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed && (
-                <div className="w-32 self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
-                  <span className="text-center text-gray-900 text-sm">
-                    {
-                      patient?.last_consultation?.current_bed?.bed_object
-                        ?.location_object?.name
-                    }
-                  </span>
-                  <span className="text-md font-bold">
-                    {patient?.last_consultation?.current_bed?.bed_object.name}
-                  </span>
-                </div>
-              )}
             <div>
               <div className="md:flex justify-between w-full">
                 <div className="text-xl font-normal capitalize">
@@ -555,6 +541,22 @@ export const PatientManager = (props: any) => {
                   )}
                 </div>
               )}
+            </div>
+            <div>
+              {patient?.last_consultation &&
+                patient?.last_consultation?.current_bed && (
+                  <div className="w-32 self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
+                    <span className="text-center text-gray-900 text-sm">
+                      {
+                        patient?.last_consultation?.current_bed?.bed_object
+                          ?.location_object?.name
+                      }
+                    </span>
+                    <span className="text-md font-bold">
+                      {patient?.last_consultation?.current_bed?.bed_object.name}
+                    </span>
+                  </div>
+                )}
             </div>
           </div>
           <div className="flex w-full">
