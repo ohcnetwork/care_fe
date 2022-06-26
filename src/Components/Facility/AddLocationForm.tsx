@@ -34,6 +34,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [facilityName, setFacilityName] = useState("");
+  const [locationName, setLocationName] = useState("");
 
   const headerText = !locationId ? "Add Location" : "Update Location";
   const buttonText = !locationId ? "Add Location" : "Update Location";
@@ -52,6 +53,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
         );
 
         setName(res?.data?.name || "");
+        setLocationName(res?.data?.name || "");
         setDescription(res?.data?.description || "");
       }
       setIsLoading(false);
@@ -93,7 +95,15 @@ export const AddLocationForm = (props: LocationFormProps) => {
     <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle
         title={headerText}
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          ...(locationId && {
+            [locationId]: {
+              name: locationName,
+              uri: `/facility/${facilityId}/location`,
+            },
+          }),
+        }}
       />
       <div className="mt-10">
         <Card>

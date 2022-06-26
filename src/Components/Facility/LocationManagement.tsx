@@ -30,18 +30,16 @@ const LocationRow = (props: LocationRowProps) => {
       key={id}
       className="w-full pb-2 border-b md:flex justify-between items-center mb-1"
     >
-      <div className="px-4 md:w-1/2 mb-2">
+      <div className="px-4 md:w-3/4 mb-2">
         <div className="md:flex justify-between w-full mb-2">
           <p className="text-xl font-normal capitalize">{name}</p>
         </div>
-        <p className="font-normal text-sm text-ellipsis overflow-hidden">
-          {description}
-        </p>
+        <p className="text-sm break-all">{description}</p>
       </div>
-      <div className="md:flex">
-        <div className="px-2 py-2 md:py-0">
+      <div className="flex mt-6">
+        <div className="px-2 py-2 w-full">
           <RoleButton
-            className="btn btn-default bg-white"
+            className="btn btn-default bg-white w-full"
             handleClickCB={() =>
               navigate(`/facility/${facilityId}/location/${id}/update`)
             }
@@ -52,9 +50,9 @@ const LocationRow = (props: LocationRowProps) => {
             Edit
           </RoleButton>
         </div>
-        <div className="px-2 pb-2 md:py-0">
+        <div className="px-2 py-2 w-full">
           <RoleButton
-            className="btn btn-default bg-white"
+            className="btn btn-default bg-white w-full"
             handleClickCB={() =>
               navigate(`/facility/${facilityId}/location/${id}/beds`)
             }
@@ -86,6 +84,10 @@ export const LocationManagement = (props: LocationManagementProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
+      const facility = await dispatchAction(getAnyFacility(facilityId));
+
+      setFacilityName(facility?.data?.name || "");
+
       const res = await dispatchAction(
         listFacilityAssetLocation(
           { limit, offset },
@@ -100,7 +102,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset]
+    [dispatchAction, offset, facilityId]
   );
 
   useAbortableEffect(
@@ -109,19 +111,6 @@ export const LocationManagement = (props: LocationManagementProps) => {
     },
     [fetchData]
   );
-
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -140,22 +129,13 @@ export const LocationManagement = (props: LocationManagementProps) => {
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
-      <tr className="bg-white">
-        <td
-          colSpan={3}
-          className="px-5 py-5 border-b border-gray-200 text-center"
-        >
-          <p className="text-gray-500 whitespace-nowrap">
-            No locations available
-          </p>
-        </td>
-      </tr>
+      <p className="bg-white px-5 py-5 border-b border-gray-200 text-center text-gray-500 whitespace-nowrap">
+        No locations available
+      </p>
     );
   }
 
-  if (isLoading || !locations) {
-    location = <Loading />;
-  } else if (locations) {
+  if (locations) {
     location = (
       <>
         <div className="grow mt-5 bg-white p-4 flex flex-wrap">
@@ -173,6 +153,10 @@ export const LocationManagement = (props: LocationManagementProps) => {
         )}
       </>
     );
+  }
+
+  if (isLoading || !locations) {
+    return <Loading />;
   }
 
   return (
