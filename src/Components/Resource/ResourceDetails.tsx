@@ -450,7 +450,11 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 mt-8 gap-x-6 gap-y-12">
+          <div
+            className={`grid grid-cols-1 lg:grid-cols-${
+              data.assigned_facility_object ? "3" : "2"
+            } mt-8 gap-x-6 gap-y-12`}
+          >
             <div>
               <h4>Origin Facility</h4>
 
