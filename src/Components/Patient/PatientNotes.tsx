@@ -13,6 +13,7 @@ import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+import Loading from "../Common/Loading";
 
 interface PatientNotesProps {
   patientId: any;
@@ -97,7 +98,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   };
 
   if (isLoading) {
-    return <div>Loading</div>;
+    return <Loading />;
   }
 
   return (
