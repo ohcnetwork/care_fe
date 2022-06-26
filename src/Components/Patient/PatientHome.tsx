@@ -1093,8 +1093,25 @@ export const PatientHome = (props: any) => {
         <section className="md:flex mt-4 space-y-2">
           <div className="hidden lg:block">
             <div className="grid 2xl:grid-cols-7 xl:grid-cols-6 lg:grid-cols-5 mt-4 gap-2">
-              <div className="w-full">
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div
+                className="w-full"
+                onClick={() => {
+                  if (
+                    !(patientData.is_active && !!consultationListData.length)
+                  ) {
+                    navigate(
+                      `/facility/${patientData?.facility}/patient/${id}/consultation`
+                    );
+                  }
+                }}
+              >
+                <div
+                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
+                    patientData.is_active && !!consultationListData.length
+                      ? "hover:cursor-not-allowed "
+                      : "hover:bg-gray-200 cursor-pointer"
+                  }`}
+                >
                   <div
                     className={`${
                       patientData.is_active && !!consultationListData.length
@@ -1108,159 +1125,194 @@ export const PatientHome = (props: any) => {
                   </div>
 
                   <div>
-                    <button
-                      className="btn btn-primary w-full text-xs"
-                      disabled={
+                    <p
+                      className={`${
                         patientData.is_active && !!consultationListData.length
-                      }
-                      onClick={() =>
-                        navigate(
-                          `/facility/${patientData?.facility}/patient/${id}/consultation`
-                        )
-                      }
+                          ? "text-gray-700"
+                          : "text-green-700"
+                      }  text-center `}
                     >
                       Add Consultation
-                    </button>
+                    </p>
                   </div>
                 </div>
               </div>
-              <div className="w-full">
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div
+                className="w-full"
+                onClick={() => navigate(`/patient/${id}/investigation_reports`)}
+              >
+                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 hover:bg-gray-200 hover:cursor-pointer">
                   <div className="text-green-700 text-center">
                     <span>
                       <i className="fa-regular fa-file-lines fa-4x"></i>
                     </span>
                   </div>
                   <div>
-                    <button
-                      className="btn btn-primary w-full text-xs"
-                      onClick={() =>
-                        navigate(`/patient/${id}/investigation_reports`)
-                      }
-                    >
+                    <p className="text-green-700 text-center">
                       Investigations Summary
-                    </button>
+                    </p>
                   </div>
                 </div>
               </div>
-              <div className="w-full">
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div
+                className="w-full"
+                onClick={() =>
+                  navigate(
+                    `/facility/${patientData?.facility}/patient/${id}/files/`
+                  )
+                }
+              >
+                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 hover:bg-gray-200 hover:cursor-pointer">
                   <div className="text-green-700 text-center">
                     <span>
                       <i className="fa-solid fa-file-arrow-up fa-4x"></i>
                     </span>
                   </div>
                   <div>
-                    <button
-                      className="btn btn-primary w-full text-xs"
-                      onClick={() =>
-                        navigate(
-                          `/facility/${patientData?.facility}/patient/${id}/files/`
-                        )
-                      }
-                    >
+                    <p className="text-green-700 text-center">
                       View/Upload Patient Files
-                    </button>
+                    </p>
                   </div>
                 </div>
               </div>
-              <div className="w-full">
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-                  <div className="text-green-700 text-center">
+              <div
+                className="w-full"
+                onClick={() => {
+                  if (
+                    !(
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility === facilityId)
+                    )
+                  ) {
+                    navigate(`/facility/${facilityId}/patient/${id}/shift/new`);
+                  }
+                }}
+              >
+                <div
+                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
+                    !patientData.is_active ||
+                    !(patientData?.last_consultation?.facility === facilityId)
+                      ? " hover:cursor-not-allowed "
+                      : " hover:bg-gray-200 hover:cursor-pointer "
+                  } `}
+                >
+                  <div
+                    className={`${
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility === facilityId)
+                        ? "text-gray-700"
+                        : "text-green-700"
+                    }  text-center `}
+                  >
                     <span>
                       <i className="fas fa-ambulance fa-4x"></i>
                     </span>
                   </div>
 
                   <div>
-                    <RoleButton
-                      className="btn btn-primary w-full text-xs"
-                      disabled={
+                    <p
+                      className={`${
                         !patientData.is_active ||
                         !(
-                          patientData?.last_consultation?.facility === facilityId
+                          patientData?.last_consultation?.facility ===
+                          facilityId
                         )
-                      }
-                      handleClickCB={() =>
-                        navigate(
-                          `/facility/${facilityId}/patient/${id}/shift/new`
-                        )
-                      }
-                      disableFor="readOnly"
-                      buttonType="html"
+                          ? "text-gray-700"
+                          : "text-green-700"
+                      }  text-center `}
                     >
                       SHIFT PATIENT
-                    </RoleButton>
+                    </p>
                   </div>
                 </div>
               </div>
-              <div className="w-full">
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-                  <div className="text-green-700 text-center">
+              <div
+                className="w-full"
+                onClick={() => {
+                  if (
+                    !(
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility === facilityId)
+                    )
+                  ) {
+                    navigate(
+                      `/facility/${patientData?.facility}/patient/${id}/sample-test`
+                    );
+                  }
+                }}
+              >
+                <div
+                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
+                    !patientData.is_active ||
+                    !(patientData?.last_consultation?.facility === facilityId)
+                      ? " hover:cursor-not-allowed "
+                      : " hover:bg-gray-200 hover:cursor-pointer "
+                  } `}
+                >
+                  <div
+                    className={`${
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility === facilityId)
+                        ? " text-gray-700 "
+                        : " text-green-700 "
+                    } text-center  `}
+                  >
                     <span>
                       <i className="fas fa-medkit fa-4x"></i>
                     </span>
                   </div>
                   <div>
-                    <RoleButton
-                      className="btn btn-primary w-full text-xs"
-                      disabled={
+                    <p
+                      className={`${
                         !patientData.is_active ||
                         !(
-                          patientData?.last_consultation?.facility == facilityId
+                          patientData?.last_consultation?.facility ===
+                          facilityId
                         )
-                      }
-                      handleClickCB={() =>
-                        navigate(
-                          `/facility/${patientData?.facility}/patient/${id}/sample-test`
-                        )
-                      }
-                      disableFor="readOnly"
-                      buttonType="html"
+                          ? " text-gray-700 "
+                          : " text-green-700 "
+                      } text-center  `}
                     >
                       Request Sample Test
-                    </RoleButton>
+                    </p>
                   </div>
                 </div>
               </div>
-              <div className="w-full">
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div
+                className="w-full"
+                onClick={() =>
+                  navigate(
+                    `/facility/${patientData?.facility}/patient/${id}/notes`
+                  )
+                }
+              >
+                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 hover:bg-gray-200 hover:cursor-pointer">
                   <div className="text-green-700 text-center">
                     <span>
                       <i className="fa-solid fa-notes-medical fa-4x"></i>
                     </span>
                   </div>
                   <div>
-                    <button
-                      className="btn btn-primary w-full text-xs"
-                      onClick={() =>
-                        navigate(
-                          `/facility/${patientData?.facility}/patient/${id}/notes`
-                        )
-                      }
-                    >
+                    <p className="text-green-700 text-center">
                       View Patient Notes
-                    </button>
+                    </p>
                   </div>
                 </div>
               </div>
-              <div className="w-full">
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div
+                className="w-full"
+                onClick={() => setOpenAssignVolunteerDialog(true)}
+              >
+                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 hover:bg-gray-200 hover:cursor-pointer">
                   <div className="text-green-700 text-center">
                     <span>
                       <i className="fa-solid fa-hospital-user fa-4x"></i>
                     </span>
                   </div>
                   <div>
-                    <RoleButton
-                      className="btn btn-primary w-full text-xs"
-                      handleClickCB={() => setOpenAssignVolunteerDialog(true)}
-                      disabled={false}
-                      disableFor="readOnly"
-                      buttonType="html"
-                    >
+                    <p className="text-green-700 text-center">
                       Assign to a volunteer
-                    </RoleButton>
+                    </p>
                   </div>
                 </div>
               </div>
