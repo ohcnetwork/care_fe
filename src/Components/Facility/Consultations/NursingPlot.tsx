@@ -87,7 +87,7 @@ export const NursingPlot = (props: any) => {
         <div>
           <div className="flex flex-row overflow-x-scroll">
             {areFieldsEmpty() && (
-              <div className="text-center text-lg mt-5 w-full">
+              <div className="text-center text-gray-500 text-lg text-semibold mt-5 w-full bg-white rounded-lg shadow py-4">
                 No data available
               </div>
             )}
