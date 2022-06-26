@@ -450,20 +450,20 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
             </div>
           </div>
-          <div className="grid-cols-1 md:grid-cols-3 gap-4 pb-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 mt-8 gap-x-6 gap-y-12">
             <div>
-              <h4 className="mt-8">Origin Facility</h4>
+              <h4>Origin Facility</h4>
 
               {showFacilityCard(data.orgin_facility_object)}
             </div>
             <div>
-              <h4 className="mt-8">Resource Approving Facility</h4>
+              <h4>Resource Approving Facility</h4>
 
               {showFacilityCard(data.approving_facility_object)}
             </div>
             {data.assigned_facility_object && (
               <div>
-                <h4 className="mt-8">Request Fulfilling Facility</h4>
+                <h4>Request Fulfilling Facility</h4>
 
                 {showFacilityCard(data.assigned_facility_object)}
               </div>
