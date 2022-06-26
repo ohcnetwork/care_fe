@@ -406,97 +406,99 @@ export default function SampleViewAdmin() {
           )
         }
       />
-      <div className="mt-5 md:grid md:grid-cols-1 gap-5">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Samples Taken
-              </dt>
-              {/* Show spinner until count is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
-          </div>
-        </div>
-
-        <div>
-          <div className="mt-2">
-            <div className="text-sm font-semibold mb-2">
-              Search by District Name
+      <div className="mt-5 grid grid-cols-1 gap-5">
+        <div className="flex md:flex-row flex-col gap-6">
+          <div className="bg-white overflow-hidden shadow rounded-lg lg:w-4/5">
+            <div className="px-4 py-5 sm:p-6">
+              <dl>
+                <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
+                  Total Samples Taken
+                </dt>
+                {/* Show spinner until count is fetched from server */}
+                {isLoading ? (
+                  <dd className="mt-4 text-5xl leading-9">
+                    <CircularProgress className="text-primary-500" />
+                  </dd>
+                ) : (
+                  <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                    {totalCount}
+                  </dd>
+                )}
+              </dl>
             </div>
-            <InputSearchBox
-              value={qParams.district_name}
-              search={searchByDistrict}
-              placeholder="District Name"
-              errors=""
-            />
           </div>
-          <div className="mt-2">
-            <div className="text-sm font-semibold mb-2">Search by Name</div>
-            <InputSearchBox
-              value={qParams.patient_name}
-              search={searchByName}
-              placeholder="Search by Patient Name"
-              errors=""
-            />
-          </div>
-        </div>
 
-        <div>
-          <div className="flex items-start mt-2 mb-2">
-            <button
-              className="btn btn-primary-ghost md:mt-7 "
-              onClick={() => setShowFilters((show) => !show)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="fill-current w-4 h-4 mr-2"
-              >
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12">
-                  {" "}
-                </line>
-                <line x1="8" y1="18" x2="21" y2="18">
-                  {" "}
-                </line>
-                <line x1="3" y1="6" x2="3.01" y2="6">
-                  {" "}
-                </line>
-                <line x1="3" y1="12" x2="3.01" y2="12">
-                  {" "}
-                </line>
-                <line x1="3" y1="18" x2="3.01" y2="18">
-                  {" "}
-                </line>
-              </svg>
-              <span>Advanced Filters</span>
-            </button>
-          </div>
-          <SlideOver show={showFilters} setShow={setShowFilters}>
-            <div className="bg-white min-h-screen p-4">
-              <SampleFilter
-                filter={qParams}
-                onChange={applyFilter}
-                closeFilter={() => setShowFilters(false)}
+          <div className="w-full">
+            <div className="mt-2">
+              <div className="text-sm font-semibold mb-2">
+                Search by District Name
+              </div>
+              <InputSearchBox
+                value={qParams.district_name}
+                search={searchByDistrict}
+                placeholder="District Name"
+                errors=""
               />
             </div>
-          </SlideOver>
+            <div className="mt-2">
+              <div className="text-sm font-semibold mb-2">Search by Name</div>
+              <InputSearchBox
+                value={qParams.patient_name}
+                search={searchByName}
+                placeholder="Search by Patient Name"
+                errors=""
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-start mt-2 mb-2 ">
+              <button
+                className="btn btn-primary-ghost md:mt-7 "
+                onClick={() => setShowFilters((show) => !show)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="fill-current w-4 h-4 mr-2"
+                >
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12">
+                    {" "}
+                  </line>
+                  <line x1="8" y1="18" x2="21" y2="18">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="6" x2="3.01" y2="6">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="12" x2="3.01" y2="12">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="18" x2="3.01" y2="18">
+                    {" "}
+                  </line>
+                </svg>
+                <span>Advanced Filters</span>
+              </button>
+            </div>
+            <SlideOver show={showFilters} setShow={setShowFilters}>
+              <div className="bg-white min-h-screen p-4">
+                <SampleFilter
+                  filter={qParams}
+                  onChange={applyFilter}
+                  closeFilter={() => setShowFilters(false)}
+                />
+              </div>
+            </SlideOver>
+          </div>
         </div>
         <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
           {badge("Patient Name", qParams.patient_name, "patient_name")}
