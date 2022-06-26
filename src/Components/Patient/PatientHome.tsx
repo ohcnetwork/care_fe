@@ -1,8 +1,8 @@
 import { Button, CircularProgress, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
-import React, { Fragment, useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { GENDER_TYPES } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -13,9 +13,7 @@ import {
   getPatient,
   getSampleTestList,
   patchSample,
-  discharge,
   patchPatient,
-  dischargePatient,
   completeTransfer,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
@@ -27,11 +25,8 @@ import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
-import { validateEmailAddress } from "../../Common/validation";
+import { ErrorHelperText } from "../Common/HelperInputFields";
 import Modal from "@material-ui/core/Modal";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -39,14 +34,6 @@ import { RoleButton } from "../Common/RoleButton";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
-interface preDischargeFormInterface {
-  donatePlasma: donatePlasmaOptionType;
-  disease_status?: string;
-  srf_id?: string;
-  date_of_test: any;
-}
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
@@ -87,36 +74,15 @@ export const PatientHome = (props: any) => {
     externalId: undefined,
     loading: false,
   });
-  const [open, setOpen] = React.useState(false);
-  const [openDischargeDialog, setOpenDischargeDialog] = React.useState(false);
   const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
     React.useState(false);
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
 
   const initErr: any = {};
-  const [errors, setErrors] = useState(initErr);
-  const initDischargeSummaryForm: { email: string } = {
-    email: "",
-  };
-
-  const [dischargeSummaryState, setDischargeSummaryForm] = useState(
-    initDischargeSummaryForm
-  );
+  const errors = initErr;
 
   useEffect(() => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
-
-  const handleDischargeSummaryFormChange = (e: any) => {
-    const { value } = e.target;
-
-    const errorField = Object.assign({}, errors);
-    errorField["dischargeSummaryForm"] = null;
-    setErrors(errorField);
-
-    setDischargeSummaryForm({ email: value });
-  };
 
   const handleTransferComplete = (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
@@ -127,56 +93,7 @@ export const PatientHome = (props: any) => {
     });
   };
 
-  const initPreDischargeForm: preDischargeFormInterface = {
-    donatePlasma: null,
-    date_of_test: null,
-  };
-
-  const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
-
-  const [preDischargeForm, setPreDischargeForm] =
-    useState(initPreDischargeForm);
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handlePreDischargeFormChange = (key: string, event: any) => {
-    if (key === "date_of_test") {
-      setPreDischargeForm({
-        ...preDischargeForm,
-        date_of_test: event,
-      });
-    } else {
-      setPreDischargeForm({
-        ...preDischargeForm,
-        [key]: event.target.value,
-      });
-    }
-  };
-
-  const handleDischargeSummarySubmit = () => {
-    if (!dischargeSummaryState.email) {
-      const errorField = Object.assign({}, errors);
-      errorField["dischargeSummaryForm"] = "email field can not be blank.";
-      setErrors(errorField);
-    } else if (!validateEmailAddress(dischargeSummaryState.email)) {
-      const errorField = Object.assign({}, errors);
-      errorField["dischargeSummaryForm"] = "Please Enter a Valid Email Address";
-      setErrors(errorField);
-    } else {
-      dispatch(
-        discharge(
-          { email: dischargeSummaryState.email },
-          { external_id: patientData.id }
-        )
-      ).then((response: any) => {
-        if ((response || {}).status === 200) {
-          Notification.Success({
-            msg: "We will be sending an email shortly. Please check your inbox.",
-          });
-        }
-      });
-      setOpen(false);
-    }
-  };
 
   const handleAssignedVolunteer = () => {
     dispatch(
@@ -227,65 +144,6 @@ export const PatientHome = (props: any) => {
     });
   };
 
-  const handlePatientDischarge = async (value: boolean) => {
-    setIsSendingDischargeApi(true);
-    const dischargeData = Object.assign({}, patientData);
-    dischargeData["discharge"] = value;
-
-    // calling patchPatient and dischargePatient together caused problems check https://github.com/coronasafe/care_fe/issues/758
-
-    // using preDischargeForm form data to update patient data
-    const preDischargeFormData = formatPreDischargeFormData(preDischargeForm);
-
-    if (Object.keys(preDischargeFormData).length) {
-      // skip calling patient update api if nothing to update
-      await dispatch(
-        patchPatient(preDischargeFormData, {
-          id: patientData.id,
-        })
-      );
-    }
-    // discharge call
-    const dischargeResponse = await dispatch(
-      dischargePatient({ discharge: value }, { id: patientData.id })
-    );
-
-    setIsSendingDischargeApi(false);
-    if (dischargeResponse?.status === 200) {
-      const dischargeData = Object.assign({}, patientData);
-      dischargeData["discharge"] = value;
-      setPatientData(dischargeData);
-
-      Notification.Success({
-        msg: "Patient Discharged",
-      });
-      setOpenDischargeDialog(false);
-      window.location.reload();
-    }
-  };
-
-  const formatPreDischargeFormData = (
-    preDischargeForm: preDischargeFormInterface
-  ) => {
-    const data: any = { ...preDischargeForm };
-    const donatePlasma = preDischargeForm.donatePlasma;
-
-    if (donatePlasma) {
-      if (donatePlasma === "yes") {
-        data["will_donate_blood"] = true;
-        data["fit_for_blood_donation"] = true;
-      } else if (donatePlasma === "no") {
-        data["will_donate_blood"] = false;
-      } else if (donatePlasma === "not-fit") {
-        data["will_donate_blood"] = true;
-        data["fit_for_blood_donation"] = false;
-      }
-    }
-
-    delete data.donatePlasma;
-    return data;
-  };
-
   function Badge(props: { color: string; icon: string; text: string }) {
     return (
       <span
@@ -302,31 +160,8 @@ export const PatientHome = (props: any) => {
     );
   }
 
-  const dischargeSummaryFormSetUserEmail = () => {
-    if (!currentUser.data.email.trim())
-      return Notification.Error({
-        msg: "Email not provided! Please update profile",
-      });
-    setDischargeSummaryForm({ email: currentUser.data.email });
-  };
-
   const handleVolunteerSelect = (volunteer: any) => {
     setAssignedVolunteerObject(volunteer);
-  };
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleDischageClickOpen = () => {
-    setOpenDischargeDialog(true);
-  };
-
-  const handleDischargeClose = () => {
-    setOpenDischargeDialog(false);
   };
 
   const limit = 5;
@@ -459,11 +294,6 @@ export const PatientHome = (props: any) => {
     });
   };
 
-  const handleDischargeSummary = (e: any) => {
-    e.preventDefault();
-    setOpen(false);
-  };
-
   const handleApproval = async () => {
     const { status, sample } = selectedStatus;
     const sampleData = {
@@ -563,13 +393,14 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={"Patient Details"}
+          title={"Covid Suspect Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
             [id]: { name: patientData?.name },
           }}
         />
+
         <div className="relative mt-2">
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
@@ -655,7 +486,7 @@ export const PatientHome = (props: any) => {
               <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-medium text-gray-500">
-                    Gender, Date of Birth
+                    Date of Birth, Gender
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
                     {patientData?.date_of_birth}, {patientGender}
@@ -942,7 +773,7 @@ export const PatientHome = (props: any) => {
         </section>
         <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
           <div
-            className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2 cursor-pointer"
+            className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
             onClick={() => {
               setShowShifts(!showShifts);
               setIsShiftClicked(true);
@@ -976,7 +807,7 @@ export const PatientHome = (props: any) => {
                         <div className="flex justify-between mt-1">
                           <div>
                             {shift.emergency && (
-                              <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                              <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
                                 Emergency
                               </span>
                             )}
@@ -1144,7 +975,7 @@ export const PatientHome = (props: any) => {
         </section>
 
         <section className="md:flex mt-4 space-y-2">
-          <div className="md:w-1/3 mx-2">
+          <div className="w-full">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Location
@@ -1196,166 +1027,6 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="md:w-1/3 mx-2">
-            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                Tracing
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Medical Worker
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900 break-all">
-                  {patientData.is_medical_worker
-                    ? "Yes" +
-                      (patientData.designation_of_health_care_worker
-                        ? ", " + patientData.designation_of_health_care_worker
-                        : "") +
-                      (patientData.instituion_of_health_care_worker
-                        ? ", " + patientData.instituion_of_health_care_worker
-                        : "")
-                    : "No"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Frontline Worker
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.frontline_worker || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Guest worker
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.is_migrant_worker ? "Yes" : "No"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Estimated Contact Date
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.estimated_contact_date
-                    ? moment(patientData.estimated_contact_date).format("LL")
-                    : "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Contact Name / Cluster
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.cluster_name || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Number of Contacts
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {"Primary: " +
-                    (patientData.number_of_primary_contacts || 0) +
-                    ", Secondary: " +
-                    (patientData.number_of_secondary_contacts || 0)}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Number of Dependents
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {"Above 60: " +
-                    (patientData.number_of_aged_dependents || 0) +
-                    ", Chronic Diseased: " +
-                    (patientData.number_of_chronic_diseased_dependents || 0)}
-                </div>
-              </div>
-              {patientData.transit_details && (
-                <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
-                    Transit Details
-                  </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData.transit_details}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="md:w-1/3 mx-2">
-            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                Testing
-              </div>
-              {patientData.covin_id && (
-                <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
-                    Vaccinated (COWIN ID)
-                  </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData?.covin_id || "-"}
-                  </div>
-                </div>
-              )}
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  SRF ID
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.srf_id || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Test Type
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.test_type || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Date of Test
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.date_of_test &&
-                    moment(patientData.date_of_test).format("LL")) ||
-                    "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Date of Result
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.date_of_result &&
-                    moment(patientData.date_of_result).format("LL")) ||
-                    "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Declared Positive
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData?.is_declared_positive ? "Yes" : "No") || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Declared on
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.date_declared_positive &&
-                    moment(patientData.date_declared_positive).format("LL")) ||
-                    "-"}
-                </div>
-              </div>
-            </div>
-          </div>
         </section>
         <section className="md:flex mt-4 space-y-2">
           <div className="md:w-2/3 mx-2">
@@ -1379,7 +1050,7 @@ export const PatientHome = (props: any) => {
                       Present Health
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
-                      {patientData.ongoing_medication}
+                      {patientData.present_health}
                     </div>
                   </div>
                 )}
@@ -1508,31 +1179,8 @@ export const PatientHome = (props: any) => {
                 <div>
                   <RoleButton
                     className="btn btn-primary w-full"
-                    handleClickCB={handleClickOpen}
-                    disableFor="readOnly"
-                    buttonType="html"
-                  >
-                    Discharge Summary
-                  </RoleButton>
-                </div>
-                <div>
-                  <RoleButton
-                    className="btn btn-primary w-full"
-                    handleClickCB={handleDischageClickOpen}
-                    disabled={
-                      !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility == facilityId)
-                    }
-                    disableFor="readOnly"
-                    buttonType="html"
-                  >
-                    Discharge from CARE
-                  </RoleButton>
-                </div>
-                <div>
-                  <RoleButton
-                    className="btn btn-primary w-full"
                     handleClickCB={() => setOpenAssignVolunteerDialog(true)}
+                    disabled={false}
                     disableFor="readOnly"
                     buttonType="html"
                   >
@@ -1544,56 +1192,6 @@ export const PatientHome = (props: any) => {
           </div>
         </section>
       </div>
-      <Dialog open={open} onClose={handleDischargeSummary}>
-        <DialogTitle id="form-dialog-title">
-          Download Discharge Summary
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please enter your email id to receive the discharge summary.
-            Disclaimer: This is an automatically Generated email using your info
-            Captured in Care System.
-            <div
-              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-              role="alert"
-            >
-              <strong className="block sm:inline font-bold">
-                Please check your email id before continuing. We cannot deliver
-                the email if the email id is invalid
-              </strong>
-            </div>
-          </DialogContentText>
-          <div className="flex justify-end">
-            <a
-              href="#"
-              className="text-xs"
-              onClick={dischargeSummaryFormSetUserEmail}
-            >
-              Fill email input with my email.
-            </a>
-          </div>
-          <TextInputField
-            type="email"
-            name="email"
-            label="email"
-            variant="outlined"
-            margin="dense"
-            autoComplete="off"
-            value={dischargeSummaryState.email}
-            InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
-            onChange={handleDischargeSummaryFormChange}
-            errors={errors.dischargeSummaryForm}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDischargeSummarySubmit} color="primary">
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Dialog
         maxWidth={"md"}
@@ -1634,131 +1232,6 @@ export const PatientHome = (props: any) => {
         </div>
       </Dialog>
 
-      <Dialog
-        maxWidth={"md"}
-        open={openDischargeDialog}
-        onClose={handleDischargeClose}
-      >
-        {/* <DialogTitle className="flex justify-center bg-primary-100">
-          Before we discharge {patientData.name}
-        </DialogTitle> */}
-        <DialogContent className="px-20">
-          <div className="flex justify-center">
-            <span className="text-md text-black-800">
-              Are you sure you want to discharge {patientData.name}?
-            </span>
-          </div>
-          {/* <FormControl variant="outlined">
-            <label className="flex justify-center w-full text-gray-900 mt-2">
-              Is the patient willing to donate blood for Plasma?
-            </label>
-            <RadioGroup
-              className="flex-row justify-center gap-15 mt-2 ml-10"
-              name="blood-donate"
-              value={preDischargeForm.donatePlasma}
-              onChange={(event) =>
-                handlePreDischargeFormChange("donatePlasma", event)
-              }
-            >
-              <FormControlLabel
-                value="yes"
-                control={<Radio />}
-                label="Yes"
-                className="mr-0"
-              />
-              <FormControlLabel
-                value="no"
-                control={<Radio />}
-                label="No"
-                className="mr-0"
-              />
-              <FormControlLabel
-                value="not-fit"
-                control={<Radio />}
-                label="Not fit for donation currently"
-                className="w-48 mr-0"
-              />
-            </RadioGroup>
-
-            <div className="flex flex-col items-center">
-              <Fragment>
-                <label
-                  id="covid-status-pre-form"
-                  className="flex justify-center w-full text-gray-900 mb-2 mt-5"
-                >
-                  Has the patient&apos;s disease status changed? If so, to what?
-                </label>
-                <Select
-                  className="h-10"
-                  labelId="covid-status-pre-form"
-                  value={preDischargeForm.disease_status}
-                  onChange={(event) =>
-                    handlePreDischargeFormChange("disease_status", event)
-                  }
-                >
-                  {DISEASE_STATUS.map((value, i) => (
-                    <MenuItem key={i} value={value}>
-                      {value}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Fragment>
-
-              <label className="flex justify-center w-full mt-5 text-gray-900">
-                Would you like to update the patient&apos;s SRF ID and Test
-                date?
-              </label>
-
-              <div className="flex">
-                <TextInputField
-                  className="flex flex-1 mr-10"
-                  name="srf_id"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="SRF ID"
-                  value={preDischargeForm.srf_id}
-                  onChange={(event) =>
-                    handlePreDischargeFormChange("srf_id", event)
-                  }
-                  errors=""
-                />
-
-                <DateInputField
-                  className="flex flex-1 ml-5"
-                  fullWidth={true}
-                  label="Date of test"
-                  value={preDischargeForm.date_of_test}
-                  onChange={(event) =>
-                    handlePreDischargeFormChange("date_of_test", event)
-                  }
-                  inputVariant="outlined"
-                  margin="dense"
-                  disableFuture={true}
-                  errors={""}
-                />
-              </div>
-            </div>
-          </FormControl> */}
-        </DialogContent>
-        <DialogActions className="flex justify-between mt-5 px-5 border-t">
-          <Button onClick={handleDischargeClose}>Cancel</Button>
-
-          {isSendingDischargeApi ? (
-            <CircularProgress size={20} />
-          ) : (
-            <Button
-              color="primary"
-              onClick={() => handlePatientDischarge(false)}
-              autoFocus
-              // disabled={preDischargeForm.disease_status ? false : true}
-            >
-              Proceed with Discharge
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
-
       <div>
         <PageTitle
           title="Consultation History"
@@ -1780,7 +1253,7 @@ export const PatientHome = (props: any) => {
 
       <div>
         <PageTitle
-          title="Patient Details"
+          title="Sample Test History"
           hideBack={true}
           breadcrumbs={false}
         />
