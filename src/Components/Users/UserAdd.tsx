@@ -503,7 +503,7 @@ export const UserAdd = (props: UserProps) => {
       };
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
-      if (res && res.data && res.status >= 200 && res.status < 300) {
+      if (res && (res.data || res.data === "") && res.status >= 200 && res.status < 300) {
         // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {

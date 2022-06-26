@@ -14,8 +14,12 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
   console.log(patient);
   return (
     <section className="flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <div className="bg-white md:w-4/5 p-4 mx-auto ">
+      <Modal
+        className="top-0 left-0 flex items-center justify-center"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        <div className="bg-white h-screen w-screen md:h-auto md:w-[800px] md:max-h-[90vh] overflow-auto p-4 mx-auto md:rounded-xl">
           {patient?.facility &&
           patient?.id &&
           patient?.last_consultation?.id ? (
@@ -24,6 +28,7 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
               patientId={patient?.id}
               consultationId={patient?.last_consultation?.id}
               smallLoader={true}
+              setState={setOpen}
             />
           ) : (
             <div>Invalid Patient Data</div>
