@@ -5,13 +5,13 @@ import {
   completeTransfer,
   downloadShiftRequests,
 } from "../../Redux/actions";
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 import { navigate } from "raviger";
 import moment from "moment";
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 import { CSVLink } from "react-csv";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import CircularProgress from "@mui/material/CircularProgress";
+import GetAppIcon from "@mui/icons-material/GetApp";
 
 const limit = 14;
 

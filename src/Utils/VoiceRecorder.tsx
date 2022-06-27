@@ -1,9 +1,8 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import useRecorder from "./useRecorder";
-import { Button } from "@material-ui/core";
-import MicIcon from "@material-ui/icons/Mic";
-import MicOffIcon from "@material-ui/icons/MicOff";
-import { useEffect, useState } from "react";
+import { Button } from "@mui/material";
+import MicIcon from "@mui/icons-material/Mic";
+import MicOffIcon from "@mui/icons-material/MicOff";
 export const VoiceRecorder = (props: any) => {
   const { createAudioBlob } = props;
   const [audioURL, isRecording, startRecording, stopRecording, newBlob] =

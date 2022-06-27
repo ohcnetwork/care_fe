@@ -4,11 +4,11 @@ import {
   listResourceRequests,
   downloadResourceRequests,
 } from "../../Redux/actions";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import CircularProgress from "@mui/material/CircularProgress";
 import { navigate } from "raviger";
 import moment from "moment";
 import { CSVLink } from "react-csv";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import GetAppIcon from "@mui/icons-material/GetApp";
 
 const limit = 14;
 

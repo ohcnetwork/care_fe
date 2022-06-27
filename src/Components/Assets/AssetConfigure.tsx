@@ -3,7 +3,7 @@ import Loading from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { AssetData } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useDispatch } from "react-redux";
 import {
   getAsset,
@@ -11,7 +11,7 @@ import {
   createAssetBed,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { Card, CardContent, InputLabel, Button } from "@material-ui/core";
+import { Card, CardContent, InputLabel, Button } from "@mui/material";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { ASSET_META_TYPE, CAMERA_TYPE } from "../../Common/constants";
 import { BedModel } from "../Facility/models";

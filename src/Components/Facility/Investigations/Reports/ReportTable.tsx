@@ -11,8 +11,8 @@ import {
   Box,
   Button,
   Grid,
-} from "@material-ui/core";
-import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
+} from "@mui/material";
+import { createStyles, makeStyles, withStyles } from "@mui/styles";
 import React from "react";
 import { getColorIndex, rowColor, transformData } from "./utils";
 import { InvestigationResponse } from "./types";

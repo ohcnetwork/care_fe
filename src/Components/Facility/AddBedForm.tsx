@@ -1,6 +1,6 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Button, Card, CardContent, InputLabel } from "@mui/material";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -174,7 +174,6 @@ export const AddBedForm = (props: BedFormProps) => {
                     errors={errors.description}
                   />
                 </div>
-
                 <div>
                   <InputLabel id="bedType">Bed Type*</InputLabel>
                   <SelectField
@@ -199,10 +198,9 @@ export const AddBedForm = (props: BedFormProps) => {
                     errors={errors.bedType}
                   />
                 </div>
-
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+                <div className="flex justify-between mt-4">
                   <Button
-                    color="default"
+                    color="secondary"
                     variant="contained"
                     type="button"
                     onClick={() =>
@@ -217,12 +215,13 @@ export const AddBedForm = (props: BedFormProps) => {
                     color="primary"
                     variant="contained"
                     type="submit"
+                    style={{ marginLeft: "auto" }}
                     startIcon={
                       <CheckCircleOutlineIcon></CheckCircleOutlineIcon>
                     }
                     onClick={(e) => handleSubmit(e)}
                   >
-                    {buttonText}
+                    Add Bed
                   </Button>
                 </div>
               </div>

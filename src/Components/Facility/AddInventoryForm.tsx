@@ -1,6 +1,6 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Button, Card, CardContent, InputLabel } from "@mui/material";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -210,7 +210,7 @@ export const AddInventoryForm = (props: any) => {
               </div>
               <div className="flex justify-between mt-4">
                 <Button
-                  color="default"
+                  color="secondary"
                   variant="contained"
                   type="button"
                   onClick={goBack}

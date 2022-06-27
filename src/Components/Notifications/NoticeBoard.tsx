@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { getNotifications } from "../../Redux/actions";
 import moment from "moment";
 import PageTitle from "../Common/PageTitle";
-import { Card, CardContent } from "@material-ui/core";
+import { Card, CardContent } from "@mui/material";
 import Loading from "../Common/Loading";
 
 export const NoticeBoard: any = () => {

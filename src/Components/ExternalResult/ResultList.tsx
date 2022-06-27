@@ -1,7 +1,7 @@
 import loadable from "@loadable/component";
-import Grid from "@material-ui/core/Grid";
-import { Button } from "@material-ui/core";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import Grid from "@mui/material/Grid";
+import { Button } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import { navigate, useQueryParams } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -12,7 +12,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import moment from "moment";
 import { CSVLink } from "react-csv";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import GetAppIcon from "@mui/icons-material/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
@@ -333,7 +333,7 @@ export default function ResultList() {
   } else if (data && data.length === 0) {
     manageResults = (
       <Grid item xs={12} md={12}>
-        <Grid container justify="center" alignItems="center">
+        <Grid container justifyContent="center" alignItems="center">
           <h5 className="flex justify-center items-center text-gray-600">
             No Results Found
           </h5>

@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-import { Check, KeyboardArrowDown } from "@material-ui/icons";
+import { Check, KeyboardArrowDown } from "@mui/icons-material";
 import classNames from "classnames";
 
 type Props<T> = {

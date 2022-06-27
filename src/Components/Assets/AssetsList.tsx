@@ -18,7 +18,7 @@ import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import CircularProgress from "@mui/material/CircularProgress";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";

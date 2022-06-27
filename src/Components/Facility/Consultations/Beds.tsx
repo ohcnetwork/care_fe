@@ -9,10 +9,9 @@ import * as Notification from "../../../Utils/Notifications.js";
 import Loading from "../../Common/Loading";
 import { BedModel, CurrentBed } from "../models";
 import { BedSelect } from "../../Common/BedSelect";
-import { Button, InputLabel } from "@material-ui/core";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { Button, InputLabel } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import { TextInputField } from "../../Common/HelperInputFields";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
 
 const formatDateTime: () => string = () => {

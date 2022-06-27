@@ -1,6 +1,6 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Button, Card, CardContent, InputLabel } from "@mui/material";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -139,7 +139,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-between mt-4">
                 <Button
-                  color="default"
+                  color="secondary"
                   variant="contained"
                   type="button"
                   onClick={goBack}

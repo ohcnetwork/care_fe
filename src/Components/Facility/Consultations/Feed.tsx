@@ -20,10 +20,9 @@ import PageTitle from "../../Common/PageTitle";
 import { ConsultationModel } from "../models";
 import * as Notification from "../../../Utils/Notifications.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 import FeedButton from "./FeedButton";
 import { AxiosError } from "axios";
-
 interface IFeedProps {
   facilityId: string;
   patientId: string;

@@ -1,9 +1,8 @@
 import React, { useEffect, useReducer, useState } from "react";
-import { MultiSelectField } from "../../Common/HelperInputFields";
 import { TestTable } from "./Table";
 import { useDispatch } from "react-redux";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { Checkbox, TextField, InputLabel } from "@material-ui/core";
+import Autocomplete from "@mui/lab/Autocomplete";
+import { Checkbox, TextField } from "@mui/material";
 import {
   createInvestigation,
   listInvestigationGroups,
@@ -237,8 +236,8 @@ const Investigation = (props: {
               setSearchInputValue(value);
             }
           }}
-          renderOption={(option, { selected }) => (
-            <React.Fragment>
+          renderOption={(props, option, { selected }) => (
+            <li {...props}>
               <Checkbox
                 style={{ marginRight: 8 }}
                 checked={selected}
@@ -246,14 +245,17 @@ const Investigation = (props: {
               />
               {option.name} |{" "}
               {isInvestigation(option) &&
-                option.groups.map((e) => {
+                option.groups.map((e, index) => {
                   return (
-                    <div className="px-2 py-1 text-xs font-bold bg-gray-300 rounded-full">
+                    <div
+                      key={index}
+                      className="px-2 py-1 text-xs font-bold bg-gray-300 rounded-full"
+                    >
                       {e.name}
                     </div>
                   );
                 })}
-            </React.Fragment>
+            </li>
           )}
           renderInput={(params) => (
             <>

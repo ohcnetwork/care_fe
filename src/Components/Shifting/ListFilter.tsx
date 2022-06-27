@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { UserSelect } from "../Common/UserSelect2";
-import {
-  SelectField,
-  DateInputField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
@@ -16,7 +12,7 @@ import {
 import moment from "moment";
 import { getAnyFacility, getUserList } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";

@@ -11,7 +11,7 @@ import {
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import moment from "moment";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 

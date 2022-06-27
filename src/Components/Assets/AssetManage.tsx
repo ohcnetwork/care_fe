@@ -6,7 +6,7 @@ import { AssetData, AssetTransaction } from "./AssetTypes";
 import * as Notification from "../../Utils/Notifications.js";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch } from "react-redux";
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 import { getAsset, listAssetTransaction } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";

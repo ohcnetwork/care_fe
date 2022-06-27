@@ -1,4 +1,4 @@
-import { Button, CardContent } from "@material-ui/core";
+import { Button, CardContent } from "@mui/material";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useState } from "react";

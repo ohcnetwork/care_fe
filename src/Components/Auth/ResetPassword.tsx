@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { Typography, CardContent, Button } from "@material-ui/core";
+import { Typography, CardContent, Button } from "@mui/material";
 import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import { createStyles, makeStyles } from "@mui/styles";
+import { Theme } from "@mui/material/styles";
 import { postResetPassword } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+import { Accordion, AccordionDetails } from "@mui/material";
 
 const panelStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -124,8 +124,8 @@ export const ResetPassword = (props: any) => {
               />
               {passReg === 0 && (
                 <div className={panel.root}>
-                  <ExpansionPanel>
-                    <ExpansionPanelDetails>
+                  <Accordion>
+                    <AccordionDetails>
                       <Typography className="text-red-500">
                         <li>Minimum password length 8</li>
                         <li>Require at least one digit</li>
@@ -133,8 +133,8 @@ export const ResetPassword = (props: any) => {
                         <li>Require at least one lower case letter</li>
                         <li>Require at least one symbol</li>
                       </Typography>
-                    </ExpansionPanelDetails>
-                  </ExpansionPanel>
+                    </AccordionDetails>
+                  </Accordion>
                 </div>
               )}
               <TextInputField
@@ -150,9 +150,9 @@ export const ResetPassword = (props: any) => {
             </CardContent>
             <div className="mt-4 sm:flex sm:justify-between grid p-4">
               <Button
-                color="default"
+                color="primary"
                 variant="contained"
-                onClick={() => navigate(`/login`)}
+                onClick={() => navigate("/login")}
                 type="button"
               >
                 Cancel{" "}

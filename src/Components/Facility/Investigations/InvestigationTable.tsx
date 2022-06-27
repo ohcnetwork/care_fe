@@ -9,10 +9,9 @@ import {
   InputLabel,
   Box,
   Button,
-} from "@material-ui/core";
-import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
-import React from "react";
-import { useState } from "react";
+} from "@mui/material";
+import { createStyles, makeStyles, withStyles } from "@mui/styles";
+import React, { useState } from "react";
 import { SelectField, TextInputField } from "../../Common/HelperInputFields";
 import _ from "lodash";
 import clsx from "clsx";
@@ -47,7 +46,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
       : "string";
   return (
     <StyledTableRow className={isChanged ? "bg-primary-300" : ""}>
-      <TableCell className={tableClass}>
+      <TableCell className={tableClass} align="center">
         {data?.investigation_object?.name || "---"}
       </TableCell>
       <TableCell
@@ -90,7 +89,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
           testValue || "---"
         )}
       </TableCell>
-      <TableCell className={tableClass} align="left">
+      <TableCell className={tableClass} align="center">
         {data.investigation_object.unit || "---"}
       </TableCell>
       <TableCell className={tableClass} align="center">
@@ -99,7 +98,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
       <TableCell className={tableClass} align="center">
         {data.investigation_object.max_value || "---"}
       </TableCell>
-      <TableCell className={tableClass} align="right">
+      <TableCell className={tableClass} align="center">
         {data.investigation_object.ideal_value || "---"}
       </TableCell>
     </StyledTableRow>
@@ -180,12 +179,12 @@ export const InvestigationTable = ({
         <Table aria-label="simple table overflow-hidden" size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell align="right">value</TableCell>
-              <TableCell align="left">Unit</TableCell>
-              <TableCell align="right">Min</TableCell>
-              <TableCell align="right">Max</TableCell>
-              <TableCell align="right">Ideal</TableCell>
+              <TableCell align="center">Name</TableCell>
+              <TableCell align="center">value</TableCell>
+              <TableCell align="center">Unit</TableCell>
+              <TableCell align="center">Min</TableCell>
+              <TableCell align="center">Max</TableCell>
+              <TableCell align="center">Ideal</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

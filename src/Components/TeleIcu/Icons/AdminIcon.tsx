@@ -1,4 +1,3 @@
-import { SvgIcon, SvgIconProps } from "@material-ui/core";
 import React, { SVGProps } from "react";
 
 export const AdminIcon = ({ ref, ...props }: SVGProps<SVGElement>) => {

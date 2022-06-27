@@ -795,12 +795,16 @@ button:disabled,
         }
   }
 
+<<<<<<< HEAD
 @media (min-width:1000px)
 {
   .manualGrid{
     display: grid !important
   }
 }
+=======
+<<<<<<< HEAD
+>>>>>>> d92555b0 (Upgraded to mui v5)
 
 /*
   Range Sliders for Camera Feed
@@ -832,3 +836,20 @@ button:disabled,
   margin-top: -8px;
   border-radius: 50%;
 }
+<<<<<<< HEAD
+=======
+=======
+/* MUI v5 classes */
+.MuiButtonBase-root.MuiRadio-root.Mui-checked {
+  color: #e53935;
+}
+.MuiButton-containedPrimary {
+  background-color: #0e9f6e !important;
+}
+
+.marginDense {
+  margin-top: 8px;
+  margin-bottom: 4px;
+} 
+>>>>>>> abbd3327 (Upgraded to mui v5)
+>>>>>>> d92555b0 (Upgraded to mui v5)

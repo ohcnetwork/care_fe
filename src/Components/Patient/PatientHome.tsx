@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Typography } from "@material-ui/core";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
@@ -23,13 +23,13 @@ import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogTitle from "@mui/material/DialogTitle";
 import { ErrorHelperText } from "../Common/HelperInputFields";
-import Modal from "@material-ui/core/Modal";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import Modal from "@mui/material/Modal";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { RoleButton } from "../Common/RoleButton";
 
 const Loading = loadable(() => import("../Common/Loading"));

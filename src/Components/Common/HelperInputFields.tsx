@@ -1,4 +1,5 @@
-import DateFnsUtils from "@date-io/date-fns";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import {
   Checkbox,
   Chip,
@@ -14,20 +15,13 @@ import {
   Select,
   TextField,
   TextFieldProps,
-} from "@material-ui/core";
-import Box from "@material-ui/core/Box";
-import FormControl from "@material-ui/core/FormControl";
-import { NativeSelectInputProps } from "@material-ui/core/NativeSelect/NativeSelectInput";
-import { SelectProps } from "@material-ui/core/Select";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import {
-  DatePickerProps,
-  KeyboardDatePicker,
-  KeyboardDateTimePicker,
-  KeyboardTimePicker,
-  MuiPickersUtilsProvider,
-} from "@material-ui/pickers";
-import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+} from "@mui/material";
+import Box from "@mui/material/Box";
+import FormControl from "@mui/material/FormControl";
+import { NativeSelectInputProps } from "@mui/material/NativeSelect/NativeSelectInput";
+import { SelectProps } from "@mui/material/Select";
+import { Autocomplete } from "@mui/material";
+import { DatePicker, DateTimePicker, TimePicker } from "@mui/x-date-pickers";
 import { debounce } from "lodash";
 import React, { ChangeEvent } from "react";
 import PhoneInput, { ICountryData } from "react-phone-input-2";
@@ -77,17 +71,20 @@ type ActionTextFieldProps = TextFieldPropsExtended & {
   actionIcon?: React.ReactElement;
   action?: () => void;
 };
-// type Option = { text: string; score: number };
-// interface InputProps {
-//   options: Array<Option>;
-//   onChange: (
-//     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-//     index: number
-//   ) => void;
-//   handleDeleteOption: (index: number) => void;
-//   errors: Array<Option>;
-//   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-// }
+type Option = { text: string; score: number };
+interface InputProps {
+  options: Array<Option>;
+  onChange: (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+    index: number
+  ) => void;
+  label?: string;
+  min?: string;
+  errors: string;
+  inputVariant?: "standard" | "outlined" | "filled";
+  disabled?: boolean;
+  margin?: "none" | "dense" | "normal";
+}
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
   onChange: (
@@ -200,83 +197,104 @@ export const ActionTextInputField = (props: ActionTextFieldProps) => {
 };
 
 export const MultilineInputField = (props: TextFieldPropsExtended) => {
-  const { errors } = props;
+  const { errors, rows, ...restProps } = props;
   return (
     <div>
-      <TextField {...props} multiline fullWidth />
+      <TextField maxRows={rows} {...restProps} multiline fullWidth />
       <ErrorHelperText error={errors} />
     </div>
   );
 };
 
 export const DateTimeFiled = (props: DateInputFieldProps) => {
-  const { label, errors, onChange, value, margin, disabled, ...restProps } =
+  const { label, errors, onChange, value, disabled, margin, ...restProps } =
     props;
   return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <KeyboardDateTimePicker
-        margin={margin || "normal"}
-        id="date-time-picker-dialog"
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <DateTimePicker
         label={label}
         value={value}
-        format="dd/MM/yyyy HH:mm"
+        margin={margin || "normal"}
+        inputFormat="dd/MM/yyyy HH:mm"
         onChange={onChange}
         disabled={disabled}
+        renderInput={(params) => (
+          <TextField
+            variant="standard"
+            sx={[
+              margin == "dense" && {
+                mt: 1,
+                mb: 0.5,
+              },
+            ]}
+            {...params}
+          />
+        )}
         {...restProps}
       />
       <ErrorHelperText error={errors} />
-    </MuiPickersUtilsProvider>
+    </LocalizationProvider>
   );
 };
 
-export const DateInputField = (props: DateInputFieldProps) => {
+export const DateInputField = (props: any) => {
   const {
     value,
     onChange,
     label,
     errors,
     min,
-    // variant,
     disabled,
     margin,
+    variant,
+    InputLabelProps,
+    fullWidth,
     ...restProps
   } = props;
   return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <KeyboardDatePicker
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <DatePicker
         margin={margin || "normal"}
         id="date-picker-dialog"
         label={label}
-        format="dd/MM/yyyy"
+        inputFormat="dd/MM/yyyy"
         value={value}
         onChange={onChange}
         minDate={min}
         disabled={disabled}
-        KeyboardButtonProps={{
-          "aria-label": "change date",
-        }}
+        margin={margin || "normal"}
+        renderInput={(params) => (
+          <TextField
+            variant={variant || "standard"}
+            InputLabelProps={InputLabelProps}
+            fullWidth={fullWidth}
+            sx={[
+              margin == "dense" && {
+                mt: 1,
+                mb: 0.5,
+              },
+            ]}
+            {...params}
+          />
+        )}
         {...restProps}
       />
       <ErrorHelperText error={errors} />
-    </MuiPickersUtilsProvider>
+    </LocalizationProvider>
   );
 };
 
 export const TimeInputField = (props: any) => {
   const { value, onChange, label } = props;
   return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <KeyboardTimePicker
-        margin="normal"
-        id="time-picker"
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <TimePicker
         label={label}
         value={value}
         onChange={onChange}
-        KeyboardButtonProps={{
-          "aria-label": "change time",
-        }}
+        renderInput={(params) => <TextField variant="standard" {...params} />}
       />
-    </MuiPickersUtilsProvider>
+    </LocalizationProvider>
   );
 };
 
@@ -602,9 +620,11 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         value={value}
         loading={loading}
         noOptionsText={noOptionsText}
-        getOptionSelected={getOptionSelected}
+        isOptionEqualToValue={getOptionSelected}
         getOptionLabel={getOptionLabel}
-        renderOption={renderOption}
+        renderOption={(props, option) => (
+          <li {...props}>{renderOption(option)}</li>
+        )}
         filterOptions={filterOptions}
         className={className}
         renderInput={(params: any) => (

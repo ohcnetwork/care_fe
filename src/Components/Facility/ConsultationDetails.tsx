@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import { Button, CircularProgress } from "@material-ui/core";
+import { Button, CircularProgress } from "@mui/material";
 import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -41,11 +41,11 @@ import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
 import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
 import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
 import { validateEmailAddress } from "../../Common/validation";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import InputLabel from "@material-ui/core/InputLabel";
 import {
   TextInputField,

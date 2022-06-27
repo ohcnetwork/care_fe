@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import LocationPicker from "react-leaflet-location-picker";
-import Popover from "@material-ui/core/Popover";
+import Popover from "@mui/material/Popover";
 import axios from "axios";
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@mui/styles";
 import { TextInputField } from "../Common/HelperInputFields";
 
 const DEFAULT_MARKER_RADIUS = 100;

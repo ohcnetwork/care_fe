@@ -4,8 +4,8 @@ import {
   CardActions,
   CardContent,
   InputLabel,
-} from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+} from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import { useCallback, useEffect, useReducer, useState } from "react";
@@ -329,7 +329,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 <div className="w-full md:w-auto">
                   <Button
                     id="bed-capacity-cancel"
-                    color="default"
+                    color="primary"
                     variant="contained"
                     type="button"
                     fullWidth

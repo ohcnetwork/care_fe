@@ -1,6 +1,6 @@
 import React, { Dispatch, useEffect } from "react";
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import { Button, Card, CardContent, InputLabel } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { AssetData } from "../AssetTypes";

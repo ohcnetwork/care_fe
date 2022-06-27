@@ -11,8 +11,8 @@ import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import moment from "moment";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import CircularProgress from "@mui/material/CircularProgress";
+import GetAppIcon from "@mui/icons-material/GetApp";
 
 import { formatFilter } from "./Commons";
 

@@ -17,8 +17,8 @@ import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { InputSearchBox } from "../Common/SearchBox";
 import { FacilityModel } from "../Facility/models";
 
-import { IconButton, CircularProgress } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { IconButton, CircularProgress } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
@@ -282,7 +282,7 @@ export default function ManageUsers() {
                 <div className="font-semibold">{facility.name}</div>
                 <IconButton
                   size="small"
-                  color="secondary"
+                  color="error"
                   disabled={isFacilityLoading}
                   onClick={() => removeFacility(username, facility)}
                 >

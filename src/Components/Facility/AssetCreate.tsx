@@ -7,9 +7,9 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import CancelOutlineIcon from "@material-ui/icons/CancelOutlined";
-import CropFreeIcon from "@material-ui/icons/CropFree";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CropFreeIcon from "@mui/icons-material/CropFree";
+import CancelOutlineIcon from "@mui/icons-material/CancelOutlined";
 import PageTitle from "../Common/PageTitle";
 import {
   Box,
@@ -20,7 +20,7 @@ import {
   InputLabel,
   Radio,
   RadioGroup,
-} from "@material-ui/core";
+} from "@mui/material";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
@@ -33,7 +33,7 @@ import {
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
-import { LocationOnOutlined } from "@material-ui/icons";
+import { LocationOnOutlined } from "@mui/icons-material";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";

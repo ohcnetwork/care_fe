@@ -7,7 +7,7 @@ import {
   MultilineInputField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -21,7 +21,7 @@ import {
 import { SelectField } from "../Common/HelperInputFields";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 import {
   Card,
   CardContent,
@@ -31,7 +31,7 @@ import {
   Box,
   FormControlLabel,
   Button,
-} from "@material-ui/core";
+} from "@mui/material";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -371,7 +371,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
 
               <div className="md:col-span-2 flex justify-between mt-4">
-                <Button color="default" variant="contained" onClick={goBack}>
+                <Button color="secondary" variant="contained" onClick={goBack}>
                   Cancel
                 </Button>
                 <Button

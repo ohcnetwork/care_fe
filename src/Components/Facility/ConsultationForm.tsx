@@ -8,9 +8,9 @@ import {
   InputLabel,
   Radio,
   RadioGroup,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, {
@@ -539,7 +539,7 @@ export const ConsultationForm = (props: any) => {
   //     dispatch({ type: "set_form", form });
   //   }
 
-  const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
+  const handleDateChange = (date: any, key: string) => {
     moment(date).isValid() &&
       dispatch({ type: "set_form", form: { ...state.form, [key]: date } });
   };
@@ -758,7 +758,7 @@ export const ConsultationForm = (props: any) => {
                           margin="dense"
                           value={state.form.admission_date}
                           disableFuture={true}
-                          onChange={(date) =>
+                          onChange={(date: Date) =>
                             handleDateChange(date, "admission_date")
                           }
                           errors={state.errors.admission_date}
@@ -1018,7 +1018,7 @@ export const ConsultationForm = (props: any) => {
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button
-                  color="default"
+                  color="secondary"
                   variant="contained"
                   type="button"
                   onClick={() =>

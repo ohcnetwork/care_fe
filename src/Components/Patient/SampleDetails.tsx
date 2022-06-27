@@ -1,4 +1,4 @@
-import { Card, CardContent, Button } from "@material-ui/core";
+import { Card, CardContent, Button } from "@mui/material";
 import moment from "moment";
 import loadable from "@loadable/component";
 import { useCallback, useState } from "react";

@@ -1,7 +1,7 @@
 import axios from "axios";
-import { Button, CircularProgress, InputLabel } from "@material-ui/core";
+import { Button, CircularProgress, InputLabel } from "@mui/material";
 import moment from "moment";
-import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
+import CloudUploadOutlineIcon from "@mui/icons-material/CloudUpload";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -14,14 +14,19 @@ import {
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
 import { TextInputField } from "../Common/HelperInputFields";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
-import { GetApp, Visibility } from "@material-ui/icons";
+import LinearProgress from "@mui/material/LinearProgress";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
-import Modal from "@material-ui/core/Modal";
-import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
+import Modal from "@mui/material/Modal";
+import {
+  Close,
+  ZoomIn,
+  ZoomOut,
+  GetApp,
+  Visibility,
+} from "@mui/icons-material";
 
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
@@ -599,7 +604,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 <div className="w-2/6 flex">
                   <div className="mr-4">
                     <Button
-                      color="default"
+                      color="secondary"
                       variant="contained"
                       style={{ marginLeft: "auto" }}
                       startIcon={<ZoomIn />}
@@ -613,7 +618,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   </div>
                   <div>
                     <Button
-                      color="default"
+                      color="secondary"
                       variant="contained"
                       style={{ marginLeft: "4px" }}
                       startIcon={<ZoomOut />}

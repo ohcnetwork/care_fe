@@ -9,7 +9,7 @@ import {
   partialUpdateAssetBed,
   deleteAssetBed,
 } from "../../../Redux/actions";
-import RefreshIcon from "@material-ui/icons/Refresh";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { getCameraPTZ } from "../../../Common/constants";
 import {
   StreamStatus,
@@ -18,7 +18,7 @@ import {
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
-import { Card, CardContent, Modal, Tooltip } from "@material-ui/core";
+import { Card, CardContent, Modal, Tooltip } from "@mui/material";
 import { FeedCameraPTZHelpButton } from "./Feed";
 import { isNull } from "lodash";
 

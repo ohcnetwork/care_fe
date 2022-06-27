@@ -6,7 +6,7 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-} from "@material-ui/core";
+} from "@mui/material";
 
 interface Props {
   title: string;
@@ -15,11 +15,27 @@ interface Props {
   handleCancel?: () => void;
   primaryButton?: {
     text?: string;
-    color?: "inherit" | "primary" | "secondary" | "default" | undefined;
+    color?:
+      | "inherit"
+      | "primary"
+      | "secondary"
+      | "success"
+      | "error"
+      | "info"
+      | "warning"
+      | undefined;
   };
   secondaryButton?: {
     text?: string;
-    color?: "inherit" | "primary" | "secondary" | "default" | undefined;
+    color?:
+      | "inherit"
+      | "primary"
+      | "secondary"
+      | "success"
+      | "error"
+      | "info"
+      | "warning"
+      | undefined;
   };
 }
 

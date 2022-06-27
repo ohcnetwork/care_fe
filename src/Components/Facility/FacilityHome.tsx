@@ -2,11 +2,11 @@ import { Link, navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
 import {
   BED_TYPES,
   DOCTOR_SPECIALIZATION,
@@ -328,9 +328,24 @@ export const FacilityHome = (props: any) => {
               <div>
                 <h1 className="text-lg font-bold">Features</h1>
                 <div className="flex gap-2 flex-wrap mt-2">
-                  {facilityData.features?.map((feature, i)=>(
-                    <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
-                      <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/> &nbsp;{FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                  {facilityData.features?.map((feature, i) => (
+                    <div
+                      key={i}
+                      className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm"
+                    >
+                      <i
+                        className={`fas fa-${
+                          FACILITY_FEATURE_TYPES.filter(
+                            (f) => f.id === feature
+                          )[0].icon
+                        }`}
+                      />{" "}
+                      &nbsp;
+                      {
+                        FACILITY_FEATURE_TYPES.filter(
+                          (f) => f.id === feature
+                        )[0].name
+                      }
                     </div>
                   ))}
                 </div>

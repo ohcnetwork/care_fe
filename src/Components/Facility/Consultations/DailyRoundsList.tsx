@@ -1,4 +1,4 @@
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, Typography } from "@mui/material";
 import { navigate } from "raviger";
 import moment from "moment";
 import { useCallback, useState } from "react";
@@ -79,7 +79,11 @@ export const DailyRoundsList = (props: any) => {
             } shadow cursor-pointer`}
           >
             <div className="p-2">
-              <Grid container justify="space-between" alignItems="center">
+              <Grid
+                container
+                justifyContent="space-between"
+                alignItems="center"
+              >
                 <Grid item xs={11} container spacing={1}>
                   {telemedicine_doctor_update ? (
                     <Grid item xs={6}>

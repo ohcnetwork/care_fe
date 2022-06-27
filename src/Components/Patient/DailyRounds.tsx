@@ -6,8 +6,8 @@ import {
   Box,
   FormControlLabel,
   Radio,
-} from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+} from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
@@ -498,7 +498,9 @@ export const DailyRounds = (props: any) => {
                     value={state.form.taken_at}
                     disableFuture={true}
                     showTodayButton={true}
-                    onChange={(date) => handleDateChange(date, "taken_at")}
+                    onChange={(date: Date) =>
+                      handleDateChange(date, "taken_at")
+                    }
                     errors={state.errors.taken_at}
                   />
                 </div>

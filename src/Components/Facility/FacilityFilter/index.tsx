@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { navigate } from "raviger";
 import { SelectField } from "../../Common/HelperInputFields";
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 import { FACILITY_TYPES, KASP_STRING } from "../../../Common/constants";
 import { getStates, getDistrictByState } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";

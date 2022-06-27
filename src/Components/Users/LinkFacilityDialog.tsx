@@ -4,9 +4,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  withStyles,
-  WithStyles,
-} from "@material-ui/core";
+} from "@mui/material";
+import { withStyles } from "@mui/styles";
+import { WithStyles } from "@mui/styles/withStyles";
+
 import React, { useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";

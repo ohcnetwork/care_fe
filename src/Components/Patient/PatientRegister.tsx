@@ -11,7 +11,7 @@ import {
   InputLabel,
   Radio,
   RadioGroup,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -56,8 +56,8 @@ import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
-import { InfoOutlined } from "@material-ui/icons";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { InfoOutlined } from "@mui/icons-material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -835,11 +835,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   };
 
   const handleDateChange = (date: any, field: string) => {
-    if (moment(date).isValid()) {
-      const form = { ...state.form };
-      form[field] = date;
-      dispatch({ type: "set_form", form });
-    }
+    const form = { ...state.form };
+    form[field] = date;
+    dispatch({ type: "set_form", form });
   };
 
   const handleMedicalCheckboxChange = (e: any, id: number) => {
@@ -1088,7 +1086,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             fullWidth={true}
                             id="date_of_birth"
                             value={state.form.date_of_birth}
-                            onChange={(date) =>
+                            onChange={(date: Date) =>
                               handleDateChange(date, "date_of_birth")
                             }
                             errors={state.errors.date_of_birth}
@@ -1498,14 +1496,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <DateInputField
                                   fullWidth={true}
                                   value={state.form.date_declared_positive}
-                                  onChange={(date) =>
+                                  onChange={(date: Date) =>
                                     handleDateChange(
                                       date,
                                       "date_declared_positive"
                                     )
                                   }
                                   errors={state.errors.date_declared_positive}
-                                  inputVariant="outlined"
+                                  variant="outlined"
                                   margin="dense"
                                   disableFuture={true}
                                 />
@@ -1634,14 +1632,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     id="last_vaccinated_date"
                                     fullWidth={true}
                                     value={state.form.last_vaccinated_date}
-                                    onChange={(date) =>
+                                    onChange={(date: Date) =>
                                       handleDateChange(
                                         date,
                                         "last_vaccinated_date"
                                       )
                                     }
                                     errors={state.errors.last_vaccinated_date}
-                                    inputVariant="outlined"
+                                    variant="outlined"
                                     margin="dense"
                                     openTo="year"
                                     disableFuture={true}
@@ -1730,14 +1728,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   id="estimated_contact_date"
                                   label="Estimate date of contact"
                                   value={state.form.estimated_contact_date}
-                                  onChange={(date) =>
+                                  onChange={(date: Date) =>
                                     handleDateChange(
                                       date,
                                       "estimated_contact_date"
                                     )
                                   }
                                   errors={state.errors.estimated_contact_date}
-                                  inputVariant="outlined"
+                                  variant="outlined"
                                   margin="dense"
                                   disableFuture={true}
                                 />
@@ -1799,11 +1797,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               fullWidth={true}
                               id="date_of_test"
                               value={state.form.date_of_test}
-                              onChange={(date) =>
+                              onChange={(date: Date) =>
                                 handleDateChange(date, "date_of_test")
                               }
                               errors={state.errors.date_of_test}
-                              inputVariant="outlined"
+                              variant="outlined"
                               margin="dense"
                               disableFuture={true}
                             />
@@ -1819,12 +1817,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               fullWidth={true}
                               id="date_of_result"
                               value={state.form.date_of_result}
-                              onChange={(date) =>
+                              onChange={(date: Date) =>
                                 handleDateChange(date, "date_of_result")
                               }
                               min={state.form.date_of_test}
                               errors={state.errors.date_of_result}
-                              inputVariant="outlined"
+                              variant="outlined"
                               margin="dense"
                               disableFuture={true}
                             />

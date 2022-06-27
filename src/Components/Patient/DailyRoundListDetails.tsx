@@ -1,4 +1,4 @@
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import moment from "moment";

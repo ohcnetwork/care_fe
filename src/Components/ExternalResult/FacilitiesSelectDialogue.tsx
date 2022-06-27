@@ -4,9 +4,9 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { WithStyles, withStyles } from "@material-ui/styles";
+} from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { WithStyles, withStyles } from "@mui/styles";
 import React from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
@@ -43,10 +43,7 @@ const FacilitiesSelectDialog = (props: Props & WithStyles<typeof styles>) => {
       }}
       onKeyDown={(e) => handleEscKeyPress(e)}
     >
-      <DialogTitle
-        className=" font-semibold text-3xl"
-        id="font-semibold text-3xl"
-      >
+      <DialogTitle className="font-semibold" id="font-semibold">
         Search for a facility
       </DialogTitle>
       <DialogContent>
@@ -62,7 +59,7 @@ const FacilitiesSelectDialog = (props: Props & WithStyles<typeof styles>) => {
       <DialogActions style={{ justifyContent: "space-between" }}>
         <Button
           className="capitalize"
-          color="secondary"
+          color="error"
           onClick={() => handleCancel()}
         >
           Cancel

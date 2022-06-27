@@ -1,5 +1,5 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import { Button, Card, CardContent, InputLabel } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import React, { useReducer, useCallback, useState, useEffect } from "react";
@@ -19,8 +19,8 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { SampleTestModel, FacilityNameModel } from "./models";
-import Typography from "@material-ui/core/Typography";
-import Container from "@material-ui/core/Container";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -513,7 +513,7 @@ export const SampleTest = (props: any) => {
               </div>
               <div className="flex justify-between mt-4">
                 <Button
-                  color="default"
+                  color="secondary"
                   variant="contained"
                   type="button"
                   onClick={goBack}

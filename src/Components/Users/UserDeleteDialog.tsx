@@ -5,8 +5,8 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-} from "@material-ui/core";
-import { WithStyles, withStyles } from "@material-ui/styles";
+} from "@mui/material";
+import { WithStyles, withStyles } from "@mui/styles";
 
 interface ConfirmDialogProps {
   name: string;
