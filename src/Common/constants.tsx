@@ -271,17 +271,10 @@ export const PATIENT_FILTER_ADMITTED_TO = [
 ];
 
 export const PATIENT_CATEGORY = [
-  { id: "ASYMPTOMATIC", text: "ASYM (ASYMPTOMATIC) " },
-  { id: "Category-A", text: "Mild (Category A)" },
-  { id: "Category-B", text: "Moderate (Category B)" },
-  { id: "Category-C", text: "Severe (Category C)" },
-];
-
-export const PATIENT_FILTER_CATEGORY = [
-  { id: "ASYM", text: "ASYM (ASYMPTOMATIC) " },
-  { id: "Mild", text: "Mild (Category A)" },
-  { id: "Moderate", text: "Moderate (Category B)" },
-  { id: "Severe", text: "Severe (Category C)" },
+  { id: "Comfort", text: "Comfort Care", color: "white" },
+  { id: "Stable", text: "Stable", color: "blue" },
+  { id: "Moderate", text: "Slightly Abnormal", color: "yellow" },
+  { id: "Critical", text: "Critical", color: "red" },
 ];
 
 export const CURRENT_HEALTH_CHANGE = [

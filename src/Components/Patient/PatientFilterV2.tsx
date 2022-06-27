@@ -11,7 +11,7 @@ import {
   GENDER_TYPES,
   FACILITY_TYPES,
   DISEASE_STATUS,
-  PATIENT_FILTER_CATEGORY,
+  PATIENT_CATEGORY,
   PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
   KASP_ENABLED,
@@ -581,7 +581,7 @@ export default function PatientFilterV2(props: any) {
             variant="outlined"
             margin="dense"
             value={filterState.category}
-            options={[{ id: "", text: "Show All" }, ...PATIENT_FILTER_CATEGORY]}
+            options={[{ id: "", text: "Show All" }, ...PATIENT_CATEGORY]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
