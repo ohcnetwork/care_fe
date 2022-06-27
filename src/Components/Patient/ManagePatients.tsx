@@ -467,7 +467,7 @@ export const PatientManager = (props: any) => {
             (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
-          <div className="pl-2  sm:flex gap-2 w-full">
+          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
             <div>
               <div className="md:flex justify-between w-full">
                 <div className="text-xl font-normal capitalize">
@@ -510,7 +510,10 @@ export const PatientManager = (props: any) => {
             </div>
             {patient?.last_consultation &&
               patient?.last_consultation?.current_bed && (
-                <div className="w-fit self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex items-center justify-center rounded-md pr-2">
+                <div
+                  className="w-fit self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex items-center justify-center rounded-md pr-2 mt-2
+                "
+                >
                   <div className="grid grid-cols-2">
                     <div className="ml-2 mt-2">
                       <i className="fa-solid fa-bed-pulse"></i>
@@ -646,7 +649,7 @@ export const PatientManager = (props: any) => {
         breadcrumbs={!!facilityId}
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
-      <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="title-text sm:flex align-center">
           <div className="text-center">
             <button

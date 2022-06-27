@@ -725,7 +725,7 @@ button:disabled,
   @apply p-0;
 }
 
-@media (min-width:540px)
+@media (min-width:770px)
   {
     .title-text {
       position: absolute;
@@ -789,3 +789,10 @@ button:disabled,
             display: none;
         }
   }
+
+@media (min-width:1000px)
+{
+  .manualGrid{
+    display: grid !important
+  }
+}
