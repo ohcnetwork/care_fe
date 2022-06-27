@@ -46,7 +46,7 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
+import GLocationPicker from "../Common/GLocationPicker";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -100,8 +100,8 @@ const initForm: FacilityForm = {
   kasp_empanelled: "false",
   address: "",
   phone_number: "",
-  latitude: "",
-  longitude: "",
+  latitude: DEFAULT_MAP_LOCATION[0].toString(),
+  longitude: DEFAULT_MAP_LOCATION[1].toString(),
   pincode: "",
   oxygen_capacity: "",
   type_b_cylinders: "",
@@ -162,7 +162,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
   >(null);
-  const [mapLoadLocation, setMapLoadLocation] = useState(DEFAULT_MAP_LOCATION);
 
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
@@ -296,6 +295,17 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
   };
 
+  const handleLocationChange = (location: any) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        latitude: location.lat(),
+        longitude: location.lng(),
+      },
+    });
+  };
+
   const handleValueChange = (value: any, field: string) => {
     dispatch({
       type: "set_form",
@@ -306,10 +316,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const handleClickLocationPicker = (event: React.MouseEvent) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        setMapLoadLocation([
-          position.coords.latitude,
-          position.coords.longitude,
-        ]);
         dispatch({
           type: "set_form",
           form: {
@@ -467,18 +473,6 @@ export const FacilityCreate = (props: FacilityProps) => {
       }
       setIsLoading(false);
     }
-  };
-
-  const handleLocationSelect = (location: { lat: string; lon: string }) => {
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        latitude: location.lat,
-        longitude: location.lon,
-      },
-    });
-    setMapLoadLocation([parseFloat(location.lat), parseFloat(location.lon)]);
   };
 
   if (isLoading) {
@@ -894,10 +888,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                     horizontal: "left",
                   }}
                 >
-                  <LocationSearchAndPick
-                    latitude={mapLoadLocation[0]}
-                    longitude={mapLoadLocation[1]}
-                    onSelectLocation={handleLocationSelect}
+                  <GLocationPicker
+                    lat={Number(state.form.latitude)}
+                    lng={Number(state.form.longitude)}
+                    handleOnChange={handleLocationChange}
                   />
                 </Popover>
               </div>
