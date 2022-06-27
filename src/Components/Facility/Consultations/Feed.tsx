@@ -188,22 +188,24 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         onError: (err: AxiosError) => {
           setLoading(undefined);
           const responseData = err.response?.data;
-          switch (responseData.status) {
-            case "error":
-              if (responseData.error.code === "EHOSTUNREACH") {
-                Notification.Error({ msg: "Camera is Offline!" });
-              } else if (responseData.message) {
-                Notification.Error({ msg: responseData.message });
-              }
-              break;
-            case "fail":
-              responseData.errors &&
-                responseData.errors.map((error: any) => {
-                  Notification.Error({ msg: error.message });
-                });
-              break;
-            default:
-              Notification.Error({ msg: "Unable to connect server!" });
+          if (responseData.status) {
+            switch (responseData.status) {
+              case "error":
+                if (responseData.error.code === "EHOSTUNREACH") {
+                  Notification.Error({ msg: "Camera is Offline!" });
+                } else if (responseData.message) {
+                  Notification.Error({ msg: responseData.message });
+                }
+                break;
+              case "fail":
+                responseData.errors &&
+                  responseData.errors.map((error: any) => {
+                    Notification.Error({ msg: error.message });
+                  });
+                break;
+            }
+          } else {
+            Notification.Error({ msg: "Unable to connect server!" });
           }
           setCurrentPreset(preset);
         },
