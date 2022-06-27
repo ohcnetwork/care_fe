@@ -52,7 +52,6 @@ import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
-import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
 
@@ -622,7 +621,7 @@ export const ConsultationForm = (props: any) => {
                     <DateInputField
                       label="Date of onset of the symptoms*"
                       value={state.form?.symptoms_onset_date}
-                      onChange={(date) =>
+                      onChange={(date: Date) =>
                         handleDateChange(date, "symptoms_onset_date")
                       }
                       disableFuture={true}

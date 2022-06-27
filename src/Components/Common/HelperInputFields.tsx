@@ -85,19 +85,19 @@ interface InputProps {
   disabled?: boolean;
   margin?: "none" | "dense" | "normal";
 }
-interface DateInputFieldProps extends DatePickerProps {
-  value: string;
-  onChange: (
-    date: MaterialUiPickersDate,
-    value?: string | null | undefined
-  ) => void;
-  label?: string;
-  min?: string;
-  errors: string;
-  inputVariant?: "standard" | "outlined" | "filled";
-  disabled?: boolean;
-  margin?: "none" | "dense" | "normal";
-}
+// interface DateInputFieldProps extends DatePickerProps {
+//   value: string;
+//   onChange: (
+//     date: MaterialUiPickersDate,
+//     value?: string | null | undefined
+//   ) => void;
+//   label?: string;
+//   min?: string;
+//   errors: string;
+//   inputVariant?: "standard" | "outlined" | "filled";
+//   disabled?: boolean;
+//   margin?: "none" | "dense" | "normal";
+// }
 // interface TimeInputFieldProps {
 //   value: string;
 //   onChange: (
@@ -206,7 +206,7 @@ export const MultilineInputField = (props: TextFieldPropsExtended) => {
   );
 };
 
-export const DateTimeFiled = (props: DateInputFieldProps) => {
+export const DateTimeFiled = (props: any) => {
   const { label, errors, onChange, value, disabled, margin, ...restProps } =
     props;
   return (
@@ -254,7 +254,6 @@ export const DateInputField = (props: any) => {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <DatePicker
-        margin={margin || "normal"}
         id="date-picker-dialog"
         label={label}
         inputFormat="dd/MM/yyyy"
