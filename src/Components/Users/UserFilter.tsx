@@ -194,7 +194,7 @@ export default function UserFilter(props: any) {
           />
         </div>
 
-        <div className="w-9/12 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">District</span>
           <DistrictSelect
             multiple={false}
