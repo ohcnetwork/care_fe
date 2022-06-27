@@ -276,14 +276,14 @@ export default function ResultList() {
         <tr key={`usr_${result.id}`} className="bg-white">
           <td
             onClick={() => navigate(resultUrl)}
-            className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900"
+            className="px-6 py-4 whitespace-nowrap text-md leading-5 text-gray-900"
           >
             <div className="flex">
               <a
                 href="#"
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
-                <p className="text-gray-500 group-hover:text-gray-900 transition ease-in-out duration-150">
+                <p className="text-gray-700 group-hover:text-gray-900 transition ease-in-out duration-150">
                   {result.name} - {result.age} {result.age_in}
                 </p>
               </a>
@@ -304,7 +304,7 @@ export default function ResultList() {
               </span>
             ) : null}
           </td>
-          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-700">
             {result.result_date || "-"}
           </td>
           <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
@@ -352,7 +352,9 @@ export default function ResultList() {
     manageResults = (
       <Grid item xs={12} md={12}>
         <Grid container justify="center" alignItems="center">
-          <h5> No Results Found</h5>
+          <h5 className="flex justify-center items-center text-gray-600">
+            No Results Found
+          </h5>
         </Grid>
       </Grid>
     );
@@ -435,7 +437,7 @@ export default function ResultList() {
               </span>
             </div>
           </div>
-          <div className="flex ml-auto  gap-2">
+          <div className="flex ml-auto gap-2 md:pt-0 pt-2">
             <button
               className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
               onClick={(_) => setShowFilters((show) => !show)}
