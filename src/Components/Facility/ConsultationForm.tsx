@@ -539,8 +539,7 @@ export const ConsultationForm = (props: any) => {
   //   }
 
   const handleDateChange = (date: any, key: string) => {
-    moment(date).isValid() &&
-      dispatch({ type: "set_form", form: { ...state.form, [key]: date } });
+    dispatch({ type: "set_form", form: { ...state.form, [key]: date } });
   };
 
   const handleDoctorSelect = (doctor: UserModel | null) => {
