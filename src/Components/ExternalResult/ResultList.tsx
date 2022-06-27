@@ -283,7 +283,7 @@ export default function ResultList() {
                 href="#"
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
-                <p className="text-gray-700 group-hover:text-gray-900 transition ease-in-out duration-150">
+                <p className="text-gray-800 group-hover:text-gray-900 transition ease-in-out duration-150">
                   {result.name} - {result.age} {result.age_in}
                 </p>
               </a>
@@ -304,7 +304,7 @@ export default function ResultList() {
               </span>
             ) : null}
           </td>
-          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-700">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-800">
             {result.result_date || "-"}
           </td>
           <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
