@@ -193,7 +193,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           } else if (responseData.message){
             Notification.Error({msg: responseData.message});
           } else {
-            Notification.Error({msg: err.message});
+            Notification.Error({msg: "Unable to connect server!"});
           }
           setCurrentPreset(preset);
         },
