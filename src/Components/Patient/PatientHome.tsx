@@ -393,7 +393,7 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={"Covid Suspect Details"}
+          title={"Patient Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
@@ -1468,11 +1468,9 @@ export const PatientHome = (props: any) => {
       </Dialog>
 
       <div>
-        <PageTitle
-          title="Consultation History"
-          hideBack={true}
-          breadcrumbs={false}
-        />
+        <h2 className="font-semibold text-2xl leading-tight ml-0 my-4">
+          Consultation History
+        </h2>
         {consultationList}
         {!isConsultationLoading && totalConsultationCount > limit && (
           <div className="mt-4 flex w-full justify-center">
@@ -1487,11 +1485,9 @@ export const PatientHome = (props: any) => {
       </div>
 
       <div>
-        <PageTitle
-          title="Patient Details"
-          hideBack={true}
-          breadcrumbs={false}
-        />
+        <h2 className="font-semibold text-2xl leading-tight ml-0 my-4">
+          Sample Test History
+        </h2>
         {sampleList}
         {!isSampleLoading && totalSampleListCount > limit && (
           <div className="mt-4 flex w-full justify-center">
