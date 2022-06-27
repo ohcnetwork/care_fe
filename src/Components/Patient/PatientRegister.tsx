@@ -945,6 +945,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <PageTitle
         title={headerText}
         className="mb-11"
+        backButtonOnPressCB={
+          showImport ? () => setShowImport(false) : undefined
+        }
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: { name: patientName },
