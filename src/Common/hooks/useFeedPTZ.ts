@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 
 export interface IAsset {
   username: string;
@@ -43,8 +43,8 @@ interface UseMSEMediaPlayerReturnType {
 }
 
 interface IOptions {
-  onSuccess?: (resp: any) => void;
-  onError?: (err: any) => void;
+  onSuccess?: (resp: AxiosResponse) => void;
+  onError?: (err: AxiosError) => void;
 }
 
 export enum PTZ {
@@ -93,8 +93,8 @@ const gotoPreset =
         ...payload,
         ...config,
       })
-      .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
-      .catch((err: any) => options?.onError && options.onError(err));
+      .then((resp: AxiosResponse) => options?.onSuccess && options.onSuccess(resp))
+      .catch((err: AxiosError) => options?.onError && options.onError(err));
   };
 
 const absoluteMove =

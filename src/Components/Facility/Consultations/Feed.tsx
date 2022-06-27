@@ -21,6 +21,7 @@ import { ConsultationModel } from "../models";
 import * as Notification from "../../../Utils/Notifications.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import { Tooltip } from "@material-ui/core";
+import { AxiosError } from "axios";
 
 interface IFeedProps {
   facilityId: string;
@@ -183,12 +184,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         onSuccess: () => {
           setLoading(undefined);
           setCurrentPreset(preset);
-          console.log("onSuccess: Set Preset to " + preset?.meta?.preset_name);
         },
-        onError: () => {
+        onError: (err: AxiosError) => {
           setLoading(undefined);
+          const responseData = err.response?.data;
+          if(responseData.error.code === "EHOSTUNREACH") {
+            Notification.Error({msg: "Camera is Offline!"});
+          } else if (responseData.message){
+            Notification.Error({msg: responseData.message});
+          } else {
+            Notification.Error({msg: err.message});
+          }
           setCurrentPreset(preset);
-          console.log("onError: Set Preset to " + preset?.meta?.preset_name);
         },
       });
     }
