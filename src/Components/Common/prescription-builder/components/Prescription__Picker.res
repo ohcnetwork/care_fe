@@ -48,7 +48,7 @@ let searchResult = (searchInput, updateCB, selectables) => {
 
 let renderDropdown = results =>
   <div className="origin-top-left absolute z-40 left-0 mt-2 w-full rounded-md shadow-lg ">
-    <div className="rounded-md bg-white shadow-xs">
+    <div className="rounded-md bg-white ring-1 ring-black ring-opacity-5">
       <div className="py-1 max-height-dropdown"> {results |> React.array} </div>
     </div>
   </div>

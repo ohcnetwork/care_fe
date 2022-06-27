@@ -41,6 +41,7 @@ let showUnit = (name, item, params, index, send) => {
         value={IOBalance.quantity(item)->Belt.Float.toString}
         type_="number"
         required=true
+        min="0"
       />
     </div>
     <div

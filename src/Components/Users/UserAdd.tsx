@@ -16,6 +16,7 @@ import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateEmailAddress,
+  validateName,
   validatePassword,
   validateUsername,
 } from "../../Common/validation";
@@ -34,6 +35,7 @@ import {
   SelectField,
   TextInputField,
   MultiSelectField,
+  CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
@@ -130,6 +132,7 @@ export const UserAdd = (props: UserProps) => {
   const [selectedFacility, setSelectedFacility] = useState<
     FacilityModel[] | null
   >([]);
+  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
 
   const rootState: any = useSelector((rootState) => rootState);
@@ -301,6 +304,11 @@ export const UserAdd = (props: UserProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  useAbortableEffect(() => {
+    phoneIsWhatsApp &&
+      handleValueChange(state.form.phone_number, "alt_phone_number");
+  }, [phoneIsWhatsApp, state.form.phone_number]);
+
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
     const form = { ...state.form };
@@ -337,6 +345,19 @@ export const UserAdd = (props: UserProps) => {
         case "user_type":
           if (!state.form[field]) {
             errors[field] = "Please select the User Type";
+            invalidForm = true;
+          }
+          return;
+        case "first_name":
+        case "last_name":
+          if (!state.form[field]) {
+            errors[field] = `${field
+              .split("_")
+              .map((word) => word[0].toUpperCase() + word.slice(1))
+              .join(" ")} is required`;
+            invalidForm = true;
+          } else if (!validateName(state.form[field])) {
+            errors[field] = "Please enter a valid name";
             invalidForm = true;
           }
           return;
@@ -482,7 +503,7 @@ export const UserAdd = (props: UserProps) => {
       };
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
-      if (res && res.data && res.status >= 200 && res.status < 300) {
+      if (res && (res.data || res.data === "") && res.status >= 200 && res.status < 300) {
         // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
@@ -541,6 +562,15 @@ export const UserAdd = (props: UserProps) => {
                   errors={state.errors.phone_number}
                   onlyIndia={true}
                 />
+                <CheckboxField
+                  checked={phoneIsWhatsApp}
+                  onChange={(_, checked) => {
+                    setPhoneIsWhatsApp(checked);
+                    !checked && handleValueChange("+91", "alt_phone_number");
+                  }}
+                  label="Is the phone number a WhatsApp number?"
+                  className="font-bold"
+                />
               </div>
 
               <div>
@@ -550,6 +580,7 @@ export const UserAdd = (props: UserProps) => {
                   onChange={(value: any) =>
                     handleValueChange(value, "alt_phone_number")
                   }
+                  disabled={phoneIsWhatsApp}
                   errors={state.errors.alt_phone_number}
                   onlyIndia={true}
                 />
@@ -610,7 +641,7 @@ export const UserAdd = (props: UserProps) => {
                       ) : (
                         <CheckCircle fontSize="inherit" color="primary" />
                       )}{" "}
-                      username can't end with ^ . @ + _ -
+                      {"username can't end with ^ . @ + _ -"}
                     </div>
                   </div>
                 )}
@@ -661,7 +692,7 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <InputLabel>First name</InputLabel>
+                <InputLabel>First name*</InputLabel>
                 <TextInputField
                   fullWidth
                   name="first_name"
@@ -674,7 +705,7 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <InputLabel>Last name</InputLabel>
+                <InputLabel>Last name*</InputLabel>
                 <TextInputField
                   fullWidth
                   name="last_name"

@@ -11,6 +11,7 @@ import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import moment from "moment";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
 import { formatFilter } from "./Commons";
@@ -34,6 +35,8 @@ export default function BoardView() {
   const [downloadFile, setDownloadFile] = useState("");
   const [isLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  // state to change download button to loading while file is not ready
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
 
   const updateQuery = (filter: any) => {
@@ -66,9 +69,13 @@ export default function BoardView() {
   const appliedFilters = formatFilter(qParams);
 
   const triggerDownload = async () => {
+    // while is getting ready
+    setDownloadLoading(true);
     const res = await dispatch(
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
+    // file ready to download
+    setDownloadLoading(false);
     setDownloadFile(res.data);
     document.getElementById("shiftRequests-ALL")?.click();
   };
@@ -85,21 +92,25 @@ export default function BoardView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="w-full flex items-center justify-between space-x-4">
+      <div className="w-full flex flex-col md:flex-row items-center justify-between space-x-4">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
             title={"Shifting"}
             hideBack={true}
             componentRight={
-              <GetAppIcon
-                className="cursor-pointer mt-2 ml-2"
-                onClick={triggerDownload}
-              />
+              downloadLoading ? (
+                <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
+              ) : (
+                <GetAppIcon
+                  className="cursor-pointer mt-2 ml-2"
+                  onClick={triggerDownload}
+                />
+              )
             }
             breadcrumbs={false}
           />
         </div>
-        <div className="w-2/3 md:w-full flex items-end pt-2 space-y-2 lg:space-x-4 lg:items-center flex-end flex-col lg:flex-row">
+        <div className="w-full md:w-full flex items-start pt-2 space-y-2 lg:space-x-4 lg:items-center flex-end flex-col lg:flex-row">
           <InputSearchBox
             value={qParams.patient_name || ""}
             search={searchByName}
@@ -154,7 +165,7 @@ export default function BoardView() {
         local={local}
         updateFilter={updateFilter}
       />
-      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
+      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-2">
         {isLoading ? (
           <Loading />
         ) : (

@@ -18,6 +18,7 @@ import {
 } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
+import { RoleButton } from "../Common/RoleButton";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -137,40 +138,40 @@ const LocationRow = (props: LocationRowProps) => {
             </Button>
           </div>
         ) : (
-          <Button
-            color="inherit"
-            variant="contained"
-            type="submit"
-            size="small"
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "#24a0ed",
-              color: "white",
+          <RoleButton
+            materialButtonProps={{
+              color: "inherit",
+              variant: "contained",
+              type: "submit",
+              size: "small",
             }}
-            onClick={() => setIsEditable(true)}
+            className="ml-auto bg-[#24a0ed] text-white disabled:bg-gray-400 disabled:text-gray-600"
+            handleClickCB={() => setIsEditable(true)}
+            disableFor="readOnly"
+            buttonType="materialUI"
           >
             EDIT
-          </Button>
+          </RoleButton>
         )}
       </td>
       <td>
         {!isEditable && (
-          <Button
-            color="inherit"
-            variant="contained"
-            type="submit"
-            size="small"
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "#4A2310",
-              color: "white",
+          <RoleButton
+            materialButtonProps={{
+              color: "inherit",
+              variant: "contained",
+              type: "submit",
+              size: "small",
             }}
-            onClick={() =>
+            className="ml-auto bg-[#4A2310] text-white disabled:bg-gray-400 disabled:text-gray-600"
+            handleClickCB={() =>
               navigate(`/facility/${facilityId}/location/${id}/beds`)
             }
+            disableFor="readOnly"
+            buttonType="materialUI"
           >
             Manage Beds
-          </Button>
+          </RoleButton>
         )}
       </td>
     </tr>
@@ -258,7 +259,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
           colSpan={3}
           className="px-5 py-5 border-b border-gray-200 text-center"
         >
-          <p className="text-gray-500 whitespace-no-wrap">
+          <p className="text-gray-500 whitespace-nowrap">
             No locations available
           </p>
         </td>
@@ -315,14 +316,18 @@ export const LocationManagement = (props: LocationManagementProps) => {
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
       <div className="container mx-auto px-4 py-4 md:my-8 sm:px-8">
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          onClick={() => navigate(`/facility/${facilityId}/location/add`)}
+        <RoleButton
+          materialButtonProps={{
+            variant: "contained",
+            color: "primary",
+            size: "small",
+          }}
+          handleClickCB={() => navigate(`/facility/${facilityId}/location/add`)}
+          disableFor="readOnly"
+          buttonType="materialUI"
         >
           Add Location
-        </Button>
+        </RoleButton>
         {location}
       </div>
     </div>

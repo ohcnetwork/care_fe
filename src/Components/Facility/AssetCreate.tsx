@@ -30,17 +30,19 @@ import {
   PhoneNumberField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
-import { AssetData } from "../Assets/AssetTypes";
+import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
 import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
+import SelectMenu from "../Common/components/SelectMenu";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError: any = {
   name: "",
   asset_type: "",
+  asset_class: "",
   description: "",
   is_working: "",
   serial_number: "",
@@ -82,18 +84,19 @@ const AssetCreate = (props: AssetProps) => {
   const { facilityId, assetId } = props;
 
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
-  const [name, setName] = useState<string>("");
-  const [asset_type, setAssetType] = useState<string>("");
-  const [not_working_reason, setNotWorkingReason] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [is_working, setIsWorking] = useState<string>("0");
-  const [serial_number, setSerialNumber] = useState<string>("");
-  const [warranty_details, setWarrantyDetails] = useState<string>("");
-  const [vendor_name, setVendorName] = useState<string>("");
-  const [support_name, setSupportName] = useState<string>("");
-  const [support_phone, setSupportPhone] = useState<string>("");
-  const [support_email, setSupportEmail] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
+  const [name, setName] = useState("");
+  const [asset_type, setAssetType] = useState<AssetType>();
+  const [asset_class, setAssetClass] = useState<AssetClass>();
+  const [not_working_reason, setNotWorkingReason] = useState("");
+  const [description, setDescription] = useState("");
+  const [is_working, setIsWorking] = useState("0");
+  const [serial_number, setSerialNumber] = useState("");
+  const [warranty_details, setWarrantyDetails] = useState("");
+  const [vendor_name, setVendorName] = useState("");
+  const [support_name, setSupportName] = useState("");
+  const [support_phone, setSupportPhone] = useState("");
+  const [support_email, setSupportEmail] = useState("");
+  const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
   const [locations, setLocations] = useState([]);
@@ -129,6 +132,7 @@ const AssetCreate = (props: AssetProps) => {
       setDescription(asset.description);
       setLocation(asset.location_object.id);
       setAssetType(asset.asset_type);
+      setAssetClass(asset.asset_class);
       setIsWorking(String(asset.is_working));
       setNotWorkingReason(asset.not_working_reason);
       setSerialNumber(asset.serial_number);
@@ -165,7 +169,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "asset_type":
-          if (asset_type !== "INTERNAL" && asset_type !== "EXTERNAL") {
+          if (!asset_type) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -208,6 +212,7 @@ const AssetCreate = (props: AssetProps) => {
       const data = {
         name: name,
         asset_type: asset_type,
+        asset_class: asset_class,
         description: description,
         is_working: is_working,
         not_working_reason: is_working === "true" ? "" : not_working_reason,
@@ -219,7 +224,7 @@ const AssetCreate = (props: AssetProps) => {
         support_email: support_email,
         support_phone:
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
-        qr_code_id: qrCodeId,
+        qr_code_id: qrCodeId !== "" ? qrCodeId : null,
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -354,34 +359,41 @@ const AssetCreate = (props: AssetProps) => {
                 <InputLabel htmlFor="asset-type" id="name=label" required>
                   Asset Type
                 </InputLabel>
-                <SelectField
-                  id="asset-type"
-                  fullWidth
-                  name="asset_type"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  options={[
-                    {
-                      id: "",
-                      name: "Select",
-                    },
-                    {
-                      id: "EXTERNAL",
-                      name: "EXTERNAL",
-                    },
-                    {
-                      id: "INTERNAL",
-                      name: "INTERNAL",
-                    },
-                  ]}
-                  optionValue="name"
-                  value={asset_type}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setAssetType(e.target.value)
-                  }
-                  errors={state.errors.asset_type}
-                />
+                <div className="my-2">
+                  <SelectMenu
+                    options={[
+                      {
+                        title: "Internal",
+                        description: "Asset is inside the facility premises.",
+                        value: "INTERNAL",
+                      },
+                      {
+                        title: "External",
+                        description: "Asset is outside the facility premises.",
+                        value: "EXTERNAL",
+                      },
+                    ]}
+                    selected={asset_type}
+                    onSelect={setAssetType}
+                  />
+                </div>
+                <ErrorHelperText error={state.errors.asset_type} />
+              </div>
+              <div>
+                <InputLabel htmlFor="asset-class" id="name=label">
+                  Asset Class
+                </InputLabel>
+                <div className="my-2">
+                  <SelectMenu
+                    options={[
+                      { title: "Select", value: undefined },
+                      { title: "ONVIF Camera", value: "ONVIF" },
+                      { title: "HL7 Vitals Monitor", value: "HL7MONITOR" },
+                    ]}
+                    selected={asset_class}
+                    onSelect={setAssetClass}
+                  />
+                </div>
               </div>
               <div>
                 <InputLabel htmlFor="location" id="name=label" required>
