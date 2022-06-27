@@ -205,7 +205,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             default:
               Notification.Error({ msg: "Unable to connect server!" });
           }
-          console.log(responseData);
           setCurrentPreset(preset);
         },
       });
