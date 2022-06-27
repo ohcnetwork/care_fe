@@ -761,21 +761,21 @@ button:disabled,
   padding-left: 5px;
 }
 
-@screen md {
+@media (max-width:180px){
   * {
     scrollbar-width: thin;
-    scrollbar-color: theme(colors.gray.500) theme(colors.gray.100);
+    scrollbar-color: #6B7280 #F3F4F6;
   }
   ::-webkit-scrollbar {
     width: 12px;
   }
   ::-webkit-scrollbar-track {
-    background: theme(colors.gray.100);
+    background: #F3F4F6;
   }
   ::-webkit-scrollbar-thumb {
-    background-color: theme(colors.gray.500);
+    background-color: #6B7280;
     border-radius: 6px;
-    border: 3px solid theme(colors.gray.100);
+    border: 3px solid #F3F4F6;
   }
 }
 
