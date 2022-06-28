@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 import { Button, CircularProgress } from "@material-ui/core";
 import moment from "moment";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications";
@@ -47,6 +47,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { TextInputField } from "../Common/HelperInputFields";
 import { discharge, patchPatient, dischargePatient } from "../../Redux/actions";
+import { isVisible, sideScroll } from "../../Utils/scroller";
 
 type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
 interface preDischargeFormInterface {
@@ -81,6 +82,11 @@ export const ConsultationDetails = (props: any) => {
   const [open, setOpen] = React.useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = React.useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
+
+  const [scrollArrowHide, setScrollArrowHide] = useState({
+    left: false,
+    right: false,
+  });
 
   const initDischargeSummaryForm: { email: string } = {
     email: "",
@@ -322,15 +328,36 @@ export const ConsultationDetails = (props: any) => {
     fetchData(status);
   }, []);
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   const tabButtonClasses = (selected: boolean) =>
     `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
+  const navBarRef = useRef<any>();
+
+  function checkArrowAndHide() {
+    const tabArr = navBarRef.current.childNodes[0].children[0].childNodes;
+    const firstElement = tabArr[0];
+    const lastElement = tabArr[tabArr.length - 1];
+
+    setScrollArrowHide((p) => ({
+      right: isVisible(lastElement, navBarRef.current),
+      left: isVisible(firstElement, navBarRef.current),
+    }));
+  }
+  useEffect(() => {
+    checkArrowAndHide();
+  }, []);
+
+  const scrollRight = () => {
+    sideScroll(navBarRef.current, "right", 25, 250, 15);
+  };
+  const scrollLeft = () => {
+    sideScroll(navBarRef.current, "left", 25, 250, 15);
+  };
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <div>
       <Dialog open={open} onClose={handleDischargeSummary}>
@@ -572,8 +599,28 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>
 
-        <div className="border-b-2 border-gray-200 mt-4 w-full">
-          <div className="sm:flex sm:items-baseline overflow-x-auto">
+        <div className="border-b-2 border-gray-200 mt-4 w-full relative">
+          {!scrollArrowHide.left && (
+            <button
+              onClick={scrollLeft}
+              className="left-0 absolute text-white p-1 w-8 h-8 text-sm rounded-full opacity-75 hover:opacity-100 bg-primary-600 z-10 lg:inline-block hidden"
+            >
+              <i className="fas fa-angle-left"></i>
+            </button>
+          )}
+          {!scrollArrowHide.right && (
+            <button
+              onClick={scrollRight}
+              className="right-0 absolute text-white p-1 w-8 h-8 text-sm  rounded-full opacity-75 hover:opacity-100  bg-primary-600 z-10 lg:inline-block hidden"
+            >
+              <i className="fas fa-angle-right"></i>
+            </button>
+          )}
+          <div
+            ref={navBarRef}
+            onScroll={checkArrowAndHide}
+            className="sm:flex sm:items-baseline lg:overflow-x-hidden overflow-x-auto"
+          >
             <div className="mt-4 sm:mt-0">
               <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
                 {CONSULTATION_TABS.map((p: OptionsType) => {
