@@ -320,7 +320,7 @@ export default function ManageUsers() {
               <div className="px-6 py-4">
                 <div className="flex lg:flex-row flex-col justify-between">
                   {user.username && (
-                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit">
                       {user.username}
                     </div>
                   )}
