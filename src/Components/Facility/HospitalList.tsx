@@ -348,7 +348,7 @@ export const HospitalList = (props: any) => {
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="flex h-full">
-              <div className="md:flex hidden w-40 self-stretch shrink-0 bg-gray-300 items-center justify-center">
+              <div className="md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center">
                 {facility.cover_image_url ? (
                   <img
                     src={facility.cover_image_url}
@@ -359,7 +359,7 @@ export const HospitalList = (props: any) => {
                   <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                 )}
               </div>
-              <div className="h-full w-full grow">
+              <div className="h-full w-full grow overflow-clip">
                 <div className="h-full flex flex-col justify-between w-full">
                   <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
                     <div className="flow-root">
@@ -394,7 +394,7 @@ export const HospitalList = (props: any) => {
                   </div>
                   <div className="bg-gray-50 border-t px-2 md:px-6 py-2 flex-none">
                     <div className="flex py-4 justify-between">
-                      <div className="flex justify-between w-full">
+                      <div className="flex justify-between w-full flex-wrap gap-2">
                         <div>
                           {userType !== "Staff" ? (
                             <button
@@ -460,7 +460,7 @@ export const HospitalList = (props: any) => {
                             </div>
                           </Modal>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 ">
                           <Link
                             href={`/facility/${facility.id}`}
                             className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
