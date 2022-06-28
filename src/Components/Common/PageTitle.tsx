@@ -7,7 +7,7 @@ interface PageTitleProps {
   title: string;
   hideBack?: boolean;
   backUrl?: string;
-  backButtonOnPressCB?: () => void;
+  backButtonCB?: () => number | void;
   className?: string;
   componentRight?: React.ReactChild;
   breadcrumbs?: boolean;
@@ -21,28 +21,30 @@ export default function PageTitle(props: PageTitleProps) {
     title,
     hideBack,
     backUrl,
-    backButtonOnPressCB,
+    backButtonCB,
     className = "",
     componentRight = <></>,
     breadcrumbs = true,
     crumbsReplacements = {},
   } = props;
-  const backButtonOnPress =
-    backButtonOnPressCB ||
-    (() => {
-      if (backUrl) {
-        navigate(backUrl);
-      } else {
-        window.history.go(-1);
+
+  const onBackButtonClick = () => {
+    if (backButtonCB) {
+      const goBack = backButtonCB();
+      if (goBack) {
+        window.history.go(goBack);
       }
-    });
+    } else {
+      backUrl ? navigate(backUrl) : window.history.go(-1);
+    }
+  };
 
   return (
     <div className={`pt-4 mb-4 ${className}`}>
       <PageHeadTitle title={title} />
       <div className="flex items-center">
         {!hideBack && (
-          <button onClick={backButtonOnPress}>
+          <button onClick={onBackButtonClick}>
             <i className="fas fa-chevron-left text-2xl rounded-md p-2 hover:bg-gray-200 mr-1">
               {" "}
             </i>
