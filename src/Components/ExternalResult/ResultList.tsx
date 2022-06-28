@@ -376,7 +376,7 @@ export default function ResultList() {
         className="-mt-2 md:mt-4"
         breadcrumbs={false}
       />
-      <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+      <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -393,19 +393,23 @@ export default function ResultList() {
           <div className="text-sm font-semibold my-2 lg:my-0 lg:mb-2">
             Search by Name
           </div>
-          <InputSearchBox
-            search={searchByName}
-            value={qParams.name || ""}
-            placeholder="Search by Patient Name"
-            errors=""
-          />
+          <div className="w-full">
+            <InputSearchBox
+              search={searchByName}
+              value={qParams.name || ""}
+              placeholder="Search by Patient Name"
+              errors=""
+            />
+          </div>
           <div className="text-sm font-semibold my-2">Search by number</div>
-          <InputSearchBox
-            value={qParams.mobile_number || ""}
-            search={searchByPhone}
-            placeholder="Search by Phone Number"
-            errors=""
-          />
+          <div className="w-full">
+            <InputSearchBox
+              value={qParams.mobile_number || ""}
+              search={searchByPhone}
+              placeholder="Search by Phone Number"
+              errors=""
+            />
+          </div>
         </div>
         <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
           <div className="flex justify-end gap-2">
