@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listAssetBeds } from "../../../Redux/actions";
 import { AssetData } from "../../Assets/AssetTypes";
 import { PatientModel } from "../../Patient/models";
+import Waveform, { WaveformType } from "./Waveform";
 
 export interface ITeleICUPatientVitalsCardProps {
   patient: PatientModel;
@@ -33,6 +34,8 @@ export default function TeleICUPatientVitalsCard({
   patient,
 }: ITeleICUPatientVitalsCardProps) {
   const wsClient = useRef<WebSocket>();
+
+  const [waveform, setWaveForm] = useState<WaveformType | null>(null);
 
   const dispatch: any = useDispatch();
   const [hl7Asset, setHl7Asset] = React.useState<AssetData>();
@@ -73,6 +76,7 @@ export default function TeleICUPatientVitalsCard({
     wsClient.current.addEventListener("message", (e) => {
       const newObservations = JSON.parse(e.data || "{}");
       if (newObservations.length > 0) {
+        setWaveForm(newObservations.filter((o : any)=>o.observation_id === "waveform")[0])
         const newObservationsMap = newObservations.reduce(
           (acc: any, curr: { observation_id: any }) => ({
             ...acc,
@@ -221,6 +225,7 @@ export default function TeleICUPatientVitalsCard({
             )}
           </span>
         </div>
+        { waveform && <Waveform wave = {waveform} />}
       </div>
     </div>
   );
