@@ -82,7 +82,7 @@ type FormDetails = {
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
-  existing_medication: string;
+  history_of_present_illness: string;
   prescribed_medication: string;
   consultation_notes: string;
   ip_no: string;
@@ -124,7 +124,7 @@ const initForm: FormDetails = {
   is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
-  existing_medication: "",
+  history_of_present_illness: "",
   prescribed_medication: "",
   consultation_notes: "",
   ip_no: "",
@@ -425,7 +425,7 @@ export const ConsultationForm = (props: any) => {
         is_kasp: state.form.is_kasp,
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
         examination_details: state.form.examination_details,
-        existing_medication: state.form.existing_medication,
+        history_of_present_illness: state.form.history_of_present_illness,
         prescribed_medication: state.form.prescribed_medication,
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
@@ -631,21 +631,21 @@ export const ConsultationForm = (props: any) => {
                 )}
                 <div id="existing-medication-div">
                   <InputLabel id="existing-medication-label">
-                    Existing Medication
+                    History of present illness
                   </InputLabel>
                   <MultilineInputField
                     rows={5}
-                    name="existing_medication"
+                    name="history_of_present_illness"
                     variant="outlined"
                     margin="dense"
                     type="text"
                     placeholder="Information optional"
                     InputLabelProps={{
-                      shrink: !!state.form.existing_medication,
+                      shrink: !!state.form.history_of_present_illness,
                     }}
-                    value={state.form.existing_medication}
+                    value={state.form.history_of_present_illness}
                     onChange={handleChange}
-                    errors={state.errors.existing_medication}
+                    errors={state.errors.history_of_present_illness}
                   />
                 </div>
 
