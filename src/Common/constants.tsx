@@ -259,15 +259,9 @@ export const ADMITTED_TO = [
 
 export const PATIENT_FILTER_ADMITTED_TO = [
   { id: "0", text: "Not admitted" },
-  { id: "20", text: "Home Isolation" },
   { id: "1", text: "Isolation Room" },
   { id: "6", text: "Bed with Oxygen Support" },
   { id: "2", text: "ICU" },
-  { id: "4", text: "ICU with Oxygen Support" },
-  { id: "3", text: "ICU with Non Invasive Ventilator" },
-  { id: "5", text: "ICU with Invasive Ventilator" },
-  { id: "30", text: "Gynaecology Ward" },
-  { id: "40", text: "Paediatric Ward" },
 ];
 
 export const PATIENT_CATEGORY = [
