@@ -334,12 +334,10 @@ export const ConsultationDetails = (props: any) => {
     }`;
 
   const navBarRef = useRef<any>();
-
   function checkArrowAndHide() {
     const tabArr = navBarRef.current.childNodes[0].children[0].childNodes;
     const firstElement = tabArr[0];
     const lastElement = tabArr[tabArr.length - 1];
-
     setScrollArrowHide((p) => ({
       right: isVisible(lastElement, navBarRef.current),
       left: isVisible(firstElement, navBarRef.current),
@@ -350,10 +348,10 @@ export const ConsultationDetails = (props: any) => {
   }, []);
 
   const scrollRight = () => {
-    sideScroll(navBarRef.current, "right", 25, 250, 15);
+    sideScroll(navBarRef.current, "right", 25, 1000, 15);
   };
   const scrollLeft = () => {
-    sideScroll(navBarRef.current, "left", 25, 250, 15);
+    sideScroll(navBarRef.current, "left", 25, 1000, 15);
   };
   if (isLoading) {
     return <Loading />;
