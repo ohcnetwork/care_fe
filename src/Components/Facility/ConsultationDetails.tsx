@@ -196,8 +196,6 @@ export const ConsultationDetails = (props: any) => {
     }
   };
 
-  console.log(errors);
-
   const handleDischargeSummaryFormChange = (e: any) => {
     const { value } = e.target;
 
