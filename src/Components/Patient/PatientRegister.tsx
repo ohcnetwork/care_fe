@@ -639,7 +639,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-
         default:
           return;
       }
@@ -1444,7 +1443,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               type="text"
                               value={state.form.srf_id}
                               onChange={handleChange}
-                              errors={state.errors.name}
+                              errors={state.errors.srf_id}
                             />
                           </div>
                           <div id="is_declared_positive-div">
