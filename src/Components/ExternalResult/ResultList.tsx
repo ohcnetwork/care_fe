@@ -22,22 +22,6 @@ import { FacilityModel } from "../Facility/models";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-// function Badge(props: { color: string; icon: string; text: string }) {
-//   return (
-//     <span
-//       className="m-1 h-full inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
-//       title={props.text}
-//     >
-//       <i
-//         className={
-//           "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-//         }
-//       ></i>
-//       {props.text}
-//     </span>
-//   );
-// }
-
 const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
@@ -373,12 +357,12 @@ export default function ResultList() {
         />
       )}
       <PageTitle
-        title="Results"
+        title="External Results"
         hideBack={true}
         className="mt-4"
         breadcrumbs={false}
       />
-      <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+      <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -391,7 +375,7 @@ export default function ResultList() {
             </dl>
           </div>
         </div>
-        <div>
+        <div className="md:mt-2">
           <div>
             <div className="text-sm font-semibold mb-2">Search by Name</div>
             <InputSearchBox
