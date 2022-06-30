@@ -227,7 +227,7 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
 export const GENDER_TYPES: Array<OptionsType> = [
   { id: 1, text: "Male" },
   { id: 2, text: "Female" },
-  { id: 3, text: "Other" },
+  { id: 3, text: "Non-binary" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
