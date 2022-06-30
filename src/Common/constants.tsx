@@ -214,6 +214,12 @@ export const SYMPTOM_CHOICES: Array<OptionsType> = [
   { id: 9, text: "OTHERS" },
 ];
 
+export const DISCHARGE_REASONS = [
+  { id: "REC", text: "Recovered" },
+  { id: "EXP", text: "Expired" },
+  { id: "REF", text: "Referred" },
+];
+
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 1, text: "CVP catheter " },
   { id: 2, text: "Arterial Line" },
