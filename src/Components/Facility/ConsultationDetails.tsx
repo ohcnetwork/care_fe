@@ -166,14 +166,21 @@ export const ConsultationDetails = (props: any) => {
   const handlePatientDischarge = async (value: boolean) => {
     setIsSendingDischargeApi(true);
 
+    if (!preDischargeForm.discharge_reason) {
+      setErrors({
+        ...errors,
+        discharge_reason: "Please select a reason for discharge",
+      });
+      setIsSendingDischargeApi(false);
+      return;
+    }
+
     const dischargeResponse = await dispatch(
       dischargePatient(
         { discharge: value, ...preDischargeForm },
         { id: patientData.id }
       )
     );
-
-    console.log(preDischargeForm);
 
     setIsSendingDischargeApi(false);
     if (dischargeResponse?.status === 200) {
@@ -188,6 +195,8 @@ export const ConsultationDetails = (props: any) => {
       window.location.reload();
     }
   };
+
+  console.log(errors);
 
   const handleDischargeSummaryFormChange = (e: any) => {
     const { value } = e.target;
