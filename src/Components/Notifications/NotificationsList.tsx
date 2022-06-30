@@ -17,6 +17,8 @@ import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
+import * as Sentry from "@sentry/browser";
+
 const RESULT_LIMIT = 14;
 
 interface Props {
@@ -65,9 +67,11 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
         setIsSubscribed("SubscribedOnAnotherDevice");
       }
     } catch (error) {
-      Error({
-        msg: `Service Worker Error - ${error}`,
-      });
+      // Error({
+      //   msg: `Service Worker Error - ${error}`,
+      // });
+      console.log(`Service worker error...Details: ${error}`);
+      Sentry.captureException(error);
     }
   };
 
@@ -126,7 +130,9 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
           });
       })
       .catch(function (_e) {
-        Error({ msg: "Service Worker Error" });
+        // Error({ msg: "Service Worker Error" });
+        console.log(`Service worker error...Details: ${_e}`);
+        Sentry.captureException(_e);
       });
   };
 
