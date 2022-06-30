@@ -611,9 +611,7 @@ const AssetCreate = (props: AssetProps) => {
                 type="button"
                 onClick={() =>
                   navigate(
-                    `${
-                      assetId ? `/assets/${assetId}` : `/facility/${facilityId}`
-                    }`
+                    assetId ? `/assets/${assetId}` : `/facility/${facilityId}`
                   )
                 }
                 startIcon={<CancelOutlineIcon>cancel</CancelOutlineIcon>}
