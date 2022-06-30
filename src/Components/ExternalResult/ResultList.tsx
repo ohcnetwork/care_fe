@@ -430,13 +430,9 @@ export default function ResultList() {
           </div>
         </div>
       </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
+      <div className="flex items-center flex-wrap gap-2 mb-4">
         {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
-      </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
         {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
-      </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
         {badge("Name", qParams.name || local.name, "name")}
         {badge(
           "Phone Number",
