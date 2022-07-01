@@ -351,6 +351,13 @@ export const FacilityHome = (props: any) => {
               <i className="fas fa-boxes text-white mr-2"></i>
               View Assets
             </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/users?facility=${facilityId}`)}
+            >
+              <i className="fas fa-users text-white mr-2"></i>
+              View Users
+            </button>
             {(currentUser.data.user_type === "DistrictAdmin" ||
               currentUser.data.user_type === "StateAdmin") && (
               <button
