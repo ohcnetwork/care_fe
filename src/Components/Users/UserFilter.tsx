@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { USER_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
+import { FacilitySelect } from "../Common/FacilitySelect";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -19,6 +20,7 @@ export default function UserFilter(props: any) {
     phone_number: filter.phone_number || "",
     alt_phone_number: filter.alt_phone_number || "",
     user_type: filter.user_type || "",
+    facility: filter.facility || "",
   });
 
   const clearFilterState = {
@@ -27,6 +29,7 @@ export default function UserFilter(props: any) {
     phone_number: "",
     alt_phone_number: "",
     user_type: "",
+    facility: "",
   };
 
   const USER_TYPE_OPTIONS = [
@@ -48,15 +51,30 @@ export default function UserFilter(props: any) {
     setFilterState(filterData);
   };
 
+  const setFacility = (selected: any, name: string) => {
+    const filterData: any = { ...filterState };
+    filterData[`${name}_ref`] = selected;
+    filterData[name] = (selected || {}).id;
+
+    setFilterState(filterData);
+  };
+
   const applyFilter = () => {
-    const { first_name, last_name, phone_number, alt_phone_number, user_type } =
-      filterState;
+    const {
+      first_name,
+      last_name,
+      phone_number,
+      alt_phone_number,
+      user_type,
+      facility,
+    } = filterState;
     const data = {
       first_name: first_name || "",
       last_name: last_name || "",
       phone_number: phone_number || "",
       alt_phone_number: alt_phone_number || "",
       user_type: user_type || "",
+      facility: facility || "",
     };
     onChange(data);
   };
@@ -160,6 +178,19 @@ export default function UserFilter(props: any) {
               />
             </div>
           </div>
+        </div>
+
+        <div className="w-full flex-none">
+          <span className="text-sm font-semibold">Facility</span>
+          <FacilitySelect
+            multiple={false}
+            name="facility"
+            selected={filterState.facility_ref}
+            showAll
+            setSelected={(obj) => setFacility(obj, "facility")}
+            className="shifting-page-filter-dropdown"
+            errors={""}
+          />
         </div>
 
         <div className="w-full flex-none">
