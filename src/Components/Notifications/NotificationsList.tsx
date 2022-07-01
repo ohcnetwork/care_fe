@@ -67,10 +67,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
         setIsSubscribed("SubscribedOnAnotherDevice");
       }
     } catch (error) {
-      // Error({
-      //   msg: `Service Worker Error - ${error}`,
-      // });
-      console.log(`Service worker error...Details: ${error}`);
+      console.error(`Service worker error...Details: ${error}`);
       Sentry.captureException(error);
     }
   };
@@ -130,8 +127,7 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
           });
       })
       .catch(function (_e) {
-        // Error({ msg: "Service Worker Error" });
-        console.log(`Service worker error...Details: ${_e}`);
+        console.error(`Service worker error...Details: ${_e}`);
         Sentry.captureException(_e);
       });
   };
