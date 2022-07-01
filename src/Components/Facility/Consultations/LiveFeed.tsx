@@ -37,7 +37,7 @@ const LiveFeed = (props: any) => {
   const dispatch: any = useDispatch();
   const [page, setPage] = useState({
     count: 0,
-    limit: 10,
+    limit: 8,
     offset: 0,
   });
 
