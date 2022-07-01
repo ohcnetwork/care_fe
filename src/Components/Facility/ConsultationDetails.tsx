@@ -339,8 +339,8 @@ export const ConsultationDetails = (props: any) => {
     const firstElement = tabArr[0];
     const lastElement = tabArr[tabArr.length - 1];
     setScrollArrowHide((p) => ({
-      right: isVisible(lastElement, navBarRef.current),
-      left: isVisible(firstElement, navBarRef.current),
+      right: isVisible(lastElement, navBarRef.current, "right"),
+      left: isVisible(firstElement, navBarRef.current, "left"),
     }));
   }
   useEffect(() => {
@@ -348,10 +348,10 @@ export const ConsultationDetails = (props: any) => {
   }, []);
 
   const scrollRight = () => {
-    sideScroll(navBarRef.current, "right", 25, 1000, 15);
+    sideScroll(navBarRef.current, "right", 25, 300, 15);
   };
   const scrollLeft = () => {
-    sideScroll(navBarRef.current, "left", 25, 1000, 15);
+    sideScroll(navBarRef.current, "left", 25, 300, 15);
   };
   if (isLoading) {
     return <Loading />;

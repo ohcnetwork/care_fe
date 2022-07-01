@@ -19,11 +19,16 @@ export const sideScroll = (
     }, speed);
 };
 
-export const isVisible = (ele, container) => {
+export const isVisible = (ele, container, checkBoundary = "") => {
     const { right, width, left } = ele.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
-
+    if (checkBoundary === "left") {
+        return left >= containerRect.left
+    }
+    if (checkBoundary === "right") {
+        return right <= containerRect.right
+    }
     return left <= containerRect.left
         ? containerRect.left - left <= width
         : right - containerRect.right <= width;
-};
+}
