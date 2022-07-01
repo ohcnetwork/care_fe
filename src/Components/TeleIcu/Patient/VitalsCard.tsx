@@ -71,6 +71,10 @@ export default function TeleICUPatientVitalsCard({
     fetchData();
   }, [patient]);
 
+  useEffect(()=>{
+    console.log(waveform);
+  },[waveform])
+
   const connectWs = (url: string) => {
     wsClient.current = new WebSocket(url);
     wsClient.current.addEventListener("message", (e) => {

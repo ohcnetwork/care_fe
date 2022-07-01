@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import { LinePlot } from "../../Facility/Consultations/components/LinePlot"
 
 export type WaveformType = {
@@ -17,19 +18,33 @@ export type WaveformType = {
 
 export default function Waveform(props : {wave : WaveformType}){
     const wave = props.wave;
-    const data = wave.data.split(" ");
+    const data = wave.data.split(" ").map(Number);
+    const [xData, setXData] = useState<number[]>([])
     const yAxisData = (name: string) => {
-        return Object.values(data)
-          .map((p: any) => p[name])
-          .reverse();
+        const newObj = Object.values(data)
+        .map((p: any) => p[name])
+        .reverse();
+        console.log(newObj, data);
+        return data;
+         
       };
+    useEffect(()=>{
+        const wave = props.wave;
+        const data = wave.data.split(" ").map(Number);
+        let newX = [];
+        for (let i = 0; i < data.length; i++) {
+            newX[i] = i+1;
+        }
+        setXData(newX);
+    }, [props])
+    
     return (
-        <div className="w-80">
+        <div className="w-[600px]">
             <LinePlot
                 title="Waveform"
                 name="waveform"
-                xData={data}
-                yData={yAxisData("Wave")}
+                xData={xData}
+                yData={data}
                 low={wave["data-low-limit"]}
                 high={wave["data-high-limit"]}
             />
