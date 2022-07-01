@@ -295,6 +295,9 @@ export const createDoctor = (
     ? fireRequest("updateDoctor", [id], params, pathParam)
     : fireRequest("createDoctor", [], params, pathParam);
 };
+export const deleteDoctor = (id: number, pathParam: object) => {
+  return fireRequest("deleteDoctor", [id], {}, pathParam);
+};
 export const createTriageForm = (params: object, pathParam: object) => {
   return fireRequest("createTriage", [], params, pathParam);
 };
