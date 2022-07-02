@@ -65,6 +65,7 @@ import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 import Error404 from "../Components/ErrorPages/404";
+import FacilityUsers from "../Components/Facility/FacilityUsers";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -92,6 +93,9 @@ const routes = {
   ),
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
+  ),
+  "facility/:facilityId/users": ({ facilityId }: any) => (
+    <FacilityUsers facilityId={facilityId} />
   ),
   "/facility/:facilityId/resource/new": ({ facilityId }: any) => (
     <ResourceCreate facilityId={facilityId} />

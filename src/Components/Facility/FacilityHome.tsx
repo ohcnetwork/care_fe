@@ -353,7 +353,7 @@ export const FacilityHome = (props: any) => {
             </button>
             <button
               className="btn-primary btn mt-2"
-              onClick={() => navigate(`/users?facility=${facilityId}`)}
+              onClick={() => navigate(`/facility/${facilityId}/users`)}
             >
               <i className="fas fa-users text-white mr-2"></i>
               View Users
