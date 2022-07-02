@@ -287,7 +287,7 @@ const AssetsList = () => {
             errors=""
           />
         </div>
-        <div className="flex flex-row justify-start items-center gap-2">
+        <div className="flex flex-row lg:px-8 justify-start items-center gap-2">
           <AdvancedFilterButton setShowFilters={setShowFilters} />
           <button
             className="btn btn-primary"
