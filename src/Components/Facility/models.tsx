@@ -45,6 +45,7 @@ export interface FacilityModel {
   district_object?: DistrictModel;
   state_object?: StateModel;
   ward_object?: WardModel;
+  modified_date?: string;
 }
 
 export interface CapacityModal {

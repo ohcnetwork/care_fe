@@ -16,13 +16,13 @@ import {
 
 interface DoctorsCountProps extends DoctorModal {
   facilityId: number;
+  removeDoctor: (doctorId: number | undefined) => void;
 }
 
 const DoctorsCountCard = (props: DoctorsCountProps) => {
   const specialization = DOCTOR_SPECIALIZATION.find((i) => i.id === props.area);
   const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [deleted, setDeleted] = useState(false);
 
   const handleDeleteSubmit = async () => {
     if (props.area) {
@@ -33,7 +33,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
         Notification.Success({
           msg: "Doctor specialization type deleted successfully",
         });
-        setDeleted(true);
+        props.removeDoctor(props.id);
       }
     }
   };
@@ -44,9 +44,6 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
 
   const area = specialization ? specialization.text : "Unknown";
 
-  if (deleted) {
-    return null;
-  }
   return (
     <div className="px-2 py-2 lg:w-1/5 w-full">
       <div className="flex flex-col items-center shadow rounded-lg p-4 h-full justify-between">

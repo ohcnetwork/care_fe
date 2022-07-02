@@ -26,7 +26,7 @@ import {
   PatientStatsModel,
 } from "./models";
 import moment from "moment";
-import { RoleButton, roleType } from "../Common/RoleButton";
+import { RoleButton } from "../Common/RoleButton";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -114,7 +114,7 @@ export const FacilityHome = (props: any) => {
     capacityList = <h5>No Bed Types Found</h5>;
   } else {
     capacityList = BED_TYPES.map((x) => {
-      let res = capacityData.find((data) => {
+      const res = capacityData.find((data) => {
         return data.room_type === x.id;
       });
       if (res) {
@@ -126,21 +126,29 @@ export const FacilityHome = (props: any) => {
   }
 
   let doctorList: any = null;
+  console.log(doctorData);
   if (!doctorData || !doctorData.length) {
     doctorList = <h5>No Doctors Found</h5>;
   } else {
     doctorList = doctorData.map((data: DoctorModal) => {
+      const removeCurrentDoctorData = (doctorId: number | undefined) => {
+        setDoctorData((state) =>
+          state.filter((i: DoctorModal) => i.id !== doctorId)
+        );
+      };
+
       return (
         <DoctorsCountCard
           facilityId={facilityId}
           key={`bed_${data.id}`}
           {...data}
+          removeDoctor={removeCurrentDoctorData}
         />
       );
     });
   }
 
-  let stats = patientStatsData.map((data: PatientStatsModel, index) => {
+  const stats = patientStatsData.map((data: PatientStatsModel, index) => {
     return (
       <tr className="border" key={index}>
         <td className="border px-4 py-2 whitespace-nowrap">
@@ -217,12 +225,8 @@ export const FacilityHome = (props: any) => {
                 <h1 className="text-4xl font-bold">{facilityData.name}</h1>
                 <p className="text-xl text-gray-700">
                   Last updated{" "}
-                  {
-                    // @ts-ignore
-                    facilityData?.modified_date &&
-                      // @ts-ignore
-                      moment(facilityData?.modified_date).fromNow()
-                  }
+                  {facilityData?.modified_date &&
+                    moment(facilityData?.modified_date).fromNow()}
                 </p>
               </div>
               <div className="flex items-center flex-1">
