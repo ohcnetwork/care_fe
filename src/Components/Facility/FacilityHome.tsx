@@ -126,7 +126,6 @@ export const FacilityHome = (props: any) => {
   }
 
   let doctorList: any = null;
-  console.log(doctorData);
   if (!doctorData || !doctorData.length) {
     doctorList = <h5>No Doctors Found</h5>;
   } else {
