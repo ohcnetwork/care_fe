@@ -190,7 +190,7 @@ export const Login = (props: any) => {
                 )}
               </div>
             </CardContent>
-            <CardActions className="padding16">
+            <CardActions style={{ padding: "16px" }}>
               <Grid container justify="center">
                 {isCaptchaEnabled && (
                   <Grid item className="px-8 py-4">
