@@ -88,8 +88,8 @@ interface InputProps {
 // interface DateInputFieldProps extends DatePickerProps {
 //   value: string;
 //   onChange: (
-//     date: MaterialUiPickersDate,
-//     value?: string | null | undefined
+//     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+//     index: number
 //   ) => void;
 //   label?: string;
 //   min?: string;
@@ -98,6 +98,7 @@ interface InputProps {
 //   disabled?: boolean;
 //   margin?: "none" | "dense" | "normal";
 // }
+
 // interface TimeInputFieldProps {
 //   value: string;
 //   onChange: (
@@ -254,6 +255,7 @@ export const DateInputField = (props: any) => {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <DatePicker
+        margin={margin || "normal"}
         id="date-picker-dialog"
         label={label}
         inputFormat="dd/MM/yyyy"
@@ -261,7 +263,6 @@ export const DateInputField = (props: any) => {
         onChange={onChange}
         minDate={min}
         disabled={disabled}
-        margin={margin || "normal"}
         renderInput={(params) => (
           <TextField
             variant={variant || "standard"}
