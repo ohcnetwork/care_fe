@@ -25,11 +25,9 @@ import {
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
-  DESIGNATION_HEALTH_CARE_WORKER,
   VACCINES,
 } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
-import statesList from "../../Common/static/states.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createPatient,
@@ -63,12 +61,8 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const debounce = require("lodash.debounce");
 
-const placesList = countryList.concat(
-  statesList.filter((i: string) => i !== "Kerala")
-);
+const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -81,7 +75,6 @@ interface medicalHistoryModel {
 }
 
 const medicalHistoryTypes = MEDICAL_HISTORY_CHOICES.filter((i) => i.id !== 1);
-
 const medicalHistoryChoices = medicalHistoryTypes.reduce(
   (acc: Array<{ [x: string]: string }>, cur) => [
     ...acc,
@@ -89,7 +82,6 @@ const medicalHistoryChoices = medicalHistoryTypes.reduce(
   ],
   []
 );
-
 const genderTypes = [
   {
     id: 0,
@@ -97,13 +89,9 @@ const genderTypes = [
   },
   ...GENDER_TYPES,
 ];
-
 const diseaseStatus = [...DISEASE_STATUS];
-
 const bloodGroups = [...BLOOD_GROUPS];
-
 const testType = [...TEST_TYPE];
-const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
 const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
@@ -240,10 +228,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   }, [careExtId]);
 
-  const headerText = !id
-    ? "Add Details of Covid Suspect / Patient"
-    : "Update Covid Suspect / Patient Details";
-  const buttonText = !id ? "Add Covid Suspect / Patient" : "Save Details";
+  const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
+  const buttonText = !id ? "Add Patient" : "Save Details";
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -510,7 +496,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     let invalidForm = false;
     let error_div = "";
 
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
         case "address":
@@ -653,7 +639,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-
         default:
           return;
       }
@@ -855,13 +840,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const handleCheckboxFieldChange = (e: any) => {
-    const form = { ...state.form };
-    const { checked, name } = e.target;
-    form[name] = checked;
-    dispatch({ type: "set_form", form });
-  };
-
   const handleMedicalCheckboxChange = (e: any, id: number) => {
     const form = { ...state.form };
     const values = state.form.medical_history;
@@ -966,6 +944,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <PageTitle
         title={headerText}
         className="mb-11"
+        backButtonCB={() => {
+          if (showImport) {
+            setShowImport(false);
+          } else {
+            navigate(`/facility/${facilityId}`);
+          }
+        }}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: { name: patientName },
@@ -1465,7 +1450,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               type="text"
                               value={state.form.srf_id}
                               onChange={handleChange}
-                              errors={state.errors.name}
+                              errors={state.errors.srf_id}
                             />
                           </div>
                           <div id="is_declared_positive-div">
@@ -1607,6 +1592,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         value="2"
                                         control={<Radio />}
                                         label="2"
+                                      />
+                                      <FormControlLabel
+                                        value="3"
+                                        control={<Radio />}
+                                        label="3 (Booster/Precautionary Dose)"
                                       />
                                     </Box>
                                   </RadioGroup>
@@ -1831,6 +1821,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_result")
                               }
+                              min={state.form.date_of_test}
                               errors={state.errors.date_of_result}
                               inputVariant="outlined"
                               margin="dense"
@@ -1984,7 +1975,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             Allergies
                           </InputLabel>
                           <MultilineInputField
-                            rows={3}
+                            rows={1}
                             id="allergies"
                             name="allergies"
                             variant="outlined"

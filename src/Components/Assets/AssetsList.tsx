@@ -11,6 +11,7 @@ import {
 } from "../../Redux/actions";
 import { Badge } from "../Patient/ManagePatients";
 import { AssetData } from "./AssetTypes";
+import { getAsset } from "../../Redux/actions";
 import React, { useState, useCallback, useEffect } from "react";
 import { navigate, useQueryParams } from "raviger";
 import loadable from "@loadable/component";
@@ -216,6 +217,21 @@ const AssetsList = () => {
     }
   };
 
+  const checkValidAssetId = async (assetId: any) => {
+    const assetData: any = await dispatch(getAsset(assetId));
+    try {
+      if (assetData.data) {
+        navigate(`/assets/${assetId}`);
+      }
+    } catch (err) {
+      console.log(err);
+      setIsLoading(false);
+      Notification.Error({
+        msg: "Invalid QR code scanned !!!",
+      });
+    }
+  };
+
   if (isLoading) return <Loading />;
   if (isScannerActive)
     return (
@@ -231,8 +247,7 @@ const AssetsList = () => {
           onScan={async (value: any) => {
             if (value) {
               const assetId = await getAssetIdFromQR(value);
-              setIsLoading(false);
-              navigate(`/assets/${assetId ?? value}`);
+              checkValidAssetId(assetId ?? value);
             }
           }}
           onError={(e: any) =>
@@ -249,7 +264,7 @@ const AssetsList = () => {
   return (
     <div className="px-4 pb-2">
       <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
-      <div className="md:flex mt-5 space-y-2">
+      <div className="lg:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -277,7 +292,7 @@ const AssetsList = () => {
             errors=""
           />
         </div>
-        <div className="flex-1 flex flex-col justify-start items-end">
+        <div className="flex flex-row justify-start items-center gap-2">
           <AdvancedFilterButton setShowFilters={setShowFilters} />
           <button
             className="btn btn-primary"
@@ -305,7 +320,7 @@ const AssetsList = () => {
         {badge("Asset Type", asset_type, ["asset_type"])}
         {badge("Status", qParams.status, ["status"])}
       </div>
-      <div className="flex-grow mt-10 bg-white">
+      <div className="grow mt-10 bg-white">
         <div className="p-8">
           <div className="flex flex-wrap md:-mx-4">
             {assetsExist ? (

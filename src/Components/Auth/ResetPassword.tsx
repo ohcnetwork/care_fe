@@ -16,7 +16,7 @@ import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import { postResetPassword } from "../../Redux/actions";
 import { navigate } from "raviger";
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 const useStyles = makeStyles((theme) => ({
   formTop: {
@@ -31,12 +31,11 @@ const panelStyles = makeStyles((theme: Theme) =>
     },
     heading: {
       fontSize: theme.typography.pxToRem(15),
-      fontWeight: theme.typography.fontWeightRegular,
     },
   })
 );
 
-const ResetPasswordPage = (props: any) => {
+export const ResetPassword = (props: any) => {
   const classes = useStyles();
   const panel = panelStyles();
 
@@ -50,7 +49,7 @@ const ResetPasswordPage = (props: any) => {
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [passReg, setPassReg] = useState(0);
-  const { t } = props;
+  const { t } = useTranslation();
   const handleChange = (e: any) => {
     const { value, name } = e.target;
     const fieldValue = Object.assign({}, form);
@@ -181,4 +180,3 @@ const ResetPasswordPage = (props: any) => {
     </div>
   );
 };
-export const ResetPassword = withTranslation()(ResetPasswordPage);

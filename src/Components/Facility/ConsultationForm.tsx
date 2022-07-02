@@ -207,6 +207,7 @@ export const ConsultationForm = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
+  const [diseaseStatus, setDiseaseStatus] = useState("");
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
@@ -218,6 +219,7 @@ export const ConsultationForm = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setDiseaseStatus(res.data.disease_status);
         }
       } else {
         setPatientName("");
@@ -322,6 +324,10 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Please enter IP Number";
             if (!error_div) error_div = field;
             invalidForm = true;
+          } else if (!state.form[field].replace(/\s/g, "").length) {
+            errors[field] = "IP can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
           }
           return;
         case "other_symptoms":
@@ -358,6 +364,10 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Required *";
             if (!error_div) error_div = field;
             invalidForm = true;
+          } else if (!state.form[field].replace(/\s/g, "").length) {
+            errors[field] = "Consultation notes can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
           }
           return;
         case "is_telemedicine":
@@ -376,6 +386,20 @@ export const ConsultationForm = (props: any) => {
             errors[
               field
             ] = `Please select an option, ${KASP_STRING} is mandatory`;
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "discharge_advice":
+          let invalid = false;
+          for (let f of dischargeAdvice) {
+            if (!f.dosage.replace(/\s/g, "").length || !f.medicine.replace(/\s/g, "").length) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Prescription field can not be empty";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -467,13 +491,13 @@ export const ConsultationForm = (props: any) => {
   const handleChange:
     | ChangeEventHandler<HTMLInputElement>
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e: any) => {
-    e &&
-      e.target &&
-      dispatch({
-        type: "set_form",
-        form: { ...state.form, [e.target.name]: e.target.value },
-      });
-  };
+      e &&
+        e.target &&
+        dispatch({
+          type: "set_form",
+          form: { ...state.form, [e.target.name]: e.target.value },
+        });
+    };
 
   const handleTelemedicineChange: ChangeEventHandler<HTMLInputElement> = (
     e
@@ -788,14 +812,14 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.consultation_notes}
                 />
               </div>
-              <div className="mt-4">
+              <div id="discharge_advice-div" className="mt-4">
                 <InputLabel>Medication</InputLabel>
                 <PrescriptionBuilder
                   prescriptions={dischargeAdvice}
                   setPrescriptions={setDischargeAdvice}
                 />
+                <ErrorHelperText error={state.errors.discharge_advice} />
               </div>
-
               <div id="ip_no-div">
                 <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
@@ -810,19 +834,22 @@ export const ConsultationForm = (props: any) => {
                   required
                 />
               </div>
-              <div id="test_id-div">
-                <InputLabel id="refered-label">State Test ID</InputLabel>
-                <TextInputField
-                  name="test_id"
-                  variant="outlined"
-                  margin="dense"
-                  type="string"
-                  InputLabelProps={{ shrink: !!state.form.test_id }}
-                  value={state.form.test_id}
-                  onChange={handleChange}
-                  errors={state.errors.test_id}
-                />
-              </div>
+
+              {diseaseStatus !== "NEGATIVE" && (
+                <div id="test_id-div">
+                  <InputLabel id="refered-label">State Test ID</InputLabel>
+                  <TextInputField
+                    name="test_id"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.test_id }}
+                    value={state.form.test_id}
+                    onChange={handleChange}
+                    errors={state.errors.test_id}
+                  />
+                </div>
+              )}
               <div id="verified_by-div">
                 <InputLabel id="exam-details-label">Verified By</InputLabel>
                 <MultilineInputField
@@ -1004,7 +1031,7 @@ export const ConsultationForm = (props: any) => {
                     name="weight"
                     variant="outlined"
                     margin="dense"
-                    type="string"
+                    type="number"
                     InputLabelProps={{ shrink: !!state.form.weight }}
                     value={state.form.weight}
                     onChange={handleChange}
@@ -1017,7 +1044,7 @@ export const ConsultationForm = (props: any) => {
                     name="height"
                     variant="outlined"
                     margin="dense"
-                    type="string"
+                    type="number"
                     InputLabelProps={{ shrink: !!state.form.height }}
                     value={state.form.height}
                     onChange={handleChange}

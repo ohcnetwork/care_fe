@@ -17,16 +17,14 @@ import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
-
 const RESULT_LIMIT = 14;
 
 interface Props {
   expanded: boolean;
-    onClickCB?: () => void;
+  onClickCB?: () => void;
 }
 
-export default function ResultList({ expanded = false }: Props) {
-  const { expanded, onClickCB } = props;
+export default function ResultList({ expanded = false, onClickCB }: Props) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
@@ -243,11 +241,11 @@ export default function ResultList({ expanded = false }: Props) {
           <div className="text-lg font-bold">
             {getNotificationTitle(result.event)}
           </div>
-          <div className="text-sm">{result.message}</div>
-          <div className="text-xs">
+          <div className="text-sm py-1">{result.message}</div>
+          <div className="text-xs py-1">
             {moment(result.created_date).format("lll")}
           </div>
-          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0">
+          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0">
             <i className="fas fa-eye mr-2 text-primary-500" />
             Visit Link
           </a>
@@ -307,13 +305,13 @@ export default function ResultList({ expanded = false }: Props) {
           expanded && "w-60"
         )}
       >
-        <div className="flex-shrink-0 flex items-center justify-center w-10 h-9">
+        <div className="shrink-0 flex items-center justify-center w-10 h-9">
           <i className={clsx("fas fa-bell", "text-lg")}></i>
         </div>
 
         <div
           className={clsx(
-            "transition-all text-left duration-300 whitespace-no-wrap",
+            "transition-all text-left duration-300 whitespace-nowrap",
             expanded ? "w-60" : "w-0"
           )}
         >
@@ -344,7 +342,7 @@ export default function ResultList({ expanded = false }: Props) {
                       setData([]);
                       setOffset(0);
                     }}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
                   >
                     <i className="fa-fw fas fa-sync cursor-pointer mr-2" />{" "}
                     Reload
@@ -353,43 +351,43 @@ export default function ResultList({ expanded = false }: Props) {
                 <div>
                   <button
                     onClick={(_) => setShowNotifications(false)}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
                   >
                     <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
                     Close
                   </button>
                 </div>
                 {!isIOSDevice && (
-                  <div>
-                    <button
-                      onClick={handleSubscribeClick}
-                      className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs flex-shrink-0"
-                      disabled={isSubscribing}
-                    >
-                      {isSubscribing && (
-                        <svg
-                          className="animate-spin h-5 w-5 mr-3"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-75"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="#f1edf7"
-                            fill="white"
-                            stroke-width="4"
-                          />
-                          <path
-                            className=""
-                            fill="white"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                      )}
-                      {getButtonText()}
-                    </button>
-                  </div>
+                <div>
+                  <button
+                    onClick={handleSubscribeClick}
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
+                    disabled={isSubscribing}
+                  >
+                    {isSubscribing && (
+                      <svg
+                        className="animate-spin h-5 w-5 mr-3"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-75"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="#f1edf7"
+                          fill="white"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className=""
+                          fill="white"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    )}
+                    {getButtonText()}
+                  </button>
+                </div>
                 )}
               </div>
               <div className="font-bold text-xl mt-4">Notifications</div>
