@@ -9,7 +9,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
 const Loading = loadable(() => import("../Common/Loading"));
 
-export const ForgotPassword = (props: any) => {
+export const ForgotPassword = () => {
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",

@@ -24,6 +24,13 @@ interface Props {
   onClickCB?: () => void;
 }
 
+enum SubscribeStatus {
+  Subscribe,
+  NotSubscribe,
+  SubscribedOnThisDevice,
+  SubscribedOnAnotherDevice,
+}
+
 export default function ResultList({ expanded = false, onClickCB }: Props) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -38,11 +45,12 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
 
-  const [isSubscribed, setIsSubscribed] = useState("");
+  const [isSubscribed, setIsSubscribed] = useState(
+    SubscribeStatus.NotSubscribe
+  );
   const [isSubscribing, setIsSubscribing] = useState(false);
 
-
-  const isIOSDevice = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
+  const isServiceWorkerSupported = "serviceWorker" in navigator;
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -55,28 +63,33 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [showNotifications]);
 
-  const intialSubscriptionState = async () => {
-    try {
-      const res = await dispatch(getUserPnconfig({ username: username }));
-      const reg = await navigator.serviceWorker.ready;
-      const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res.data.pf_endpoint) {
-        setIsSubscribed("NotSubscribed");
-      } else if (subscription?.endpoint === res.data.pf_endpoint) {
-        setIsSubscribed("SubscribedOnThisDevice");
-      } else {
-        setIsSubscribed("SubscribedOnAnotherDevice");
+  const initialSubscriptionState = async () => {
+    if (isServiceWorkerSupported) {
+      try {
+        const res = await dispatch(getUserPnconfig({ username: username }));
+        const reg = await navigator.serviceWorker.ready;
+        const subscription = await reg.pushManager.getSubscription();
+        if (!subscription && !res.data.pf_endpoint) {
+          setIsSubscribed(SubscribeStatus.NotSubscribe);
+        } else if (subscription?.endpoint === res.data.pf_endpoint) {
+          setIsSubscribed(SubscribeStatus.SubscribedOnThisDevice);
+        } else {
+          setIsSubscribed(SubscribeStatus.SubscribedOnAnotherDevice);
+        }
+      } catch (error) {
+        Error({
+          msg: `Service Worker Error - ${error}`,
+        });
       }
-    } catch (error) {
-      Error({
-        msg: `Service Worker Error - ${error}`,
-      });
     }
   };
 
   const handleSubscribeClick = () => {
     const status = isSubscribed;
-    if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
+    if (
+      status === SubscribeStatus.NotSubscribe ||
+      status === SubscribeStatus.SubscribedOnAnotherDevice
+    ) {
       subscribe();
     } else {
       unsubscribe();
@@ -85,92 +98,98 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
 
   const getButtonText = () => {
     const status = isSubscribed;
-    if (status === "NotSubscribed") {
+    if (status === SubscribeStatus.NotSubscribe) {
       return "Subscribe";
-    } else if (status === "SubscribedOnAnotherDevice") {
+    } else if (status === SubscribeStatus.SubscribedOnAnotherDevice) {
       return "Subscribe On This Device";
-    } else {
+    } else if (status === SubscribeStatus.SubscribedOnThisDevice) {
       return "Unsubscribe";
+    } else {
+      return "Subscribe";
     }
   };
 
   let manageResults: any = null;
 
   const unsubscribe = () => {
-    navigator.serviceWorker.ready
-      .then(function (reg) {
-        setIsSubscribing(true);
-        reg.pushManager
-          .getSubscription()
-          .then(function (subscription) {
-            subscription
-              ?.unsubscribe()
-              .then(async function (_successful) {
-                const data = {
-                  pf_endpoint: "",
-                  pf_p256dh: "",
-                  pf_auth: "",
-                };
-                await dispatch(
-                  updateUserPnconfig(data, { username: username })
-                );
-
-                setIsSubscribed("NotSubscribed");
-                setIsSubscribing(false);
-              })
-              .catch(function (_e) {
-                Error({
-                  msg: "Unsubscribe failed.",
+    console.log("Unsubscribe started", isServiceWorkerSupported);
+    if (isServiceWorkerSupported) {
+      navigator.serviceWorker.ready
+        .then(function (reg) {
+          setIsSubscribing(true);
+          reg.pushManager
+            .getSubscription()
+            .then(function (subscription) {
+              subscription
+                ?.unsubscribe()
+                .then(function (_successful) {
+                  const data = {
+                    pf_endpoint: "",
+                    pf_p256dh: "",
+                    pf_auth: "",
+                  };
+                  dispatch(updateUserPnconfig(data, { username })).then(() => {
+                    setIsSubscribed(SubscribeStatus.NotSubscribe);
+                    setIsSubscribing(false);
+                  });
+                })
+                .catch(function (_e) {
+                  Error({
+                    msg: "Unsubscribe failed.",
+                  });
                 });
-              });
-          })
-          .catch(function (_e) {
-            Error({ msg: "Subscription Error" });
-          });
-      })
-      .catch(function (_e) {
-        Error({ msg: "Service Worker Error" });
-      });
+            })
+            .catch(function (_e) {
+              Error({ msg: "Subscription Error" });
+            });
+        })
+        .catch(function (_e) {
+          Error({ msg: "Service Worker Error" });
+        });
+    }
   };
 
   async function subscribe() {
-    setIsSubscribing(true);
-    const response = await dispatch(getPublicKey());
-    const public_key = response.data.public_key;
-    const sw = await navigator.serviceWorker.ready;
-    const push = await sw.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: public_key,
-    });
-    const p256dh = btoa(
-      String.fromCharCode.apply(
-        null,
-        new Uint8Array(push.getKey("p256dh") as any) as any
-      )
-    );
-    const auth = btoa(
-      String.fromCharCode.apply(
-        null,
-        new Uint8Array(push.getKey("auth") as any) as any
-      )
-    );
+    if (isServiceWorkerSupported) {
+      setIsSubscribing(true);
+      const response = await dispatch(getPublicKey());
+      const public_key = response.data.public_key;
+      const sw = await navigator.serviceWorker.ready;
+      const push = await sw.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: public_key,
+      });
 
-    const data = {
-      pf_endpoint: push.endpoint,
-      pf_p256dh: p256dh,
-      pf_auth: auth,
-    };
+      const p256dh = btoa(
+        String.fromCharCode.apply(
+          null,
+          new Uint8Array(push.getKey("p256dh") as any) as any
+        )
+      );
+      const auth = btoa(
+        String.fromCharCode.apply(
+          null,
+          new Uint8Array(push.getKey("auth") as any) as any
+        )
+      );
 
-    const res = await dispatch(
-      updateUserPnconfig(data, { username: username })
-    );
+      const data = {
+        pf_endpoint: push.endpoint,
+        pf_p256dh: p256dh,
+        pf_auth: auth,
+      };
 
-    if (res.status >= 200 && res.status <= 300) {
-      setIsSubscribed("SubscribedOnThisDevice");
-    } else {
-      console.log("Error saving web push info.");
+      const res = await dispatch(
+        updateUserPnconfig(data, { username: username })
+      );
+
+      if (res.status >= 200 && res.status <= 300) {
+        setIsSubscribed(SubscribeStatus.SubscribedOnThisDevice);
+      } else {
+        console.log("Error saving web push info.");
+      }
+      setIsSubscribing(false);
     }
-    setIsSubscribing(false);
   }
 
   useEffect(() => {
@@ -192,8 +211,16 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
         });
     }
 
-    if (!isIOSDevice) intialSubscriptionState();
-  }, [dispatch, reload, showNotifications, offset, eventFilter, isSubscribed]);
+    if (isServiceWorkerSupported) initialSubscriptionState();
+  }, [
+    dispatch,
+    reload,
+    showNotifications,
+    offset,
+    eventFilter,
+    isSubscribed,
+    isServiceWorkerSupported,
+  ]);
 
   // const handlePagination = (page: number, limit: number) => {
   //   updateQuery({ page, limit });
@@ -357,37 +384,37 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
                     Close
                   </button>
                 </div>
-                {!isIOSDevice && (
-                <div>
-                  <button
-                    onClick={handleSubscribeClick}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
-                    disabled={isSubscribing}
-                  >
-                    {isSubscribing && (
-                      <svg
-                        className="animate-spin h-5 w-5 mr-3"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-75"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="#f1edf7"
-                          fill="white"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className=""
-                          fill="white"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                    )}
-                    {getButtonText()}
-                  </button>
-                </div>
+                {isServiceWorkerSupported && (
+                  <div>
+                    <button
+                      onClick={handleSubscribeClick}
+                      className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
+                      disabled={isSubscribing}
+                    >
+                      {isSubscribing && (
+                        <svg
+                          className="animate-spin h-5 w-5 mr-3"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-75"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="#f1edf7"
+                            fill="white"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className=""
+                            fill="white"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                      )}
+                      {getButtonText()}
+                    </button>
+                  </div>
                 )}
               </div>
               <div className="font-bold text-xl mt-4">Notifications</div>
