@@ -30,7 +30,6 @@ describe("User management", () => {
     cy.contains("Add New User").click();
     cy.get('[name="user_type"]').select("Volunteer");
     cy.get('[placeholder="phone_number"]').type("9343234277");
-    cy.get('[placeholder="whatsapp_number"]').type("9239342343");
     cy.get('[name="facilities"]')
       .type("Harsha", { delay: 200 })
       .wait(2000)
