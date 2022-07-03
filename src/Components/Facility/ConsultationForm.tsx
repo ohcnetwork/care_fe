@@ -393,7 +393,10 @@ export const ConsultationForm = (props: any) => {
         case "discharge_advice":
           let invalid = false;
           for (let f of dischargeAdvice) {
-            if (!f.dosage.replace(/\s/g, "").length || !f.medicine.replace(/\s/g, "").length) {
+            if (
+              !f.dosage.replace(/\s/g, "").length ||
+              !f.medicine.replace(/\s/g, "").length
+            ) {
               invalid = true;
               break;
             }
@@ -491,13 +494,13 @@ export const ConsultationForm = (props: any) => {
   const handleChange:
     | ChangeEventHandler<HTMLInputElement>
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e: any) => {
-      e &&
-        e.target &&
-        dispatch({
-          type: "set_form",
-          form: { ...state.form, [e.target.name]: e.target.value },
-        });
-    };
+    e &&
+      e.target &&
+      dispatch({
+        type: "set_form",
+        form: { ...state.form, [e.target.name]: e.target.value },
+      });
+  };
 
   const handleTelemedicineChange: ChangeEventHandler<HTMLInputElement> = (
     e
@@ -820,7 +823,7 @@ export const ConsultationForm = (props: any) => {
                 />
                 <ErrorHelperText error={state.errors.discharge_advice} />
               </div>
-              <div id="ip_no-div">
+              <div id="ip_no-div" className="mt-4">
                 <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
                   name="ip_no"
@@ -850,7 +853,7 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
               )}
-              <div id="verified_by-div">
+              <div id="verified_by-div" className="mt-4">
                 <InputLabel id="exam-details-label">Verified By</InputLabel>
                 <MultilineInputField
                   rows={3}
@@ -867,7 +870,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.verified_by}
                 />
               </div>
-              <div id="diagnosis-div">
+              <div id="diagnosis-div" className="mt-4">
                 <InputLabel id="exam-details-label">Diagnosis</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -912,7 +915,7 @@ export const ConsultationForm = (props: any) => {
                 </div>
               )}
               {/* Telemedicine Fields */}
-              <div className="flex">
+              <div className="flex mt-4">
                 <div className="flex-1" id="is_telemedicine-div">
                   <InputLabel id="admitted-label">Telemedicine</InputLabel>
                   <RadioGroup
@@ -987,7 +990,7 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-              <div id="operation-div" className="mt-2">
+              <div id="operation-div" className="mt-4">
                 <InputLabel id="exam-details-label">Operation</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -1004,7 +1007,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.operation}
                 />
               </div>
-              <div id="special_instruction-div" className="mt-2">
+              <div id="special_instruction-div" className="mt-4">
                 <InputLabel id="special-instruction-label">
                   Special Instructions
                 </InputLabel>
@@ -1024,7 +1027,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row justify-between md:gap-5">
+              <div className="flex flex-col md:flex-row justify-between md:gap-5 mt-4">
                 <div id="weight-div" className="flex-1">
                   <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
                   <TextInputField
