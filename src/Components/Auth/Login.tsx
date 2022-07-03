@@ -202,7 +202,7 @@ export const Login = (props: any) => {
                   </Grid>
                 )}
 
-                <div className="w-full flex justify-between items-center px-4 pb-4">
+                <div className="w-full flex justify-between items-center pb-4">
                   <a
                     href="/forgot-password"
                     className="text-sm text-primary-400 hover:text-primary-500"
