@@ -495,8 +495,8 @@ export const ConsultationDetails = (props: any) => {
               )}
             </div>
 
-            <div className="flex px-4 flex-col md:flex-row">
-              <div className="flex w-3/4">
+            <div className="flex px-4 flex-col lg:flex-row gap-2">
+              <div className="flex flex-col w-3/4 h-full">
                 {/*consultationData.other_symptoms && (
                   <div className="capitalize">
                     <span className="font-semibold leading-relaxed">
@@ -524,7 +524,7 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col lg:flex-row gap-2 text-right">
+              <div className="flex flex-col lg:flex-row gap-2 text-right h-full">
                 <button className="btn btn-primary" onClick={handleClickOpen}>
                   <i className="fas fa-clipboard-list"></i>
                   &nbsp; Discharge Summary
