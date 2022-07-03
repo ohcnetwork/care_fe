@@ -1,4 +1,9 @@
-import React, { useReducer, useState, useEffect } from "react";
+import React, {
+  useReducer,
+  useState,
+  useEffect,
+  ReactEventHandler,
+} from "react";
 import {
   createAsset,
   getAsset,
@@ -29,6 +34,7 @@ import {
   MultilineInputField,
   PhoneNumberField,
   ErrorHelperText,
+  DateInputField,
 } from "../Common/HelperInputFields";
 import { AssetData } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
@@ -36,23 +42,58 @@ import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
+import moment from "moment";
 const Loading = loadable(() => import("../Common/Loading"));
 
-const initError: any = {
+interface CreateAssetForm {
+  asset_type: "INTERNAL" | "EXTERNAL";
+  asset_category: "5-Para-Monitor" | "Ventilator" | "PTZ Camera" | string;
+  name: string;
+  description: string;
+  location: string;
+  manufacturer: string;
+  model: string;
+  serial_number: string;
+  warranty_amc_applicable_till: string | null;
+  is_working: boolean;
+  support_name: string;
+  support_phone: string;
+  support_email: string;
+  note: string;
+  last_service_on: string | null;
+  not_working_reason: string;
+  qr_code_id: string;
+}
+
+const form: CreateAssetForm = {
+  asset_type: "INTERNAL",
+  asset_category: "",
   name: "",
-  asset_type: "",
   description: "",
-  is_working: "",
-  serial_number: "",
-  warranty_details: "",
   location: "",
-  vendor_name: "",
+  manufacturer: "",
+  model: "",
+  serial_number: "",
+  warranty_amc_applicable_till: null,
+  is_working: false,
   support_name: "",
   support_phone: "",
   support_email: "",
+  note: "",
+  last_service_on: null,
+  not_working_reason: "",
+  qr_code_id: "",
 };
 
+type FieldError = Record<keyof CreateAssetForm, string>;
+
+const initError: FieldError = Object.keys(form).reduce(
+  (a, c) => ({ ...a, [c]: "" }),
+  {} as any
+);
+
 const initialState = {
+  form: { ...form },
   errors: { ...initError },
 };
 
@@ -61,12 +102,22 @@ interface AssetProps {
   assetId?: string;
 }
 
-const asset_create_reducer = (state = initialState, action: any) => {
+type Action =
+  | { type: "set_error"; errors: FieldError }
+  | { type: "set_form"; payload: CreateAssetForm };
+
+const asset_create_reducer = (state = initialState, action: Action) => {
   switch (action.type) {
     case "set_error": {
       return {
         ...state,
         errors: action.errors,
+      };
+    }
+    case "set_form": {
+      return {
+        ...state,
+        form: action.payload,
       };
     }
     default:
@@ -82,25 +133,57 @@ const AssetCreate = (props: AssetProps) => {
   const { facilityId, assetId } = props;
 
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
-  const [name, setName] = useState<string>("");
-  const [asset_type, setAssetType] = useState<string>("");
-  const [not_working_reason, setNotWorkingReason] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [is_working, setIsWorking] = useState<string>("0");
-  const [serial_number, setSerialNumber] = useState<string>("");
+  const {
+    asset_category,
+    asset_type,
+    description,
+    is_working,
+    last_service_on,
+    location,
+    manufacturer,
+    model,
+    name,
+    not_working_reason,
+    note,
+    qr_code_id,
+    serial_number,
+    support_email,
+    support_name,
+    support_phone,
+    warranty_amc_applicable_till,
+  } = state.form;
   const [warranty_details, setWarrantyDetails] = useState<string>("");
   const [vendor_name, setVendorName] = useState<string>("");
-  const [support_name, setSupportName] = useState<string>("");
-  const [support_phone, setSupportPhone] = useState<string>("");
-  const [support_email, setSupportEmail] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
   const [locations, setLocations] = useState([]);
   const [asset, setAsset] = useState<AssetData>();
   const [facilityName, setFacilityName] = useState("");
-  const [qrCodeId, setQrCodeId] = useState("");
+  const [qrCodeId, setQrCodeId] = useState(qr_code_id);
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
+
+  const handleChange = (e: any) => {
+    const newForm = { ...state.form };
+    // @ts-ignore
+    newForm[e.target.name] = e.target.value;
+    dispatch({ type: "set_form", payload: newForm });
+  };
+
+  const handleValueChange = (name: keyof CreateAssetForm, value: any) => {
+    const newForm = { ...state.form };
+    // @ts-ignore
+    newForm[name] = value;
+    dispatch({ type: "set_form", payload: newForm });
+  };
+
+  const handleDateChange = (date: string | null, field: string) => {
+    if (moment(date).isValid()) {
+      const form = { ...state.form };
+      // @ts-ignore
+      form[field] = date;
+      dispatch({ type: "set_form", payload: form });
+    }
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -116,36 +199,40 @@ const AssetCreate = (props: AssetProps) => {
 
     if (assetId) {
       setIsLoading(true);
-      dispatchAction(getAsset(assetId)).then(({ data }: any) => {
-        setAsset(data);
-        setIsLoading(false);
-      });
+      dispatchAction(getAsset(assetId)).then(
+        ({ data }: { data: AssetData }) => {
+          dispatch({
+            type: "set_form",
+            payload: {
+              ...data,
+              ...data.meta,
+              location: data.location_object.id,
+            } as unknown as CreateAssetForm,
+          });
+          setIsLoading(false);
+        }
+      );
     }
   }, [assetId]);
-
-  useEffect(() => {
-    if (asset) {
-      setName(asset.name);
-      setDescription(asset.description);
-      setLocation(asset.location_object.id);
-      setAssetType(asset.asset_type);
-      setIsWorking(String(asset.is_working));
-      setNotWorkingReason(asset.not_working_reason);
-      setSerialNumber(asset.serial_number);
-      setWarrantyDetails(asset.warranty_details);
-      setVendorName(asset.vendor_name);
-      setSupportName(asset.support_name);
-      setSupportEmail(asset.support_email);
-      setSupportPhone(asset.support_phone);
-      setQrCodeId(asset.qr_code_id);
-    }
-  }, [asset]);
 
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.errors).forEach((field) => {
       switch (field) {
+        case "asset_type":
+          if (asset_type !== "INTERNAL" && asset_type !== "EXTERNAL") {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
+
+        case "asset_category":
+          if (!asset_category) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
         case "name":
           if (!name) {
             errors[field] = "Field is required";
@@ -153,23 +240,12 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "is_working":
-          if (is_working == "0") {
+          if (is_working === undefined || is_working === null) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
-        case "location":
-          if (!location || location === "0" || location === "") {
-            errors[field] = "Field is required";
-            invalidForm = true;
-          }
-          return;
-        case "asset_type":
-          if (asset_type !== "INTERNAL" && asset_type !== "EXTERNAL") {
-            errors[field] = "Field is required";
-            invalidForm = true;
-          }
-          return;
+
         case "support_phone":
           if (!support_phone) {
             errors[field] = "Field is required";
@@ -210,9 +286,8 @@ const AssetCreate = (props: AssetProps) => {
         asset_type: asset_type,
         description: description,
         is_working: is_working,
-        not_working_reason: is_working === "true" ? "" : not_working_reason,
+        not_working_reason: is_working ? "" : not_working_reason,
         serial_number: serial_number,
-        warranty_details: warranty_details,
         location: location,
         vendor_name: vendor_name,
         support_name: support_name,
@@ -220,6 +295,14 @@ const AssetCreate = (props: AssetProps) => {
         support_phone:
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
+        meta: {
+          asset_category,
+          manufacturer,
+          model,
+          warranty_amc_applicable_till,
+          note,
+          last_service_on,
+        },
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -317,7 +400,7 @@ const AssetCreate = (props: AssetProps) => {
         <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
       </div>
     );
-
+  console.log(state);
   return (
     <div className="px-6 pb-2">
       <PageTitle
@@ -333,29 +416,11 @@ const AssetCreate = (props: AssetProps) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <InputLabel htmlFor="asset-name" id="name=label" required>
-                  Asset Name
-                </InputLabel>
-                <TextInputField
-                  id="asset-name"
-                  fullWidth
-                  name="name"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setName(e.target.value)
-                  }
-                  errors={state.errors.name}
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="asset-type" id="name=label" required>
+                <InputLabel htmlFor="asset_type" id="asset_type" required>
                   Asset Type
                 </InputLabel>
                 <SelectField
-                  id="asset-type"
+                  id="asset_type"
                   fullWidth
                   name="asset_type"
                   placeholder=""
@@ -377,14 +442,89 @@ const AssetCreate = (props: AssetProps) => {
                   ]}
                   optionValue="name"
                   value={asset_type}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setAssetType(e.target.value)
-                  }
+                  onChange={handleChange}
                   errors={state.errors.asset_type}
                 />
               </div>
               <div>
-                <InputLabel htmlFor="location" id="name=label" required>
+                <InputLabel
+                  htmlFor="asset_category"
+                  id="asset_category"
+                  required
+                >
+                  Asset Category
+                </InputLabel>
+                <SelectField
+                  id="asset_category"
+                  fullWidth
+                  name="asset_category"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  options={[
+                    {
+                      id: "",
+                      name: "Select",
+                    },
+                    {
+                      id: "Ventilator",
+                      name: "Ventilator",
+                    },
+                    {
+                      id: "5-Para-Monitor",
+                      name: "5-Para-Monitor",
+                    },
+                    {
+                      id: "PTZ Camera",
+                      name: "PTZ Camera",
+                    },
+                    {
+                      id: "Others",
+                      name: "Others",
+                    },
+                  ]}
+                  optionValue="name"
+                  value={asset_category}
+                  onChange={handleChange}
+                  errors={state.errors.asset_category}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="name" id="name" required>
+                  Asset Name
+                </InputLabel>
+                <TextInputField
+                  id="name"
+                  fullWidth
+                  name="name"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={name}
+                  onChange={handleChange}
+                  errors={state.errors.name}
+                />
+              </div>
+
+              <div>
+                <InputLabel htmlFor="model" id="label">
+                  Model
+                </InputLabel>
+                <TextInputField
+                  id="model"
+                  fullWidth
+                  name="model"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={model}
+                  onChange={handleChange}
+                  errors={state.errors.model}
+                />
+              </div>
+
+              <div>
+                <InputLabel htmlFor="location" id="location" required>
                   Location
                 </InputLabel>
 
@@ -392,67 +532,17 @@ const AssetCreate = (props: AssetProps) => {
                   id="location"
                   fullWidth
                   name="location"
-                  placeholder=""
                   variant="outlined"
                   margin="dense"
                   options={[{ id: "0", name: "Select" }, ...locations]}
                   optionValue="name"
                   value={location}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setLocation(e.target.value)
-                  }
+                  onChange={handleChange}
                   errors={state.errors.location}
                 />
               </div>
               <div>
-                <InputLabel htmlFor="is_working" id="name=label" required>
-                  Is Working
-                </InputLabel>
-                <RadioGroup
-                  aria-label="is_working"
-                  name="is_working"
-                  value={is_working}
-                  onChange={(e) => setIsWorking(e.target.value)}
-                  className="flex flex-col justify-center mt-2"
-                >
-                  <Box display="flex" flexDirection="row">
-                    <FormControlLabel
-                      value={"true"}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={"false"}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.is_working} />
-              </div>
-              {is_working === "false" && (
-                <div>
-                  <InputLabel htmlFor="description" id="name=label">
-                    Reason
-                  </InputLabel>
-                  <MultilineInputField
-                    id="not_working_reason"
-                    rows={3}
-                    fullWidth
-                    name="description"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    value={not_working_reason}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setNotWorkingReason(e.target.value)
-                    }
-                    errors={state.errors.not_working_reason}
-                  />
-                </div>
-              )}
-              <div>
-                <InputLabel htmlFor="description" id="name=label">
+                <InputLabel htmlFor="description" id="description">
                   Description
                 </InputLabel>
                 <MultilineInputField
@@ -460,18 +550,32 @@ const AssetCreate = (props: AssetProps) => {
                   rows={3}
                   fullWidth
                   name="description"
-                  placeholder=""
+                  placeholder="Type description here"
                   variant="outlined"
                   margin="dense"
                   value={description}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setDescription(e.target.value)
-                  }
+                  onChange={handleChange}
                   errors={state.errors.description}
                 />
               </div>
               <div>
-                <InputLabel htmlFor="serial_number" id="name=label">
+                <InputLabel htmlFor="manufacturer" id="manufacturer">
+                  Manufacturer
+                </InputLabel>
+                <TextInputField
+                  id="manufacturer"
+                  name="manufacturer"
+                  fullWidth
+                  placeholder="manufacturer"
+                  variant="outlined"
+                  margin="dense"
+                  value={manufacturer}
+                  onChange={handleChange}
+                  errors={state.errors.manufacturer}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="serial_number" id="serial_number">
                   Serial Number
                 </InputLabel>
                 <TextInputField
@@ -482,48 +586,85 @@ const AssetCreate = (props: AssetProps) => {
                   variant="outlined"
                   margin="dense"
                   value={serial_number}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSerialNumber(e.target.value)
-                  }
+                  onChange={handleChange}
                   errors={state.errors.serial_number}
                 />
               </div>
               <div>
-                <InputLabel htmlFor="warranty_details" id="name=label">
-                  Warranty Details
+                <InputLabel
+                  htmlFor="warranty_amc_applicable_till"
+                  id="warranty_amc_applicable_till"
+                >
+                  Warranty/AMC Applicable till
                 </InputLabel>
-                <TextInputField
-                  id="warranty_details"
-                  fullWidth
-                  name="warranty_details"
-                  placeholder=""
-                  variant="outlined"
+                <DateInputField
+                  fullWidth={true}
+                  inputVariant="outlined"
+                  errors={state.errors.warranty_amc_applicable_till}
                   margin="dense"
-                  value={warranty_details}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWarrantyDetails(e.target.value)
+                  onChange={(val) =>
+                    handleValueChange("warranty_amc_applicable_till", val)
                   }
-                  errors={state.errors.warranty_details}
+                  value={state.form.warranty_amc_applicable_till}
                 />
               </div>
               <div>
-                <InputLabel htmlFor="vendor_name" id="name=label">
-                  Vendor Name
+                <InputLabel htmlFor="serial_number" id="name=label">
+                  Upload invoice/Warranty card/AMC
                 </InputLabel>
-                <TextInputField
-                  id="vendor_name"
-                  fullWidth
-                  name="vendor_name"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={vendor_name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setVendorName(e.target.value)
-                  }
-                  errors={state.errors.vendor_name}
-                />
+                <label className="btn btn-primary mt-2">
+                  <input className="hidden" type="file" />
+                  Upload File
+                </label>
               </div>
+              <div className="sm:col-span-2">
+                <InputLabel htmlFor="is_working" id="is_working" required>
+                  Is Working
+                </InputLabel>
+                <RadioGroup
+                  aria-label="is_working"
+                  name="is_working"
+                  value={is_working}
+                  onChange={(e) =>
+                    handleValueChange("is_working", e.target.value === "true")
+                  }
+                  className="flex flex-col justify-center mt-2"
+                >
+                  <Box display="flex" flexDirection="row">
+                    <FormControlLabel
+                      value={true}
+                      control={<Radio />}
+                      label="Yes"
+                    />
+                    <FormControlLabel
+                      value={false}
+                      control={<Radio />}
+                      label="No"
+                    />
+                  </Box>
+                </RadioGroup>
+                <ErrorHelperText error={state.errors.is_working} />
+                {!is_working && (
+                  <div>
+                    <InputLabel htmlFor="not_working_reason" id="name=label">
+                      Reason
+                    </InputLabel>
+                    <MultilineInputField
+                      id="not_working_reason"
+                      rows={3}
+                      fullWidth
+                      name="not_working_reason"
+                      placeholder=""
+                      variant="outlined"
+                      margin="dense"
+                      value={not_working_reason}
+                      onChange={handleChange}
+                      errors={state.errors.not_working_reason}
+                    />
+                  </div>
+                )}
+              </div>
+
               <div>
                 <InputLabel htmlFor="support_name" id="name=label">
                   Customer Support Name
@@ -536,36 +677,8 @@ const AssetCreate = (props: AssetProps) => {
                   variant="outlined"
                   margin="dense"
                   value={support_name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSupportName(e.target.value)
-                  }
+                  onChange={handleChange}
                   errors={state.errors.support_name}
-                />
-              </div>
-              <div>
-                <PhoneNumberField
-                  label="Phone Number*"
-                  value={support_phone}
-                  onChange={(value: any) => setSupportPhone(value)}
-                  errors={state.errors.support_phone}
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="support_email" id="name=label">
-                  Contact Email
-                </InputLabel>
-                <TextInputField
-                  id="support_email"
-                  fullWidth
-                  name="support_email"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={support_email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSupportEmail(e.target.value)
-                  }
-                  errors={state.errors.support_email}
                 />
               </div>
               <div>
@@ -579,13 +692,66 @@ const AssetCreate = (props: AssetProps) => {
                   placeholder=""
                   variant="outlined"
                   margin="dense"
-                  value={qrCodeId}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setQrCodeId(e.target.value)
-                  }
+                  value={qr_code_id}
+                  onChange={handleChange}
                   actionIcon={<CropFreeIcon className="cursor-pointer" />}
                   action={() => setIsScannerActive(true)}
                   errors={state.errors.qr_code_id}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="support_email" id="name=label">
+                  Customer Support Email
+                </InputLabel>
+                <TextInputField
+                  id="support_email"
+                  fullWidth
+                  name="support_email"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={support_email}
+                  onChange={handleChange}
+                  errors={state.errors.support_email}
+                />
+              </div>
+              <div>
+                <PhoneNumberField
+                  label="Customer Support Phone Number*"
+                  value={support_phone}
+                  onChange={(value: string) =>
+                    handleValueChange("support_phone", value)
+                  }
+                  errors={state.errors.support_phone}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="note">Note</InputLabel>
+                <MultilineInputField
+                  id="note"
+                  rows={3}
+                  fullWidth
+                  name="note"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={note}
+                  onChange={handleChange}
+                  errors={state.errors.note}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="last_service_on" id="last_service_on">
+                  Last Serviced on
+                </InputLabel>
+                <DateInputField
+                  fullWidth={true}
+                  inputVariant="outlined"
+                  errors=""
+                  name="last_service_on"
+                  margin="dense"
+                  onChange={(val) => handleValueChange("last_service_on", val)}
+                  value={last_service_on}
                 />
               </div>
             </div>

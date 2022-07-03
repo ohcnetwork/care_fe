@@ -18,6 +18,19 @@ interface AssetManageProps {
   assetId: string;
 }
 
+interface AssetDetailsTextProps {
+  label: string;
+  text?: string;
+}
+const AssetDetailsText = ({ label, text }: AssetDetailsTextProps) => {
+  return (
+    <div className="flex flex-col gap-1">
+      <h1 className="text-sm text-gray-800">{label}</h1>
+      <p className="text-base font-bold">{text || "---"}</p>
+    </div>
+  );
+};
+
 const AssetManage = (props: AssetManageProps) => {
   const { assetId } = props;
   const [asset, setAsset] = useState<AssetData>();
@@ -176,60 +189,76 @@ const AssetManage = (props: AssetManageProps) => {
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
       <div className="bg-white rounded-lg md:p-6 p-3 shadow">
-        <div className="text-2xl font-semibold mb-4">{asset?.name}</div>
+        <h1 className="text-2xl font-semibold mb-4">Basic Asset Details</h1>
         <div className="md:flex justify-between">
           <div className="mb-2">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Typography className="flex flex-col">
-                <span className="font-bold">Location</span>
-                <span>{asset?.location_object.name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Facility</span>
-                <span>{asset?.location_object.facility.name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Serial Number</span>
-                <span>{asset?.serial_number || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Warranty Details</span>
-                <span>{asset?.warranty_details || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Type</span>
-                <span>{asset?.asset_type || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Vendor Name</span>
-                <span>{asset?.vendor_name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Customer Support Name</span>
-                <span>{asset?.support_name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Contact Phone Number</span>
-                <span>{asset?.support_phone || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Contact Email</span>
-                <span>{asset?.support_email || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Status</span>
-                <span>{status(asset?.status)}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Working status</span>
-                <span>{working_status(asset?.is_working)}</span>
-              </Typography>
+              <AssetDetailsText label="Asset Type" text={asset?.asset_type} />
+              <AssetDetailsText
+                label="Asset Category"
+                text={asset?.meta?.asset_category}
+              />
+              <AssetDetailsText label="Asset Model" text={asset?.meta?.model} />
+              <AssetDetailsText
+                label="Manufacturer"
+                text={asset?.meta?.manufacturer}
+              />
+              <AssetDetailsText label="Serial No" text={asset?.serial_number} />
+              <AssetDetailsText
+                label="Warranty available till"
+                text={
+                  asset?.meta?.warranty_amc_applicable_till
+                    ? moment(asset?.meta?.warranty_amc_applicable_till).format(
+                        "ll"
+                      )
+                    : undefined
+                }
+              />
+              <AssetDetailsText label="Description" text={asset?.description} />
+              <AssetDetailsText
+                label="Location"
+                text={asset?.location_object.name}
+              />
+              <AssetDetailsText
+                label="Is the Asset working"
+                text={asset?.is_working ? "Yes" : "No"}
+              />
+
               {!asset?.is_working && (
-                <Typography className="flex flex-col">
-                  <span className="font-bold">Not working reason</span>
-                  <span>{asset?.not_working_reason || "--"}</span>
-                </Typography>
+                <AssetDetailsText
+                  label="Not Working Reason"
+                  text={asset?.not_working_reason}
+                />
               )}
+            </div>
+            <div className="mt-8">
+              <h1 className="text-2xl font-semibold mb-4">
+                Customer Support Details
+              </h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AssetDetailsText
+                  label="Customer Support Person"
+                  text={asset?.support_name}
+                />
+                <AssetDetailsText
+                  label="Customer Support Phone No"
+                  text={asset?.support_phone}
+                />
+
+                <AssetDetailsText
+                  label="Customer Support Email"
+                  text={asset?.support_email}
+                />
+                <AssetDetailsText
+                  label="Last Service On"
+                  text={
+                    asset?.meta?.last_service_on
+                      ? moment(asset?.meta?.last_service_on).format("ll")
+                      : undefined
+                  }
+                />
+                <AssetDetailsText label="Notes" text={asset?.meta?.note} />
+              </div>
             </div>
           </div>
           <div className="flex mt-2 flex-col gap-1">
