@@ -524,14 +524,14 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex-1 text-right">
+              <div className="flex flex-col lg:flex-row gap-2 text-right">
                 <button className="btn btn-primary" onClick={handleClickOpen}>
                   <i className="fas fa-clipboard-list"></i>
                   &nbsp; Discharge Summary
                 </button>
 
                 <button
-                  className="btn btn-primary ml-2"
+                  className="btn btn-primary"
                   onClick={handleDischageClickOpen}
                   disabled={
                     !patientData.is_active ||
