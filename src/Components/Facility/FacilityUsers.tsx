@@ -80,8 +80,8 @@ export default function FacilityUsers(props: any) {
       const res = await dispatch(getFacilityUsers(facilityId));
       if (!status.aborted) {
         if (res && res.data) {
-          setUsers(res.data.results);
-          setTotalCount(res.data.count);
+          setUsers(res.data);
+          setTotalCount(res.data.length);
         }
         setIsLoading(false);
       }
@@ -382,7 +382,6 @@ export default function FacilityUsers(props: any) {
   } else if (users && users.length) {
     manageUsers = (
       <div>
-        {userTypes.length}
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
