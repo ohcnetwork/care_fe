@@ -89,7 +89,7 @@ type ActionTextFieldProps = TextFieldPropsExtended & {
 //   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 // }
 interface DateInputFieldProps extends DatePickerProps {
-  value: string;
+  value: string | null;
   onChange: (
     date: MaterialUiPickersDate,
     value?: string | null | undefined
