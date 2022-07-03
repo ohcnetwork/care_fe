@@ -130,7 +130,7 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
-        <div className="mt-2">
+        <div className="mt-2 grid lg:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Name: </span>
             <Link href={`/patient/${patientData?.id}`}>
@@ -717,17 +717,18 @@ export default function ShiftDetails(props: { id: string }) {
                 </span>
                 {data.breathlessness_level || "--"}
               </div>
-
-              <div className="md:row-span-2 md:col-span-2">
+              <div>
+                {/* <div className="md:row-span-2 md:col-span-2"> */}
                 <span className="font-semibold leading-relaxed">Reason: </span>
                 <span className="ml-2">{data.reason || "--"}</span>
               </div>
 
-              <div className="md:row-span-2 md:col-span-2">
+              <div>
                 <span className="font-semibold leading-relaxed">
-                  Comments:{" "}
+                  {" "}
+                  Last Updated on :{" "}
                 </span>
-                <span className="ml-2">{data.comments || "--"}</span>
+                {moment(data.modified_date).format("LLL") || "--"}
               </div>
 
               <div>
@@ -738,12 +739,11 @@ export default function ShiftDetails(props: { id: string }) {
                 {moment(data.created_date).format("LLL") || "--"}
               </div>
 
-              <div>
+              <div className="md:row-span-2 md:col-span-2">
                 <span className="font-semibold leading-relaxed">
-                  {" "}
-                  Last Updated on :{" "}
+                  Comments:{" "}
                 </span>
-                {moment(data.modified_date).format("LLL") || "--"}
+                <span className="ml-2">{data.comments || "--"}</span>
               </div>
             </div>
 
