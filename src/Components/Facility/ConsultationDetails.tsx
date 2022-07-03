@@ -391,7 +391,7 @@ export const ConsultationDetails = (props: any) => {
         <DialogContent className="px-20">
           <div className="flex justify-center">
             <span className="text-xl text-black-800">
-              <i className="text-red-500 fas fa-exclamation-circle"></i>
+              <i className="text-red-500 fas fa-exclamation-triangle"></i>
               &nbsp;Are you sure you want to discharge <b>{patientData.name}</b>
               ?
             </span>
@@ -404,10 +404,9 @@ export const ConsultationDetails = (props: any) => {
             <CircularProgress size={20} />
           ) : (
             <Button
-              color="secondary"
               onClick={() => handlePatientDischarge(false)}
               autoFocus
-              className="bg-green-200 hover:bg-green-300"
+              className="bg-green-500 hover:bg-green-700 text-white font-bold"
               // disabled={preDischargeForm.disease_status ? false : true}
             >
               Proceed with Discharge
