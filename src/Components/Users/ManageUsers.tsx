@@ -480,7 +480,7 @@ export default function ManageUsers() {
         breadcrumbs={false}
       />
 
-      <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-4">
+      <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-2">
         <div className="bg-white overflow-hidden shadow col-span-1 rounded-lg">
           <div className="p-5 w-fit sm:p-6">
             <dl>
@@ -562,7 +562,7 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <div className="flex mt-2 mx-7 flex-wrap gap-2 items-center">
+      <div className="flex mt-2 mx-6 flex-wrap gap-2 items-center">
         {badge("Username", qParams.username, "username")}
         {badge("First Name", qParams.first_name, "first_name")}
         {badge("Last Name", qParams.last_name, "last_name")}

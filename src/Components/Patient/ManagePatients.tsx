@@ -655,7 +655,7 @@ export const PatientManager = (props: any) => {
   }
 
   return (
-    <div className="px-2">
+    <div className="px-6">
       {showDialog && (
         <FacilitiesSelectDialogue
           setSelected={(e) => setSelectedFacility(e)}
@@ -667,7 +667,7 @@ export const PatientManager = (props: any) => {
       <PageTitle
         title="Patients"
         hideBack={!facilityId}
-        className="mx-3 md:mx-8"
+        className="mx-3"
         breadcrumbs={!!facilityId}
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />

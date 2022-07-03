@@ -380,7 +380,7 @@ export default function SampleViewAdmin() {
   };
 
   return (
-    <div className="px-2">
+    <div className="px-6">
       {statusDialog.show && (
         <UpdateStatusDialog
           sample={statusDialog.sample}
@@ -392,7 +392,7 @@ export default function SampleViewAdmin() {
       <PageTitle
         title="Sample Management System"
         hideBack={true}
-        className="mx-3 md:mx-8"
+        className="mx-3"
         breadcrumbs={false}
         componentRight={
           downloadLoading ? (

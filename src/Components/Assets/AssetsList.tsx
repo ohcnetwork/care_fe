@@ -258,10 +258,10 @@ const AssetsList = () => {
     );
 
   return (
-    <div className="px-2">
+    <div className="px-6">
       <PageTitle
         title="Assets"
-        className="mx-3 md:mx-8"
+        className="mx-3"
         hideBack={true}
         breadcrumbs={false}
       />
