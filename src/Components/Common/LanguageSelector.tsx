@@ -24,7 +24,7 @@ export const LanguageSelector = (props: any) => {
       <select
         className={clsx(
           props.className,
-          "py-2 pl-2 pr-10 appearance-none rounded-md shadow-lg cursor-auto focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+          "py-2 pl-2 pr-10 appearance-none rounded-md shadow-lg cursor-pointer focus:outline-none focus:ring-primary-500 focus:border-primary-500"
         )}
         id="language-selector"
         name="language"
