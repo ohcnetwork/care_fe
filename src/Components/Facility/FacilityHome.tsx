@@ -27,6 +27,7 @@ import {
 } from "./models";
 import moment from "moment";
 import { RoleButton, roleType } from "../Common/RoleButton";
+import Error404 from "../ErrorPages/404";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -38,7 +39,7 @@ export const FacilityHome = (props: any) => {
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
-
+  const [facilityNotFound, setFacilityNotFound] = useState(false);
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
@@ -46,36 +47,43 @@ export const FacilityHome = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [facilityRes, capacityRes, doctorRes, triageRes] =
-        await Promise.all([
-          dispatch(getPermittedFacility(facilityId)),
+      const facilityRes = await dispatch(getPermittedFacility(facilityId));
+      if (facilityRes) {
+        const [capacityRes, doctorRes, triageRes] = await Promise.all([
           dispatch(listCapacity({}, { facilityId })),
           dispatch(listDoctor({}, { facilityId })),
           dispatch(getTriageInfo({ facilityId })),
         ]);
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (!facilityRes.data) {
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        } else {
-          setFacilityData(facilityRes.data);
-          if (capacityRes && capacityRes.data) {
-            setCapacityData(capacityRes.data.results);
-          }
-          if (doctorRes && doctorRes.data) {
-            setDoctorData(doctorRes.data.results);
-          }
-          if (
-            triageRes &&
-            triageRes.data &&
-            triageRes.data.results &&
-            triageRes.data.results.length
-          ) {
-            setPatientStatsData(triageRes.data.results);
+        if (!status.aborted) {
+          setIsLoading(false);
+          if (!facilityRes.data) {
+            Notification.Error({
+              msg: "Something went wrong..!",
+            });
+          } else {
+            setFacilityData(facilityRes.data);
+            if (capacityRes && capacityRes.data) {
+              setCapacityData(capacityRes.data.results);
+            }
+            if (doctorRes && doctorRes.data) {
+              setDoctorData(doctorRes.data.results);
+            }
+            if (
+              triageRes &&
+              triageRes.data &&
+              triageRes.data.results &&
+              triageRes.data.results.length
+            ) {
+              setPatientStatsData(triageRes.data.results);
+            }
           }
         }
+      } else {
+        setFacilityNotFound(true);
+        setIsLoading(false);
+        Notification.Error({
+          msg: `The facility ID seems to be incorrect, please try again...`,
+        });
       }
     },
     [dispatch, facilityId]
@@ -107,6 +115,10 @@ export const FacilityHome = (props: any) => {
 
   if (isLoading) {
     return <Loading />;
+  }
+
+  if (facilityNotFound) {
+    return <Error404 />;
   }
 
   let capacityList: any = null;
