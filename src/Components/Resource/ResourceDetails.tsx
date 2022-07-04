@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
+import clsx from "clsx";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
 import { navigate, Link } from "raviger";
@@ -451,9 +452,10 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
           </div>
           <div
-            className={`grid grid-cols-1 lg:grid-cols-${
-              data.assigned_facility_object ? "3" : "2"
-            } mt-8 gap-x-6 gap-y-12`}
+            className={clsx("grid grid-cols-1 mt-8 gap-x-6 gap-y-12", {
+              "lg:grid-cols-3": data.assigned_facility_object,
+              "lg:grid-cols-2": !data.assigned_facility_object,
+            })}
           >
             <div>
               <h4>Origin Facility</h4>
