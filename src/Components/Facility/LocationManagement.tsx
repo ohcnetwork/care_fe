@@ -28,13 +28,15 @@ const LocationRow = (props: LocationRowProps) => {
   return (
     <div
       key={id}
-      className="w-full pb-2 border-b md:flex justify-between items-center mb-1"
+      className="w-full pb-2 border-b lg:flex justify-between items-center mb-1"
     >
-      <div className="px-4 md:w-3/4 mb-2">
-        <div className="md:flex justify-between w-full mb-2">
-          <p className="text-xl font-normal capitalize">{name}</p>
+      <div className="px-4 lg:w-3/4 mt-2">
+        <div className="lg:flex items-baseline w-full">
+          <p className="text-xl capitalize break-words lg:w-1/4 lg:mr-4 mb-2">
+            {name}
+          </p>
+          <p className="text-sm break-all lg:w-3/4">{description}</p>
         </div>
-        <p className="text-sm break-all">{description}</p>
       </div>
       <div className="flex mt-6">
         <div className="px-2 py-2 w-full">
