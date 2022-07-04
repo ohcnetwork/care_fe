@@ -1120,7 +1120,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           in={String(state.form.gender) === "2"}
                           timeout="auto"
                           unmountOnExit
-                          className="col-span-2"
                         >
                           {
                             <div id="is_antenatal-div" className="col-span-2">
