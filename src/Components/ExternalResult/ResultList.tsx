@@ -19,22 +19,6 @@ import clsx from "clsx";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-// function Badge(props: { color: string; icon: string; text: string }) {
-//   return (
-//     <span
-//       className="m-1 h-full inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
-//       title={props.text}
-//     >
-//       <i
-//         className={
-//           "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-//         }
-//       ></i>
-//       {props.text}
-//     </span>
-//   );
-// }
-
 const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
@@ -274,25 +258,25 @@ export default function ResultList() {
         <tr key={`usr_${result.id}`} className="bg-white">
           <td
             onClick={() => navigate(resultUrl)}
-            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-900"
+            className="px-6 py-4 whitespace-nowrap text-md leading-5 text-gray-900"
           >
             <div className="flex">
               <a
                 href="#"
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
-                <p className="text-gray-500 group-hover:text-gray-900 transition ease-in-out duration-150">
+                <p className="text-gray-800 group-hover:text-gray-900 transition ease-in-out duration-150">
                   {result.name} - {result.age} {result.age_in}
                 </p>
               </a>
             </div>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             <span className="text-gray-900 font-medium">
               {result.test_type}
             </span>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
               {result.result}
             </span>
@@ -302,10 +286,10 @@ export default function ResultList() {
               </span>
             ) : null}
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-800">
             {result.result_date || "-"}
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             <Button
               variant="outlined"
               color="primary"
@@ -350,7 +334,9 @@ export default function ResultList() {
     manageResults = (
       <Grid item xs={12} md={12}>
         <Grid container justify="center" alignItems="center">
-          <h5> No Results Found</h5>
+          <h5 className="flex justify-center items-center text-gray-600">
+            No Results Found
+          </h5>
         </Grid>
       </Grid>
     );
@@ -371,7 +357,7 @@ export default function ResultList() {
         />
       )}
       <PageTitle
-        title="Results"
+        title="External Results"
         hideBack={true}
         className="-mt-2 md:mt-4"
         breadcrumbs={false}
@@ -389,11 +375,9 @@ export default function ResultList() {
             </dl>
           </div>
         </div>
-        <div className="w-full">
-          <div className="text-sm font-semibold my-2 lg:my-0 lg:mb-2">
-            Search by Name
-          </div>
-          <div className="w-full">
+        <div className="md:mt-2">
+          <div>
+            <div className="text-sm font-semibold mb-2">Search by Name</div>
             <InputSearchBox
               search={searchByName}
               value={qParams.name || ""}
@@ -436,7 +420,7 @@ export default function ResultList() {
               </span>
             </div>
           </div>
-          <div className="flex justify-end items-center gap-2">
+          <div className="flex ml-auto gap-2 md:pt-0 pt-2">
             <button
               className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
               onClick={(_) => setShowFilters((show) => !show)}
@@ -447,13 +431,9 @@ export default function ResultList() {
           </div>
         </div>
       </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
+      <div className="flex items-center flex-wrap gap-2 mb-4">
         {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
-      </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
         {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
-      </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
         {badge("Name", qParams.name || local.name, "name")}
         {badge(
           "Phone Number",
