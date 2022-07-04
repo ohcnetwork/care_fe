@@ -84,16 +84,12 @@ export default function InventoryList(props: any) {
       >
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
           <div className="flex items-center">
-            <div className="ml-3">
-              <p className="text-gray-900 whitespace-nowrap">
-                {inventoryItem.item_object?.name}
-                {inventoryItem.is_low && (
-                  <span className="ml-2 badge badge badge-danger">
-                    Low Stock
-                  </span>
-                )}
-              </p>
-            </div>
+            <p className="text-gray-900 whitespace-nowrap">
+              {inventoryItem.item_object?.name}
+              {inventoryItem.is_low && (
+                <span className="ml-2 badge badge badge-danger">Low Stock</span>
+              )}
+            </p>
           </div>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
