@@ -390,6 +390,20 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "discharge_advice":
+          let invalid = false;
+          for (let f of dischargeAdvice) {
+            if (!f.dosage.replace(/\s/g, "").length || !f.medicine.replace(/\s/g, "").length) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Prescription field can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -477,13 +491,13 @@ export const ConsultationForm = (props: any) => {
   const handleChange:
     | ChangeEventHandler<HTMLInputElement>
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e: any) => {
-    e &&
-      e.target &&
-      dispatch({
-        type: "set_form",
-        form: { ...state.form, [e.target.name]: e.target.value },
-      });
-  };
+      e &&
+        e.target &&
+        dispatch({
+          type: "set_form",
+          form: { ...state.form, [e.target.name]: e.target.value },
+        });
+    };
 
   const handleTelemedicineChange: ChangeEventHandler<HTMLInputElement> = (
     e
@@ -798,12 +812,13 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.consultation_notes}
                 />
               </div>
-              <div className="mt-4">
+              <div id="discharge_advice-div" className="mt-4">
                 <InputLabel>Medication</InputLabel>
                 <PrescriptionBuilder
                   prescriptions={dischargeAdvice}
                   setPrescriptions={setDischargeAdvice}
                 />
+                <ErrorHelperText error={state.errors.discharge_advice} />
               </div>
               <div id="ip_no-div">
                 <InputLabel id="refered-label">IP number*</InputLabel>

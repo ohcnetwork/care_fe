@@ -639,7 +639,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-
         default:
           return;
       }
@@ -945,6 +944,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <PageTitle
         title={headerText}
         className="mb-11"
+        backButtonCB={() => {
+          if (showImport) {
+            setShowImport(false);
+          } else {
+            navigate(`/facility/${facilityId}`);
+          }
+        }}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: { name: patientName },
@@ -1114,7 +1120,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           in={String(state.form.gender) === "2"}
                           timeout="auto"
                           unmountOnExit
-                          className="col-span-2"
                         >
                           {
                             <div id="is_antenatal-div" className="col-span-2">
@@ -1444,7 +1449,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               type="text"
                               value={state.form.srf_id}
                               onChange={handleChange}
-                              errors={state.errors.name}
+                              errors={state.errors.srf_id}
                             />
                           </div>
                           <div id="is_declared_positive-div">
