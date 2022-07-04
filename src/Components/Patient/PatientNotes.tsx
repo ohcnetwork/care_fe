@@ -115,7 +115,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       <textarea
         rows={3}
         placeholder="Type your Note"
-        className="mx-10 my-4 border border-gray-500 rounded-lg p-4 focus:outline-none focus:ring-green-500 focus:border-green-500"
+        className="mx-10 my-4 border border-gray-500 rounded-lg p-4 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
         onChange={(e) => setNoteField(e.target.value)}
       />
       <div className="flex w-full justify-end pr-10">
