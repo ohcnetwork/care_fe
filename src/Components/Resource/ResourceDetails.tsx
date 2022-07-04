@@ -203,7 +203,7 @@ export default function ResourceDetails(props: { id: string }) {
               {data.assigned_facility_object.state_object?.name}
             </div>
           ) : null}
-          <div className="flex justify-end mt-10">
+          <div className="flex mt-10">
             <div>
               <div className="font-semibold">APPROVED BY</div>
               <div className="mt-3">
