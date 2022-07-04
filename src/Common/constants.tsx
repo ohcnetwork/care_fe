@@ -690,3 +690,26 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
     shortcutKey: ["F"],
   },
 ];
+
+export const FACILITY_FEATURE_TYPES = [
+  {
+    id : 1,
+    name : "CT Scan Facility"
+  },
+  {
+    id : 2,
+    name : "Maternity Care"
+  },
+  {
+    id : 3,
+    name : "X-Ray facility"
+  },
+  {
+    id : 4,
+    name : "Neonatal care"
+  },
+  {
+    id : 5,
+    name : "Operation theater"
+  }
+];

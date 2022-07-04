@@ -6,6 +6,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 
 import {
   DOWNLOAD_TYPES,
+  FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
   KASP_STRING,
 } from "../../Common/constants";
@@ -377,6 +378,13 @@ export const HospitalList = (props: any) => {
                       <div className="inline-flex items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
+                    </div>
+                    <div className="flex gap-1 flex-wrap mt-2">
+                      {facility.features?.map((feature : number, i : number)=>(
+                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs">
+                          {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                        </div>
+                      ))}
                     </div>
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
