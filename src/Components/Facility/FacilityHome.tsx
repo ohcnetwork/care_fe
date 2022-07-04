@@ -363,7 +363,7 @@ export const FacilityHome = (props: any) => {
             Information on Oxygen
           </h1>
 
-          <div className="overflow-x-auto sm:rounded-lg border-b border-gray-200 mt-4">
+          <div className="overflow-x-auto sm:rounded-lg mt-4">
             <table className="border-2 rounded overflow-hidden align-middle">
               <thead>
                 <tr className="white border">
