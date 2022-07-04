@@ -93,6 +93,7 @@ const PatientNotes = (props: PatientNotesProps) => {
     }
     dispatch(addPatientNote(props.patientId, payload)).then(() => {
       Notification.Success({ msg: "Note added successfully" });
+      setNoteField("");
       fetchData();
     });
   };
