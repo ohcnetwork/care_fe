@@ -344,15 +344,38 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
           <div className="flex items-center">
             {item.file_category === "AUDIO" ? (
-              <div>
+              <div className="flex space-x-2">
                 {item.id ? (
                   Object.keys(url).length > 0 ? (
-                    <audio
-                      className="max-h-full max-w-full m-auto object-contain"
-                      src={url[item.id]}
-                      controls
-                      preload="auto"
-                    />
+                    <>
+                      <audio
+                        className="max-h-full max-w-full m-auto object-contain"
+                        src={url[item.id]}
+                        controls
+                        preload="auto"
+                        controlsList="nodownload"
+                      />
+                      <a
+                        href={url[item.id]}
+                        className="text-black p-4"
+                        download={true}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                          />
+                        </svg>
+                      </a>
+                    </>
                   ) : (
                     <CircularProgress />
                   )
