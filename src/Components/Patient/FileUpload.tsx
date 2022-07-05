@@ -120,6 +120,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
+  const [uploadFileNameError, setUploadFileNameError] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
   const [contentType, setcontentType] = useState<string>("");
@@ -426,18 +427,32 @@ export const FileUpload = (props: FileUploadProps) => {
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
+        setUploadFileNameError("");
       })
       .catch(() => {
         setUploadStarted(false);
       });
   };
 
-  const handleUpload = async (status: any) => {
+  const validateFileUpload = () => {
+    const filenameLength = uploadFileName.trim().length;
     const f = file;
-    if (f === undefined) return;
+    if (f === undefined) {
+      return false;
+    }
+    if (filenameLength === 0) {
+      setUploadFileNameError("Please give a name !!");
+      return false;
+    }
+    return true;
+  };
+
+  const handleUpload = async (status: any) => {
+    if (!validateFileUpload()) return;
+    const f = file;
     const category = "UNSPECIFIED";
     const filename = uploadFileName;
-    const name = f.name;
+    const name = f?.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
     const requestData = {
@@ -455,6 +470,7 @@ export const FileUpload = (props: FileUploadProps) => {
       .then(fetchData(status).then(() => {}));
 
     // setting the value of file name to empty
+    setUploadFileNameError("");
     setUploadFileName("");
   };
 
@@ -675,7 +691,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
                   }}
-                  errors={`${[]}`}
+                  errors={uploadFileNameError}
                 />
               </div>
               <div className="mt-4">
@@ -684,9 +700,15 @@ export const FileUpload = (props: FileUploadProps) => {
                 ) : (
                   <div className="md:flex justify-between">
                     <input
-                      title="changeFile"
+                      title="Choose File"
                       onChange={onFileChange}
                       type="file"
+                      className="block w-full text-sm text-slate-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-primary-100 file:text-primary-700
+                      hover:file:bg-primary-300"
                     />
                     <div className="mt-2">
                       <Button
