@@ -130,13 +130,37 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
-export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
-  { id: 1, text: "created_date", desc: "ASC Created Date" },
-  { id: 2, text: "-created_date", desc: "DESC Created Date" },
-  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
-  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
-  { id: 5, text: "review_time", desc: "ASC Review Time" },
-  { id: 6, text: "-review_time", desc: "DESC Review Time" },
+export const PATIENT_FILTER_ORDER = [
+  {
+    title: "Created Date",
+    description: "(Ascending)",
+    value: "created_date",
+  },
+  {
+    title: "Created Date",
+    description: "(Descending)",
+    value: "-created_date",
+  },
+  {
+    title: "Modified Date",
+    description: "(Ascending)",
+    value: "modified_date",
+  },
+  {
+    title: "Modified Date",
+    description: "(Descending)",
+    value: "-modified_date",
+  },
+  {
+    title: "Review Time",
+    description: "(Ascending)",
+    value: "review_time",
+  },
+  {
+    title: "Review Time",
+    description: "(Descending)",
+    value: "-review_time",
+  },
 ];
 
 const KASP_BED_TYPES = KASP_ENABLED

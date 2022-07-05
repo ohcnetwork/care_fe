@@ -15,6 +15,7 @@ import {
   PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
   KASP_ENABLED,
+  OptionsType,
 } from "../../Common/constants";
 import moment from "moment";
 import {
@@ -28,6 +29,7 @@ import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 import { debounce } from "lodash";
+import SelectMenu from "../Common/components/SelectMenu";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -38,8 +40,8 @@ const useMergeState = (initialState: any) => {
 
 export default function PatientFilterV2(props: any) {
   const { filter, onChange, closeFilter } = props;
-  const [isFacilityLoading, setFacilityLoading] = useState(false);
-  const [isDistrictLoading, setDistrictLoading] = useState(false);
+  const [_isFacilityLoading, setFacilityLoading] = useState(false);
+  const [_isDistrictLoading, setDistrictLoading] = useState(false);
 
   const [lsgBody, setLsgBody] = useState<any[]>([]);
   const [isLsgLoading, setLsgLoading] = useState(false);
@@ -412,6 +414,18 @@ export default function PatientFilterV2(props: any) {
     setFilterState(filterData);
   };
 
+  function _selectMenuOptions(options: Array<OptionsType>) {
+    return [
+      {
+        title: "Show All",
+        value: "",
+      },
+      ...options.map((option) => {
+        return { title: option.text, value: option.text };
+      }),
+    ];
+  }
+
   return (
     <div>
       <div className="flex justify-between">
@@ -436,17 +450,21 @@ export default function PatientFilterV2(props: any) {
       </div>
       <div className="w-full flex-none mt-2">
         <span className="text-sm font-semibold">Ordering</span>
-        <SelectField
-          name="ordering"
-          variant="outlined"
-          margin="dense"
-          optionKey="text"
-          optionValue="desc"
-          value={filterState.ordering}
-          options={[{ desc: "Select", text: "" }, ...PATIENT_FILTER_ORDER]}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
+        <div className="py-2">
+          <SelectMenu
+            selected={filterState["ordering"]}
+            onSelect={(ordering) =>
+              setFilterState({ ...filterState, ordering })
+            }
+            options={[
+              {
+                title: "Select",
+                value: "",
+              },
+              ...PATIENT_FILTER_ORDER,
+            ]}
+          />
+        </div>
       </div>
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
@@ -506,27 +524,26 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Facility type</span>
-          <SelectField
-            name="facility_type"
-            variant="outlined"
-            margin="dense"
-            value={filterState.facility_type}
-            options={[
-              { id: "", text: "Show All" },
-              ...FACILITY_TYPES.map(({ id, text }) => {
-                return {
-                  id: text,
-                  text,
-                };
-              }),
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
+          <div className="py-2">
+            <SelectMenu
+              selected={filterState["facility_type"]}
+              onSelect={(facility_type) =>
+                setFilterState({ ...filterState, facility_type })
+              }
+              options={_selectMenuOptions(FACILITY_TYPES)}
+            />
+          </div>
         </div>
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Gender</span>
+          <div className="py-2">
+            <SelectMenu
+              selected={filterState["gender"]}
+              onSelect={(gender) => setFilterState({ ...filterState, gender })}
+              options={_selectMenuOptions(GENDER_TYPES)}
+            />
+          </div>
           <SelectField
             name="gender"
             variant="outlined"
