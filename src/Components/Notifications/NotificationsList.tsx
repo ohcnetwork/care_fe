@@ -57,9 +57,9 @@ export default function ResultList({ expanded = false, onClickCB }: Props) {
       const res = await dispatch(getUserPnconfig({ username: username }));
       const reg = await navigator.serviceWorker.ready;
       const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res.data.pf_endpoint) {
+      if (!subscription && !res?.data?.pf_endpoint) {
         setIsSubscribed("NotSubscribed");
-      } else if (subscription?.endpoint === res.data.pf_endpoint) {
+      } else if (subscription?.endpoint === res?.data?.pf_endpoint) {
         setIsSubscribed("SubscribedOnThisDevice");
       } else {
         setIsSubscribed("SubscribedOnAnotherDevice");
