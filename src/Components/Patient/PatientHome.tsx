@@ -147,7 +147,7 @@ export const PatientHome = (props: any) => {
   function Badge(props: { color: string; icon: string; text: string }) {
     return (
       <span
-        className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+        className="inline-flex items-center py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
         title={props.text}
       >
         <i
@@ -353,7 +353,14 @@ export const PatientHome = (props: any) => {
   if (isConsultationLoading) {
     consultationList = <CircularProgress size={20} />;
   } else if (consultationListData.length === 0) {
-    consultationList = <Typography>No Consultation available.</Typography>;
+    consultationList = (
+      <div>
+        <hr />
+        <div className="p-4 text-xl text-gray-500 font-bold flex justify-center items-center border-2 border-solid border-gray-200">
+          No Data Found
+        </div>
+      </div>
+    );
   } else if (consultationListData.length > 0) {
     consultationList = consultationListData.map((itemData, idx) => (
       <ConsultationCard
@@ -367,7 +374,14 @@ export const PatientHome = (props: any) => {
   if (isSampleLoading) {
     sampleList = <CircularProgress size={20} />;
   } else if (sampleListData.length === 0) {
-    sampleList = <Typography>No sample test available.</Typography>;
+    sampleList = (
+      <div>
+        <hr />
+        <div className="p-4 text-xl text-gray-500 font-bold flex justify-center items-center border-2 border-solid border-gray-200">
+          No Data Found
+        </div>
+      </div>
+    );
   } else if (sampleListData.length > 0) {
     sampleList = sampleListData.map((itemData, idx) => (
       <SampleTestCard
@@ -598,7 +612,7 @@ export const PatientHome = (props: any) => {
                     </div>
                   )}
               </div>
-              <div className="flex flex-wrap mt-2">
+              <div className="flex flex-wrap mt-2 space-x-2">
                 {patientData.is_vaccinated ? (
                   <Badge color="blue" icon="syringe" text="Vaccinated" />
                 ) : (
