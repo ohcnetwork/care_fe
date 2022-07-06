@@ -68,7 +68,7 @@ export default function Breadcrumbs(props: any) {
               </Link>
             </div>
           </li>
-          {!showFullPath && crumbs!.length > 2 && (
+          {!showFullPath && crumbs && crumbs.length > 2 && (
             <li>
               <div className="flex items-center cursor-pointer">
                 <svg
