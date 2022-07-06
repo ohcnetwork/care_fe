@@ -195,7 +195,7 @@ export default function SampleViewAdmin() {
         (i) => i.text === status
       )?.desc;
       return (
-        <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
+        <div key={`usr_${item.id}`} className="w-full lg:w-1/2 mt-6 lg:px-4">
           <div
             className={`block border rounded-lg bg-white shadow h-full hover:border-black text-black ${
               item.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
@@ -348,11 +348,10 @@ export default function SampleViewAdmin() {
     );
   } else if (sample && sample.length === 0) {
     manageSamples = (
-      <Grid item xs={12} md={12} className="textMarginCenter">
-        <h5 style={{ color: "red" }}>
-          Its looks like samples are empty, please visit once you submit a
-          sample request
-        </h5>
+      <Grid item xs={12} md={12} style={{ display: "flex" }}>
+        <Grid container justify="center" alignItems="center">
+          <h5> No Sample Tests Found</h5>
+        </Grid>
       </Grid>
     );
   }
@@ -406,26 +405,24 @@ export default function SampleViewAdmin() {
           )
         }
       />
-      <div className="mt-5 grid grid-cols-1 gap-5">
-        <div className="flex flex-col lg:flex-row gap-6 justify-between">
-          <div className="bg-white overflow-hidden shadow rounded-lg lg:w-4/5 w-full">
-            <div className="px-4 py-5 sm:p-6">
-              <dl>
-                <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                  Total Samples Taken
-                </dt>
-                {/* Show spinner until count is fetched from server */}
-                {isLoading ? (
-                  <dd className="mt-4 text-5xl leading-9">
-                    <CircularProgress className="text-primary-500" />
-                  </dd>
-                ) : (
-                  <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                    {totalCount}
-                  </dd>
-                )}
-              </dl>
-            </div>
+      <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <dl>
+              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
+                Total Samples Taken
+              </dt>
+              {/* Show spinner until count is fetched from server */}
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
+            </dl>
           </div>
 
           <div className="w-full">

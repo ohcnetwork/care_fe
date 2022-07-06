@@ -260,14 +260,16 @@ const AssetManage = (props: AssetManageProps) => {
               <i className="fas fa-pencil-alt text-white mr-2"></i>
               Update Asset
             </button>
-            <button
-              onClick={() => navigate(`/assets/${asset?.id}/configure`)}
-              id="update-asset"
-              className="btn-primary btn"
-            >
-              <i className="fas fa-cog text-white mr-2"></i>
-              Configure Asset
-            </button>
+            {asset?.asset_class && (
+              <button
+                onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+                id="update-asset"
+                className="btn-primary btn"
+              >
+                <i className="fas fa-cog text-white mr-2"></i>
+                Configure Asset
+              </button>
+            )}
           </div>
         </div>
       </div>

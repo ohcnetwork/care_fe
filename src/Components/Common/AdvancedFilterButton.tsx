@@ -3,7 +3,7 @@ import React from "react";
 const AdvancedFilterButton = ({ setShowFilters }: any) => {
   return (
     <div>
-      <div className="flex items-start mb-2">
+      <div className="flex items-start">
         <button
           className="btn btn-primary-ghost"
           onClick={() => setShowFilters(true)}
