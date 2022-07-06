@@ -165,12 +165,12 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const zoom_values = [
-    "h-1/6 my-40",
-    "h-2/6 my-32",
-    "h-3/6 my-24",
-    "h-4/6 my-20",
-    "h-5/6 my-16",
-    "h-full my-12",
+    "h-1/6 w-1/6 my-40",
+    "h-2/6 w-2/6 my-32",
+    "h-3/6 w-3/6 my-24",
+    "h-4/6 w-4/6 my-20",
+    "h-5/6 w-5/6 my-16",
+    "h-full w-full my-12",
   ];
 
   const handleZoomIn = () => {

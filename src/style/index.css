@@ -486,6 +486,10 @@ button:disabled,
   color: #0085ad !important;
 }
 
+.MuiSelect-select:focus {
+  background-color: #ffffff !important;
+}
+
 .main-content {
   margin-top: 64px;
   border-bottom: solid 50px #f1f1f1;
