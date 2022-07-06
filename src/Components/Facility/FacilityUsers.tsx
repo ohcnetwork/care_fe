@@ -80,8 +80,8 @@ export default function FacilityUsers(props: any) {
       const res = await dispatch(getFacilityUsers(facilityId));
       if (!status.aborted) {
         if (res && res.data) {
-          setUsers(res.data);
-          setTotalCount(res.data.length);
+          setUsers(res.data.results);
+          setTotalCount(res.data.count);
         }
         setIsLoading(false);
       }
