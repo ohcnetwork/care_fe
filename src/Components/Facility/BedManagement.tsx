@@ -76,9 +76,9 @@ const BedRow = (props: BedRowProps) => {
   return (
     <div
       key={id}
-      className="w-full pt-4 pb-2 border-b lg:flex justify-between items-center"
+      className="w-full border-b lg:flex justify-between items-center py-6"
     >
-      <div className="px-4 lg:w-3/4 mb-2">
+      <div className="px-4 lg:w-3/4">
         <p className="text-xl font-normal capitalize">
           {name} &nbsp;
           <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
@@ -90,7 +90,7 @@ const BedRow = (props: BedRowProps) => {
         </p>
         <p className="text-sm break-all">{description}</p>
       </div>
-      <div className="flex mt-6">
+      <div className="flex">
         <div className="px-2 py-2 w-full">
           <button
             onClick={() =>
