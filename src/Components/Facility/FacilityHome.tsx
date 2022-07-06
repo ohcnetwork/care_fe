@@ -7,7 +7,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
-import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
+import { BED_TYPES, DOCTOR_SPECIALIZATION, FACILITY_FEATURE_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getPermittedFacility,
@@ -111,7 +111,11 @@ export const FacilityHome = (props: any) => {
 
   let capacityList: any = null;
   if (!capacityData || !capacityData.length) {
-    capacityList = <h5>No Bed Types Found</h5>;
+    capacityList = (
+      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+        No Bed Types Found
+      </h5>
+    );
   } else {
     capacityList = BED_TYPES.map((x) => {
       let res = capacityData.find((data) => {
@@ -127,7 +131,11 @@ export const FacilityHome = (props: any) => {
 
   let doctorList: any = null;
   if (!doctorData || !doctorData.length) {
-    doctorList = <h5>No Doctors Found</h5>;
+    doctorList = (
+      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+        No Doctors Found
+      </h5>
+    );
   } else {
     doctorList = doctorData.map((data: DoctorModal) => {
       return (
@@ -244,6 +252,19 @@ export const FacilityHome = (props: any) => {
                         </a>
                       </div>
                     </div>
+                    <div className="flex items-center gap-3 mt-4">
+                      <div>
+                        <h1 className="text-lg font-bold">Features</h1>
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          {facilityData.features?.map((feature, i)=>(
+                            <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
+                              {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                            </div>
+                          ))}
+                        </div>
+                        
+                      </div>
+                    </div>
                   </div>
                   <div className="lg:flex-1 min-w-[300px] md:flex flex-col justify-between">
                     <div className="mb-4">
@@ -313,13 +334,15 @@ export const FacilityHome = (props: any) => {
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Inventory Management
             </button>
-            <button
+            <RoleButton
               className="btn-primary btn mt-2"
-              onClick={() => navigate(`/facility/${facilityId}/location`)}
+              handleClickCB={() => navigate(`/facility/${facilityId}/location`)}
+              disableFor="readOnly"
+              buttonType="html"
             >
               <i className="fas fa-map-marker-alt text-white mr-2"></i>
               Location Management
-            </button>
+            </RoleButton>
             <RoleButton
               className="btn-primary btn mt-2"
               handleClickCB={() =>
@@ -416,7 +439,7 @@ export const FacilityHome = (props: any) => {
               Add More Bed Types
             </RoleButton>
           </div>
-          <div className="mt-4 flex flex-wrap">{capacityList}</div>
+          <div className="mt-4 flex flex-wrap w-full">{capacityList}</div>
         </div>
         <div className="mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
@@ -462,6 +485,14 @@ export const FacilityHome = (props: any) => {
               </thead>
               <tbody>{stats}</tbody>
             </table>
+            {stats.length === 0 && (
+              <div>
+                <hr />
+                <div className="p-4 text-xl text-gray-500 font-bold flex justify-center items-center">
+                  No Data Found
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -482,7 +482,10 @@ export const PatientManager = (props: any) => {
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
       let patientUrl = "";
-      if (patient.last_consultation) {
+      if (
+        patient.last_consultation &&
+        patient.last_consultation?.facility === patient.facility
+      ) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation.id}`;
       } else if (patient.facility) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
