@@ -935,6 +935,11 @@ export const ConsultationDetails = (props: any) => {
                           )}
                         </tbody>
                       </table>
+                      {consultationData.discharge_advice.length === 0 && (
+                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
+                          No data found
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

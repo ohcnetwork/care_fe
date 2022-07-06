@@ -749,7 +749,7 @@ export const HospitalList = (props: any) => {
             "kasp_empanelled"
           )}
       </div>
-      <div className="mt-4 pb-24">
+      <div className="mt-4 pb-4">
         <div>{manageFacilities}</div>
       </div>
     </div>
