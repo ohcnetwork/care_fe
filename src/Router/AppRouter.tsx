@@ -94,7 +94,7 @@ const routes = {
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
   ),
-  "facility/:facilityId/users": ({ facilityId }: any) => (
+  "/facility/:facilityId/users": ({ facilityId }: any) => (
     <FacilityUsers facilityId={facilityId} />
   ),
   "/facility/:facilityId/resource/new": ({ facilityId }: any) => (
