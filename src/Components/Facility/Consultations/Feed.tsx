@@ -123,11 +123,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     [consultationId, dispatch]
   );
-
-  useEffect(()=>{
-    console.log(cameraConfig);
-  },[cameraConfig])
-
   const middlewareHostname =
     cameraMiddlewareHostname || "dev_middleware.coronasafe.live";
 
@@ -387,22 +382,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             </div>
           </div>
         )}
-        {/*cameraState && (
-          <div className="absolute left-3 bottom-3 rounded-xl text-xs p-4 flex flex-col text-black bg-white/40">
-            {
-              Object.keys(cameraState).map((key,i)=>{
-                const val = cameraState[key as keyof PTZState];
-                return (
-                  <div key={i}>
-                    <b>
-                      {key} : 
-                    </b> {(Math.round(val * 100000) / 100000).toFixed(5)} 
-                  </div>
-                )
-              })
-            }
-          </div>
-        )*/}
         <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center text-white">
           {streamStatus === StreamStatus.Offline && (
             <div className="text-center">
@@ -439,57 +418,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             </div>
           )}
         </div>
-        {/* zoom slider (broken)
-        <div className="absolute bottom-8 right-[calc(158px+2rem)] z-20 flex justify-center items-center gap-4">
-          <FeedButton
-            camProp={cameraPTZ[6]}
-            styleType="PLAIN"
-            clickAction={()=>{
-              cameraPTZ[6].callback();
-              if(cameraState){
-                const val = cameraState.zoom;
-                const newVal = val > 0 ? (val - (0.1 / Math.max(1, precision))) : val;
-                setCameraState({
-                  ...cameraState,
-                  zoom : newVal
-                })
-              }
-            }}
-          />
-          <input 
-            type="range"
-            id="feed-range"
-            min="0" 
-            max="100"
-            value={camTimeout *100}
-            className=""
-            onChange={(e)=>{
-              
-              if(cameraState){
-                const zoomval = (parseInt(e.target.value) / 100);
-                setCamTimeout(zoomval)
-                
-              }
-            }}
-          />
-          <FeedButton
-            camProp={cameraPTZ[5]}
-            styleType="PLAIN"
-            clickAction={()=>{
-              cameraPTZ[5].callback();
-              if(cameraState){
-                const val = cameraState.zoom;
-                const newVal = val < 1 ? (val + (0.1 / Math.max(1, precision))) : val;
-                setCameraState({
-                  ...cameraState,
-                  zoom : newVal
-                })
-              }
-            }}
-          />
-          
-        </div>
-        */}
         <div className="absolute top-8 right-8 z-20 flex flex-col gap-4">
           {
             [10,9,7,5,6].map((button, i)=>{
