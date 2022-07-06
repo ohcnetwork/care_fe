@@ -452,10 +452,10 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
           </div>
           <div
-            className={clsx("grid grid-cols-1 mt-8 gap-x-6 gap-y-12", {
-              "lg:grid-cols-3": data.assigned_facility_object,
-              "lg:grid-cols-2": !data.assigned_facility_object,
-            })}
+            className={clsx(
+                "grid grid-cols-1 mt-8 gap-x-6 gap-y-12", 
+                data.assigned_facility_object ? "lg:grid-cols-3" : "lg:grid-cols-2"
+            )}
           >
             <div>
               <h4>Origin Facility</h4>
