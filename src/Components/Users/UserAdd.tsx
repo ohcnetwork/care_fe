@@ -10,7 +10,7 @@ import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
-import { useCallback, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -25,6 +25,7 @@ import {
   getDistrictByState,
   getLocalbodyByDistrict,
   getStates,
+  getUserDetails,
   getUserListFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
@@ -134,6 +135,24 @@ export const UserAdd = (props: UserProps) => {
   >([]);
   const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
+  const [usernameInput, setUsernameInput] = useState("");
+  const [usernameExists, setUsernameExists] = useState<number>(0);
+
+  const checkUsername = async (username : string) => {
+    setUsernameExists(1);
+    const userDetails = await dispatchAction(getUserDetails(username), true);
+    setUsernameExists(userDetails ? 2 : 3);
+  }
+
+  useEffect(()=>{
+    setUsernameExists(0);
+    if(usernameInput.length > 1){
+      let timeout = setTimeout(() => {
+        checkUsername(usernameInput);
+      }, 500);
+      return ()=>clearTimeout(timeout);
+    }
+  }, [usernameInput])
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -375,6 +394,9 @@ export const UserAdd = (props: UserProps) => {
             errors[field] =
               "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
+          } else if (usernameExists){
+            errors[field] = "This username already exists";
+            invalidForm = true;
           }
           return;
         case "password":
@@ -501,6 +523,7 @@ export const UserAdd = (props: UserProps) => {
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
       };
+
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
       if (res && (res.data || res.data === "") && res.status >= 200 && res.status < 300) {
@@ -617,12 +640,26 @@ export const UserAdd = (props: UserProps) => {
                   autoComplete="new-username"
                   variant="outlined"
                   margin="dense"
-                  onChange={handleChange}
+                  value={usernameInput}
+                  onChange={(e)=>{
+                    handleChange(e);
+                    setUsernameInput(e.target.value);
+                  }}
                   errors={state.errors.username}
                   onFocus={() => setUsernameInputInFocus(true)}
                   onBlur={() => setUsernameInputInFocus(false)}
                 />
-
+                {usernameExists !== 0 && (
+                  <>
+                    {usernameExists === 1 ? 
+                      <span className="text-gray-700">checking...</span> 
+                    : (usernameExists === 2 ? 
+                      <span className="text-red-500">User already exists</span> 
+                    : (usernameExists === 3 && 
+                      <span className="text-primary-500">Available!</span>
+                    ))}
+                  </>
+                )}
                 {usernameInputInFocus && (
                   <div className="pl-2 text-small text-gray-500">
                     <div>
