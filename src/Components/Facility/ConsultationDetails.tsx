@@ -601,9 +601,9 @@ export const ConsultationDetails = (props: any) => {
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
               <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row">
                 <TeleICUPatientVitalsCard patient={patientData} />
-                <TeleICUPatientVitalsGraphCard
+                {/*<TeleICUPatientVitalsGraphCard
                   consultationId={patientData.last_consultation?.id}
-                />
+                />*/}
               </section>
 
               {consultationData.symptoms_text && (

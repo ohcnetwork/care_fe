@@ -18,19 +18,12 @@ export type WaveformType = {
 
 export default function Waveform(props : {wave : WaveformType}){
     const wave = props.wave;
-    const data = wave.data.split(" ").map(Number);
+    const data = wave.data.split(" ").map(Number).reverse();
     const [xData, setXData] = useState<number[]>([])
-    const yAxisData = (name: string) => {
-        const newObj = Object.values(data)
-        .map((p: any) => p[name])
-        .reverse();
-        console.log(newObj, data);
-        return data;
-         
-      };
     useEffect(()=>{
         const wave = props.wave;
         const data = wave.data.split(" ").map(Number);
+        console.log(data.length);
         let newX = [];
         for (let i = 0; i < data.length; i++) {
             newX[i] = i+1;
@@ -39,7 +32,7 @@ export default function Waveform(props : {wave : WaveformType}){
     }, [props])
     
     return (
-        <div className="w-[600px]">
+        <div className="w-full">
             <LinePlot
                 title="Waveform"
                 name="waveform"
@@ -47,6 +40,7 @@ export default function Waveform(props : {wave : WaveformType}){
                 yData={data}
                 low={wave["data-low-limit"]}
                 high={wave["data-high-limit"]}
+                classes="h-full"
             />
         </div>
     )

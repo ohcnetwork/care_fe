@@ -105,5 +105,5 @@ export const LinePlot = (props: any) => {
     generalOptions = { ...generalOptions, ...visualMap };
   }
 
-  return <ReactECharts option={generalOptions} />;
+  return <ReactECharts option={generalOptions} className={props.classes} />;
 };

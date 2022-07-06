@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listAssetBeds } from "../../../Redux/actions";
 import { AssetData } from "../../Assets/AssetTypes";
@@ -48,7 +48,7 @@ export default function TeleICUPatientVitalsCard({
           bed: patient.last_consultation?.current_bed?.bed_object?.id,
         })
       );
-      console.log("Found " + bedAssets?.data?.results?.length + "bedAssets:");
+      //console.log("Found " + bedAssets?.data?.results?.length + "bedAssets:");
       bedAssets = {
         ...bedAssets,
         data: {
@@ -63,17 +63,13 @@ export default function TeleICUPatientVitalsCard({
       if (bedAssets.data.results.length > 0) {
         setHl7Asset(bedAssets.data.results[0].asset_object);
       }
-      console.log("Found " + bedAssets.data?.results?.length + "bedAssets:");
+      //console.log("Found " + bedAssets.data?.results?.length + "bedAssets:");
     }
   };
 
   useEffect(() => {
     fetchData();
   }, [patient]);
-
-  useEffect(()=>{
-    console.log(waveform);
-  },[waveform])
 
   const connectWs = (url: string) => {
     wsClient.current = new WebSocket(url);
@@ -111,8 +107,57 @@ export default function TeleICUPatientVitalsCard({
     };
   }, []);
 
+  const vitals : [ReactNode, string, string | null][] = [
+    
+    [(<>Pulse Rate</>), "pulse-rate", "pulse"],
+    [(<>Heart Rate</>),"heart-rate","pulse"],
+    [(<>SpO<sub>2</sub></>),"SpO2","ventilator_spo2"],
+    [(<>R. Rate</>), "respiratory-rate", "resp"],
+    [(<>Temperature (F)</>),"body-temperature1", "temperature"],
+    
+  ]
+
   return (
-    <div className="lg:w-8/12 w-full p-5 py-3">
+    <div className=" w-full">
+      <div className="flex w-full items-stretch">
+        <div className="w-full flex items-stretch py-3 px-5">
+          { waveform ? <Waveform wave = {waveform} /> : (
+            <div className="h-full w-full flex items-center justify-center">
+              <div className="text-center w-[150px]">
+                <i className="fas fa-plug-circle-exclamation text-4xl mb-4" />
+                <div>
+                  No Live data at the moment!
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col w-[220px] border-l border-l-gray-400 p-3">
+          {
+            vitals.map((vital, i)=>{
+
+              const liveReading = getVital(patientObservations, vital[1])
+
+              return (
+                <div key={i} className="p-2">
+                  <h2 className="font-bold text-3xl">
+                    {liveReading 
+                    || patient.last_consultation?.last_daily_round?.[vital[2] || ""] 
+                    || "--"}
+                  </h2>
+                  <div>
+                    
+                    <i className={`fas fa-circle text-xs mr-2 ${liveReading ? "text-green-600" : "text-gray-600"}`} />
+                    {vital[0]}
+                  </div>
+                  
+                </div>
+              )
+            })
+          }
+        </div>
+      </div>
+      {/*
       <h4 className="flex items-center mb-2">
         <span className="font-semibold text-xl">Vitals</span>
       </h4>
@@ -231,6 +276,7 @@ export default function TeleICUPatientVitalsCard({
         </div>
         { waveform && <Waveform wave = {waveform} />}
       </div>
+      */}
     </div>
   );
 }
