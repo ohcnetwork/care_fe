@@ -212,7 +212,7 @@ const AssetCreate = (props: AssetProps) => {
       const data = {
         name: name,
         asset_type: asset_type,
-        asset_class: asset_class,
+        asset_class: asset_class || "",
         description: description,
         is_working: is_working,
         not_working_reason: is_working === "true" ? "" : not_working_reason,
