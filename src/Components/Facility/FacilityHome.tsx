@@ -111,7 +111,11 @@ export const FacilityHome = (props: any) => {
 
   let capacityList: any = null;
   if (!capacityData || !capacityData.length) {
-    capacityList = <h5>No Bed Types Found</h5>;
+    capacityList = (
+      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+        No Bed Types Found
+      </h5>
+    );
   } else {
     capacityList = BED_TYPES.map((x) => {
       let res = capacityData.find((data) => {
@@ -127,7 +131,11 @@ export const FacilityHome = (props: any) => {
 
   let doctorList: any = null;
   if (!doctorData || !doctorData.length) {
-    doctorList = <h5>No Doctors Found</h5>;
+    doctorList = (
+      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+        No Doctors Found
+      </h5>
+    );
   } else {
     doctorList = doctorData.map((data: DoctorModal) => {
       return (
@@ -431,7 +439,7 @@ export const FacilityHome = (props: any) => {
               Add More Bed Types
             </RoleButton>
           </div>
-          <div className="mt-4 flex flex-wrap">{capacityList}</div>
+          <div className="mt-4 flex flex-wrap w-full">{capacityList}</div>
         </div>
         <div className="mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
