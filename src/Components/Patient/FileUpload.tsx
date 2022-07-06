@@ -17,10 +17,9 @@ import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import { GetApp, Visibility } from "@material-ui/icons";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
-// import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
@@ -58,30 +57,6 @@ const ExtImage: URLS = {
   png: "1",
   svg: "1",
 };
-
-// function getModalStyle() {
-//   const top = 100;
-//   const left = 100;
-
-//   return {
-//     top: `${top}%`,
-//     left: `${left}%`,
-//     transform: `translate(-${top}%, -${left}%)`,
-//   };
-// }
-
-// const useStyles = makeStyles((theme: Theme) =>
-//   createStyles({
-//     paper: {
-//       position: "absolute",
-//       width: "60%",
-//       backgroundColor: theme.palette.background.paper,
-//       border: "2px solid #000",
-//       boxShadow: theme.shadows[5],
-//       padding: theme.spacing(2, 4, 3),
-//     },
-//   })
-// );
 
 export const LinearProgressWithLabel = (props: any) => {
   return (
@@ -190,12 +165,12 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const zoom_values = [
-    "h-1/6 my-40",
-    "h-2/6 my-32",
-    "h-3/6 my-24",
-    "h-4/6 my-20",
-    "h-5/6 my-16",
-    "h-full my-12",
+    "h-1/6 w-1/6 my-40",
+    "h-2/6 w-2/6 my-32",
+    "h-3/6 w-3/6 my-24",
+    "h-4/6 w-4/6 my-20",
+    "h-5/6 w-5/6 my-16",
+    "h-full w-full my-12",
   ];
 
   const handleZoomIn = () => {
@@ -367,7 +342,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 : "-"}
             </div>
           </div>
-          <div>
+          <div className="flex items-center">
             {item.file_category === "AUDIO" ? (
               <div>
                 {item.id ? (
@@ -392,7 +367,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
-                  startIcon={<GetAppIcon>load</GetAppIcon>}
+                  startIcon={<Visibility />}
                   onClick={() => {
                     loadFile(item.id);
                   }}
@@ -601,7 +576,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       download
                       className="text-white p-4 my-2 rounded m-2 bg-primary-500"
                     >
-                      <GetAppIcon>load</GetAppIcon>
+                      <GetApp>load</GetApp>
                       Download
                     </a>
                   </div>

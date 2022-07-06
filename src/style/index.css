@@ -486,6 +486,10 @@ button:disabled,
   color: #0085ad !important;
 }
 
+.MuiSelect-select:focus {
+  background-color: #ffffff !important;
+}
+
 .main-content {
   margin-top: 64px;
   border-bottom: solid 50px #f1f1f1;
@@ -761,23 +765,20 @@ button:disabled,
   padding-left: 5px;
 }
 
-@screen md {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: theme(colors.gray.500) theme(colors.gray.100);
-  }
+
+ 
   ::-webkit-scrollbar {
-    width: 12px;
+    width: 2px;
   }
   ::-webkit-scrollbar-track {
-    background: theme(colors.gray.100);
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background-color: theme(colors.gray.500);
+    background-color: #6B7280;
     border-radius: 6px;
-    border: 3px solid theme(colors.gray.100);
+    border: 1px #6B7280;
   }
-}
+
 
 @media (max-width:640px)
   {

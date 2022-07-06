@@ -227,7 +227,7 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
 export const GENDER_TYPES: Array<OptionsType> = [
   { id: 1, text: "Male" },
   { id: 2, text: "Female" },
-  { id: 3, text: "Other" },
+  { id: 3, text: "Non-binary" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -259,15 +259,9 @@ export const ADMITTED_TO = [
 
 export const PATIENT_FILTER_ADMITTED_TO = [
   { id: "0", text: "Not admitted" },
-  { id: "20", text: "Home Isolation" },
   { id: "1", text: "Isolation Room" },
   { id: "6", text: "Bed with Oxygen Support" },
   { id: "2", text: "ICU" },
-  { id: "4", text: "ICU with Oxygen Support" },
-  { id: "3", text: "ICU with Non Invasive Ventilator" },
-  { id: "5", text: "ICU with Invasive Ventilator" },
-  { id: "30", text: "Gynaecology Ward" },
-  { id: "40", text: "Paediatric Ward" },
 ];
 
 export const PATIENT_CATEGORY = [
@@ -695,4 +689,27 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
     action: "fullScreen",
     shortcutKey: ["F"],
   },
+];
+
+export const FACILITY_FEATURE_TYPES = [
+  {
+    id : 1,
+    name : "CT Scan Facility"
+  },
+  {
+    id : 2,
+    name : "Maternity Care"
+  },
+  {
+    id : 3,
+    name : "X-Ray facility"
+  },
+  {
+    id : 4,
+    name : "Neonatal care"
+  },
+  {
+    id : 5,
+    name : "Operation theater"
+  }
 ];

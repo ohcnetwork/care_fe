@@ -267,6 +267,12 @@ const routes = {
   "/facility/:facilityId/location/add": ({ facilityId }: any) => (
     <AddLocationForm facilityId={facilityId} />
   ),
+  "/facility/:facilityId/location/:locationId/update": ({
+    facilityId,
+    locationId,
+  }: any) => (
+    <AddLocationForm facilityId={facilityId} locationId={locationId} />
+  ),
   "/facility/:facilityId/location/:locationId/beds/add": ({
     facilityId,
     locationId,
@@ -434,7 +440,7 @@ export default function AppRouter() {
 
         <main
           id="pages"
-          className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none"
+          className="flex-1 overflow-y-scroll pb-4 md:py-0 focus:outline-none"
         >
           <div className="max-w-8xl mx-auto px-3 py-3">{pages}</div>
         </main>

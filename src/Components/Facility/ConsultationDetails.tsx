@@ -242,7 +242,6 @@ export const ConsultationDetails = (props: any) => {
     setDischargeSummaryForm({ email: currentUser.data.email });
   };
 
-
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -414,13 +413,13 @@ export const ConsultationDetails = (props: any) => {
         </DialogActions>
       </Dialog>
       <div className="px-2 pb-2">
-        <nav className="flex justify-between flex-wrap">
+        <nav className="flex justify-between flex-wrap relative">
           <PageTitle
-            title="Patient Details"
+            title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
-          <div className="lg:absolute right-0 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+          <div className="lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
               <div className="px-2">
                 <button
@@ -457,7 +456,10 @@ export const ConsultationDetails = (props: any) => {
         </nav>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black w-full">
-            <TeleICUPatientInfoCard patient={patientData} ip_no ={consultationData.ip_no}/>
+            <TeleICUPatientInfoCard
+              patient={patientData}
+              ip_no={consultationData.ip_no}
+            />
 
             <div className="flex md:flex-row flex-col justify-between border-t px-4 pt-5">
               {consultationData.admitted_to && (
@@ -493,8 +495,8 @@ export const ConsultationDetails = (props: any) => {
               )}
             </div>
 
-            <div className="flex px-4">
-              <div className="flex-1">
+            <div className="flex px-4 flex-col lg:flex-row gap-2">
+              <div className="flex flex-col w-3/4 h-full">
                 {/*consultationData.other_symptoms && (
                   <div className="capitalize">
                     <span className="font-semibold leading-relaxed">
@@ -522,15 +524,14 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex-1 text-right">
+              <div className="flex flex-col lg:flex-row gap-2 text-right h-full">
                 <button className="btn btn-primary" onClick={handleClickOpen}>
                   <i className="fas fa-clipboard-list"></i>
-                  &nbsp;
-                  Discharge Summary
+                  &nbsp; Discharge Summary
                 </button>
 
                 <button
-                  className="btn btn-primary ml-2"
+                  className="btn btn-primary"
                   onClick={handleDischageClickOpen}
                   disabled={
                     !patientData.is_active ||
@@ -538,8 +539,7 @@ export const ConsultationDetails = (props: any) => {
                   }
                 >
                   <i className="fas fa-hospital-user"></i>
-                  &nbsp;
-                  Discharge from CARE
+                  &nbsp; Discharge from CARE
                 </button>
               </div>
             </div>
@@ -634,6 +634,20 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 </div>
               )}
+
+              {consultationData.existing_medication && (
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      History of Present Illness
+                    </h3>
+                    <div className="mt-2">
+                      {consultationData.existing_medication || "-"}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {consultationData.examination_details && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
@@ -671,8 +685,7 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               )}
 
-              {(consultationData.diagnosis ||
-                consultationData.operation ||
+              {(consultationData.operation ||
                 consultationData.special_instruction) && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
@@ -680,14 +693,6 @@ export const ConsultationDetails = (props: any) => {
                       Notes
                     </h3>
                     <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.diagnosis && (
-                        <div>
-                          <h5>Diagnosis</h5>
-                          <p className="text-justify break-words">
-                            {consultationData.diagnosis}
-                          </p>
-                        </div>
-                      )}
                       {consultationData.operation && (
                         <div className="mt-4">
                           <h5>Operation</h5>
@@ -901,13 +906,13 @@ export const ConsultationDetails = (props: any) => {
                       <table className="min-w-full">
                         <thead>
                           <tr>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
                               Medicine
                             </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
                               Dosage
                             </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
                               Days
                             </th>
                           </tr>
@@ -919,10 +924,10 @@ export const ConsultationDetails = (props: any) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
                                   {med.medicine}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
                                   {med.dosage}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
                                   {med.days}
                                 </td>
                               </tr>
@@ -930,6 +935,11 @@ export const ConsultationDetails = (props: any) => {
                           )}
                         </tbody>
                       </table>
+                      {consultationData.discharge_advice.length === 0 && (
+                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
+                          No data found
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
