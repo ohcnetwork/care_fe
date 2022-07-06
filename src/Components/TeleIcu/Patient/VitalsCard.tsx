@@ -108,13 +108,11 @@ export default function TeleICUPatientVitalsCard({
   }, []);
 
   const vitals : [ReactNode, string, string | null][] = [
-    
     [(<>Pulse Rate</>), "pulse-rate", "pulse"],
-    [(<>Heart Rate</>),"heart-rate","pulse"],
+    [(<>Blood Pressure</>),"bp","bp"],
     [(<>SpO<sub>2</sub></>),"SpO2","ventilator_spo2"],
     [(<>R. Rate</>), "respiratory-rate", "resp"],
-    [(<>Temperature (F)</>),"body-temperature1", "temperature"],
-    
+    [(<>Temperature (F)</>),"body-temperature1", "temperature"], 
   ]
 
   return (
@@ -135,9 +133,7 @@ export default function TeleICUPatientVitalsCard({
         <div className="flex flex-col w-[220px] border-l border-l-gray-400 p-3">
           {
             vitals.map((vital, i)=>{
-
               const liveReading = getVital(patientObservations, vital[1])
-
               return (
                 <div key={i} className="p-2">
                   <h2 className="font-bold text-3xl">
@@ -150,11 +146,9 @@ export default function TeleICUPatientVitalsCard({
                     || "--"}
                   </h2>
                   <div>
-                    
                     <i className={`fas fa-circle text-xs mr-2 ${liveReading ? "text-green-600" : "text-gray-600"}`} />
                     {vital[0]}
                   </div>
-                  
                 </div>
               )
             })
