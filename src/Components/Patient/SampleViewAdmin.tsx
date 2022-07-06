@@ -407,7 +407,7 @@ export default function SampleViewAdmin() {
         }
       />
       <div className="mt-5 grid grid-cols-1 gap-5">
-        <div className="flex md:flex-row flex-col gap-6">
+        <div className="flex flex-col lg:flex-row gap-6 justify-between">
           <div className="bg-white overflow-hidden shadow rounded-lg lg:w-4/5 w-full">
             <div className="px-4 py-5 sm:p-6">
               <dl>
