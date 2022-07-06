@@ -406,8 +406,8 @@ export default function SampleViewAdmin() {
         }
       />
       <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
+        <div className="flex flex-col lg:flex-row gap-6 justify-between">
+          <div className="bg-white overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6 w-full">
             <dl>
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Samples Taken
