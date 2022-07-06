@@ -156,9 +156,9 @@ export const SetInventoryForm = (props: any) => {
                     Inventory Name
                   </InputLabel>
                   <SelectField
-                    className="pt-3"
                     name="id"
-                    variant="standard"
+                    variant="outlined"
+                    margin="dense"
                     value={state.form.id}
                     options={data.map((e) => {
                       return { id: e.id, name: e.name };
@@ -185,7 +185,7 @@ export const SetInventoryForm = (props: any) => {
                   <InputLabel id="inventory_name_label">Unit</InputLabel>
                   <TextInputField
                     name="id"
-                    variant="standard"
+                    variant="outlined"
                     margin="dense"
                     type="string"
                     value={currentUnit}
