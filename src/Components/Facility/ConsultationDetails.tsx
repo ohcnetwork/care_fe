@@ -398,7 +398,11 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </DialogContent>
         <DialogActions className="flex justify-between mt-5 px-5 border-t">
-          <Button variant="contained" onClick={handleDischargeClose}>
+          <Button
+            variant="outlined"
+            className="bg-gray-200 hover:bg-gray-400"
+            onClick={handleDischargeClose}
+          >
             Cancel
           </Button>
 
