@@ -141,8 +141,12 @@ export default function TeleICUPatientVitalsCard({
               return (
                 <div key={i} className="p-2">
                   <h2 className="font-bold text-3xl">
-                    {liveReading 
-                    || patient.last_consultation?.last_daily_round?.[vital[2] || ""] 
+                    {liveReading
+                    || (
+                      vital[2] === "bp" ? 
+                      `${patient.last_consultation?.last_daily_round?.bp.systolic}/${patient.last_consultation?.last_daily_round?.bp.diastolic}` : 
+                      patient.last_consultation?.last_daily_round?.[vital[2] || ""]
+                      )
                     || "--"}
                   </h2>
                   <div>
@@ -157,126 +161,6 @@ export default function TeleICUPatientVitalsCard({
           }
         </div>
       </div>
-      {/*
-      <h4 className="flex items-center mb-2">
-        <span className="font-semibold text-xl">Vitals</span>
-      </h4>
-      <div className="grid grid-cols-2 gap-2 my-2">
-        <div className="bg-white rounded-md p-3 text-center">
-          <h2 className="text-2xl md:text-4xl font-bold">
-            {getVital(
-              patientObservations,
-              "body-temperature1",
-              patient.last_consultation?.last_daily_round?.temperature
-                ? `${patient.last_consultation?.last_daily_round?.temperature} F`
-                : "-"
-            )}
-          </h2>
-          <span className="font-medium text-primary-900 md:text-lg text-sm">
-            Temperature
-            {getVital(patientObservations, "body-temperature1") ? (
-              <span className="ml-2">
-                <i className="fas fa-circle text-green-500" />
-              </span>
-            ) : (
-              <span className="ml-2">
-                <i className="fas fa-circle text-gray-500" />
-              </span>
-            )}
-          </span>
-        </div>
-        <div className="bg-white rounded-md p-3 text-center">
-          <h2 className="text-2xl md:text-4xl font-bold">
-            {getVital(
-              patientObservations,
-              "pulse-rate",
-              patient.last_consultation?.last_daily_round?.pulse
-                ? `${patient.last_consultation?.last_daily_round?.pulse}`
-                : "-"
-            )}
-          </h2>
-          <span className="font-medium text-primary-900 md:text-lg text-sm">
-            Pulse Rate
-            {getVital(patientObservations, "pulse-rate") ? (
-              <span className="ml-2">
-                <i className="fas fa-circle text-green-500" />
-              </span>
-            ) : (
-              <span className="ml-2">
-                <i className="fas fa-circle text-gray-500" />
-              </span>
-            )}
-          </span>
-        </div>
-      </div>
-      <div className="grid grid-cols-3 gap-2 my-2">
-        <div className="bg-white rounded-md p-3 text-center">
-          <h2 className="text-2xl md:text-4xl font-bold">
-            {getVital(
-              patientObservations,
-              "respiratory-rate",
-              patient.last_consultation?.last_daily_round?.resp ?? "-"
-            )}
-          </h2>
-          <span className="font-medium text-primary-900 md:text-lg text-sm">
-            R. Rate
-            {getVital(patientObservations, "respiratory-rate") ? (
-              <span className="ml-2">
-                <i className="fas fa-circle text-green-500" />
-              </span>
-            ) : (
-              <span className="ml-2">
-                <i className="fas fa-circle text-gray-500" />
-              </span>
-            )}
-          </span>
-        </div>
-        <div className="bg-white rounded-md p-3 text-center">
-          <h2 className="text-2xl md:text-4xl font-bold">
-            {getVital(
-              patientObservations,
-              "SpO2",
-              patient.last_consultation?.last_daily_round?.ventilator_spo2 ??
-                "-"
-            )}
-          </h2>
-          <span className="font-medium text-primary-900 md:text-lg text-sm">
-            SpO<sub>2</sub>
-            {getVital(patientObservations, "SpO2") ? (
-              <span className="ml-2">
-                <i className="fas fa-circle text-green-500" />
-              </span>
-            ) : (
-              <span className="ml-2">
-                <i className="fas fa-circle text-gray-500" />
-              </span>
-            )}
-          </span>
-        </div>
-        <div className="bg-white rounded-md p-3 text-center">
-          <h2 className="text-2xl md:text-4xl font-bold">
-            {getVital(
-              patientObservations,
-              "heart-rate",
-              patient.last_consultation?.last_daily_round?.pulse ?? "-"
-            )}
-          </h2>
-          <span className="font-medium text-primary-900 md:text-lg text-sm">
-            Heart Rate
-            {getVital(patientObservations, "heart-rate") ? (
-              <span className="ml-2">
-                <i className="fas fa-circle text-green-500" />
-              </span>
-            ) : (
-              <span className="ml-2">
-                <i className="fas fa-circle text-gray-500" />
-              </span>
-            )}
-          </span>
-        </div>
-        { waveform && <Waveform wave = {waveform} />}
-      </div>
-      */}
     </div>
   );
 }
