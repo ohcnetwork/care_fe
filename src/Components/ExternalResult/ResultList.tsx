@@ -108,7 +108,7 @@ export default function ResultList() {
           : a,
       {}
     );
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -352,7 +352,7 @@ export default function ResultList() {
           selectedFacility={selectedFacility}
           handleOk={() =>
             navigate(`facility/${selectedFacility.id}/patient`, {
-              extId: resultId,
+              query: { extId: resultId },
             })
           }
           handleCancel={() => setShowDialog(false)}

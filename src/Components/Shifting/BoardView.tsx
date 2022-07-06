@@ -48,7 +48,7 @@ export default function BoardView() {
           : a,
       {}
     );
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const searchByName = (patient_name: string) => {

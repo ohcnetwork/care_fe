@@ -202,8 +202,8 @@ export const HospitalList = (props: any) => {
   };
 
   const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ search }, true);
-    else setQueryParams({ search: "" }, true);
+    if (search !== "") setQueryParams({ search }, { replace: true });
+    else setQueryParams({ search: "" }, { replace: true });
   };
 
   const handleDownload = async () => {
@@ -248,7 +248,7 @@ export const HospitalList = (props: any) => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const applyFilter = (data: any) => {
