@@ -1092,7 +1092,7 @@ export const PatientHome = (props: any) => {
                   <button
                     className="btn btn-primary w-full"
                     disabled={
-                      !patientData.is_active && !!consultationListData.length
+                      !patientData.is_active || consultationListData.length > 0
                     }
                     onClick={() =>
                       navigate(

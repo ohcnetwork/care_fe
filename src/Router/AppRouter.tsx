@@ -267,6 +267,12 @@ const routes = {
   "/facility/:facilityId/location/add": ({ facilityId }: any) => (
     <AddLocationForm facilityId={facilityId} />
   ),
+  "/facility/:facilityId/location/:locationId/update": ({
+    facilityId,
+    locationId,
+  }: any) => (
+    <AddLocationForm facilityId={facilityId} locationId={locationId} />
+  ),
   "/facility/:facilityId/location/:locationId/beds/add": ({
     facilityId,
     locationId,

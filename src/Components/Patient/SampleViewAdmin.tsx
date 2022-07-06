@@ -307,7 +307,7 @@ export default function SampleViewAdmin() {
                   <div className="mt-2">
                     <button
                       onClick={() => showUpdateStatus(item)}
-                      className="w-full text-sm bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                      className="w-full text-sm bg-primary-500 hover:bg-primary-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                     >
                       UPDATE SAMPLE TEST STATUS
                     </button>
