@@ -7,7 +7,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
-import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
+import { BED_TYPES, DOCTOR_SPECIALIZATION, FACILITY_FEATURE_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getPermittedFacility,
@@ -111,7 +111,11 @@ export const FacilityHome = (props: any) => {
 
   let capacityList: any = null;
   if (!capacityData || !capacityData.length) {
-    capacityList = <h5>No Bed Types Found</h5>;
+    capacityList = (
+      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+        No Bed Types Found
+      </h5>
+    );
   } else {
     capacityList = BED_TYPES.map((x) => {
       const res = capacityData.find((data) => {
@@ -127,7 +131,11 @@ export const FacilityHome = (props: any) => {
 
   let doctorList: any = null;
   if (!doctorData || !doctorData.length) {
-    doctorList = <h5>No Doctors Found</h5>;
+    doctorList = (
+      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+        No Doctors Found
+      </h5>
+    );
   } else {
     doctorList = doctorData.map((data: DoctorModal) => {
       const removeCurrentDoctorData = (doctorId: number | undefined) => {
@@ -245,6 +253,19 @@ export const FacilityHome = (props: any) => {
                         >
                           {facilityData.phone_number}
                         </a>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 mt-4">
+                      <div>
+                        <h1 className="text-lg font-bold">Features</h1>
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          {facilityData.features?.map((feature, i)=>(
+                            <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
+                              {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                            </div>
+                          ))}
+                        </div>
+                        
                       </div>
                     </div>
                   </div>
@@ -372,43 +393,61 @@ export const FacilityHome = (props: any) => {
             Information on Oxygen
           </h1>
 
-          <div className="grid grid-cols-5 mb-6 max-w-2xl p-0 bg-white break-all">
-            <div className="border p-2"></div>
-            <div className="border p-2 text-right font-semibold">Liquid</div>
-            <div className="border p-2 text-right font-semibold">B</div>
-            <div className="border p-2 text-right font-semibold">C</div>
-            <div className="border p-2 text-right font-semibold">D</div>
-            <div className="border p-2 font-semibold">Capacity</div>
-            <div className="border p-2 text-right ">
-              {facilityData.oxygen_capacity}
-            </div>
-            <div className="border p-2 text-right ">
-              {facilityData.type_b_cylinders}
-            </div>
-            <div className="border p-2 text-right ">
-              {facilityData.type_c_cylinders}
-            </div>
-            <div className="border p-2 text-right ">
-              {facilityData.type_d_cylinders}
-            </div>
-            <div className="border p-2 font-semibold">
-              Daily Expected Consumption
-            </div>
-            <div className="border p-2 text-right">
-              {facilityData.expected_oxygen_requirement}
-            </div>
-            <div className="border p-2 text-right">
-              {facilityData.expected_type_b_cylinders}
-            </div>
-            <div className="border p-2 text-right">
-              {facilityData.expected_type_c_cylinders}
-            </div>
-            <div className="border p-2 text-right">
-              {facilityData.expected_type_d_cylinders}
-            </div>
+          <div className="overflow-x-auto sm:rounded-lg mt-4">
+            <table className="border-2 rounded overflow-hidden align-middle">
+              <thead>
+                <tr className="white border">
+                  <th className="border px-4 py-2"></th>
+                  <th className="border px-4 py-2 whitespace-nowrap">
+                    Oxygen capacity
+                  </th>
+                  <th className="border px-4 py-2 whitespace-nowrap">
+                    Type B cylinder
+                  </th>
+                  <th className="border px-4 py-2 whitespace-nowrap">
+                    Type C cylinder
+                  </th>
+                  <th className="border px-4 py-2 whitespace-nowrap">
+                    Type D cylinder
+                  </th>
+                </tr>
+                <tr className="border">
+                  <th className="border px-4 py-2">Capacity</th>
+                  <td className="border px-4 py-2 text-center">
+                    {facilityData.oxygen_capacity}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {facilityData.type_b_cylinders}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {facilityData.type_c_cylinders}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {facilityData.type_d_cylinders}
+                  </td>
+                </tr>
+                <tr className="border">
+                  <th className="border px-4 py-2">
+                    Daily Expected Consumption
+                  </th>
+                  <td className="border px-4 py-2 text-center">
+                    {facilityData.expected_oxygen_requirement}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {facilityData.expected_type_b_cylinders}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {facilityData.expected_type_c_cylinders}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {facilityData.expected_type_d_cylinders}
+                  </td>
+                </tr>
+              </thead>
+            </table>
           </div>
         </div>
-        <div className="mt-4">
+        <div className="mt-6">
           <div className="md:flex justify-between  md:border-b md:pb-2">
             <div className="font-semibold text-xl">Bed Capacity</div>
             <RoleButton
@@ -421,7 +460,7 @@ export const FacilityHome = (props: any) => {
               Add More Bed Types
             </RoleButton>
           </div>
-          <div className="mt-4 flex flex-wrap">{capacityList}</div>
+          <div className="mt-4 flex flex-wrap w-full">{capacityList}</div>
         </div>
         <div className="mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
@@ -439,7 +478,7 @@ export const FacilityHome = (props: any) => {
           </div>
           <div className="mt-4 flex flex-wrap">{doctorList}</div>
         </div>
-        <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
+        <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
             <div className="font-semibold text-xl">Corona Triage</div>
             <RoleButton
@@ -452,8 +491,8 @@ export const FacilityHome = (props: any) => {
               Add Triage
             </RoleButton>
           </div>
-          <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
-            <table className="min-w-full border-2 rounded overflow-hidden">
+          <div className="overflow-x-auto  min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
+            <table className="min-w-full border-2 rounded overflow-hidden align-middle">
               <thead>
                 <tr className="white border">
                   <th className="border px-4 py-2">Date</th>

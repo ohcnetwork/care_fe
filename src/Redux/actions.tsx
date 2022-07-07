@@ -580,6 +580,15 @@ export const getNotificationData = (pathParam: object) => {
   return fireRequest("getNotificationData", [], {}, pathParam);
 };
 
+export const markNotificationAsRead = (id: string) => {
+  return fireRequest(
+    "markNotificationAsRead",
+    [],
+    { read_at: new Date() },
+    { id }
+  );
+};
+
 export const getPublicKey = () => {
   return fireRequest("getPublicKey", [], {}, {});
 };
