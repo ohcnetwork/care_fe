@@ -207,7 +207,7 @@ export default function ResourceDetails(props: { id: string }) {
             <div>
               <div className="font-semibold">APPROVED BY</div>
               <div className="mt-3">
-                <div className="min-w-min lg:w-60 p-4 pr-0 pt-0 text-left">
+                <div>
                   <div>{data.approving_facility_object?.name || "--"}</div>
                   <div className="mt-2">
                     {data.approving_facility_object?.facility_type?.name ||
