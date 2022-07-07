@@ -1254,7 +1254,7 @@ export const PatientHome = (props: any) => {
           hideBack={true}
           breadcrumbs={false}
         />
-        {sampleList}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-4">{sampleList}</div>
         {!isSampleLoading && totalSampleListCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
