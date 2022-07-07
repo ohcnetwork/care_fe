@@ -391,7 +391,7 @@ export const FileUpload = (props: FileUploadProps) => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
     }
-    setfile(e.target.files[0]);
+    setFile(e.target.files[0]);
     setUploadFileName(e.target.files[0].name);
     const fileName = e.target.files[0].name;
     const ext: string = fileName.split(".")[1];
