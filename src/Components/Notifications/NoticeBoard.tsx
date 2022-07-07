@@ -4,10 +4,11 @@ import { getNotifications } from "../../Redux/actions";
 import moment from "moment";
 import PageTitle from "../Common/PageTitle";
 import { Card, CardContent } from "@material-ui/core";
+import Loading from "../Common/Loading";
 
 export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -29,21 +30,26 @@ export const NoticeBoard: any = () => {
   let notices: any[] = [];
   if (data && data.length) {
     notices = data.map((item) => (
-      <Card key={`usr_${item.id}`} className="my-4 mx-8 rounded-lg">
+      <Card key={`usr_${item.id}`} className="rounded w-full shadow">
         <CardContent>
-          <div className="">
-            <div className="text-lg font-bold">{`Message From: ${item.caused_by.first_name} ${item.caused_by.last_name} - ${item.caused_by.user_type}`}</div>
-            <div className="text-xs">
+          <div className="bg-white">
+            <div className="text-justify text-lg">{item.message}</div>
+            <div className="text-gray-700 text-md mt-2">
+              {`${item.caused_by.first_name} ${item.caused_by.last_name}`} -{" "}
+              <span className="text-primary-700 font-bold">
+                {item.caused_by.user_type}
+              </span>
+            </div>
+            <div className="text-xs text-gray-900">
               On: {moment(item.created_date).format("lll")}
             </div>
-            <div className="text-justify">{item.message}</div>
           </div>
         </CardContent>
       </Card>
     ));
   } else {
     notices.push(
-      <Card key="no-notice" className="my-4 mx-8 rounded-lg">
+      <Card key="no-notice" className="my-4 rounded-lg">
         <CardContent>
           <div className="text-xl text-center semibold">
             No notices for you.
@@ -53,10 +59,13 @@ export const NoticeBoard: any = () => {
     );
   }
 
+  if (isLoading) return <Loading />;
   return (
-    <div className="flex flex-col">
-      <PageTitle title="Notice Board" breadcrumbs={false} />
-      {notices}
+    <div className="px-5">
+      <PageTitle title="Notice Board" hideBack={true} breadcrumbs={false} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-6">
+        {notices}
+      </div>
     </div>
   );
 };

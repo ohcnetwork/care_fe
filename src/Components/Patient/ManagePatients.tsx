@@ -377,7 +377,7 @@ export const PatientManager = (props: any) => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handleTabChange = async (tab: number) => {
@@ -482,7 +482,10 @@ export const PatientManager = (props: any) => {
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
       let patientUrl = "";
-      if (patient.last_consultation) {
+      if (
+        patient.last_consultation &&
+        patient.last_consultation?.facility === patient.facility
+      ) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation.id}`;
       } else if (patient.facility) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;

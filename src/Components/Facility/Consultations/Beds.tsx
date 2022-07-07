@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { Dispatch, SetStateAction, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import {
   createConsultationBed,
@@ -31,11 +31,13 @@ interface BedsProps {
   patientId: number;
   consultationId: number;
   smallLoader?: boolean;
+  discharged?: boolean;
+  setState?: Dispatch<SetStateAction<boolean>>;
 }
 
 const Beds = (props: BedsProps) => {
   const dispatch = useDispatch();
-  const { facilityId, consultationId } = props;
+  const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = React.useState<BedModel>({});
   const [startDate, setStartDate] = React.useState<string>(formatDateTime());
   const [consultationBeds, setConsultationBeds] = React.useState<CurrentBed[]>(
@@ -108,57 +110,76 @@ const Beds = (props: BedsProps) => {
 
   return (
     <div>
-      <h3 className="mb-4 text-lg">Move to a new bed: </h3>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-          <div>
-            <InputLabel id="asset-type">Bed</InputLabel>
-            <BedSelect
-              name="bed"
-              setSelected={(selected) => setBed(selected as BedModel)}
-              selected={bed}
-              errors=""
-              multiple={false}
-              margin="dense"
-              facility={facilityId}
-            />
-          </div>
-          <div>
-            <InputLabel htmlFor="date_declared_positive">
-              Date of Shift
-            </InputLabel>
-            <TextInputField
-              name="date_declared_positive"
-              id="date_declared_positive"
-              variant="outlined"
-              margin="dense"
-              type="datetime-local"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              errors=""
-            />
-          </div>
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-2xl font-bold">
+          {!discharged ? "Move to bed:" : "Bed History"}
         </div>
-        <div className="flex flex-row justify-center mt-4">
-          <div>
-            <Button
-              color="primary"
-              variant="contained"
-              type="submit"
-              style={{ marginLeft: "auto" }}
-              startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-            >
-              Move to bed
-            </Button>
+        {props.setState && (
+          <button
+            className="text-xl"
+            onClick={() => props.setState && props.setState(false)}
+          >
+            <i className="fas fa-times"></i>
+          </button>
+        )}
+      </div>
+      {!discharged ? (
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            <div>
+              <InputLabel id="asset-type">Bed</InputLabel>
+              <BedSelect
+                name="bed"
+                setSelected={(selected) => setBed(selected as BedModel)}
+                selected={bed}
+                errors=""
+                multiple={false}
+                margin="dense"
+                facility={facilityId}
+              />
+            </div>
+            <div>
+              <InputLabel htmlFor="date_declared_positive">
+                Date of Shift
+              </InputLabel>
+              <TextInputField
+                name="date_declared_positive"
+                id="date_declared_positive"
+                variant="outlined"
+                margin="dense"
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                errors=""
+              />
+            </div>
           </div>
-        </div>
-      </form>
+          <div className="flex flex-row justify-center mt-4">
+            <div>
+              <Button
+                color="primary"
+                variant="contained"
+                type="submit"
+                style={{ marginLeft: "auto" }}
+                startIcon={<i className="fas fa-bed" />}
+              >
+                Move to bed
+              </Button>
+            </div>
+          </div>
+        </form>
+      ) : (
+        ""
+      )}
       <div>
         <h3 className="my-4 text-lg">Previous beds: </h3>
-        <div>
-          <div className="grid grid-cols-3 gap-1">
+        <div className="overflow-hidden rounded-xl">
+          <div className="grid grid-cols-4 gap-[1px]">
             <div className="font-bold text-center bg-primary-500 text-white py-2">
               Bed
+            </div>
+            <div className="font-bold text-center bg-primary-500 text-white py-2">
+              Location
             </div>
             <div className="font-bold text-center bg-primary-500 text-white py-2">
               Start Date
@@ -169,19 +190,22 @@ const Beds = (props: BedsProps) => {
           </div>
           {consultationBeds.length > 0 ? (
             consultationBeds.map((bed) => (
-              <div className="grid grid-cols-3 gap-1" key={bed?.id}>
-                <div className="text-center bg-primary-100 py-2">
+              <div className="grid grid-cols-4 gap-[1px]" key={bed?.id}>
+                <div className="text-center bg-primary-100 p-2 break-words">
                   {bed?.bed_object?.name}
                 </div>
                 <div className="text-center bg-primary-100 py-2">
+                  {bed?.bed_object?.location_object?.name}
+                </div>
+                <div className="text-center bg-primary-100 p-2 break-words">
                   {moment(bed?.start_date).format("MMMM Do YYYY, h:mm:ss a")}
                 </div>
                 {bed?.end_date ? (
-                  <div className="text-center bg-primary-100 py-2">
+                  <div className="text-center bg-primary-100 p-2 break-words">
                     {moment(bed?.end_date).format("MMMM Do YYYY, h:mm:ss a")}
                   </div>
                 ) : (
-                  <div className="text-center bg-primary-100 py-2">
+                  <div className="text-center bg-primary-100 p-2">
                     <span className="border px-1 text-sm rounded-full bg-yellow-100 text-yellow-500 border-yellow-500 ">
                       In Use
                     </span>

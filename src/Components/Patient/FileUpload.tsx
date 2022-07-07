@@ -17,15 +17,15 @@ import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import { GetApp, Visibility } from "@material-ui/icons";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
-// import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+import imageCompression from "browser-image-compression";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -58,30 +58,6 @@ const ExtImage: URLS = {
   png: "1",
   svg: "1",
 };
-
-// function getModalStyle() {
-//   const top = 100;
-//   const left = 100;
-
-//   return {
-//     top: `${top}%`,
-//     left: `${left}%`,
-//     transform: `translate(-${top}%, -${left}%)`,
-//   };
-// }
-
-// const useStyles = makeStyles((theme: Theme) =>
-//   createStyles({
-//     paper: {
-//       position: "absolute",
-//       width: "60%",
-//       backgroundColor: theme.palette.background.paper,
-//       border: "2px solid #000",
-//       boxShadow: theme.shadows[5],
-//       padding: theme.spacing(2, 4, 3),
-//     },
-//   })
-// );
 
 export const LinearProgressWithLabel = (props: any) => {
   return (
@@ -123,7 +99,7 @@ interface StateInterface {
 
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [file, setfile] = useState<File>();
+  const [file, setFile] = useState<File>();
   const {
     facilityId,
     consultationId,
@@ -147,7 +123,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
-  const [contentType, setcontentType] = useState<string>("");
+  const [contentType, setContentType] = useState<string>("");
   // const classes = useStyles();
   // const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
@@ -190,12 +166,12 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const zoom_values = [
-    "h-1/6 my-40",
-    "h-2/6 my-32",
-    "h-3/6 my-24",
-    "h-4/6 my-20",
-    "h-5/6 my-16",
-    "h-full my-12",
+    "h-1/6 w-1/6 my-40",
+    "h-2/6 w-2/6 my-32",
+    "h-3/6 w-3/6 my-24",
+    "h-4/6 w-4/6 my-20",
+    "h-5/6 w-5/6 my-16",
+    "h-full w-full my-12",
   ];
 
   const handleZoomIn = () => {
@@ -367,7 +343,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 : "-"}
             </div>
           </div>
-          <div>
+          <div className="flex items-center">
             {item.file_category === "AUDIO" ? (
               <div>
                 {item.id ? (
@@ -392,7 +368,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
-                  startIcon={<GetAppIcon>load</GetAppIcon>}
+                  startIcon={<Visibility />}
                   onClick={() => {
                     loadFile(item.id);
                   }}
@@ -415,11 +391,22 @@ export const FileUpload = (props: FileUploadProps) => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
     }
-    setfile(e.target.files[0]);
-    const fileName = e.target.files[0].name;
+    const f = e.target.files[0];
+    const fileName = f.name;
     const ext: string = fileName.split(".")[1];
-    setcontentType(header_content_type[ext]);
-    return e.target.files[0];
+    setContentType(header_content_type[ext]);
+
+    if (ExtImage[ext] && ExtImage[ext] === "1") {
+      const options = {
+        initialQuality: 0.6,
+        alwaysKeepResolution: true,
+      };
+      imageCompression(f, options).then((compressedFile: File) => {
+        setFile(compressedFile);
+      });
+      return;
+    }
+    setFile(f);
   };
 
   const uploadfile = (response: any) => {
@@ -601,7 +588,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       download
                       className="text-white p-4 my-2 rounded m-2 bg-primary-500"
                     >
-                      <GetAppIcon>load</GetAppIcon>
+                      <GetApp>load</GetApp>
                       Download
                     </a>
                   </div>
