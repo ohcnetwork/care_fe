@@ -138,6 +138,7 @@ export default function NotificationsList({
   const [showNotifications, setShowNotifications] = useState(false);
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
@@ -283,22 +284,26 @@ export default function NotificationsList({
 
   useEffect(() => {
     setIsLoading(true);
-    if (showNotifications) {
-      dispatch(
-        getNotifications({ offset, event: eventFilter, medium_sent: "SYSTEM" })
-      )
-        .then((res: any) => {
-          if (res && res.data) {
-            setData(res.data.results);
-            setTotalCount(res.data.count);
-          }
-          setIsLoading(false);
-        })
-        .catch(() => {
-          setIsLoading(false);
-          setOffset((prev) => prev - RESULT_LIMIT);
-        });
-    }
+    dispatch(
+      getNotifications({ offset, event: eventFilter, medium_sent: "SYSTEM" })
+    )
+      .then((res: any) => {
+        if (res && res.data) {
+          setData(res.data.results);
+          setUnreadCount(
+            res.data.results?.reduce(
+              (acc: number, result: any) => acc + (result.read_at ? 0 : 1),
+              0
+            )
+          );
+          setTotalCount(res.data.count);
+        }
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsLoading(false);
+        setOffset((prev) => prev - RESULT_LIMIT);
+      });
     intialSubscriptionState();
   }, [dispatch, reload, showNotifications, offset, eventFilter, isSubscribed]);
 
@@ -350,11 +355,16 @@ export default function NotificationsList({
   }
 
   return (
-    <div>
+    <div className={clsx("cursor-pointer", unreadCount && "-mt-5")}>
+      {!!unreadCount && (
+        <span className="relative top-5 left-5 w-5 h-5 flex items-center justify-center text-xs text-white bg-red-400 rounded-full">
+          {unreadCount}
+        </span>
+      )}
       <button
         onClick={() => setShowNotifications(!showNotifications)}
         className={clsx(
-          "flex justify-items-start items-center overflow-hidden w-10 text-primary-300 hover:text-white py-1 my-1 hover:bg-primary-700 rounded transition-all duration-300",
+          "flex justify-items-start items-center overflow-hidden w-10 text-primary-300 hover:text-white hover:bg-primary-700 rounded transition-all duration-300",
           showNotifications
             ? "bg-primary-900 hover:bg-primary-900 text-white"
             : "bg-primary-800",
@@ -385,6 +395,7 @@ export default function NotificationsList({
                     onClick={(_) => {
                       setReload(!reload);
                       setData([]);
+                      setUnreadCount(0);
                       setOffset(0);
                     }}
                     className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
