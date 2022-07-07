@@ -56,7 +56,7 @@ export default function ResultItem(props: any) {
 
   return (
     <div>
-      <PageTitle title={"Result details"} className="px-6 mb-2" />
+      <PageTitle title={"Result details"} className="px-2 mb-2" />
 
       {showDeleteAlert && (
         <AlertDialog
@@ -68,7 +68,7 @@ export default function ResultItem(props: any) {
         />
       )}
 
-      <div className="mx-3 md:mx-8 mb-10 mt-4">
+      <div className="mx-2 md:mx-2 mb-10 mt-4">
         <div className="flex justify-end">
           <button
             className="btn-primary btn mr-2"

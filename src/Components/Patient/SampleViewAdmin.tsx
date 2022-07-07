@@ -380,7 +380,7 @@ export default function SampleViewAdmin() {
   };
 
   return (
-    <div>
+    <div className="px-2">
       {statusDialog.show && (
         <UpdateStatusDialog
           sample={statusDialog.sample}
@@ -392,7 +392,6 @@ export default function SampleViewAdmin() {
       <PageTitle
         title="Sample Management System"
         hideBack={true}
-        className="mx-3 md:mx-8"
         breadcrumbs={false}
         componentRight={
           downloadLoading ? (
@@ -527,7 +526,7 @@ export default function SampleViewAdmin() {
           {badge("Facility", facilityName, "facility")}
         </div>
       </div>
-      <div className="md:px-2">
+      <div>
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
       </div>
 

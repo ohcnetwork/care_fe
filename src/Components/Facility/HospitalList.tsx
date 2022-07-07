@@ -538,12 +538,11 @@ export const HospitalList = (props: any) => {
   }
 
   return (
-    <div className="px-6">
+    <div className="px-2">
       <div className="grid grid-cols-2">
         <PageTitle
           title={t("Facilities")}
           hideBack={true}
-          className="mx-3"
           breadcrumbs={false}
         />
 
