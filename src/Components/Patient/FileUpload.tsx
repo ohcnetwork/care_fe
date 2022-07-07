@@ -391,9 +391,10 @@ export const FileUpload = (props: FileUploadProps) => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
     }
+    const f = e.target.files[0];
+    const fileName = f.name;
     setFile(e.target.files[0]);
-    setUploadFileName(e.target.files[0].name);
-    const fileName = e.target.files[0].name;
+    setUploadFileName(fileName);
     const ext: string = fileName.split(".")[1];
     setContentType(header_content_type[ext]);
 
