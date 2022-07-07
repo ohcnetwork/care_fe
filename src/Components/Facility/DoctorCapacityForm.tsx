@@ -294,7 +294,24 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     Cancel
                   </Button>
                 </Grid>
-                <Grid item>
+                <Grid item className="flex flex-row gap-4">
+                  {!isLastOptionType && (
+                    <Button
+                      id="doctor-save"
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      startIcon={
+                        <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                      }
+                      onClick={(e) => {
+                        handleSubmit(e);
+                        navigate(`/facility/${facilityId}`);
+                      }}
+                    >
+                      Save Doctor Capacity
+                    </Button>
+                  )}
                   <Button
                     id="doctor-save"
                     color="primary"
