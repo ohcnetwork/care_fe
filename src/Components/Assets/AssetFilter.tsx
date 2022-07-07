@@ -49,7 +49,7 @@ function AssetFilter(props: any) {
     const searchQuery = qParams?.search && `?search=${qParams?.search}`;
     if (searchQuery) navigate(`/assets${searchQuery}`);
     else navigate("/assets");
-  }, [qParams]);
+  }, [closeFilter, qParams?.search]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
@@ -209,11 +209,11 @@ function AssetFilter(props: any) {
                 name: "Select",
               },
               {
-                id: "WORKING",
+                id: "True",
                 name: "WORKING",
               },
               {
-                id: "NOTWORKING",
+                id: "False",
                 name: "NOT WORKING",
               },
             ]}
