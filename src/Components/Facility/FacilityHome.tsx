@@ -7,7 +7,11 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
-import { BED_TYPES, DOCTOR_SPECIALIZATION, FACILITY_FEATURE_TYPES } from "../../Common/constants";
+import {
+  BED_TYPES,
+  DOCTOR_SPECIALIZATION,
+  FACILITY_FEATURE_TYPES,
+} from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getPermittedFacility,
@@ -122,8 +126,16 @@ export const FacilityHome = (props: any) => {
         return data.room_type === x.id;
       });
       if (res) {
+        const removeCurrentBedType = (bedTypeId: number | undefined) => {
+          setCapacityData((state) => state.filter((i) => i.id !== bedTypeId));
+        };
         return (
-          <BedTypeCard facilityId={facilityId} key={`bed_${res.id}`} {...res} />
+          <BedTypeCard
+            facilityId={facilityId}
+            key={`bed_${res.id}`}
+            {...res}
+            removeBedType={removeCurrentBedType}
+          />
         );
       }
     });
@@ -252,13 +264,19 @@ export const FacilityHome = (props: any) => {
                       <div>
                         <h1 className="text-lg font-bold">Features</h1>
                         <div className="flex gap-2 flex-wrap mt-2">
-                          {facilityData.features?.map((feature, i)=>(
-                            <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
-                              {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                          {facilityData.features?.map((feature, i) => (
+                            <div
+                              key={i}
+                              className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm"
+                            >
+                              {
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0].name
+                              }
                             </div>
                           ))}
                         </div>
-                        
                       </div>
                     </div>
                   </div>

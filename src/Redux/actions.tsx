@@ -321,6 +321,9 @@ export const getCapacityBed = (pathParam: object) => {
 export const getDoctor = (pathParam: object) => {
   return fireRequest("getDoctor", [], {}, pathParam);
 };
+export const deleteCapacity = (pathParam: object) => {
+  return fireRequest("deleteCapacityBed", [], {}, pathParam);
+};
 
 //Patient
 export const searchPatient = (params: object) => {

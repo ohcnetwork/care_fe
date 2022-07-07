@@ -315,6 +315,11 @@ const routes: Routes = {
     path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
   },
 
+  deleteCapacityBed: {
+    path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
+    method: "DELETE",
+  },
+
   listDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/",
   },
