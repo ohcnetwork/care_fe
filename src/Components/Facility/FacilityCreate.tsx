@@ -536,7 +536,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
               <div className="">
-                <InputLabel id="features-label">Features*</InputLabel>
+                <InputLabel id="features-label">Features</InputLabel>
                 <MultiSelectField
                     data-test="facility-features"
                     name="features"
