@@ -30,6 +30,7 @@ interface qParamModel {
   asset_type?: string;
   location?: string;
   status?: string;
+  is_working?: string;
 }
 
 const AssetsList = () => {
@@ -59,6 +60,7 @@ const AssetsList = () => {
             asset_type: qParams.asset_type,
             location: qParams.location,
             status: qParams.status,
+            is_working: qParams.is_working,
           }
         : {
             limit,
@@ -67,6 +69,7 @@ const AssetsList = () => {
             asset_type: qParams.asset_type,
             location: qParams.location,
             status: qParams.status,
+            is_working: qParams.is_working,
           };
       const { data }: any = await dispatch(listAssets(params));
       if (!status.aborted) {
@@ -89,6 +92,7 @@ const AssetsList = () => {
       qParams.asset_type,
       qParams.location,
       qParams.status,
+      qParams.is_working,
     ]
   );
 
@@ -135,7 +139,7 @@ const AssetsList = () => {
         setLocationName("");
       }
     },
-    [dispatch, qParams.location]
+    [dispatch, qParams.facility, qParams.location]
   );
 
   useAbortableEffect(
@@ -299,6 +303,7 @@ const AssetsList = () => {
         {badge("Location", locationName, ["location"])}
         {badge("Asset Type", asset_type, ["asset_type"])}
         {badge("Status", qParams.status, ["status"])}
+        {badge("Is Working", qParams.is_working, ["is_working"])}
       </div>
       <div className="grow mt-10 bg-white">
         <div className="p-8">
