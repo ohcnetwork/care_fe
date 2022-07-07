@@ -1057,7 +1057,7 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "INVESTIGATIONS" && (
           <div>
-            <div className="flex justify-between">
+            <div className="sm:flex justify-between">
               <PageTitle
                 title="Investigations"
                 hideBack={true}
@@ -1072,7 +1072,7 @@ export const ConsultationDetails = (props: any) => {
                     )
                   }
                 >
-                  Create Investigation
+                  <i className="fas fa-plus w-4 mr-3"></i> Create Investigation
                 </button>
               </div>
             </div>
