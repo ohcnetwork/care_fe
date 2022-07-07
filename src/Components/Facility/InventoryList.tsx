@@ -71,7 +71,7 @@ export default function InventoryList(props: any) {
     inventoryList = inventory.map((inventoryItem: any) => (
       <tr
         key={inventoryItem.id}
-        className={`${
+        className={`cursor-pointer ${
           inventoryItem.is_low
             ? "bg-red-100 hover:bg-gray-200"
             : "bg-white hover:bg-gray-200"
@@ -154,7 +154,7 @@ export default function InventoryList(props: any) {
   return (
     <div>
       <PageTitle
-        title="Inventory Summary"
+        title="Inventory Manager"
         hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
