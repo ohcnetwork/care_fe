@@ -470,8 +470,8 @@ export const ConsultationDetails = (props: any) => {
               )}
             </div>
 
-            <div className="flex px-4">
-              <div className="flex-1">
+            <div className="flex px-4 flex-col lg:flex-row gap-2">
+              <div className="flex flex-col w-3/4 h-full">
                 {/*consultationData.other_symptoms && (
                   <div className="capitalize">
                     <span className="font-semibold leading-relaxed">
@@ -499,14 +499,14 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex-1 text-right">
+              <div className="flex flex-col lg:flex-row gap-2 text-right h-full">
                 <button className="btn btn-primary" onClick={handleClickOpen}>
                   <i className="fas fa-clipboard-list"></i>
                   &nbsp; Discharge Summary
                 </button>
 
                 <button
-                  className="btn btn-primary ml-2"
+                  className="btn btn-primary"
                   onClick={handleDischageClickOpen}
                   disabled={
                     !patientData.is_active ||
@@ -610,14 +610,14 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               )}
 
-              {consultationData.existing_medication && (
+              {consultationData.history_of_present_illness && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
                     <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                       History of Present Illness
                     </h3>
                     <div className="mt-2">
-                      {consultationData.existing_medication || "-"}
+                      {consultationData.history_of_present_illness || "-"}
                     </div>
                   </div>
                 </div>
@@ -860,14 +860,14 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "MEDICINES" && (
           <div>
-            {consultationData.existing_medication && (
+            {consultationData.history_of_present_illness && (
               <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                 <div className="px-4 py-5 sm:p-6">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                    Existing Medication:{" "}
+                    History of present illness:{" "}
                   </h3>
                   <div className="mt-2">
-                    {consultationData.existing_medication || "-"}
+                    {consultationData.history_of_present_illness || "-"}
                   </div>
                 </div>
               </div>
@@ -888,13 +888,13 @@ export const ConsultationDetails = (props: any) => {
                       <table className="min-w-full">
                         <thead>
                           <tr>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
                               Medicine
                             </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
                               Dosage
                             </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
                               Days
                             </th>
                           </tr>
@@ -906,10 +906,10 @@ export const ConsultationDetails = (props: any) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
                                   {med.medicine}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
                                   {med.dosage}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
                                   {med.days}
                                 </td>
                               </tr>
@@ -917,6 +917,11 @@ export const ConsultationDetails = (props: any) => {
                           )}
                         </tbody>
                       </table>
+                      {consultationData.discharge_advice.length === 0 && (
+                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
+                          No data found
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1034,7 +1039,7 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "INVESTIGATIONS" && (
           <div>
-            <div className="flex justify-between">
+            <div className="sm:flex justify-between">
               <PageTitle
                 title="Investigations"
                 hideBack={true}
@@ -1049,7 +1054,7 @@ export const ConsultationDetails = (props: any) => {
                     )
                   }
                 >
-                  Create Investigation
+                  <i className="fas fa-plus w-4 mr-3"></i> Create Investigation
                 </button>
               </div>
             </div>

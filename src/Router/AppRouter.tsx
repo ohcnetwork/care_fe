@@ -127,7 +127,7 @@ const routes = {
     facilityId,
     patientId,
   }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
-  "/facility/:facilityId/patient/:patientId/files/": ({
+  "/facility/:facilityId/patient/:patientId/files": ({
     facilityId,
     patientId,
   }: any) => (
@@ -176,7 +176,7 @@ const routes = {
       unspecified={true}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation": ({
     facilityId,
     patientId,
     id,
@@ -266,6 +266,12 @@ const routes = {
   "/facility/:facilityId/location/add": ({ facilityId }: any) => (
     <AddLocationForm facilityId={facilityId} />
   ),
+  "/facility/:facilityId/location/:locationId/update": ({
+    facilityId,
+    locationId,
+  }: any) => (
+    <AddLocationForm facilityId={facilityId} locationId={locationId} />
+  ),
   "/facility/:facilityId/location/:locationId/beds/add": ({
     facilityId,
     locationId,
@@ -333,7 +339,7 @@ const routes = {
   "/external_results/:id/update": ({ id }: any) => <ResultUpdate id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
-  "/notice_board/": () => <NoticeBoard />,
+  "/notice_board": () => <NoticeBoard />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId": ({
     facilityId,
     patientId,
@@ -425,7 +431,7 @@ export default function AppRouter() {
 
         <main
           id="pages"
-          className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none"
+          className="flex-1 overflow-y-scroll pb-4 md:py-0 focus:outline-none"
         >
           <div className="max-w-8xl mx-auto px-3 py-3">{pages}</div>
         </main>
