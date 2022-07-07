@@ -161,7 +161,7 @@ export default function ListView() {
     }
 
     return data.map((shift: any) => (
-      <div key={`shift_${shift.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
+      <div key={`shift_${shift.id}`} className="w-full md:w-1/2 mt-6 md:px-7">
         <div className="overflow-hidden shadow rounded-lg bg-white h-full">
           <div
             className={
@@ -356,7 +356,6 @@ export default function ListView() {
         <PageTitle
           title={"Shifting"}
           hideBack={true}
-          className="mx-3 md:mx-8"
           componentRight={
             downloadLoading ? (
               <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />

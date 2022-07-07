@@ -62,12 +62,7 @@ export const NoticeBoard: any = () => {
   if (isLoading) return <Loading />;
   return (
     <div className="px-6">
-      <PageTitle
-        title="Notice Board"
-        className="mx-3"
-        hideBack={true}
-        breadcrumbs={false}
-      />
+      <PageTitle title="Notice Board" hideBack={true} breadcrumbs={false} />
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-6">
         {notices}
       </div>

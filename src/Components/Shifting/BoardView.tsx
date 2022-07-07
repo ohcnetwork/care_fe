@@ -96,7 +96,7 @@ export default function BoardView() {
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
             title={"Shifting"}
-            className="mx-3 md:mx-8"
+            className="mx-3 md:mx-5"
             hideBack={true}
             componentRight={
               downloadLoading ? (
@@ -166,7 +166,7 @@ export default function BoardView() {
         local={local}
         updateFilter={updateFilter}
       />
-      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-2">
+      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
         {isLoading ? (
           <Loading />
         ) : (

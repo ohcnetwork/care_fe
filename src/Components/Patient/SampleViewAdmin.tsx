@@ -392,7 +392,6 @@ export default function SampleViewAdmin() {
       <PageTitle
         title="Sample Management System"
         hideBack={true}
-        className="mx-3"
         breadcrumbs={false}
         componentRight={
           downloadLoading ? (
@@ -528,7 +527,7 @@ export default function SampleViewAdmin() {
         </div>
       </div>
       <div className="md:px-2">
-        <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
+        <div className="flex flex-wrap md:-mx-2 lg:-mx-6">{manageSamples}</div>
       </div>
 
       <CSVLink

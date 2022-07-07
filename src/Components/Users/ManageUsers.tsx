@@ -476,7 +476,7 @@ export default function ManageUsers() {
       <PageTitle
         title="User Management"
         hideBack={true}
-        className="mx-3 md:mx-8 px-2"
+        className="mx-5 px-2"
         breadcrumbs={false}
       />
 
@@ -581,7 +581,7 @@ export default function ManageUsers() {
           : null}
       </div>
 
-      <div className="px-3 md:px-8">
+      <div className="px-3 md:px-6">
         <div>{manageUsers}</div>
       </div>
       {userData.show && (
