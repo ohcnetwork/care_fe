@@ -342,7 +342,10 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                       color="primary"
                       variant="contained"
                       type="submit"
-                      onClick={(e) => handleSubmit(e)}
+                      onClick={(e) => {
+                        handleSubmit(e);
+                        navigate(`/facility/${facilityId}`);
+                      }}
                       startIcon={
                         <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                       }
