@@ -397,7 +397,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = e.target.files[0];
     const fileName = f.name;
     const ext: string = fileName.split(".")[1];
-    setContentType(header_content_type[ext]);
+    setcontentType(header_content_type[ext]);
 
     if (ExtImage[ext] && ExtImage[ext] === "1") {
       const options = {
@@ -515,10 +515,6 @@ export const FileUpload = (props: FileUploadProps) => {
     if (f === undefined) {
       return false;
     }
-    if (filenameLength === 0) {
-      setAudioNameError("Please give a name !!");
-      return false;
-    }
     return true;
   };
 
@@ -527,7 +523,8 @@ export const FileUpload = (props: FileUploadProps) => {
     setAudioNameError("");
     const category = "AUDIO";
     const name = "audio.mp3";
-    const filename = audioName.trim();
+    const filename =
+      audioName.trim().length === 0 ? Date.now().toString() : audioName.trim();
     setAudioUploadStarted(true);
     // setUploadSuccess(false);
     const requestData = {
@@ -667,7 +664,9 @@ export const FileUpload = (props: FileUploadProps) => {
               <div>
                 <h4>Record and Upload Audio File</h4>
               </div>
-              <InputLabel id="spo2-label">Enter Audio File Name</InputLabel>
+              <InputLabel id="spo2-label">
+                Enter Audio File Name (optional)
+              </InputLabel>
               <TextInputField
                 name="consultation_audio_file"
                 variant="outlined"
