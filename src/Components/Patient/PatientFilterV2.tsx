@@ -414,14 +414,17 @@ export default function PatientFilterV2(props: any) {
     setFilterState(filterData);
   };
 
-  function _selectMenuOptions(options: Array<OptionsType>) {
+  function _selectMenuOptions(options: any, useIdAsValue = true) {
     return [
       {
         title: "Show All",
         value: "",
       },
-      ...options.map((option) => {
-        return { title: option.text, value: option.text };
+      ...options.map((option: any) => {
+        return {
+          title: option.text,
+          value: useIdAsValue ? option.id : option.text,
+        };
       }),
     ];
   }
@@ -526,11 +529,11 @@ export default function PatientFilterV2(props: any) {
           <span className="text-sm font-semibold">Facility type</span>
           <div className="py-2">
             <SelectMenu
-              selected={filterState["facility_type"]}
+              selected={filterState.facility_type}
               onSelect={(facility_type) =>
                 setFilterState({ ...filterState, facility_type })
               }
-              options={_selectMenuOptions(FACILITY_TYPES)}
+              options={_selectMenuOptions(FACILITY_TYPES, false)}
             />
           </div>
         </div>
@@ -539,86 +542,91 @@ export default function PatientFilterV2(props: any) {
           <span className="text-sm font-semibold">Gender</span>
           <div className="py-2">
             <SelectMenu
-              selected={filterState["gender"]}
+              selected={filterState.gender}
               onSelect={(gender) => setFilterState({ ...filterState, gender })}
               options={_selectMenuOptions(GENDER_TYPES)}
             />
           </div>
-          <SelectField
-            name="gender"
-            variant="outlined"
-            margin="dense"
-            value={filterState.gender}
-            options={[{ id: "", text: "Show All" }, ...GENDER_TYPES]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
         </div>
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Is Antenatal</span>
-          <SelectField
-            name="is_antenatal"
-            variant="outlined"
-            margin="dense"
-            value={filterState.is_antenatal}
-            options={[
-              { id: "", text: "Show All" },
-              { id: "true", text: "antenatal" },
-              { id: "false", text: "non antenatal" },
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
+          <div className="py-2">
+            <SelectMenu
+              selected={filterState.is_antenatal}
+              onSelect={(is_antenatal) =>
+                setFilterState({ ...filterState, is_antenatal })
+              }
+              options={_selectMenuOptions([
+                { id: "true", text: "antenatal" },
+                { id: "false", text: "non antenatal" },
+              ])}
+            />
+          </div>
         </div>
 
         {KASP_ENABLED && (
           <div className="w-full flex-none">
             <span className="text-sm font-semibold">{KASP_STRING}</span>
-            <SelectField
-              name="is_kasp"
-              variant="outlined"
-              margin="dense"
-              value={filterState.is_kasp}
-              options={[
-                { id: "", text: "Show All" },
-                { id: "true", text: `Show ${KASP_STRING}` },
-                { id: "false", text: `Show Non ${KASP_STRING}` },
-              ]}
-              onChange={handleChange}
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-            />
+            <div className="py-2">
+              <SelectMenu
+                selected={filterState.is_kasp}
+                onSelect={(is_kasp) =>
+                  setFilterState({ ...filterState, is_kasp })
+                }
+                options={_selectMenuOptions([
+                  { id: "true", text: `Show ${KASP_STRING}` },
+                  { id: "false", text: `Show Non ${KASP_STRING}` },
+                ])}
+              />
+            </div>
           </div>
         )}
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Category</span>
-          <SelectField
-            name="category"
-            variant="outlined"
-            margin="dense"
-            value={filterState.category}
-            options={[{ id: "", text: "Show All" }, ...PATIENT_FILTER_CATEGORY]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
+          <div className="py-2">
+            <SelectMenu
+              selected={filterState.category}
+              onSelect={(category) =>
+                setFilterState({ ...filterState, category })
+              }
+              options={_selectMenuOptions(PATIENT_FILTER_CATEGORY)}
+            />
+          </div>
         </div>
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Disease Status</span>
-          <SelectField
-            name="disease_status"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.disease_status}
-            options={["Show All", ...DISEASE_STATUS]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
+          <div className="py-2">
+            <SelectMenu
+              selected={filterState.disease_status}
+              onSelect={(disease_status) =>
+                setFilterState({ ...filterState, disease_status })
+              }
+              options={_selectMenuOptions(
+                DISEASE_STATUS.map((status) => {
+                  return { id: status, text: status };
+                })
+              )}
+            />
+          </div>
         </div>
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Vaccinated</span>
+          <div className="py-2">
+            <SelectMenu
+              selected={filterState.number_of_doses}
+              onSelect={(number_of_doses) =>
+                setFilterState({ ...filterState, number_of_doses })
+              }
+              options={_selectMenuOptions(
+                DISEASE_STATUS.map((status) => {
+                  return { id: status, text: status };
+                })
+              )}
+            />
+          </div>
           <SelectField
             name="number_of_doses"
             variant="outlined"
