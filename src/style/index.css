@@ -796,6 +796,7 @@ button:disabled,
   .manualGrid{
     display: grid !important
   }
+}
 
 /*
   Range Sliders for Camera Feed
