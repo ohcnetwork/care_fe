@@ -5,6 +5,7 @@ import {
   MultiSelectField,
   TextInputField,
   AutoCompleteAsyncField,
+  DateInputField,
 } from "../Common/HelperInputFields";
 import {
   PATIENT_FILTER_ORDER,
@@ -25,6 +26,7 @@ import {
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 import { debounce } from "lodash";
@@ -104,6 +106,7 @@ export default function PatientFilterV2(props: any) {
     last_consultation_is_telemedicine:
       filter.last_consultation_is_telemedicine || null,
     is_antenatal: filter.is_antenatal || null,
+    admit_date: filter.admit_date || null,
   });
   const dispatch: any = useDispatch();
 
@@ -147,6 +150,7 @@ export default function PatientFilterV2(props: any) {
     last_vaccinated_date_after: null,
     last_consultation_is_telemedicine: null,
     is_antenatal: null,
+    admit_date: null,
   };
 
   useEffect(() => {
@@ -291,7 +295,10 @@ export default function PatientFilterV2(props: any) {
       last_vaccinated_date_after,
       last_consultation_is_telemedicine,
       is_antenatal,
+      admit_date,
     } = filterState;
+
+    console.log(filterState);
     const data = {
       district: district || "",
       lsgBody: lsgBody || "",
@@ -396,6 +403,10 @@ export default function PatientFilterV2(props: any) {
       last_consultation_is_telemedicine:
         last_consultation_is_telemedicine || "",
       is_antenatal: is_antenatal || "",
+      admit_date:
+        admit_date && moment(admit_date).isValid()
+          ? moment(admit_date).format("YYYY-MM-DD")
+          : "",
     };
     onChange(data);
   };
@@ -408,6 +419,13 @@ export default function PatientFilterV2(props: any) {
     const filterData: any = { ...filterState };
     filterData[startDateId] = startDate?.toString();
     filterData[endDateId] = endDate?.toString();
+
+    setFilterState(filterData);
+  };
+
+  const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
+    const filterData: any = { ...filterState };
+    filterData[key] = date?.toString();
 
     setFilterState(filterData);
   };
@@ -762,9 +780,18 @@ export default function PatientFilterV2(props: any) {
             }
             endDateId={"last_consultation_admission_date_before"}
             startDateId={"last_consultation_admission_date_after"}
-            label={"Admit Date"}
+            label={"Admit Date Range"}
             size="small"
           />
+
+          <DateInputField
+            label="Admit Date"
+            value={filterState.admit_date}
+            onChange={(date) => handleDateChange(date, "admit_date")}
+            errors={""}
+            disableFuture={true}
+          />
+
           <DateRangePicker
             startDate={getDate(
               filterState.last_consultation_discharge_date_after

@@ -187,6 +187,7 @@ export const PatientManager = (props: any) => {
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
+    admit_date: qParams.admit_date || undefined,
   };
 
   const date_range_fields = [
@@ -316,6 +317,7 @@ export const PatientManager = (props: any) => {
     qParams.last_vaccinated_date_after,
     qParams.last_consultation_is_telemedicine,
     qParams.is_antenatal,
+    qParams.admit_date,
   ]);
 
   const fetchDistrictName = useCallback(
