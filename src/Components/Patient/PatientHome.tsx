@@ -377,6 +377,8 @@ export const PatientHome = (props: any) => {
     ));
   }
 
+  console.log(patientData, consultationListData);
+
   return (
     <div className="px-2 pb-2">
       {showAlertMessage.show && (
@@ -1092,7 +1094,9 @@ export const PatientHome = (props: any) => {
                   <button
                     className="btn btn-primary w-full"
                     disabled={
-                      !patientData.is_active || consultationListData.length > 0
+                      !patientData.is_active ||
+                      patientData?.facility ===
+                        patientData?.last_consultation?.facility
                     }
                     onClick={() =>
                       navigate(
