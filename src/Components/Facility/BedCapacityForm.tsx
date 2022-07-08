@@ -324,27 +324,45 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 className="padding16"
                 style={{ justifyContent: "space-between" }}
               >
-                <Button
-                  id="bed-capacity-cancel"
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={goBack}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  id="bed-capacity-save"
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  onClick={(e) => handleSubmit(e)}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
-                >
-                  {buttonText}
-                </Button>
+                <div>
+                  <Button
+                    id="bed-capacity-cancel"
+                    color="default"
+                    variant="contained"
+                    type="button"
+                    onClick={goBack}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+                <div className="flex flex-row gap-6">
+                  {!isLastOptionType && (
+                    <Button
+                      id="bed-capacity-save-and-exit"
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      onClick={(e) => handleSubmit(e)}
+                      startIcon={
+                        <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                      }
+                    >
+                      Save Bed Capacity
+                    </Button>
+                  )}
+                  <Button
+                    id="bed-capacity-save"
+                    color="primary"
+                    variant="contained"
+                    type="submit"
+                    onClick={(e) => handleSubmit(e)}
+                    startIcon={
+                      <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                    }
+                  >
+                    {buttonText}
+                  </Button>
+                </div>
               </CardActions>
             </CardContent>
           </form>
