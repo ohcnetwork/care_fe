@@ -199,7 +199,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
     return true;
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: any, btnType: string = "Save") => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
@@ -229,7 +229,9 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
           Notification.Success({
             msg: "Bed capacity added successfully",
           });
-          if (isLastOptionType) {
+          if (btnType == "Save and Exit") {
+            navigate(`/facility/${facilityId}`);
+          } else if (isLastOptionType) {
             navigate(`/facility/${facilityId}/doctor`);
           }
         } else {
@@ -342,10 +344,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                       color="primary"
                       variant="contained"
                       type="submit"
-                      onClick={(e) => {
-                        handleSubmit(e);
-                        navigate(`/facility/${facilityId}`);
-                      }}
+                      onClick={(e) => handleSubmit(e, "Save and Exit")}
                       startIcon={
                         <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                       }
