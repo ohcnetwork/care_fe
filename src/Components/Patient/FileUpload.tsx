@@ -716,8 +716,8 @@ export const FileUpload = (props: FileUploadProps) => {
                       onChange={onFileChange}
                       type="file"
                       className="block w-full text-sm text-slate-500
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-full file:border-0
+                      file:mr-4 file:py-2 file:px-4 
+                            file:border-0
                       file:text-sm file:font-semibold
                       file:bg-primary-100 file:text-primary-700
                       hover:file:bg-primary-300"
