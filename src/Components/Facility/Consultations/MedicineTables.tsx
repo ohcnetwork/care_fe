@@ -67,7 +67,7 @@ export const MedicineTables = (props: any) => {
         <div>
           <div className="mt-4 text-lg font-bold">Consultation Updates</div>
           {noDataFound && (
-            <div className="text-md h-full text-center mt-5">
+            <div className="text-md h-full text-center mt-5 text-gray-500 text-semibold bg-white rounded-lg shadow py-4">
               No Consultation Updates Found
             </div>
           )}

@@ -347,7 +347,7 @@ export const PatientManager = (props: any) => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handleTabChange = async (tab: number) => {

@@ -87,8 +87,10 @@ export const NursingPlot = (props: any) => {
         <div>
           <div className="flex flex-row overflow-x-scroll">
             {areFieldsEmpty() && (
-              <div className="text-center text-lg mt-5 w-full">
-                No data available
+              <div className="w-full mt-1 border bg-white shadow rounded-lg p-4">
+                <div className="font-bold text-gray-500 text-2xl flex justify-center items-center">
+                  No data available
+                </div>
               </div>
             )}
             {NURSING_CARE_FIELDS.map(
