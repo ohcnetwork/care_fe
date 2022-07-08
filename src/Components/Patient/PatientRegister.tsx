@@ -1019,7 +1019,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     className="btn btn-primary mb-8 mx-4"
                     onClick={(_) => {
                       setShowImport(true);
-                      setQuery({ extId: "" }, true);
+                      setQuery({ extId: "" }, { replace: true });
                     }}
                   >
                     {" "}
@@ -1120,7 +1120,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           in={String(state.form.gender) === "2"}
                           timeout="auto"
                           unmountOnExit
-                          className="col-span-2"
                         >
                           {
                             <div id="is_antenatal-div" className="col-span-2">

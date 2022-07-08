@@ -53,7 +53,7 @@ export default function BoardView() {
           : a,
       {}
     );
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const applyFilter = (data: any) => {
