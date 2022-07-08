@@ -615,7 +615,7 @@ export const ConsultationDetails = (props: any) => {
                       </h3>
                       <div className="">
                         <div className="capitalize">
-                          {consultationData.symptoms_text || "-"}
+                          {consultationData.symptoms_text}
                         </div>
                         {consultationData.other_symptoms && (
                           <div className="capitalize">
@@ -644,9 +644,7 @@ export const ConsultationDetails = (props: any) => {
                       </h3>
                       <div className="mt-2">
                         <ReadMore
-                          text={
-                            consultationData.history_of_present_illness || "-"
-                          }
+                          text={consultationData.history_of_present_illness}
                           minChars={250}
                         />
                       </div>
@@ -662,7 +660,7 @@ export const ConsultationDetails = (props: any) => {
                       </h3>
                       <div className="mt-2">
                         <ReadMore
-                          text={consultationData.examination_details || "-"}
+                          text={consultationData.examination_details}
                           minChars={250}
                         />
                       </div>
@@ -677,7 +675,7 @@ export const ConsultationDetails = (props: any) => {
                       </h3>
                       <div className="mt-2">
                         <ReadMore
-                          text={consultationData.prescribed_medication || "-"}
+                          text={consultationData.prescribed_medication}
                           minChars={250}
                         />
                       </div>
@@ -692,7 +690,7 @@ export const ConsultationDetails = (props: any) => {
                       </h3>
                       <div className="mt-2">
                         <ReadMore
-                          text={consultationData.consultation_notes || "-"}
+                          text={consultationData.consultation_notes}
                           minChars={250}
                         />
                       </div>
@@ -902,7 +900,7 @@ export const ConsultationDetails = (props: any) => {
                     History of present illness:{" "}
                   </h3>
                   <div className="mt-2">
-                    {consultationData.history_of_present_illness || "-"}
+                    {consultationData.history_of_present_illness}
                   </div>
                 </div>
               </div>
