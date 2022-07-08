@@ -19,6 +19,7 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
+  FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
   KASP_ENABLED,
   KASP_STRING,
@@ -42,6 +43,7 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import {
   MultilineInputField,
+  MultiSelectField,
   PhoneNumberField,
   SelectField,
   TextInputField,
@@ -73,6 +75,7 @@ type FacilityForm = {
   state: string;
   district: string;
   local_body: string;
+  features : string[];
   ward: string;
   kasp_empanelled: string;
   address: string;
@@ -98,6 +101,7 @@ const initForm: FacilityForm = {
   local_body: "",
   ward: "",
   kasp_empanelled: "false",
+  features : [],
   address: "",
   phone_number: "",
   latitude: "",
@@ -229,6 +233,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
             local_body: res.data.local_body ? res.data.local_body : "",
+            features : res.data.features || [],
             ward: res.data.ward_object ? res.data.ward_object.id : initialWards,
             kasp_empanelled: res.data.kasp_empanelled
               ? String(res.data.kasp_empanelled)
@@ -408,6 +413,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         address: state.form.address,
         pincode: state.form.pincode,
         local_body: state.form.local_body,
+        features : state.form.features,
         ward: state.form.ward,
         kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
         location:
@@ -529,7 +535,20 @@ export const FacilityCreate = (props: FacilityProps) => {
                   errors={state.errors.name}
                 />
               </div>
-
+              <div className="">
+                <InputLabel id="features-label">Features</InputLabel>
+                <MultiSelectField
+                    data-test="facility-features"
+                    name="features"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.features}
+                    options={FACILITY_FEATURE_TYPES}
+                    onChange={(e)=>handleChange(e)}
+                    optionValue="name"
+                    errors={state.errors.features}
+                  />
+              </div>
               <div>
                 <InputLabel id="gender-label">State*</InputLabel>
                 {isStateLoading ? (
@@ -574,7 +593,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 )}
               </div>
 
-              <div className="md:col-span-2">
+              <div className="">
                 <InputLabel id="local_body-label">Localbody*</InputLabel>
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
