@@ -991,7 +991,6 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Location
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-medium text-gray-500">
@@ -999,6 +998,14 @@ export const PatientHome = (props: any) => {
                   </div>
                   <div className="my-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
                     {patientData.address || "-"}
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    District
+                  </div>
+                  <div className="my-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
+                    {patientData.district_object?.name || "-"}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
