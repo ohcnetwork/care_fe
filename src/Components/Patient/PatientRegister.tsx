@@ -1019,7 +1019,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     className="btn btn-primary mb-8 mx-4"
                     onClick={(_) => {
                       setShowImport(true);
-                      setQuery({ extId: "" }, true);
+                      setQuery({ extId: "" }, { replace: true });
                     }}
                   >
                     {" "}
