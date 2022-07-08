@@ -163,22 +163,22 @@ export const DailyRounds = (props: any) => {
 
   useEffect(() => {
     async function fetchHasPreviousLog() {
-      if (consultationId) {
+      if (consultationId && !id) {
         const res = await dispatchAction(
           getDailyReport({ limit: 1, offset: 0 }, { consultationId })
         );
         setHasPreviousLog(res.data.count > 0);
-        dispatch((prev: any) => ({
+        dispatch({
           type: "set_form",
           form: {
-            ...prev.form,
+            ...state.form,
             clone_last: res.data.count > 0 ? "true" : "false",
           },
-        }));
+        });
       }
     }
     fetchHasPreviousLog();
-  }, [dispatchAction, consultationId]);
+  }, [dispatchAction, consultationId, id]);
 
   const validateForm = () => {
     const errors = { ...initError };
