@@ -47,6 +47,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { TextInputField } from "../Common/HelperInputFields";
 import { discharge, patchPatient, dischargePatient } from "../../Redux/actions";
+import ReadMore from "../Common/components/Readmore";
 
 type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
 interface preDischargeFormInterface {
@@ -636,13 +637,18 @@ export const ConsultationDetails = (props: any) => {
                 )}
 
                 {consultationData.history_of_present_illness && (
-                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
                       <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                         History of Present Illness
                       </h3>
                       <div className="mt-2">
-                        {consultationData.history_of_present_illness || "-"}
+                        <ReadMore
+                          text={
+                            consultationData.history_of_present_illness || "-"
+                          }
+                          minChars={250}
+                        />
                       </div>
                     </div>
                   </div>
@@ -655,7 +661,10 @@ export const ConsultationDetails = (props: any) => {
                         Examination details and Clinical conditions:{" "}
                       </h3>
                       <div className="mt-2">
-                        {consultationData.examination_details || "-"}
+                        <ReadMore
+                          text={consultationData.examination_details || "-"}
+                          minChars={250}
+                        />
                       </div>
                     </div>
                   </div>
@@ -667,7 +676,10 @@ export const ConsultationDetails = (props: any) => {
                         Treatment Summary
                       </h3>
                       <div className="mt-2">
-                        {consultationData.prescribed_medication || "-"}
+                        <ReadMore
+                          text={consultationData.prescribed_medication || "-"}
+                          minChars={250}
+                        />
                       </div>
                     </div>
                   </div>
@@ -679,7 +691,10 @@ export const ConsultationDetails = (props: any) => {
                         Advice
                       </h3>
                       <div className="mt-2">
-                        {consultationData.consultation_notes || "-"}
+                        <ReadMore
+                          text={consultationData.consultation_notes || "-"}
+                          minChars={250}
+                        />
                       </div>
                     </div>
                   </div>
@@ -687,7 +702,7 @@ export const ConsultationDetails = (props: any) => {
 
                 {(consultationData.operation ||
                   consultationData.special_instruction) && (
-                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                  <div className="bg-white overflow-hidden shadow rounded-lg lg:col-span-2">
                     <div className="px-4 py-5 sm:p-6">
                       <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                         Notes
@@ -696,17 +711,19 @@ export const ConsultationDetails = (props: any) => {
                         {consultationData.operation && (
                           <div className="mt-4">
                             <h5>Operation</h5>
-                            <p className="text-justify break-words">
-                              {consultationData.operation}
-                            </p>
+                            <ReadMore
+                              text={consultationData.operation}
+                              minChars={250}
+                            />
                           </div>
                         )}
                         {consultationData.special_instruction && (
                           <div className="mt-4">
                             <h5>Special Instruction</h5>
-                            <p className="text-justify break-words">
-                              {consultationData.special_instruction}
-                            </p>
+                            <ReadMore
+                              text={consultationData.special_instruction}
+                              minChars={250}
+                            />
                           </div>
                         )}
                       </div>
