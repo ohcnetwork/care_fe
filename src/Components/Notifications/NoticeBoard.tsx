@@ -49,7 +49,7 @@ export const NoticeBoard: any = () => {
     ));
   } else {
     notices.push(
-      <Card key="no-notice" className="my-4 mx-8 rounded-lg">
+      <Card key="no-notice" className="my-4 rounded-lg">
         <CardContent>
           <div className="text-xl text-center semibold">
             No notices for you.
@@ -62,7 +62,7 @@ export const NoticeBoard: any = () => {
   if (isLoading) return <Loading />;
   return (
     <div className="px-5">
-      <PageTitle title="Notice Board" breadcrumbs={false} />
+      <PageTitle title="Notice Board" hideBack={true} breadcrumbs={false} />
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-6">
         {notices}
       </div>
