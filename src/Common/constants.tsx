@@ -187,7 +187,7 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
   { id: 120, text: "2 hours" },
   { id: 180, text: "3 hours" },
   { id: 240, text: "4 hours" },
-  { id: 300, text: "6 hours" },
+  { id: 360, text: "6 hours" },
   { id: 480, text: "8 hours" },
   { id: 720, text: "12 hours" },
   { id: 1440, text: "24 hours" },
@@ -693,23 +693,23 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
 
 export const FACILITY_FEATURE_TYPES = [
   {
-    id : 1,
-    name : "CT Scan Facility"
+    id: 1,
+    name: "CT Scan Facility",
   },
   {
-    id : 2,
-    name : "Maternity Care"
+    id: 2,
+    name: "Maternity Care",
   },
   {
-    id : 3,
-    name : "X-Ray facility"
+    id: 3,
+    name: "X-Ray facility",
   },
   {
-    id : 4,
-    name : "Neonatal care"
+    id: 4,
+    name: "Neonatal care",
   },
   {
-    id : 5,
-    name : "Operation theater"
-  }
+    id: 5,
+    name: "Operation theater",
+  },
 ];
