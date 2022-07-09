@@ -305,11 +305,11 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
           )->React.array}
         </div>
       </div>
-      <div className="w-full mb-10 px-3 font-bold">
-        <label htmlFor="description" className="block mb-2"> {str("Description")} </label>
+      <div className="w-full mb-10 px-3">
+        <label htmlFor="description" className="block mb-2 font-bold"> {str("Description")} </label>
         <textarea
           id="description"
-          className="block w-full border-gray-500 border-2 rounded px-2 py-1"
+          className="block w-full border-gray-500 border-2 rounded px-2 py-1 focus:border-green-500"
           rows=3
           value={state.rhythmDetails}
           onChange={e => send(SetRhythmDetails(ReactEvent.Form.target(e)["value"]))}
