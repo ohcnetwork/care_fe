@@ -1,4 +1,4 @@
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
@@ -81,9 +81,6 @@ export const FacilityHome = (props: any) => {
       } else {
         setFacilityNotFound(true);
         setIsLoading(false);
-        Notification.Error({
-          msg: `The facility ID seems to be incorrect, please try again...`,
-        });
       }
     },
     [dispatch, facilityId]
@@ -118,7 +115,32 @@ export const FacilityHome = (props: any) => {
   }
 
   if (facilityNotFound) {
-    return <Error404 />;
+    return (
+      <div className="flex justify-center text-center items-center h-screen">
+        <div className="text-center error-page-wrap">
+          <div>
+            <div className="w-28  -rotate-45 mx-auto relative top-14">
+              <div className="bg-gray-900 h-1 w-full"></div>
+              <div className="bg-gray-100 h-1 w-full"></div>
+            </div>
+            <i className="fas fa-hospital text-6xl my-4"></i>
+          </div>
+
+          <h1>Facility Not Found</h1>
+          <p>
+            A facility with ID: {facilityId}, does not exist!
+            <br />
+            <br />
+            <Link
+              href="/"
+              className="rounded-lg px-4 py-2 inline-block bg-primary-600 text-white hover:text-white hover:bg-primary-700"
+            >
+              Return to CARE
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
   }
 
   let capacityList: any = null;
