@@ -76,19 +76,19 @@ const BedRow = (props: BedRowProps) => {
   return (
     <div
       key={id}
-      className="w-full border-b lg:flex justify-between items-center py-6"
+      className="w-full border-b lg:flex justify-between items-center py-6 space-y-5"
     >
-      <div className="px-4 lg:w-3/4">
-        <p className="text-xl font-normal capitalize">
-          {name} &nbsp;
-          <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
+      <div className="px-4 lg:w-3/4 space-y-2">
+        <div>
+          <p className="inline text-xl capitalize break-words">{name}</p> &nbsp;
+          <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
             {LOCATION_BED_TYPES.find((item) => item.id === bedType).name.slice(
               0,
               25
             ) + (bedType.length > 25 ? "..." : "")}
-          </div>
-        </p>
-        <p className="text-sm break-all">{description}</p>
+          </p>
+        </div>
+        <p className="break-all">{description}</p>
       </div>
       <div className="flex">
         <div className="px-2 py-2 w-full">
