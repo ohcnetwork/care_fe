@@ -6,6 +6,8 @@ import { useDispatch } from "react-redux";
 import {
   createFacilityAssetLocation,
   getAnyFacility,
+  getFacilityAssetLocation,
+  updateFacilityAssetLocation,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import {
@@ -22,28 +24,42 @@ const goBack = () => {
 
 interface LocationFormProps {
   facilityId: string;
+  locationId?: string;
 }
 
 export const AddLocationForm = (props: LocationFormProps) => {
-  const { facilityId } = props;
+  const { facilityId, locationId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [facilityName, setFacilityName] = useState("");
+  const [locationName, setLocationName] = useState("");
+
+  const headerText = !locationId ? "Add Location" : "Update Location";
+  const buttonText = !locationId ? "Add Location" : "Update Location";
 
   useEffect(() => {
     async function fetchFacilityName() {
+      setIsLoading(true);
       if (facilityId) {
         const res = await dispatchAction(getAnyFacility(facilityId));
 
         setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
       }
+      if (locationId) {
+        const res = await dispatchAction(
+          getFacilityAssetLocation(facilityId, locationId)
+        );
+
+        setName(res?.data?.name || "");
+        setLocationName(res?.data?.name || "");
+        setDescription(res?.data?.description || "");
+      }
+      setIsLoading(false);
     }
     fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  }, [dispatchAction, facilityId, locationId]);
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -54,13 +70,19 @@ export const AddLocationForm = (props: LocationFormProps) => {
     };
 
     const res = await dispatchAction(
-      createFacilityAssetLocation(data, facilityId)
+      locationId
+        ? updateFacilityAssetLocation(data, facilityId, locationId)
+        : createFacilityAssetLocation(data, facilityId)
     );
     setIsLoading(false);
-    if (res && res.status === 201) {
-      navigate(`/facility/${facilityId}/location/${res.data.id}/beds/add`);
+    if (res && (res.status === 201 || res.status === 200)) {
+      const notificationMessage = locationId
+        ? "Location updated successfully"
+        : "Location created successfully";
+
+      navigate(`/facility/${facilityId}/location`);
       Notification.Success({
-        msg: "Location created successfully",
+        msg: notificationMessage,
       });
     }
   };
@@ -70,16 +92,24 @@ export const AddLocationForm = (props: LocationFormProps) => {
   }
 
   return (
-    <div className="px-2">
+    <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle
-        title="Add Location"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+        title={headerText}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          ...(locationId && {
+            [locationId]: {
+              name: locationName,
+              uri: `/facility/${facilityId}/location`,
+            },
+          }),
+        }}
       />
-      <div className="mt-4">
+      <div className="mt-10">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="mt-2 grid gap-4 grid-cols-1">
                 <div>
                   <InputLabel id="name">Name *</InputLabel>
                   <TextInputField
@@ -107,7 +137,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                   />
                 </div>
               </div>
-              <div className="flex justify-between mt-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-between mt-4">
                 <Button
                   color="default"
                   variant="contained"
@@ -120,11 +150,10 @@ export const AddLocationForm = (props: LocationFormProps) => {
                   color="primary"
                   variant="contained"
                   type="submit"
-                  style={{ marginLeft: "auto" }}
                   startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
                   onClick={(e) => handleSubmit(e)}
                 >
-                  Add Location
+                  {buttonText}
                 </Button>
               </div>
             </CardContent>
