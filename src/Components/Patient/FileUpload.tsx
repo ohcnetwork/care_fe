@@ -675,7 +675,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4>Upload New File</h4>
               </div>
               <div>
-                <InputLabel id="spo2-label">Enter File Name</InputLabel>
+                <InputLabel id="spo2-label">Enter File Name*</InputLabel>
                 <TextInputField
                   name="temperature"
                   variant="outlined"
