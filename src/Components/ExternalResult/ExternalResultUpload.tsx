@@ -14,7 +14,7 @@ export default function ExternalResultUpload() {
   // for disabling save button once clicked
   const [loading, setLoading] = useState(false);
   const [csvData, setCsvData] = useState(new Array<any>());
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<any>([]);
   const handleForce = (data: any) => {
     setCsvData(data);
   };
@@ -37,13 +37,13 @@ export default function ExternalResultUpload() {
       };
 
       if (valid) {
-        setErrors({});
+        setErrors([]);
         dispatch(externalResultUploadCsv(data)).then((resp: any) => {
           if (resp && resp.status === 202) {
             setLoading(false);
             navigate("/external_results");
           } else {
-            setErrors(resp.data);
+            setErrors(resp.data.map((err: any) => Object.entries(err)));
             setLoading(false);
           }
         });
