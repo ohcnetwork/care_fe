@@ -128,7 +128,7 @@ const routes = {
     facilityId,
     patientId,
   }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
-  "/facility/:facilityId/patient/:patientId/files/": ({
+  "/facility/:facilityId/patient/:patientId/files": ({
     facilityId,
     patientId,
   }: any) => (
@@ -177,7 +177,7 @@ const routes = {
       unspecified={true}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation": ({
     facilityId,
     patientId,
     id,
@@ -340,7 +340,7 @@ const routes = {
   "/external_results/:id/update": ({ id }: any) => <ResultUpdate id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
-  "/notice_board/": () => <NoticeBoard />,
+  "/notice_board": () => <NoticeBoard />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId": ({
     facilityId,
     patientId,

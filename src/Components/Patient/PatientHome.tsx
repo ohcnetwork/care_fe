@@ -1092,7 +1092,8 @@ export const PatientHome = (props: any) => {
                   <button
                     className="btn btn-primary w-full"
                     disabled={
-                      !patientData.is_active || consultationListData.length > 0
+                      !patientData.is_active ||
+                      !patientData?.last_consultation?.discharge_date
                     }
                     onClick={() =>
                       navigate(
@@ -1118,7 +1119,7 @@ export const PatientHome = (props: any) => {
                     className="btn btn-primary w-full"
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/files/`
+                        `/facility/${patientData?.facility}/patient/${id}/files`
                       )
                     }
                   >

@@ -71,7 +71,7 @@ export default function ManageUsers() {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const fetchData = useCallback(

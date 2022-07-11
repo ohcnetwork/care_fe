@@ -172,8 +172,9 @@ const AssetsList = () => {
   };
 
   const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ ...qParams, search }, true);
-    else setQueryParams({ ...qParams, search: "" }, true);
+    if (search !== "")
+      setQueryParams({ ...qParams, search }, { replace: true });
+    else setQueryParams({ ...qParams, search: "" }, { replace: true });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -184,7 +185,7 @@ const AssetsList = () => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
     console.log(qParams);
   };
 

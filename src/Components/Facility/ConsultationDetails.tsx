@@ -635,14 +635,14 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               )}
 
-              {consultationData.existing_medication && (
+              {consultationData.history_of_present_illness && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
                     <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                       History of Present Illness
                     </h3>
                     <div className="mt-2">
-                      {consultationData.existing_medication || "-"}
+                      {consultationData.history_of_present_illness || "-"}
                     </div>
                   </div>
                 </div>
@@ -878,14 +878,14 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "MEDICINES" && (
           <div>
-            {consultationData.existing_medication && (
+            {consultationData.history_of_present_illness && (
               <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                 <div className="px-4 py-5 sm:p-6">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                    Existing Medication:{" "}
+                    History of present illness:{" "}
                   </h3>
                   <div className="mt-2">
-                    {consultationData.existing_medication || "-"}
+                    {consultationData.history_of_present_illness || "-"}
                   </div>
                 </div>
               </div>
@@ -1057,7 +1057,7 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "INVESTIGATIONS" && (
           <div>
-            <div className="flex justify-between">
+            <div className="sm:flex justify-between">
               <PageTitle
                 title="Investigations"
                 hideBack={true}
@@ -1072,7 +1072,7 @@ export const ConsultationDetails = (props: any) => {
                     )
                   }
                 >
-                  Create Investigation
+                  <i className="fas fa-plus w-4 mr-3"></i> Create Investigation
                 </button>
               </div>
             </div>
