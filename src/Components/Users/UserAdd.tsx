@@ -146,7 +146,7 @@ export const UserAdd = (props: UserProps) => {
 
   useEffect(()=>{
     setUsernameExists(0);
-    if(usernameInput.length > 1){
+    if(usernameInput.length > 1 && !(state.form.username?.length < 2) && /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])){
       let timeout = setTimeout(() => {
         checkUsername(usernameInput);
       }, 500);
@@ -649,36 +649,44 @@ export const UserAdd = (props: UserProps) => {
                   onFocus={() => setUsernameInputInFocus(true)}
                   onBlur={() => setUsernameInputInFocus(false)}
                 />
-                {usernameExists !== 0 && (
-                  <>
-                    {usernameExists === 1 ? 
-                      <span className="text-gray-700">checking...</span> 
-                    : (usernameExists === 2 ? 
-                      <span className="text-red-500">User already exists</span> 
-                    : (usernameExists === 3 && 
-                      <span className="text-primary-500">Available!</span>
-                    ))}
-                  </>
-                )}
                 {usernameInputInFocus && (
                   <div className="pl-2 text-small text-gray-500">
                     <div>
+                      {usernameExists !== 0 && (
+                        <>
+                          {usernameExists === 1 ? 
+                            <span>
+                              <i className="fas fa-circle-dot" /> checking...
+                            </span> 
+                          : (usernameExists === 2 ? 
+                            <span className="text-red-500">
+                              <i className="fas fa-circle-xmark text-red-500" /> User already exists
+                            </span> 
+                          : (usernameExists === 3 && 
+                            <span className="text-primary-500">
+                              <i className="fas fa-circle-check text-green-500" /> Available!
+                            </span>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                    <div>
                       {state.form.username?.length < 2 ? (
-                        <Cancel fontSize="inherit" color="error" />
+                          <i className="fas fa-circle-xmark text-red-500" />
                       ) : (
-                        <CheckCircle fontSize="inherit" color="primary" />
+                        <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
-                      username should be atleast 2 characters long
+                      Username should be atleast 2 characters long
                     </div>
                     <div>
                       {!/[^.@+_-]/.test(
                         state.form.username[state.form.username?.length - 1]
                       ) ? (
-                        <Cancel fontSize="inherit" color="error" />
+                        <i className="fas fa-circle-xmark text-red-500" />
                       ) : (
-                        <CheckCircle fontSize="inherit" color="primary" />
+                        <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
-                      {"username can't end with ^ . @ + _ -"}
+                      Username can't end with ^ . @ + _ -
                     </div>
                   </div>
                 )}
