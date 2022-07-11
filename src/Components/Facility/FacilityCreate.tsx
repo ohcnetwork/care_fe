@@ -457,7 +457,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         facilityId ? updateFacility(facilityId, data) : createFacility(data)
       );
 
-      if (res && res.data) {
+      if (res && res.status === 200 && res.data) {
         if (res.status === 200) {
           const id = res.data.id;
           dispatch({ type: "set_form", form: initForm });
