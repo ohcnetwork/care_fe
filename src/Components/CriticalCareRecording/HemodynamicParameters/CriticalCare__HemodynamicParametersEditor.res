@@ -309,7 +309,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         <label htmlFor="description" className="block mb-2 font-bold"> {str("Description")} </label>
         <textarea
           id="description"
-          className="block w-full border-gray-500 border-2 rounded px-2 py-1 focus:border-green-500"
+          className="block w-full border-gray-500 border-2 rounded px-2 py-1 focus:outline-green-500 focus:outline-offset-0 focus:outline-1 focus:border-green-500"
           rows=3
           value={state.rhythmDetails}
           onChange={e => send(SetRhythmDetails(ReactEvent.Form.target(e)["value"]))}
