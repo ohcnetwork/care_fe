@@ -531,7 +531,7 @@ export const UserAdd = (props: UserProps) => {
 
       <Card className="mt-4">
         <HelpToolTip
-          text="Need help? Go to the docs "
+          text="Need help? Go to the docs"
           link="https://school.coronasafe.network/targets/12953"
         />
         <CardContent>
