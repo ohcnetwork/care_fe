@@ -1,56 +1,23 @@
 import loadable from "@loadable/component";
-import { navigate } from "raviger";
-import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  externalResultUploadCsv,
-  getAllLocalBodyByDistrict,
-} from "../../Redux/actions";
-import CSVReader from "react-csv-reader";
-import {
-  MultilineInputField,
-  PhoneNumberField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
-import { ExternalResultLocalbodySelector } from "./ExternalResultLocalbodySelector";
-import StateManager from "react-select";
 import _ from "lodash";
-const get = require("lodash.get");
-const Loading = loadable(() => import("../Common/Loading"));
+import { navigate } from "raviger";
+import { useState } from "react";
+import CSVReader from "react-csv-reader";
+import { useDispatch } from "react-redux";
+import { externalResultUploadCsv } from "../../Redux/actions";
+import * as Notification from "../../Utils/Notifications.js";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+
 
 export default function ExternalResultUpload() {
   const dispatch: any = useDispatch();
-  const [uploadFile, setUploadFile] = useState("");
   // for disabling save button once clicked
   const [loading, setLoading] = useState(false);
   const [csvData, setCsvData] = useState(new Array<any>());
-  const [errors, setErrors] = useState<any>([]);
-  const initalState = { loading: false, lsgs: new Array<any>() };
-  const [state, setState] = useState(initalState);
-  const handleForce = (data: any, fileInfo: any) => {
+  const [errors, setErrors] = useState<any>({});
+  const handleForce = (data: any) => {
     setCsvData(data);
   };
-
-  // const fetchLSG = useCallback(
-  //   async (status: statusType) => {
-  //     setState({ ...state, loading: true });
-  //     let id = 7
-  //     const res = await dispatch(getAllLocalBodyByDistrict({ id }));
-  //     if (!status.aborted) {
-  //       if (res && res.data) {
-  //         setState({ loading: false, lsgs: res.data.results });
-  //       }
-  //     }
-  //   },
-  //   [dispatch]
-  // );
-
-  // useAbortableEffect((status: statusType) => {
-  //   fetchLSG(status);
-  // }, []);
 
   const papaparseOptions = {
     header: true,
@@ -64,20 +31,30 @@ export default function ExternalResultUpload() {
     e.preventDefault();
     setLoading(true);
     const valid = true;
-    const data = {
-      sample_tests: csvData,
-    };
+    if (csvData.length !== 0) {
+      const data = {
+        sample_tests: csvData,
+      };
 
-    if (valid) {
-      setErrors([]);
-      dispatch(externalResultUploadCsv(data)).then((resp: any) => {
-        if (resp && resp.status === 202) {
-          navigate("/external_results");
-        } else {
-          setErrors(resp.data.map((err: any) => Object.entries(err)));
-        }
+      if (valid) {
+        setErrors({});
+        dispatch(externalResultUploadCsv(data)).then((resp: any) => {
+          if (resp && resp.status === 202) {
+            setLoading(false);
+            navigate("/external_results");
+          } else {
+            setErrors(resp.data);
+            setLoading(false);
+          }
+        });
+      } else {
         setLoading(false);
+      }
+    } else {
+      Notification.Error({
+        msg: "Please Upload A CSV file !!!",
       });
+      setLoading(false);
     }
   };
 
@@ -94,6 +71,22 @@ export default function ExternalResultUpload() {
             <div className="mt-2 sm:mt-0 sm:col-span-2 my-2">
               <div className="mx-auto max-w-lg flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                 <div className="text-center">
+                  <span className="flex justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-12 w-12 text-gray-700 mb-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </span>
                   <CSVReader
                     cssLabelClass="block text-sm leading-5 font-medium text-gray-700 pb-4 px-4"
                     cssClass="react-csv-input"
@@ -131,17 +124,12 @@ export default function ExternalResultUpload() {
                         })
                       : null}
                   </div>
-                  {/* <div>
-                      {
-                        !state.loading && <ExternalResultLocalbodySelector lsgs={state.lsgs} />
-                      }
-                    </div> */}
                 </div>
               );
             })}
           </div>
           <div className=""></div>
-          <div className="mt-2">
+          <div className="mt-2 text-center">
             <button
               disabled={loading}
               className="block btn btn-primary mx-auto"

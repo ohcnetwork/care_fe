@@ -22,7 +22,7 @@ const initialLocation = {
 };
 
 function AssetFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter } = props;
   const dispatch: any = useDispatch();
   const [facility, setFacility] = useState<FacilityModel>({ name: "" });
   const [location, setLocation] =
@@ -113,24 +113,27 @@ function AssetFilter(props: any) {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
+      <div className="flex flex-wrap justify-between">
+        <button className="btn btn-default mr-1 my-1" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
-        <button className="btn btn-default" onClick={handleClearFilter}>
+        <button
+          className="btn btn-default mx-1 my-1 "
+          onClick={handleClearFilter}
+        >
           <i className="fas fa-times mr-2" />
           Clear Filter
         </button>
-        <button className="btn btn-primary" onClick={applyFilter}>
+        <button className="btn btn-primary ml-1 my-1" onClick={applyFilter}>
           <i className="fas fa-check mr-2" />
           Apply
         </button>
       </div>
-      <div className="w-64 flex-none mt-2">
+      <div className="w-full flex-none mt-2">
         <div className="font-light text-md mt-2">Filter By:</div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none mt-2">
           <span className="text-sm font-semibold">Facility</span>
           <FacilitySelect
             name="Facilities"
@@ -144,7 +147,7 @@ function AssetFilter(props: any) {
           />
         </div>
         {facilityId && (
-          <div className="w-64 flex-none">
+          <div className="w-full flex-none">
             <span className="text-sm font-semibold">Location</span>
             <LocationSelect
               name="Facilities"
@@ -159,7 +162,7 @@ function AssetFilter(props: any) {
             />
           </div>
         )}
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Asset Type</span>
           <SelectField
             id="asset-type"
@@ -190,7 +193,7 @@ function AssetFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
+        <div className="w-full flex-none">
           <span className="text-sm font-semibold">Asset Status</span>
           <SelectField
             id="asset-status"

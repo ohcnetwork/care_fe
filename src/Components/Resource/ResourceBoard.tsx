@@ -133,7 +133,7 @@ export default function ResourceBoard({
                     )}
                   </div>
                 </div>
-                <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+                <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
                   <div className="sm:col-span-1">
                     <dt
                       title=" Origin facility"
@@ -222,7 +222,7 @@ export default function ResourceBoard({
       ));
   };
   return (
-    <div className="bg-gray-200 mr-2 shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
+    <div className="bg-gray-200 mr-2 shrink-0 w-full sm:w-1/2 md:w-3/4 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
       <div className="sticky top-0 pt-2 bg-gray-200 rounded">
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">

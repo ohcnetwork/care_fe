@@ -274,7 +274,7 @@ const LiveFeed = (props: any) => {
                 )}
               </div>
             </div>
-            <div className="flex max-w-lg mt-4">
+            <div className="md:flex max-w-lg mt-4">
               {cameraPTZ.map((option) => {
                 const shortcutKeyDescription =
                   option.shortcutKey &&
@@ -303,7 +303,7 @@ const LiveFeed = (props: any) => {
                     >
                       <span className="sr-only">{option.label}</span>
                       {option.icon ? (
-                        <i className={`${option.icon} md:p-2`}></i>
+                        <i className={`fas fa-${option.icon} md:p-2`}></i>
                       ) : (
                         <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
                           {option.value}x
@@ -313,7 +313,7 @@ const LiveFeed = (props: any) => {
                   </Tooltip>
                 );
               })}
-              <div className="pl-3">
+              <div className="pl-3 hideonmobilescreen">
                 <FeedCameraPTZHelpButton
                   cameraPTZ={cameraPTZ}
                   tooltipPlacement="top"

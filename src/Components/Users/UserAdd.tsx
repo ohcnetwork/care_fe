@@ -16,6 +16,7 @@ import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateEmailAddress,
+  validateName,
   validatePassword,
   validateUsername,
 } from "../../Common/validation";
@@ -304,12 +305,9 @@ export const UserAdd = (props: UserProps) => {
   };
 
   useAbortableEffect(() => {
-    if (phoneIsWhatsApp) {
+    phoneIsWhatsApp &&
       handleValueChange(state.form.phone_number, "alt_phone_number");
-    } else {
-      handleValueChange("+91", "alt_phone_number"); // reset alt_phone_number
-    }
-  }, [phoneIsWhatsApp, state.form.phone_number, state.form.alt_phone_number]);
+  }, [phoneIsWhatsApp, state.form.phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
@@ -347,6 +345,19 @@ export const UserAdd = (props: UserProps) => {
         case "user_type":
           if (!state.form[field]) {
             errors[field] = "Please select the User Type";
+            invalidForm = true;
+          }
+          return;
+        case "first_name":
+        case "last_name":
+          if (!state.form[field]) {
+            errors[field] = `${field
+              .split("_")
+              .map((word) => word[0].toUpperCase() + word.slice(1))
+              .join(" ")} is required`;
+            invalidForm = true;
+          } else if (!validateName(state.form[field])) {
+            errors[field] = "Please enter a valid name";
             invalidForm = true;
           }
           return;
@@ -492,7 +503,7 @@ export const UserAdd = (props: UserProps) => {
       };
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
-      if (res && res.data && res.status >= 200 && res.status < 300) {
+      if (res && (res.data || res.data === "") && res.status >= 200 && res.status < 300) {
         // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
@@ -553,7 +564,10 @@ export const UserAdd = (props: UserProps) => {
                 />
                 <CheckboxField
                   checked={phoneIsWhatsApp}
-                  onChange={() => setPhoneIsWhatsApp(!phoneIsWhatsApp)}
+                  onChange={(_, checked) => {
+                    setPhoneIsWhatsApp(checked);
+                    !checked && handleValueChange("+91", "alt_phone_number");
+                  }}
                   label="Is the phone number a WhatsApp number?"
                   className="font-bold"
                 />
@@ -678,7 +692,7 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <InputLabel>First name</InputLabel>
+                <InputLabel>First name*</InputLabel>
                 <TextInputField
                   fullWidth
                   name="first_name"
@@ -691,7 +705,7 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <InputLabel>Last name</InputLabel>
+                <InputLabel>Last name*</InputLabel>
                 <TextInputField
                   fullWidth
                   name="last_name"

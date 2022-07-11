@@ -54,12 +54,12 @@ const menus = [
   {
     title: "Users",
     link: "/users",
-    icon: "fas fa-user-friends",
+    icon: "fas fa-users",
   },
   {
     title: "Profile",
     link: "/user/profile",
-    icon: "fas fa-user-secret",
+    icon: "fas fa-user-circle",
   },
   {
     title: "Notice Board",
@@ -82,11 +82,11 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     ""
   )}`;
   const path = usePath();
-  const url = path.replaceAll("/", "");
+  const url = path?.replaceAll("/", "");
 
   const active = menus.reduce((acc, menu) => {
     const tag = menu.link.replaceAll("/", "");
-    return url.includes(tag) ? tag : acc;
+    return url?.includes(tag) ? tag : acc;
   }, "");
 
   const theme = useTheme();
@@ -102,7 +102,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     localStorage.removeItem("shift-filters");
     localStorage.removeItem("external-filters");
     localStorage.removeItem("lsg-ward-data");
-    navigate("/login");
+    navigate("/");
     window.location.reload();
   };
 
@@ -188,7 +188,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
                 {
                   <div
                     className={clsx(
-                      "transition-all duration-300 whitespace-no-wrap",
+                      "transition-all duration-300 whitespace-nowrap",
                       expanded ? "w-60" : "w-0"
                     )}
                   >
@@ -220,11 +220,12 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
 
             <div
               className={clsx(
-                "transition-all duration-300 whitespace-no-wrap",
+                "transition-all duration-300 whitespace-nowrap",
                 expanded ? "w-60" : "w-0"
               )}
             >
-              {t("Dashboard")}
+              {t("Dashboard")}{" "}
+              <i className="fas fa-arrow-up-right-from-square text-xs"></i>
             </div>
           </a>
         </nav>
@@ -240,7 +241,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               <i className="block fas fa-user text-base text-primary-800"></i>
             </div>
           </div>
-          <div className="ml-3 overflow-hidden whitespace-no-wrap">
+          <div className="ml-3 overflow-hidden whitespace-nowrap">
             <p className="text-base leading-5 font-medium text-white mb-1">
               {loginUser}
             </p>

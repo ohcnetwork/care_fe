@@ -198,6 +198,10 @@ const routes: Routes = {
     path: "/api/v1/bed/{external_id}/",
     method: "PUT",
   },
+  deleteFacilityBed: {
+    path: "/api/v1/bed/{external_id}/",
+    method: "DELETE",
+  },
 
   // Consultation beds
 
@@ -580,6 +584,10 @@ const routes: Routes = {
   },
   getNotificationData: {
     path: "/api/v1/notification/{id}/",
+  },
+  markNotificationAsRead: {
+    path: "/api/v1/notification/{id}/",
+    method: "PATCH",
   },
   getPublicKey: {
     path: "/api/v1/notification/public_key/",

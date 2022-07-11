@@ -45,7 +45,7 @@ export const NursingPlot = (props: any) => {
     [currentPage]
   );
 
-  const handlePagination = (page: number, limit: number) => {
+  const handlePagination = (page: number) => {
     setCurrentPage(page);
   };
 
@@ -56,7 +56,7 @@ export const NursingPlot = (props: any) => {
     };
   });
 
-  let dataToDisplay = data
+  const dataToDisplay = data
     .map((x) =>
       x.nursing.map((f: any) => {
         f["date"] = x.date;
@@ -72,11 +72,27 @@ export const NursingPlot = (props: any) => {
     return filtered.length > 0;
   };
 
+  const areFieldsEmpty = () => {
+    let emptyFieldCount = 0;
+    for (let i = 0; i < NURSING_CARE_FIELDS.length; i++) {
+      if (!filterEmpty(NURSING_CARE_FIELDS[i])) emptyFieldCount++;
+    }
+    if (emptyFieldCount === NURSING_CARE_FIELDS.length) return true;
+    else return false;
+  };
+
   return (
     <div>
       <div className="">
         <div>
           <div className="flex flex-row overflow-x-scroll">
+            {areFieldsEmpty() && (
+              <div className="w-full mt-1 border bg-white shadow rounded-lg p-4">
+                <div className="font-bold text-gray-500 text-2xl flex justify-center items-center">
+                  No data available
+                </div>
+              </div>
+            )}
             {NURSING_CARE_FIELDS.map(
               (f: any) =>
                 filterEmpty(f) && (

@@ -125,23 +125,23 @@ const AssetManage = (props: AssetManageProps) => {
       setTransactionDetails(
         transactions.map((transaction: AssetTransaction) => (
           <tr key={`transaction_id_${transaction.id}`}>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
               <span className="text-gray-900 font-medium">
                 {transaction.from_location.name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
               <span className="text-gray-900 font-medium">
                 {transaction.to_location.name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
               <span className="text-gray-900 font-medium">
                 {transaction.performed_by.first_name}{" "}
                 {transaction.performed_by.last_name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-gray-500">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
               <span className="text-gray-900 font-medium">
                 {moment(transaction.modified_date).format("lll")}
               </span>
@@ -153,7 +153,7 @@ const AssetManage = (props: AssetManageProps) => {
       setTransactionDetails(
         <tr>
           <td
-            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500 text-center"
+            className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500 text-center"
             colSpan={4}
           >
             <h5>No Transactions Found</h5>
@@ -260,14 +260,16 @@ const AssetManage = (props: AssetManageProps) => {
               <i className="fas fa-pencil-alt text-white mr-2"></i>
               Update Asset
             </button>
-            <button
-              onClick={() => navigate(`/assets/${asset?.id}/configure`)}
-              id="update-asset"
-              className="btn-primary btn"
-            >
-              <i className="fas fa-cog text-white mr-2"></i>
-              Configure Asset
-            </button>
+            {asset?.asset_class && (
+              <button
+                onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+                id="update-asset"
+                className="btn-primary btn"
+              >
+                <i className="fas fa-cog text-white mr-2"></i>
+                Configure Asset
+              </button>
+            )}
           </div>
         </div>
       </div>
