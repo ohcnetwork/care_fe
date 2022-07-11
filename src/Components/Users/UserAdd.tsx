@@ -141,7 +141,7 @@ export const UserAdd = (props: UserProps) => {
   const checkUsername = async (username : string) => {
     setUsernameExists(1);
     const userDetails = await dispatchAction(getUserDetails(username), true);
-    setUsernameExists(userDetails ? 2 : 3);
+    setUsernameExists(userDetails.status === 404 ? 3 : 2);
   }
 
   useEffect(()=>{
