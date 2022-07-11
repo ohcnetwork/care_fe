@@ -61,6 +61,17 @@ let showPrescriptionForm = (item, index, send) =>
         required=true
       />
     </div>
+    <div className="m-1 rounded-md shadow-sm w-1/6">
+      <input
+        id={"notes" ++ (index |> string_of_int)}
+        className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
+        placeholder="Notes"
+        onChange={e => send(UpdateDosage(ReactEvent.Form.target(e)["value"], index))}
+        value={item |> Prescription__Prescription.notes}
+        type_="text"
+        required=true
+      />
+    </div>
     <div
       onClick={_ => send(DeletePescription(index))}
       className="appearance-none h-10 mt-1 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold">
@@ -90,11 +101,16 @@ let make = (~prescriptions, ~selectCB) => {
           {"Days" |> str}
         </label>
       </div>
+      <div className="m-1 rounded-md shadow-sm w-1/6">
+        <label htmlFor="Dosage" className="block text-sm font-medium leading-5 text-gray-700">
+          {"Notes" |> str}
+        </label>
+      </div>
     </div>
     {prescriptions
     |> Array.mapi((index, item) => showPrescriptionForm(item, index, send))
     |> React.array}
-    <div className="m-1 rounded-md shadow-sm bg-gray-200 rounded">
+    <div className="m-1 shadow-sm bg-gray-200 rounded">
       <button
         type_="button"
         onClick={_ => send(AddPescription)}
