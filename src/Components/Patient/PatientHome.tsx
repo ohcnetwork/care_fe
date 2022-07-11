@@ -3,7 +3,7 @@ import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { GENDER_TYPES } from "../../Common/constants";
+import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
@@ -301,10 +301,7 @@ export const PatientHome = (props: any) => {
       status,
       consultation: sample.consultation,
     };
-    let statusName = "";
-    if (status === 4) {
-      statusName = "SENT_TO_COLLECTON_CENTRE";
-    }
+    const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
 
     const res = await dispatch(patchSample(sampleData, { id: sample.id }));
     if (res && (res.status === 201 || res.status === 200)) {
@@ -1095,7 +1092,8 @@ export const PatientHome = (props: any) => {
                   <button
                     className="btn btn-primary w-full"
                     disabled={
-                      patientData.is_active && !!consultationListData.length
+                      !patientData.is_active ||
+                      !patientData?.last_consultation?.discharge_date
                     }
                     onClick={() =>
                       navigate(
@@ -1121,7 +1119,7 @@ export const PatientHome = (props: any) => {
                     className="btn btn-primary w-full"
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/files/`
+                        `/facility/${patientData?.facility}/patient/${id}/files`
                       )
                     }
                   >
