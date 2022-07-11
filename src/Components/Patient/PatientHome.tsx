@@ -350,7 +350,11 @@ export const PatientHome = (props: any) => {
   if (isConsultationLoading) {
     consultationList = <CircularProgress size={20} />;
   } else if (consultationListData.length === 0) {
-    consultationList = <Typography>No Consultation available.</Typography>;
+    consultationList = (
+      <div className="bg-white flex justify-center font-bold text-xl text-gray-500 rounded-lg shadow p-4 space-y-2 w-full">
+        No Consultations available
+      </div>
+    );
   } else if (consultationListData.length > 0) {
     consultationList = consultationListData.map((itemData, idx) => (
       <ConsultationCard
@@ -364,7 +368,11 @@ export const PatientHome = (props: any) => {
   if (isSampleLoading) {
     sampleList = <CircularProgress size={20} />;
   } else if (sampleListData.length === 0) {
-    sampleList = <Typography>No sample test available.</Typography>;
+    sampleList = (
+      <div className="bg-white flex justify-center font-bold text-xl text-gray-500 rounded-lg shadow p-4 space-y-2 w-full">
+        No Sample test available
+      </div>
+    );
   } else if (sampleListData.length > 0) {
     sampleList = sampleListData.map((itemData, idx) => (
       <SampleTestCard
@@ -1231,48 +1239,44 @@ export const PatientHome = (props: any) => {
       </Dialog>
 
       <section className="md:flex mt-4 space-y-2">
-        <div className="mx-2 w-full">
-          <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-            <PageTitle
-              title="Consultation History"
-              hideBack={true}
-              breadcrumbs={false}
-            />
-            {consultationList}
-            {!isConsultationLoading && totalConsultationCount > limit && (
-              <div className="mt-4 flex w-full justify-center">
-                <Pagination
-                  cPage={currentConsultationPage}
-                  defaultPerPage={limit}
-                  data={{ totalCount: totalConsultationCount }}
-                  onChange={handleConsultationPagination}
-                />
-              </div>
-            )}
-          </div>
+        <div className="w-full">
+          <PageTitle
+            title="Consultation History"
+            hideBack={true}
+            breadcrumbs={false}
+          />
+          {consultationList}
+          {!isConsultationLoading && totalConsultationCount > limit && (
+            <div className="mt-4 flex w-full justify-center">
+              <Pagination
+                cPage={currentConsultationPage}
+                defaultPerPage={limit}
+                data={{ totalCount: totalConsultationCount }}
+                onChange={handleConsultationPagination}
+              />
+            </div>
+          )}
         </div>
       </section>
 
       <section className="md:flex mt-4 space-y-2">
-        <div className="mx-2 w-full">
-          <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-            <PageTitle
-              title="Sample Test History"
-              hideBack={true}
-              breadcrumbs={false}
-            />
-            {sampleList}
-            {!isSampleLoading && totalSampleListCount > limit && (
-              <div className="mt-4 flex w-full justify-center">
-                <Pagination
-                  cPage={currentSampleListPage}
-                  defaultPerPage={limit}
-                  data={{ totalCount: totalSampleListCount }}
-                  onChange={handleSampleListPagination}
-                />
-              </div>
-            )}
-          </div>
+        <div className="w-full">
+          <PageTitle
+            title="Sample Test History"
+            hideBack={true}
+            breadcrumbs={false}
+          />
+          {sampleList}
+          {!isSampleLoading && totalSampleListCount > limit && (
+            <div className="mt-4 flex w-full justify-center">
+              <Pagination
+                cPage={currentSampleListPage}
+                defaultPerPage={limit}
+                data={{ totalCount: totalSampleListCount }}
+                onChange={handleSampleListPagination}
+              />
+            </div>
+          )}
         </div>
       </section>
     </div>

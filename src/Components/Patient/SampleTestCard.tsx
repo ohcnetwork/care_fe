@@ -70,7 +70,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
     });
   };
   return (
-    <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4">
+    <div className="block border rounded-lg bg-white shadow cursor-pointer hover:border-primary-500 text-black mt-4">
       <CardContent>
         <div
           onClick={(_e) =>
