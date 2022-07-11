@@ -394,7 +394,7 @@ export const UserAdd = (props: UserProps) => {
             errors[field] =
               "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
-          } else if (usernameExists){
+          } else if (usernameExists !== 3){
             errors[field] = "This username already exists";
             invalidForm = true;
           }
