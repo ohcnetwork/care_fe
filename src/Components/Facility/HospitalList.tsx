@@ -202,8 +202,8 @@ export const HospitalList = (props: any) => {
   };
 
   const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ search }, true);
-    else setQueryParams({ search: "" }, true);
+    if (search !== "") setQueryParams({ search }, { replace: true });
+    else setQueryParams({ search: "" }, { replace: true });
   };
 
   const handleDownload = async () => {
@@ -248,7 +248,7 @@ export const HospitalList = (props: any) => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const applyFilter = (data: any) => {
@@ -646,9 +646,8 @@ export const HospitalList = (props: any) => {
           </div>
         </div>
       </div>
-
-      <div className="md:flex my-4 space-y-2">
-        <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
+      <div className="lg:flex gap-2 mt-4">
+        <div className="bg-white overflow-hidden shadow rounded-lg md:mr-2 min-w-fit flex-1">
           <div className="px-4 py-5 sm:p-6">
             <dl>
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
@@ -667,58 +666,59 @@ export const HospitalList = (props: any) => {
             </dl>
           </div>
         </div>
-        <div className="flex-1">
-          <InputSearchBox
-            value={qParams.search}
-            search={onSearchSuspects}
-            placeholder={t("facility_search_placeholder")}
-            errors=""
-          />
-        </div>
+        <div className="flex my-4 gap-2 flex-wrap justify-between flex-grow">
+          <div className="w-72">
+            <InputSearchBox
+              value={qParams.search}
+              search={onSearchSuspects}
+              placeholder={t("facility_search_placeholder")}
+              errors=""
+            />
+          </div>
 
-        <div className="flex-1 flex justify-end">
-          <div>
-            <div className="flex items-start mb-2">
-              <button
-                className="btn btn-primary-ghost"
-                onClick={() => setShowFilters(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
+          <div className="flex">
+            <div>
+              <div className="flex items-start mb-2">
+                <button
+                  className="btn btn-primary-ghost"
+                  onClick={() => setShowFilters(true)}
                 >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>{t("advanced_filters")}</span>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="fill-current w-4 h-4 mr-2"
+                  >
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12">
+                      {" "}
+                    </line>
+                    <line x1="8" y1="18" x2="21" y2="18">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="6" x2="3.01" y2="6">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="12" x2="3.01" y2="12">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="18" x2="3.01" y2="18">
+                      {" "}
+                    </line>
+                  </svg>
+                  <span>{t("advanced_filters")}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
       <div>
         <SlideOver show={showFilters} setShow={setShowFilters}>
           <div className="bg-white min-h-screen p-4">
@@ -730,7 +730,7 @@ export const HospitalList = (props: any) => {
           </div>
         </SlideOver>
       </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
+      <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
         {badge("Facility/District Name", qParams.search, "search")}
         {badge("State", stateName, "state")}
         {badge("District", districtName, "district")}
