@@ -338,7 +338,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                   </Button>
                 </div>
                 <div className="flex flex-row gap-6">
-                  {!isLastOptionType && (
+                  {!isLastOptionType && headerText === "Add Bed Capacity" && (
                     <Button
                       id="bed-capacity-save-and-exit"
                       color="primary"
