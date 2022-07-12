@@ -211,9 +211,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
           Notification.Success({
             msg: "Doctor count added successfully",
           });
-          if (btnType === "Save and Exit") {
-            navigate(`/facility/${facilityId}`);
-          } else if (isLastOptionType) {
+          if (btnType === "Save and Exit" || isLastOptionType) {
             navigate(`/facility/${facilityId}`);
           }
         } else {
