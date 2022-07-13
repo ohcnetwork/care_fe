@@ -35,7 +35,7 @@ export default function Waveform(props : {wave : WaveformType}){
         <div className="w-full">
             <LinePlot
                 title="ECG"
-                name="waveform"
+                name="ECG"
                 xData={xData}
                 yData={data}
                 low={wave["data-low-limit"]}
