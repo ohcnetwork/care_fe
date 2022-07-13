@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 
+import { cy } from "local-cypress";
+
 class facility {
   static create(facility) {
     cy.visit("http://localhost:4000/facility/create");
@@ -34,7 +36,6 @@ class facility {
     expected_type_c_cylinders,
     type_d_cylinders,
     expected_type_d_cylinders,
-    kasp_empanelled,
   }) {
     cy.get("[data-test=facility-type]").should("exist").type(type);
     cy.get("[id=facility-name]").should("exist").type(name);
@@ -97,7 +98,7 @@ let current_url = "http://localhost:4000";
 
 describe("Facility", () => {
   before(() => {
-    cy.login("karadmin", "passwordR0FL");
+    cy.loginByApi("karadmin", "passwordR0FL");
     cy.saveLocalStorage();
   });
 
@@ -125,7 +126,6 @@ describe("Facility", () => {
       expected_type_c_cylinders: "34",
       type_d_cylinders: "342",
       expected_type_d_cylinders: "43",
-      kasp_empanelled: true,
     });
 
     // add bed type
@@ -173,8 +173,8 @@ describe("Facility", () => {
       expected_type_c_cylinders: "84",
       type_d_cylinders: "64",
       expected_type_d_cylinders: "4",
-      kasp_empanelled: false,
     });
+    cy.wait(1000);
     cy.url().then((url) => {
       current_url = url;
     });

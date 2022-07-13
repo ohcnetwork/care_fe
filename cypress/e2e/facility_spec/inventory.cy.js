@@ -2,14 +2,13 @@
 
 describe("Inventory Management Section", () => {
   before(() => {
-    cy.login("devdistrictadmin", "Coronasafe@123");
+    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
   });
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
-    cy.contains("View Facility").click();
+    cy.visit("/facility/f8f05c04-5c97-415c-814d-419ecf692d0e");
     cy.contains("Inventory Management").click();
   });
 

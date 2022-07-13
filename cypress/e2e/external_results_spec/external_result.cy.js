@@ -2,7 +2,7 @@
 
 describe("Edit Profile Testing", () => {
   before(() => {
-    cy.login("devdistrictadmin", "Coronasafe@123");
+    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
   });
 

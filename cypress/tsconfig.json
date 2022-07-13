@@ -6,5 +6,5 @@
     "types": ["cypress"],
     "typeRoots": ["./support"]
   },
-  "include": ["**/*.ts", "support/commands.js"]
+  "include": ["**/*.ts", "support/commands.js"],
 }

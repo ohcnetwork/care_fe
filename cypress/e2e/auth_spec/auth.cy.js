@@ -8,6 +8,7 @@ describe("Authorisation/Authentication", () => {
   it("Try login as admin with correct password", () => {
     cy.login("devdistrictadmin", "Coronasafe@123");
     cy.get("p").contains("Sign Out").click();
+    cy.wait(1000);
     cy.url().should("include", "login");
   });
 

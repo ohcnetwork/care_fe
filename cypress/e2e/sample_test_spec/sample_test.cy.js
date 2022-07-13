@@ -2,7 +2,7 @@
 
 describe("Sample List", () => {
   before(() => {
-    cy.login("devdistrictadmin", "Coronasafe@123");
+    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
   });
 
@@ -37,9 +37,9 @@ describe("Sample List", () => {
   it("Next/Previous Page", () => {
     cy.wait(1000);
     // only works for desktop mode
-    cy.get("button").contains("Next").click();
+    cy.get("button").contains(">").click();
     cy.wait(1000);
-    cy.get("button").contains("Prev").click();
+    cy.get("button").contains("<").click();
   });
 
   afterEach(() => {

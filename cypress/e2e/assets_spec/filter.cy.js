@@ -1,8 +1,10 @@
+/* eslint-disable quotes */
+/* eslint-disable no-undef */
 /// <reference types="cypress" />
 
 describe("Assets Filter", () => {
   before(() => {
-    cy.login("devdistrictadmin", "Coronasafe@123");
+    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
   });
 

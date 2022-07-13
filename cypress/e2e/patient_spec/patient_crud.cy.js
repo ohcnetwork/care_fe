@@ -8,7 +8,7 @@ let patient_url = "";
 
 describe("Patient Creation", () => {
   before(() => {
-    cy.login(username, password);
+    cy.loginByApi(username, password);
     cy.saveLocalStorage();
   });
 

@@ -8,7 +8,7 @@ const base_url = "http://localhost:4000";
 
 describe("Edit Profile Testing", () => {
   before(() => {
-    cy.login(username, password);
+    cy.loginByApi(username, password);
     cy.saveLocalStorage();
   });
 

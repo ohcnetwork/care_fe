@@ -2,14 +2,14 @@
 
 describe("Location Management Section", () => {
   before(() => {
-    cy.login("devdistrictadmin", "Coronasafe@123");
+    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
   });
 
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.visit("http://localhost:4000");
-    cy.contains("View Facility").click();
+    cy.get("a").contains("Facility").click({ force: true });
     cy.contains("Location Management").click();
   });
 

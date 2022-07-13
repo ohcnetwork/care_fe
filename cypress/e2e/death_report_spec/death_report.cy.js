@@ -5,7 +5,7 @@ const address = "C-106,\nSector-H,\nAliganj,\nLucknow,\nUttar Pradesh";
 
 describe("Death Report", () => {
   before(() => {
-    cy.login(user.username, user.password);
+    cy.loginByApi(user.username, user.password);
     cy.saveLocalStorage();
   });
 
