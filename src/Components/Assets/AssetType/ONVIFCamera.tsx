@@ -112,9 +112,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       });
     }
   };
-  {
-    console.log(assetType, "hiii");
-  }
   if (isLoading) return <Loading />;
   return (
     <div>
@@ -122,77 +119,96 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         <CardContent>
           <form onSubmit={handleSubmit}>
             <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                <div>
-                  <InputLabel id="location">Location</InputLabel>
-                  <TextInputField
-                    name="name"
-                    id="location"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    errors=""
-                  />
+              <div className="mt-2 grid grid-cols-1 md:grid-cols-2">
+                <div className="text-primary-500 m-auto">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    className="h-64 w-64"
+                    id="Icons"
+                    version="1.1"
+                    viewBox="0 0 40 40"
+                  >
+                    <circle cx="16" cy="20" r="2" />
+                    <g>
+                      <path d="M30.7,10c0.6-1.8,0.4-3.9-0.8-5.6C29.7,4.2,29.4,4,29.1,4H2.9C2.6,4,2.3,4.2,2.1,4.4C1,6.1,0.7,8.2,1.3,10H30.7z" />
+                      <path d="M3,16c0,7.2,5.8,13,13,13s13-5.8,13-13v-4H3V16z M24,14h2c0.6,0,1,0.4,1,1s-0.4,1-1,1h-2c-0.6,0-1-0.4-1-1S23.4,14,24,14z    M16,14c3.3,0,6,2.7,6,6s-2.7,6-6,6s-6-2.7-6-6S12.7,14,16,14z" />
+                    </g>
+                  </svg>
                 </div>
-                <div>
-                  <InputLabel id="middleware-hostname">
-                    Hospital Middleware Hostname
-                  </InputLabel>
-                  <TextInputField
-                    name="name"
-                    id="middleware-hostname"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={middlewareHostname}
-                    onChange={(e) => setMiddlewareHostname(e.target.value)}
-                    errors=""
-                  />
-                </div>
-                <div>
-                  <InputLabel id="camera-type">Camera Type</InputLabel>
-                  <SelectField
-                    name="camera_type"
-                    id="camera-type"
-                    variant="outlined"
-                    margin="dense"
-                    options={[
-                      { id: "", text: "Select Camera Type" },
-                      ...CAMERA_TYPE,
-                    ]}
-                    value={cameraType}
-                    onChange={(e) => setCameraType(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <InputLabel id="camera-addess">Camera Address</InputLabel>
-                  <TextInputField
-                    name="name"
-                    id="camera-addess"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={cameraAddress}
-                    onChange={(e) => setCameraAddress(e.target.value)}
-                    errors={ipadrdress_error}
-                  />
-                </div>
-                <div>
-                  <InputLabel id="camera-access-key">
-                    Camera Access Key
-                  </InputLabel>
-                  <TextInputField
-                    name="name"
-                    id="camera-access-key"
-                    variant="outlined"
-                    margin="dense"
-                    type="password"
-                    value={cameraAccessKey}
-                    onChange={(e) => setCameraAccessKey(e.target.value)}
-                    errors=""
-                  />
+
+                <div className="mt-2 grid gap-4 grid-cols-1 lg:grid-cols-2 col-span-1">
+                  <div>
+                    <InputLabel id="location">Location</InputLabel>
+                    <TextInputField
+                      name="name"
+                      id="location"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      errors=""
+                    />
+                  </div>
+                  <div>
+                    <InputLabel id="middleware-hostname">
+                      Hospital Middleware Hostname
+                    </InputLabel>
+                    <TextInputField
+                      name="name"
+                      id="middleware-hostname"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      value={middlewareHostname}
+                      onChange={(e) => setMiddlewareHostname(e.target.value)}
+                      errors=""
+                    />
+                  </div>
+                  <div>
+                    <InputLabel id="camera-type">Camera Type</InputLabel>
+                    <SelectField
+                      name="camera_type"
+                      id="camera-type"
+                      variant="outlined"
+                      margin="dense"
+                      options={[
+                        { id: "", text: "Select Camera Type" },
+                        ...CAMERA_TYPE,
+                      ]}
+                      value={cameraType}
+                      onChange={(e) => setCameraType(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <InputLabel id="camera-addess">Camera Address</InputLabel>
+                    <TextInputField
+                      name="name"
+                      id="camera-addess"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      value={cameraAddress}
+                      onChange={(e) => setCameraAddress(e.target.value)}
+                      errors={ipadrdress_error}
+                    />
+                  </div>
+                  <div>
+                    <InputLabel id="camera-access-key">
+                      Camera Access Key
+                    </InputLabel>
+                    <TextInputField
+                      name="name"
+                      id="camera-access-key"
+                      variant="outlined"
+                      margin="dense"
+                      type="password"
+                      value={cameraAccessKey}
+                      onChange={(e) => setCameraAccessKey(e.target.value)}
+                      errors=""
+                    />
+                  </div>
                 </div>
               </div>
               <div className="flex justify-between mt-4">
