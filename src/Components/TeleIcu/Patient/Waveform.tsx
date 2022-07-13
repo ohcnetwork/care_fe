@@ -34,7 +34,7 @@ export default function Waveform(props : {wave : WaveformType}){
     return (
         <div className="w-full">
             <LinePlot
-                title="Waveform"
+                title="ECG"
                 name="waveform"
                 xData={xData}
                 yData={data}
