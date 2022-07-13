@@ -22,6 +22,7 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
 import { AxiosError } from "axios";
+import PageTitle from "../../Common/PageTitle";
 
 interface IFeedProps {
   facilityId: string;
