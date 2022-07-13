@@ -107,7 +107,7 @@ export const AddBedForm = (props: BedFormProps) => {
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="mt-2 grid gap-4">
                 <div>
                   <InputLabel id="name">Name*</InputLabel>
                   <TextInputField
@@ -133,8 +133,6 @@ export const AddBedForm = (props: BedFormProps) => {
                     errors={errors.description}
                   />
                 </div>
-              </div>
-              <div>
                 <InputLabel id="bedType">Bed Type*</InputLabel>
                 <SelectField
                   id="bed-type"
