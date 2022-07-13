@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
+import clsx from "clsx";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
 import { navigate, Link } from "raviger";
@@ -259,7 +260,7 @@ export default function ResourceDetails(props: { id: string }) {
         </div>
       ) : (
         <div className="mx-3 md:mx-8 mb-10">
-          <div className="my-4 flex justify-between items-center">
+          <div className="my-4 flex flex-col items-start md:flex-row md:justify-between md:items-center">
             <PageTitle
               title={"Resource details"}
               crumbsReplacements={{ [props.id]: { name: data.title } }}
@@ -289,10 +290,10 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
           )}
           <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
-            <div className="flex justify-between">
+            <div className="flex flex-col sm:flex-row sm:justify-between mb-4">
               <div className="text-xl font-semibold">{data.title || "--"}</div>
               <div>
-                <div className="mt-2">
+                <div className="mt-4 sm:mt-2">
                   <Button
                     fullWidth
                     variant="contained"
@@ -450,20 +451,25 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
             </div>
           </div>
-          <div className="grid md:grid-cols-3 gap-4 pb-4">
+          <div
+            className={clsx(
+                "grid grid-cols-1 mt-8 gap-x-6 gap-y-12", 
+                data.assigned_facility_object ? "lg:grid-cols-3" : "lg:grid-cols-2"
+            )}
+          >
             <div>
-              <h4 className="mt-8">Origin Facility</h4>
+              <h4>Origin Facility</h4>
 
               {showFacilityCard(data.orgin_facility_object)}
             </div>
             <div>
-              <h4 className="mt-8">Resource Approving facility</h4>
+              <h4>Resource Approving Facility</h4>
 
               {showFacilityCard(data.approving_facility_object)}
             </div>
             {data.assigned_facility_object && (
               <div>
-                <h4 className="mt-8">Request Fulfilling Facility</h4>
+                <h4>Request Fulfilling Facility</h4>
 
                 {showFacilityCard(data.assigned_facility_object)}
               </div>

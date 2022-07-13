@@ -49,7 +49,7 @@ export const NoticeBoard: any = () => {
     ));
   } else {
     notices.push(
-      <Card key="no-notice" className="my-4 mx-8 rounded-lg">
+      <Card key="no-notice" className="my-4 rounded-lg">
         <CardContent>
           <div className="text-xl text-center semibold">
             No notices for you.
