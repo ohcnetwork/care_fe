@@ -138,11 +138,18 @@ export const FacilityHome = (props: any) => {
     );
   } else {
     doctorList = doctorData.map((data: DoctorModal) => {
+      const removeCurrentDoctorData = (doctorId: number | undefined) => {
+        setDoctorData((state) =>
+          state.filter((i: DoctorModal) => i.id !== doctorId)
+        );
+      };
+
       return (
         <DoctorsCountCard
           facilityId={facilityId}
           key={`bed_${data.id}`}
           {...data}
+          removeDoctor={removeCurrentDoctorData}
         />
       );
     });
