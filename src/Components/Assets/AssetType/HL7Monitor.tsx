@@ -8,6 +8,7 @@ import { partialUpdateAsset } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import MonitorConfigure from "../configure/MonitorConfigure";
 import Loading from "../../Common/Loading";
+import { checkIfValidIP } from "../../../Common/validation";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -16,14 +17,11 @@ interface HL7MonitorProps {
 
 const HL7Monitor = (props: HL7MonitorProps) => {
   const { assetId, asset } = props;
-  const [assetType, setAssetType] = React.useState(asset?.asset_class);
-  const [middlewareHostname, setMiddlewareHostname] = React.useState(
-    asset.meta?.middleware_hostname
-  );
+  const [assetType, setAssetType] = React.useState("");
+  const [middlewareHostname, setMiddlewareHostname] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(true);
-  const [localipAddress, setLocalIPAddress] = React.useState(
-    asset.meta?.local_ip_address
-  );
+  const [localipAddress, setLocalIPAddress] = React.useState("");
+  const [ipadrdress_error, setIpAddress_error] = React.useState("");
   const dispatch = useDispatch();
   useEffect(() => {
     setAssetType(asset?.asset_class);
@@ -34,24 +32,29 @@ const HL7Monitor = (props: HL7MonitorProps) => {
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    const data = {
-      meta: {
-        asset_type: assetType,
-        middleware_hostname: middlewareHostname,
-        local_ip_address: localipAddress,
-      },
-    };
-    const res: any = await Promise.resolve(
-      dispatch(partialUpdateAsset(assetId, data))
-    );
-    if (res?.status === 200) {
-      Notification.Success({
-        msg: "Asset Configured Successfully",
-      });
+    if (checkIfValidIP(localipAddress)) {
+      setIpAddress_error("");
+      const data = {
+        meta: {
+          asset_type: assetType,
+          middleware_hostname: middlewareHostname,
+          local_ip_address: localipAddress,
+        },
+      };
+      const res: any = await Promise.resolve(
+        dispatch(partialUpdateAsset(assetId, data))
+      );
+      if (res?.status === 200) {
+        Notification.Success({
+          msg: "Asset Configured Successfully",
+        });
+      } else {
+        Notification.Error({
+          msg: "Something went wrong..!",
+        });
+      }
     } else {
-      Notification.Error({
-        msg: "Something went wrong..!",
-      });
+      setIpAddress_error("Please Enter a Valid IP address !!");
     }
   };
   if (isLoading) return <Loading />;
@@ -100,7 +103,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                       type="text"
                       value={localipAddress}
                       onChange={(e) => setLocalIPAddress(e.target.value)}
-                      errors=""
+                      errors={ipadrdress_error}
                     />
                   </div>
                 </div>

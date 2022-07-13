@@ -52,7 +52,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
       {assetType === "HL7MONITOR" ? (
         <>
           <PageTitle
-            title={`Configure HL7Monitor: ${asset?.name}`}
+            title={`Configure HL7 Monitor: ${asset?.name}`}
             crumbsReplacements={{ [assetId]: { name: asset?.name } }}
           />
           <HL7Monitor asset={asset} assetId={assetId} />
@@ -60,7 +60,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
       ) : (
         <>
           <PageTitle
-            title={`Configure ONVIFCamera: ${asset?.name}`}
+            title={`Configure ONVIF Camera: ${asset?.name}`}
             crumbsReplacements={{ [assetId]: { name: asset?.name } }}
           />
           <ONVIFCamera asset={asset} assetId={assetId} />

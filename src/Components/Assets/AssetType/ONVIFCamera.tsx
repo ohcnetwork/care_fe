@@ -12,6 +12,7 @@ import axios from "axios";
 import { getCameraConfig } from "../../../Utils/transformUtils";
 import CameraConfigure from "../configure/CameraConfigure";
 import Loading from "../../Common/Loading";
+import { checkIfValidIP } from "../../../Common/validation";
 
 interface ONVIFCameraProps {
   assetId: string;
@@ -26,6 +27,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [middlewareHostname, setMiddlewareHostname] = React.useState("");
   const [cameraType, setCameraType] = React.useState("");
   const [cameraAddress, setCameraAddress] = React.useState("");
+  const [ipadrdress_error, setIpAddress_error] = React.useState("");
   const [cameraAccessKey, setCameraAccessKey] = React.useState("");
   const [bed, setBed] = React.useState<BedModel>({});
   const [newPreset, setNewPreset] = React.useState("");
@@ -46,24 +48,29 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    const data = {
-      meta: {
-        asset_type: assetType,
-        middleware_hostname: middlewareHostname,
-        local_ip_address: cameraAddress,
-      },
-    };
-    const res: any = await Promise.resolve(
-      dispatch(partialUpdateAsset(assetId, data))
-    );
-    if (res?.status === 200) {
-      Notification.Success({
-        msg: "Asset Configured Successfully",
-      });
+    if (checkIfValidIP(cameraAddress)) {
+      setIpAddress_error("");
+      const data = {
+        meta: {
+          asset_type: assetType,
+          middleware_hostname: middlewareHostname,
+          local_ip_address: cameraAddress,
+        },
+      };
+      const res: any = await Promise.resolve(
+        dispatch(partialUpdateAsset(assetId, data))
+      );
+      if (res?.status === 200) {
+        Notification.Success({
+          msg: "Asset Configured Successfully",
+        });
+      } else {
+        Notification.Error({
+          msg: "Something went wrong..!",
+        });
+      }
     } else {
-      Notification.Error({
-        msg: "Something went wrong..!",
-      });
+      setIpAddress_error("Please Enter a Valid Camera address !!");
     }
   };
 
@@ -169,7 +176,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                     type="text"
                     value={cameraAddress}
                     onChange={(e) => setCameraAddress(e.target.value)}
-                    errors=""
+                    errors={ipadrdress_error}
                   />
                 </div>
                 <div>
