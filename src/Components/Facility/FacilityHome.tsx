@@ -231,7 +231,7 @@ export const FacilityHome = (props: any) => {
               </div>
               <div className="flex items-center flex-1">
                 <div className="grid grid-cols-1  lg:grid-cols-2 gap-4 mb-6 md:mb-0 w-full">
-                  <div className="md:flex flex-col justify-between lg:flex-1 min-w-[300px]">
+                  <div className="md:flex flex-col justify-between lg:flex-1 ">
                     <div className="mb-4">
                       <h1 className="text-lg font-bold">Address</h1>
                       <p className="text-lg">{facilityData.address}</p>
@@ -248,21 +248,9 @@ export const FacilityHome = (props: any) => {
                         </a>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 mt-4">
-                      <div>
-                        <h1 className="text-lg font-bold">Features</h1>
-                        <div className="flex gap-2 flex-wrap mt-2">
-                          {facilityData.features?.map((feature, i)=>(
-                            <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
-                              {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
-                            </div>
-                          ))}
-                        </div>
-                        
-                      </div>
-                    </div>
+                    
                   </div>
-                  <div className="lg:flex-1 min-w-[300px] md:flex flex-col justify-between">
+                  <div className="lg:flex-1 min-w-[300px] md:flex flex-col">
                     <div className="mb-4">
                       <h1 className="text-lg font-bold">Local Body</h1>
                       <p className="text-lg">
@@ -286,6 +274,18 @@ export const FacilityHome = (props: any) => {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 mt-4">
+              <div>
+                <h1 className="text-lg font-bold">Features</h1>
+                <div className="flex gap-2 flex-wrap mt-2">
+                  {facilityData.features?.map((feature, i)=>(
+                    <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
+                      {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

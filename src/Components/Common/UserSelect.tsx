@@ -16,11 +16,10 @@ export const UserSelect = (props: any) => {
   } = props;
   const dispatchAction: any = useDispatch();
   const [userLoading, isUserLoading] = useState(false);
-  const [hasSearchText, setHasSearchText] = useState(false);
   const [UserList, setUserList] = useState<Array<UserModel>>([]);
 
   const getPersonName = (user: any) => {
-    let personName = user.first_name + " " + user.last_name;
+    const personName = user.first_name + " " + user.last_name;
 
     return personName.trim().length > 0 ? personName : user.username;
   };
@@ -28,7 +27,6 @@ export const UserSelect = (props: any) => {
   const handleValueChange = (current: UserModel | UserModel[] | null) => {
     if (!current) {
       isUserLoading(false);
-      setHasSearchText(false);
     }
     setSelected(current);
   };
@@ -39,7 +37,7 @@ export const UserSelect = (props: any) => {
         isUserLoading(true);
         const res = await dispatchAction(getFacilityUsers(facilityId));
         if (res && res.data) {
-          setUserList(res.data);
+          setUserList(res.data.results);
         }
         isUserLoading(false);
       } else {

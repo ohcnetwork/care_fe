@@ -63,16 +63,16 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     
   },[precision])
 
-  useEffect(()=>{
-    let timeout = setTimeout(()=>{
+  useEffect(() => {
+    const timeout = setTimeout(() => {
       setCameraState({
-        ...cameraConfig.position, 
-        precision : cameraState?.precision
-      })
+        ...cameraConfig.position,
+        precision: cameraState?.precision,
+      });
       setCamTimeout(0);
-    }, 5000)
-    return (()=>clearTimeout(timeout))
-  },[cameraState])
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, [cameraState]);
 
   const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
   const fetchData = useCallback(
@@ -115,7 +115,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             });
             setCameraMiddlewareHostname(middleware_hostname);
             setCameraConfig(bedAssets.data.results[0].meta);
-            setCameraState({...bedAssets.data.results[0].meta.position, precision : 1})
+            setCameraState({
+              ...bedAssets.data.results[0].meta.position,
+              precision: 1,
+            });
           }
         }
 
@@ -135,19 +138,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   const [loading, setLoading] = useState<string | undefined>(undefined);
   const [camTimeout, setCamTimeout] = useState<number>(0);
-  useEffect(()=>{
-    let timeout = setTimeout(()=>{
-      if(cameraState){
-        cameraPTZ[5].callback(camTimeout - cameraState.zoom)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (cameraState) {
+        cameraPTZ[5].callback(camTimeout - cameraState.zoom);
         setCameraState({
           ...cameraState,
-          zoom : camTimeout
-        })
+          zoom: camTimeout,
+        });
       }
-     
-    },1000);
-    return (()=>clearTimeout(timeout))
-  }, [camTimeout])
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [camTimeout]);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
     StreamStatus.Offline
   );
@@ -216,45 +218,53 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   useEffect(() => {
     if (streamStatus === StreamStatus.Playing) {
       setLoading("Moving");
-      const preset = bedPresets?.find(
-        (preset: any) =>
-          String(preset?.meta?.preset_name).trim().toLowerCase() ===
-          PATIENT_DEFAULT_PRESET
-      );
-      absoluteMove(preset?.meta?.position, {
-        onSuccess: () => {
-          setLoading(undefined);
-          setCurrentPreset(preset);
-        },
-        onError: (err: AxiosError) => {
-          setLoading(undefined);
-          const responseData = err.response?.data;
-          if (responseData.status) {
-            switch (responseData.status) {
-              case "error":
-                if (responseData.error.code === "EHOSTUNREACH") {
-                  Notification.Error({ msg: "Camera is Offline!" });
-                } else if (responseData.message) {
-                  Notification.Error({ msg: responseData.message });
-                }
-                break;
-              case "fail":
-                responseData.errors &&
-                  responseData.errors.map((error: any) => {
-                    Notification.Error({ msg: error.message });
-                  });
-                break;
+      const preset =
+        bedPresets?.find(
+          (preset: any) =>
+            String(preset?.meta?.preset_name).trim().toLowerCase() ===
+            PATIENT_DEFAULT_PRESET
+        ) || bedPresets?.[0];
+
+      if (preset) {
+        absoluteMove(preset?.meta?.position, {
+          onSuccess: () => {
+            setLoading(undefined);
+            setCurrentPreset(preset);
+          },
+          onError: (err: AxiosError) => {
+            setLoading(undefined);
+            const responseData = err.response?.data;
+            if (responseData.status) {
+              switch (responseData.status) {
+                case "error":
+                  if (responseData.error.code === "EHOSTUNREACH") {
+                    Notification.Error({ msg: "Camera is Offline!" });
+                  } else if (responseData.message) {
+                    Notification.Error({ msg: responseData.message });
+                  }
+                  break;
+                case "fail":
+                  responseData.errors &&
+                    responseData.errors.map((error: any) => {
+                      Notification.Error({ msg: error.message });
+                    });
+                  break;
+              }
+            } else {
+              Notification.Error({ msg: "Unable to connect server!" });
             }
-          } else {
-            Notification.Error({ msg: "Unable to connect server!" });
-          }
-          setCurrentPreset(preset);
-        },
-      });
+            setCurrentPreset(preset);
+          },
+        });
+      } else {
+        setLoading(undefined);
+      }
     }
   }, [bedPresets, streamStatus]);
 
-  const cameraPTZActionCBs: { [key: string]: (option: any, value? : any) => void } = {
+  const cameraPTZActionCBs: {
+    [key: string]: (option: any, value?: any) => void;
+  } = {
     precision: () => {
       setPrecision((precision: number) =>
         precision === 16 ? 1 : precision * 2
@@ -272,17 +282,19 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
-      !screenfull.isFullscreen ? 
-      screenfull.request(videoWrapper.current ? videoWrapper.current : liveFeedPlayerRef.current) :
-      screenfull.exit();
+      !screenfull.isFullscreen
+        ? screenfull.request(
+            videoWrapper.current
+              ? videoWrapper.current
+              : liveFeedPlayerRef.current
+          )
+        : screenfull.exit();
     },
     updatePreset: (option) => {
       getCameraStatus({
         onSuccess: async ({ data }) => {
-          console.log({ currentPreset, data });
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
-            console.log("Updating Preset");
             const response = await dispatch(
               partialUpdateAssetBed(
                 {
@@ -319,7 +331,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       cameraPTZActionCBs[
         cameraPTZActionCBs[option.action] ? option.action : "other"
       ];
-    return { ...option, callback: (value? : any) => cb(option, value) };
+    return { ...option, callback: (value?: any) => cb(option, value) };
   });
 
   // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
@@ -333,9 +345,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   if (isLoading) return <Loading />;
 
   return (
-    <div
-      className="px-2 flex flex-col h-[calc(100vh-1.5rem)]"
-    >
+    <div className="px-2 flex flex-col h-[calc(100vh-1.5rem)]">
       <div className="flex items-center flex-wrap justify-between gap-2">
         <PageTitle
           title={
@@ -384,7 +394,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
       </div>
-      <div className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden" ref={videoWrapper}>
+      <div
+        className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden"
+        ref={videoWrapper}
+      >
         <video
           id="mse-video"
           autoPlay
@@ -407,9 +420,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               <p className="font-bold">
                 STATUS: <span className="text-red-600">OFFLINE</span>
               </p>
-              <p className="font-semibold ">
-                Feed is currently not live.
-              </p>
+              <p className="font-semibold ">Feed is currently not live.</p>
               <p className="font-semibold ">
                 Click refresh button to try again.
               </p>
@@ -431,25 +442,21 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               <p className="font-bold ">
                 STATUS: <span className="text-red-600"> LOADING</span>
               </p>
-              <p className="font-semibold ">
-                Fetching latest feed.
-              </p>
+              <p className="font-semibold ">Fetching latest feed.</p>
             </div>
           )}
         </div>
         <div className="absolute top-8 right-8 z-20 flex flex-col gap-4">
-          {
-            [10,9,7,5,6].map((button, i)=>{
-              const option = cameraPTZ[button];
-              return (
-                <FeedButton
-                  camProp={option}
-                  styleType="CHHOTUBUTTON"
-                  clickAction={()=>cameraPTZ[button].callback()}
-                />
-              )
-            })
-          }
+          {[10, 9, 7, 5, 6].map((button) => {
+            const option = cameraPTZ[button];
+            return (
+              <FeedButton
+                camProp={option}
+                styleType="CHHOTUBUTTON"
+                clickAction={() => cameraPTZ[button].callback()}
+              />
+            );
+          })}
           <div className="pl-3 hideonmobilescreen">
             <FeedCameraPTZHelpButton
               cameraPTZ={cameraPTZ}
@@ -458,79 +465,69 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
         <div className="absolute bottom-8 right-8 z-20">
-            <FeedButton
-              camProp={cameraPTZ[4]}
-              styleType="CHHOTUBUTTON"
-              clickAction={()=>cameraPTZ[4].callback()}
-            />
+          <FeedButton
+            camProp={cameraPTZ[4]}
+            styleType="CHHOTUBUTTON"
+            clickAction={() => cameraPTZ[4].callback()}
+          />
         </div>
         <div className="absolute bottom-8 right-8 grid grid-rows-3 grid-flow-col gap-1 z-10">
-          {
-            ([
-              false,
-              cameraPTZ[2],
-              false,
-              cameraPTZ[0],
-              false,
-              cameraPTZ[1],
-              false,
-              cameraPTZ[3],
-              false
-            ]).map((c, i)=>{
+          {[
+            false,
+            cameraPTZ[2],
+            false,
+            cameraPTZ[0],
+            false,
+            cameraPTZ[1],
+            false,
+            cameraPTZ[3],
+            false,
+          ].map((c, i) => {
+            let out = <div className="w-[60px] h-[60px]" key={i}></div>;
+            if (c) {
+              const button = c as any;
+              out = (
+                <FeedButton
+                  camProp={button}
+                  styleType="BUTTON"
+                  clickAction={() => {
+                    button.callback();
+                    if (cameraState) {
+                      let x = cameraState.x;
+                      let y = cameraState.y;
+                      switch (button.action) {
+                        case "left":
+                          x += -0.1 / cameraState.precision;
+                          break;
 
-              let out = (
-                <div className="w-[60px] h-[60px]" key={i}>
+                        case "right":
+                          x += 0.1 / cameraState.precision;
+                          break;
 
-                </div>
-              );
-              if(c){
-                const button = c as any;
-                out = (
-                  <FeedButton
-                    camProp={button}
-                    styleType="BUTTON"
-                    clickAction={()=>{
-                      button.callback();
-                      if(cameraState){
-                        let x = cameraState.x;
-                        let y = cameraState.y;
-                        switch (button.action) {
-                          case "left":
-                            x += (-0.1 / cameraState.precision)
-                            console.log(x);
-                            break;
-                          
-                          case "right":
-                            x += (0.1 / cameraState.precision)
-                            break;
-                          
-                          case "down":
-                            y += (-0.1 / cameraState.precision)
-                            break;
-                          
-                          case "up":
-                            y += (0.1 / cameraState.precision)
-                            break;
+                        case "down":
+                          y += -0.1 / cameraState.precision;
+                          break;
 
-                          default:
-                            break;
-                        }
+                        case "up":
+                          y += 0.1 / cameraState.precision;
+                          break;
 
-                        
-                        setCameraState({...cameraState, x : x, y : y});
+                        default:
+                          break;
                       }
-                    }}
-                  />
-                )
-              }
 
-              return out;
-            })
-          }
+                      setCameraState({ ...cameraState, x: x, y: y });
+                    }
+                  }}
+                />
+              );
+            }
+
+            return out;
+          })}
         </div>
       </div>
     </div>
-     
   );
 };
 
