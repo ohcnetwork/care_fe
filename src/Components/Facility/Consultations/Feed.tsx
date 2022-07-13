@@ -22,7 +22,6 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
 import { AxiosError } from "axios";
-import PageTitle from "../../Common/PageTitle";
 
 interface IFeedProps {
   facilityId: string;
@@ -348,13 +347,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   return (
     <div className="px-2 flex flex-col h-[calc(100vh-1.5rem)]">
       <div className="flex items-center flex-wrap justify-between gap-2">
-        <PageTitle
-          title={
-            "Camera Feed | " +
-            (bedPresets?.[0]?.asset_object?.location_object?.name ?? "")
-          }
-          breadcrumbs={false}
-        />
         <div className="flex items-center gap-4 px-3">
           <p className="block text-lg font-medium"> Camera Presets :</p>
           <div className="flex items-center">
