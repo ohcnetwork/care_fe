@@ -90,7 +90,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   const validStatusChoices = statusChoices.filter(
     (i) => status && statusFlow[status] && statusFlow[status].includes(i.text)
   );
-  
+
   useEffect(() => {
     const form = { ...state.form };
     form.status = currentStatus?.id;
@@ -156,6 +156,12 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
       });
   };
 
+  const handleEscKeyPress = (event: any) => {
+    if (event.key === "Escape") {
+      cancelClicked();
+    }
+  };
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
@@ -193,6 +199,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
       classes={{
         paper: classes.paper,
       }}
+      onKeyDown={(e) => handleEscKeyPress(e)}
     >
       <DialogTitle id="test-sample-title">
         Update Sample Test Status

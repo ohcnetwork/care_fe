@@ -95,6 +95,7 @@ interface DateInputFieldProps extends DatePickerProps {
     value?: string | null | undefined
   ) => void;
   label?: string;
+  min?: string;
   errors: string;
   inputVariant?: "standard" | "outlined" | "filled";
   disabled?: boolean;
@@ -234,6 +235,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
     onChange,
     label,
     errors,
+    min,
     // variant,
     disabled,
     margin,
@@ -248,6 +250,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
         format="dd/MM/yyyy"
         value={value}
         onChange={onChange}
+        minDate={min}
         disabled={disabled}
         KeyboardButtonProps={{
           "aria-label": "change date",

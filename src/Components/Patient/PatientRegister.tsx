@@ -61,7 +61,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -75,7 +75,6 @@ interface medicalHistoryModel {
 }
 
 const medicalHistoryTypes = MEDICAL_HISTORY_CHOICES.filter((i) => i.id !== 1);
-
 const medicalHistoryChoices = medicalHistoryTypes.reduce(
   (acc: Array<{ [x: string]: string }>, cur) => [
     ...acc,
@@ -83,7 +82,6 @@ const medicalHistoryChoices = medicalHistoryTypes.reduce(
   ],
   []
 );
-
 const genderTypes = [
   {
     id: 0,
@@ -91,11 +89,8 @@ const genderTypes = [
   },
   ...GENDER_TYPES,
 ];
-
 const diseaseStatus = [...DISEASE_STATUS];
-
 const bloodGroups = [...BLOOD_GROUPS];
-
 const testType = [...TEST_TYPE];
 const vaccines = ["Select", ...VACCINES];
 
@@ -1592,6 +1587,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         control={<Radio />}
                                         label="2"
                                       />
+                                      <FormControlLabel
+                                        value="3"
+                                        control={<Radio />}
+                                        label="3 (Booster/Precautionary Dose)"
+                                      />
                                     </Box>
                                   </RadioGroup>
                                 </div>
@@ -1815,6 +1815,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_result")
                               }
+                              min={state.form.date_of_test}
                               errors={state.errors.date_of_result}
                               inputVariant="outlined"
                               margin="dense"
@@ -1968,7 +1969,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             Allergies
                           </InputLabel>
                           <MultilineInputField
-                            rows={3}
+                            rows={1}
                             id="allergies"
                             name="allergies"
                             variant="outlined"
