@@ -332,6 +332,11 @@ const routes: Routes = {
     method: "PUT",
   },
 
+  deleteDoctor: {
+    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    method: "DELETE",
+  },
+
   //Triage
   createTriage: {
     path: "/api/v1/facility/{facilityId}/patient_stats/",

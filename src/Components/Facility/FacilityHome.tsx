@@ -1,4 +1,4 @@
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
@@ -38,7 +38,7 @@ export const FacilityHome = (props: any) => {
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
-
+  const [facilityNotFound, setFacilityNotFound] = useState(false);
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
@@ -46,36 +46,40 @@ export const FacilityHome = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [facilityRes, capacityRes, doctorRes, triageRes] =
-        await Promise.all([
-          dispatch(getPermittedFacility(facilityId)),
+      const facilityRes = await dispatch(getPermittedFacility(facilityId));
+      if (facilityRes) {
+        const [capacityRes, doctorRes, triageRes] = await Promise.all([
           dispatch(listCapacity({}, { facilityId })),
           dispatch(listDoctor({}, { facilityId })),
           dispatch(getTriageInfo({ facilityId })),
         ]);
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (!facilityRes.data) {
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        } else {
-          setFacilityData(facilityRes.data);
-          if (capacityRes && capacityRes.data) {
-            setCapacityData(capacityRes.data.results);
-          }
-          if (doctorRes && doctorRes.data) {
-            setDoctorData(doctorRes.data.results);
-          }
-          if (
-            triageRes &&
-            triageRes.data &&
-            triageRes.data.results &&
-            triageRes.data.results.length
-          ) {
-            setPatientStatsData(triageRes.data.results);
+        if (!status.aborted) {
+          setIsLoading(false);
+          if (!facilityRes.data) {
+            Notification.Error({
+              msg: "Something went wrong..!",
+            });
+          } else {
+            setFacilityData(facilityRes.data);
+            if (capacityRes && capacityRes.data) {
+              setCapacityData(capacityRes.data.results);
+            }
+            if (doctorRes && doctorRes.data) {
+              setDoctorData(doctorRes.data.results);
+            }
+            if (
+              triageRes &&
+              triageRes.data &&
+              triageRes.data.results &&
+              triageRes.data.results.length
+            ) {
+              setPatientStatsData(triageRes.data.results);
+            }
           }
         }
+      } else {
+        setFacilityNotFound(true);
+        setIsLoading(false);
       }
     },
     [dispatch, facilityId]
@@ -109,6 +113,35 @@ export const FacilityHome = (props: any) => {
     return <Loading />;
   }
 
+  if (facilityNotFound) {
+    return (
+      <div className="flex justify-center text-center items-center h-screen">
+        <div className="text-center error-page-wrap">
+          <div>
+            <div className="w-28  -rotate-45 mx-auto relative top-14">
+              <div className="bg-gray-900 h-1 w-full"></div>
+              <div className="bg-gray-100 h-1 w-full"></div>
+            </div>
+            <i className="fas fa-hospital text-6xl my-4"></i>
+          </div>
+
+          <h1>Facility Not Found</h1>
+          <p>
+            A facility with ID: {facilityId}, does not exist!
+            <br />
+            <br />
+            <Link
+              href="/"
+              className="rounded-lg px-4 py-2 inline-block bg-primary-600 text-white hover:text-white hover:bg-primary-700"
+            >
+              Return to CARE
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   let capacityList: any = null;
   if (!capacityData || !capacityData.length) {
     capacityList = (
@@ -138,11 +171,18 @@ export const FacilityHome = (props: any) => {
     );
   } else {
     doctorList = doctorData.map((data: DoctorModal) => {
+      const removeCurrentDoctorData = (doctorId: number | undefined) => {
+        setDoctorData((state) =>
+          state.filter((i: DoctorModal) => i.id !== doctorId)
+        );
+      };
+
       return (
         <DoctorsCountCard
           facilityId={facilityId}
           key={`bed_${data.id}`}
           {...data}
+          removeDoctor={removeCurrentDoctorData}
         />
       );
     });
@@ -367,6 +407,13 @@ export const FacilityHome = (props: any) => {
             >
               <i className="fas fa-boxes text-white mr-2"></i>
               View Assets
+            </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/facility/${facilityId}/users`)}
+            >
+              <i className="fas fa-users text-white mr-2"></i>
+              View Users
             </button>
             {(currentUser.data.user_type === "DistrictAdmin" ||
               currentUser.data.user_type === "StateAdmin") && (
