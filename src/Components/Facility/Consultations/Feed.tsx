@@ -54,15 +54,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
 
-  useEffect(()=>{
-    if(cameraState){
+  useEffect(() => {
+    if (cameraState) {
       setCameraState({
         ...cameraState,
-        precision : precision
+        precision: precision,
       });
     }
-    
-  },[precision])
+  }, [precision]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -231,7 +230,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             setLoading(undefined);
             setCurrentPreset(preset);
           },
-          onError: (err: AxiosError) => {
+          onError: (err: AxiosError<any>) => {
             setLoading(undefined);
             const responseData = err.response?.data;
             if (responseData.status) {
@@ -594,10 +593,7 @@ export const FeedCameraPTZHelpButton = (props: {
         </ul>
       }
     >
-      <button
-        key="option.action"
-        className="rounded text-2xl text-white/40"
-      >
+      <button key="option.action" className="rounded text-2xl text-white/40">
         <i className={"fa fa-circle-question"} />
       </button>
     </Tooltip>
