@@ -1,7 +1,9 @@
 let str = React.string
 
 let medicines = %raw(`require("../assets/medicines.json")`)
-let dosages = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk", "sos"]
+let dosages = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
+let units = ["mg", "ml", "drops"]
+
 type prescriptions = array<Prescription__Prescription.t>
 
 let findAndReplace = (index, f, array) =>
@@ -9,6 +11,8 @@ let findAndReplace = (index, f, array) =>
 
 type action =
   | UpdateMedicine(string, int)
+  | UpdateUnitDosage(int, int)
+  | UpdateUnit(string, int)
   | UpdateDosage(string, int)
   | UpdateDays(int, int)
   | DeletePescription(int)
@@ -18,6 +22,12 @@ let reducer = (prescriptions, action) =>
   switch action {
   | UpdateMedicine(medicine, index) =>
     prescriptions |> findAndReplace(index, Prescription__Prescription.updateMedicine(medicine))
+
+  | UpdateUnitDosage(amount, index) =>
+    prescriptions |> findAndReplace(index, Prescription__Prescription.updateUnitDosage(amount))
+
+  | UpdateUnit(unit, index) =>
+    prescriptions |> findAndReplace(index, Prescription__Prescription.updateUnit(unit))
 
   | UpdateDosage(dosage, index) =>
     prescriptions |> findAndReplace(index, Prescription__Prescription.updateDosage(dosage))
@@ -42,11 +52,31 @@ let showPrescriptionForm = (item, index, send) =>
       />
     </div>
     <div className="m-1 rounded-md shadow-sm w-1/6">
+      <input
+        id={"dosageAmount" ++ (index |> string_of_int)}
+        className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
+        placeholder="Dosage Amount"
+        onChange={e => send(UpdateUnitDosage(ReactEvent.Form.target(e)["value"], index))}
+        value={item |> Prescription__Prescription.amount |> string_of_int}
+        type_="number"
+        required=true
+      />
+    </div>
+    <div className="m-1 rounded-md shadow-sm w-1/6">
       <Prescription__Picker
-        id={"dosage" ++ (index |> string_of_int)}
+        id={"units" ++ (index |> string_of_int)}
+        value={item |> Prescription__Prescription.unit}
+        updateCB={unit => send(UpdateUnit(unit, index))}
+        placeholder="Units"
+        selectables=units
+      />
+    </div>
+    <div className="m-1 rounded-md shadow-sm w-1/6">
+      <Prescription__Picker
+        id={"frequency" ++ (index |> string_of_int)}
         value={item |> Prescription__Prescription.dosage}
-        updateCB={dosage => send(UpdateDosage(dosage, index))}
-        placeholder="Dosage"
+        updateCB={frequency => send(UpdateDosage(frequency, index))}
+        placeholder="Frequency"
         selectables=dosages
       />
     </div>
@@ -92,8 +122,19 @@ let make = (~prescriptions, ~selectCB) => {
         </label>
       </div>
       <div className="m-1 rounded-md shadow-sm w-1/6">
-        <label htmlFor="Dosage" className="block text-sm font-medium leading-5 text-gray-700">
-          {"Dosage" |> str}
+        <label
+          htmlFor="Dosage Amount" className="block text-sm font-medium leading-5 text-gray-700">
+          {"Dosage Amount" |> str}
+        </label>
+      </div>
+      <div className="m-1 rounded-md shadow-sm w-1/6">
+        <label htmlFor="Units" className="block text-sm font-medium leading-5 text-gray-700">
+          {"Units" |> str}
+        </label>
+      </div>
+      <div className="m-1 rounded-md shadow-sm w-1/6">
+        <label htmlFor="frequency" className="block text-sm font-medium leading-5 text-gray-700">
+          {"Frequency" |> str}
         </label>
       </div>
       <div className="m-1 rounded-md shadow-sm w-1/6">
@@ -102,7 +143,7 @@ let make = (~prescriptions, ~selectCB) => {
         </label>
       </div>
       <div className="m-1 rounded-md shadow-sm w-1/6">
-        <label htmlFor="Dosage" className="block text-sm font-medium leading-5 text-gray-700">
+        <label htmlFor="notes" className="block text-sm font-medium leading-5 text-gray-700">
           {"Notes" |> str}
         </label>
       </div>
