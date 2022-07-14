@@ -107,18 +107,44 @@ export const AddBedForm = (props: BedFormProps) => {
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div className="mt-2 grid gap-4">
-                <div>
-                  <InputLabel id="name">Name*</InputLabel>
-                  <TextInputField
-                    name="name"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    errors={errors.name}
-                  />
+              <div className="flex flex-col gap-4">
+                <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+                  <div>
+                    <InputLabel id="name">Name*</InputLabel>
+                    <TextInputField
+                      name="name"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      errors={errors.name}
+                    />
+                  </div>
+                  <div>
+                    <InputLabel id="bedType">Bed Type*</InputLabel>
+                    <SelectField
+                      id="bed-type"
+                      fullWidth
+                      name="bed_type"
+                      placeholder=""
+                      variant="outlined"
+                      margin="dense"
+                      options={[
+                        {
+                          id: "",
+                          name: "Select",
+                        },
+                        ...LOCATION_BED_TYPES,
+                      ]}
+                      optionValue="name"
+                      value={bedType}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setBedType(e.target.value)
+                      }
+                      errors={errors.bedType}
+                    />
+                  </div>
                 </div>
                 <div>
                   <InputLabel id="description">Description</InputLabel>
@@ -133,28 +159,6 @@ export const AddBedForm = (props: BedFormProps) => {
                     errors={errors.description}
                   />
                 </div>
-                <InputLabel id="bedType">Bed Type*</InputLabel>
-                <SelectField
-                  id="bed-type"
-                  fullWidth
-                  name="bed_type"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  options={[
-                    {
-                      id: "",
-                      name: "Select",
-                    },
-                    ...LOCATION_BED_TYPES,
-                  ]}
-                  optionValue="name"
-                  value={bedType}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setBedType(e.target.value)
-                  }
-                  errors={errors.bedType}
-                />
               </div>
               <div className="flex justify-between mt-4">
                 <Button
