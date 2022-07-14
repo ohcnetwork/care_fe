@@ -7,7 +7,11 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
-import { BED_TYPES, DOCTOR_SPECIALIZATION, FACILITY_FEATURE_TYPES } from "../../Common/constants";
+import {
+  BED_TYPES,
+  DOCTOR_SPECIALIZATION,
+  FACILITY_FEATURE_TYPES,
+} from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getPermittedFacility,
@@ -288,7 +292,6 @@ export const FacilityHome = (props: any) => {
                         </a>
                       </div>
                     </div>
-                    
                   </div>
                   <div className="lg:flex-1 min-w-[300px] md:flex flex-col">
                     <div className="mb-4">
@@ -297,7 +300,7 @@ export const FacilityHome = (props: any) => {
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex flex-col md:flex-row lg:flex-row gap-4">
                       <div>
                         <h1 className="text-lg font-bold">Ward</h1>
                         <p className="text-lg">
@@ -321,9 +324,16 @@ export const FacilityHome = (props: any) => {
               <div>
                 <h1 className="text-lg font-bold">Features</h1>
                 <div className="flex gap-2 flex-wrap mt-2">
-                  {facilityData.features?.map((feature, i)=>(
-                    <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
-                      {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                  {facilityData.features?.map((feature, i) => (
+                    <div
+                      key={i}
+                      className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm"
+                    >
+                      {
+                        FACILITY_FEATURE_TYPES.filter(
+                          (f) => f.id === feature
+                        )[0].name
+                      }
                     </div>
                   ))}
                 </div>
