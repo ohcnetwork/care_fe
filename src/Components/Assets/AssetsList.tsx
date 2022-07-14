@@ -172,8 +172,9 @@ const AssetsList = () => {
   };
 
   const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ ...qParams, search }, true);
-    else setQueryParams({ ...qParams, search: "" }, true);
+    if (search !== "")
+      setQueryParams({ ...qParams, search }, { replace: true });
+    else setQueryParams({ ...qParams, search: "" }, { replace: true });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -184,7 +185,7 @@ const AssetsList = () => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
     console.log(qParams);
   };
 
@@ -316,7 +317,7 @@ const AssetsList = () => {
         {badge("Status", qParams.status, ["status"])}
       </div>
       <div className="grow mt-10 bg-white">
-        <div className="p-8">
+        <div className="py-8 md:px-8">
           <div className="flex flex-wrap md:-mx-4">
             {assetsExist ? (
               assets.map((asset: AssetData) => (
