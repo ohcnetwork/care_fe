@@ -365,7 +365,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
-            blood_group: res.data.blood_group ? res.data.blood_group : "",
+            blood_group: res.data.blood_group
+              ? res.data.blood_group === "UNKNOWN"
+                ? "UNK"
+                : res.data.blood_group
+              : "",
             local_body: res.data.local_body ? res.data.local_body : "",
             ward: res.data.ward_object ? res.data.ward_object.id : initialWard,
             village: res.data.village ? res.data.village : "",
