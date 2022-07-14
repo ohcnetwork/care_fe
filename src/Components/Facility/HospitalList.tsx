@@ -719,7 +719,7 @@ export const HospitalList = (props: any) => {
           </div>
         </SlideOver>
       </div>
-      <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
+      <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3 -mx-3">
         {badge("Facility/District Name", qParams.search, "search")}
         {badge("State", stateName, "state")}
         {badge("District", districtName, "district")}
