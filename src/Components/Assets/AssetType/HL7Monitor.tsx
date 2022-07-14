@@ -69,7 +69,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                 <div className="text-primary-500 m-auto">
                   <Monitorsvg
                     className="h-64 w-64"
-                    viewBox="0 0 64 64"
+                    viewBox="0 0 122.88 78.97"
                     fill="currentColor"
                   />
                 </div>
