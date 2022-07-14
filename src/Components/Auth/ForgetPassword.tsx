@@ -9,7 +9,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
 const Loading = loadable(() => import("../Common/Loading"));
 
-export const ForgotPassword = (props: any) => {
+export const ForgotPassword = () => {
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
@@ -84,9 +84,9 @@ export const ForgotPassword = (props: any) => {
   }
   return (
     <div>
-      <div className="py-10 md:py-40">
+      <div className="py-10 md:py-40 mx-5">
         <form
-          className="max-w-xl bg-white shadow rounded-lg mx-auto"
+          className="w-full md:w-1/2 lg:w-1/3 p-2  md:p-5 bg-gray-100 shadow rounded-lg mx-auto"
           onSubmit={(e) => {
             handleSubmit(e);
           }}
@@ -104,6 +104,7 @@ export const ForgotPassword = (props: any) => {
               value={form.username.toLowerCase()}
               onChange={handleChange}
               errors={errors.username}
+              className="mt-6"
             />
           </CardContent>
 
