@@ -641,8 +641,7 @@ export const DailyRounds = (props: any) => {
                       />
                       <ErrorHelperText error={state.errors.action} />
                     </div>
-                  </div>
-                  <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
+
                     <div className="flex-1">
                       <InputLabel id="review_time-label">
                         Review After{" "}
@@ -671,6 +670,7 @@ export const DailyRounds = (props: any) => {
                       />
                     </div>
                   </div>
+
                   {state.form.rounds_type === "NORMAL" && (
                     <div className="mt-4">
                       <h3>Vitals</h3>
@@ -946,19 +946,14 @@ export const DailyRounds = (props: any) => {
                     Back
                   </Link>
                 )}
-
-                <Button
-                  color="primary"
-                  variant="contained"
+                <button
                   type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
+                  className="btn btn-primary ml-auto text-base"
                   onClick={(e) => handleSubmit(e)}
                 >
+                  <i className="fa-regular fa-circle-check mr-2"></i>{" "}
                   {buttonText}
-                </Button>
+                </button>
               </div>
             </CardContent>
           </form>
