@@ -1,5 +1,5 @@
 export const KeralaLogo = "images/kerala-logo.png";
-
+export const Error404Logo = "images/404.png";
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
 export interface OptionsType {
