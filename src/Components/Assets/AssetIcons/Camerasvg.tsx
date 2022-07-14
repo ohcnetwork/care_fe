@@ -1,10 +1,10 @@
 interface CamerasvgProps {
-  fill: string;
-  className: string;
-  viewBox: string;
+  fill?: string;
+  className?: string;
+  viewBox?: string;
 }
 
-const Camerasvg = (props: any) => {
+const Camerasvg = (props: CamerasvgProps) => {
   const { fill, className, viewBox } = props;
   return (
     <svg
