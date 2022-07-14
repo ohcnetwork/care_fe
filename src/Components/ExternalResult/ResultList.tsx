@@ -3,22 +3,19 @@ import Grid from "@material-ui/core/Grid";
 import { Button } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate, useQueryParams } from "raviger";
-// import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
-// import { PhoneNumberField } from "../Common/HelperInputFields";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import moment from "moment";
 import { CSVLink } from "react-csv";
-// import { externalResultFormatter } from "./Commons";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-
+import clsx from "clsx";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -44,6 +41,7 @@ export default function ResultList() {
     lsgList: [],
     wardList: [],
   });
+
   let manageResults: any = null;
   let pagination: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
@@ -108,7 +106,7 @@ export default function ResultList() {
           : a,
       {}
     );
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -352,7 +350,7 @@ export default function ResultList() {
           selectedFacility={selectedFacility}
           handleOk={() =>
             navigate(`facility/${selectedFacility.id}/patient`, {
-              extId: resultId,
+              query: { extId: resultId },
             })
           }
           handleCancel={() => setShowDialog(false)}
@@ -361,7 +359,7 @@ export default function ResultList() {
       <PageTitle
         title="External Results"
         hideBack={true}
-        className="mt-4"
+        className="-mt-2 md:mt-4"
         breadcrumbs={false}
       />
       <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
@@ -387,8 +385,8 @@ export default function ResultList() {
               errors=""
             />
           </div>
-          <div>
-            <div className="text-sm font-semibold mt-2">Search by number</div>
+          <div className="text-sm font-semibold my-2">Search by number</div>
+          <div className="w-full">
             <InputSearchBox
               value={qParams.mobile_number || ""}
               search={searchByPhone}
@@ -397,18 +395,19 @@ export default function ResultList() {
             />
           </div>
         </div>
-        <div className="flex flex-col justify-between">
-          <div className="flex">
+        <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
+          <div className="flex justify-end gap-2">
             <div
-              className="btn mt-8 ml-auto btn-primary"
+              className="btn btn-primary"
               onClick={(_) => navigate("external_results/upload")}
             >
               Upload List
             </div>
             <div
-              className={`btn mt-8 ml-4 gap-2 btn-primary ${
-                downloadLoading ? "pointer-events-none" : ""
-              }`}
+              className={clsx(
+                "btn btn-primary",
+                downloadLoading && "pointer-events-none"
+              )}
               onClick={triggerDownload}
             >
               <span className="flex flex-row justify-center">

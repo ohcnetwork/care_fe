@@ -202,8 +202,8 @@ export const HospitalList = (props: any) => {
   };
 
   const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ search }, true);
-    else setQueryParams({ search: "" }, true);
+    if (search !== "") setQueryParams({ search }, { replace: true });
+    else setQueryParams({ search: "" }, { replace: true });
   };
 
   const handleDownload = async () => {
@@ -248,7 +248,7 @@ export const HospitalList = (props: any) => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const applyFilter = (data: any) => {
@@ -380,9 +380,16 @@ export const HospitalList = (props: any) => {
                       </div>
                     </div>
                     <div className="flex gap-1 flex-wrap mt-2">
-                      {facility.features?.map((feature : number, i : number)=>(
-                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs">
-                          {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                      {facility.features?.map((feature: number, i: number) => (
+                        <div
+                          key={i}
+                          className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs"
+                        >
+                          {
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
                         </div>
                       ))}
                     </div>
@@ -539,7 +546,7 @@ export const HospitalList = (props: any) => {
 
   return (
     <div className="px-6">
-      <div className="grid grid-cols-2">
+      <div className="grid md:grid-cols-2">
         <PageTitle
           title={t("Facilities")}
           hideBack={true}
@@ -547,9 +554,9 @@ export const HospitalList = (props: any) => {
           breadcrumbs={false}
         />
 
-        <div className="flex justify-end w-full mt-4">
+        <div className="flex md:justify-end w-full md:mt-4">
           <div>
-            <Accordion className="mt-10 lg:mt-0 md:mt-0 sm:mt-0">
+            <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"

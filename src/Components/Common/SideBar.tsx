@@ -82,11 +82,11 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     ""
   )}`;
   const path = usePath();
-  const url = path.replaceAll("/", "");
+  const url = path?.replaceAll("/", "");
 
   const active = menus.reduce((acc, menu) => {
     const tag = menu.link.replaceAll("/", "");
-    return url.includes(tag) ? tag : acc;
+    return url?.includes(tag) ? tag : acc;
   }, "");
 
   const theme = useTheme();

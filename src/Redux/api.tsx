@@ -332,6 +332,11 @@ const routes: Routes = {
     method: "PUT",
   },
 
+  deleteDoctor: {
+    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    method: "DELETE",
+  },
+
   //Triage
   createTriage: {
     path: "/api/v1/facility/{facilityId}/patient_stats/",
@@ -584,6 +589,10 @@ const routes: Routes = {
   },
   getNotificationData: {
     path: "/api/v1/notification/{id}/",
+  },
+  markNotificationAsRead: {
+    path: "/api/v1/notification/{id}/",
+    method: "PATCH",
   },
   getPublicKey: {
     path: "/api/v1/notification/public_key/",

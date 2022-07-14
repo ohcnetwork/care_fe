@@ -8,6 +8,7 @@ import {
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CancelOutlineIcon from "@material-ui/icons/CancelOutlined";
 import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
 import {
@@ -601,17 +602,36 @@ const AssetCreate = (props: AssetProps) => {
                 />
               </div>
             </div>
-            <Button
-              id="asset-create"
-              color="primary"
-              variant="contained"
-              type="submit"
-              style={{ marginLeft: "auto" }}
-              onClick={(e) => handleSubmit(e)}
-              startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-            >
-              {assetId ? "Update" : "Create"}
-            </Button>
+            <div className="flex justify-center sm:justify-start gap-x-4 gap-y-2 flex-wrap">
+              <Button
+                id="asset-create"
+                color="primary"
+                variant="contained"
+                type="submit"
+                onClick={(e) => handleSubmit(e)}
+                startIcon={
+                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                }
+                className="w-full sm:w-auto"
+              >
+                {assetId ? "Update" : "Create"}
+              </Button>
+              <Button
+                id="asset-cancel"
+                color="primary"
+                variant="outlined"
+                type="button"
+                onClick={() =>
+                  navigate(
+                    assetId ? `/assets/${assetId}` : `/facility/${facilityId}`
+                  )
+                }
+                startIcon={<CancelOutlineIcon>cancel</CancelOutlineIcon>}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

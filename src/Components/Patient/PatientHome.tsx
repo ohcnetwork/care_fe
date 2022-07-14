@@ -390,7 +390,7 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={"Covid Suspect Details"}
+          title={"Patient Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
@@ -1092,7 +1092,8 @@ export const PatientHome = (props: any) => {
                   <button
                     className="btn btn-primary w-full"
                     disabled={
-                      !patientData.is_active || consultationListData.length > 0
+                      !patientData.is_active ||
+                      !patientData?.last_consultation?.discharge_date
                     }
                     onClick={() =>
                       navigate(
@@ -1118,7 +1119,7 @@ export const PatientHome = (props: any) => {
                     className="btn btn-primary w-full"
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/files/`
+                        `/facility/${patientData?.facility}/patient/${id}/files`
                       )
                     }
                   >
@@ -1254,7 +1255,7 @@ export const PatientHome = (props: any) => {
           hideBack={true}
           breadcrumbs={false}
         />
-        {sampleList}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-4">{sampleList}</div>
         {!isSampleLoading && totalSampleListCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination

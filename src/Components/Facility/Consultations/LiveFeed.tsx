@@ -303,7 +303,7 @@ const LiveFeed = (props: any) => {
                     >
                       <span className="sr-only">{option.label}</span>
                       {option.icon ? (
-                        <i className={`${option.icon} md:p-2`}></i>
+                        <i className={`fas fa-${option.icon} md:p-2`}></i>
                       ) : (
                         <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
                           {option.value}x

@@ -65,6 +65,7 @@ import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 import Error404 from "../Components/ErrorPages/404";
+import FacilityUsers from "../Components/Facility/FacilityUsers";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -92,6 +93,9 @@ const routes = {
   ),
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/users": ({ facilityId }: any) => (
+    <FacilityUsers facilityId={facilityId} />
   ),
   "/facility/:facilityId/resource/new": ({ facilityId }: any) => (
     <ResourceCreate facilityId={facilityId} />
@@ -128,7 +132,7 @@ const routes = {
     facilityId,
     patientId,
   }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
-  "/facility/:facilityId/patient/:patientId/files/": ({
+  "/facility/:facilityId/patient/:patientId/files": ({
     facilityId,
     patientId,
   }: any) => (
@@ -177,7 +181,7 @@ const routes = {
       unspecified={true}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation": ({
     facilityId,
     patientId,
     id,
@@ -340,7 +344,7 @@ const routes = {
   "/external_results/:id/update": ({ id }: any) => <ResultUpdate id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
-  "/notice_board/": () => <NoticeBoard />,
+  "/notice_board": () => <NoticeBoard />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId": ({
     facilityId,
     patientId,
