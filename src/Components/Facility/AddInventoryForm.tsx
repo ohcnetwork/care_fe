@@ -153,7 +153,8 @@ export const AddInventoryForm = (props: any) => {
                   </InputLabel>
                   <SelectField
                     name="id"
-                    variant="standard"
+                    variant="outlined"
+                    margin="dense"
                     value={state.form.id}
                     options={data.map((e) => {
                       return { id: e.id, name: e.name };
@@ -169,7 +170,8 @@ export const AddInventoryForm = (props: any) => {
                   </InputLabel>
                   <SelectField
                     name="isIncoming"
-                    variant="standard"
+                    variant="outlined"
+                    margin="dense"
                     value={state.form.isIncoming}
                     options={[
                       { id: true, value: "Add Stock" },
@@ -195,9 +197,9 @@ export const AddInventoryForm = (props: any) => {
                 <div>
                   <InputLabel id="unit">Unit</InputLabel>
                   <SelectField
-                    className="pt-3"
                     name="unit"
-                    variant="standard"
+                    margin="dense"
+                    variant="outlined"
                     value={state.form.unit}
                     options={currentUnit || []}
                     onChange={handleChange}

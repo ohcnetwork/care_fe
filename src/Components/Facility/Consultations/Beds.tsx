@@ -90,10 +90,6 @@ const Beds = (props: BedsProps) => {
         msg: "Bed allocated successfully",
       });
       window.location.reload();
-    } else {
-      Notification.Error({
-        msg: "Something went wrong..!",
-      });
     }
   };
 
