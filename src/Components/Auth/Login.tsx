@@ -189,8 +189,6 @@ export const Login = (props: any) => {
                   />
                 )}
               </div>
-            </CardContent>
-            <CardActions style={{ padding: "16px" }}>
               <Grid container justify="center">
                 {isCaptchaEnabled && (
                   <Grid item className="px-8 py-4">
@@ -224,7 +222,7 @@ export const Login = (props: any) => {
                   </button>
                 )}
               </Grid>
-            </CardActions>
+            </CardContent>
           </form>
         </div>
       </div>
