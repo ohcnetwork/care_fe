@@ -374,15 +374,19 @@ export const PatientHome = (props: any) => {
       </div>
     );
   } else if (sampleListData.length > 0) {
-    sampleList = sampleListData.map((itemData, idx) => (
-      <SampleTestCard
-        itemData={itemData}
-        key={idx}
-        handleApproval={confirmApproval}
-        facilityId={facilityId}
-        patientId={id}
-      />
-    ));
+    sampleList = (
+      <div className="lg:grid lg:grid-cols-2 lg:gap-4">
+        {sampleListData.map((itemData, idx) => (
+          <SampleTestCard
+            itemData={itemData}
+            key={idx}
+            handleApproval={confirmApproval}
+            facilityId={facilityId}
+            patientId={id}
+          />
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -1265,7 +1269,7 @@ export const PatientHome = (props: any) => {
           hideBack={true}
           breadcrumbs={false}
         />
-        <div className="lg:grid lg:grid-cols-2 lg:gap-4">{sampleList}</div>
+        {sampleList}
         {!isSampleLoading && totalSampleListCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
