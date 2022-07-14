@@ -300,7 +300,7 @@ export const FacilityHome = (props: any) => {
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
-                    <div className="flex flex-col md:flex-row lg:flex-row gap-4">
+                    <div className="flex flex-col md:flex-row gap-4">
                       <div>
                         <h1 className="text-lg font-bold">Ward</h1>
                         <p className="text-lg">
