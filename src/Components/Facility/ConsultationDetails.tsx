@@ -361,7 +361,10 @@ export const ConsultationDetails = (props: any) => {
         open={openDischargeDialog}
         onClose={handleDischargeClose}
       >
-        <DialogTitle>Discharge Patient From Care</DialogTitle>
+        <DialogTitle>
+          <i className="text-red-500 fas fa-exclamation-triangle"></i>
+          &nbsp;Discharge Patient From Care
+        </DialogTitle>
         <DialogContent>
           <div className="flex flex-col gap-4">
             <div className="sm:w-1/2" id="discharge-reason-div">
@@ -417,6 +420,8 @@ export const ConsultationDetails = (props: any) => {
             <CircularProgress size={20} />
           ) : (
             <Button
+              variant="contained"
+              color="primary"
               onClick={() => handlePatientDischarge(false)}
               autoFocus
             >
