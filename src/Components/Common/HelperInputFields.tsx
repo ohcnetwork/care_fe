@@ -375,7 +375,6 @@ export const SelectField = (props: DefaultSelectInputProps) => {
       <FormControl style={{ width: "100%" }} variant={variant} margin={margin}>
         {label && <InputLabel htmlFor={labelId}>{label}</InputLabel>}
         <Select
-          native
           inputProps={{
             name: name,
             id: labelId,
@@ -383,23 +382,23 @@ export const SelectField = (props: DefaultSelectInputProps) => {
           value={value}
           {...restProps}
         >
-          {showEmpty && <option aria-label="None" value="" />}
+          {showEmpty && <MenuItem value="">None</MenuItem>}
           {!optionArray &&
             options.map((opt: any) => {
               const value = optionKey ? opt[optionKey] : opt.id;
               const text = optionValue ? opt[optionValue] : opt.text;
               return (
-                <option value={value} key={opt.id} disabled={opt.disabled}>
+                <MenuItem value={value} key={opt.id} disabled={opt.disabled}>
                   {text}
-                </option>
+                </MenuItem>
               );
             })}
           {optionArray &&
             options.map((opt: any) => {
               return (
-                <option value={opt} key={opt}>
+                <MenuItem value={opt} key={opt}>
                   {opt}
-                </option>
+                </MenuItem>
               );
             })}
         </Select>
