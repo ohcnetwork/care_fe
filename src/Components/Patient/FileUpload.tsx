@@ -393,6 +393,10 @@ export const FileUpload = (props: FileUploadProps) => {
     }
     const f = e.target.files[0];
     const fileName = f.name;
+    setFile(e.target.files[0]);
+    setUploadFileName(
+      fileName.substring(0, fileName.lastIndexOf(".")) || fileName
+    );
     const ext: string = fileName.split(".")[1];
     setContentType(header_content_type[ext]);
 

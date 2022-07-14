@@ -398,7 +398,7 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={"Covid Suspect Details"}
+          title={"Patient Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
@@ -1259,26 +1259,24 @@ export const PatientHome = (props: any) => {
         </div>
       </section>
 
-      <section className="md:flex mt-4 space-y-2">
-        <div className="w-full">
-          <PageTitle
-            title="Sample Test History"
-            hideBack={true}
-            breadcrumbs={false}
-          />
-          {sampleList}
-          {!isSampleLoading && totalSampleListCount > limit && (
-            <div className="mt-4 flex w-full justify-center">
-              <Pagination
-                cPage={currentSampleListPage}
-                defaultPerPage={limit}
-                data={{ totalCount: totalSampleListCount }}
-                onChange={handleSampleListPagination}
-              />
-            </div>
-          )}
-        </div>
-      </section>
+      <div>
+        <PageTitle
+          title="Sample Test History"
+          hideBack={true}
+          breadcrumbs={false}
+        />
+        <div className="lg:grid lg:grid-cols-2 lg:gap-4">{sampleList}</div>
+        {!isSampleLoading && totalSampleListCount > limit && (
+          <div className="mt-4 flex w-full justify-center">
+            <Pagination
+              cPage={currentSampleListPage}
+              defaultPerPage={limit}
+              data={{ totalCount: totalSampleListCount }}
+              onChange={handleSampleListPagination}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
