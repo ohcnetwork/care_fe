@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -325,23 +325,32 @@ export default function ManageUsers() {
                     </div>
                   )}
                   <div className="flex-shrink-0 text-sm text-gray-600 min-width-50">
-                    Last Online:{" "}
-                    <span
-                      aria-label="Online"
-                      className={
-                        "shrink-0 inline-block h-2 w-2 rounded-full " +
-                        (moment()
-                          .subtract(5, "minutes")
-                          .isBefore(user.last_login)
-                          ? "bg-primary-400"
-                          : "bg-gray-300")
-                      }
-                    ></span>
-                    <span className="pl-2">
-                      {user.last_login
-                        ? moment(user.last_login).fromNow()
-                        : "Never"}
-                    </span>
+                    {user.last_login &&
+                    moment()
+                      .subtract(5, "minutes")
+                      .isBefore(user.last_login) ? (
+                      <span>Currently Online</span>
+                    ) : (
+                      <>
+                        <span>Last Online: </span>
+                        <span
+                          aria-label="Online"
+                          className={
+                            "shrink-0 inline-block h-2 w-2 rounded-full " +
+                            (moment()
+                              .subtract(5, "minutes")
+                              .isBefore(user.last_login)
+                              ? "bg-primary-400"
+                              : "bg-gray-300")
+                          }
+                        ></span>
+                        <span className="pl-2">
+                          {user.last_login
+                            ? moment(user.last_login).fromNow()
+                            : "Never"}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="font-black text-2xl capitalize mt-2">
