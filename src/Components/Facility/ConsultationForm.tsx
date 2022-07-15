@@ -198,6 +198,11 @@ export const ConsultationForm = (props: any) => {
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
   const [dischargeAdvice, setDischargeAdvice] = useState<Prescription_t[]>([]);
+
+  useEffect(()=>{
+    console.log("da", dischargeAdvice);
+  },[dischargeAdvice])
+
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -807,7 +812,13 @@ export const ConsultationForm = (props: any) => {
               <div id="discharge_advice-div" className="mt-4">
                 <InputLabel>Medication</InputLabel>
                 <PrescriptionBuilder
-                  prescriptions={dischargeAdvice}
+                  prescriptions={dischargeAdvice.map(d=>{
+                    return {
+                      ...d,
+                      notes : d.notes || "",
+                      route : d.route || "",
+                    }
+                  })}
                   setPrescriptions={setDischargeAdvice}
                 />
                 <ErrorHelperText error={state.errors.discharge_advice} />
