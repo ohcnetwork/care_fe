@@ -60,7 +60,7 @@ const Beds = (props: BedsProps) => {
         else {
           const beds: CurrentBed[] = bedsData?.data?.results;
           setConsultationBeds(beds);
-          beds.map((bed: CurrentBed) => {
+          beds.forEach((bed: CurrentBed) => {
             if (!bed?.end_date) {
               setUseBed(bed?.bed_object);
             }
