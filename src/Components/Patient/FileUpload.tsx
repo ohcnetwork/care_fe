@@ -394,6 +394,10 @@ export const FileUpload = (props: FileUploadProps) => {
     }
     const f = e.target.files[0];
     const fileName = f.name;
+    setFile(e.target.files[0]);
+    setUploadFileName(
+      fileName.substring(0, fileName.lastIndexOf(".")) || fileName
+    );
     const ext: string = fileName.split(".")[1];
     setContentType(header_content_type[ext]);
 
@@ -691,7 +695,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4>Upload New File</h4>
               </div>
               <div>
-                <InputLabel id="spo2-label">Enter File Name</InputLabel>
+                <InputLabel id="spo2-label">Enter File Name*</InputLabel>
                 <TextInputField
                   name="temperature"
                   variant="outlined"

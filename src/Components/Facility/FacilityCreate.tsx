@@ -350,7 +350,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         case "state":
         case "local_body":
         case "ward":
-          if (!state.form[field]) {
+          if (!Number(state.form[field])) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
