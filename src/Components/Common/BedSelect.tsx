@@ -16,6 +16,7 @@ interface BedSelectProps {
   location?: string;
   showAll?: boolean;
   selected: BedModel | BedModel[] | null;
+  useBed?: BedModel | null;
   setSelected: (selected: BedModel | BedModel[] | null) => void;
 }
 
@@ -31,6 +32,7 @@ export const BedSelect = (props: BedSelectProps) => {
     className = "",
     facility,
     location,
+    useBed,
   } = props;
   const dispatchAction: any = useDispatch();
   const [bedLoading, isBedLoading] = useState(false);
@@ -98,7 +100,9 @@ export const BedSelect = (props: BedSelectProps) => {
       )}
       getOptionSelected={(option: any, value: any) => option.id === value.id}
       getOptionLabel={(option: any) => option?.name || ""}
-      filterOptions={(options: BedModel[]) => options}
+      filterOptions={(options: BedModel[]) =>
+        options.filter((option) => option.id !== useBed?.id)
+      }
       errors={errors}
       className={className}
     />
