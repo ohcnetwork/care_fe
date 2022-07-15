@@ -401,7 +401,11 @@ const InvestigationReports = ({ id }: any) => {
                       <TextField
                         margin="dense"
                         {...params}
-                        placeholder="Select Investigation"
+                        placeholder={
+                          selectedInvestigations.length
+                            ? ""
+                            : "Select Investigation"
+                        }
                       />
                     </>
                   )}

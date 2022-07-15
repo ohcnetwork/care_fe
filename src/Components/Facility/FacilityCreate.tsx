@@ -350,7 +350,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         case "state":
         case "local_body":
         case "ward":
-          if (!state.form[field]) {
+          if (!Number(state.form[field])) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -536,7 +536,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
               <div className="">
-                <InputLabel id="features-label">Features*</InputLabel>
+                <InputLabel id="features-label">Features</InputLabel>
                 <MultiSelectField
                     data-test="facility-features"
                     name="features"

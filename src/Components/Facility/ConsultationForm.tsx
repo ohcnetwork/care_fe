@@ -81,7 +81,7 @@ type FormDetails = {
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
-  existing_medication: string;
+  history_of_present_illness: string;
   prescribed_medication: string;
   consultation_notes: string;
   ip_no: string;
@@ -121,7 +121,7 @@ const initForm: FormDetails = {
   is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
-  existing_medication: "",
+  history_of_present_illness: "",
   prescribed_medication: "",
   consultation_notes: "",
   ip_no: "",
@@ -387,7 +387,10 @@ export const ConsultationForm = (props: any) => {
         case "discharge_advice":
           let invalid = false;
           for (let f of dischargeAdvice) {
-            if (!f.dosage.replace(/\s/g, "").length || !f.medicine.replace(/\s/g, "").length) {
+            if (
+              !f.dosage.replace(/\s/g, "").length ||
+              !f.medicine.replace(/\s/g, "").length
+            ) {
               invalid = true;
               break;
             }
@@ -433,7 +436,7 @@ export const ConsultationForm = (props: any) => {
         is_kasp: state.form.is_kasp,
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
         examination_details: state.form.examination_details,
-        existing_medication: state.form.existing_medication,
+        history_of_present_illness: state.form.history_of_present_illness,
         prescribed_medication: state.form.prescribed_medication,
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
@@ -483,13 +486,13 @@ export const ConsultationForm = (props: any) => {
   const handleChange:
     | ChangeEventHandler<HTMLInputElement>
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e: any) => {
-      e &&
-        e.target &&
-        dispatch({
-          type: "set_form",
-          form: { ...state.form, [e.target.name]: e.target.value },
-        });
-    };
+    e &&
+      e.target &&
+      dispatch({
+        type: "set_form",
+        form: { ...state.form, [e.target.name]: e.target.value },
+      });
+  };
 
   const handleTelemedicineChange: ChangeEventHandler<HTMLInputElement> = (
     e
@@ -641,17 +644,17 @@ export const ConsultationForm = (props: any) => {
                   </InputLabel>
                   <MultilineInputField
                     rows={5}
-                    name="existing_medication"
+                    name="history_of_present_illness"
                     variant="outlined"
                     margin="dense"
                     type="text"
                     placeholder="Information optional"
                     InputLabelProps={{
-                      shrink: !!state.form.existing_medication,
+                      shrink: !!state.form.history_of_present_illness,
                     }}
-                    value={state.form.existing_medication}
+                    value={state.form.history_of_present_illness}
                     onChange={handleChange}
-                    errors={state.errors.existing_medication}
+                    errors={state.errors.history_of_present_illness}
                   />
                 </div>
 
@@ -812,7 +815,7 @@ export const ConsultationForm = (props: any) => {
                 />
                 <ErrorHelperText error={state.errors.discharge_advice} />
               </div>
-              <div id="ip_no-div">
+              <div id="ip_no-div" className="mt-4">
                 <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
                   name="ip_no"
@@ -826,9 +829,8 @@ export const ConsultationForm = (props: any) => {
                   required
                 />
               </div>
-
               <div id="verified_by-div">
-                <InputLabel id="exam-details-label">Verified By</InputLabel>
+              <InputLabel id="exam-details-label">Verified By</InputLabel>
                 <MultilineInputField
                   rows={3}
                   name="verified_by"
@@ -844,7 +846,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.verified_by}
                 />
               </div>
-              <div id="diagnosis-div">
+              <div id="diagnosis-div" className="mt-4">
                 <InputLabel id="exam-details-label">Diagnosis</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -889,7 +891,7 @@ export const ConsultationForm = (props: any) => {
                 </div>
               )}
               {/* Telemedicine Fields */}
-              <div className="flex">
+              <div className="flex mt-4">
                 <div className="flex-1" id="is_telemedicine-div">
                   <InputLabel id="admitted-label">Telemedicine</InputLabel>
                   <RadioGroup
@@ -964,7 +966,6 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-
               <div id="special_instruction-div" className="mt-2">
                 <InputLabel id="special-instruction-label">
                   Special Instructions
@@ -985,7 +986,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row justify-between md:gap-5">
+              <div className="flex flex-col md:flex-row justify-between md:gap-5 mt-4">
                 <div id="weight-div" className="flex-1">
                   <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
                   <TextInputField

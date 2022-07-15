@@ -539,17 +539,16 @@ export const HospitalList = (props: any) => {
 
   return (
     <div className="px-6">
-      <div className="grid grid-cols-2">
+      <div className="grid md:grid-cols-2">
         <PageTitle
           title={t("Facilities")}
           hideBack={true}
-          className="mx-3"
           breadcrumbs={false}
         />
 
-        <div className="flex justify-end w-full mt-4">
+        <div className="flex md:justify-end w-full md:mt-4">
           <div>
-            <Accordion className="mt-10 lg:mt-0 md:mt-0 sm:mt-0">
+            <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"
