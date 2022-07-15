@@ -1035,7 +1035,7 @@ export const PatientHome = (props: any) => {
                 !patientData.allergies &&
                 !patientData.ongoing_medication &&
                 !patientData.is_antenatal && 
-                !patientData.medical_history?.length (
+                !patientData.medical_history?.length && (
                   <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
                     No Medical History Available
                   </div>
