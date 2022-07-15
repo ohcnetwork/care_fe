@@ -391,7 +391,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.preferred_vehicle_choice}
                   options={["", ...vehicleOptions]}
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
                   errors={state.errors.preferred_vehicle_choice}
                 />
               </div>
@@ -405,7 +405,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.assigned_facility_type}
                   options={["", ...facilityOptions]}
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
                   errors={state.errors.assigned_facility_type}
                 />
               </div>
@@ -419,7 +419,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.breathlessness_level}
                   options={BREATHLESSNESS_LEVEL}
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
                 />
               </div>
               <div className="md:col-span-2">

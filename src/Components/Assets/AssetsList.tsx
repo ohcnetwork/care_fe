@@ -258,9 +258,9 @@ const AssetsList = () => {
     );
 
   return (
-    <div className="px-4 pb-2">
+    <div className="px-6">
       <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
-      <div className="lg:flex mt-5 space-y-2">
+      <div className="md:flex mt-5 space-y-2 space-x-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -317,8 +317,8 @@ const AssetsList = () => {
         {badge("Status", qParams.status, ["status"])}
       </div>
       <div className="grow mt-10 bg-white">
-        <div className="py-8 md:px-8">
-          <div className="flex flex-wrap md:-mx-4">
+        <div className="py-8 md:px-5">
+          <div className="flex flex-wrap md:-mx-8">
             {assetsExist ? (
               assets.map((asset: AssetData) => (
                 <div
