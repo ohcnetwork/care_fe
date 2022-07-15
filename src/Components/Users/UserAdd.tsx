@@ -136,16 +136,24 @@ export const UserAdd = (props: UserProps) => {
   const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
+
+  const userExistsEnums = {
+    idle : 0,
+    checking : 1,
+    exists : 2,
+    avaliable : 3 
+  }
+
   const [usernameExists, setUsernameExists] = useState<number>(0);
 
   const checkUsername = async (username : string) => {
-    setUsernameExists(1);
+    setUsernameExists(userExistsEnums.checking);
     const userDetails = await dispatchAction(getUserDetails(username), true);
-    setUsernameExists(userDetails.status === 404 ? 3 : 2);
+    setUsernameExists(userDetails.status === 404 ? userExistsEnums.avaliable : userExistsEnums.exists);
   }
 
   useEffect(()=>{
-    setUsernameExists(0);
+    setUsernameExists(userExistsEnums.idle);
     if(usernameInput.length > 1 && !(state.form.username?.length < 2) && /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])){
       let timeout = setTimeout(() => {
         checkUsername(usernameInput);
@@ -394,7 +402,7 @@ export const UserAdd = (props: UserProps) => {
             errors[field] =
               "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
-          } else if (usernameExists !== 3){
+          } else if (usernameExists !== userExistsEnums.avaliable){
             errors[field] = "This username already exists";
             invalidForm = true;
           }
@@ -652,17 +660,17 @@ export const UserAdd = (props: UserProps) => {
                 {usernameInputInFocus && (
                   <div className="pl-2 text-small text-gray-500">
                     <div>
-                      {usernameExists !== 0 && (
+                      {usernameExists !== userExistsEnums.idle && (
                         <>
-                          {usernameExists === 1 ? 
+                          {usernameExists === userExistsEnums.checking ? 
                             <span>
                               <i className="fas fa-circle-dot" /> checking...
                             </span> 
-                          : (usernameExists === 2 ? 
+                          : (usernameExists === userExistsEnums.exists ? 
                             <span className="text-red-500">
                               <i className="fas fa-circle-xmark text-red-500" /> User already exists
                             </span> 
-                          : (usernameExists === 3 && 
+                          : (usernameExists === userExistsEnums.avaliable && 
                             <span className="text-primary-500">
                               <i className="fas fa-circle-check text-green-500" /> Available!
                             </span>
