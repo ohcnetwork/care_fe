@@ -390,7 +390,7 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={"Covid Suspect Details"}
+          title={"Patient Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
@@ -1255,7 +1255,7 @@ export const PatientHome = (props: any) => {
           hideBack={true}
           breadcrumbs={false}
         />
-        {sampleList}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-4">{sampleList}</div>
         {!isSampleLoading && totalSampleListCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
