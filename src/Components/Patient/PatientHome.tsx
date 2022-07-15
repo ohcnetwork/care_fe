@@ -1031,11 +1031,11 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Medical
               </div>
-              {/* No medical data found */}
               {!patientData.present_health &&
                 !patientData.allergies &&
                 !patientData.ongoing_medication &&
-                !patientData.is_antenatal && (
+                !patientData.is_antenatal && 
+                !patientData.medical_history?.length (
                   <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
                     No Medical History Available
                   </div>
@@ -1068,16 +1068,6 @@ export const PatientHome = (props: any) => {
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
                       {patientData.allergies}
-                    </div>
-                  </div>
-                )}
-                {patientData.is_antenatal && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-medium text-gray-500">
-                      Is pregnant
-                    </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900">
-                      Yes
                     </div>
                   </div>
                 )}
