@@ -333,7 +333,7 @@ export const PatientHome = (props: any) => {
       <div className="sm:col-span-1" key={`med_his_${idx}`}>
         {item?.disease != "NO" && (
           <>
-            <div className="text-sm leading-5 font-medium text-gray-500">
+            <div className="text-sm leading-5 font-medium text-gray-700">
               {item.disease}
             </div>
             <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
