@@ -56,11 +56,6 @@ const menus = [
     link: "/users",
     icon: "fas fa-users",
   },
-  /*{
-    title: "Profile",
-    link: "/user/profile",
-    icon: "fas fa-user-circle",
-  },*/
   {
     title: "Notice Board",
     link: "/notice_board/",
