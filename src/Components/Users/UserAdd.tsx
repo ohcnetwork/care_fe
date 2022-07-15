@@ -39,7 +39,7 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
-import { Cancel, CheckCircle } from "@material-ui/icons";
+import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -530,10 +530,14 @@ export const UserAdd = (props: UserProps) => {
       <PageTitle title={headerText} />
 
       <Card className="mt-4">
-        <HelpToolTip
-          text="Need help? Go to the docs"
-          link="https://school.coronasafe.network/targets/12953"
-        />
+        <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
+          <div className="text-lg font-bold flex items-center mb-1">
+            <InfoOutlined className="mr-2" /> Need help?
+          </div>
+          <p className="text-sm text-black font-normal">
+            Go to the docs <a href="https://school.coronasafe.network/targets/12953">https://school.coronasafe.network/targets/12953</a>
+          </p>
+        </div>
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
