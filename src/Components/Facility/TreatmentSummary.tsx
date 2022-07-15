@@ -1,30 +1,17 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { navigate } from "raviger";
+import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  getPatient,
-  getInvestigation,
-  getDailyReport,
-} from "../../Redux/actions";
+import { getPatient, getInvestigation } from "../../Redux/actions";
 import { ConsultationModel } from "./models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { PatientModel, DailyRoundsModel } from "../Patient/models";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { getConsultation } from "../../Redux/actions";
-import {
-  PATIENT_CATEGORY,
-  SYMPTOM_CHOICES,
-  CONSULTATION_TABS,
-  OptionsType,
-  GENDER_TYPES,
-} from "../../Common/constants";
-const symptomChoices = [...SYMPTOM_CHOICES];
-const patientCategoryChoices = [...PATIENT_CATEGORY];
+import { GENDER_TYPES } from "../../Common/constants";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
-  const { consultationId, patientId, dailyRoundsListData } = props;
+  const { consultationId, patientId } = props;
   const date = new Date();
   const dispatch: any = useDispatch();
   const [patientData, setPatientData] = useState<PatientModel>({});
@@ -258,9 +245,8 @@ const TreatmentSummary = (props: any) => {
 
                   <div>
                     <b>Physical Examination info :</b>
-                    {dailyRoundsListData.length > 0 &&
-                    dailyRoundsListData["0"]["physical_examination_info"]
-                      ? dailyRoundsListData["0"]["physical_examination_info"]
+                    {dailyRounds.physical_examination_info
+                      ? dailyRounds.physical_examination_info
                       : "    ---"}
                   </div>
                 </div>
