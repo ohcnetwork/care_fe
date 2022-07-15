@@ -39,6 +39,7 @@ const Beds = (props: BedsProps) => {
   const dispatch = useDispatch();
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = React.useState<BedModel>({});
+  const [useBed, setUseBed] = React.useState<BedModel>({});
   const [startDate, setStartDate] = React.useState<string>(formatDateTime());
   const [consultationBeds, setConsultationBeds] = React.useState<CurrentBed[]>(
     []
@@ -57,7 +58,13 @@ const Beds = (props: BedsProps) => {
             msg: "Something went wrong..!",
           });
         else {
-          setConsultationBeds(bedsData?.data?.results);
+          const beds: CurrentBed[] = bedsData?.data?.results;
+          setConsultationBeds(beds);
+          beds.map((bed: CurrentBed) => {
+            if (!bed?.end_date) {
+              setUseBed(bed?.bed_object);
+            }
+          });
         }
       }
     },
@@ -132,6 +139,7 @@ const Beds = (props: BedsProps) => {
                 multiple={false}
                 margin="dense"
                 facility={facilityId}
+                useBed={useBed}
               />
             </div>
             <div>
