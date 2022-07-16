@@ -550,7 +550,6 @@ export const HospitalList = (props: any) => {
         <PageTitle
           title={t("Facilities")}
           hideBack={true}
-          className="mx-3"
           breadcrumbs={false}
         />
 
