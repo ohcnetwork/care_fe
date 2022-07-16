@@ -356,12 +356,7 @@ export default function ResultList() {
           handleCancel={() => setShowDialog(false)}
         />
       )}
-      <PageTitle
-        title="External Results"
-        hideBack={true}
-        className="-mt-2 md:mt-4"
-        breadcrumbs={false}
-      />
+      <PageTitle title="External Results" hideBack={true} breadcrumbs={false} />
       <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
