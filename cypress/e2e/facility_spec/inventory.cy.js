@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 
+import * as cy from "local-cypress";
+
 describe("Inventory Management Section", () => {
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
