@@ -289,9 +289,11 @@ const AssetsList = () => {
           />
         </div>
         <div className="flex flex-col md:flex-row lg:ml-2 justify-start items-start gap-2">
-          <AdvancedFilterButton setShowFilters={setShowFilters} />
+          <div className="w-full">
+            <AdvancedFilterButton setShowFilters={setShowFilters} />
+          </div>
           <button
-            className="btn btn-primary"
+            className="btn btn-primary w-full"
             onClick={() => setIsScannerActive(true)}
           >
             <i className="fas fa-search mr-1"></i> Scan Asset QR
