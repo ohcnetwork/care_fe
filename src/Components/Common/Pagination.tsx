@@ -89,8 +89,10 @@ const Pagination = (props: PaginationProps) => {
         break;
     }
 
-    setCurrentPage(newPage);
-    onChange(newPage, rowsPerPage);
+    if (newPage >= 1 && newPage <= totalPage) {
+      setCurrentPage(newPage);
+      onChange(newPage, rowsPerPage);
+    }
   };
 
   const goToPage = (page: any) => {
