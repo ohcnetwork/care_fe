@@ -139,13 +139,8 @@ export default function Breadcrumbs(props: any) {
                           <span>{crumb.name.slice(0, 13) + "..."}</span>
                         </div>
                       ) : (
-                        <div>
-                          <span className="hidden md:block">{crumb.name}</span>
-                          <span className="block md:hidden">
-                            {crumb.name.length > 13
-                              ? crumb.name.slice(0, 13) + "..."
-                              : crumb.name}
-                          </span>
+                        <div className="truncate w-20 md:w-full">
+                          <span>{crumb.name}</span>
                         </div>
                       )}
                     </Link>
