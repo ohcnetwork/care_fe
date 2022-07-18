@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 import { Button, CircularProgress } from "@material-ui/core";
 import moment from "moment";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications";
@@ -20,6 +20,7 @@ import {
   CONSULTATION_TABS,
   OptionsType,
   GENDER_TYPES,
+  DISCHARGE_REASONS,
 } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
@@ -45,16 +46,17 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { TextInputField } from "../Common/HelperInputFields";
-import { discharge, patchPatient, dischargePatient } from "../../Redux/actions";
+import InputLabel from "@material-ui/core/InputLabel";
+import {
+  TextInputField,
+  SelectField,
+  MultilineInputField,
+} from "../Common/HelperInputFields";
+import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
-
-type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
-interface preDischargeFormInterface {
-  donatePlasma: donatePlasmaOptionType;
-  disease_status?: string;
-  srf_id?: string;
-  date_of_test: any;
+interface PreDischargeFormInterface {
+  discharge_reason: string;
+  discharge_notes: string;
 }
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -78,9 +80,8 @@ export const ConsultationDetails = (props: any) => {
   const [cameraAsset, setCameraAsset] = useState({});
   const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState({});
   const [cameraConfig, setCameraConfig] = useState({});
-
-  const [open, setOpen] = React.useState(false);
-  const [openDischargeDialog, setOpenDischargeDialog] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
 
   const initDischargeSummaryForm: { email: string } = {
@@ -89,16 +90,12 @@ export const ConsultationDetails = (props: any) => {
   const [dischargeSummaryState, setDischargeSummaryForm] = useState(
     initDischargeSummaryForm
   );
-
-  const initErr: any = {};
-  const [errors, setErrors] = useState(initErr);
-
-  const initPreDischargeForm: preDischargeFormInterface = {
-    donatePlasma: null,
-    date_of_test: null,
-  };
-
-  const preDischargeForm = initPreDischargeForm;
+  const [errors, setErrors] = useState<any>({});
+  const [preDischargeForm, setPreDischargeForm] =
+    useState<PreDischargeFormInterface>({
+      discharge_reason: "",
+      discharge_notes: "",
+    });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -168,25 +165,21 @@ export const ConsultationDetails = (props: any) => {
 
   const handlePatientDischarge = async (value: boolean) => {
     setIsSendingDischargeApi(true);
-    const dischargeData = Object.assign({}, patientData);
-    dischargeData["discharge"] = value;
 
-    // calling patchPatient and dischargePatient together caused problems check https://github.com/coronasafe/care_fe/issues/758
-
-    // using preDischargeForm form data to update patient data
-    const preDischargeFormData = formatPreDischargeFormData(preDischargeForm);
-
-    if (Object.keys(preDischargeFormData).length) {
-      // skip calling patient update api if nothing to update
-      await dispatch(
-        patchPatient(preDischargeFormData, {
-          id: patientData.id,
-        })
-      );
+    if (!preDischargeForm.discharge_reason) {
+      setErrors({
+        ...errors,
+        discharge_reason: "Please select a reason for discharge",
+      });
+      setIsSendingDischargeApi(false);
+      return;
     }
-    // discharge call
+
     const dischargeResponse = await dispatch(
-      dischargePatient({ discharge: value }, { id: patientData.id })
+      dischargePatient(
+        { discharge: value, ...preDischargeForm },
+        { id: patientData.id }
+      )
     );
 
     setIsSendingDischargeApi(false);
@@ -201,28 +194,6 @@ export const ConsultationDetails = (props: any) => {
       setOpenDischargeDialog(false);
       window.location.reload();
     }
-  };
-
-  const formatPreDischargeFormData = (
-    preDischargeForm: preDischargeFormInterface
-  ) => {
-    const data: any = { ...preDischargeForm };
-    const donatePlasma = preDischargeForm.donatePlasma;
-
-    if (donatePlasma) {
-      if (donatePlasma === "yes") {
-        data["will_donate_blood"] = true;
-        data["fit_for_blood_donation"] = true;
-      } else if (donatePlasma === "no") {
-        data["will_donate_blood"] = false;
-      } else if (donatePlasma === "not-fit") {
-        data["will_donate_blood"] = true;
-        data["fit_for_blood_donation"] = false;
-      }
-    }
-
-    delete data.donatePlasma;
-    return data;
   };
 
   const handleDischargeSummaryFormChange = (e: any) => {
@@ -384,16 +355,53 @@ export const ConsultationDetails = (props: any) => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog
-        maxWidth={"md"}
+        fullWidth={true}
         open={openDischargeDialog}
         onClose={handleDischargeClose}
       >
-        <DialogContent className="px-20">
-          <div className="flex justify-center">
-            <span className="text-md text-black-800">
-              Are you sure you want to discharge {patientData.name}?
-            </span>
+        <DialogTitle>Discharge Patient From Care</DialogTitle>
+        <DialogContent>
+          <div className="flex flex-col gap-4">
+            <div className="sm:w-1/2" id="discharge-reason-div">
+              <InputLabel id="discharge-reason-label">
+                Discharge Reason*
+              </InputLabel>
+              <SelectField
+                name="discharge_reason"
+                variant="standard"
+                value={preDischargeForm.discharge_reason}
+                options={[{ id: "", text: "Select" }, ...DISCHARGE_REASONS]}
+                onChange={(e) =>
+                  setPreDischargeForm((prev) => ({
+                    ...prev,
+                    discharge_reason: e.target.value,
+                  }))
+                }
+                errors={errors?.discharge_reason}
+              />
+            </div>
+
+            <div id="discharge-notes-div">
+              <InputLabel id="refered-label">Discharge Notes</InputLabel>
+              <MultilineInputField
+                name="discharge_notes"
+                variant="outlined"
+                margin="dense"
+                type="text"
+                rows={2}
+                InputLabelProps={{ shrink: !!preDischargeForm.discharge_notes }}
+                value={preDischargeForm.discharge_notes}
+                onChange={(e) =>
+                  setPreDischargeForm((prev) => ({
+                    ...prev,
+                    discharge_notes: e.target.value,
+                  }))
+                }
+                errors={errors?.discharge_notes}
+              />
+            </div>
           </div>
         </DialogContent>
         <DialogActions className="flex justify-between mt-5 px-5 border-t">
@@ -406,9 +414,8 @@ export const ConsultationDetails = (props: any) => {
               color="primary"
               onClick={() => handlePatientDischarge(false)}
               autoFocus
-              // disabled={preDischargeForm.disease_status ? false : true}
             >
-              Proceed with Discharge
+              Discharge
             </Button>
           )}
         </DialogActions>
