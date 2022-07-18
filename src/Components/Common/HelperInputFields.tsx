@@ -542,15 +542,16 @@ export const AutoCompleteAsyncField = (props: any) => {
     noOptionsText,
     filterOptions,
     multiple = false,
+    autoSelect = true,
     className = "",
   } = props;
   return (
     <>
       <Autocomplete
         openOnFocus
-        autoSelect
         autoComplete
         autoHighlight
+        autoSelect={autoSelect}
         multiple={multiple}
         onOpen={onOpen}
         options={options}
