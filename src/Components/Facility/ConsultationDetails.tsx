@@ -700,7 +700,7 @@ export const ConsultationDetails = (props: any) => {
 
                 {(consultationData.operation ||
                   consultationData.special_instruction) && (
-                  <div className="bg-white overflow-hidden shadow rounded-lg lg:col-span-2">
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
                       <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                         Notes
