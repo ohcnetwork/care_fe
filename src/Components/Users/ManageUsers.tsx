@@ -25,6 +25,7 @@ import classNames from "classnames";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
+import clsx from "clsx";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -310,6 +311,9 @@ export default function ManageUsers() {
   users &&
     users.length &&
     (userList = users.map((user: any) => {
+      const cur_online = moment()
+        .subtract(5, "minutes")
+        .isBefore(user.last_login);
       return (
         <div
           key={`usr_${user.id}`}
@@ -325,24 +329,17 @@ export default function ManageUsers() {
                     </div>
                   )}
                   <div className="flex-shrink-0 text-sm text-gray-600 min-width-50">
-                    {user.last_login &&
-                    moment()
-                      .subtract(5, "minutes")
-                      .isBefore(user.last_login) ? (
+                    {user.last_login && cur_online ? (
                       <span>Currently Online</span>
                     ) : (
                       <>
                         <span>Last Online: </span>
                         <span
                           aria-label="Online"
-                          className={
-                            "shrink-0 inline-block h-2 w-2 rounded-full " +
-                            (moment()
-                              .subtract(5, "minutes")
-                              .isBefore(user.last_login)
-                              ? "bg-primary-400"
-                              : "bg-gray-300")
-                          }
+                          className={clsx(
+                            "shrink-0 inline-block h-2 w-2 rounded-full",
+                            cur_online ? "bg-primary-400" : "bg-gray-300"
+                          )}
                         ></span>
                         <span className="pl-2">
                           {user.last_login
@@ -356,8 +353,7 @@ export default function ManageUsers() {
                 <div className="font-black text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
 
-                  {user.last_login &&
-                  moment().subtract(5, "minutes").isBefore(user.last_login) ? (
+                  {user.last_login && cur_online ? (
                     <i
                       className="animate-pulse text-primary-500 fas fa-circle ml-1 opacity-75"
                       aria-label="Online"
