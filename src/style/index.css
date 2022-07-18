@@ -765,23 +765,23 @@ button:disabled,
   padding-left: 5px;
 }
 
-@screen md {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: theme(colors.gray.500) theme(colors.gray.100);
-  }
-  ::-webkit-scrollbar {
-    width: 12px;
-  }
-  ::-webkit-scrollbar-track {
-    background: theme(colors.gray.100);
-  }
-  ::-webkit-scrollbar-thumb {
-    background-color: theme(colors.gray.500);
-    border-radius: 6px;
-    border: 3px solid theme(colors.gray.100);
-  }
+
+ 
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
 }
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
 
 @media (max-width:640px)
   {
@@ -789,3 +789,35 @@ button:disabled,
             display: none;
         }
   }
+
+
+/*
+  Range Sliders for Camera Feed
+*/
+
+#feed-range {
+  -webkit-appearance: none;
+  margin: 18px 0;
+  width: 100%;
+}
+#feed-range:focus {
+  outline: none;
+}
+#feed-range::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 1px;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 5px;
+}
+#feed-range::-webkit-slider-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 3px;
+  border: 1px solid white;
+  background: black;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -8px;
+  border-radius: 50%;
+}

@@ -187,7 +187,7 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
   { id: 120, text: "2 hours" },
   { id: 180, text: "3 hours" },
   { id: 240, text: "4 hours" },
-  { id: 300, text: "6 hours" },
+  { id: 360, text: "6 hours" },
   { id: 480, text: "8 hours" },
   { id: 720, text: "12 hours" },
   { id: 1440, text: "24 hours" },
@@ -212,6 +212,12 @@ export const SYMPTOM_CHOICES: Array<OptionsType> = [
   { id: 15, text: "NASAL DISCHARGE" },
   { id: 16, text: "BODY ACHE" },
   { id: 9, text: "OTHERS" },
+];
+
+export const DISCHARGE_REASONS = [
+  { id: "REC", text: "Recovered" },
+  { id: "EXP", text: "Expired" },
+  { id: "REF", text: "Referred" },
 ];
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
@@ -451,32 +457,72 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
 ];
 
 export const NOTIFICATION_EVENTS = [
-  { id: "MESSAGE", text: "Message" },
-  { id: "PATIENT_CREATED", text: "Patient Created" },
-  { id: "PATIENT_UPDATED", text: "Patient Updated" },
-  { id: "PATIENT_DELETED", text: "Patient Deleted" },
-  { id: "PATIENT_CONSULTATION_CREATED", text: "Patient Consultation Created" },
-  { id: "PATIENT_CONSULTATION_UPDATED", text: "Patient Consultation Updated" },
-  { id: "PATIENT_CONSULTATION_DELETED", text: "Patient Consultation Deleted" },
+  { id: "MESSAGE", text: "Message", icon: "fa-regular fa-message" },
+  {
+    id: "PATIENT_CREATED",
+    text: "Patient Created",
+    icon: "fa-solid fa-user-plus",
+  },
+  {
+    id: "PATIENT_UPDATED",
+    text: "Patient Updated",
+    icon: "fa-solid fa-user-pen",
+  },
+  {
+    id: "PATIENT_DELETED",
+    text: "Patient Deleted",
+    icon: "fa-solid fa-user-minus",
+  },
+  {
+    id: "PATIENT_CONSULTATION_CREATED",
+    text: "Patient Consultation Created",
+    icon: "fa-solid fa-heart-circle-check",
+  },
+  {
+    id: "PATIENT_CONSULTATION_UPDATED",
+    text: "Patient Consultation Updated",
+    icon: "fa-solid fa-heart-circle-plus",
+  },
+  {
+    id: "PATIENT_CONSULTATION_DELETED",
+    text: "Patient Consultation Deleted",
+    icon: "fa-solid fa-heart-circle-minus",
+  },
   {
     id: "INVESTIGATION_SESSION_CREATED",
     text: "Investigation Session Created",
+    icon: "fa-solid fa-magnifying-glass",
   },
-  { id: "INVESTIGATION_UPDATED", text: "Investigation Updated" },
-  { id: "PATIENT_FILE_UPLOAD_CREATED", text: "Patient File Upload Created" },
+  {
+    id: "INVESTIGATION_UPDATED",
+    text: "Investigation Updated",
+    icon: "fa-solid fa-magnifying-glass-plus",
+  },
+  {
+    id: "PATIENT_FILE_UPLOAD_CREATED",
+    text: "Patient File Upload Created",
+    icon: "fa-solid fa-file-medical",
+  },
   {
     id: "CONSULTATION_FILE_UPLOAD_CREATED",
     text: "Consultation File Upload Created",
+    icon: "fa-solid fa-file-waveform",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_CREATED",
     text: "Patient Consultation Update Created",
+    icon: "fa-solid fa-file-circle-check",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_UPDATED",
     text: "Patient Consultation Update Updated",
+    icon: "fa-solid fa-file-circle-plus",
   },
-  { id: "SHIFTING_UPDATED", text: "Shifting Updated" },
+  {
+    id: "SHIFTING_UPDATED",
+    text: "Shifting Updated",
+    icon: "fa-solid fa-truck-medical",
+  },
 ];
 
 export const BREATHLESSNESS_LEVEL = [
@@ -616,28 +662,28 @@ export type CameraPTZ = {
 
 export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   {
-    icon: "fa fa-arrow-up",
+    icon: "chevron-up",
     label: "Move Up",
     action: "up",
     loadingLabel: "Moving Up",
     shortcutKey: ["Control", "Shift", "ArrowUp"],
   },
   {
-    icon: "fa fa-arrow-down",
+    icon: "chevron-down",
     label: "Move Down",
     action: "down",
     loadingLabel: "Moving Down",
     shortcutKey: ["Control", "Shift", "ArrowDown"],
   },
   {
-    icon: "fa fa-arrow-left",
+    icon: "chevron-left",
     label: "Move Left",
     action: "left",
     loadingLabel: "Moving Left",
     shortcutKey: ["Control", "Shift", "ArrowLeft"],
   },
   {
-    icon: "fa fa-arrow-right",
+    icon: "chevron-right",
     label: "Move Right",
     action: "right",
     loadingLabel: "Moving Right",
@@ -651,42 +697,65 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
     shortcutKey: ["Shift", "P"],
   },
   {
-    icon: "fa fa-search-plus",
+    icon: "search-plus",
     label: "Zoom In",
     action: "zoomIn",
     loadingLabel: "Zooming In",
     shortcutKey: ["Shift", "I"],
   },
   {
-    icon: "fa fa-search-minus",
+    icon: "search-minus",
     label: "Zoom Out",
     action: "zoomOut",
     loadingLabel: "Zooming Out",
     shortcutKey: ["Shift", "O"],
   },
   {
-    icon: "fas fa-save",
+    icon: "save",
     label: "Update Preset",
     action: "updatePreset",
     loadingLabel: "Updating Preset",
     shortcutKey: ["Shift", "S"],
   },
   {
-    icon: "fa fa-stop",
+    icon: "stop",
     label: "Stop",
     action: "stop",
     shortcutKey: ["Shift", "X"],
   },
   {
-    icon: "fa fa-undo",
+    icon: "undo",
     label: "Reset",
     action: "reset",
     shortcutKey: ["Shift", "R"],
   },
   {
-    icon: "fas fa-expand",
+    icon: "expand",
     label: "Full Screen",
     action: "fullScreen",
     shortcutKey: ["F"],
+  },
+];
+
+export const FACILITY_FEATURE_TYPES = [
+  {
+    id: 1,
+    name: "CT Scan Facility",
+  },
+  {
+    id: 2,
+    name: "Maternity Care",
+  },
+  {
+    id: 3,
+    name: "X-Ray facility",
+  },
+  {
+    id: 4,
+    name: "Neonatal care",
+  },
+  {
+    id: 5,
+    name: "Operation theater",
   },
 ];

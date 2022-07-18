@@ -29,6 +29,7 @@ export default function TeleICUPatientInfoCard(props: {
             <Beds
               facilityId={patient?.facility}
               patientId={patient?.id}
+              discharged={!patient.is_active}
               consultationId={patient?.last_consultation?.id}
               smallLoader={true}
               setState={setOpen}
@@ -54,7 +55,9 @@ export default function TeleICUPatientInfoCard(props: {
             className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded m-1"
             onClick={() => setOpen(true)}
           >
-            {!patient.last_consultation?.current_bed
+            {!patient.is_active
+              ? "Bed History"
+              : !patient.last_consultation?.current_bed
               ? "Assign Bed"
               : "Switch Bed"}
           </button>
