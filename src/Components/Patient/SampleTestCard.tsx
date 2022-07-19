@@ -159,7 +159,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             )}
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap justify-between w-full gap-4 h-full items-baseline">
+        <div className="mt-4 flex flex-wrap justify-between w-full gap-4">
           <button
             onClick={(e) => navigate(`/sample/${itemData.id}`)}
             className="w-full md:w-auto px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
