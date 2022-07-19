@@ -1,4 +1,4 @@
-/// <reference types="cypress" />
+import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 const username = "dummy_user_1";
 const password = "Dummyuser1";

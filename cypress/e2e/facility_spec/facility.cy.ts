@@ -1,6 +1,4 @@
-/// <reference types="cypress" />
-
-import * as cy from "local-cypress";
+import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 class facility {
   static create(facility) {
@@ -96,18 +94,18 @@ class facility {
 
 let current_url = "http://localhost:4000";
 
-cy.describe("Facility", () => {
-  cy.before(() => {
+describe("Facility", () => {
+  before(() => {
     cy.loginByApi("karadmin", "passwordR0FL");
     cy.saveLocalStorage();
   });
 
-  cy.beforeEach(() => {
+  beforeEach(() => {
     cy.restoreLocalStorage();
     cy.visit(current_url);
   });
 
-  cy.it("creats facility", () => {
+  it("creats facility", () => {
     facility.create({
       type: "Private Hospital",
       name: "cypress facility",
@@ -153,7 +151,7 @@ cy.describe("Facility", () => {
     });
   });
 
-  cy.it("updates facility", () => {
+  it("updates facility", () => {
     cy.visit(current_url);
     facility.update({
       type: "Private Hosp",
@@ -180,7 +178,7 @@ cy.describe("Facility", () => {
     });
   });
 
-  cy.it("deletes facility", () => {
+  it("deletes facility", () => {
     cy.visit(current_url);
     cy.get("[id=facility-delete]").click();
     cy.get("[id=facility-delete-confirm]").click();
@@ -190,7 +188,7 @@ cy.describe("Facility", () => {
     });
   });
 
-  cy.afterEach(() => {
+  afterEach(() => {
     cy.saveLocalStorage();
   });
 });

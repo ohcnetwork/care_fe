@@ -1,4 +1,4 @@
-/// <reference types="cypress" />
+import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 describe("Shifting section filter", () => {
   before(() => {

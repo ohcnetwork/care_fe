@@ -1,4 +1,4 @@
-/// <reference types="cypress" />
+import { cy, describe, it, before, beforeEach, afterEach } from "local-cypress";
 
 describe("Resource filter", () => {
   before(() => {

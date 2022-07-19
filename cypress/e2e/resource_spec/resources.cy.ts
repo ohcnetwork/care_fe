@@ -1,6 +1,6 @@
-/// <reference types="cypress" />
+import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
-describe("Shifting Page", () => {
+describe("Resource Page", () => {
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
@@ -9,8 +9,8 @@ describe("Shifting Page", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.visit("http://localhost:4000");
-    cy.get("a").contains("Shifting").click();
-    cy.url().should("include", "/shifting");
+    cy.get("a").contains("Resource").click();
+    cy.url().should("include", "/resource");
   });
 
   it("checks if all download button works", () => {
@@ -23,11 +23,6 @@ describe("Shifting Page", () => {
     cy.contains("List View").click();
     cy.wait(1000);
     cy.contains("Board View").click();
-  });
-
-  it("search patient", () => {
-    cy.get('[name="search"]').type("Akhil");
-    cy.url().should("include", "Akhil");
   });
 
   it("switch between active/completed", () => {

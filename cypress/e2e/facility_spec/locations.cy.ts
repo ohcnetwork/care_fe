@@ -1,6 +1,4 @@
-/// <reference types="cypress" />
-
-import * as cy from "local-cypress";
+import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 describe("Location Management Section", () => {
   before(() => {
