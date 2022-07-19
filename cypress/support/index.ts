@@ -16,10 +16,15 @@
 // Import commands.js using ES2015 syntax:
 import "./commands";
 
-declare namespace Cypress {
-  interface Chainable<Subject = any> {
-    login(username: string, password: string): Chainable<Subject>;
-    verifyNotification(msg: string): Chainable<Subject>;
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Cypress {
+    interface Chainable<Subject> {
+      login(username: string, password: string): Chainable<Subject>;
+      refreshApiLogin(username: string, password: string): Chainable<Subject>;
+      loginByApi(username: string, password: string): Chainable<Subject>;
+      verifyNotification(msg: string): Chainable<Subject>;
+    }
   }
 }
 

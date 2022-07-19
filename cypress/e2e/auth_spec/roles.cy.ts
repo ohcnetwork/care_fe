@@ -1,5 +1,5 @@
-/// <reference types="cypress" />
-import users from "../../fixtures/users.json";
+import { afterEach, cy, describe, it } from "local-cypress";
+import * as users from "../../fixtures/users.json";
 
 describe("authentication", () => {
   users.forEach((user) => {
@@ -16,6 +16,6 @@ describe("authentication", () => {
   afterEach(() => {
     cy.log("Logging out");
     cy.get("p").contains("Sign Out").click();
-    cy.url().should("include", "/login");
+    cy.url().should("include", "/");
   });
 });

@@ -4,7 +4,8 @@
     "target": "es5",
     "lib": ["es5", "dom"],
     "types": ["cypress"],
-    "typeRoots": ["./support"]
+    "typeRoots": ["./support"],
+    "resolveJsonModule": true
   },
   "include": ["**/*.ts", "support/commands.js"],
 }

@@ -36,14 +36,14 @@
 //   }
 // }
 
-import cypress = require("cypress");
+import { cy, Cypress } from "local-cypress";
 import "cypress-localstorage-commands";
 
-Cypress.Commands.add("login", (username, password) => {
+Cypress.Commands.add("login", (username: string, password: string) => {
   cy.log(`Logging in the user: ${username}:${password}`);
   cy.visit("http://localhost:4000/");
-  cy.get('input[name="username"]').type(username);
-  cy.get('input[name="password"]').type(password);
+  cy.get("input[name='username']").type(username);
+  cy.get("input[name='password']").type(password);
   cy.get("button").contains("Login").click();
   cy.wait(1000);
   return cy.url().should("include", "/facility");
@@ -76,7 +76,7 @@ Cypress.Commands.add("refreshApiLogin", (username, password) => {
 Cypress.Commands.add("loginByApi", (username, password) => {
   cy.log(`Logging in the user: ${username}:${password}`);
   cy.task("readFileMaybe", "cypress/fixtures/token.json")
-    .then((tkn) => {
+    .then((tkn: string) => {
       const token = JSON.parse(tkn);
       if (tkn && token.access && token.username === username) {
         cy.request({
