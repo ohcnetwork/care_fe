@@ -131,7 +131,7 @@ export default function SampleViewAdmin() {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -195,7 +195,7 @@ export default function SampleViewAdmin() {
         (i) => i.text === status
       )?.desc;
       return (
-        <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
+        <div key={`usr_${item.id}`} className="w-full lg:w-1/2 mt-6 lg:px-4">
           <div
             className={`block border rounded-lg bg-white shadow h-full hover:border-black text-black ${
               item.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
@@ -307,7 +307,7 @@ export default function SampleViewAdmin() {
                   <div className="mt-2">
                     <button
                       onClick={() => showUpdateStatus(item)}
-                      className="w-full text-sm bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                      className="w-full text-sm bg-primary-500 hover:bg-primary-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                     >
                       UPDATE SAMPLE TEST STATUS
                     </button>
@@ -348,11 +348,10 @@ export default function SampleViewAdmin() {
     );
   } else if (sample && sample.length === 0) {
     manageSamples = (
-      <Grid item xs={12} md={12} className="textMarginCenter">
-        <h5 style={{ color: "red" }}>
-          Its looks like samples are empty, please visit once you submit a
-          sample request
-        </h5>
+      <Grid item xs={12} md={12} style={{ display: "flex" }}>
+        <Grid container justify="center" alignItems="center">
+          <h5> No Sample Tests Found</h5>
+        </Grid>
       </Grid>
     );
   }
@@ -381,7 +380,7 @@ export default function SampleViewAdmin() {
   };
 
   return (
-    <div>
+    <div className="px-6">
       {statusDialog.show && (
         <UpdateStatusDialog
           sample={statusDialog.sample}
@@ -393,7 +392,6 @@ export default function SampleViewAdmin() {
       <PageTitle
         title="Sample Management System"
         hideBack={true}
-        className="mx-3 md:mx-8"
         breadcrumbs={false}
         componentRight={
           downloadLoading ? (
@@ -406,7 +404,7 @@ export default function SampleViewAdmin() {
           )
         }
       />
-      <div className="mt-5 md:grid md:grid-cols-1 gap-5">
+      <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -529,7 +527,7 @@ export default function SampleViewAdmin() {
         </div>
       </div>
       <div className="md:px-2">
-        <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
+        <div className="flex flex-wrap md:-mx-2 lg:-mx-6">{manageSamples}</div>
       </div>
 
       <CSVLink

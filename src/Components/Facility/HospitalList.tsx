@@ -6,6 +6,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 
 import {
   DOWNLOAD_TYPES,
+  FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
   KASP_STRING,
 } from "../../Common/constants";
@@ -201,8 +202,8 @@ export const HospitalList = (props: any) => {
   };
 
   const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ search }, true);
-    else setQueryParams({ search: "" }, true);
+    if (search !== "") setQueryParams({ search }, { replace: true });
+    else setQueryParams({ search: "" }, { replace: true });
   };
 
   const handleDownload = async () => {
@@ -247,7 +248,7 @@ export const HospitalList = (props: any) => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const applyFilter = (data: any) => {
@@ -347,8 +348,8 @@ export const HospitalList = (props: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
-            <div className="flex ">
-              <div className="md:flex hidden w-32 self-stretch shrink-0 bg-gray-300 items-center justify-center">
+            <div className="flex h-full">
+              <div className="md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center">
                 {facility.cover_image_url ? (
                   <img
                     src={facility.cover_image_url}
@@ -359,21 +360,38 @@ export const HospitalList = (props: any) => {
                   <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                 )}
               </div>
-              <div className="h-full">
-                <div className="h-full flex flex-col justify-between">
-                  <div className="pl-4 md:pl-2 pr-4 py-2">
-                    {facility.kasp_empanelled && (
-                      <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-                        {KASP_STRING}
+              <div className="h-full w-full grow overflow-clip">
+                <div className="h-full flex flex-col justify-between w-full">
+                  <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
+                    <div className="flow-root">
+                      {facility.kasp_empanelled && (
+                        <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
+                          {KASP_STRING}
+                        </div>
+                      )}
+                      <div className="float-left font-black text-xl capitalize">
+                        {facility.name}
                       </div>
-                    )}
-                    <div className="font-black text-xl capitalize">
-                      {facility.name}
                     </div>
+
                     <div className="block">
                       <div className="inline-flex items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
+                    </div>
+                    <div className="flex gap-1 flex-wrap mt-2">
+                      {facility.features?.map((feature: number, i: number) => (
+                        <div
+                          key={i}
+                          className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs"
+                        >
+                          {
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
+                        </div>
+                      ))}
                     </div>
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
@@ -389,90 +407,92 @@ export const HospitalList = (props: any) => {
                       {facility.phone_number || "-"}
                     </a>
                   </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-50 border-t px-2 md:px-6 py-2">
-              <div className="flex py-4 justify-between">
-                <div className="flex justify-between w-full">
-                  <div>
-                    {userType !== "Staff" ? (
-                      <button
-                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                        onClick={(_) => setModalFor(facility.id)}
-                      >
-                        <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
-                        <span className="md:block hidden">Notify</span>
-                      </button>
-                    ) : (
-                      <></>
-                    )}
-                    <Modal
-                      open={modalFor === facility.id}
-                      onClose={(_) => setModalFor(undefined)}
-                      aria-labelledby="Notify This Facility"
-                      aria-describedby="Type a message and notify this facility"
-                      className=""
-                    >
-                      <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                        <form
-                          onSubmit={(event: any) => {
-                            event.preventDefault();
-                            handleNotifySubmit(modalFor);
-                          }}
-                          className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
-                        >
-                          <div className="mb-4">
-                            <h1 className="text-2xl">
-                              Notify: {facility.name}
-                            </h1>
-                          </div>
-                          <div>
-                            <TextField
-                              id="NotifyModalMessageInput"
-                              rows={6}
-                              multiline
-                              required
-                              className="w-full border p-2 max-h-64"
-                              onChange={(e) => setNotifyMessage(e.target.value)}
-                              placeholder="Type your message..."
-                              variant="outlined"
-                            />
-                          </div>
-                          <div className="flex flex-row justify-end">
+                  <div className="bg-gray-50 border-t px-2 md:px-6 py-2 flex-none">
+                    <div className="flex py-4 justify-between">
+                      <div className="flex justify-between w-full flex-wrap gap-2">
+                        <div>
+                          {userType !== "Staff" ? (
                             <button
-                              type="button"
-                              className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
-                              onClick={(_) => setModalFor(undefined)}
+                              className="mx-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                              onClick={(_) => setModalFor(facility.id)}
                             >
-                              Cancel
+                              <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
+                              <span className="md:block hidden">Notify</span>
                             </button>
-                            <button
-                              type="submit"
-                              className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
-                            >
-                              Send Notification
-                            </button>
-                          </div>
-                        </form>
+                          ) : (
+                            <></>
+                          )}
+                          <Modal
+                            open={modalFor === facility.id}
+                            onClose={(_) => setModalFor(undefined)}
+                            aria-labelledby="Notify This Facility"
+                            aria-describedby="Type a message and notify this facility"
+                            className=""
+                          >
+                            <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+                              <form
+                                onSubmit={(event: any) => {
+                                  event.preventDefault();
+                                  handleNotifySubmit(modalFor);
+                                }}
+                                className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
+                              >
+                                <div className="mb-4">
+                                  <h1 className="text-2xl">
+                                    Notify: {facility.name}
+                                  </h1>
+                                </div>
+                                <div>
+                                  <TextField
+                                    id="NotifyModalMessageInput"
+                                    rows={6}
+                                    multiline
+                                    required
+                                    className="w-full border p-2 max-h-64"
+                                    onChange={(e) =>
+                                      setNotifyMessage(e.target.value)
+                                    }
+                                    placeholder="Type your message..."
+                                    variant="outlined"
+                                  />
+                                </div>
+                                <div className="flex flex-row justify-end">
+                                  <button
+                                    type="button"
+                                    className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
+                                    onClick={(_) => setModalFor(undefined)}
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    type="submit"
+                                    className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
+                                  >
+                                    Send Notification
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+                          </Modal>
+                        </div>
+                        <div className="flex gap-2 ">
+                          <Link
+                            href={`/facility/${facility.id}`}
+                            className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                          >
+                            <i className="fas fa-hospital mr-2 text-primary-500"></i>
+                            {t("Facility")}
+                          </Link>
+                          <Link
+                            href={`/facility/${facility.id}/patients`}
+                            className=" inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                          >
+                            <i className="fas fa-user-injured text-primary-500 mr-2"></i>
+                            {t("Patients")}
+                          </Link>
+                        </div>
                       </div>
-                    </Modal>
-                  </div>
-                  <div>
-                    <Link
-                      href={`/facility/${facility.id}`}
-                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                    >
-                      <i className="fas fa-hospital mr-2 text-primary-500"></i>
-                      {t("Facility")}
-                    </Link>
-                    <Link
-                      href={`/facility/${facility.id}/patients`}
-                      className="ml-2 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                    >
-                      <i className="fas fa-user-injured text-primary-500 mr-2"></i>
-                      {t("Patients")}
-                    </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -488,7 +508,9 @@ export const HospitalList = (props: any) => {
   } else if (data && data.length) {
     manageFacilities = (
       <>
-        <div className="grid md:grid-cols-2 gap-4">{facilityList}</div>
+        <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-4">
+          {facilityList}
+        </div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
@@ -524,17 +546,16 @@ export const HospitalList = (props: any) => {
 
   return (
     <div className="px-6">
-      <div className="grid grid-cols-2">
+      <div className="grid md:grid-cols-2">
         <PageTitle
           title={t("Facilities")}
           hideBack={true}
-          className="mx-3"
           breadcrumbs={false}
         />
 
-        <div className="flex justify-end w-full mt-4">
+        <div className="flex md:justify-end w-full md:mt-4">
           <div>
-            <Accordion className="mt-10 lg:mt-0 md:mt-0 sm:mt-0">
+            <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"
@@ -631,9 +652,8 @@ export const HospitalList = (props: any) => {
           </div>
         </div>
       </div>
-
-      <div className="md:flex my-4 space-y-2">
-        <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
+      <div className="lg:flex gap-2 mt-4">
+        <div className="bg-white overflow-hidden shadow rounded-lg md:mr-2 min-w-fit flex-1">
           <div className="px-4 py-5 sm:p-6">
             <dl>
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
@@ -652,58 +672,59 @@ export const HospitalList = (props: any) => {
             </dl>
           </div>
         </div>
-        <div className="flex-1">
-          <InputSearchBox
-            value={qParams.search}
-            search={onSearchSuspects}
-            placeholder={t("facility_search_placeholder")}
-            errors=""
-          />
-        </div>
+        <div className="flex my-4 gap-2 flex-wrap justify-between flex-grow">
+          <div className="w-72">
+            <InputSearchBox
+              value={qParams.search}
+              search={onSearchSuspects}
+              placeholder={t("facility_search_placeholder")}
+              errors=""
+            />
+          </div>
 
-        <div className="flex-1 flex justify-end">
-          <div>
-            <div className="flex items-start mb-2">
-              <button
-                className="btn btn-primary-ghost"
-                onClick={() => setShowFilters(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
+          <div className="flex">
+            <div>
+              <div className="flex items-start mb-2">
+                <button
+                  className="btn btn-primary-ghost"
+                  onClick={() => setShowFilters(true)}
                 >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>{t("advanced_filters")}</span>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="fill-current w-4 h-4 mr-2"
+                  >
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12">
+                      {" "}
+                    </line>
+                    <line x1="8" y1="18" x2="21" y2="18">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="6" x2="3.01" y2="6">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="12" x2="3.01" y2="12">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="18" x2="3.01" y2="18">
+                      {" "}
+                    </line>
+                  </svg>
+                  <span>{t("advanced_filters")}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
       <div>
         <SlideOver show={showFilters} setShow={setShowFilters}>
           <div className="bg-white min-h-screen p-4">
@@ -715,7 +736,7 @@ export const HospitalList = (props: any) => {
           </div>
         </SlideOver>
       </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
+      <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
         {badge("Facility/District Name", qParams.search, "search")}
         {badge("State", stateName, "state")}
         {badge("District", districtName, "district")}
@@ -734,7 +755,7 @@ export const HospitalList = (props: any) => {
             "kasp_empanelled"
           )}
       </div>
-      <div className="mt-4 pb-24">
+      <div className="mt-4 pb-4">
         <div>{manageFacilities}</div>
       </div>
     </div>

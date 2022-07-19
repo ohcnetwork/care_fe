@@ -5,7 +5,10 @@ import { Modal } from "@material-ui/core";
 import Beds from "../../Facility/Consultations/Beds";
 import { useState } from "react";
 
-export default function TeleICUPatientInfoCard(props : { patient : PatientModel , ip_no? : string | undefined }) {
+export default function TeleICUPatientInfoCard(props: {
+  patient: PatientModel;
+  ip_no?: string | undefined;
+}) {
   const [open, setOpen] = useState(false);
 
   const patient = props.patient;
@@ -26,6 +29,7 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
             <Beds
               facilityId={patient?.facility}
               patientId={patient?.id}
+              discharged={!patient.is_active}
               consultationId={patient?.last_consultation?.id}
               smallLoader={true}
               setState={setOpen}
@@ -36,9 +40,8 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
         </div>
       </Modal>
       <div className="bg-white p-6 flex lg:w-7/12 w-full">
-
         {/* Can support for patient picture in the future */}
-        <div className="text-center">
+        <div className="text-center mt-2">
           <div className="w-24 h-24 rounded-2xl bg-primary-100 text-5xl flex justify-center items-center">
             {!patient.last_consultation?.current_bed ? (
               <i className="fas fa-user-injured text-primary-600"></i>
@@ -47,13 +50,16 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
                 {patient.last_consultation?.current_bed?.bed_object?.name}
               </span>
             )}
-            
-          </div> 
+          </div>
           <button
             className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded m-1"
             onClick={() => setOpen(true)}
           >
-            {!patient.last_consultation?.current_bed ? "Assign Bed" : "Switch Bed"}
+            {!patient.is_active
+              ? "Bed History"
+              : !patient.last_consultation?.current_bed
+              ? "Assign Bed"
+              : "Switch Bed"}
           </button>
         </div>
         <div className="pl-6">
@@ -65,7 +71,10 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
               href={`/facility/${patient.facility_object?.id}`}
               className="font-semibold text-black hover:text-primary-600"
             >
-              <i className="text-primary-400 fas fa-hospital mr-1" aria-hidden="true"></i>
+              <i
+                className="text-primary-400 fas fa-hospital mr-1"
+                aria-hidden="true"
+              ></i>
               {patient.facility_object?.name}
             </Link>
             {ip_no && (
@@ -87,79 +96,72 @@ export default function TeleICUPatientInfoCard(props : { patient : PatientModel 
             <span>{patient.gender}</span>
           </p>
           <div className="text-sm flex flex-wrap gap-2 mt-4">
-
-            {
+            {[
+              ["Blood Group", patient.blood_group, patient.blood_group],
               [
-                [
-                  "Blood Group",
-                  patient.blood_group,
-                  patient.blood_group,
-                ],
-                [
-                  "Weight",
-                  getDimensionOrDash(patient.last_consultation?.weight, " kg"),
-                  true
-                ],
-                [
-                  "Height",
-                  getDimensionOrDash(patient.last_consultation?.height, "cm"),
-                  true
-                ]
-              ].map((stat, i)=>{
-                return stat[2] ? (
-                  <div key={`patient_stat_`+i} className="bg-gray-200 border-gray-500 border py-1 px-2 rounded-lg text-xs">
-                    <b>
-                      {stat[0]}
-                    </b> : {stat[1]}
-                  </div>
-                ) : ""
-              })
-            }
+                "Weight",
+                getDimensionOrDash(patient.last_consultation?.weight, " kg"),
+                true,
+              ],
+              [
+                "Height",
+                getDimensionOrDash(patient.last_consultation?.height, "cm"),
+                true,
+              ],
+            ].map((stat, i) => {
+              return stat[2] ? (
+                <div
+                  key={"patient_stat_" + i}
+                  className="bg-gray-200 border-gray-500 border py-1 px-2 rounded-lg text-xs"
+                >
+                  <b>{stat[0]}</b> : {stat[1]}
+                </div>
+              ) : (
+                ""
+              );
+            })}
           </div>
         </div>
       </div>
-      <div
-        className={`flex gap-2 flex-col bg-gray-100 p-6`}
-      >
-        {
+      <div className="flex gap-2 flex-col bg-gray-100 p-6">
+        {[
           [
-            [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`, 
-              "Edit Consultation Details",
-              "pencil-alt", 
-              patient.is_active && patient.last_consultation?.id
-            ],
-            [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/daily-rounds`,
-              "Log Update", 
-              "plus", 
-              patient.is_active && patient.last_consultation?.id
-            ],
-            [
-              `/patient/${patient.id}/investigation_reports`, 
-              "Investigation Summary", 
-              "address-card", 
-              true
-            ],
-            [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/treatment-summary`,
-              "Treatment Summary", 
-              "prescription-bottle-medical", 
-              patient.last_consultation?.id
-            ]
-          ].map((action, i) => action[3] && (
-            <Link
-              key={i}
-              href={`${action[0]}`}
-              className="btn btn-primary justify-start hover:text-white"
-            >
-              <i className={`fas fa-${action[2]} w-4 mr-3`}></i>
-              <p className="font-semibold">
-                {action[1]}
-              </p>
-            </Link>
-          ))
-        }
+            `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`,
+            "Edit Consultation Details",
+            "pencil-alt",
+            patient.is_active && patient.last_consultation?.id,
+          ],
+          [
+            `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/daily-rounds`,
+            "Log Update",
+            "plus",
+            patient.is_active && patient.last_consultation?.id,
+          ],
+          [
+            `/patient/${patient.id}/investigation_reports`,
+            "Investigation Summary",
+            "address-card",
+            true,
+          ],
+          [
+            `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/treatment-summary`,
+            "Treatment Summary",
+            "prescription-bottle-medical",
+            patient.last_consultation?.id,
+          ],
+        ].map(
+          (action, i) =>
+            action[3] && (
+              <Link
+                key={i}
+                href={`${action[0]}`}
+                className="btn btn-primary justify-start hover:text-white"
+              >
+                <i className={`fas fa-${action[2]} w-4 mr-3`}></i>
+                <p className="font-semibold">{action[1]}</p>
+              </Link>
+            )
+        )}
       </div>
     </section>
   );

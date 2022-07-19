@@ -25,6 +25,7 @@ import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+import imageCompression from "browser-image-compression";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -98,7 +99,7 @@ interface StateInterface {
 
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [file, setfile] = useState<File>();
+  const [file, setFile] = useState<File>();
   const {
     facilityId,
     consultationId,
@@ -122,7 +123,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
-  const [contentType, setcontentType] = useState<string>("");
+  const [contentType, setContentType] = useState<string>("");
   // const classes = useStyles();
   // const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
@@ -165,12 +166,12 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const zoom_values = [
-    "h-1/6 my-40",
-    "h-2/6 my-32",
-    "h-3/6 my-24",
-    "h-4/6 my-20",
-    "h-5/6 my-16",
-    "h-full my-12",
+    "h-1/6 w-1/6 my-40",
+    "h-2/6 w-2/6 my-32",
+    "h-3/6 w-3/6 my-24",
+    "h-4/6 w-4/6 my-20",
+    "h-5/6 w-5/6 my-16",
+    "h-full w-full my-12",
   ];
 
   const handleZoomIn = () => {
@@ -390,11 +391,26 @@ export const FileUpload = (props: FileUploadProps) => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
     }
-    setfile(e.target.files[0]);
-    const fileName = e.target.files[0].name;
+    const f = e.target.files[0];
+    const fileName = f.name;
+    setFile(e.target.files[0]);
+    setUploadFileName(
+      fileName.substring(0, fileName.lastIndexOf(".")) || fileName
+    );
     const ext: string = fileName.split(".")[1];
-    setcontentType(header_content_type[ext]);
-    return e.target.files[0];
+    setContentType(header_content_type[ext]);
+
+    if (ExtImage[ext] && ExtImage[ext] === "1") {
+      const options = {
+        initialQuality: 0.6,
+        alwaysKeepResolution: true,
+      };
+      imageCompression(f, options).then((compressedFile: File) => {
+        setFile(compressedFile);
+      });
+      return;
+    }
+    setFile(f);
   };
 
   const uploadfile = (response: any) => {
@@ -663,7 +679,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4>Upload New File</h4>
               </div>
               <div>
-                <InputLabel id="spo2-label">Enter File Name</InputLabel>
+                <InputLabel id="spo2-label">Enter File Name*</InputLabel>
                 <TextInputField
                   name="temperature"
                   variant="outlined"
