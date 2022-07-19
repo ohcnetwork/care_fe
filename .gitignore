@@ -51,5 +51,6 @@ public/build-meta.json
 # package-lock.json
 yarn.lock
 
+# Cypress
 cypress/downloads
 cypress/fixtures/token.json
