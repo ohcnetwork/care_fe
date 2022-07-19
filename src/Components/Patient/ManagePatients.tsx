@@ -377,7 +377,7 @@ export const PatientManager = (props: any) => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handleTabChange = async (tab: number) => {
@@ -501,7 +501,7 @@ export const PatientManager = (props: any) => {
             (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
-          <div className="px-4  flex gap-2 w-full">
+          <div className="px-4 flex gap-2 w-full">
             {patient?.is_active &&
               patient?.last_consultation &&
               patient?.last_consultation?.current_bed && (
@@ -656,7 +656,7 @@ export const PatientManager = (props: any) => {
   }
 
   return (
-    <div className="px-2">
+    <div className="px-6">
       {showDialog && (
         <FacilitiesSelectDialogue
           setSelected={(e) => setSelectedFacility(e)}
@@ -668,7 +668,6 @@ export const PatientManager = (props: any) => {
       <PageTitle
         title="Patients"
         hideBack={!facilityId}
-        className="mt-4"
         breadcrumbs={!!facilityId}
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
@@ -985,10 +984,10 @@ export const PatientManager = (props: any) => {
           index={tabValue}
         >
           <TabPanel value={tabValue} index={0} dir={theme.direction}>
-            <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
+            <div className="flex flex-wrap md:-mx-6">{managePatients}</div>
           </TabPanel>
           <TabPanel value={tabValue} index={1} dir={theme.direction}>
-            <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
+            <div className="flex flex-wrap md:-mx-6">{managePatients}</div>
           </TabPanel>
         </SwipeableViews>
       </div>

@@ -131,7 +131,7 @@ export default function SampleViewAdmin() {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -307,7 +307,7 @@ export default function SampleViewAdmin() {
                   <div className="mt-2">
                     <button
                       onClick={() => showUpdateStatus(item)}
-                      className="w-full text-sm bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                      className="w-full text-sm bg-primary-500 hover:bg-primary-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                     >
                       UPDATE SAMPLE TEST STATUS
                     </button>
@@ -380,7 +380,7 @@ export default function SampleViewAdmin() {
   };
 
   return (
-    <div>
+    <div className="px-6">
       {statusDialog.show && (
         <UpdateStatusDialog
           sample={statusDialog.sample}
@@ -392,7 +392,6 @@ export default function SampleViewAdmin() {
       <PageTitle
         title="Sample Management System"
         hideBack={true}
-        className="mx-3 md:mx-8"
         breadcrumbs={false}
         componentRight={
           downloadLoading ? (
@@ -528,7 +527,7 @@ export default function SampleViewAdmin() {
         </div>
       </div>
       <div className="md:px-2">
-        <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
+        <div className="flex flex-wrap md:-mx-2 lg:-mx-6">{manageSamples}</div>
       </div>
 
       <CSVLink

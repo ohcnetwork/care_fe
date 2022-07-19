@@ -172,8 +172,9 @@ const AssetsList = () => {
   };
 
   const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ ...qParams, search }, true);
-    else setQueryParams({ ...qParams, search: "" }, true);
+    if (search !== "")
+      setQueryParams({ ...qParams, search }, { replace: true });
+    else setQueryParams({ ...qParams, search: "" }, { replace: true });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -184,7 +185,7 @@ const AssetsList = () => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
     console.log(qParams);
   };
 
@@ -257,9 +258,9 @@ const AssetsList = () => {
     );
 
   return (
-    <div className="px-4 pb-2">
+    <div className="px-6">
       <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
-      <div className="lg:flex mt-5 space-y-2">
+      <div className="md:flex mt-5 space-y-2 space-x-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -287,7 +288,7 @@ const AssetsList = () => {
             errors=""
           />
         </div>
-        <div className="flex flex-row justify-start items-center gap-2">
+        <div className="flex flex-row lg:ml-2 justify-start items-start gap-2">
           <AdvancedFilterButton setShowFilters={setShowFilters} />
           <button
             className="btn btn-primary"
@@ -316,8 +317,8 @@ const AssetsList = () => {
         {badge("Status", qParams.status, ["status"])}
       </div>
       <div className="grow mt-10 bg-white">
-        <div className="p-8">
-          <div className="flex flex-wrap md:-mx-4">
+        <div className="py-8 md:px-5">
+          <div className="flex flex-wrap md:-mx-8">
             {assetsExist ? (
               assets.map((asset: AssetData) => (
                 <div

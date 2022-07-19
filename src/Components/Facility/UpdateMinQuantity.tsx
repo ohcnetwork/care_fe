@@ -147,7 +147,7 @@ export const UpdateMinQuantity = (props: any) => {
                   </InputLabel>
                   <TextInputField
                     name="id"
-                    variant="standard"
+                    variant="outlined"
                     margin="dense"
                     type="string"
                     value={data}
