@@ -13,12 +13,12 @@ describe("Sample List", () => {
   });
 
   it("Search by District name", () => {
-    cy.get('[placeholder="District Name"]').type("TEst").wait(1000);
+    cy.get("[placeholder='District Name']").type("TEst").wait(1000);
     cy.url().should("include", "TEst");
   });
 
   it("Search by Patient Name", () => {
-    cy.get('[placeholder="Search by Patient Name"]').type("Test").wait(1000);
+    cy.get("[placeholder='Search by Patient Name']").type("Test").wait(1000);
     cy.url().should("include", "Test");
   });
 

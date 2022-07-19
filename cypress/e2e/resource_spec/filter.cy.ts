@@ -15,7 +15,7 @@ describe("Resource filter", () => {
   });
 
   it("filter by origin facility", () => {
-    cy.get('[name="orgin_facility"]')
+    cy.get("[name='orgin_facility']")
       .type("harsha")
       .wait(3000)
       .type("{downarrow}{enter}");
@@ -23,7 +23,7 @@ describe("Resource filter", () => {
   });
 
   it("filter by resource approval facility", () => {
-    cy.get('[name="approving_facility"]')
+    cy.get("[name='approving_facility']")
       .type("test")
       .wait(3000)
       .type("{downarrow}{enter}");
@@ -31,7 +31,7 @@ describe("Resource filter", () => {
   });
 
   it("filter by assigned facility", () => {
-    cy.get('[name="assigned_facility"]')
+    cy.get("[name='assigned_facility']")
       .type("center")
       .wait(3000)
       .type("{downarrow}{enter}");
@@ -45,7 +45,7 @@ describe("Resource filter", () => {
       "DESC Modified Date",
       "ASC Created Date",
     ].forEach((select) => {
-      cy.get('[name="ordering"]').select(select);
+      cy.get("[name='ordering']").select(select);
       cy.contains("Apply").click().wait(1000);
       cy.contains("Filters").click();
     });
@@ -54,7 +54,7 @@ describe("Resource filter", () => {
 
   it("filter by emergency case", () => {
     ["yes", "no"].forEach((select) => {
-      cy.get('[name="emergency"]').select(select);
+      cy.get("[name='emergency']").select(select);
       cy.contains("Apply").click().wait(1000);
       cy.contains("Filters").click();
     });
@@ -62,14 +62,14 @@ describe("Resource filter", () => {
   });
 
   it("filter by created date", () => {
-    cy.get('[name="created_date_after"]').type("22/05/2020");
-    cy.get('[name="created_date_before"]').type("09/09/2021");
+    cy.get("[name='created_date_after']").type("22/05/2020");
+    cy.get("[name='created_date_before']").type("09/09/2021");
     cy.contains("Apply").click().wait(1000);
   });
 
   it("filter by modified date", () => {
-    cy.get('[name="modified_date_after"]').type("22/05/2020");
-    cy.get('[name="modified_date_before"]').type("09/09/2021");
+    cy.get("[name='modified_date_after']").type("22/05/2020");
+    cy.get("[name='modified_date_before']").type("09/09/2021");
     cy.contains("Apply").click().wait(1000);
   });
 

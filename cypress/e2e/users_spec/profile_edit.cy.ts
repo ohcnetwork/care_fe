@@ -36,7 +36,7 @@ describe("Edit Profile Testing", () => {
     cy.get("form").get("button[type='submit']").click();
     cy.wait(2000);
     cy.wait(2000);
-    cy.get("dt").contains("First Name").siblings().first().contains(`User 1`);
+    cy.get("dt").contains("First Name").siblings().first().contains("User 1");
   });
 
   it("Empty Last-Name field of " + username, () => {
@@ -55,14 +55,14 @@ describe("Edit Profile Testing", () => {
     cy.get("form").get("button[type='submit']").click();
     cy.wait(2000);
     cy.wait(2000);
-    cy.get("dt").contains("Last Name").siblings().first().contains(`User 1`);
+    cy.get("dt").contains("Last Name").siblings().first().contains("User 1");
   });
 
   it("Invalid Whatsapp Number of " + username, () => {
     const whatsapp_num = "11111-11111";
 
     cy.get(".flag-dropdown").last().find(".arrow").click();
-    cy.get('li[data-flag-key="flag_no_84"]').click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("input[type='tel']")
       .last()
       .focus()
@@ -78,7 +78,7 @@ describe("Edit Profile Testing", () => {
     const whatsapp_num = "91111-11111";
 
     cy.get(".flag-dropdown").last().find(".arrow").click();
-    cy.get('li[data-flag-key="flag_no_84"]').click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("input[type='tel']")
       .last()
       .focus()
@@ -99,7 +99,7 @@ describe("Edit Profile Testing", () => {
     const phone_num = "11111-11111";
 
     cy.get(".flag-dropdown").first().find(".arrow").click();
-    cy.get('li[data-flag-key="flag_no_84"]').click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("input[type='tel']")
       .first()
       .focus()
@@ -115,7 +115,7 @@ describe("Edit Profile Testing", () => {
     const phone_num = "99999-99999";
 
     cy.get(".flag-dropdown").first().find(".arrow").click();
-    cy.get('li[data-flag-key="flag_no_84"]').click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("input[type='tel']")
       .first()
       .focus()

@@ -15,11 +15,11 @@ describe("Sample Filter", () => {
   });
 
   it("Filter by Status", () => {
-    cy.get('[name="status"]').select("APPROVED");
+    cy.get("[name='status']").select("APPROVED");
   });
 
   it("Filter by Asset Type", () => {
-    cy.get('[name="result"]').select("POSITIVE");
+    cy.get("[name='result']").select("POSITIVE");
   });
 
   afterEach(() => {

@@ -14,7 +14,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Search by Patient name", () => {
-    cy.get('[name="search"][placeholder="Search by Patient Name"]')
+    cy.get("[name='search'][placeholder='Search by Patient Name']")
       .type("akhil")
       .wait(2000)
       .url()
@@ -22,7 +22,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Search by phone number", () => {
-    cy.get('[name="search"][placeholder="Search by Phone Number"]')
+    cy.get("[name='search'][placeholder='Search by Phone Number']")
       .type("4738743424")
       .wait(2000)
       .url()
