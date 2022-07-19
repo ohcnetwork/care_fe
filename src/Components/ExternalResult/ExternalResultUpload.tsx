@@ -8,7 +8,6 @@ import { externalResultUploadCsv } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-
 export default function ExternalResultUpload() {
   const dispatch: any = useDispatch();
   // for disabling save button once clicked
@@ -59,7 +58,7 @@ export default function ExternalResultUpload() {
   };
 
   return (
-    <div className="px-6">
+    <div className="px-4">
       <PageTitle
         title="Upload External Results"
         backUrl="/external_results"
@@ -69,39 +68,37 @@ export default function ExternalResultUpload() {
         <div className="p-4 ">
           <div className="block text-sm leading-5 font-medium text-gray-700 sm:mt-px sm:pt-2">
             <div className="mt-2 sm:mt-0 sm:col-span-2 my-2">
-              <div className="mx-auto max-w-lg flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                <div className="text-center">
-                  <span className="flex justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-12 w-12 text-gray-700 mb-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                  </span>
-                  <CSVReader
-                    cssLabelClass="block text-sm leading-5 font-medium text-gray-700 pb-4 px-4"
-                    cssClass="react-csv-input"
-                    label="Select a CSV file in the specified format"
-                    onFileLoaded={handleForce}
-                    parserOptions={papaparseOptions}
-                  />
-                  <a
-                    className="mt-4 ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                    href="https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/export?format=csv&id=17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE"
+              <div className="mx-auto max-w-lg flex flex-col text-center justify-center px-4 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                <span className="flex justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12 text-gray-700 mb-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
                   >
-                    <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
-                    <span>Sample Format</span>
-                  </a>
-                </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </span>
+                <CSVReader
+                  cssLabelClass="text-sm leading-5 font-medium text-gray-700"
+                  cssClass="react-csv-input"
+                  label="Select a CSV file in the specified format"
+                  onFileLoaded={handleForce}
+                  parserOptions={papaparseOptions}
+                />
+                <a
+                  className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                  href="https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/export?format=csv&id=17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE"
+                >
+                  <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
+                  <span>Sample Format</span>
+                </a>
               </div>
             </div>
           </div>
