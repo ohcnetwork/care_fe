@@ -323,7 +323,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             </CardContent>
             <CardContent>
               <CardActions
-                className="padding16"
+                className="padding16 flex flex-col md:flex-row gap-4"
                 style={{ justifyContent: "space-between" }}
               >
                 <div>
@@ -337,7 +337,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                     Cancel
                   </Button>
                 </div>
-                <div className="flex flex-row gap-6">
+                <div className="flex flex-col md:flex-row gap-4">
                   {!isLastOptionType && headerText === "Add Bed Capacity" && (
                     <Button
                       id="bed-capacity-save-and-exit"
