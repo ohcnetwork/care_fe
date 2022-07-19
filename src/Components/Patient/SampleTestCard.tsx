@@ -89,54 +89,57 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <span className="text-gray-700">Result: </span>
             {_.startCase(_.camelCase(itemData.result))}
           </div>
-          <div className="md:col-span-2">
+          <div className="">
             <span className="text-gray-700">Sample Type: </span>
             {itemData.sample_type !== "OTHER TYPE"
               ? itemData.sample_type
               : itemData.sample_type_other}
           </div>
           {itemData.fast_track && (
-            <div className="md:col-span-2">
+            <div className="">
               <span className="text-gray-700">Fast-Track:</span>{" "}
               {itemData.fast_track}
             </div>
           )}
         </div>
 
-        <div className="mt-4">
-          <div className="text-gray-600 text-sm font-bold">
-            <span className="text-gray-800">Date of Sample:</span>{" "}
-            {itemData.date_of_sample
-              ? moment(itemData.date_of_sample).format("lll")
-              : "Not Available"}
+        <div className="mt-4 flex flex-col md:flex-row justify-between gap-4">
+          <div className="">
+            <div className="text-gray-600 text-sm font-bold">
+              <span className="text-gray-800">Date of Sample:</span>{" "}
+              {itemData.date_of_sample
+                ? moment(itemData.date_of_sample).format("lll")
+                : "Not Available"}
+            </div>
+
+            <div className="text-gray-600 text-sm font-bold">
+              <span className="text-gray-800">Date of Result:</span>{" "}
+              {itemData.date_of_result
+                ? moment(itemData.date_of_result).format("lll")
+                : "Not Available"}
+            </div>
           </div>
 
-          <div className="text-gray-600 text-sm font-bold">
-            <span className="text-gray-800">Date of Result:</span>{" "}
-            {itemData.date_of_result
-              ? moment(itemData.date_of_result).format("lll")
-              : "Not Available"}
-          </div>
+          {itemData.status === "APPROVED" && (
+            <div className="flex justify-center items-center">
+              <Button
+                style={{ color: "green" }}
+                className="w-full md:w-auto"
+                variant="outlined"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleApproval(4, itemData);
+                }}
+              >
+                Send to Collection Centre
+              </Button>
+            </div>
+          )}
         </div>
-
-        {itemData.status === "APPROVED" && (
-          <div className="mt-4">
-            <Button
-              style={{ color: "green" }}
-              variant="outlined"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleApproval(4, itemData);
-              }}
-            >
-              Sent to Collection Centre
-            </Button>
-          </div>
-        )}
-        <div className="flex flex-col mt-6">
+        <div className="flex flex-col mt-6 gap-2">
           {
             <div className="text-sm text-gray-700">
-              Created on {moment(itemData.created_date).format("lll")}{" "}
+              <b>Created</b> on {moment(itemData.created_date).format("lll")}{" "}
               {itemData.created_by && (
                 <span>
                   by{" "}
@@ -146,7 +149,8 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             </div>
           }
           <div className="text-sm text-gray-700">
-            Last Modified on {moment(itemData.modified_date).format("lll")}{" "}
+            <b>Last Modified</b> on{" "}
+            {moment(itemData.modified_date).format("lll")}{" "}
             {itemData.last_edited_by && (
               <span>
                 by{" "}
@@ -155,16 +159,16 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             )}
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap justify-between w-full">
+        <div className="mt-4 flex flex-wrap justify-between w-full gap-4 h-full items-baseline">
           <button
             onClick={(e) => navigate(`/sample/${itemData.id}`)}
-            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+            className="w-full md:w-auto px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           >
             Sample Report
           </button>
           <button
             onClick={(e) => showUpdateStatus(itemData)}
-            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+            className="w-full md:w-auto px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           >
             UPDATE SAMPLE TEST STATUS
           </button>
