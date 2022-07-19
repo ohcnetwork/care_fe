@@ -45,7 +45,7 @@ Cypress.Commands.add("loginByApi", (username, password) => {
           method: "POST",
           url: "/api/v1/auth/token/verify/",
           body: {
-            token: token.refresh,
+            token: token.access,
           },
           headers: {
             "Content-Type": "application/json",
