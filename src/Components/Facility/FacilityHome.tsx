@@ -296,7 +296,7 @@ export const FacilityHome = (props: any) => {
                   <div className="lg:flex-1 min-w-[300px] md:flex flex-col">
                     <div className="mb-4">
                       <h1 className="text-lg font-bold">Local Body</h1>
-                      <p className="text-lg">
+                      <p className="text-lg w-2/3 md:w-full">
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
