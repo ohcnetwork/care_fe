@@ -4,7 +4,7 @@ import * as users from "../../fixtures/users.json";
 describe("authentication", () => {
   users.forEach((user) => {
     it("Login as " + user.username + " - " + user.rolename, () => {
-      cy.login(user.username, "passwordR0FL");
+      cy.loginByApi(user.username, "passwordR0FL");
 
       // Assert user
       cy.get("a").contains("Profile").click();
