@@ -8,7 +8,7 @@ describe("Inventory Management Section", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("/facility/f8f05c04-5c97-415c-814d-419ecf692d0e");
+    cy.get("a").contains("Facility").click({ force: true });
     cy.contains("Inventory Management").click();
   });
 

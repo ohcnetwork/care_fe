@@ -122,8 +122,11 @@ describe("Shifting section filter", () => {
   });
 
   afterEach(() => {
-    cy.contains("Filters").click();
-    cy.contains("Clear Filters").click();
+    cy.get("span").should("contain", "Filters").contains("Filters").click();
+    cy.get("a")
+      .should("contain", "Clear Filters")
+      .contains("Clear Filters")
+      .click();
     cy.saveLocalStorage();
   });
 });

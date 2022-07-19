@@ -76,8 +76,16 @@ describe("User management", () => {
     cy.wait(2000);
     cy.get("[name='search']").type(username);
     cy.wait(1000);
-    cy.contains("Click here to show").click();
-    cy.contains("Link new facility").click();
+    cy.get("a")
+      .should("contain", "Click here to show")
+      .contains("Click here to show")
+      .click({ force: true })
+      .then(() => {
+        cy.get("a")
+          .should("contain", "Link new facility")
+          .contains("Link new facility")
+          .click({ force: true });
+      });
     cy.get("[name='facility']")
       .type("test")
       .wait(2000)
@@ -95,9 +103,8 @@ describe("User management", () => {
   it("Next/Previous Page", () => {
     cy.wait(1000);
     // only works for desktop mode
-    cy.get("button").contains(">").click();
-    cy.wait(1000);
-    cy.get("button").contains("<").click();
+    cy.get("button").should("contain", ">").contains(">").click();
+    cy.get("button").should("contain", "<").contains("<").click();
   });
 
   afterEach(() => {

@@ -96,7 +96,7 @@ let current_url = "http://localhost:4000";
 
 describe("Facility", () => {
   before(() => {
-    cy.loginByApi("karadmin", "passwordR0FL");
+    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
   });
 

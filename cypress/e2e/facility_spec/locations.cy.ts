@@ -8,13 +8,12 @@ describe("Location Management Section", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
     cy.get("a").contains("Facility").click({ force: true });
     cy.contains("Location Management").click();
   });
 
   it("Adds Location", () => {
-    cy.contains("Add Location").click();
+    cy.contains("Add New Location").click();
     cy.get("[name='name']").type("Test Location");
     cy.get("textarea[name='description']").type("Test Description");
     cy.get("button").contains("Add Location").click();

@@ -2,7 +2,7 @@ import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";
-const phone_number = "9" + (Math.random() * 10 ** 9).toString();
+const phone_number = "9" + parseInt(Math.random() * 10 ** 9).toString();
 const emergency_phone_number = "9430123487";
 let patient_url = "";
 
@@ -14,14 +14,14 @@ describe("Patient Creation", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
   });
 
   it("Create", () => {
-    cy.visit(
-      "http://localhost:4000/facility/2fa3fceb-d54d-455d-949c-e64dde945168"
-    );
-    cy.get("[data-testid=add-patient-button]").click();
+    cy.get("a").contains("Facility").click();
+    cy.get("button").should("contain", "Add Details of a Patient");
+    cy.get("button")
+      .contains("Add Details of a Patient")
+      .click({ force: true });
     cy.get("[data-testid=phone-number] input").type(phone_number);
     cy.get("[data-testid=date-of-birth] svg").click();
     cy.get("div").contains("1999").click();

@@ -26,10 +26,6 @@ describe("Sample List", () => {
     cy.contains("UPDATE SAMPLE TEST STATUS").click();
   });
 
-  it("View Patient Details", () => {
-    cy.contains("Patient Details").click();
-  });
-
   it("View Sample Details", () => {
     cy.contains("Sample Details").click();
   });
@@ -37,9 +33,8 @@ describe("Sample List", () => {
   it("Next/Previous Page", () => {
     cy.wait(1000);
     // only works for desktop mode
-    cy.get("button").contains(">").click();
-    cy.wait(1000);
-    cy.get("button").contains("<").click();
+    cy.get("button").should("contain", ">").contains(">").click();
+    cy.get("button").should("contain", "<").contains("<").click();
   });
 
   afterEach(() => {
