@@ -458,20 +458,18 @@ export const FacilityCreate = (props: FacilityProps) => {
       );
 
       if (res && res.status === 200 && res.data) {
-        if (res.status === 200) {
-          const id = res.data.id;
-          dispatch({ type: "set_form", form: initForm });
-          if (!facilityId) {
-            Notification.Success({
-              msg: "Facility added successfully",
-            });
-            navigate(`/facility/${id}/bed`);
-          } else {
-            Notification.Success({
-              msg: "Facility updated successfully",
-            });
-            navigate(`/facility/${facilityId}`);
-          }
+        const id = res.data.id;
+        dispatch({ type: "set_form", form: initForm });
+        if (!facilityId) {
+          Notification.Success({
+            msg: "Facility added successfully",
+          });
+          navigate(`/facility/${id}/bed`);
+        } else {
+          Notification.Success({
+            msg: "Facility updated successfully",
+          });
+          navigate(`/facility/${facilityId}`);
         }
       }
       setIsLoading(false);
