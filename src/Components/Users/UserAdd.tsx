@@ -146,7 +146,6 @@ export const UserAdd = (props: UserProps) => {
   const userIndex = USER_TYPES.indexOf(userType);
 
   const defaultAllowedUserTypes = USER_TYPES.slice(0, userIndex + 1);
-
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : userType === "StaffReadOnly"
@@ -542,7 +541,12 @@ export const UserAdd = (props: UserProps) => {
       };
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
-      if (res && (res.data || res.data === "") && res.status >= 200 && res.status < 300) {
+      if (
+        res &&
+        (res.data || res.data === "") &&
+        res.status >= 200 &&
+        res.status < 300
+      ) {
         // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
