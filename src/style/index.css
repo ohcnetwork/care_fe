@@ -56,6 +56,10 @@ h6 {
   @apply outline-none shadow-inner;
 }
 
+[type="text"]:focus {
+  @apply border-black ring-white;
+}
+
 /* Button Styles */
 
 .btn-large {
@@ -475,7 +479,7 @@ button:disabled,
 }
 
 .MuiInputBase-input:focus {
-  @apply ring-0 !important
+  @apply ring-0 !important;
 }
 
 .Mui-selected .MuiSvgIcon-root {
@@ -765,8 +769,6 @@ button:disabled,
   padding-left: 5px;
 }
 
-
- 
 ::-webkit-scrollbar {
   width: 10px;
   height: 8px;
@@ -782,14 +784,11 @@ button:disabled,
   background: rgba(0, 0, 0, 0.4);
 }
 
-
-@media (max-width:640px)
-  {
-    .hideonmobilescreen {
-            display: none;
-        }
+@media (max-width: 640px) {
+  .hideonmobilescreen {
+    display: none;
   }
-
+}
 
 /*
   Range Sliders for Camera Feed
