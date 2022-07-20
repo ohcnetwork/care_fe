@@ -245,7 +245,20 @@ export const UserAdd = (props: UserProps) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        setStates([...initialStates, ...statesRes.data.results]);
+        if (
+          USER_TYPES.indexOf(currentUser.data.user_type) <=
+          USER_TYPES.indexOf("StateAdmin")
+        ) {
+          setStates([
+            ...initialStates,
+            {
+              id: currentUser.data.state,
+              name: currentUser.data.state_object.name,
+            },
+          ]);
+        } else {
+          setStates([...initialStates, ...statesRes.data.results]);
+        }
       }
       setIsStateLoading(false);
     },
