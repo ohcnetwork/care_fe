@@ -178,7 +178,20 @@ export const UserAdd = (props: UserProps) => {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
         if (districtList) {
-          setDistricts([...initialDistricts, ...districtList.data]);
+          if (
+            USER_TYPES.indexOf(currentUser.data.user_type) <=
+            USER_TYPES.indexOf("DistrictAdmin")
+          ) {
+            setDistricts([
+              ...initialDistricts,
+              {
+                id: currentUser.data.district,
+                name: currentUser.data.district_object.name,
+              },
+            ]);
+          } else {
+            setDistricts([...initialDistricts, ...districtList.data]);
+          }
         }
         setIsDistrictLoading(false);
       } else {
