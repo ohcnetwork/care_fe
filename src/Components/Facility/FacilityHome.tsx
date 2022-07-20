@@ -262,7 +262,7 @@ export const FacilityHome = (props: any) => {
         </DialogActions>
       </Dialog>
       <div className="bg-white rounded-lg p-3 md:p-6 shadow">
-        <div className="md:flex justify-between gap-2">
+        <div className="lg:flex justify-between gap-2">
           <div className="md:flex flex-col justify-between">
             <div className="flex flex-col flex-1 gap-3">
               <div>
