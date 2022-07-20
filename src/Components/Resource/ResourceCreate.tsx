@@ -98,6 +98,9 @@ export default function ResourceCreate(props: resourceProps) {
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
+  const [category, setCategory] = useState("OXYGEN");
+  const [subCategory, setSubCategory] = useState("UNSPECIFIED");
+  const [isEmergency, setIsEmergency] = useState("false");
 
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -184,12 +187,12 @@ export default function ResourceCreate(props: resourceProps) {
 
       const data = {
         status: "PENDING",
-        category: state.form.category,
-        sub_category: state.form.sub_category,
+        category: category,
+        sub_category: subCategory,
         orgin_facility: props.facilityId,
         approving_facility: (state.form.approving_facility || {}).id,
         assigned_facility: (state.form.assigned_facility || {}).id,
-        emergency: state.form.emergency === "true",
+        emergency: isEmergency === "true",
         title: state.form.title,
         reason: state.form.reason,
         refering_facility_contact_name:
@@ -270,58 +273,56 @@ export default function ResourceCreate(props: resourceProps) {
                 />
               </div>
 
-              <div>
-                <InputLabel>Is this an emergency?</InputLabel>
-                <RadioGroup
-                  aria-label="emergency"
-                  name="emergency"
-                  value={state.form.emergency === "true"}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label="Yes"
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <InputLabel>Category</InputLabel>
+                  <div className="py-4">
+                    <SelectMenu
+                      options={RESOURCE_CATEGORY_CHOICES.map(
+                        (option: string) => ({
+                          title: option,
+                          value: option,
+                        })
+                      )}
+                      selected={category}
+                      onSelect={setCategory}
                     />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label="No"
+                  </div>
+                </div>
+                <div>
+                  <InputLabel>Subcategory</InputLabel>
+                  <div className="py-4">
+                    <SelectMenu
+                      options={RESOURCE_SUBCATEGORIES.map((option) => ({
+                        title: option.text,
+                        value: option.text,
+                      }))}
+                      selected={subCategory}
+                      onSelect={setSubCategory}
                     />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
+                  </div>
+                </div>
+                <div>
+                  <InputLabel>Is this an emergency?</InputLabel>
+                  <div className="py-4">
+                    <SelectMenu
+                      options={[
+                        {
+                          title: "Yes",
+                          value: "true",
+                        },
+                        {
+                          title: "No",
+                          value: "false",
+                        },
+                      ]}
+                      selected={isEmergency}
+                      onSelect={setIsEmergency}
+                    />
+                  </div>
+                  <ErrorHelperText error={state.errors.emergency} />
+                </div>
               </div>
-
-              <div>
-                <InputLabel>Category</InputLabel>
-                <SelectField
-                  name="category"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.category}
-                  options={RESOURCE_CATEGORY_CHOICES}
-                  onChange={handleChange}
-                  className="bg-white h-14 lg:w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-
-              <div>
-                <InputLabel>Subcategory</InputLabel>
-                <SelectField
-                  name="sub_category"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.sub_category}
-                  options={RESOURCE_SUBCATEGORIES}
-                  onChange={handleChange}
-                  className="bg-white h-14 lg:w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-
               <div>
                 <InputLabel>Required Quantity</InputLabel>
                 <TextInputField
@@ -335,7 +336,7 @@ export default function ResourceCreate(props: resourceProps) {
                 />
               </div>
 
-              <div className="md:col-span-2">
+              <div className="">
                 <InputLabel>Request Title*</InputLabel>
                 <TextInputField
                   rows={5}
