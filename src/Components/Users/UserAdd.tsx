@@ -210,7 +210,20 @@ export const UserAdd = (props: UserProps) => {
         );
         setIsLocalbodyLoading(false);
         if (localBodyList) {
-          setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+          if (
+            USER_TYPES.indexOf(currentUser.data.user_type) <=
+            USER_TYPES.indexOf("LocalBodyAdmin")
+          ) {
+            setLocalBody([
+              ...initialLocalbodies,
+              {
+                id: currentUser.data.local_body,
+                name: currentUser.data.local_body_object.name,
+              },
+            ]);
+          } else {
+            setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+          }
         }
       } else {
         setLocalBody(selectDistrict);
