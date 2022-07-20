@@ -6,31 +6,21 @@ import {
   MultilineInputField,
   ErrorHelperText,
   PhoneNumberField,
-  SelectField,
 } from "../Common/HelperInputFields";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import {
-  FACILITY_TYPES,
   RESOURCE_CATEGORY_CHOICES,
   RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import {
-  Card,
-  CardContent,
-  InputLabel,
-  Radio,
-  RadioGroup,
-  Box,
-  FormControlLabel,
-  Button,
-} from "@material-ui/core";
+import { Card, CardContent, InputLabel, Button } from "@material-ui/core";
 import { phonePreg } from "../../Common/validation";
 
 import { createResource, getAnyFacility } from "../../Redux/actions";
+import SelectMenu from "../Common/components/SelectMenu";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
