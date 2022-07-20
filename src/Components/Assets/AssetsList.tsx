@@ -260,7 +260,7 @@ const AssetsList = () => {
   return (
     <div className="px-6">
       <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
-      <div className="md:flex mt-5 space-y-2 space-x-2">
+      <div className="lg:flex mt-5 space-y-2 space-x-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
             <dl>
