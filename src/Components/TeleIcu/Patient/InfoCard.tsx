@@ -123,7 +123,7 @@ export default function TeleICUPatientInfoCard(props: {
           </div>
         </div>
       </div>
-      <div className="flex gap-2 flex-col px-4 py-1 lg:p-6">
+      <div className="w-full lg:w-fit flex gap-2 flex-col px-4 py-1 lg:p-6">
         {[
           [
             `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`,
@@ -155,7 +155,7 @@ export default function TeleICUPatientInfoCard(props: {
               <Link
                 key={i}
                 href={`${action[0]}`}
-                className="btn btn-primary justify-start hover:text-white"
+                className="btn btn-primary hover:text-white flex justify-center"
               >
                 <i className={`fas fa-${action[2]} w-4 mr-3`}></i>
                 <p className="font-semibold">{action[1]}</p>
