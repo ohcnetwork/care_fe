@@ -177,10 +177,7 @@ export const UserAdd = (props: UserProps) => {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
         if (districtList) {
-          if (
-            USER_TYPES.indexOf(currentUser.data.user_type) <=
-            USER_TYPES.indexOf("DistrictAdmin")
-          ) {
+          if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
             setDistricts([
               ...initialDistricts,
               {
@@ -209,10 +206,7 @@ export const UserAdd = (props: UserProps) => {
         );
         setIsLocalbodyLoading(false);
         if (localBodyList) {
-          if (
-            USER_TYPES.indexOf(currentUser.data.user_type) <=
-            USER_TYPES.indexOf("LocalBodyAdmin")
-          ) {
+          if (userIndex <= USER_TYPES.indexOf("LocalBodyAdmin")) {
             setLocalBody([
               ...initialLocalbodies,
               {
@@ -270,10 +264,7 @@ export const UserAdd = (props: UserProps) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        if (
-          USER_TYPES.indexOf(currentUser.data.user_type) <=
-          USER_TYPES.indexOf("StateAdmin")
-        ) {
+        if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
           setStates([
             ...initialStates,
             {
