@@ -523,7 +523,31 @@ export const AutoCompleteMultiField = (props: any) => {
   );
 };
 
-export const AutoCompleteAsyncField = (props: any) => {
+interface AutoCompleteAsyncFieldProps {
+  multiple?: boolean;
+  className?: string;
+  autoSelect?: boolean;
+  margin?: string;
+  variant: string;
+  label?: string;
+  onSearch?: (e: any) => void;
+  onChange: (e: any, selected: any) => void;
+  options: Array<any>;
+  getOptionSelected: (option: any, value: any) => boolean;
+  getOptionLabel: (option: any) => string;
+  renderOption: (option: any) => JSX.Element;
+  placeholder: string;
+  noOptionsText?: string;
+  value: any;
+  loading?: boolean;
+  errors?: string;
+  onOpen?: (e: any) => void;
+  filterOptions?: (options: any) => any;
+  name?: string;
+  freeSolo?: boolean;
+}
+
+export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
   const {
     margin,
     options,
