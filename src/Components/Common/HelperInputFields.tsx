@@ -280,7 +280,7 @@ export const TimeInputField = (props: any) => {
   );
 };
 
-export const ErrorHelperText = (props: { error: string | number }) => {
+export const ErrorHelperText = (props: { error: string }) => {
   const { error } = props;
   return <div className="error-text">{error}</div>;
 };
@@ -557,7 +557,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
     renderOption,
     variant,
     placeholder,
-    errors,
+    errors = "",
     onChange,
     onSearch,
     value,
