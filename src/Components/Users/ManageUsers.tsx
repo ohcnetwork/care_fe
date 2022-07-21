@@ -85,6 +85,7 @@ export default function ManageUsers() {
         last_name: qParams.last_name,
         phone_number: qParams.phone_number,
         alt_phone_number: qParams.alt_phone_number,
+        district_id: currentUser?.data?.district,
         user_type: qParams.user_type,
       };
       const res = await dispatch(getUserList(params));
@@ -311,7 +312,6 @@ export default function ManageUsers() {
     users.length &&
     (userList = users.map((user: any) => {
       return (
-        user?.district_object?.id === currentUser?.data?.district?
         <div
           key={`usr_${user.id}`}
           className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
@@ -431,7 +431,7 @@ export default function ManageUsers() {
               )}
             </div>
           </div>
-        </div>:""
+        </div>
       );
     }));
 
