@@ -230,10 +230,8 @@ export default function UserProfile() {
   };
 
   const handleValueChange = (phoneNo: string, name: string) => {
-    if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
-      const form: EditForm = { ...states.form, [name]: phoneNo };
-      dispatch({ type: "set_form", form });
-    }
+    const form: EditForm = { ...states.form, [name]: phoneNo };
+    dispatch({ type: "set_form", form });
   };
 
   const handleWhatsappNumChange = (phoneNo: string, name: string) => {
