@@ -3,6 +3,7 @@ type t = {
   medicine: string,
   route: string,
   dosage: string,
+  dosage_new: string,
   days: int,
   notes: string,
 }
@@ -10,22 +11,25 @@ type t = {
 let medicine = t => t.medicine
 let route = t => t.route
 let dosage = t => t.dosage
+let dosage_new = t => t.dosage_new
 let days = t => t.days
 let notes = t => t.notes
 
-let make = (medicine, route, dosage, days, notes) => {
+let make = (medicine, route, dosage, dosage_new, days, notes) => {
   medicine,
   route,
   dosage,
+  dosage_new,
   days,
   notes,
 }
 
-let empty = () => {medicine: "", route: "", dosage: "", days: 0, notes: ""}
+let empty = () => {medicine: "", route: "", dosage: "", dosage_new: "0 mg", days: 0, notes: ""}
 
 let updateMedicine = (medicine, t) => {...t, medicine}
 let updateRoute = (route, t) => {...t, route}
 let updateDosage = (dosage, t) => {...t, dosage}
+let updateDosageNew = (dosage, t) => {...t, dosage}
 let updateDays = (days, t) => {...t, days}
 let updateNotes = (notes, t) => {...t, notes}
 
@@ -35,6 +39,7 @@ let decode = json => {
     medicine: json |> field("medicine", string),
     route: json |> field("route", string),
     dosage: json |> field("dosage", string),
+    dosage_new: json |> field("dosage_new", string),
     days: json |> field("days", int),
     notes: json |> field("notes", string),
   }
@@ -46,6 +51,7 @@ let encode = t => {
     ("medicine", t.medicine |> string),
     ("route", t.route |> string),
     ("dosage", t.dosage |> string),
+    ("dosage_new", t.dosage_new |> string),
     ("days", t.days |> int),
     ("notes", t.notes |> string),
   })
@@ -59,6 +65,9 @@ let encodeArray = prescriptions =>
 
 let makeFromJs = json => {
   Js.Array.isArray(json)
-    ? Js.Array.map(p => make(p["medicine"], p["route"], p["dosage"], p["days"], p["notes"]), json)
+    ? Js.Array.map(
+        p => make(p["medicine"], p["route"], p["dosage"], p["dosage_new"], p["days"], p["notes"]),
+        json,
+      )
     : []
 }
