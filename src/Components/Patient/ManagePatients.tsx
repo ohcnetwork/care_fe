@@ -111,7 +111,7 @@ export const PatientManager = (props: any) => {
   const theme = useTheme();
   const dispatch: any = useDispatch();
 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
@@ -377,7 +377,7 @@ export const PatientManager = (props: any) => {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handleTabChange = async (tab: number) => {
@@ -468,11 +468,24 @@ export const PatientManager = (props: any) => {
       });
   };
 
+  const showReviewAlert = (patient: any) => {
+    return (
+      patient.review_time &&
+      !patient.last_consultation?.discharge_date &&
+      moment(patient.review_time).isAfter(
+        patient.last_consultation?.last_daily_round?.modified_date
+      )
+    );
+  };
+
   let patientList: any[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
       let patientUrl = "";
-      if (patient.last_consultation) {
+      if (
+        patient.last_consultation &&
+        patient.last_consultation?.facility === patient.facility
+      ) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation.id}`;
       } else if (patient.facility) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
@@ -488,8 +501,9 @@ export const PatientManager = (props: any) => {
             (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
-          <div className="px-4  flex gap-2 w-full">
-            {patient?.last_consultation &&
+          <div className="px-4 flex gap-2 w-full">
+            {patient?.is_active &&
+              patient?.last_consultation &&
               patient?.last_consultation?.current_bed && (
                 <div className="w-32 self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
                   <span className="text-center text-gray-900 text-sm">
@@ -525,8 +539,7 @@ export const PatientManager = (props: any) => {
                   <span className="text-xs ml-1">
                     Updated at: {moment(patient.modified_date).format("lll")}
                   </span>
-                  <br />
-                  {patient.review_time && (
+                  {showReviewAlert(patient) && (
                     <span
                       className={
                         "m-1 inline-block items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
@@ -643,7 +656,7 @@ export const PatientManager = (props: any) => {
   }
 
   return (
-    <div className="px-2">
+    <div className="px-6">
       {showDialog && (
         <FacilitiesSelectDialogue
           setSelected={(e) => setSelectedFacility(e)}
@@ -655,7 +668,6 @@ export const PatientManager = (props: any) => {
       <PageTitle
         title="Patients"
         hideBack={!facilityId}
-        className="mt-4"
         breadcrumbs={!!facilityId}
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
@@ -972,10 +984,10 @@ export const PatientManager = (props: any) => {
           index={tabValue}
         >
           <TabPanel value={tabValue} index={0} dir={theme.direction}>
-            <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
+            <div className="flex flex-wrap md:-mx-6">{managePatients}</div>
           </TabPanel>
           <TabPanel value={tabValue} index={1} dir={theme.direction}>
-            <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
+            <div className="flex flex-wrap md:-mx-6">{managePatients}</div>
           </TabPanel>
         </SwipeableViews>
       </div>

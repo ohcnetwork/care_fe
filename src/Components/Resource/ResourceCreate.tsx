@@ -305,7 +305,7 @@ export default function ResourceCreate(props: resourceProps) {
                   value={state.form.category}
                   options={RESOURCE_CATEGORY_CHOICES}
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-14 lg:w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
 
@@ -318,7 +318,7 @@ export default function ResourceCreate(props: resourceProps) {
                   value={state.form.sub_category}
                   options={RESOURCE_SUBCATEGORIES}
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-14 lg:w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
 

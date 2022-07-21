@@ -305,6 +305,9 @@ export const createDoctor = (
     ? fireRequest("updateDoctor", [id], params, pathParam)
     : fireRequest("createDoctor", [], params, pathParam);
 };
+export const deleteDoctor = (id: number, pathParam: object) => {
+  return fireRequest("deleteDoctor", [id], {}, pathParam);
+};
 export const createTriageForm = (params: object, pathParam: object) => {
   return fireRequest("createTriage", [], params, pathParam);
 };
@@ -519,8 +522,8 @@ export const dischargePatient = (params: object, pathParams: object) => {
 };
 
 //Profile
-export const getUserDetails = (username: string) => {
-  return fireRequest("getUserDetails", [], {}, { username: username });
+export const getUserDetails = (username: string, suppress? : true) => {
+  return fireRequest("getUserDetails", [], {}, { username: username }, undefined, suppress);
 };
 export const updateUserDetails = (username: string, data: object) => {
   return fireRequest("updateUserDetails", [username], data);
@@ -585,6 +588,15 @@ export const getNotifications = (params: object) => {
 
 export const getNotificationData = (pathParam: object) => {
   return fireRequest("getNotificationData", [], {}, pathParam);
+};
+
+export const markNotificationAsRead = (id: string) => {
+  return fireRequest(
+    "markNotificationAsRead",
+    [],
+    { read_at: new Date() },
+    { id }
+  );
 };
 
 export const getPublicKey = () => {

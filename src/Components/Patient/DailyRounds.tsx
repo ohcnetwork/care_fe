@@ -9,11 +9,11 @@ import {
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
+import moment from "moment";
 import loadable from "@loadable/component";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
-  CURRENT_HEALTH_CHANGE,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
@@ -81,8 +81,6 @@ const initialState = {
 
 const symptomChoices = [...SYMPTOM_CHOICES];
 
-const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
-
 const DailyRoundsFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
     case "set_form": {
@@ -109,11 +107,12 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [prevReviewTime, setPreviousReviewTime] = useState("");
   const [hasPreviousLog, setHasPreviousLog] = useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
-  const fetchpatient = useCallback(
+  const fetchRoundDetails = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(
@@ -139,10 +138,10 @@ export const DailyRounds = (props: any) => {
   useAbortableEffect(
     (status: statusType) => {
       if (id) {
-        fetchpatient(status);
+        fetchRoundDetails(status);
       }
     },
-    [dispatchAction, fetchpatient]
+    [dispatchAction, fetchRoundDetails]
   );
 
   useEffect(() => {
@@ -152,6 +151,7 @@ export const DailyRounds = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setPreviousReviewTime(res.data.review_time);
         }
       } else {
         setPatientName("");
@@ -163,7 +163,7 @@ export const DailyRounds = (props: any) => {
 
   useEffect(() => {
     async function fetchHasPreviousLog() {
-      if (consultationId) {
+      if (consultationId && !id) {
         const res = await dispatchAction(
           getDailyReport({ limit: 1, offset: 0 }, { consultationId })
         );
@@ -178,12 +178,11 @@ export const DailyRounds = (props: any) => {
       }
     }
     fetchHasPreviousLog();
-  }, [dispatchAction, consultationId]);
+  }, [dispatchAction, consultationId, id]);
 
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
-    const error_div = "";
     Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "other_symptoms":
@@ -198,31 +197,22 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        // case "admitted_to":
-        //   if (!state.form.admitted_to && state.form.clone_last === "false") {
-        //     errors[field] = "Please select admitted to details";
-        //     if (!error_div) error_div = field;
-        //     invalidForm = true;
-        //   }
-        //   return;
-        // case "resp":
-        //   if (state.form.resp === null) {
-        //     errors[field] = "Please enter a respiratory rate";
-        //     if (!error_div) error_div = field;
-        //     invalidForm = true;
-        //   }
-        //   return;
+        case "resp":
+          if (
+            state.form.resp === null &&
+            state.form.rounds_type === "NORMAL" &&
+            state.form.clone_last !== "true"
+          ) {
+            errors[field] = "Please enter a respiratory rate";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
     });
     dispatch({ type: "set_error", errors });
-    return [!invalidForm, error_div];
-  };
-
-  const scrollTo = (id: any) => {
-    const element = document.querySelector(`#${id}-div`);
-    element?.scrollIntoView({ behavior: "smooth", block: "center" });
+    return !invalidForm;
   };
 
   const fahrenheitToCelcius = (x: any) => {
@@ -245,11 +235,8 @@ export const DailyRounds = (props: any) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const [validForm, error_div] = validateForm();
-    console.log(validForm, error_div);
-    if (!validForm) {
-      scrollTo(error_div);
-    } else {
+    const validForm = validateForm();
+    if (validForm) {
       setIsLoading(true);
       const baseData = {
         clone_last: state.form.clone_last === "true" ? true : false,
@@ -276,7 +263,6 @@ export const DailyRounds = (props: any) => {
           other_details: state.form.other_details,
           consultation: consultationId,
           patient_category: state.form.category,
-          current_health: state.form.current_health,
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: state.form.action,
           review_time: state.form.review_time,
@@ -463,6 +449,18 @@ export const DailyRounds = (props: any) => {
     }
   };
 
+  const getExpectedReviewTime = () => {
+    if (Number(state.form.review_time))
+      return `Next Review at ${moment()
+        .add(state.form.review_time, "minutes")
+        .format("DD/MM/YYYY hh:mm A")}`;
+    if (prevReviewTime && moment().isBefore(prevReviewTime))
+      return `Next Review at ${moment(prevReviewTime).format(
+        "DD/MM/YYYY hh:mm A"
+      )}`;
+    return "No Reviews Planned!";
+  };
+
   const toggleTemperature = () => {
     const isCelcius = state.form.tempInCelcius;
     const temp = state.form.temperature;
@@ -630,88 +628,6 @@ export const DailyRounds = (props: any) => {
                         />
                       </div>
                     )}
-
-                    {/* <div>
-                      <InputLabel id="category-label">Category</InputLabel>
-                      <SelectField
-                        name="category"
-                        variant="standard"
-                        value={state.form.patient_category}
-                        options={categoryChoices}
-                        onChange={handleChange}
-                        errors={state.errors.patient_category}
-                      />
-                    </div> */}
-
-                    <div>
-                      <InputLabel id="current-health-label">
-                        Current Health
-                      </InputLabel>
-                      <SelectField
-                        name="current_health"
-                        variant="standard"
-                        value={state.form.current_health}
-                        options={currentHealthChoices}
-                        onChange={handleChange}
-                        optionKey="text"
-                        optionValue="desc"
-                        errors={state.errors.current_health}
-                      />
-                    </div>
-                    {/* <div>
-                      <InputLabel id="asset-type">Bed</InputLabel>
-                      <BedSelect
-                        name="bed"
-                        setSelected={setBed}
-                        selected={bed}
-                        errors=""
-                        multiple={false}
-                        margin="dense"
-                        // location={state.form.}
-                        facility={facilityId}
-                      />
-                    </div> */}
-                    {/* <div className="flex-1" id="admitted_to-div">
-                      <InputLabel id="admitted-to-label">
-                        Admitted To *{" "}
-                      </InputLabel>
-                      <SelectField
-                        optionArray={true}
-                        name="admitted_to"
-                        variant="standard"
-                        value={state.form.admitted_to}
-                        options={admittedToChoices}
-                        onChange={handleChange}
-                        errors={state.errors.admitted_to}
-                      />
-                    </div> */}
-                    {/* <div className="flex-1" id="is_telemedicine-div">
-                      <InputLabel id="admitted-label">TeleICU</InputLabel>
-                      <RadioGroup
-                        aria-label="covid"
-                        name="is_teleicu"
-                        value={isTeleicu}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          setIsTeleicu(e.target.value);
-                        }}
-                        style={{ padding: "0px 5px" }}
-                      >
-                        <Box display="flex" flexDirection="row">
-                          <FormControlLabel
-                            value="true"
-                            control={<Radio />}
-                            label="Yes"
-                          />
-                          <FormControlLabel
-                            value="false"
-                            control={<Radio />}
-                            label="No"
-                          />
-                        </Box>
-                      </RadioGroup>
-                      <ErrorHelperText error={state.errors.is_telemedicine} />
-                    </div> */}
-
                     <div className="flex-1">
                       <InputLabel id="action-label">Action </InputLabel>
                       <NativeSelectField
@@ -725,33 +641,7 @@ export const DailyRounds = (props: any) => {
                       />
                       <ErrorHelperText error={state.errors.action} />
                     </div>
-                    {/* {
-                       === "true" && (
-                      <div className="">
-                        <InputLabel id="bed">Bed</InputLabel>
-                        <SelectField
-                          className=""
-                          name="bed"
-                          variant="standard"
-                          margin="dense"
-                          options={[
-                            { id: "", name: "Select Bed" },
-                            ...beds.map((bed: any) => {
-                              return {
-                                id: bed.id,
-                                name: `${bed.name} - ${bed.bed_type}`,
-                              };
-                            }),
-                          ]}
-                          optionValue="name"
-                          value={state.form.bed}
-                          onChange={handleChange}
-                          errors={state.errors.bed}
-                        />
-                      </div>
-                    )}*/}
-                  </div>
-                  <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
+
                     <div className="flex-1">
                       <InputLabel id="review_time-label">
                         Review After{" "}
@@ -761,12 +651,15 @@ export const DailyRounds = (props: any) => {
                         variant="standard"
                         value={state.form.review_time}
                         options={[
-                          { id: "", text: "select" },
+                          { id: 0, text: "select" },
                           ...REVIEW_AT_CHOICES,
                         ]}
                         onChange={handleChange}
                         errors={state.errors.review_time}
                       />
+                      <div className="text-gray-500 text-sm">
+                        {getExpectedReviewTime()}
+                      </div>
                     </div>
                     <div>
                       <CheckboxField
@@ -777,6 +670,7 @@ export const DailyRounds = (props: any) => {
                       />
                     </div>
                   </div>
+
                   {state.form.rounds_type === "NORMAL" && (
                     <div className="mt-4">
                       <h3>Vitals</h3>
@@ -1052,19 +946,14 @@ export const DailyRounds = (props: any) => {
                     Back
                   </Link>
                 )}
-
-                <Button
-                  color="primary"
-                  variant="contained"
+                <button
                   type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
+                  className="btn btn-primary ml-auto text-base"
                   onClick={(e) => handleSubmit(e)}
                 >
+                  <i className="fa-regular fa-circle-check mr-2"></i>{" "}
                   {buttonText}
-                </Button>
+                </button>
               </div>
             </CardContent>
           </form>
