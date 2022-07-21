@@ -234,7 +234,7 @@ export default function UserProfile() {
     dispatch({ type: "set_form", form });
   };
 
-  const handleWhatsappNumChange = (phoneNo: string, name: string) => {
+  const handleAlternativeNumChange = (phoneNo: string, name: string) => {
     const form: EditForm = { ...states.form, [name]: phoneNo };
     dispatch({ type: "set_form", form });
   };
@@ -342,7 +342,7 @@ export default function UserProfile() {
                     <ProfileValue text={details.phone_number} />
                   </LabelValueCard>
                   <LabelValueCard>
-                    <ProfileLabel text="Whatsapp No" />
+                    <ProfileLabel text="Alternative No" />
                     <ProfileValue text={details.alt_phone_number} />
                   </LabelValueCard>
                   <LabelValueCard>
@@ -487,10 +487,10 @@ export default function UserProfile() {
                       <div className="col-span-6 sm:col-span-3">
                         <PhoneNumberField
                           name="altPhoneNumber"
-                          label="Whatsapp Number"
+                          label="Alternative Number"
                           value={states.form.altPhoneNumber}
                           onChange={(value: string) =>
-                            handleWhatsappNumChange(value, "altPhoneNumber")
+                            handleAlternativeNumChange(value, "altPhoneNumber")
                           }
                           errors={states.errors.altPhoneNumber}
                         />

@@ -133,7 +133,7 @@ export const UserAdd = (props: UserProps) => {
   const [selectedFacility, setSelectedFacility] = useState<
     FacilityModel[] | null
   >([]);
-  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
+  const [phoneIsAlt, setPhoneIsAlt] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
 
@@ -332,9 +332,9 @@ export const UserAdd = (props: UserProps) => {
   };
 
   useAbortableEffect(() => {
-    phoneIsWhatsApp &&
+    phoneIsAlt &&
       handleValueChange(state.form.phone_number, "alt_phone_number");
-  }, [phoneIsWhatsApp, state.form.phone_number]);
+  }, [phoneIsAlt, state.form.phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
@@ -594,24 +594,24 @@ export const UserAdd = (props: UserProps) => {
                   onlyIndia={true}
                 />
                 <CheckboxField
-                  checked={phoneIsWhatsApp}
+                  checked={phoneIsAlt}
                   onChange={(_, checked) => {
-                    setPhoneIsWhatsApp(checked);
+                    setPhoneIsAlt(checked);
                     !checked && handleValueChange("+91", "alt_phone_number");
                   }}
-                  label="Is the phone number a WhatsApp number?"
+                  label="Is the phone number an Alternative number?"
                   className="font-bold"
                 />
               </div>
 
               <div>
                 <PhoneNumberField
-                  label="Whatsapp Number"
+                  label="Alternative Number"
                   value={state.form.alt_phone_number}
                   onChange={(value: any) =>
                     handleValueChange(value, "alt_phone_number")
                   }
-                  disabled={phoneIsWhatsApp}
+                  disabled={phoneIsAlt}
                   errors={state.errors.alt_phone_number}
                   onlyIndia={true}
                 />
