@@ -117,13 +117,16 @@ export const FileUpload = (props: FileUploadProps) => {
     {},
   ]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
+  const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
   // const [uploadSuccess, setUploadSuccess] = useState(false);
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
-  const [contentType, setContentType] = useState<string>("");
+  const [audioName, setAudioName] = useState<string>("");
+  const [audioNameError, setAudioNameError] = useState<string>("");
+  const [contentType, setcontentType] = useState<string>("");
   // const classes = useStyles();
   // const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
@@ -398,7 +401,7 @@ export const FileUpload = (props: FileUploadProps) => {
       fileName.substring(0, fileName.lastIndexOf(".")) || fileName
     );
     const ext: string = fileName.split(".")[1];
-    setContentType(header_content_type[ext]);
+    setcontentType(header_content_type[ext]);
 
     if (ExtImage[ext] && ExtImage[ext] === "1") {
       const options = {
@@ -497,26 +500,36 @@ export const FileUpload = (props: FileUploadProps) => {
     axios
       .put(url, newFile, config)
       .then(() => {
-        setUploadStarted(false);
+        setAudioUploadStarted(false);
         // setUploadSuccess(true);
-        setUploadFileName("");
+        setAudioName("");
         setReload(!reload);
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
       })
       .catch(() => {
-        setUploadStarted(false);
+        setAudioUploadStarted(false);
       });
   };
 
-  const handleAudioUpload = async () => {
+  const validateAudioUpload = () => {
+    const filenameLength = audioName.trim().length;
     const f = audioBlob;
-    if (f === undefined) return;
+    if (f === undefined) {
+      return false;
+    }
+    return true;
+  };
+
+  const handleAudioUpload = async () => {
+    if (!validateAudioUpload()) return;
+    setAudioNameError("");
     const category = "AUDIO";
-    const filename = Date.now().toString();
     const name = "audio.mp3";
-    setUploadStarted(true);
+    const filename =
+      audioName.trim().length === 0 ? Date.now().toString() : audioName.trim();
+    setAudioUploadStarted(true);
     // setUploadSuccess(false);
     const requestData = {
       original_name: name,
@@ -528,8 +541,9 @@ export const FileUpload = (props: FileUploadProps) => {
     dispatch(createUpload(requestData))
       .then(uploadAudiofile)
       .catch(() => {
-        setUploadStarted(false);
+        setAudioUploadStarted(false);
       });
+    setAudioName("");
   };
 
   // For creating the Download File URL
@@ -654,22 +668,44 @@ export const FileUpload = (props: FileUploadProps) => {
               <div>
                 <h4>Record and Upload Audio File</h4>
               </div>
-              <VoiceRecorder createAudioBlob={createAudioBlob} />
-              {audioBlob && (
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                  }
-                  onClick={() => {
-                    handleAudioUpload();
-                  }}
-                >
-                  Save Recording
-                </Button>
+              <InputLabel id="spo2-label">
+                Enter Audio File Name (optional)
+              </InputLabel>
+              <TextInputField
+                name="consultation_audio_file"
+                variant="outlined"
+                margin="dense"
+                type="text"
+                InputLabelProps={{ shrink: !!audioName }}
+                value={audioName}
+                disabled={uploadStarted}
+                onChange={(e: any) => {
+                  setAudioName(e.target.value);
+                }}
+                errors={audioNameError}
+              />
+              {audiouploadStarted ? (
+                <LinearProgressWithLabel value={uploadPercent} />
+              ) : (
+                <>
+                  <VoiceRecorder createAudioBlob={createAudioBlob} />
+                  {audioBlob && (
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      style={{ marginLeft: "auto" }}
+                      startIcon={
+                        <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
+                      }
+                      onClick={() => {
+                        handleAudioUpload();
+                      }}
+                    >
+                      Save Recording
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           ) : null}
@@ -681,7 +717,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <div>
                 <InputLabel id="spo2-label">Enter File Name*</InputLabel>
                 <TextInputField
-                  name="temperature"
+                  name="consultation_file"
                   variant="outlined"
                   margin="dense"
                   type="text"
