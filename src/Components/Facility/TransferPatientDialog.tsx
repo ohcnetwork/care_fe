@@ -74,7 +74,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
     return {
       id: patient.patient_id,
-      text: `#${patient.patient_id} - ${patient.name} (${patient.gender})`,
+      text: `${patient.name} (${patient.gender})`,
     };
   });
 
@@ -130,7 +130,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
         transferPatient(data, { id: state.form.patient })
       );
       setIsLoading(false);
-      if (res && res.data) {
+      if (res && res.data && res.status === 200) {
         dispatch({ type: "set_form", form: initForm });
         handleOk();
         Notification.Success({

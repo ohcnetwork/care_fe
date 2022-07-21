@@ -3,7 +3,7 @@ import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { GENDER_TYPES } from "../../Common/constants";
+import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
@@ -147,7 +147,7 @@ export const PatientHome = (props: any) => {
   function Badge(props: { color: string; icon: string; text: string }) {
     return (
       <span
-        className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+        className="inline-flex items-center py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
         title={props.text}
       >
         <i
@@ -301,10 +301,7 @@ export const PatientHome = (props: any) => {
       status,
       consultation: sample.consultation,
     };
-    let statusName = "";
-    if (status === 4) {
-      statusName = "SENT_TO_COLLECTON_CENTRE";
-    }
+    const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
 
     const res = await dispatch(patchSample(sampleData, { id: sample.id }));
     if (res && (res.status === 201 || res.status === 200)) {
@@ -353,7 +350,14 @@ export const PatientHome = (props: any) => {
   if (isConsultationLoading) {
     consultationList = <CircularProgress size={20} />;
   } else if (consultationListData.length === 0) {
-    consultationList = <Typography>No Consultation available.</Typography>;
+    consultationList = (
+      <div>
+        <hr />
+        <div className="p-4 text-xl text-gray-500 font-bold flex justify-center items-center border-2 border-solid border-gray-200">
+          No Data Found
+        </div>
+      </div>
+    );
   } else if (consultationListData.length > 0) {
     consultationList = consultationListData.map((itemData, idx) => (
       <ConsultationCard
@@ -367,7 +371,14 @@ export const PatientHome = (props: any) => {
   if (isSampleLoading) {
     sampleList = <CircularProgress size={20} />;
   } else if (sampleListData.length === 0) {
-    sampleList = <Typography>No sample test available.</Typography>;
+    sampleList = (
+      <div>
+        <hr />
+        <div className="p-4 text-xl text-gray-500 font-bold flex justify-center items-center border-2 border-solid border-gray-200">
+          No Data Found
+        </div>
+      </div>
+    );
   } else if (sampleListData.length > 0) {
     sampleList = sampleListData.map((itemData, idx) => (
       <SampleTestCard
@@ -393,7 +404,7 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={"Covid Suspect Details"}
+          title={"Patient Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
@@ -470,10 +481,10 @@ export const PatientHome = (props: any) => {
           </div>
         )}
         <section
-          className="md:flex items-center mt-4 space-y-2"
+          className="lg:flex items-center mt-4 space-y-2"
           data-testid="patient-dashboard"
         >
-          <div className="md:w-2/3 mx-2 h-full">
+          <div className="lg:w-2/3 mx-2 h-full">
             <div className="bg-white rounded-lg shadow p-4 h-full">
               <h1 className="font-bold text-3xl">
                 {" "}
@@ -483,10 +494,10 @@ export const PatientHome = (props: any) => {
                 <i className="fas fa-hospital mr-2"></i>
                 {patientData.facility_object?.name || "-"}
               </h3>
-              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 md:grid-cols-2 lg:grid-cols-3 mt-2">
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-medium text-gray-500">
-                    Gender, Date of Birth
+                    Date of Birth, Gender
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
                     {patientData?.date_of_birth}, {patientGender}
@@ -598,7 +609,7 @@ export const PatientHome = (props: any) => {
                     </div>
                   )}
               </div>
-              <div className="flex flex-wrap mt-2">
+              <div className="flex flex-wrap mt-2 space-x-2">
                 {patientData.is_vaccinated ? (
                   <Badge color="blue" icon="syringe" text="Vaccinated" />
                 ) : (
@@ -643,7 +654,7 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="md:w-1/3 mx-2 h-full">
+          <div className="lg:w-1/3 mx-2 h-full">
             <div
               id="actions"
               className="space-y-2 flex-col justify-between flex h-full"
@@ -974,222 +985,70 @@ export const PatientHome = (props: any) => {
           </div>
         </section>
 
-        <section className="md:flex mt-4 space-y-2">
-          <div className="md:w-1/3 mx-2">
+        <section className="grid lg:grid-cols-2 grid-cols-1 mt-4 gap-2">
+          <div className="w-full">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Location
               </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Address
-                </div>
-                <div className="mt-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
-                  {patientData.address || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Village
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.village || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Ward
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.ward_object &&
-                    patientData.ward_object.number +
-                      ", " +
-                      patientData.ward_object.name) ||
-                    "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Local Body
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.local_body_object?.name || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  State, Country - Pincode
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.state_object?.name},{" "}
-                  {patientData.nationality || "-"} - {patientData.pincode}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="md:w-1/3 mx-2">
-            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                Tracing
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Medical Worker
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900 break-all">
-                  {patientData.is_medical_worker
-                    ? "Yes" +
-                      (patientData.designation_of_health_care_worker
-                        ? ", " + patientData.designation_of_health_care_worker
-                        : "") +
-                      (patientData.instituion_of_health_care_worker
-                        ? ", " + patientData.instituion_of_health_care_worker
-                        : "")
-                    : "No"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Frontline Worker
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.frontline_worker || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Guest worker
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.is_migrant_worker ? "Yes" : "No"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Estimated Contact Date
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.estimated_contact_date
-                    ? moment(patientData.estimated_contact_date).format("LL")
-                    : "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Contact Name / Cluster
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.cluster_name || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Number of Contacts
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {"Primary: " +
-                    (patientData.number_of_primary_contacts || 0) +
-                    ", Secondary: " +
-                    (patientData.number_of_secondary_contacts || 0)}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Number of Dependents
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {"Above 60: " +
-                    (patientData.number_of_aged_dependents || 0) +
-                    ", Chronic Diseased: " +
-                    (patientData.number_of_chronic_diseased_dependents || 0)}
-                </div>
-              </div>
-              {patientData.transit_details && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-medium text-gray-500">
-                    Transit Details
+                    Address
                   </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData.transit_details}
+                  <div className="my-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
+                    {patientData.address || "-"}
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-          <div className="md:w-1/3 mx-2">
-            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                Testing
-              </div>
-              {patientData.covin_id && (
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-medium text-gray-500">
-                    Vaccinated (COWIN ID)
+                    District
                   </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData?.covin_id || "-"}
+                  <div className="my-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
+                    {patientData.district_object?.name || "-"}
                   </div>
                 </div>
-              )}
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  SRF ID
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Village
+                  </div>
+                  <div className="my-1 text-sm leading-5 text-gray-900">
+                    {patientData.village || "-"}
+                  </div>
                 </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.srf_id || "-"}
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Ward
+                  </div>
+                  <div className="my-1 text-sm leading-5 text-gray-900">
+                    {(patientData.ward_object &&
+                      patientData.ward_object.number +
+                        ", " +
+                        patientData.ward_object.name) ||
+                      "-"}
+                  </div>
                 </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Test Type
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    State, Country - Pincode
+                  </div>
+                  <div className="my-1 text-sm leading-5 text-gray-900">
+                    {patientData?.state_object?.name},{" "}
+                    {patientData.nationality || "-"} - {patientData.pincode}
+                  </div>
                 </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.test_type || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Date of Test
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.date_of_test &&
-                    moment(patientData.date_of_test).format("LL")) ||
-                    "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Date of Result
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.date_of_result &&
-                    moment(patientData.date_of_result).format("LL")) ||
-                    "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Declared Positive
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData?.is_declared_positive ? "Yes" : "No") || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Declared on
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.date_declared_positive &&
-                    moment(patientData.date_declared_positive).format("LL")) ||
-                    "-"}
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Local Body
+                  </div>
+                  <div className="my-1 text-sm leading-5 text-gray-900">
+                    {patientData.local_body_object?.name || "-"}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </section>
-        <section className="md:flex mt-4 space-y-2">
-          <div className="md:w-2/3 mx-2">
+          <div className="w-full">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Medical
@@ -1210,7 +1069,7 @@ export const PatientHome = (props: any) => {
                       Present Health
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
-                      {patientData.ongoing_medication}
+                      {patientData.present_health}
                     </div>
                   </div>
                 )}
@@ -1219,7 +1078,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Ongoing Medications
                     </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="my-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
                       {patientData.ongoing_medication}
                     </div>
                   </div>
@@ -1229,7 +1088,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Allergies
                     </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="my-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
                       {patientData.allergies}
                     </div>
                   </div>
@@ -1239,7 +1098,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Is pregnant
                     </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900">
+                    <div className="my-1 text-sm leading-5 text-gray-900">
                       Yes
                     </div>
                   </div>
@@ -1248,14 +1107,244 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="md:w-1/3 mx-2">
+        </section>
+        <section className="md:flex mt-4 space-y-2">
+          <div className="hidden lg:block">
+            <div className="grid 2xl:grid-cols-7 xl:grid-cols-6 lg:grid-cols-5 mt-4 gap-2">
+              <div
+                className="w-full"
+                onClick={() => {
+                  if (
+                    !(patientData.is_active && !!consultationListData.length)
+                  ) {
+                    navigate(
+                      `/facility/${patientData?.facility}/patient/${id}/consultation`
+                    );
+                  }
+                }}
+              >
+                <div
+                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
+                    patientData.is_active && !!consultationListData.length
+                      ? "hover:cursor-not-allowed "
+                      : "hover:bg-gray-200 cursor-pointer"
+                  }`}
+                >
+                  <div
+                    className={`${
+                      patientData.is_active && !!consultationListData.length
+                        ? "text-gray-700 "
+                        : "text-green-700 "
+                    }  text-center `}
+                  >
+                    <span>
+                      <i className="fa-solid fa-comment-medical fa-4x"></i>
+                    </span>
+                  </div>
+
+                  <div>
+                    <p
+                      className={`${
+                        patientData.is_active && !!consultationListData.length
+                          ? "text-gray-700"
+                          : "text-green-700"
+                      }  text-center `}
+                    >
+                      Add Consultation
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="w-full"
+                onClick={() => navigate(`/patient/${id}/investigation_reports`)}
+              >
+                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 hover:bg-gray-200 hover:cursor-pointer">
+                  <div className="text-green-700 text-center">
+                    <span>
+                      <i className="fa-regular fa-file-lines fa-4x"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-green-700 text-center">
+                      Investigations Summary
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="w-full"
+                onClick={() =>
+                  navigate(
+                    `/facility/${patientData?.facility}/patient/${id}/files/`
+                  )
+                }
+              >
+                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 hover:bg-gray-200 hover:cursor-pointer">
+                  <div className="text-green-700 text-center">
+                    <span>
+                      <i className="fa-solid fa-file-arrow-up fa-4x"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-green-700 text-center">
+                      View/Upload Patient Files
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="w-full"
+                onClick={() => {
+                  if (
+                    !(
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility === facilityId)
+                    )
+                  ) {
+                    navigate(`/facility/${facilityId}/patient/${id}/shift/new`);
+                  }
+                }}
+              >
+                <div
+                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
+                    !patientData.is_active ||
+                    !(patientData?.last_consultation?.facility === facilityId)
+                      ? " hover:cursor-not-allowed "
+                      : " hover:bg-gray-200 hover:cursor-pointer "
+                  } `}
+                >
+                  <div
+                    className={`${
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility === facilityId)
+                        ? "text-gray-700"
+                        : "text-green-700"
+                    }  text-center `}
+                  >
+                    <span>
+                      <i className="fas fa-ambulance fa-4x"></i>
+                    </span>
+                  </div>
+
+                  <div>
+                    <p
+                      className={`${
+                        !patientData.is_active ||
+                        !(
+                          patientData?.last_consultation?.facility ===
+                          facilityId
+                        )
+                          ? "text-gray-700"
+                          : "text-green-700"
+                      }  text-center `}
+                    >
+                      SHIFT PATIENT
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="w-full"
+                onClick={() => {
+                  if (
+                    !(
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility === facilityId)
+                    )
+                  ) {
+                    navigate(
+                      `/facility/${patientData?.facility}/patient/${id}/sample-test`
+                    );
+                  }
+                }}
+              >
+                <div
+                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
+                    !patientData.is_active ||
+                    !(patientData?.last_consultation?.facility === facilityId)
+                      ? " hover:cursor-not-allowed "
+                      : " hover:bg-gray-200 hover:cursor-pointer "
+                  } `}
+                >
+                  <div
+                    className={`${
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility === facilityId)
+                        ? " text-gray-700 "
+                        : " text-green-700 "
+                    } text-center  `}
+                  >
+                    <span>
+                      <i className="fas fa-medkit fa-4x"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p
+                      className={`${
+                        !patientData.is_active ||
+                        !(
+                          patientData?.last_consultation?.facility ===
+                          facilityId
+                        )
+                          ? " text-gray-700 "
+                          : " text-green-700 "
+                      } text-center  `}
+                    >
+                      Request Sample Test
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="w-full"
+                onClick={() =>
+                  navigate(
+                    `/facility/${patientData?.facility}/patient/${id}/notes`
+                  )
+                }
+              >
+                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 hover:bg-gray-200 hover:cursor-pointer">
+                  <div className="text-green-700 text-center">
+                    <span>
+                      <i className="fa-solid fa-notes-medical fa-4x"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-green-700 text-center">
+                      View Patient Notes
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="w-full"
+                onClick={() => setOpenAssignVolunteerDialog(true)}
+              >
+                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 hover:bg-gray-200 hover:cursor-pointer">
+                  <div className="text-green-700 text-center">
+                    <span>
+                      <i className="fa-solid fa-hospital-user fa-4x"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-green-700 text-center">
+                      Assign to a volunteer
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="w-full mx-2 lg:hidden">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg space-y-2">
                 <div>
                   <button
                     className="btn btn-primary w-full"
                     disabled={
-                      patientData.is_active && !!consultationListData.length
+                      !patientData.is_active ||
+                      !patientData?.last_consultation?.discharge_date
                     }
                     onClick={() =>
                       navigate(
@@ -1263,7 +1352,8 @@ export const PatientHome = (props: any) => {
                       )
                     }
                   >
-                    Add Consultation
+                    <i className="fa-solid fa-comment-medical mr-2"></i> Add
+                    Consultation
                   </button>
                 </div>
                 <div>
@@ -1273,6 +1363,7 @@ export const PatientHome = (props: any) => {
                       navigate(`/patient/${id}/investigation_reports`)
                     }
                   >
+                    <i className="fa-regular fa-file-lines mr-2"></i>{" "}
                     Investigations Summary
                   </button>
                 </div>
@@ -1281,10 +1372,11 @@ export const PatientHome = (props: any) => {
                     className="btn btn-primary w-full"
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/files/`
+                        `/facility/${patientData?.facility}/patient/${id}/files`
                       )
                     }
                   >
+                    <i className="fa-solid fa-file-arrow-up mr-2"></i>{" "}
                     View/Upload Patient Files
                   </button>
                 </div>
@@ -1303,7 +1395,7 @@ export const PatientHome = (props: any) => {
                     disableFor="readOnly"
                     buttonType="html"
                   >
-                    SHIFT PATIENT
+                    <i className="fas fa-ambulance mr-2"></i> SHIFT PATIENT
                   </RoleButton>
                 </div>
                 <div>
@@ -1321,7 +1413,7 @@ export const PatientHome = (props: any) => {
                     disableFor="readOnly"
                     buttonType="html"
                   >
-                    Request Sample Test
+                    <i className="fas fa-medkit mr-2"></i> Request Sample Test
                   </RoleButton>
                 </div>
                 <div>
@@ -1333,7 +1425,8 @@ export const PatientHome = (props: any) => {
                       )
                     }
                   >
-                    View Patient Notes
+                    <i className="fa-solid fa-notes-medical mr-2"></i> View
+                    Patient Notes
                   </button>
                 </div>
                 <div>
@@ -1344,7 +1437,8 @@ export const PatientHome = (props: any) => {
                     disableFor="readOnly"
                     buttonType="html"
                   >
-                    Assign to a volunteer
+                    <i className="fa-solid fa-hospital-user mr-2"></i> Assign to
+                    a volunteer
                   </RoleButton>
                 </div>
               </div>
@@ -1393,11 +1487,9 @@ export const PatientHome = (props: any) => {
       </Dialog>
 
       <div>
-        <PageTitle
-          title="Consultation History"
-          hideBack={true}
-          breadcrumbs={false}
-        />
+        <h2 className="font-semibold text-2xl leading-tight ml-0 my-4">
+          Consultation History
+        </h2>
         {consultationList}
         {!isConsultationLoading && totalConsultationCount > limit && (
           <div className="mt-4 flex w-full justify-center">
@@ -1412,11 +1504,9 @@ export const PatientHome = (props: any) => {
       </div>
 
       <div>
-        <PageTitle
-          title="Sample Test History"
-          hideBack={true}
-          breadcrumbs={false}
-        />
+        <h2 className="font-semibold text-2xl leading-tight ml-0 my-4">
+          Sample Test History
+        </h2>
         {sampleList}
         {!isSampleLoading && totalSampleListCount > limit && (
           <div className="mt-4 flex w-full justify-center">
