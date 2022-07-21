@@ -53,7 +53,7 @@ import {
   MultilineInputField,
 } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
-
+import ReadMore from "../Common/components/Readmore";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -613,115 +613,129 @@ export const ConsultationDetails = (props: any) => {
                   consultationId={patientData.last_consultation?.id}
                 />
               </section>
-
-              {consultationData.symptoms_text && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Symptoms
-                    </h3>
-                    <div className="">
-                      <div className="capitalize">
-                        {consultationData.symptoms_text || "-"}
-                      </div>
-                      {consultationData.other_symptoms && (
+              <div className="grid lg:grid-cols-2 gap-4 mt-4">
+                {consultationData.symptoms_text && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Symptoms
+                      </h3>
+                      <div className="">
                         <div className="capitalize">
-                          <span className="font-semibold leading-relaxed">
-                            Other Symptoms:{" "}
-                          </span>
-                          {consultationData.other_symptoms}
+                          {consultationData.symptoms_text}
                         </div>
-                      )}
-                      <span className="font-semibold leading-relaxed text-gray-800 text-xs">
-                        from{" "}
-                        {moment(consultationData.symptoms_onset_date).format(
-                          "lll"
+                        {consultationData.other_symptoms && (
+                          <div className="capitalize">
+                            <span className="font-semibold leading-relaxed">
+                              Other Symptoms:{" "}
+                            </span>
+                            {consultationData.other_symptoms}
+                          </div>
                         )}
-                      </span>
+                        <span className="font-semibold leading-relaxed text-gray-800 text-xs">
+                          from{" "}
+                          {moment(consultationData.symptoms_onset_date).format(
+                            "lll"
+                          )}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {consultationData.history_of_present_illness && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      History of Present Illness
-                    </h3>
-                    <div className="mt-2">
-                      {consultationData.history_of_present_illness || "-"}
+                {consultationData.history_of_present_illness && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        History of Present Illness
+                      </h3>
+                      <div className="mt-2">
+                        <ReadMore
+                          text={consultationData.history_of_present_illness}
+                          minChars={250}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {consultationData.examination_details && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Examination details and Clinical conditions:{" "}
-                    </h3>
-                    <div className="mt-2">
-                      {consultationData.examination_details || "-"}
+                {consultationData.examination_details && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Examination details and Clinical conditions:{" "}
+                      </h3>
+                      <div className="mt-2">
+                        <ReadMore
+                          text={consultationData.examination_details}
+                          minChars={250}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {consultationData.prescribed_medication && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Treatment Summary
-                    </h3>
-                    <div className="mt-2">
-                      {consultationData.prescribed_medication || "-"}
+                )}
+                {consultationData.prescribed_medication && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Treatment Summary
+                      </h3>
+                      <div className="mt-2">
+                        <ReadMore
+                          text={consultationData.prescribed_medication}
+                          minChars={250}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {consultationData.consultation_notes && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Advice
-                    </h3>
-                    <div className="mt-2">
-                      {consultationData.consultation_notes || "-"}
+                )}
+                {consultationData.consultation_notes && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Advice
+                      </h3>
+                      <div className="mt-2">
+                        <ReadMore
+                          text={consultationData.consultation_notes}
+                          minChars={250}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {(consultationData.operation ||
-                consultationData.special_instruction) && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Notes
-                    </h3>
-                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.operation && (
-                        <div className="mt-4">
-                          <h5>Operation</h5>
-                          <p className="text-justify break-words">
-                            {consultationData.operation}
-                          </p>
-                        </div>
-                      )}
-                      {consultationData.special_instruction && (
-                        <div className="mt-4">
-                          <h5>Special Instruction</h5>
-                          <p className="text-justify break-words">
-                            {consultationData.special_instruction}
-                          </p>
-                        </div>
-                      )}
+                {(consultationData.operation ||
+                  consultationData.special_instruction) && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Notes
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                        {consultationData.operation && (
+                          <div className="mt-4">
+                            <h5>Operation</h5>
+                            <ReadMore
+                              text={consultationData.operation}
+                              minChars={250}
+                            />
+                          </div>
+                        )}
+                        {consultationData.special_instruction && (
+                          <div className="mt-4">
+                            <h5>Special Instruction</h5>
+                            <ReadMore
+                              text={consultationData.special_instruction}
+                              minChars={250}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-
+                )}
+              </div>
               {consultationData.intubation_start_date && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
@@ -893,7 +907,7 @@ export const ConsultationDetails = (props: any) => {
                     History of present illness:{" "}
                   </h3>
                   <div className="mt-2">
-                    {consultationData.history_of_present_illness || "-"}
+                    {consultationData.history_of_present_illness}
                   </div>
                 </div>
               </div>
