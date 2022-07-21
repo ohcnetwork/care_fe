@@ -1022,11 +1022,12 @@ export const ConsultationForm = (props: any) => {
                 m<sup>2</sup>
               </div>
               {/* End of Telemedicine fields */}
-              <div className="mt-4 flex justify-between">
+              <div className="mt-4 sm:flex grid sm:justify-between">
                 <Button
                   color="default"
                   variant="contained"
                   type="button"
+                  style={{marginTop: "0.5rem" }}
                   onClick={() =>
                     navigate(`/facility/${facilityId}/patient/${patientId}`)
                   }
@@ -1037,7 +1038,7 @@ export const ConsultationForm = (props: any) => {
                   color="primary"
                   variant="contained"
                   type="submit"
-                  style={{ marginLeft: "auto" }}
+                  style={{marginTop: "0.5rem" }}
                   startIcon={
                     <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                   }
