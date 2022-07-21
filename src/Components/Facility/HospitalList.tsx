@@ -380,16 +380,9 @@ export const HospitalList = (props: any) => {
                       </div>
                     </div>
                     <div className="flex gap-1 flex-wrap mt-2">
-                      {facility.features?.map((feature: number, i: number) => (
-                        <div
-                          key={i}
-                          className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs"
-                        >
-                          {
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0].name
-                          }
+                      {facility.features?.map((feature : number, i : number)=>(
+                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs" title={FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}>
+                          <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/>
                         </div>
                       ))}
                     </div>
@@ -550,7 +543,6 @@ export const HospitalList = (props: any) => {
         <PageTitle
           title={t("Facilities")}
           hideBack={true}
-          className="mx-3"
           breadcrumbs={false}
         />
 
