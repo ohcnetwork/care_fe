@@ -18,8 +18,9 @@ import {
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
-import { Tooltip } from "@material-ui/core";
+import { Card, CardContent, Modal, Tooltip } from "@material-ui/core";
 import { FeedCameraPTZHelpButton } from "./Feed";
+import { isNull } from "lodash";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -40,6 +41,7 @@ const LiveFeed = (props: any) => {
     limit: 8,
     offset: 0,
   });
+  const [toDelete, setToDelete] = useState<any>(null);
 
   const liveFeedPlayerRef = useRef<any>(null);
 
@@ -90,12 +92,6 @@ const LiveFeed = (props: any) => {
   };
 
   const deletePreset = async (id: any) => {
-    const shouldProceed = window.confirm(
-      "Are you sure you want to delete this preset?"
-    );
-    if (!shouldProceed) {
-      return;
-    }
     const res = await dispatch(deleteAssetBed(id));
     if (res?.status === 204) {
       Notification.Success({ msg: "Preset deleted successfully" });
@@ -103,6 +99,7 @@ const LiveFeed = (props: any) => {
     } else {
       Notification.Error({ msg: "Failed to delete preset" });
     }
+    setToDelete(null);
   };
 
   const gotoBedPreset = (preset: any) => {
@@ -234,6 +231,33 @@ const LiveFeed = (props: any) => {
     <div className="mt-4 px-6 mb-2">
       <PageTitle title="Live Feed" hideBack={true} />
 
+      {toDelete && (
+        <Modal
+          className="flex h-fit justify-center items-center top-1/2"
+          open={!isNull(toDelete)}
+        >
+          <Card>
+            <CardContent>
+              <h5>
+                Confirm delete preset: {toDelete.meta.preset_name} (in bed:{" "}
+                {toDelete.bed_object.name})?
+              </h5>
+              <hr />
+              <div className="flex gap-3 justify-end mt-2">
+                <button
+                  className="bg-red-500 px-3 text-sm py-1 rounded-md text-white"
+                  onClick={() => deletePreset(toDelete.id)}
+                >
+                  Confirm
+                </button>
+                <button className="text-sm" onClick={() => setToDelete(null)}>
+                  Cancel
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </Modal>
+      )}
       <div className="mt-4 flex flex-col">
         <div className="flex flex-col lg:flex-row gap-4 mt-4 relative">
           <div className="flex-1">
@@ -438,7 +462,7 @@ const LiveFeed = (props: any) => {
                           </span>
                         </button>
                         <button
-                          onClick={() => deletePreset(preset.id)}
+                          onClick={() => setToDelete(preset)}
                           className="text-red-800 text-sm py-1 bg-red-200 justify-center items-center gap-2 flex hover:bg-red-800 hover:text-red-200 rounded-b-md"
                         >
                           <i className="fa-solid fa-trash-can"></i>
