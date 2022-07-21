@@ -739,23 +739,28 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
 
 export const FACILITY_FEATURE_TYPES = [
   {
-    id: 1,
-    name: "CT Scan Facility",
+    id : 1,
+    name : "CT Scan Facility",
+    icon : "circle-dot"
   },
   {
-    id: 2,
-    name: "Maternity Care",
+    id : 2,
+    name : "Maternity Care",
+    icon : "person-breastfeeding"
   },
   {
-    id: 3,
-    name: "X-Ray facility",
+    id : 3,
+    name : "X-Ray facility",
+    icon : "x-ray"
   },
   {
-    id: 4,
-    name: "Neonatal care",
+    id : 4,
+    name : "Neonatal care",
+    icon : "baby"
   },
   {
-    id: 5,
-    name: "Operation theater",
-  },
+    id : 5,
+    name : "Operation theater",
+    icon : "syringe"
+  }
 ];
