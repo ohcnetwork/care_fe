@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import {
+  PhoneNumberField,
+  SelectField,
+  TextInputField,
+} from "../Common/HelperInputFields";
 import { USER_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
+import parsePhoneNumberFromString from "libphonenumber-js";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -54,8 +59,12 @@ export default function UserFilter(props: any) {
     const data = {
       first_name: first_name || "",
       last_name: last_name || "",
-      phone_number: phone_number || "",
-      alt_phone_number: alt_phone_number || "",
+      phone_number: phone_number
+        ? parsePhoneNumberFromString(phone_number)?.format("E.164")
+        : "",
+      alt_phone_number: alt_phone_number
+        ? parsePhoneNumberFromString(alt_phone_number)?.format("E.164")
+        : "",
       user_type: user_type || "",
     };
     onChange(data);
@@ -128,16 +137,12 @@ export default function UserFilter(props: any) {
           <span className="text-sm font-semibold">Phone Number</span>
           <div className="flex justify-between">
             <div className="w-full">
-              <TextInputField
-                id="phone_number"
+              <PhoneNumberField
                 name="phone_number"
-                variant="outlined"
-                margin="dense"
-                errors=""
                 value={filterState.phone_number}
-                onChange={handleChange}
-                label="Phone Number"
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+                onChange={(value: string) => {
+                  handleChange({ target: { name: "phone_number", value } });
+                }}
               />
             </div>
           </div>
@@ -147,16 +152,12 @@ export default function UserFilter(props: any) {
           <span className="text-sm font-semibold">Alt Phone Number</span>
           <div className="flex justify-between">
             <div className="w-full">
-              <TextInputField
-                id="alt_phone_number"
+              <PhoneNumberField
                 name="alt_phone_number"
-                variant="outlined"
-                margin="dense"
-                errors=""
                 value={filterState.alt_phone_number}
-                onChange={handleChange}
-                label="Alt Phone Number"
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+                onChange={(value: string) => {
+                  handleChange({ target: { name: "alt_phone_number", value } });
+                }}
               />
             </div>
           </div>
