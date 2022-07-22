@@ -16,6 +16,7 @@ const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
 import { Tooltip } from "@material-ui/core";
 import { FeedCameraPTZHelpButton } from "./Feed";
+import { AxiosError } from "axios";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -92,7 +93,18 @@ const LiveFeed = (props: any) => {
     });
   };
   useEffect(() => {
-    getPresets({ onSuccess: (resp) => setPresets(resp.data) });
+    getPresets({
+      onSuccess: (resp) => setPresets(resp.data),
+      onError: (resp) => {
+        resp instanceof AxiosError &&
+          resp.response?.data?.errors &&
+          resp.response?.data?.errors.map((error: { message: string }) => {
+            Notification.Error({
+              msg: "Presets failed: " + error.message,
+            });
+          });
+      },
+    });
   }, []);
 
   useEffect(() => {

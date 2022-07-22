@@ -188,7 +188,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   useEffect(() => {
     if (cameraAsset.hostname) {
-      getPresets({ onSuccess: (resp) => setPresets(resp.data) });
+      getPresets({
+        onSuccess: (resp) => setPresets(resp.data),
+        onError: (resp) => {
+          resp instanceof AxiosError &&
+            resp.response?.data?.errors &&
+            resp.response?.data?.errors.map((error: { message: string }) => {
+              Notification.Error({
+                msg: "Presets failed: " + error.message,
+              });
+            });
+        },
+      });
       getBedPresets(cameraAsset);
     }
   }, [cameraAsset]);
