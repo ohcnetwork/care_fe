@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import { CameraPTZ, getCameraPTZ } from "../../../Common/constants";
-import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
+import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import {
   ICameraAssetState,
   StreamStatus,
@@ -21,6 +21,8 @@ import { ConsultationModel } from "../models";
 import * as Notification from "../../../Utils/Notifications.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import { Tooltip } from "@material-ui/core";
+import FeedButton from "./FeedButton";
+import { AxiosError } from "axios";
 
 interface IFeedProps {
   facilityId: string;
@@ -31,6 +33,9 @@ const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
 export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const dispatch: any = useDispatch();
+
+  const videoWrapper = useRef<HTMLDivElement>(null);
+
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
     hostname: "",
     id: "",
@@ -46,6 +51,28 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
+
+  const [cameraState, setCameraState] = useState<PTZState | null>(null);
+
+  useEffect(() => {
+    if (cameraState) {
+      setCameraState({
+        ...cameraState,
+        precision: precision,
+      });
+    }
+  }, [precision]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setCameraState({
+        ...cameraConfig.position,
+        precision: cameraState?.precision,
+      });
+      setCamTimeout(0);
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, [cameraState]);
 
   const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
   const fetchData = useCallback(
@@ -87,6 +114,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             });
             setCameraMiddlewareHostname(middleware_hostname);
             setCameraConfig(bedAssets.data.results[0].meta);
+            setCameraState({
+              ...bedAssets.data.results[0].meta.position,
+              precision: 1,
+            });
           }
         }
 
@@ -95,7 +126,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     [consultationId, dispatch]
   );
-
   const middlewareHostname =
     cameraMiddlewareHostname || "dev_middleware.coronasafe.live";
 
@@ -106,6 +136,19 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<string | undefined>(undefined);
+  const [camTimeout, setCamTimeout] = useState<number>(0);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (cameraState) {
+        cameraPTZ[5].callback(camTimeout - cameraState.zoom);
+        setCameraState({
+          ...cameraState,
+          zoom: camTimeout,
+        });
+      }
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [camTimeout]);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
     StreamStatus.Offline
   );
@@ -174,27 +217,53 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   useEffect(() => {
     if (streamStatus === StreamStatus.Playing) {
       setLoading("Moving");
-      const preset = bedPresets?.find(
-        (preset: any) =>
-          String(preset?.meta?.preset_name).trim().toLowerCase() ===
-          PATIENT_DEFAULT_PRESET
-      );
-      absoluteMove(preset?.meta?.position, {
-        onSuccess: () => {
-          setLoading(undefined);
-          setCurrentPreset(preset);
-          console.log("onSuccess: Set Preset to " + preset?.meta?.preset_name);
-        },
-        onError: () => {
-          setLoading(undefined);
-          setCurrentPreset(preset);
-          console.log("onError: Set Preset to " + preset?.meta?.preset_name);
-        },
-      });
+      const preset =
+        bedPresets?.find(
+          (preset: any) =>
+            String(preset?.meta?.preset_name).trim().toLowerCase() ===
+            PATIENT_DEFAULT_PRESET
+        ) || bedPresets?.[0];
+
+      if (preset) {
+        absoluteMove(preset?.meta?.position, {
+          onSuccess: () => {
+            setLoading(undefined);
+            setCurrentPreset(preset);
+          },
+          onError: (err: AxiosError<any>) => {
+            setLoading(undefined);
+            const responseData = err.response?.data;
+            if (responseData.status) {
+              switch (responseData.status) {
+                case "error":
+                  if (responseData.error.code === "EHOSTUNREACH") {
+                    Notification.Error({ msg: "Camera is Offline!" });
+                  } else if (responseData.message) {
+                    Notification.Error({ msg: responseData.message });
+                  }
+                  break;
+                case "fail":
+                  responseData.errors &&
+                    responseData.errors.map((error: any) => {
+                      Notification.Error({ msg: error.message });
+                    });
+                  break;
+              }
+            } else {
+              Notification.Error({ msg: "Unable to connect server!" });
+            }
+            setCurrentPreset(preset);
+          },
+        });
+      } else {
+        setLoading(undefined);
+      }
     }
   }, [bedPresets, streamStatus]);
 
-  const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
+  const cameraPTZActionCBs: {
+    [key: string]: (option: any, value?: any) => void;
+  } = {
     precision: () => {
       setPrecision((precision: number) =>
         precision === 16 ? 1 : precision * 2
@@ -212,15 +281,19 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
-      screenfull.request(liveFeedPlayerRef.current);
+      !screenfull.isFullscreen
+        ? screenfull.request(
+            videoWrapper.current
+              ? videoWrapper.current
+              : liveFeedPlayerRef.current
+          )
+        : screenfull.exit();
     },
     updatePreset: (option) => {
       getCameraStatus({
         onSuccess: async ({ data }) => {
-          console.log({ currentPreset, data });
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
-            console.log("Updating Preset");
             const response = await dispatch(
               partialUpdateAssetBed(
                 {
@@ -244,9 +317,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         },
       });
     },
-    other: (option) => {
+    other: (option, value) => {
       setLoading(option.loadingLabel);
-      relativeMove(getPTZPayload(option.action, precision), {
+      relativeMove(getPTZPayload(option.action, precision, value), {
         onSuccess: () => setLoading(undefined),
       });
     },
@@ -257,7 +330,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       cameraPTZActionCBs[
         cameraPTZActionCBs[option.action] ? option.action : "other"
       ];
-    return { ...option, callback: () => cb(option) };
+    return { ...option, callback: (value?: any) => cb(option, value) };
   });
 
   // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
@@ -271,14 +344,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   if (isLoading) return <Loading />;
 
   return (
-    <div
-      className="px-2 flex flex-col gap-4 overflow-hidden w-full"
-      style={{ height: "90vh", maxHeight: "860px" }}
-    >
+    <div className="px-2 flex flex-col h-[calc(100vh-1.5rem)]">
       <div className="flex items-center flex-wrap justify-between gap-2">
         <PageTitle
           title={
-            "Patient Details | " +
+            "Camera Feed | " +
             (bedPresets?.[0]?.asset_object?.location_object?.name ?? "")
           }
           breadcrumbs={false}
@@ -323,106 +393,137 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
       </div>
-      <div className="px-3 mt-4">
-        <div className="lg:flex items-start gap-8">
-          <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
-            <video
-              id="mse-video"
-              autoPlay
-              muted
-              playsInline
-              className="h-full w-full z-10"
-              ref={liveFeedPlayerRef}
-            ></video>
-            {loading && (
-              <div className="absolute right-0 top-0 p-4 bg-white bg-opacity-75 rounded-bl">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
-                  <p className="text-base font-bold">{loading}</p>
-                </div>
-              </div>
-            )}
-            {/* { streamStatus > 0 && */}
-            <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center">
-              {streamStatus === StreamStatus.Offline && (
-                <div className="text-center">
-                  <p className="font-bold text-black">
-                    STATUS: <span className="text-red-600">OFFLINE</span>
-                  </p>
-                  <p className="font-semibold text-black">
-                    Feed is currently not live.
-                  </p>
-                  <p className="font-semibold text-black">
-                    Click refresh button to try again.
-                  </p>
-                </div>
-              )}
-              {streamStatus === StreamStatus.Stop && (
-                <div className="text-center">
-                  <p className="font-bold text-black">
-                    STATUS: <span className="text-red-600">STOPPED</span>
-                  </p>
-                  <p className="font-semibold text-black">Feed is Stooped.</p>
-                  <p className="font-semibold text-black">
-                    Click refresh button to start feed.
-                  </p>
-                </div>
-              )}
-              {streamStatus === StreamStatus.Loading && (
-                <div className="text-center">
-                  <p className="font-bold text-black">
-                    STATUS: <span className="text-red-600"> LOADING</span>
-                  </p>
-                  <p className="font-semibold text-black">
-                    Fetching latest feed.
-                  </p>
-                </div>
-              )}
+      <div
+        className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden"
+        ref={videoWrapper}
+      >
+        <video
+          id="mse-video"
+          autoPlay
+          muted
+          playsInline
+          className="max-h-full max-w-full"
+          ref={liveFeedPlayerRef}
+        />
+        {loading && (
+          <div className="absolute inset-x-0 top-2 text-center flex items-center justify-center">
+            <div className="inline-flex items-center rounded p-4 gap-2 bg-white/70">
+              <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
+              <p className="text-base font-bold">{loading}</p>
             </div>
           </div>
-          <div className="mt-8 lg:mt-0 shrink-0 md:flex lg:flex-col items-stretch">
-            <div className="pb-3 hideonmobilescreen">
-              <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+        )}
+        <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center text-white">
+          {streamStatus === StreamStatus.Offline && (
+            <div className="text-center">
+              <p className="font-bold">
+                STATUS: <span className="text-red-600">OFFLINE</span>
+              </p>
+              <p className="font-semibold ">Feed is currently not live.</p>
+              <p className="font-semibold ">
+                Click refresh button to try again.
+              </p>
             </div>
-            {cameraPTZ.map((option) => {
-              const shortcutKeyDescription =
-                option.shortcutKey &&
-                option.shortcutKey
-                  .join(" + ")
-                  .replace("Control", "Ctrl")
-                  .replace("ArrowUp", "↑")
-                  .replace("ArrowDown", "↓")
-                  .replace("ArrowLeft", "←")
-                  .replace("ArrowRight", "→");
+          )}
+          {streamStatus === StreamStatus.Stop && (
+            <div className="text-center">
+              <p className="font-bold">
+                STATUS: <span className="text-red-600">STOPPED</span>
+              </p>
+              <p className="font-semibold ">Feed is Stooped.</p>
+              <p className="font-semibold ">
+                Click refresh button to start feed.
+              </p>
+            </div>
+          )}
+          {streamStatus === StreamStatus.Loading && (
+            <div className="text-center">
+              <p className="font-bold ">
+                STATUS: <span className="text-red-600"> LOADING</span>
+              </p>
+              <p className="font-semibold ">Fetching latest feed.</p>
+            </div>
+          )}
+        </div>
+        <div className="absolute top-8 right-8 z-20 flex flex-col gap-4">
+          {[10, 9, 7, 5, 6].map((button) => {
+            const option = cameraPTZ[button];
+            return (
+              <FeedButton
+                camProp={option}
+                styleType="CHHOTUBUTTON"
+                clickAction={() => cameraPTZ[button].callback()}
+              />
+            );
+          })}
+          <div className="pl-3 hideonmobilescreen">
+            <FeedCameraPTZHelpButton
+              cameraPTZ={cameraPTZ}
+              tooltipPlacement="left-end"
+            />
+          </div>
+        </div>
+        <div className="absolute bottom-8 right-8 z-20">
+          <FeedButton
+            camProp={cameraPTZ[4]}
+            styleType="CHHOTUBUTTON"
+            clickAction={() => cameraPTZ[4].callback()}
+          />
+        </div>
+        <div className="absolute bottom-8 right-8 grid grid-rows-3 grid-flow-col gap-1 z-10">
+          {[
+            false,
+            cameraPTZ[2],
+            false,
+            cameraPTZ[0],
+            false,
+            cameraPTZ[1],
+            false,
+            cameraPTZ[3],
+            false,
+          ].map((c, i) => {
+            let out = <div className="w-[60px] h-[60px]" key={i}></div>;
+            if (c) {
+              const button = c as any;
+              out = (
+                <FeedButton
+                  camProp={button}
+                  styleType="BUTTON"
+                  clickAction={() => {
+                    button.callback();
+                    if (cameraState) {
+                      let x = cameraState.x;
+                      let y = cameraState.y;
+                      switch (button.action) {
+                        case "left":
+                          x += -0.1 / cameraState.precision;
+                          break;
 
-              return (
-                <Tooltip
-                  key={option.action}
-                  placement="left"
-                  arrow={true}
-                  title={
-                    <span className="text-sm font-semibold">
-                      {`${option.label}  (${shortcutKeyDescription})`}
-                    </span>
-                  }
-                >
-                  <button
-                    className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
-                    onClick={option.callback}
-                  >
-                    <span className="sr-only">{option.label}</span>
-                    {option.icon ? (
-                      <i className={`${option.icon} md:p-2`} />
-                    ) : (
-                      <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
-                        {option.value}x
-                      </span>
-                    )}
-                  </button>
-                </Tooltip>
+                        case "right":
+                          x += 0.1 / cameraState.precision;
+                          break;
+
+                        case "down":
+                          y += -0.1 / cameraState.precision;
+                          break;
+
+                        case "up":
+                          y += 0.1 / cameraState.precision;
+                          break;
+
+                        default:
+                          break;
+                      }
+
+                      setCameraState({ ...cameraState, x: x, y: y });
+                    }
+                  }}
+                />
               );
-            })}
-          </div>
+            }
+
+            return out;
+          })}
         </div>
       </div>
     </div>
@@ -467,7 +568,7 @@ export const FeedCameraPTZHelpButton = (props: {
                         className="font-mono shadow-md border-gray-500 border rounded-md p-1.5"
                       >
                         {isArrowKey ? (
-                          <i className={`fa-sm ${option.icon}`} />
+                          <i className={`fa-sm fas fa-${option.icon}`} />
                         ) : (
                           hotkey
                         )}
@@ -492,14 +593,8 @@ export const FeedCameraPTZHelpButton = (props: {
         </ul>
       }
     >
-      <button
-        key="option.action"
-        className="rounded p-2"
-        onClick={() => {
-          // TODO
-        }}
-      >
-        <i className={"fa fa-circle-question md:p-2"} />
+      <button key="option.action" className="rounded text-2xl text-white/40">
+        <i className={"fa fa-circle-question"} />
       </button>
     </Tooltip>
   );

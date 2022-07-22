@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
-import classNames from "classnames";
+import clsx from "clsx";
 import { UserModel } from "../Users/models";
 
 type UserFetchState = {
@@ -106,7 +106,7 @@ export const OnlineUsersSelect = (props: Props) => {
                 onKeyUp={(e) => e.preventDefault()}
               />
               <div
-                className={classNames("flex items-center justify-between", {
+                className={clsx("flex items-center justify-between", {
                   hidden: isDropdownExpanded,
                 })}
               >
