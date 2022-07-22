@@ -748,7 +748,7 @@ export const PatientManager = (props: any) => {
             />
           </div>
         </div>
-        <div>
+        <div className="flex flex-col-reverse md:flex-col">
           <div>
             <div className="md:flex items-end gap-2 mb-2">
               <button
