@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  Typography,
-  Grid,
-  Card,
-  CardHeader,
-  CardContent,
-  CardActions,
-  Button,
-} from "@material-ui/core";
+import { Typography, CardContent, Button } from "@material-ui/core";
 import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
@@ -17,12 +9,6 @@ import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import { postResetPassword } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
-
-const useStyles = makeStyles((theme) => ({
-  formTop: {
-    marginTop: "100px",
-  },
-}));
 
 const panelStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -36,7 +22,6 @@ const panelStyles = makeStyles((theme: Theme) =>
 );
 
 export const ResetPassword = (props: any) => {
-  const classes = useStyles();
   const panel = panelStyles();
 
   const dispatch: any = useDispatch();
