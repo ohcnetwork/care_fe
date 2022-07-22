@@ -823,7 +823,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="verified_by-div">
-              <InputLabel id="exam-details-label">Verified By</InputLabel>
+                <InputLabel id="exam-details-label">Verified By</InputLabel>
                 <MultilineInputField
                   rows={3}
                   name="verified_by"
@@ -936,6 +936,7 @@ export const ConsultationForm = (props: any) => {
                     selectedUser={state.form.assigned_to_object}
                     onSelect={handleDoctorSelect}
                     user_type={"Doctor"}
+                    outline={true}
                   />
                 </div>
               )}

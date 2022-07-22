@@ -19,6 +19,7 @@ type Props = {
   userId: string;
   onSelect: (user: UserModel | null) => void;
   user_type: string;
+  outline?: boolean;
 };
 
 const initialState: UserFetchState = {
@@ -30,7 +31,7 @@ const initialState: UserFetchState = {
 
 export const OnlineUsersSelect = (props: Props) => {
   const dispatchAction: any = useDispatch();
-  const { selectedUser, userId, onSelect, user_type } = props;
+  const { selectedUser, userId, onSelect, user_type, outline } = props;
   const [state, setState] = useState(initialState);
   const { loading, users, searchTerm, searchFieldRef } = state;
   const [isDropdownExpanded, setDropdownExpand] = useState(false);
@@ -93,12 +94,21 @@ export const OnlineUsersSelect = (props: Props) => {
                 name="searchTerm"
                 type="text"
                 placeholder="Search by name or username"
-                className={classNames(
-                  "py-2 pl-3 w-full focus:outline-none focus:ring-green-500 focus:border-green-500",
-                  {
-                    hidden: !isDropdownExpanded,
-                  }
-                )}
+                className={
+                  !outline
+                    ? ` ${clsx(
+                        "py-2 pl-3 w-full focus:outline-none ring-transparent border-transparent",
+                        {
+                          hidden: !isDropdownExpanded,
+                        }
+                      )}`
+                    : `${clsx(
+                        "py-2 pl-3 w-full focus:outline-none focus:ring-primary-500 focus:border-primary-500",
+                        {
+                          hidden: !isDropdownExpanded,
+                        }
+                      )} `
+                }
                 value={searchTerm}
                 onChange={(e) =>
                   setState({ ...state, searchTerm: e.target.value })
