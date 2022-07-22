@@ -163,19 +163,6 @@ export const ResetPassword = (props: any) => {
               />
               <ErrorHelperText error={errors.token} />
             </CardContent>
-
-            {/* <CardActions className="padding16">
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                onClick={(e) => handleSubmit(e)}
-              >
-                {t("reset")}
-              </Button>
-              
-            </CardActions> */}
             <div className="mt-4 sm:flex sm:justify-between grid p-4">
               <Button
                 color="default"
