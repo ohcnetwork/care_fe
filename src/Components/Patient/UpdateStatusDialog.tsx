@@ -93,7 +93,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
 
   useEffect(() => {
     const form = { ...state.form };
-    form.status = currentStatus?.id;
+    form.status = 0;
     dispatch({ type: "set_form", form });
   }, []);
 
