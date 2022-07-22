@@ -4,17 +4,19 @@ import { ReactNode, useState } from "react"
 export default function ToolTip(props : {
     children : ReactNode
     text : ReactNode
-    position : "TOP" | "BOTTOM" | "LEFT" | "RIGHT"
+    position? : "TOP" | "BOTTOM" | "LEFT" | "RIGHT"
 }){
 
+    const position = props.position || "TOP"; 
+    
     const [status, show] = useState(false);
 
     const style = clsx({
         "absolute bg-black/50 backdrop-blur rounded text-white transition px-2 py-1 z-50 w-[150px] text-center block" : true,
-        "bottom-[calc(100%+5px)] left-[calc(50%-75px)]" : props.position === "TOP",
-        "top-[calc(100%+5px)] left-[calc(50%-75px)]" : props.position === "BOTTOM",
-        "right-[calc(100%+5px)] top-[calc(50%-75px)]" : props.position === "LEFT",
-        "left-[calc(100%+5px)] top-[calc(50%-75px)]" : props.position === "RIGHT",
+        "bottom-[calc(100%+5px)] left-[calc(50%-75px)]" : position === "TOP",
+        "top-[calc(100%+5px)] left-[calc(50%-75px)]" : position === "BOTTOM",
+        "right-[calc(100%+5px)] top-[calc(50%-75px)]" : position === "LEFT",
+        "left-[calc(100%+5px)] top-[calc(50%-75px)]" : position === "RIGHT",
         "visible opacity-100 -translate-y-1" : status === true,
         "invisible opacity-0 translate-y-0" : status === false
     })
