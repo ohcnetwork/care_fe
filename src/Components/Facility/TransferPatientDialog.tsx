@@ -74,7 +74,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
     return {
       id: patient.patient_id,
-      text: `#${patient.patient_id} - ${patient.name} (${patient.gender})`,
+      text: `${patient.name} (${patient.gender})`,
     };
   });
 

@@ -230,10 +230,8 @@ export default function UserProfile() {
   };
 
   const handleValueChange = (phoneNo: string, name: string) => {
-    if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
-      const form: EditForm = { ...states.form, [name]: phoneNo };
-      dispatch({ type: "set_form", form });
-    }
+    const form: EditForm = { ...states.form, [name]: phoneNo };
+    dispatch({ type: "set_form", form });
   };
 
   const handleWhatsappNumChange = (phoneNo: string, name: string) => {
@@ -312,8 +310,8 @@ export default function UserProfile() {
   }
   return (
     <div>
-      <div className="md:p-20 p-10">
-        <div className="md:grid md:grid-cols-3 md:gap-6">
+      <div className="lg:px-20 py-10 md:px-10 px-5">
+        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -331,7 +329,7 @@ export default function UserProfile() {
               </button>
             </div>
           </div>
-          <div className="mt-5 md:mt-0 md:col-span-2">
+          <div className="mt-5 lg:mt-0 md:col-span-2">
             {!showEdit && (
               <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">

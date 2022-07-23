@@ -180,6 +180,10 @@ const routes: Routes = {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PATCH",
   },
+  deleteAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "DELETE",
+  },
 
   // Facility Beds
   listFacilityBeds: {
@@ -330,6 +334,11 @@ const routes: Routes = {
   updateDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor",
     method: "PUT",
+  },
+
+  deleteDoctor: {
+    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    method: "DELETE",
   },
 
   //Triage
@@ -584,6 +593,10 @@ const routes: Routes = {
   },
   getNotificationData: {
     path: "/api/v1/notification/{id}/",
+  },
+  markNotificationAsRead: {
+    path: "/api/v1/notification/{id}/",
+    method: "PATCH",
   },
   getPublicKey: {
     path: "/api/v1/notification/public_key/",
