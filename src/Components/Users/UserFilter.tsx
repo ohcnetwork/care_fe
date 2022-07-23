@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { getDistrict } from "../../Redux/actions";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { USER_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
@@ -12,8 +14,8 @@ const useMergeState = (initialState: any) => {
 };
 
 export default function UserFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
-
+  const { filter, onChange, closeFilter } = props;
+  const dispatch: any = useDispatch();
   const [filterState, setFilterState] = useMergeState({
     first_name: filter.first_name || "",
     last_name: filter.last_name || "",
@@ -21,7 +23,7 @@ export default function UserFilter(props: any) {
     alt_phone_number: filter.alt_phone_number || "",
     user_type: filter.user_type || "",
     district_id: filter.district_id || "",
-    district_ref: filter.district_ref || null,
+    district_ref: null,
   });
 
   const clearFilterState = {
@@ -31,6 +33,7 @@ export default function UserFilter(props: any) {
     alt_phone_number: "",
     user_type: "",
     district_id: "",
+    district_ref: null,
   };
 
   const USER_TYPE_OPTIONS = [
@@ -52,11 +55,10 @@ export default function UserFilter(props: any) {
     setFilterState(filterData);
   };
 
-  const setFacility = (selected: any, name: string) => {
+  const setDistrict = (selected: any) => {
     const filterData: any = { ...filterState };
-    filterData[`${name}_ref`] = selected;
+    filterData["district_ref"] = selected;
     filterData["district_id"] = (selected || {}).id;
-
     setFilterState(filterData);
   };
 
@@ -79,6 +81,18 @@ export default function UserFilter(props: any) {
     };
     onChange(data);
   };
+
+  useEffect(() => {
+    async function fetchData() {
+      if (filter.district_id) {
+        const { data: districtData } = await dispatch(
+          getDistrict(filter.district_id, "district")
+        );
+        setFilterState({ district_ref: districtData });
+      }
+    }
+    fetchData();
+  }, [dispatch]);
 
   return (
     <div>
@@ -200,7 +214,9 @@ export default function UserFilter(props: any) {
             multiple={false}
             name="district"
             selected={filterState.district_ref}
-            setSelected={(obj: any) => setFacility(obj, "district")}
+            setSelected={(obj: any) => {
+              setDistrict(obj);
+            }}
             className="shifting-page-filter-dropdown"
             errors={""}
           />

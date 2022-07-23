@@ -42,7 +42,9 @@ export default function ManageUsers() {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-  const [districtName, setDistrictName] = useState<string | undefined>(undefined);
+  const [districtName, setDistrictName] = useState<string | undefined>(
+    undefined
+  );
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const isSuperuser = currentUser.data.is_superuser;
