@@ -324,25 +324,23 @@ export default function ManageUsers() {
                       {user.username}
                     </div>
                   )}
-                  <div className="flex-shrink-0 text-sm text-gray-600 min-width-50">
-                    Last Online:{" "}
-                    <span
-                      aria-label="Online"
-                      className={
-                        "shrink-0 inline-block h-2 w-2 rounded-full " +
-                        (moment()
-                          .subtract(5, "minutes")
-                          .isBefore(user.last_login)
-                          ? "bg-primary-400"
-                          : "bg-gray-300")
-                      }
-                    ></span>
-                    <span className="pl-2">
-                      {user.last_login
-                        ? moment(user.last_login).fromNow()
-                        : "Never"}
-                    </span>
-                  </div>
+                </div>
+                <div className="flex-shrink-0 text-sm mt-1 mb-2 text-gray-600 min-width-50">
+                  Last Online:{" "}
+                  <span
+                    aria-label="Online"
+                    className={
+                      "shrink-0 inline-block h-2 w-2 rounded-full " +
+                      (moment().subtract(5, "minutes").isBefore(user.last_login)
+                        ? "bg-primary-400"
+                        : "bg-gray-300")
+                    }
+                  ></span>
+                  <span className="pl-2">
+                    {user.last_login
+                      ? moment(user.last_login).fromNow()
+                      : "Never"}
+                  </span>
                 </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
