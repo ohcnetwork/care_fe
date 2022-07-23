@@ -388,7 +388,7 @@ export default function ShiftDetails(props: { id: string }) {
             <img alt="logo" src={process.env.REACT_APP_HEADER_LOGO} />
           )}
         </div>
-        <div className="mx-2 p-2">
+        <div className="mx-2">
           <div className="mt-6">
             <span className="font-semibold leading-relaxed mt-4">
               Name of Hospital:{" "}
