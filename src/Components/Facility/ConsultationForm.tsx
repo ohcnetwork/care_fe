@@ -814,7 +814,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="discharge_advice-div" className="mt-4">
-                <InputLabel>Medication</InputLabel>
+                <InputLabel>Prescription Medication</InputLabel>
                 {/*<PrescriptionBuilderOld
                   prescriptions={dischargeAdvice as Prescription__Prescription_t[]}
                   setPrescriptions={setDischargeAdvice}
