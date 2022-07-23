@@ -1,10 +1,27 @@
 import clsx from "clsx";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function PrescriptionDropdown(props : {options : string[], value : string, setValue : (value: string) => void, placeholder? : string}){
 
     const {options, value, setValue} = props;
     const [open, setOpen] = useState(false);
+
+    function useOutsideAlerter(ref : any) {
+        useEffect(() => {
+            function handleClickOutside(event : any) {
+                if (ref.current && !ref.current.contains(event.target)) {
+                    setOpen(false)
+                }
+            }
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }, [ref]);
+    }
+
+    const dropRef = useRef(null);
+    useOutsideAlerter(dropRef);
 
     return (
         <div className="w-full relative">
@@ -17,6 +34,7 @@ export function PrescriptionDropdown(props : {options : string[], value : string
                 required
             />
             <div
+                ref={dropRef}
                 className={clsx([
                     "absolute z-40 top-[calc(100%+10px)] left-0 w-full rounded-md shadow-lg bg-white max-h-[300px] overflow-auto",
                     {"hidden" : !open},
