@@ -784,7 +784,7 @@ export default function UserProfile() {
             Check for software updates
             <p className="mt-1 text-sm leading-5 text-gray-600">
               Click the update button to see if you have the latest
-              &quotcare&quot version.
+              &quot;care&quot; version.
             </p>
           </div>
           <button
