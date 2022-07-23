@@ -529,21 +529,30 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "local_body":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select local body";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "ward":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select ward";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "district":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select district";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -826,6 +835,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   const handleChange = (e: any) => {
     const form = { ...state.form };
+    if (e.target.name === "local_body") form["ward"] = "0";
+    if (e.target.name === "district") form["local_body"] = "0";
+    if (e.target.name === "state") form["district"] = "0";
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
