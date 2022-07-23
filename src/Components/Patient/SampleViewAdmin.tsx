@@ -213,7 +213,7 @@ export default function SampleViewAdmin() {
                   </div>
                   <div>
                     {item.sample_type && (
-                      <span className="bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
+                      <span className="truncate bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
                         Type: {item.sample_type}
                       </span>
                     )}
