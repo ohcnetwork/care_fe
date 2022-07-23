@@ -473,7 +473,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         }
       } else {
         Notification.Error({
-          msg: "Something went wrong: " + res.data.detail ? res.data.detail : "",
+          msg: "Something went wrong: " + (res.data.detail || ""),
         });
       }
       setIsLoading(false);
