@@ -16,22 +16,22 @@ let days = t => t.days
 let notes = t => t.notes
 
 let make = (medicine, route, dosage, dosage_new, days, notes) => {
-  medicine,
-  route,
-  dosage,
-  dosage_new,
-  days,
-  notes,
+  medicine: medicine,
+  route: route,
+  dosage: dosage,
+  dosage_new: dosage_new,
+  days: days,
+  notes: notes,
 }
 
 let empty = () => {medicine: "", route: "", dosage: "", dosage_new: "0 mg", days: 0, notes: ""}
 
-let updateMedicine = (medicine, t) => {...t, medicine}
-let updateRoute = (route, t) => {...t, route}
-let updateDosage = (dosage, t) => {...t, dosage}
-let updateDosageNew = (dosage, t) => {...t, dosage}
-let updateDays = (days, t) => {...t, days}
-let updateNotes = (notes, t) => {...t, notes}
+let updateMedicine = (medicine, t) => {...t, medicine: medicine}
+let updateRoute = (route, t) => {...t, route: route}
+let updateDosage = (dosage, t) => {...t, dosage: dosage}
+let updateDosageNew = (dosage, t) => {...t, dosage: dosage}
+let updateDays = (days, t) => {...t, days: days}
+let updateNotes = (notes, t) => {...t, notes: notes}
 
 let decode = json => {
   open Json.Decode

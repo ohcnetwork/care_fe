@@ -77,10 +77,7 @@ let showPrescriptionForm = (item, index, send) =>
         id={"dosage_new" ++ (index |> string_of_int)}
         className="appearance-none h-10 mt-1 inline-block w-[calc(100%-72px)] border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
         placeholder="Frequency"
-        onChange={e =>
-          send(
-            UpdateDays(Js.String.split(" ", Js.String(ReactEvent.Form.target(e)["value"])), index),
-          )}
+        onChange={e => send(UpdateDosageNew(ReactEvent.Form.target(e)["value"], index))}
         value={item |> Prescription__Prescription.days |> string_of_int}
         type_="number"
         max="999"
