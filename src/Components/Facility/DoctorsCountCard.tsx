@@ -29,11 +29,17 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
       const res = await dispatchAction(
         deleteDoctor(props.area, { facilityId: props.facilityId })
       );
-      if (res && res.status == 204) {
+      if (res && res.status === 204) {
         Notification.Success({
           msg: "Doctor specialization type deleted successfully",
         });
         props.removeDoctor(props.id);
+      } else {
+        Notification.Error({
+          msg:
+            "Error while deleting Doctor specialization: " +
+            ((res.data && res.data.detail) || ""),
+        });
       }
     }
   };
