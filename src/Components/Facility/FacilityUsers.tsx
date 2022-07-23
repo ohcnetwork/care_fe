@@ -150,9 +150,14 @@ export default function FacilityUsers(props: any) {
   const handleSubmit = async () => {
     const username = userData.username;
     const res = await dispatch(deleteUser(username));
-    if (res.status >= 200) {
+    if (res && res.status === 204) {
       Notification.Success({
         msg: "User deleted successfully",
+      });
+    } else {
+      Notification.Error({
+        msg:
+          "Error while deleting User: " + ((res.data && res.data.detail) || ""),
       });
     }
 
@@ -231,6 +236,7 @@ export default function FacilityUsers(props: any) {
   };
 
   const showDelete = (user: any) => {
+    return true;
     const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateLabAdmin");
     const STATE_READ_ONLY_ADMIN_LEVEL =
       USER_TYPES.indexOf("StateReadOnlyAdmin");

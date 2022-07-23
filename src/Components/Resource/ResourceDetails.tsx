@@ -25,7 +25,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResourceDetails(props: { id: string }) {
   const dispatch: any = useDispatch();
-  let initialData: any = {};
+  const initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
@@ -57,14 +57,20 @@ export default function ResourceDetails(props: { id: string }) {
   const handleResourceDelete = async () => {
     setOpenDeleteResourceDialog(true);
 
-    let res = await dispatch(deleteResourceRecord(props.id));
-    if (res.status >= 200) {
+    const res = await dispatch(deleteResourceRecord(props.id));
+    if (res && res.status === 204) {
       Notification.Success({
         msg: "Resource record has been deleted successfully.",
       });
+    } else {
+      Notification.Error({
+        msg:
+          "Error while deleting Resource: " +
+          ((res.data && res.data.detail) || ""),
+      });
     }
 
-    navigate(`/resource`);
+    navigate("/resource");
   };
 
   const showFacilityCard = (facilityData: any) => {
@@ -453,8 +459,10 @@ export default function ResourceDetails(props: { id: string }) {
           </div>
           <div
             className={clsx(
-                "grid grid-cols-1 mt-8 gap-x-6 gap-y-12", 
-                data.assigned_facility_object ? "lg:grid-cols-3" : "lg:grid-cols-2"
+              "grid grid-cols-1 mt-8 gap-x-6 gap-y-12",
+              data.assigned_facility_object
+                ? "lg:grid-cols-3"
+                : "lg:grid-cols-2"
             )}
           >
             <div>

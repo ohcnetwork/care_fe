@@ -207,9 +207,14 @@ export default function ManageUsers() {
   const handleSubmit = async () => {
     const username = userData.username;
     const res = await dispatch(deleteUser(username));
-    if (res.status >= 200) {
+    if (res && res.status === 204) {
       Notification.Success({
         msg: "User deleted successfully",
+      });
+    } else {
+      Notification.Error({
+        msg:
+          "Error while deleting User: " + ((res.data && res.data.detail) || ""),
       });
     }
 
