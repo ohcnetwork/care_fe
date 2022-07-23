@@ -375,7 +375,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             village: res.data.village ? res.data.village : "",
             medical_history: [],
             is_antenatal: res.data.is_antenatal
-              ? res.data.is_antenatal
+              ? String(res.data.is_antenatal)
               : "false",
             allergies: res.data.allergies ? res.data.allergies : "",
             pincode: res.data.pincode ? res.data.pincode : "",
