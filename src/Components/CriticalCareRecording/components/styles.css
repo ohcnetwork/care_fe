@@ -217,8 +217,9 @@
   vertical-align: baseline;
 }
 
-input[type="number"] {
+input[type="number"]:focus {
   background-color: #fbfafc;
+  border:1px solid #0e9f6e;
 }
 
 /* Copied CSS */
