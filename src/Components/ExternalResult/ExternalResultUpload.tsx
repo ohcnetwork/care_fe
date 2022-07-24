@@ -65,10 +65,10 @@ export default function ExternalResultUpload() {
         className="mt-4"
       />
       <div className="max-w-3xl mx-auto mt-6">
-        <div className="p-4 ">
+        <div className="py-4">
           <div className="block text-sm leading-5 font-medium text-gray-700 sm:mt-px sm:pt-2">
             <div className="mt-2 sm:mt-0 sm:col-span-2 my-2">
-              <div className="mx-auto max-w-lg flex flex-col text-center justify-center px-4 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+              <div className="mx-auto max-w-lg flex flex-col text-center justify-center pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                 <span className="flex justify-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -86,8 +86,9 @@ export default function ExternalResultUpload() {
                   </svg>
                 </span>
                 <CSVReader
-                  cssLabelClass="text-sm leading-5 font-medium text-gray-700"
-                  cssClass="react-csv-input"
+                  cssLabelClass="mx-auto text-sm leading-5 font-medium text-gray-700"
+                  cssClass="flex flex-col react-csv-input"
+                  cssInputClass="sm:mx-auto"
                   label="Select a CSV file in the specified format"
                   onFileLoaded={handleForce}
                   parserOptions={papaparseOptions}
