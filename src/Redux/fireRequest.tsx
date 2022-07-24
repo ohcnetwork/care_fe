@@ -157,7 +157,7 @@ export const fireRequest = (
             });
             return;
           }
-        }else{
+        } else {
           return error.response;
         }
       });
