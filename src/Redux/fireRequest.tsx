@@ -49,7 +49,7 @@ export const fireRequest = (
   params: any = {},
   pathParam?: any,
   altKey?: string,
-  suppressNotif? : true,
+  suppressNotif = false
 ) => {
   return (dispatch: any) => {
     // cancel previous api call
@@ -102,7 +102,7 @@ export const fireRequest = (
       .catch((error: any) => {
         dispatch(fetchDataRequestError(key, error));
 
-        if (suppressNotif && error.response) {
+        if (!suppressNotif && error.response) {
           // temporarily don't show invalid phone number error on duplicate patient check
           if (error.response.status === 400 && key === "searchPatient") {
             return;
@@ -157,7 +157,7 @@ export const fireRequest = (
             });
             return;
           }
-        }else{
+        } else {
           return error.response;
         }
       });
