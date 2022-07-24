@@ -23,6 +23,7 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
 import { AxiosError } from "axios";
+import ReactPlayer from "react-player";
 
 interface IFeedProps {
   facilityId: string;
@@ -153,7 +154,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     StreamStatus.Offline
   );
 
-  const url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  const url = !isIOS
+    ? `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
+    : `https://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hlsll/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
+
   const {
     startStream,
     // setVideoEl,
@@ -397,14 +403,19 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden"
         ref={videoWrapper}
       >
-        <video
-          id="mse-video"
-          autoPlay
-          muted
-          playsInline
-          className="max-h-full max-w-full"
-          ref={liveFeedPlayerRef}
-        />
+        {isIOS ? (
+          <ReactPlayer url={url} controls={false} />
+        ) : (
+          <video
+            id="mse-video"
+            autoPlay
+            muted
+            playsInline
+            className="max-h-full max-w-full"
+            ref={liveFeedPlayerRef}
+          />
+        )}
+
         {loading && (
           <div className="absolute inset-x-0 top-2 text-center flex items-center justify-center">
             <div className="inline-flex items-center rounded p-4 gap-2 bg-white/70">
