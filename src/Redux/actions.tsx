@@ -171,6 +171,16 @@ export const updateAssetBed = (
     }
   );
 
+export const deleteAssetBed = (asset_id: string) =>
+  fireRequest(
+    "deleteAssetBed",
+    [],
+    {},
+    {
+      external_id: asset_id,
+    }
+  );
+
 // Facility Beds
 export const listFacilityBeds = (params: object) =>
   fireRequest("listFacilityBeds", [], params, {});
@@ -512,8 +522,8 @@ export const dischargePatient = (params: object, pathParams: object) => {
 };
 
 //Profile
-export const getUserDetails = (username: string) => {
-  return fireRequest("getUserDetails", [], {}, { username: username });
+export const getUserDetails = (username: string, suppress? : true) => {
+  return fireRequest("getUserDetails", [], {}, { username: username }, undefined, suppress);
 };
 export const updateUserDetails = (username: string, data: object) => {
   return fireRequest("updateUserDetails", [username], data);
