@@ -835,9 +835,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   const handleChange = (e: any) => {
     const form = { ...state.form };
-    if (e.target.name === "local_body") form["ward"] = "0";
-    if (e.target.name === "district") form["local_body"] = "0";
-    if (e.target.name === "state") form["district"] = "0";
+    switch (e.target.name) {
+      case "state":
+        form["district"] = "0";
+        form["local_body"] = "0";
+        form["ward"] = "0";
+        break;
+
+      case "district":
+        form["local_body"] = "0";
+        form["ward"] = "0";
+        break;
+
+      case "local_body":
+        form["ward"] = "0";
+        break;
+    }
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
