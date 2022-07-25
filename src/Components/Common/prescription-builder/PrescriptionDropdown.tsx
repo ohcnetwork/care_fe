@@ -27,7 +27,7 @@ export function PrescriptionDropdown(props : {options : string[], value : string
         <div className="w-full relative">
             <input
                 placeholder={props.placeholder}
-                className="w-full relative border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
+                className="w-full relative focus:ring-primary-500 focus:border-primary-500 border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                 onClick={()=>setOpen(!open)}
                 value={value}
                 onChange={(e)=>setValue(e.target.value)}

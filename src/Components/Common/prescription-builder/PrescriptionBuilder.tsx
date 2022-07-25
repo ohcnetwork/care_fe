@@ -34,7 +34,7 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
     }
 
     return (
-        <div className="">
+        <div className="mt-2">
             {
                 prescriptions.map((prescription, i)=>{
 
@@ -67,7 +67,7 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                     }
 
                     return (
-                        <div key={i} className="mt-4 text-xs text-gray-600">
+                        <div key={i} className="border-b border-b-gray-300 border-dashed py-2 text-xs text-gray-600">
                             <div className="flex gap-2">
                                 <div
                                     className="w-full"    
@@ -99,59 +99,61 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                     />
                                 </div>
                             </div>
-                            <div className="flex gap-2 mt-2">
-                                <div>
-                                    Dosage :
-                                    <div className="flex gap-1">
+                            <div className="flex gap-2 mt-2 flex-col md:flex-row">
+                                <div className="w-full md:w-[260px] flex gap-2 shrink-0">
+                                    <div>
+                                        Dosage :
+                                        <div className="flex gap-1">
+                                            <input 
+                                                type="number"
+                                                className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                                                value={prescription.dosage_new?.split(" ")[0]}
+                                                placeholder="Dosage"
+                                                onChange={(e)=>{
+                                                    setItem({
+                                                        ...prescription,
+                                                        dosage_new : e.target.value + " " + (prescription.dosage_new ? prescription.dosage_new.split(" ")[1] : "mg")
+                                                    },i)
+                                                }}
+                                                required
+                                            />
+                                            <div
+                                                className="w-[70px] shrink-0"    
+                                            >
+                                                <PrescriptionDropdown
+                                                    placeholder="Unit"
+                                                    options={units}
+                                                    value={prescription.dosage_new?.split(" ")[1] || "mg"}
+                                                    setValue={setDosageUnit}
+                                                />
+                                            </div>
+                                        </div>
+                                            
+                                    </div>
+                                            
+                                    <div className="w-[80px]">
+                                        Days
                                         <input 
                                             type="number"
-                                            className="w-[110px] block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
-                                            value={prescription.dosage_new?.split(" ")[0]}
-                                            placeholder="Dosage"
+                                            className="border w-[80px] focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                                            value={prescription.days}
+                                            placeholder="Days"
                                             onChange={(e)=>{
                                                 setItem({
                                                     ...prescription,
-                                                    dosage_new : e.target.value + " " + (prescription.dosage_new ? prescription.dosage_new.split(" ")[1] : "mg")
+                                                    days : parseInt(e.target.value)
                                                 },i)
                                             }}
                                             required
                                         />
-                                        <div
-                                            className="w-[70px] shrink-0"    
-                                        >
-                                            <PrescriptionDropdown
-                                                placeholder="Unit"
-                                                options={units}
-                                                value={prescription.dosage_new?.split(" ")[1] || "mg"}
-                                                setValue={setDosageUnit}
-                                            />
-                                        </div>
                                     </div>
-                                    
-                                </div>
-                                
-                                <div className="w-[80px]">
-                                    Days
-                                    <input 
-                                        type="number"
-                                        className="border w-[80px] block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
-                                        value={prescription.days}
-                                        placeholder="Days"
-                                        onChange={(e)=>{
-                                            setItem({
-                                                ...prescription,
-                                                days : parseInt(e.target.value)
-                                            },i)
-                                        }}
-                                        required
-                                    />
                                 </div>
                                 
                                 <div className="w-full">
                                     Notes : 
                                     <input 
                                         type="text"
-                                        className="border w-full block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
+                                        className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                                         value={prescription.notes}
                                         placeholder="Notes"
                                         onChange={(e)=>{
