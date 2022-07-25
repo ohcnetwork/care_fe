@@ -515,7 +515,6 @@ const AssetCreate = (props: AssetProps) => {
                   errors={state.errors.support_email}
                 />
               </div>
-
               <div>
                 <InputLabel htmlFor="qr_code_id" id="name=label">
                   Asset QR Code ID
@@ -576,7 +575,6 @@ const AssetCreate = (props: AssetProps) => {
                   />
                 </div>
               </div>
-
               <div>
                 <InputLabel htmlFor="is_working" id="name=label" required>
                   Is Working
