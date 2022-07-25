@@ -180,6 +180,10 @@ const routes: Routes = {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PATCH",
   },
+  deleteAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "DELETE",
+  },
 
   // Facility Beds
   listFacilityBeds: {
