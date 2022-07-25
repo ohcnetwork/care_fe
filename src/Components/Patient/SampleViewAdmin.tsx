@@ -207,7 +207,7 @@ export default function SampleViewAdmin() {
           >
             <div className="px-6 py-4 h-full flex flex-col justify-between">
               <div>
-                <div className="flex justify-between">
+                <div className="flex flex-col md:flex-row md:justify-between">
                   <div className="font-bold text-xl capitalize mb-2">
                     {item.patient_name}
                   </div>
