@@ -171,6 +171,16 @@ export const updateAssetBed = (
     }
   );
 
+export const deleteAssetBed = (asset_id: string) =>
+  fireRequest(
+    "deleteAssetBed",
+    [],
+    {},
+    {
+      external_id: asset_id,
+    }
+  );
+
 // Facility Beds
 export const listFacilityBeds = (params: object) =>
   fireRequest("listFacilityBeds", [], params, {});
