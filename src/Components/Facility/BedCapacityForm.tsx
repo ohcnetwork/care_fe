@@ -326,18 +326,19 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 className="padding16 flex flex-col md:flex-row gap-4"
                 style={{ justifyContent: "space-between" }}
               >
-                <div>
+                <div className="w-full md:w-auto">
                   <Button
                     id="bed-capacity-cancel"
                     color="default"
                     variant="contained"
                     type="button"
+                    fullWidth
                     onClick={goBack}
                   >
                     Cancel
                   </Button>
                 </div>
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                   {!isLastOptionType && headerText === "Add Bed Capacity" && (
                     <Button
                       id="bed-capacity-save-and-exit"
