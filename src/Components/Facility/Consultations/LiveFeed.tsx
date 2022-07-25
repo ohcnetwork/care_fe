@@ -93,14 +93,12 @@ const LiveFeed = (props: any) => {
 
   const deletePreset = async (id: any) => {
     const res = await dispatch(deleteAssetBed(id));
-    if (res && res.status === 204) {
+    if (res?.status === 204) {
       Notification.Success({ msg: "Preset deleted successfully" });
       getBedPresets(cameraAsset.id);
     } else {
       Notification.Error({
-        msg:
-          "Error while deleting Preset: " +
-          ((res.data && res.data.detail) || ""),
+        msg: "Error while deleting Preset: " + (res?.data?.detail || ""),
       });
     }
     setToDelete(null);

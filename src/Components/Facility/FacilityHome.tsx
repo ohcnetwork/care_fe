@@ -98,15 +98,13 @@ export const FacilityHome = (props: any) => {
 
   const handleDeleteSubmit = async () => {
     const res = await dispatch(deleteFacility(facilityId));
-    if (res && res.status === 204) {
+    if (res?.status === 204) {
       Notification.Success({
         msg: "Facility deleted successfully",
       });
     } else {
       Notification.Error({
-        msg:
-          "Error while deleting Facility: " +
-          ((res.data && res.data.detail) || ""),
+        msg: "Error while deleting Facility: " + (res?.data?.detail || ""),
       });
     }
     navigate("/facility");

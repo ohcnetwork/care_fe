@@ -25,7 +25,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResourceDetails(props: { id: string }) {
   const dispatch: any = useDispatch();
-  const initialData: any = {};
+  let initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
@@ -58,15 +58,13 @@ export default function ResourceDetails(props: { id: string }) {
     setOpenDeleteResourceDialog(true);
 
     const res = await dispatch(deleteResourceRecord(props.id));
-    if (res && res.status === 204) {
+    if (res?.status === 204) {
       Notification.Success({
         msg: "Resource record has been deleted successfully.",
       });
     } else {
       Notification.Error({
-        msg:
-          "Error while deleting Resource: " +
-          ((res.data && res.data.detail) || ""),
+        msg: "Error while deleting Resource: " + (res?.data?.detail || ""),
       });
     }
 
