@@ -4,7 +4,12 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems, postInventory, getAnyFacility } from "../../Redux/actions";
+import {
+  getItems,
+  postInventory,
+  getAnyFacility,
+  getInventorySummary,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
@@ -50,6 +55,8 @@ export const AddInventoryForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
+  const [stockError, setStockError] = useState("");
+  const [inventory, setInventory] = useState<any>([]);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
   const [facilityName, setFacilityName] = useState("");
@@ -80,6 +87,29 @@ export const AddInventoryForm = (props: any) => {
     [fetchData]
   );
 
+  const fetchInventoryData = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatchAction(
+        getInventorySummary(facilityId, { limit, offset })
+      );
+      if (!status.aborted) {
+        if (res && res.data) {
+          setInventory(res.data.results);
+        }
+        setIsLoading(false);
+      }
+    },
+    [dispatchAction, facilityId]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchInventoryData(status);
+    },
+    [fetchInventoryData]
+  );
+
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
@@ -105,6 +135,46 @@ export const AddInventoryForm = (props: any) => {
     }
   }, [state.form.id]);
 
+  const defaultUnitConverter = (unitData: any) => {
+    const unitName = data[Number(unitData.item - 1)].allowed_units?.filter(
+      (u: any) => Number(u.id) === Number(unitData.unit)
+    )[0].name;
+    if (unitName === "Dozen") {
+      return Number(unitData.quantity) * 12;
+    }
+    if (unitName === "Gram") {
+      return Number(unitData.quantity) / 1000;
+    }
+    return Number(unitData.quantity);
+  };
+
+  const stockValidation = (data: any) => {
+    if (inventory && inventory.length) {
+      const stockBefore = inventory.filter(
+        (inventoryItem: any) =>
+          Number(inventoryItem.item_object.id) === Number(data.item)
+      );
+      if (stockBefore.length === 0) {
+        setStockError("No Stock Available ! Please Add Stock.");
+        setIsLoading(false);
+        return false;
+      } else {
+        const stockAfterQuantity = defaultUnitConverter(data);
+        if (stockAfterQuantity > Number(stockBefore[0].quantity)) {
+          setStockError("Stock Insufficient ! Please Add Stock.");
+          setIsLoading(false);
+          return false;
+        }
+        setStockError("");
+        return true;
+      }
+    } else if (inventory && inventory.length === 0) {
+      setStockError("No Stock Available !");
+      setIsLoading(false);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
@@ -115,17 +185,22 @@ export const AddInventoryForm = (props: any) => {
       unit: Number(state.form.unit),
     };
 
-    const res = await dispatchAction(postInventory(data, { facilityId }));
-    setIsLoading(false);
+    if (data.is_incoming || stockValidation(data)) {
+      const res = await dispatchAction(postInventory(data, { facilityId }));
+      setIsLoading(false);
 
-    if (res && res.data && (res.status === 200 || res.status === 201)) {
-      Notification.Success({
-        msg: "Inventory created successfully",
-      });
+      if (res && res.data && (res.status === 200 || res.status === 201)) {
+        Notification.Success({
+          msg: "Inventory created successfully",
+        });
+        goBack();
+      } else {
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false);
     }
-    goBack();
   };
-
   const handleChange = (e: any) => {
     let form = { ...state.form };
     form[e.target.name] = e.target.value;
@@ -180,6 +255,7 @@ export const AddInventoryForm = (props: any) => {
                     onChange={handleChange}
                     optionKey="id"
                     optionValue="value"
+                    errors={stockError}
                   />
                 </div>
                 <div>
