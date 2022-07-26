@@ -552,8 +552,7 @@ export const ConsultationForm = (props: any) => {
   };
 
   const handleDoctorSelect = (doctor: UserModel | null) => {
-    doctor &&
-      doctor.id &&
+    if (doctor && doctor.id) {
       dispatch({
         type: "set_form",
         form: {
@@ -562,6 +561,16 @@ export const ConsultationForm = (props: any) => {
           assigned_to_object: doctor,
         },
       });
+    } else {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          assigned_to: "",
+          assigned_to_object: null,
+        },
+      });
+    }
   };
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
@@ -830,7 +839,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="verified_by-div">
-              <InputLabel id="exam-details-label">Verified By</InputLabel>
+                <InputLabel id="exam-details-label">Verified By</InputLabel>
                 <MultilineInputField
                   rows={3}
                   name="verified_by"
