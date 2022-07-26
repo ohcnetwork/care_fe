@@ -218,6 +218,7 @@ export const DISCHARGE_REASONS = [
   { id: "REC", text: "Recovered" },
   { id: "EXP", text: "Expired" },
   { id: "REF", text: "Referred" },
+  { id: "LAMA", text: "LAMA" },
 ];
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
@@ -739,28 +740,28 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
 
 export const FACILITY_FEATURE_TYPES = [
   {
-    id : 1,
-    name : "CT Scan Facility",
-    icon : "circle-dot"
+    id: 1,
+    name: "CT Scan Facility",
+    icon: "circle-dot",
   },
   {
-    id : 2,
-    name : "Maternity Care",
-    icon : "person-breastfeeding"
+    id: 2,
+    name: "Maternity Care",
+    icon: "person-breastfeeding",
   },
   {
-    id : 3,
-    name : "X-Ray facility",
-    icon : "x-ray"
+    id: 3,
+    name: "X-Ray facility",
+    icon: "x-ray",
   },
   {
-    id : 4,
-    name : "Neonatal care",
-    icon : "baby"
+    id: 4,
+    name: "Neonatal care",
+    icon: "baby",
   },
   {
-    id : 5,
-    name : "Operation theater",
-    icon : "syringe"
-  }
+    id: 5,
+    name: "Operation theater",
+    icon: "syringe",
+  },
 ];
