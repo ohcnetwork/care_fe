@@ -2,7 +2,6 @@ let str = React.string
 
 let medicines = %raw(`require("../assets/medicines.json")`)
 let dosages = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
-let routes = ["Oral", "IV", "IM", "S/C"]
 type prescriptions = array<Prescription__Prescription.t>
 
 let findAndReplace = (index, f, array) =>
@@ -10,11 +9,8 @@ let findAndReplace = (index, f, array) =>
 
 type action =
   | UpdateMedicine(string, int)
-  | UpdateRoute(string, int)
   | UpdateDosage(string, int)
-  | UpdateDosageNew(string, int)
   | UpdateDays(int, int)
-  | UpdateNotes(string, int)
   | DeletePescription(int)
   | AddPescription
 
@@ -23,14 +19,8 @@ let reducer = (prescriptions, action) =>
   | UpdateMedicine(medicine, index) =>
     prescriptions |> findAndReplace(index, Prescription__Prescription.updateMedicine(medicine))
 
-  | UpdateRoute(route, index) =>
-    prescriptions |> findAndReplace(index, Prescription__Prescription.updateRoute(route))
-
   | UpdateDosage(dosage, index) =>
     prescriptions |> findAndReplace(index, Prescription__Prescription.updateDosage(dosage))
-
-  | UpdateDosageNew(dosage, index) =>
-    prescriptions |> findAndReplace(index, Prescription__Prescription.updateDosageNew(dosage))
 
   | UpdateDays(days, index) =>
     prescriptions |> findAndReplace(index, Prescription__Prescription.updateDays(days |> abs))
@@ -38,14 +28,11 @@ let reducer = (prescriptions, action) =>
   | AddPescription => prescriptions |> Js.Array.concat([Prescription__Prescription.empty()])
 
   | DeletePescription(index) => prescriptions |> Js.Array.filteri((_, i) => i != index)
-
-  | UpdateNotes(notes, index) =>
-    prescriptions |> findAndReplace(index, Prescription__Prescription.updateNotes(notes))
   }
 
 let showPrescriptionForm = (item, index, send) =>
   <div className="flex justify-between items-center" key={index |> string_of_int}>
-    <div className="m-1 rounded-md shadow-sm w-1/6">
+    <div className="m-1 rounded-md shadow-sm w-4/6">
       <Prescription__Picker
         id={"medicine" ++ (index |> string_of_int)}
         value={item |> Prescription__Prescription.medicine}
@@ -56,43 +43,12 @@ let showPrescriptionForm = (item, index, send) =>
     </div>
     <div className="m-1 rounded-md shadow-sm w-1/6">
       <Prescription__Picker
-        id={"route" ++ (index |> string_of_int)}
-        value={item |> Prescription__Prescription.route}
-        updateCB={route => send(UpdateRoute(route, index))}
-        placeholder="Route"
-        selectables=routes
-      />
-    </div>
-    <div className="m-1 rounded-md shadow-sm w-2/12">
-      <Prescription__Picker
         id={"dosage" ++ (index |> string_of_int)}
         value={item |> Prescription__Prescription.dosage}
         updateCB={dosage => send(UpdateDosage(dosage, index))}
-        placeholder="Frequency"
+        placeholder="Dosage"
         selectables=dosages
       />
-    </div>
-    <div className="m-1 rounded-md shadow-sm w-2/6">
-      <input
-        id={"dosage_new" ++ (index |> string_of_int)}
-        className="appearance-none h-10 mt-1 inline-block w-[calc(100%-72px)] border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
-        placeholder="Frequency"
-        onChange={e => send(UpdateDosageNew(ReactEvent.Form.target(e)["value"], index))}
-        value={item |> Prescription__Prescription.days |> string_of_int}
-        type_="number"
-        max="999"
-        required=true
-      />
-      <select
-        id={"dosage_new_type" ++ (index |> string_of_int)}
-        className="appearance-none h-10 mt-1 inline-block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
-        //onChange={e => send(UpdateDays(ReactEvent.Form.target(e)["value"], index))}
-        //value={item |> Prescription__Prescription.days |> string_of_int}
-        required=true>
-        <option value="mg"> {"mg" |> str} </option>
-        <option value="ml"> {"ml" |> str} </option>
-        <option value="drops"> {"drops" |> str} </option>
-      </select>
     </div>
     <div className="m-1 rounded-md shadow-sm w-1/6">
       <input
@@ -105,20 +61,9 @@ let showPrescriptionForm = (item, index, send) =>
         required=true
       />
     </div>
-    <div className="m-1 rounded-md shadow-sm w-1/6">
-      <input
-        id={"notes" ++ (index |> string_of_int)}
-        className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
-        placeholder="Notes"
-        onChange={e => send(UpdateNotes(ReactEvent.Form.target(e)["value"], index))}
-        value={item |> Prescription__Prescription.notes}
-        type_="text"
-        required=true
-      />
-    </div>
     <div
       onClick={_ => send(DeletePescription(index))}
-      className="appearance-none cursor-pointer h-10 mt-1 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold">
+      className="appearance-none h-10 mt-1 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold">
       {"x" |> str}
     </div>
   </div>
@@ -130,14 +75,9 @@ let make = (~prescriptions, ~selectCB) => {
     className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4">
     <h3 className="text-lg leading-6 font-medium text-gray-900"> {"Prescription" |> str} </h3>
     <div className="flex justify-between mt-4">
-      <div className="m-1 rounded-md shadow-sm w-1/6">
+      <div className="m-1 rounded-md shadow-sm w-4/6">
         <label htmlFor="Medicine" className="block text-sm font-medium leading-5 text-gray-700">
           {"Medicine" |> str}
-        </label>
-      </div>
-      <div className="m-1 rounded-md shadow-sm w-1/6">
-        <label htmlFor="Route" className="block text-sm font-medium leading-5 text-gray-700">
-          {"Route" |> str}
         </label>
       </div>
       <div className="m-1 rounded-md shadow-sm w-1/6">
@@ -146,18 +86,8 @@ let make = (~prescriptions, ~selectCB) => {
         </label>
       </div>
       <div className="m-1 rounded-md shadow-sm w-1/6">
-        <label htmlFor="Dosage" className="block text-sm font-medium leading-5 text-gray-700">
-          {"Frequency" |> str}
-        </label>
-      </div>
-      <div className="m-1 rounded-md shadow-sm w-1/6">
         <label htmlFor="Days" className="block text-sm font-medium leading-5 text-gray-700">
           {"Days" |> str}
-        </label>
-      </div>
-      <div className="m-1 rounded-md shadow-sm w-1/6">
-        <label htmlFor="Dosage" className="block text-sm font-medium leading-5 text-gray-700">
-          {"Notes" |> str}
         </label>
       </div>
     </div>
