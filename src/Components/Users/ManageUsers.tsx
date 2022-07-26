@@ -25,6 +25,7 @@ import classNames from "classnames";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
+import clsx from "classnames";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -329,12 +330,12 @@ export default function ManageUsers() {
                   Last Online:{" "}
                   <span
                     aria-label="Online"
-                    className={
-                      "shrink-0 inline-block h-2 w-2 rounded-full " +
-                      (moment().subtract(5, "minutes").isBefore(user.last_login)
+                    className={clsx(
+                      "shrink-0 inline-block h-2 w-2 rounded-full",
+                      moment().subtract(5, "minutes").isBefore(user.last_login)
                         ? "bg-primary-400"
-                        : "bg-gray-300")
-                    }
+                        : "bg-gray-300"
+                    )}
                   ></span>
                   <span className="pl-2">
                     {user.last_login
