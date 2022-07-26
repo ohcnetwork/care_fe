@@ -67,8 +67,8 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                     }
 
                     return (
-                        <div key={i} className="border-b border-b-gray-300 border-dashed py-2 text-xs text-gray-600">
-                            <div className="flex gap-2">
+                        <div key={i} className="border-b border-b-gray-500 border-dashed py-2 text-xs text-gray-600">
+                            <div className="flex gap-2 flex-col md:flex-row">
                                 <div
                                     className="w-full"    
                                 >
@@ -80,23 +80,25 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                         setValue={setMedicine}
                                     />
                                 </div>
-                                <div>
-                                    Route :
-                                    <PrescriptionDropdown
-                                        placeholder="Route"
-                                        options={routes}
-                                        value={prescription.route || ""}
-                                        setValue={setRoute}
-                                    />
-                                </div>
-                                <div>
-                                    Frequency :
-                                    <PrescriptionDropdown
-                                        placeholder="Frequency"
-                                        options={frequency}
-                                        value={prescription.dosage || ""}
-                                        setValue={setFrequency}
-                                    />
+                                <div className="flex gap-2">
+                                    <div>
+                                        Route :
+                                        <PrescriptionDropdown
+                                            placeholder="Route"
+                                            options={routes}
+                                            value={prescription.route || ""}
+                                            setValue={setRoute}
+                                        />
+                                    </div>
+                                    <div>
+                                        Frequency :
+                                        <PrescriptionDropdown
+                                            placeholder="Frequency"
+                                            options={frequency}
+                                            value={prescription.dosage || ""}
+                                            setValue={setFrequency}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex gap-2 mt-2 flex-col md:flex-row">
@@ -109,10 +111,15 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                                 className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                                                 value={prescription.dosage_new?.split(" ")[0]}
                                                 placeholder="Dosage"
+                                                min={0}
                                                 onChange={(e)=>{
+                                                    let value = parseInt(e.target.value);
+                                                    if(value < 0){
+                                                        value = 0;
+                                                    }
                                                     setItem({
                                                         ...prescription,
-                                                        dosage_new : e.target.value + " " + (prescription.dosage_new ? prescription.dosage_new.split(" ")[1] : "mg")
+                                                        dosage_new : value + " " + (prescription.dosage_new?.split(" ")[1] || "mg")
                                                     },i)
                                                 }}
                                                 required
@@ -138,10 +145,15 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                             className="border w-[80px] focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                                             value={prescription.days}
                                             placeholder="Days"
+                                            min={0}
                                             onChange={(e)=>{
+                                                let value = parseInt(e.target.value);
+                                                if(value < 0){
+                                                    value = 0;
+                                                }
                                                 setItem({
                                                     ...prescription,
-                                                    days : parseInt(e.target.value)
+                                                    days : value
                                                 },i)
                                             }}
                                             required
