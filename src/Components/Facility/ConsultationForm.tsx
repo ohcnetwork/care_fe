@@ -552,7 +552,7 @@ export const ConsultationForm = (props: any) => {
   };
 
   const handleDoctorSelect = (doctor: UserModel | null) => {
-    if (doctor && doctor.id) {
+    if (doctor?.id) {
       dispatch({
         type: "set_form",
         form: {
