@@ -90,7 +90,7 @@ const AssetCreate = (props: AssetProps) => {
   const [asset_class, setAssetClass] = useState<AssetClass>();
   const [not_working_reason, setNotWorkingReason] = useState("");
   const [description, setDescription] = useState("");
-  const [is_working, setIsWorking] = useState<string | undefined>("");
+  const [is_working, setIsWorking] = useState<string | undefined>(undefined);
   const [serial_number, setSerialNumber] = useState("");
   const [warranty_details, setWarrantyDetails] = useState("");
   const [vendor_name, setVendorName] = useState("");
