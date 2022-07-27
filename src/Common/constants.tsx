@@ -14,19 +14,19 @@ export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
 export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
 export const USER_TYPES: Array<string> = [
-  "Volunteer",
   "Pharmacist",
+  "Volunteer",
   "StaffReadOnly",
   "Staff",
   "Doctor",
   "WardAdmin",
   "LocalBodyAdmin",
-  "DistrictReadOnlyAdmin",
   "DistrictLabAdmin",
+  "DistrictReadOnlyAdmin",
   "DistrictAdmin",
   "StateLabAdmin",
-  "StateAdmin",
   "StateReadOnlyAdmin",
+  "StateAdmin",
 ];
 
 export const DOWNLOAD_TYPES: Array<string> = [
@@ -457,7 +457,7 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
 ];
 
 export const NOTIFICATION_EVENTS = [
-  { id: "MESSAGE", text: "Message", icon: "fa-regular fa-message" },
+  { id: "MESSAGE", text: "Notice", icon: "fa-regular fa-message" },
   {
     id: "PATIENT_CREATED",
     text: "Patient Created",
@@ -741,21 +741,26 @@ export const FACILITY_FEATURE_TYPES = [
   {
     id: 1,
     name: "CT Scan Facility",
+    icon: "circle-dot",
   },
   {
     id: 2,
     name: "Maternity Care",
+    icon: "person-breastfeeding",
   },
   {
     id: 3,
     name: "X-Ray facility",
+    icon: "x-ray",
   },
   {
     id: 4,
     name: "Neonatal care",
+    icon: "baby",
   },
   {
     id: 5,
     name: "Operation theater",
+    icon: "syringe",
   },
 ];

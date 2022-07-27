@@ -755,7 +755,7 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   )}
                 */}
-                {!id && state.form.suggestion === "A" && (
+                {state.form.suggestion === "A" && (
                   <>
                     <div className="flex">
                       <div className="flex-1" id="admission_date-div">
