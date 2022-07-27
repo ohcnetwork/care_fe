@@ -88,7 +88,6 @@ export default function ManageUsers() {
         last_name: qParams.last_name,
         phone_number: qParams.phone_number,
         alt_phone_number: qParams.alt_phone_number,
-        district_id: currentUser?.data?.district,
         user_type: qParams.user_type,
         district_id: qParams.district_id,
       };
