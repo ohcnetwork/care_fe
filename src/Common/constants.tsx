@@ -457,7 +457,7 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
 ];
 
 export const NOTIFICATION_EVENTS = [
-  { id: "MESSAGE", text: "Message", icon: "fa-regular fa-message" },
+  { id: "MESSAGE", text: "Notice", icon: "fa-regular fa-message" },
   {
     id: "PATIENT_CREATED",
     text: "Patient Created",
@@ -739,28 +739,28 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
 
 export const FACILITY_FEATURE_TYPES = [
   {
-    id : 1,
-    name : "CT Scan Facility",
-    icon : "circle-dot"
+    id: 1,
+    name: "CT Scan Facility",
+    icon: "circle-dot",
   },
   {
-    id : 2,
-    name : "Maternity Care",
-    icon : "person-breastfeeding"
+    id: 2,
+    name: "Maternity Care",
+    icon: "person-breastfeeding",
   },
   {
-    id : 3,
-    name : "X-Ray facility",
-    icon : "x-ray"
+    id: 3,
+    name: "X-Ray facility",
+    icon: "x-ray",
   },
   {
-    id : 4,
-    name : "Neonatal care",
-    icon : "baby"
+    id: 4,
+    name: "Neonatal care",
+    icon: "baby",
   },
   {
-    id : 5,
-    name : "Operation theater",
-    icon : "syringe"
-  }
+    id: 5,
+    name: "Operation theater",
+    icon: "syringe",
+  },
 ];
