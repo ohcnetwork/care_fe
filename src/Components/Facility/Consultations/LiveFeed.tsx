@@ -97,7 +97,9 @@ const LiveFeed = (props: any) => {
       Notification.Success({ msg: "Preset deleted successfully" });
       getBedPresets(cameraAsset.id);
     } else {
-      Notification.Error({ msg: "Failed to delete preset" });
+      Notification.Error({
+        msg: "Error while deleting Preset: " + (res?.data?.detail || ""),
+      });
     }
     setToDelete(null);
   };

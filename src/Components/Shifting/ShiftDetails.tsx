@@ -59,14 +59,19 @@ export default function ShiftDetails(props: { id: string }) {
   const handleShiftDelete = async () => {
     setOpenDeleteShiftDialog(true);
 
-    let res = await dispatch(deleteShiftRecord(props.id));
-    if (res.status >= 200) {
+    const res = await dispatch(deleteShiftRecord(props.id));
+    if (res?.status == 204) {
       Notification.Success({
         msg: "Shifting record has been deleted successfully.",
       });
+    } else {
+      Notification.Error({
+        msg:
+          "Error while deleting Shifting record: " + (res?.data?.detail || ""),
+      });
     }
 
-    navigate(`/shifting`);
+    navigate("/shifting");
   };
 
   const showCopyToclipBoard = (data: any) => {
