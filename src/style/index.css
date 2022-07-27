@@ -788,9 +788,11 @@ button:disabled,
   background: rgba(0, 0, 0, 0.4);
 }
 
-@media (max-width: 640px) {
-  .hideonmobilescreen {
-    display: none;
+@media (max-width:640px)
+  {
+    .hideonmobilescreen {
+            display: none;
+        }
   }
 
 @media (min-width:1000px)
