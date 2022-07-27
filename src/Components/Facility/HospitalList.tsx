@@ -380,9 +380,23 @@ export const HospitalList = (props: any) => {
                       </div>
                     </div>
                     <div className="flex gap-1 flex-wrap mt-2">
-                      {facility.features?.map((feature : number, i : number)=>(
-                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs" title={FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}>
-                          <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/>
+                      {facility.features?.map((feature: number, i: number) => (
+                        <div
+                          key={i}
+                          className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs"
+                          title={
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
+                        >
+                          <i
+                            className={`fas fa-${
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0].icon
+                            }`}
+                          />
                         </div>
                       ))}
                     </div>
@@ -449,17 +463,17 @@ export const HospitalList = (props: any) => {
                                     variant="outlined"
                                   />
                                 </div>
-                                <div className="flex flex-row justify-end">
+                                <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
                                   <button
                                     type="button"
-                                    className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
+                                    className="btn-danger btn mr-2 w-full md:w-auto"
                                     onClick={(_) => setModalFor(undefined)}
                                   >
                                     Cancel
                                   </button>
                                   <button
                                     type="submit"
-                                    className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
+                                    className="btn-primary btn mr-2 w-full md:w-auto"
                                   >
                                     Send Notification
                                   </button>
@@ -547,7 +561,7 @@ export const HospitalList = (props: any) => {
         />
 
         <div className="flex md:justify-end w-full md:mt-4">
-          <div>
+          <div className="w-full">
             <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
@@ -666,7 +680,7 @@ export const HospitalList = (props: any) => {
           </div>
         </div>
         <div className="flex my-4 gap-2 flex-wrap justify-between flex-grow">
-          <div className="w-72">
+          <div className="w-full">
             <InputSearchBox
               value={qParams.search}
               search={onSearchSuspects}
@@ -675,46 +689,42 @@ export const HospitalList = (props: any) => {
             />
           </div>
 
-          <div className="flex">
-            <div>
-              <div className="flex items-start mb-2">
-                <button
-                  className="btn btn-primary-ghost"
-                  onClick={() => setShowFilters(true)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="fill-current w-4 h-4 mr-2"
-                  >
-                    <line x1="8" y1="6" x2="21" y2="6"></line>
-                    <line x1="8" y1="12" x2="21" y2="12">
-                      {" "}
-                    </line>
-                    <line x1="8" y1="18" x2="21" y2="18">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="6" x2="3.01" y2="6">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="12" x2="3.01" y2="12">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="18" x2="3.01" y2="18">
-                      {" "}
-                    </line>
-                  </svg>
-                  <span>{t("advanced_filters")}</span>
-                </button>
-              </div>
-            </div>
+          <div className="flex items-start mb-2 w-full">
+            <button
+              className="btn btn-primary-ghost w-full"
+              onClick={() => setShowFilters(true)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="fill-current w-4 h-4 mr-2"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12">
+                  {" "}
+                </line>
+                <line x1="8" y1="18" x2="21" y2="18">
+                  {" "}
+                </line>
+                <line x1="3" y1="6" x2="3.01" y2="6">
+                  {" "}
+                </line>
+                <line x1="3" y1="12" x2="3.01" y2="12">
+                  {" "}
+                </line>
+                <line x1="3" y1="18" x2="3.01" y2="18">
+                  {" "}
+                </line>
+              </svg>
+              <span>{t("advanced_filters")}</span>
+            </button>
           </div>
         </div>
       </div>
