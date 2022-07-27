@@ -419,25 +419,6 @@ const LiveFeed = (props: any) => {
                         {option.label}
                       </button>
                     ))}
-                    {/* Page Number Next and Prev buttons */}
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={presetsPage < 10}
-                      onClick={() => {
-                        setPresetsPage(presetsPage - 10);
-                      }}
-                    >
-                      <i className="fas fa-arrow-left"></i>
-                    </button>
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={presetsPage >= presets.length}
-                      onClick={() => {
-                        setPresetsPage(presetsPage + 10);
-                      }}
-                    >
-                      <i className="fas fa-arrow-right"></i>
-                    </button>
                   </>
                 ) : (
                   <>
@@ -472,27 +453,53 @@ const LiveFeed = (props: any) => {
                         </button>
                       </div>
                     ))}
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={page.offset === 0}
-                      onClick={() => {
-                        handlePagination(page.offset - page.limit);
-                      }}
-                    >
-                      <i className="fas fa-arrow-left"></i>
-                    </button>
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={page.offset + page.limit >= page.count}
-                      onClick={() => {
-                        handlePagination(page.offset + page.limit);
-                      }}
-                    >
-                      <i className="fas fa-arrow-right"></i>
-                    </button>
                   </>
                 )}
               </div>
+              {/* Page Number Next and Prev buttons */}
+              {showDefaultPresets ? (
+                <div className="flex flex-row gap-1">
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={presetsPage < 10}
+                    onClick={() => {
+                      setPresetsPage(presetsPage - 10);
+                    }}
+                  >
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={presetsPage >= presets.length}
+                    onClick={() => {
+                      setPresetsPage(presetsPage + 10);
+                    }}
+                  >
+                    <i className="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-row gap-1">
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={page.offset === 0}
+                    onClick={() => {
+                      handlePagination(page.offset - page.limit);
+                    }}
+                  >
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={page.offset + page.limit >= page.count}
+                    onClick={() => {
+                      handlePagination(page.offset + page.limit);
+                    }}
+                  >
+                    <i className="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+              )}
               {props?.showRefreshButton && (
                 <button
                   className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full"
