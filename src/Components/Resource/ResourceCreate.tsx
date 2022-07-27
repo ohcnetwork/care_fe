@@ -263,7 +263,7 @@ export default function ResourceCreate(props: resourceProps) {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                 <div>
                   <InputLabel>Category</InputLabel>
                   <div className="py-4">
@@ -292,9 +292,37 @@ export default function ResourceCreate(props: resourceProps) {
                     />
                   </div>
                 </div>
+              </div>
+              <div className="">
+                <InputLabel>Request Title*</InputLabel>
+                <TextInputField
+                  rows={5}
+                  name="title"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Type your title here"
+                  value={state.form.title}
+                  onChange={handleChange}
+                  errors={state.errors.title}
+                />
+              </div>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                <div>
+                  <InputLabel>Required Quantity</InputLabel>
+                  <TextInputField
+                    name="requested_quantity"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.required_quantity}
+                    onChange={handleChange}
+                    errors=""
+                  />
+                </div>
                 <div>
                   <InputLabel>Is this an emergency?</InputLabel>
-                  <div className="py-4">
+                  <div className="py-2">
                     <SelectMenu
                       options={[
                         {
@@ -313,34 +341,6 @@ export default function ResourceCreate(props: resourceProps) {
                   <ErrorHelperText error={state.errors.emergency} />
                 </div>
               </div>
-              <div>
-                <InputLabel>Required Quantity</InputLabel>
-                <TextInputField
-                  name="requested_quantity"
-                  variant="outlined"
-                  margin="dense"
-                  type="number"
-                  value={state.form.required_quantity}
-                  onChange={handleChange}
-                  errors=""
-                />
-              </div>
-
-              <div className="">
-                <InputLabel>Request Title*</InputLabel>
-                <TextInputField
-                  rows={5}
-                  name="title"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Type your title here"
-                  value={state.form.title}
-                  onChange={handleChange}
-                  errors={state.errors.title}
-                />
-              </div>
-
               <div className="md:col-span-2">
                 <InputLabel>Description of request*</InputLabel>
                 <MultilineInputField
