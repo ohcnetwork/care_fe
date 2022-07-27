@@ -9,6 +9,7 @@ import {
   getUserList,
   getUserListFacility,
   deleteUser,
+  getDistrict,
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate, useQueryParams } from "raviger";
@@ -41,7 +42,9 @@ export default function ManageUsers() {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-
+  const [districtName, setDistrictName] = useState<string | undefined>(
+    undefined
+  );
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const isSuperuser = currentUser.data.is_superuser;
@@ -87,7 +90,16 @@ export default function ManageUsers() {
         alt_phone_number: qParams.alt_phone_number,
         district_id: currentUser?.data?.district,
         user_type: qParams.user_type,
+        district_id: qParams.district_id,
       };
+      if (qParams.district_id) {
+        const dis = await dispatch(getDistrict(qParams.district_id));
+        if (!status.aborted) {
+          if (dis && dis.data) {
+            setDistrictName(dis.data.name);
+          }
+        }
+      }
       const res = await dispatch(getUserList(params));
       if (!status.aborted) {
         if (res && res.data) {
@@ -107,6 +119,7 @@ export default function ManageUsers() {
       qParams.last_name,
       qParams.phone_number,
       qParams.alt_phone_number,
+      qParams.district_id,
     ]
   );
 
@@ -583,6 +596,9 @@ export default function ManageUsers() {
           : null}
         {qParams.user_type
           ? badge("Role", qParams.user_type, "user_type")
+          : null}
+        {qParams.district_id
+          ? badge("District", districtName, "district_id")
           : null}
       </div>
 
