@@ -492,6 +492,18 @@ export const setMinQuantity = (params: object, pathParams: object) => {
 export const getMinQuantity = (facilityId: object, params: object) => {
   return fireRequest("getMinQuantity", [facilityId, "min_quantity"], params);
 };
+
+export const getMinQuantityOfItem = (
+  facilityId: object,
+  externalId: object
+) => {
+  return fireRequest("getMinQuantity", [
+    facilityId,
+    "min_quantity",
+    externalId,
+  ]);
+};
+
 export const updateMinQuantity = (pathParams: object, params: object) => {
   return fireRequest("updateMinQuantity", [], pathParams, params);
 };
@@ -522,8 +534,15 @@ export const dischargePatient = (params: object, pathParams: object) => {
 };
 
 //Profile
-export const getUserDetails = (username: string, suppress? : true) => {
-  return fireRequest("getUserDetails", [], {}, { username: username }, undefined, suppress);
+export const getUserDetails = (username: string, suppress?: true) => {
+  return fireRequest(
+    "getUserDetails",
+    [],
+    {},
+    { username: username },
+    undefined,
+    suppress
+  );
 };
 export const updateUserDetails = (username: string, data: object) => {
   return fireRequest("updateUserDetails", [username], data);
