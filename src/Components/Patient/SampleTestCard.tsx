@@ -119,22 +119,6 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
                 : "Not Available"}
             </div>
           </div>
-
-          {itemData.status === "APPROVED" && (
-            <div className="flex justify-center items-center">
-              <Button
-                style={{ color: "green" }}
-                className="w-full md:w-auto"
-                variant="outlined"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleApproval(4, itemData);
-                }}
-              >
-                Send to Collection Centre
-              </Button>
-            </div>
-          )}
         </div>
         <div className="flex flex-col mt-6 gap-2">
           {
@@ -159,18 +143,29 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             )}
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap justify-between w-full gap-4">
-          <button
-            onClick={(e) => navigate(`/sample/${itemData.id}`)}
-            className="w-full md:w-auto px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
-          >
-            Sample Report
-          </button>
+        <div className="mt-4 flex flex-wrap w-full gap-4">
+          {itemData.status === "APPROVED" && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApproval(4, itemData);
+              }}
+              className="w-full md:w-auto px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+            >
+              Send to Collection Centre
+            </button>
+          )}
           <button
             onClick={(e) => showUpdateStatus(itemData)}
             className="w-full md:w-auto px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           >
             UPDATE SAMPLE TEST STATUS
+          </button>
+          <button
+            onClick={(e) => navigate(`/sample/${itemData.id}`)}
+            className="w-full md:w-auto px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+          >
+            Sample Report
           </button>
         </div>
       </CardContent>
