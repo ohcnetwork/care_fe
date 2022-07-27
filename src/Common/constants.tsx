@@ -14,19 +14,19 @@ export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
 export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
 export const USER_TYPES: Array<string> = [
-  "Volunteer",
   "Pharmacist",
+  "Volunteer",
   "StaffReadOnly",
   "Staff",
   "Doctor",
   "WardAdmin",
   "LocalBodyAdmin",
-  "DistrictReadOnlyAdmin",
   "DistrictLabAdmin",
+  "DistrictReadOnlyAdmin",
   "DistrictAdmin",
   "StateLabAdmin",
-  "StateAdmin",
   "StateReadOnlyAdmin",
+  "StateAdmin",
 ];
 
 export const DOWNLOAD_TYPES: Array<string> = [
