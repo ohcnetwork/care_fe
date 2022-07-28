@@ -49,6 +49,7 @@ const LinkFacilityDialog = (props: Props & WithStyles<typeof styles>) => {
           <FacilitySelect
             multiple={false}
             name="facility"
+            showAll={false} // Show only facilities that user has access to link (not all facilities)
             selected={facility}
             setSelected={setFacility}
             errors=""
@@ -59,7 +60,12 @@ const LinkFacilityDialog = (props: Props & WithStyles<typeof styles>) => {
         <Button onClick={cancelClicked} color="secondary">
           Cancel
         </Button>
-        <Button color="primary" onClick={okClicked} autoFocus>
+        <Button
+          color="primary"
+          disabled={!facility}
+          onClick={okClicked}
+          autoFocus
+        >
           Add
         </Button>
       </DialogActions>
