@@ -299,13 +299,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        // case "category":
-        //   if (!state.form[field] || !state.form[field].length) {
-        //     errors[field] = "Please select the category";
-        //     if (!error_div) error_div = field;
-        //     invalidForm = true;
-        //   }
-        //   return;
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
@@ -764,7 +757,7 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   )}
                 */}
-                {!id && state.form.suggestion === "A" && (
+                {state.form.suggestion === "A" && (
                   <>
                     <div className="flex">
                       <div className="flex-1" id="admission_date-div">
@@ -952,6 +945,7 @@ export const ConsultationForm = (props: any) => {
                     selectedUser={state.form.assigned_to_object}
                     onSelect={handleDoctorSelect}
                     user_type={"Doctor"}
+                    outline={false}
                   />
                 </div>
               )}
