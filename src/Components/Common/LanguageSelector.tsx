@@ -20,7 +20,7 @@ export const LanguageSelector = (props: any) => {
   };
 
   return (
-    <div className="flex items-center relative w-full">
+    <div className="flex justify-end items-center relative w-full">
       <select
         className={clsx(
           props.className,
