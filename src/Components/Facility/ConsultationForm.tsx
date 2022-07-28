@@ -299,13 +299,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        // case "category":
-        //   if (!state.form[field] || !state.form[field].length) {
-        //     errors[field] = "Please select the category";
-        //     if (!error_div) error_div = field;
-        //     invalidForm = true;
-        //   }
-        //   return;
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
@@ -830,7 +823,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="verified_by-div">
-              <InputLabel id="exam-details-label">Verified By</InputLabel>
+                <InputLabel id="exam-details-label">Verified By</InputLabel>
                 <MultilineInputField
                   rows={3}
                   name="verified_by"
@@ -943,6 +936,7 @@ export const ConsultationForm = (props: any) => {
                     selectedUser={state.form.assigned_to_object}
                     onSelect={handleDoctorSelect}
                     user_type={"Doctor"}
+                    outline={false}
                   />
                 </div>
               )}

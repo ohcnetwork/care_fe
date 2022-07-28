@@ -1468,6 +1468,7 @@ export const PatientHome = (props: any) => {
               }
               onSelect={handleVolunteerSelect}
               user_type={"Volunteer"}
+              outline={false}
             />
             <ErrorHelperText error={errors.assignedVolunteer} />
           </div>
