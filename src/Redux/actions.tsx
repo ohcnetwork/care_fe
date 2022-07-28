@@ -25,6 +25,10 @@ export const postForgotPassword = (form: object) => {
   return fireRequest("forgotPassword", [], form);
 };
 
+export const updateUserPassword = (form: object) => {
+  return fireRequest("updatePassword", [], form);
+};
+
 export const getUserPnconfig = (pathParams: object) => {
   return fireRequest("getUserPnconfig", [], {}, pathParams);
 };
@@ -171,6 +175,16 @@ export const updateAssetBed = (
     }
   );
 
+export const deleteAssetBed = (asset_id: string) =>
+  fireRequest(
+    "deleteAssetBed",
+    [],
+    {},
+    {
+      external_id: asset_id,
+    }
+  );
+
 // Facility Beds
 export const listFacilityBeds = (params: object) =>
   fireRequest("listFacilityBeds", [], params, {});
@@ -294,6 +308,9 @@ export const createDoctor = (
   return id
     ? fireRequest("updateDoctor", [id], params, pathParam)
     : fireRequest("createDoctor", [], params, pathParam);
+};
+export const deleteDoctor = (id: number, pathParam: object) => {
+  return fireRequest("deleteDoctor", [id], {}, pathParam);
 };
 export const createTriageForm = (params: object, pathParam: object) => {
   return fireRequest("createTriage", [], params, pathParam);
@@ -479,6 +496,18 @@ export const setMinQuantity = (params: object, pathParams: object) => {
 export const getMinQuantity = (facilityId: object, params: object) => {
   return fireRequest("getMinQuantity", [facilityId, "min_quantity"], params);
 };
+
+export const getMinQuantityOfItem = (
+  facilityId: object,
+  externalId: object
+) => {
+  return fireRequest("getMinQuantity", [
+    facilityId,
+    "min_quantity",
+    externalId,
+  ]);
+};
+
 export const updateMinQuantity = (pathParams: object, params: object) => {
   return fireRequest("updateMinQuantity", [], pathParams, params);
 };
@@ -509,8 +538,15 @@ export const dischargePatient = (params: object, pathParams: object) => {
 };
 
 //Profile
-export const getUserDetails = (username: string) => {
-  return fireRequest("getUserDetails", [], {}, { username: username });
+export const getUserDetails = (username: string, suppress?: true) => {
+  return fireRequest(
+    "getUserDetails",
+    [],
+    {},
+    { username: username },
+    undefined,
+    suppress
+  );
 };
 export const updateUserDetails = (username: string, data: object) => {
   return fireRequest("updateUserDetails", [username], data);
