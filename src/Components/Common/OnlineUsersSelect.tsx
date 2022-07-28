@@ -94,21 +94,11 @@ export const OnlineUsersSelect = (props: Props) => {
                 name="searchTerm"
                 type="text"
                 placeholder="Search by name or username"
-                className={
-                  !outline
-                    ? ` ${clsx(
-                        "py-2 pl-3 w-full focus:outline-none ring-transparent border-transparent",
-                        {
-                          hidden: !isDropdownExpanded,
-                        }
-                      )}`
-                    : `${clsx(
-                        "py-2 pl-3 w-full focus:outline-none focus:ring-primary-500 focus:border-primary-500",
-                        {
-                          hidden: !isDropdownExpanded,
-                        }
-                      )} `
-                }
+                className={clsx(
+                 "py-2 pl-3 w-full focus:outline-none",
+                 outline ? "focus:ring-primary-500 focus:border-primary-500" : "ring-transparent border-transparent",
+                 !isDropdownExpanded && "hidden"
+                )}
                 value={searchTerm}
                 onChange={(e) =>
                   setState({ ...state, searchTerm: e.target.value })
