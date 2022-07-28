@@ -218,6 +218,7 @@ export const DISCHARGE_REASONS = [
   { id: "REC", text: "Recovered" },
   { id: "EXP", text: "Expired" },
   { id: "REF", text: "Referred" },
+  { id: "LAMA", text: "LAMA" },
 ];
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
