@@ -462,7 +462,10 @@ export default function NotificationsList({
                   value={eventFilter}
                   options={[
                     { id: "", text: "Show All" },
-                    ...NOTIFICATION_EVENTS,
+                    ...NOTIFICATION_EVENTS.map((i) => {
+                      if (i.id === "MESSAGE") return { ...i, text: "Notices" };
+                      return i;
+                    }),
                   ]}
                   onChange={(e: any) => setEventFilter(e.target.value)}
                 />

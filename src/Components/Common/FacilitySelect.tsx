@@ -83,6 +83,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     <AutoCompleteAsyncField
       name={name}
       multiple={multiple}
+      autoSelect={false}
       variant="outlined"
       margin={margin}
       value={selected}

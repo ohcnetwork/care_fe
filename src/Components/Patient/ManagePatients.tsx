@@ -555,7 +555,9 @@ export const PatientManager = (props: any) => {
                   text={patient.disease_status}
                 />
               )}
-              {patient.is_antenatal && patient.is_active && (
+              {patient.gender === 2 &&
+                patient.is_antenatal &&
+                patient.is_active && (
                 <Badge color="blue" icon="baby-carriage" text="Antenatal" />
               )}
               {patient.is_medical_worker && patient.is_active && (
@@ -742,7 +744,7 @@ export const PatientManager = (props: any) => {
             />
           </div>
         </div>
-        <div>
+        <div className="flex flex-col-reverse md:flex-col">
           <div>
             <div className="md:flex items-end gap-2 mb-2">
               <button
