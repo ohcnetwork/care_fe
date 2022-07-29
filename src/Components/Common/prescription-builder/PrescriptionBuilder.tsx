@@ -138,11 +138,11 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                             
                                     </div>
                                             
-                                    <div className="w-[80px]">
+                                    <div className="w-[65px] shrink-0">
                                         Days
                                         <input 
                                             type="number"
-                                            className="border w-[80px] focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                                            className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                                             value={prescription.days}
                                             placeholder="Days"
                                             min={0}
