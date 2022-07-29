@@ -173,7 +173,6 @@ export const UserAdd = (props: UserProps) => {
   const userIndex = USER_TYPES.indexOf(userType);
 
   const defaultAllowedUserTypes = USER_TYPES.slice(0, userIndex + 1);
-
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : userType === "StaffReadOnly"
@@ -205,7 +204,17 @@ export const UserAdd = (props: UserProps) => {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
         if (districtList) {
-          setDistricts([...initialDistricts, ...districtList.data]);
+          if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
+            setDistricts([
+              ...initialDistricts,
+              {
+                id: currentUser.data.district,
+                name: currentUser.data.district_object.name,
+              },
+            ]);
+          } else {
+            setDistricts([...initialDistricts, ...districtList.data]);
+          }
         }
         setIsDistrictLoading(false);
       } else {
@@ -224,7 +233,17 @@ export const UserAdd = (props: UserProps) => {
         );
         setIsLocalbodyLoading(false);
         if (localBodyList) {
-          setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+          if (userIndex <= USER_TYPES.indexOf("LocalBodyAdmin")) {
+            setLocalBody([
+              ...initialLocalbodies,
+              {
+                id: currentUser.data.local_body,
+                name: currentUser.data.local_body_object.name,
+              },
+            ]);
+          } else {
+            setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+          }
         }
       } else {
         setLocalBody(selectDistrict);
@@ -272,7 +291,17 @@ export const UserAdd = (props: UserProps) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        setStates([...initialStates, ...statesRes.data.results]);
+        if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
+          setStates([
+            ...initialStates,
+            {
+              id: currentUser.data.state,
+              name: currentUser.data.state_object.name,
+            },
+          ]);
+        } else {
+          setStates([...initialStates, ...statesRes.data.results]);
+        }
       }
       setIsStateLoading(false);
     },
@@ -534,7 +563,12 @@ export const UserAdd = (props: UserProps) => {
 
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
-      if (res && (res.data || res.data === "") && res.status >= 200 && res.status < 300) {
+      if (
+        res &&
+        (res.data || res.data === "") &&
+        res.status >= 200 &&
+        res.status < 300
+      ) {
         // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
