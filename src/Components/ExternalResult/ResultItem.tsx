@@ -32,15 +32,19 @@ export default function ResultItem(props: any) {
   );
 
   const handleDelete = async () => {
-    let res = await dispatch(deleteExternalResult(props.id));
-    if (res.status >= 200) {
+    const res = await dispatch(deleteExternalResult(props.id));
+    if (res?.status === 204) {
       Notification.Success({
         msg: "Record has been deleted successfully.",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while deleting record: " + (res?.data?.detail || ""),
       });
     }
 
     setShowDeleteAlert(false);
-    navigate(`/external_results`);
+    navigate("/external_results");
   };
 
   useAbortableEffect(
