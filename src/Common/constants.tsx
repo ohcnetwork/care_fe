@@ -755,6 +755,7 @@ export const FACILITY_FEATURE_TYPES = [
     icon : "x-ray"
   },
   {
+    id : 4,
     name : "Neonatal Care",
     icon : "baby"
   },
