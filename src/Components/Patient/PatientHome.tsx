@@ -628,9 +628,11 @@ export const PatientHome = (props: any) => {
                 ) : (
                   <Badge color="primary" icon="lock" text="Transfer Blocked" />
                 )}
-                {patientData.is_antenatal && patientData.is_active && (
-                  <Badge color="blue" icon="baby-carriage" text="Antenatal" />
-                )}
+                {patientData.gender === 2 &&
+                  patientData.is_antenatal &&
+                  patientData.is_active && (
+                    <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+                  )}
                 {patientData.contact_with_confirmed_carrier && (
                   <Badge
                     color="red"
@@ -1061,6 +1063,7 @@ export const PatientHome = (props: any) => {
               {!patientData.present_health &&
                 !patientData.allergies &&
                 !patientData.ongoing_medication &&
+                patientData.gender === 2 &&
                 !patientData.is_antenatal && (
                   <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
                     No Medical History Available
@@ -1097,7 +1100,7 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
-                {patientData.is_antenatal && (
+                {patientData.gender === 2 && patientData.is_antenatal && (
                   <div className="sm:col-span-1">
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Is pregnant
@@ -1469,6 +1472,7 @@ export const PatientHome = (props: any) => {
               }
               onSelect={handleVolunteerSelect}
               user_type={"Volunteer"}
+              outline={false}
             />
             <ErrorHelperText error={errors.assignedVolunteer} />
           </div>
