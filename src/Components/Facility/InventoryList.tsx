@@ -72,7 +72,10 @@ export default function InventoryList(props: any) {
     inventoryList = inventory.map((inventoryItem: any) => (
       <tr
         key={inventoryItem.id}
-        className={clsx("cursor-pointer hover:bg-gray-200", inventoryItem.is_low ? "bg-red-100" : "bg-white")}
+        className={clsx(
+          "cursor-pointer hover:bg-gray-200",
+          inventoryItem.is_low ? "bg-red-100" : "bg-white"
+        )}
         onClick={() =>
           navigate(
             `/facility/${facilityId}/inventory/${inventoryItem.item_object?.id}`
