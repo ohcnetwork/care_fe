@@ -19,6 +19,7 @@ type Props = {
   userId: string;
   onSelect: (user: UserModel | null) => void;
   user_type: string;
+  outline?: boolean;
 };
 
 const initialState: UserFetchState = {
@@ -30,7 +31,7 @@ const initialState: UserFetchState = {
 
 export const OnlineUsersSelect = (props: Props) => {
   const dispatchAction: any = useDispatch();
-  const { selectedUser, userId, onSelect, user_type } = props;
+  const { selectedUser, userId, onSelect, user_type, outline } = props;
   const [state, setState] = useState(initialState);
   const { loading, users, searchTerm, searchFieldRef } = state;
   const [isDropdownExpanded, setDropdownExpand] = useState(false);
@@ -86,7 +87,7 @@ export const OnlineUsersSelect = (props: Props) => {
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-labelledby="listbox-label"
-              className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:ring-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+              className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:ring-green-500 focus:border-green-500 transition ease-in-out duration-150 sm:text-sm sm:leading-5"
             >
               <input
                 ref={searchFieldRef}
@@ -94,10 +95,9 @@ export const OnlineUsersSelect = (props: Props) => {
                 type="text"
                 placeholder="Search by name or username"
                 className={clsx(
-                  "py-2 pl-3 w-full outline-none ring-transparent border-transparent",
-                  {
-                    hidden: !isDropdownExpanded,
-                  }
+                 "py-2 pl-3 w-full focus:outline-none",
+                 outline ? "focus:ring-primary-500 focus:border-primary-500" : "ring-transparent border-transparent",
+                 !isDropdownExpanded && "hidden"
                 )}
                 value={searchTerm}
                 onChange={(e) =>
