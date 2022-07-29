@@ -4,7 +4,11 @@ import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import loadable from "@loadable/component";
-import { listAssetBeds, partialUpdateAssetBed } from "../../../Redux/actions";
+import {
+  listAssetBeds,
+  partialUpdateAssetBed,
+  deleteAssetBed,
+} from "../../../Redux/actions";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { getCameraPTZ } from "../../../Common/constants";
 import {
@@ -14,8 +18,9 @@ import {
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
-import { Tooltip } from "@material-ui/core";
+import { Card, CardContent, Modal, Tooltip } from "@material-ui/core";
 import { FeedCameraPTZHelpButton } from "./Feed";
+import { isNull } from "lodash";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -33,9 +38,10 @@ const LiveFeed = (props: any) => {
   const dispatch: any = useDispatch();
   const [page, setPage] = useState({
     count: 0,
-    limit: 10,
+    limit: 8,
     offset: 0,
   });
+  const [toDelete, setToDelete] = useState<any>(null);
 
   const liveFeedPlayerRef = useRef<any>(null);
 
@@ -83,6 +89,19 @@ const LiveFeed = (props: any) => {
       ...page,
       count: bedAssets?.data?.count,
     });
+  };
+
+  const deletePreset = async (id: any) => {
+    const res = await dispatch(deleteAssetBed(id));
+    if (res?.status === 204) {
+      Notification.Success({ msg: "Preset deleted successfully" });
+      getBedPresets(cameraAsset.id);
+    } else {
+      Notification.Error({
+        msg: "Error while deleting Preset: " + (res?.data?.detail || ""),
+      });
+    }
+    setToDelete(null);
   };
 
   const gotoBedPreset = (preset: any) => {
@@ -214,6 +233,33 @@ const LiveFeed = (props: any) => {
     <div className="mt-4 px-6 mb-2">
       <PageTitle title="Live Feed" hideBack={true} />
 
+      {toDelete && (
+        <Modal
+          className="flex h-fit justify-center items-center top-1/2"
+          open={!isNull(toDelete)}
+        >
+          <Card>
+            <CardContent>
+              <h5>
+                Confirm delete preset: {toDelete.meta.preset_name} (in bed:{" "}
+                {toDelete.bed_object.name})?
+              </h5>
+              <hr />
+              <div className="flex gap-3 justify-end mt-2">
+                <button
+                  className="bg-red-500 px-3 text-sm py-1 rounded-md text-white"
+                  onClick={() => deletePreset(toDelete.id)}
+                >
+                  Confirm
+                </button>
+                <button className="text-sm" onClick={() => setToDelete(null)}>
+                  Cancel
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </Modal>
+      )}
       <div className="mt-4 flex flex-col">
         <div className="flex flex-col lg:flex-row gap-4 mt-4 relative">
           <div className="flex-1">
@@ -373,71 +419,87 @@ const LiveFeed = (props: any) => {
                         {option.label}
                       </button>
                     ))}
-                    {/* Page Number Next and Prev buttons */}
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={presetsPage < 10}
-                      onClick={() => {
-                        setPresetsPage(presetsPage - 10);
-                      }}
-                    >
-                      <i className="fas fa-arrow-left"></i>
-                    </button>
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={presetsPage >= presets.length}
-                      onClick={() => {
-                        setPresetsPage(presetsPage + 10);
-                      }}
-                    >
-                      <i className="fas fa-arrow-right"></i>
-                    </button>
                   </>
                 ) : (
                   <>
                     {bedPresets?.map((preset: any, index: number) => (
-                      <button
-                        key={preset.id}
-                        className="flex flex-col bg-green-100 border border-white rounded-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
-                        onClick={() => {
-                          setLoading("Moving");
-                          gotoBedPreset(preset);
-                          setCurrentPreset(preset);
-                          getBedPresets(cameraAsset?.id);
-                          getPresets({});
-                        }}
-                      >
-                        <span className="justify-start text-xs font-semibold">
-                          {preset.bed_object.name}
-                        </span>
-                        <span className="mx-auto">
-                          {preset.meta.preset_name
-                            ? preset.meta.preset_name
-                            : `Unnamed Preset ${index + 1}`}
-                        </span>
-                      </button>
+                      <div className="flex flex-col">
+                        <button
+                          key={preset.id}
+                          className="flex flex-col bg-green-100 border border-white rounded-t-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
+                          onClick={() => {
+                            setLoading("Moving");
+                            gotoBedPreset(preset);
+                            setCurrentPreset(preset);
+                            getBedPresets(cameraAsset?.id);
+                            getPresets({});
+                          }}
+                        >
+                          <span className="justify-start text-xs font-semibold">
+                            {preset.bed_object.name}
+                          </span>
+                          <span className="mx-auto">
+                            {preset.meta.preset_name
+                              ? preset.meta.preset_name
+                              : `Unnamed Preset ${index + 1}`}
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setToDelete(preset)}
+                          className="text-red-800 text-sm py-1 bg-red-200 justify-center items-center gap-2 flex hover:bg-red-800 hover:text-red-200 rounded-b-md"
+                        >
+                          <i className="fa-solid fa-trash-can"></i>
+                          <span>Delete</span>
+                        </button>
+                      </div>
                     ))}
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={page.offset === 0}
-                      onClick={() => {
-                        handlePagination(page.offset - page.limit);
-                      }}
-                    >
-                      <i className="fas fa-arrow-left"></i>
-                    </button>
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={page.offset + page.limit >= page.count}
-                      onClick={() => {
-                        handlePagination(page.offset + page.limit);
-                      }}
-                    >
-                      <i className="fas fa-arrow-right"></i>
-                    </button>
                   </>
                 )}
               </div>
+              {/* Page Number Next and Prev buttons */}
+              {showDefaultPresets ? (
+                <div className="flex flex-row gap-1">
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={presetsPage < 10}
+                    onClick={() => {
+                      setPresetsPage(presetsPage - 10);
+                    }}
+                  >
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={presetsPage >= presets.length}
+                    onClick={() => {
+                      setPresetsPage(presetsPage + 10);
+                    }}
+                  >
+                    <i className="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-row gap-1">
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={page.offset === 0}
+                    onClick={() => {
+                      handlePagination(page.offset - page.limit);
+                    }}
+                  >
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={page.offset + page.limit >= page.count}
+                    onClick={() => {
+                      handlePagination(page.offset + page.limit);
+                    }}
+                  >
+                    <i className="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+              )}
               {props?.showRefreshButton && (
                 <button
                   className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full"
