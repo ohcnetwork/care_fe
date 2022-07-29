@@ -617,7 +617,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="flex md:flex-row flex-col">
             <div className="md:w-2/3">
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
-              <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row">
+              <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
                 <TeleICUPatientVitalsCard patient={patientData} />
                 {/*<TeleICUPatientVitalsGraphCard
                   consultationId={patientData.last_consultation?.id}

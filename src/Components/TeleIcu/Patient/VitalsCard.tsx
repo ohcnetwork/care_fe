@@ -117,11 +117,11 @@ export default function TeleICUPatientVitalsCard({
 
   return (
     <div className=" w-full">
-      <div className="flex w-full items-stretch">
-        <div className="w-full flex items-stretch py-3 px-5">
+      <div className="flex w-full items-stretch flex-col md:flex-row">
+        <div className="w-full flex items-stretch py-3 px-5 bg-black h-[50vw] md:h-auto text-gray-400">
           { waveform ? <Waveform wave = {waveform} /> : (
             <div className="h-full w-full flex items-center justify-center">
-              <div className="text-center w-[150px]">
+              <div className="text-center w-[150px] text-gray-800">
                 <i className="fas fa-plug-circle-exclamation text-4xl mb-4" />
                 <div>
                   No Live data at the moment!
@@ -130,22 +130,22 @@ export default function TeleICUPatientVitalsCard({
             </div>
           )}
         </div>
-        <div className="flex flex-col w-[220px] border-l border-l-gray-400 p-3">
+        <div className="flex flex-row md:flex-col w-full md:w-[220px] border-l border-l-gray-400 p-3 justify-between md:justify-start">
           {
             vitals.map((vital, i)=>{
               const liveReading = getVital(patientObservations, vital[1])
               return (
                 <div key={i} className="p-2">
-                  <h2 className="font-bold text-3xl">
+                  <h2 className="font-bold text-xl md:text-3xl">
                     {liveReading
                     || (
                       vital[2] === "bp" ? 
-                      `${patient.last_consultation?.last_daily_round?.bp.systolic}/${patient.last_consultation?.last_daily_round?.bp.diastolic}` : 
+                      `${patient.last_consultation?.last_daily_round?.bp.systolic || "--"}/${patient.last_consultation?.last_daily_round?.bp.diastolic || "--"}` : 
                       patient.last_consultation?.last_daily_round?.[vital[2] || ""]
                       )
                     || "--"}
                   </h2>
-                  <div>
+                  <div className="text-xs md:text-base">
                     <i className={`fas fa-circle text-xs mr-2 ${liveReading ? "text-green-600" : "text-gray-600"}`} />
                     {vital[0]}
                   </div>
