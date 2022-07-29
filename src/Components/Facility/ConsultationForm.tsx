@@ -1016,7 +1016,7 @@ export const ConsultationForm = (props: any) => {
               {/* End of Telemedicine fields */}
               <div className="mt-4 sm:flex grid sm:justify-between">
                 <button
-                  className="btn text-gray-900 bg-gray-200 border border-gray-300 focus:outline-none hover:bg-gray-400  font-medium  text-sm px-5 py-2.5 mt-2"
+                  className="btn btn-default font-medium  text-sm px-5 py-2.5 mt-2"
                   type="button"
                   onClick={() =>
                     navigate(`/facility/${facilityId}/patient/${patientId}`)
