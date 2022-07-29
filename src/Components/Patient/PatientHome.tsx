@@ -147,7 +147,7 @@ export const PatientHome = (props: any) => {
   function Badge(props: { color: string; icon: string; text: string }) {
     return (
       <span
-        className="inline-flex items-center py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+        className="inline-flex m-2 items-center py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
         title={props.text}
       >
         <i
@@ -1059,7 +1059,7 @@ export const PatientHome = (props: any) => {
               {!patientData.present_health &&
                 !patientData.allergies &&
                 !patientData.ongoing_medication &&
-                patientData.gender === 2 &&
+                // patientData.gender === 2 &&
                 !patientData.is_antenatal && (
                   <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
                     No Medical History Available
