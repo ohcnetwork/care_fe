@@ -25,6 +25,10 @@ export const postForgotPassword = (form: object) => {
   return fireRequest("forgotPassword", [], form);
 };
 
+export const updateUserPassword = (form: object) => {
+  return fireRequest("updatePassword", [], form);
+};
+
 export const getUserPnconfig = (pathParams: object) => {
   return fireRequest("getUserPnconfig", [], {}, pathParams);
 };
@@ -492,6 +496,18 @@ export const setMinQuantity = (params: object, pathParams: object) => {
 export const getMinQuantity = (facilityId: object, params: object) => {
   return fireRequest("getMinQuantity", [facilityId, "min_quantity"], params);
 };
+
+export const getMinQuantityOfItem = (
+  facilityId: object,
+  externalId: object
+) => {
+  return fireRequest("getMinQuantity", [
+    facilityId,
+    "min_quantity",
+    externalId,
+  ]);
+};
+
 export const updateMinQuantity = (pathParams: object, params: object) => {
   return fireRequest("updateMinQuantity", [], pathParams, params);
 };
