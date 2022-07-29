@@ -437,35 +437,35 @@ export const ConsultationDetails = (props: any) => {
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
-          <div className="lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+          <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
-              <div className="px-2">
+              <div className="w-full flex flex-col sm:flex-row px-2">
                 <button
                   onClick={() => setShowDoctors(true)}
-                  className="btn m-1 btn-primary hover:text-white"
+                  className="w-full btn m-1 btn-primary hover:text-white"
                 >
                   Doctor Connect
                 </button>
                 {patientData.last_consultation?.id && (
                   <Link
                     href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
-                    className="btn m-1 btn-primary hover:text-white"
+                    className="w-full btn m-1 btn-primary hover:text-white"
                   >
                     Camera Feed
                   </Link>
                 )}
               </div>
             )}
-            <div className="px-2">
+            <div className="w-full flex flex-col sm:flex-row px-2">
               <Link
                 href={`/facility/${patientData.facility}/patient/${patientData.id}`}
-                className="btn m-1 btn-primary hover:text-white"
+                className="w-full btn m-1 btn-primary hover:text-white"
               >
                 Patient Details
               </Link>
               <Link
                 href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
-                className="btn m-1 btn-primary hover:text-white"
+                className="w-full btn m-1 btn-primary hover:text-white"
               >
                 Doctor&apos;s Notes
               </Link>

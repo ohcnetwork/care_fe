@@ -35,23 +35,23 @@ export default function SelectMenu<T>(props: Props<T>) {
         <>
           <Listbox.Label className="sr-only">{props.label}</Listbox.Label>
           <div className="relative">
-            <div className="inline-flex shadow-sm rounded-md divide-x divide-primary-600">
+            <Listbox.Button className="inline-flex shadow-sm rounded-md divide-x divide-primary-600">
               <div className="relative z-0 inline-flex shadow-sm rounded-md divide-x divide-primary-600">
-                <div className="relative inline-flex items-center bg-primary-500 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white">
+                <div className="relative inline-flex items-center bg-primary-500 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white hover:bg-primary-600 focus:outline-none focus:z-10">
                   {selected.value && (
                     <Check className="h-5 w-5" aria-hidden="true" />
                   )}
                   <p className="ml-2.5 text-sm font-medium">{selected.title}</p>
                 </div>
-                <Listbox.Button className="relative inline-flex items-center bg-primary-500 p-2 rounded-l-none rounded-r-md text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:z-10 ">
+                <div className="relative inline-flex items-center bg-primary-500 p-2 rounded-l-none rounded-r-md text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:z-10 ">
                   <span className="sr-only">Change published status</span>
                   <KeyboardArrowDown
                     className="h-5 w-5 text-white"
                     aria-hidden="true"
                   />
-                </Listbox.Button>
+                </div>
               </div>
-            </div>
+            </Listbox.Button>
 
             <Transition
               show={open}
