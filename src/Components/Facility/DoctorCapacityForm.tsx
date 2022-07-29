@@ -294,7 +294,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     Cancel
                   </Button>
                 </Grid>
-                <Grid item className="flex flex-row gap-4">
+                <Grid item className="flex flex-row gap-4 flex-wrap">
                   {!isLastOptionType && (
                     <Button
                       id="doctor-save-and-exit"
