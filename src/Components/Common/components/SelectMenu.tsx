@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { Check, KeyboardArrowDown } from "@material-ui/icons";
-import classNames from "classnames";
+import clsx from "clsx";
 
 type Props<T> = {
   options: {
@@ -62,7 +62,7 @@ export default function SelectMenu<T>(props: Props<T>) {
               leaveTo="opacity-0"
             >
               <Listbox.Options
-                className={classNames(
+                className={clsx(
                   `${props.position ?? "left"}-0`,
                   "origin-top-right absolute z-10 mt-2 w-72 rounded-md shadow-lg overflow-hidden bg-white divide-y divide-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none"
                 )}
@@ -71,7 +71,7 @@ export default function SelectMenu<T>(props: Props<T>) {
                   <Listbox.Option
                     key={option.title}
                     className={({ active }) =>
-                      classNames(
+                      clsx(
                         active ? "text-white bg-primary-500" : "text-gray-900",
                         "cursor-default select-none relative p-4 text-sm"
                       )
@@ -82,9 +82,9 @@ export default function SelectMenu<T>(props: Props<T>) {
                       <div className="flex flex-col">
                         <div className="flex justify-between">
                           <p
-                            className={
+                            className={clsx(
                               selected ? "font-semibold" : "font-normal"
-                            }
+                            )}
                           >
                             {option.title}
                           </p>
@@ -100,7 +100,7 @@ export default function SelectMenu<T>(props: Props<T>) {
                         </div>
                         {option.description && (
                           <p
-                            className={classNames(
+                            className={clsx(
                               active ? "text-primary-200" : "text-gray-500",
                               "mt-2"
                             )}
