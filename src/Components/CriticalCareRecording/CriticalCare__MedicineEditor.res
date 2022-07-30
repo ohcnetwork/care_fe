@@ -68,17 +68,53 @@ let errorCB = (send, _error) => {
   send(ClearSaving)
 }
 
-let saveData = (id, consultationId, state, send, updateCB) => {
-  send(SetSaving)
-  updateDailyRound(
-    consultationId,
-    id,
-    Js.Json.object_(makePayload(state)),
-    successCB(send, updateCB),
-    errorCB(send),
-  )
+let validateMedicines = (prescriptions: array<Prescription__Prescription.t>) => {
+  let error = prescriptions |> Js.Array.find(prescription => {
+    let medicine = prescription |> Prescription__Prescription.medicine
+    let dosage = prescription |> Prescription__Prescription.dosage
+    let dosage_new = prescription |> Prescription__Prescription.dosage_new |> Js.String.split(" ")
+    let dosage_invalid = switch dosage_new |> Js.Array.length == 2 {
+    | true => {
+        let dosage_value =
+          dosage_new->Js.Array.unsafe_get(0) |> Js.String.replaceByRe(%re("/\D/g"), "")
+        let dosage_unit = dosage_new->Js.Array.unsafe_get(1)
+        dosage_value == "" || dosage_unit == ""
+      }
+    | false => true
+    }
+    let invalid =
+      medicine == "" || medicine == " " || dosage == "" || dosage == " " || dosage_invalid
+    switch invalid {
+    | true => {
+        Notifications.error({
+          msg: "Medicine, Dosage and Frequency are mandatory for Prescriptions.",
+        })
+        true
+      }
+    | false => false
+    }
+  })
+  switch error {
+  | None => true
+  | Some(_) => false
+  }
 }
 
+let saveData = (id, consultationId, state, send, updateCB) => {
+  switch state.medicines |> validateMedicines {
+  | true => {
+      send(SetSaving)
+      updateDailyRound(
+        consultationId,
+        id,
+        Js.Json.object_(makePayload(state)),
+        successCB(send, updateCB),
+        errorCB(send),
+      )
+    }
+  | false => Js_console.log("Validation failed")
+  }
+}
 let initialState = medicines => {
   {
     medicines: medicines,
@@ -97,7 +133,7 @@ let make = (~medicines, ~updateCB, ~id, ~consultationId) => {
 
   <div>
     <CriticalCare__PageTitle title="Medicines" />
-    <div className="w-full">
+    <div className="w-full mb-4">
       <PrescriptionBuilderTS
         prescriptions={state.medicines}
         setPrescriptions={medicines => send(SetMedicines(medicines))}
