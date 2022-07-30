@@ -122,27 +122,37 @@ export const LocationManagement = (props: LocationManagementProps) => {
 
   if (locations && locations.length) {
     locationsList = locations.map((locationItem: LocationModel) => (
-      <LocationRow
-        id={locationItem.id || ""}
-        facilityId={facilityId || ""}
-        name={locationItem.name || ""}
-        description={locationItem.description || ""}
-      />
+      <div className="grow mt-5 bg-white p-4 flex flex-wrap">
+        <LocationRow
+          id={locationItem.id || ""}
+          facilityId={facilityId || ""}
+          name={locationItem.name || ""}
+          description={locationItem.description || ""}
+        />
+      </div>
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
-      <p className="bg-white px-5 py-5 border-b border-gray-200 text-center text-gray-500 whitespace-nowrap">
-        No locations available
-      </p>
+      // <p className="bg-white px-5 py-5 border-b border-gray-200 text-center text-gray-500 whitespace-nowrap">
+      //   No locations available
+      // </p>
+      <div className="mt-5 grid justify-items-center">
+        <img
+          className="self-center w-5/12"
+          src={"https://cdn.coronasafe.network/location-finding-error.png"}
+          alt={"No locations found"}
+        />
+        <p className="font-sans text-xl text-center text-teal-500">
+          No locations found.
+        </p>
+      </div>
     );
   }
 
   if (locations) {
     location = (
       <>
-        <div className="grow mt-5 bg-white p-4 flex flex-wrap">
-          {locationsList}
-        </div>
+        {locationsList}
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
