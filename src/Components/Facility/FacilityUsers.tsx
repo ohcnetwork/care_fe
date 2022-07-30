@@ -16,7 +16,7 @@ import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
 
 import { IconButton, CircularProgress } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import CloseIcon from "@mui/icons-material/Close";
 import LinkFacilityDialog from "../Users/LinkFacilityDialog";
 import UserDeleteDialog from "../Users/UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
