@@ -258,9 +258,9 @@ const AssetsList = () => {
     );
 
   return (
-    <div className="px-4 pb-2">
+    <div className="px-6">
       <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
-      <div className="lg:flex mt-5 space-y-2">
+      <div className="lg:flex mt-5 space-y-2 space-x-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -288,10 +288,12 @@ const AssetsList = () => {
             errors=""
           />
         </div>
-        <div className="flex flex-row lg:ml-2 justify-start items-start gap-2">
-          <AdvancedFilterButton setShowFilters={setShowFilters} />
+        <div className="flex flex-col md:flex-row lg:ml-2 justify-start items-start gap-2">
+          <div className="w-full">
+            <AdvancedFilterButton setShowFilters={setShowFilters} />
+          </div>
           <button
-            className="btn btn-primary"
+            className="btn btn-primary w-full"
             onClick={() => setIsScannerActive(true)}
           >
             <i className="fas fa-search mr-1"></i> Scan Asset QR
@@ -316,18 +318,18 @@ const AssetsList = () => {
         {badge("Asset Type", asset_type, ["asset_type"])}
         {badge("Status", qParams.status, ["status"])}
       </div>
-      <div className="grow mt-10 bg-white">
-        <div className="py-8 md:px-8">
-          <div className="flex flex-wrap md:-mx-4">
+      <div className="grow mt-10">
+        <div className="py-8 md:px-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 md:-mx-8 gap-2">
             {assetsExist ? (
               assets.map((asset: AssetData) => (
                 <div
                   key={asset.id}
-                  className="w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3"
+                  className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-3 justify-center items-center"
                   onClick={() => navigate(`/assets/${asset.id}`)}
                 >
                   <div className="px-4 md:w-1/2">
-                    <div className="md:flex justify-between w-full">
+                    <div className="md:flex">
                       <p className="text-xl font-normal capitalize">
                         {asset.name}
                       </p>
@@ -339,8 +341,8 @@ const AssetsList = () => {
                       </span>
                     </p>
                   </div>
-                  <div className="md:flex">
-                    <div className="md:flex flex-wrap justify-end">
+                  <div className="md:flex justify-between pt-2">
+                    <div className="md:flex flex-wrap">
                       {asset.is_working ? (
                         <Badge color="green" icon="cog" text="Working" />
                       ) : (
@@ -370,17 +372,17 @@ const AssetsList = () => {
                 </p>
               </div>
             )}
-            {totalCount > limit && (
-              <div className="mt-4 flex w-full justify-center">
-                <Pagination
-                  cPage={currentPage}
-                  defaultPerPage={limit}
-                  data={{ totalCount }}
-                  onChange={handlePagination}
-                />
-              </div>
-            )}
           </div>
+          {totalCount > limit && (
+            <div className="mt-4 flex w-full justify-center">
+              <Pagination
+                cPage={currentPage}
+                defaultPerPage={limit}
+                data={{ totalCount }}
+                onChange={handlePagination}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -19,7 +19,7 @@ export default function DoctorVideoSlideover(props: {
       if (facilityId) {
         const res = await dispatchAction(getFacilityUsers(facilityId));
         if (res && res.data) {
-          setDoctors(res.data.filter((user : any) => user.alt_phone_number)
+          setDoctors(res.data.results.filter((user : any) => user.alt_phone_number)
           .sort((a : any, b : any) => {
             return Number(a.last_login) - Number(b.last_login);
           }));

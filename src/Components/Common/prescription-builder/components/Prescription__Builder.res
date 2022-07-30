@@ -1,7 +1,7 @@
 let str = React.string
 
 let medicines = %raw(`require("../assets/medicines.json")`)
-let dosages = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk", "sos"]
+let dosages = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
 type prescriptions = array<Prescription__Prescription.t>
 
 let findAndReplace = (index, f, array) =>

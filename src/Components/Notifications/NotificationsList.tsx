@@ -70,6 +70,8 @@ const NotificationTile = ({
 
   const getNotificationTitle = (id: string) =>
     NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.text;
+  const getNotificationIcon = (id: string) =>
+    NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.icon;
   return (
     <div
       onClick={() => {
@@ -87,32 +89,39 @@ const NotificationTile = ({
         {getNotificationTitle(result.event)}
       </div>
       <div className="text-sm py-1">{result.message}</div>
-      <div className="text-xs text-right py-1">
-        {moment(result.created_date).format("lll")}
+      <div className="grid grid-cols-2 ">
+        <div>
+          <i className={`${getNotificationIcon(result.event)} fa-2x py-4`}></i>
+        </div>
+        <div>
+          <div className="text-xs text-right py-1">
+            {moment(result.created_date).format("lll")}
+          </div>
+          <div className="mt-2 text-right">
+            <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
+              <i className="fas fa-eye mr-2 text-primary-500" /> Visit Link
+            </button>
+          </div>
+        </div>
       </div>
-      <div className="mt-2 gap-2 flex flex-row-reverse items-center">
-        <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
-          <i className="fas fa-eye mr-2 text-primary-500" />
-          Visit Link
+      {!result.read_at && (
+        <button
+          className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+          disabled={isMarkingAsRead}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleMarkAsRead();
+          }}
+        >
+          {" "}
+          {isMarkingAsRead ? (
+            <Spinner />
+          ) : (
+            <i className="fa-solid fa-check mr-2 text-primary-500" />
+          )}
+          Mark as Read
         </button>
-        {!result.read_at && (
-          <button
-            className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
-            disabled={isMarkingAsRead}
-            onClick={(event) => {
-              event.stopPropagation();
-              handleMarkAsRead();
-            }}
-          >
-            {isMarkingAsRead ? (
-              <Spinner />
-            ) : (
-              <i className="fa-solid fa-check mr-2 text-primary-500" />
-            )}
-            Mark as Read
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 };
@@ -453,7 +462,10 @@ export default function NotificationsList({
                   value={eventFilter}
                   options={[
                     { id: "", text: "Show All" },
-                    ...NOTIFICATION_EVENTS,
+                    ...NOTIFICATION_EVENTS.map((i) => {
+                      if (i.id === "MESSAGE") return { ...i, text: "Notices" };
+                      return i;
+                    }),
                   ]}
                   onChange={(e: any) => setEventFilter(e.target.value)}
                 />
