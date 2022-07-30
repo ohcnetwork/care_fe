@@ -31,7 +31,6 @@ export default function Waveform(props : {wave : WaveformType}){
 
     useEffect(()=>{
         let timeout = setTimeout(() => {
-            console.log("gmm");
             if(!data[pointer + 1]){
                 return; 
             }
@@ -48,12 +47,9 @@ export default function Waveform(props : {wave : WaveformType}){
         const wave = props.wave;
         const data = wave.data.split(" ").map(Number);
 
-        //making waveform animation
-
         setViewableData(data.slice(0,viewable));
         setPointer(viewable);
         
-        console.log("Data length" ,data.length);
         let newX = [];
         for (let i = 0; i < viewable; i++) {
             newX[i] = i+1;
