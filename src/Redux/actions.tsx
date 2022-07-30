@@ -545,7 +545,7 @@ export const getUserDetails = (username: string, suppress = true) => {
     {},
     { username: username },
     undefined,
-    suppress
+    suppress ?? true
   );
 };
 export const updateUserDetails = (username: string, data: object) => {
