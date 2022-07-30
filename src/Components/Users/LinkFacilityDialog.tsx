@@ -57,7 +57,7 @@ const LinkFacilityDialog = (props: Props & WithStyles<typeof styles>) => {
         </div>
       </DialogContent>
       <DialogActions>
-        <Button onClick={cancelClicked} color="secondary">
+        <Button onClick={cancelClicked} color="error">
           Cancel
         </Button>
         <Button color="primary" onClick={okClicked} autoFocus>

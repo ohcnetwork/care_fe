@@ -26,7 +26,7 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel} color="primary">
+        <Button onClick={handleCancel} color="secondary">
           Cancel
         </Button>
         <Button onClick={handleOk} color="primary">

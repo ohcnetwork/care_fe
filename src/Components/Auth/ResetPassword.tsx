@@ -150,7 +150,7 @@ export const ResetPassword = (props: any) => {
             </CardContent>
             <div className="mt-4 sm:flex sm:justify-between grid p-4">
               <Button
-                color="primary"
+                color="secondary"
                 variant="contained"
                 onClick={() => navigate("/login")}
                 type="button"

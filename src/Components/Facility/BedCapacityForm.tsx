@@ -329,7 +329,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 <div className="w-full md:w-auto">
                   <Button
                     id="bed-capacity-cancel"
-                    color="primary"
+                    color="secondary"
                     variant="contained"
                     type="button"
                     fullWidth
