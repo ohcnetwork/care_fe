@@ -19,6 +19,7 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
 import * as Sentry from "@sentry/browser";
+import Spinner from "../Common/Spinner";
 
 const RESULT_LIMIT = 14;
 
