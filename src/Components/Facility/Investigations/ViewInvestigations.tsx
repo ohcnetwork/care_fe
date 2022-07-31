@@ -87,8 +87,8 @@ export default function ViewInvestigations(props: any) {
               />
             </div>
           )}
-          {investigationSessions.length === 0 && (
-            <div className="text-lg h-full text-center mt-5">
+          {investigationData.length === 0 && (
+            <div className="text-lg h-full text-center mt-5 text-gray-500 text-semibold bg-white py-4 rounded-lg shadow">
               No Investigation Reports Found
             </div>
           )}

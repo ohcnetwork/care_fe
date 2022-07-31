@@ -194,7 +194,9 @@ const ReportTable: React.FC<ReportTableProps> = ({
           <Table aria-label="simple table" stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell align="right">Name</TableCell>
+                <TableCell className={className.tableCell} align="right">
+                  Name
+                </TableCell>
                 {sessions.map((session) => (
                   <TableCell
                     align="center"
@@ -203,6 +205,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
                       backgroundColor: "#4B5563",
                       color: "#F9FAFB",
                     }}
+                    className={className.tableCell}
                   >
                     {moment(session.session_created_date).format(
                       "D MMM YYYY h:mm a"
