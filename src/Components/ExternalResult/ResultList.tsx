@@ -3,40 +3,21 @@ import Grid from "@material-ui/core/Grid";
 import { Button } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate, useQueryParams } from "raviger";
-// import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
-// import { PhoneNumberField } from "../Common/HelperInputFields";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import moment from "moment";
 import { CSVLink } from "react-csv";
-// import { externalResultFormatter } from "./Commons";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-
+import clsx from "clsx";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-// function Badge(props: { color: string; icon: string; text: string }) {
-//   return (
-//     <span
-//       className="m-1 h-full inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
-//       title={props.text}
-//     >
-//       <i
-//         className={
-//           "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-//         }
-//       ></i>
-//       {props.text}
-//     </span>
-//   );
-// }
 
 const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
@@ -60,7 +41,9 @@ export default function ResultList() {
     lsgList: [],
     wardList: [],
   });
+
   let manageResults: any = null;
+  let pagination: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
     localStorage.getItem("lsg-ward-data") ||
@@ -123,7 +106,7 @@ export default function ResultList() {
           : a,
       {}
     );
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -275,25 +258,25 @@ export default function ResultList() {
         <tr key={`usr_${result.id}`} className="bg-white">
           <td
             onClick={() => navigate(resultUrl)}
-            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-900"
+            className="px-6 py-4 whitespace-nowrap text-md leading-5 text-gray-900"
           >
             <div className="flex">
               <a
                 href="#"
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
-                <p className="text-cool-gray-500 group-hover:text-cool-gray-900 transition ease-in-out duration-150">
+                <p className="text-gray-800 group-hover:text-gray-900 transition ease-in-out duration-150">
                   {result.name} - {result.age} {result.age_in}
                 </p>
               </a>
             </div>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-            <span className="text-cool-gray-900 font-medium">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+            <span className="text-gray-900 font-medium">
               {result.test_type}
             </span>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
               {result.result}
             </span>
@@ -303,10 +286,10 @@ export default function ResultList() {
               </span>
             ) : null}
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-800">
             {result.result_date || "-"}
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
             <Button
               variant="outlined"
               color="primary"
@@ -332,11 +315,11 @@ export default function ResultList() {
       </tr>
     );
   } else if (data && data.length) {
-    manageResults = (
+    manageResults = <>{resultList}</>;
+    pagination = (
       <>
-        {resultList}
         {totalCount > RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center">
+          <div className="mt-4 w-full flex justify-center items-center">
             <Pagination
               cPage={qParams.page}
               defaultPerPage={RESULT_LIMIT}
@@ -351,7 +334,9 @@ export default function ResultList() {
     manageResults = (
       <Grid item xs={12} md={12}>
         <Grid container justify="center" alignItems="center">
-          <h5> No Results Found</h5>
+          <h5 className="flex justify-center items-center text-gray-600">
+            No Results Found
+          </h5>
         </Grid>
       </Grid>
     );
@@ -365,19 +350,14 @@ export default function ResultList() {
           selectedFacility={selectedFacility}
           handleOk={() =>
             navigate(`facility/${selectedFacility.id}/patient`, {
-              extId: resultId,
+              query: { extId: resultId },
             })
           }
           handleCancel={() => setShowDialog(false)}
         />
       )}
-      <PageTitle
-        title="Results"
-        hideBack={true}
-        className="mt-4"
-        breadcrumbs={false}
-      />
-      <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+      <PageTitle title="External Results" hideBack={true} breadcrumbs={false} />
+      <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -390,7 +370,7 @@ export default function ResultList() {
             </dl>
           </div>
         </div>
-        <div>
+        <div className="md:mt-2">
           <div>
             <div className="text-sm font-semibold mb-2">Search by Name</div>
             <InputSearchBox
@@ -400,8 +380,8 @@ export default function ResultList() {
               errors=""
             />
           </div>
-          <div>
-            <div className="text-sm font-semibold mt-2">Search by number</div>
+          <div className="text-sm font-semibold my-2">Search by number</div>
+          <div className="w-full">
             <InputSearchBox
               value={qParams.mobile_number || ""}
               search={searchByPhone}
@@ -410,18 +390,19 @@ export default function ResultList() {
             />
           </div>
         </div>
-        <div className="flex flex-col justify-between">
-          <div className="flex">
+        <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
+          <div className="flex justify-end gap-2">
             <div
-              className="btn mt-8 ml-auto btn-primary"
+              className="btn btn-primary"
               onClick={(_) => navigate("external_results/upload")}
             >
               Upload List
             </div>
             <div
-              className={`btn mt-8 ml-4 gap-2 btn-primary ${
-                downloadLoading ? "pointer-events-none" : ""
-              }`}
+              className={clsx(
+                "btn btn-primary",
+                downloadLoading && "pointer-events-none"
+              )}
               onClick={triggerDownload}
             >
               <span className="flex flex-row justify-center">
@@ -434,7 +415,7 @@ export default function ResultList() {
               </span>
             </div>
           </div>
-          <div className="flex ml-auto  gap-2">
+          <div className="flex ml-auto gap-2 md:pt-0 pt-2">
             <button
               className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
               onClick={(_) => setShowFilters((show) => !show)}
@@ -445,13 +426,9 @@ export default function ResultList() {
           </div>
         </div>
       </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
+      <div className="flex items-center flex-wrap gap-2 mb-4">
         {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
-      </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
         {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
-      </div>
-      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
         {badge("Name", qParams.name || local.name, "name")}
         {badge(
           "Phone Number",
@@ -493,30 +470,31 @@ export default function ResultList() {
         {badge("SRF ID", qParams.srf_id, "srf_id")}
       </div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-        <table className="min-w-full divide-y divide-cool-gray-200">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Test Type
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wide">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wide">
                 Status
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Result Date
               </th>
-              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Create Patient
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-cool-gray-200">
+          <tbody className="bg-white divide-y divide-gray-200">
             {manageResults}
           </tbody>
         </table>
+        <div className="bg-white divide-y divide-gray-200">{pagination}</div>
       </div>
       <CSVLink
         data={downloadFile}

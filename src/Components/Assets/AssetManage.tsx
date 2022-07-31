@@ -125,24 +125,24 @@ const AssetManage = (props: AssetManageProps) => {
       setTransactionDetails(
         transactions.map((transaction: AssetTransaction) => (
           <tr key={`transaction_id_${transaction.id}`}>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">
                 {transaction.from_location.name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">
                 {transaction.to_location.name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">
                 {transaction.performed_by.first_name}{" "}
                 {transaction.performed_by.last_name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">
                 {moment(transaction.modified_date).format("lll")}
               </span>
             </td>
@@ -153,7 +153,7 @@ const AssetManage = (props: AssetManageProps) => {
       setTransactionDetails(
         <tr>
           <td
-            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-500 text-center"
+            className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500 text-center"
             colSpan={4}
           >
             <h5>No Transactions Found</h5>
@@ -260,38 +260,40 @@ const AssetManage = (props: AssetManageProps) => {
               <i className="fas fa-pencil-alt text-white mr-2"></i>
               Update Asset
             </button>
-            <button
-              onClick={() => navigate(`/assets/${asset?.id}/configure`)}
-              id="update-asset"
-              className="btn-primary btn"
-            >
-              <i className="fas fa-cog text-white mr-2"></i>
-              Configure Asset
-            </button>
+            {asset?.asset_class && (
+              <button
+                onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+                id="update-asset"
+                className="btn-primary btn"
+              >
+                <i className="fas fa-cog text-white mr-2"></i>
+                Configure Asset
+              </button>
+            )}
           </div>
         </div>
       </div>
       <div className="bg-white rounded-lg md:p-6 p-3 shadow mt-2">
         <div className="text-xl font-semibold">Transaction History</div>
         <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-          <table className="min-w-full divide-y divide-cool-gray-200">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
-                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Moved from
                 </th>
-                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Moved to
                 </th>
-                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Moved By
                 </th>
-                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Moved On
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-cool-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200">
               {transactionDetails}
             </tbody>
           </table>

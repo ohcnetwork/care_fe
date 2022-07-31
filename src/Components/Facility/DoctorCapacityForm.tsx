@@ -184,7 +184,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: any, btnType: string = "Save") => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
@@ -211,7 +211,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
           Notification.Success({
             msg: "Doctor count added successfully",
           });
-          if (isLastOptionType) {
+          if (btnType === "Save and Exit" || isLastOptionType) {
             navigate(`/facility/${facilityId}`);
           }
         } else {
@@ -294,7 +294,21 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     Cancel
                   </Button>
                 </Grid>
-                <Grid item>
+                <Grid item className="flex flex-row gap-4">
+                  {!isLastOptionType && (
+                    <Button
+                      id="doctor-save-and-exit"
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      startIcon={
+                        <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                      }
+                      onClick={(e) => handleSubmit(e, "Save and Exit")}
+                    >
+                      Save Doctor Capacity
+                    </Button>
+                  )}
                   <Button
                     id="doctor-save"
                     color="primary"

@@ -68,20 +68,20 @@ const Pagination = (props: PaginationProps) => {
     return pageNumbers.sort((a, b) => a - b);
   };
 
-  const handleChangePage = (evt: any, action: any) => {
+  const handleChangePage = (action: any) => {
     let newPage = 1;
     const totalPage = Math.ceil(data.totalCount / rowsPerPage);
 
     switch (action) {
-      case "prev":
+      case "<":
         newPage = currentPage - 1;
         break;
 
-      case "next":
+      case ">":
         newPage = currentPage + 1;
         break;
 
-      case "last":
+      case ">>>":
         newPage = totalPage;
         break;
 
@@ -93,7 +93,7 @@ const Pagination = (props: PaginationProps) => {
     onChange(newPage, rowsPerPage);
   };
 
-  const goToPage = (e: any, page: any) => {
+  const goToPage = (page: any) => {
     setCurrentPage(page);
     onChange(page, rowsPerPage);
   };
@@ -102,8 +102,8 @@ const Pagination = (props: PaginationProps) => {
     return (
       <button
         disabled={disabled}
-        onClick={(e) => handleChangePage(e, label.toLowerCase())}
-        className={`${classes} -ml-px relative bg-white text-gray-600 hover:text-gray-800 hover:bg-gray-200 inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium focus:z-10 focus:outline-none focus:border-primary-300 focus:shadow-outline-primary transition ease-in-out duration-150  ${
+        onClick={() => handleChangePage(label.toLowerCase())}
+        className={`${classes} -ml-px relative bg-white text-gray-600 hover:text-gray-800 hover:bg-gray-200 inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium focus:z-10 focus:outline-none focus:border-primary-300 focus:ring-primary transition ease-in-out duration-150  ${
           !disabled ? "cursor-pointer" : "cursor-not-allowed"
         }`}
       >
@@ -126,40 +126,42 @@ const Pagination = (props: PaginationProps) => {
   return (
     <div className="mx-auto mb-4">
       <div className="flex-1 flex justify-between sm:hidden">
-        <div
-          onClick={(e) => handleChangePage(e, "prev")}
-          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
+        <button
+          disabled={firstBtnDisable}
+          onClick={() => handleChangePage("<")}
+          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
         >
           Previous
-        </div>
-        <div
-          onClick={(e) => handleChangePage(e, "next")}
-          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
+        </button>
+        <button
+          disabled={lastBtnDisable}
+          onClick={() => handleChangePage(">")}
+          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
         >
           Next
-        </div>
+        </button>
       </div>
       <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
         <div>
           <nav className="relative z-0 inline-flex shadow-sm">
-            {renderNavigationBtn("First", firstBtnDisable, "rounded-l-md")}
-            {renderNavigationBtn("Prev", prevBtnDisable, "")}
+            {renderNavigationBtn("<<<", firstBtnDisable, "rounded-l-md")}
+            {renderNavigationBtn("<", prevBtnDisable, "")}
             {pageNumbers.map((pageNo) => (
               <button
                 type="button"
                 key={`page_${pageNo}`}
-                className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium focus:z-10 focus:outline-none focus:border-primary-300 focus:shadow-outline-primary transition ease-in-out duration-150 ${
+                className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium focus:z-10 focus:outline-none focus:border-primary-300 focus:ring-primary transition ease-in-out duration-150 ${
                   currentPage === pageNo
                     ? "bg-primary-500 text-white"
                     : "bg-white text-gray-600 hover:text-gray-800 hover:bg-gray-200"
                 }`}
-                onClick={(e) => goToPage(e, pageNo)}
+                onClick={() => goToPage(pageNo)}
               >
                 {pageNo}
               </button>
             ))}
-            {renderNavigationBtn("Next", nextBtnDisable, "")}
-            {renderNavigationBtn("Last", lastBtnDisable, "rounded-r-md")}
+            {renderNavigationBtn(">", nextBtnDisable, "")}
+            {renderNavigationBtn(">>>", lastBtnDisable, "rounded-r-md")}
           </nav>
         </div>
       </div>

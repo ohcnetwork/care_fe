@@ -54,12 +54,7 @@ const menus = [
   {
     title: "Users",
     link: "/users",
-    icon: "fas fa-user-friends",
-  },
-  {
-    title: "Profile",
-    link: "/user/profile",
-    icon: "fas fa-user-secret",
+    icon: "fas fa-users",
   },
   {
     title: "Notice Board",
@@ -82,11 +77,11 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     ""
   )}`;
   const path = usePath();
-  const url = path.replaceAll("/", "");
+  const url = path?.replaceAll("/", "");
 
   const active = menus.reduce((acc, menu) => {
     const tag = menu.link.replaceAll("/", "");
-    return url.includes(tag) ? tag : acc;
+    return url?.includes(tag) ? tag : acc;
   }, "");
 
   const theme = useTheme();
@@ -102,7 +97,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     localStorage.removeItem("shift-filters");
     localStorage.removeItem("external-filters");
     localStorage.removeItem("lsg-ward-data");
-    navigate("/login");
+    navigate("/");
     window.location.reload();
   };
 
@@ -152,7 +147,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
         )}
       >
         <div className="flex items-center justify-between">
-          <Link href="/" className="block flex-shrink-0 w-28">
+          <Link href="/" className="block shrink-0 w-28">
             <img
               className="m-2 p-2 h-10 w-auto transition"
               src={expanded ? LOGO : LOGO_COLLAPSE}
@@ -182,13 +177,13 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
                   expanded && "w-60"
                 )}
               >
-                <div className="flex-shrink-0 flex items-center justify-center w-10 h-8">
+                <div className="shrink-0 flex items-center justify-center w-10 h-8">
                   <i className={clsx(item.icon, "text-lg")}></i>
                 </div>
                 {
                   <div
                     className={clsx(
-                      "transition-all duration-300 whitespace-no-wrap",
+                      "transition-all duration-300 whitespace-nowrap",
                       expanded ? "w-60" : "w-0"
                     )}
                   >
@@ -214,17 +209,18 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               expanded && "w-60"
             )}
           >
-            <div className="flex-shrink-0 flex items-center justify-center w-10 h-9">
+            <div className="shrink-0 flex items-center justify-center w-10 h-9">
               <i className={clsx("fas fa-tachometer-alt", "text-lg")}></i>
             </div>
 
             <div
               className={clsx(
-                "transition-all duration-300 whitespace-no-wrap",
+                "transition-all duration-300 whitespace-nowrap",
                 expanded ? "w-60" : "w-0"
               )}
             >
-              {t("Dashboard")}
+              {t("Dashboard")}{" "}
+              <i className="fas fa-arrow-up-right-from-square text-xs"></i>
             </div>
           </a>
         </nav>
@@ -235,15 +231,15 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
             expanded ? "w-60" : "w-10"
           )}
         >
-          <div className="flex-shrink-0 flex items-center justify-center w-10">
-            <div className="flex items-center justify-center bg-white rounded-full w-8 h-8">
+          <div className="shrink-0 flex items-center justify-center w-10">
+            <Link href="/user/profile" className="flex items-center justify-center bg-white rounded-full w-8 h-8">
               <i className="block fas fa-user text-base text-primary-800"></i>
-            </div>
+            </Link>
           </div>
-          <div className="ml-3 overflow-hidden whitespace-no-wrap">
-            <p className="text-base leading-5 font-medium text-white mb-1">
+          <div className="ml-3 overflow-hidden whitespace-nowrap">
+            <Link href="/user/profile" className="text-base leading-5 font-medium text-white mb-1">
               {loginUser}
-            </p>
+            </Link>
             <p
               onClick={handleSignOut}
               className="cursor-pointer text-sm leading-4 font-medium text-primary-200 group-hover:text-primary-100 transition ease-in-out duration-150"

@@ -1,16 +1,22 @@
 export const phonePreg = (phone: string) => {
-  const pattern = /^((\+91|91|0)[\- ]{0,1})?[123456789]\d{9}$/;
+  const pattern = /^((\+91|91|0)[- ]{0,1})?[123456789]\d{9}$/;
   return pattern.test(phone);
 };
 
-export const validateLocationCoordinates = (location: string) => {
-  const pattern = /^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}/;
-  return pattern.test(location);
+const valueIsBetween = (val: number, a: number, b: number) =>
+  a <= val && val <= b;
+
+export const validateLatitude = (latitude: string) => {
+  return valueIsBetween(Number(latitude), -90, 90);
+};
+
+export const validateLongitude = (longitude: string) => {
+  return valueIsBetween(Number(longitude), -180, 180);
 };
 
 export const validateEmailAddress = (email: string) => {
   const pattern =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return pattern.test(email);
 };
 
@@ -29,6 +35,11 @@ export const getArrayValueByKey = (
 
 export const getRandomNumbers = (min: number, max: number) => {
   return Math.floor(Math.random() * max) + min;
+};
+
+export const validateName = (name: string) => {
+  const pattern = /^([a-zA-Z]*( [a-zA-Z])?)+$/;
+  return pattern.test(name);
 };
 
 export const validateUsername = (username: string) => {

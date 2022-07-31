@@ -11,6 +11,7 @@ import {
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import moment from "moment";
+import { Tooltip } from "@material-ui/core";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -88,11 +89,15 @@ export default function InventoryLog(props: any) {
       })
     );
 
-    if (res && res.status === 201) {
+    if (res?.status === 201) {
       Notification.Success({
-        msg: "Deleted Successfully",
+        msg: "Last entry deleted Successfully",
       });
       window.location.reload();
+    } else {
+      Notification.Error({
+        msg: "Error while deleting last entry: " + (res?.data?.detail || ""),
+      });
     }
     setSaving(false);
   };
@@ -116,14 +121,14 @@ export default function InventoryLog(props: any) {
         <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
           <div className="flex items-center">
             <div className="ml-3">
-              <p className="text-gray-900 whitespace-no-wrap">
+              <p className="text-gray-900 whitespace-nowrap">
                 {moment(inventoryItem.created_date).format("DD-MM-YYYY LTS")}
               </p>
             </div>
           </div>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
-          <p className="text-gray-900 whitespace-no-wrap lowercase">
+          <p className="text-gray-900 whitespace-nowrap lowercase">
             {inventoryItem.quantity_in_default_unit}{" "}
             {inventoryItem.item_object?.default_unit?.name}
             {inventoryItem.probable_accident && (
@@ -132,7 +137,7 @@ export default function InventoryLog(props: any) {
           </p>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
-          <p className="text-gray-900 whitespace-no-wrap lowercase">
+          <p className="text-gray-900 whitespace-nowrap lowercase">
             {inventoryItem.is_incoming ? (
               <span className="ml-2 text-primary-600">Added Stock</span>
             ) : (
@@ -141,22 +146,43 @@ export default function InventoryLog(props: any) {
           </p>
         </td>
         <td>
-          <button
-            onClick={(_) => flagFacility(inventoryItem.external_id)}
-            disabled={saving}
-            className="btn btn-default"
+          <Tooltip
+            title={
+              inventoryItem.probable_accident ? (
+                <div className="text-sm leading-snug text-justify">
+                  <b>Unmarks this transaction as accident</b>
+                  <br />
+                  This action will not affect the total stock.
+                </div>
+              ) : (
+                <div className="text-sm leading-snug text-justify">
+                  <b>Marks this transaction as accident</b>
+                  <br />
+                  This action will not affect the total stock. To delete the
+                  transaction, create another transaction that undos the effect
+                  of this, or click <i>Delete Last Entry</i>.
+                </div>
+              )
+            }
+            arrow={true}
           >
-            {inventoryItem.probable_accident ? (
-              <span className="text-primary-500">
-                <i className="fas fa-exclamation-triangle pr-2"></i>UnMark
-              </span>
-            ) : (
-              <span className="text-red-500">
-                <i className="fas fa-exclamation-circle pr-2"></i>
-                Mark as Accident
-              </span>
-            )}
-          </button>
+            <button
+              onClick={(_) => flagFacility(inventoryItem.external_id)}
+              disabled={saving}
+              className="btn btn-default"
+            >
+              {inventoryItem.probable_accident ? (
+                <span className="text-primary-500">
+                  <i className="fas fa-exclamation-triangle pr-2"></i>UnMark
+                </span>
+              ) : (
+                <span className="text-red-500">
+                  <i className="fas fa-exclamation-circle pr-2"></i>
+                  Mark as Accident
+                </span>
+              )}
+            </button>
+          </Tooltip>
         </td>
       </tr>
     ));
@@ -167,7 +193,7 @@ export default function InventoryLog(props: any) {
           colSpan={3}
           className="px-5 py-5 border-b border-gray-200 text-center"
         >
-          <p className="text-gray-500 whitespace-no-wrap">
+          <p className="text-gray-500 whitespace-nowrap">
             No log for this inventory available
           </p>
         </td>
@@ -233,18 +259,29 @@ export default function InventoryLog(props: any) {
           <div className="flex justify-between">
             <h4>Item: {itemName}</h4>
             {current_stock > 0 && (
-              <button
-                onClick={(_) =>
-                  removeLastInventoryLog(inventory[0].item_object.id)
+              <Tooltip
+                title={
+                  <div className="text-sm leading-snug text-justify">
+                    <b>Deletes the last transaction</b> by creating an
+                    equivalent undo transaction and marks both the transactions
+                    as accident.
+                  </div>
                 }
-                disabled={saving}
-                className="btn btn-default"
+                arrow={true}
               >
-                <span className="text-red-500">
-                  <i className="fas fa-exclamation-circle pr-2"></i>
-                  Delete Last Entry
-                </span>
-              </button>
+                <button
+                  onClick={(_) =>
+                    removeLastInventoryLog(inventory[0].item_object.id)
+                  }
+                  disabled={saving}
+                  className="btn btn-default"
+                >
+                  <span className="text-red-500">
+                    <i className="fas fa-exclamation-circle pr-2"></i>
+                    Delete Last Entry
+                  </span>
+                </button>
+              </Tooltip>
             )}
           </div>
           {inventoryItem}

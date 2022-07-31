@@ -11,7 +11,6 @@ import { WithStyles, withStyles } from "@material-ui/styles";
 import React, { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
-  ROLE_STATUS_MAP,
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
@@ -21,9 +20,6 @@ import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { createUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import Box from "@material-ui/core/Box";
-import Typography from "@material-ui/core/Typography";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
 
 interface Props {
@@ -40,10 +36,6 @@ const styles = {
   },
 };
 
-interface URLS {
-  [id: string]: string;
-}
-
 const statusChoices = [...SAMPLE_TEST_STATUS];
 
 const statusFlow = { ...SAMPLE_FLOW_RULES };
@@ -55,8 +47,6 @@ const resultTypes = [
   },
   ...SAMPLE_TEST_RESULT,
 ];
-
-const roleStatusMap = { ...ROLE_STATUS_MAP };
 
 const initForm: any = {
   confirm: false,
@@ -83,7 +73,7 @@ const updateStatusReducer = (state = initialState, action: any) => {
 };
 
 const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
-  const { sample, handleOk, handleCancel, classes, userType } = props;
+  const { sample, handleOk, handleCancel, classes } = props;
   const [state, dispatch] = useReducer(updateStatusReducer, initialState);
   const [file, setfile] = useState<File>();
   const [contentType, setcontentType] = useState<string>("");
@@ -100,7 +90,6 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   const validStatusChoices = statusChoices.filter(
     (i) => status && statusFlow[status] && statusFlow[status].includes(i.text)
   );
-  // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
 
   useEffect(() => {
     const form = { ...state.form };
@@ -135,8 +124,8 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   };
 
   const uploadfile = (response: any) => {
-    var url = response.data.signed_url;
-    var internal_name = response.data.internal_name;
+    const url = response.data.signed_url;
+    const internal_name = response.data.internal_name;
     const f = file;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
@@ -147,7 +136,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
         "Content-disposition": "inline",
       },
       onUploadProgress: (progressEvent: any) => {
-        var percentCompleted = Math.round(
+        const percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
         );
         setUploadPercent(percentCompleted);
@@ -155,16 +144,22 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
     };
     axios
       .put(url, newFile, config)
-      .then((result) => {
+      .then(() => {
         setUploadStarted(false);
         setUploadDone(true);
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
       })
-      .catch((error) => {
+      .catch(() => {
         setUploadStarted(false);
       });
+  };
+
+  const handleEscKeyPress = (event: any) => {
+    if (event.key === "Escape") {
+      cancelClicked();
+    }
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
@@ -181,7 +176,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
     const f = file;
     if (f === undefined) return;
     const category = "UNSPECIFIED";
-    let name = f.name;
+    const name = f.name;
     setUploadStarted(true);
     setUploadDone(false);
     const requestData = {
@@ -204,19 +199,16 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
       classes={{
         paper: classes.paper,
       }}
+      onKeyDown={(e) => handleEscKeyPress(e)}
     >
       <DialogTitle id="test-sample-title">
         Update Sample Test Status
       </DialogTitle>
       <DialogContent>
-        <div className="grid gap-4 grid-cols-3">
-          <div className="font-semibold leading-relaxed text-right">
-            Current Status :
-          </div>
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+          <div className="font-semibold leading-relaxed">Current Status :</div>
           <div className="md:col-span-2">{currentStatus?.desc}</div>
-          <div className="font-semibold leading-relaxed text-right">
-            New Status :
-          </div>
+          <div className="font-semibold leading-relaxed">New Status :</div>
           <div className="md:col-span-2">
             <SelectField
               name="status"

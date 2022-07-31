@@ -56,6 +56,12 @@ const CommentSection = (props: CommentSectionProps) => {
     const payload = {
       comment: commentBox,
     };
+    if (!/\S+/.test(commentBox)) {
+      Notification.Error({
+        msg: "Comment Should Contain At Least 1 Character",
+      });
+      return;
+    }
     dispatch(addResourceComments(props.id, payload)).then((_: any) => {
       Notification.Success({ msg: "Comment added successfully" });
       fetchData();
@@ -68,7 +74,7 @@ const CommentSection = (props: CommentSectionProps) => {
       <textarea
         rows={3}
         placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4"
+        className="mt-4 border border-gray-500 rounded-lg p-4 focus:border-primary-600 focus:ring-primary-600"
         value={commentBox}
         onChange={(e) => setCommentBox(e.target.value)}
       />

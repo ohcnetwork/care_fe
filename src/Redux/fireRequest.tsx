@@ -48,7 +48,8 @@ export const fireRequest = (
   path: any = [],
   params: any = {},
   pathParam?: any,
-  altKey?: string
+  altKey?: string,
+  suppressNotif?: boolean
 ) => {
   return (dispatch: any) => {
     // cancel previous api call
@@ -60,6 +61,10 @@ export const fireRequest = (
     const request = Object.assign({}, requestMap[key]);
     if (path.length > 0) {
       request.path += "/" + path.join("/");
+    }
+    // add trailing slash to path before query paramaters
+    if (request.path.slice(-1) !== "/" && request.path.indexOf("?") === -1) {
+      request.path += "/";
     }
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
@@ -97,7 +102,7 @@ export const fireRequest = (
       .catch((error: any) => {
         dispatch(fetchDataRequestError(key, error));
 
-        if (error.response) {
+        if (!(suppressNotif ?? false) && error.response) {
           // temporarily don't show invalid phone number error on duplicate patient check
           if (error.response.status === 400 && key === "searchPatient") {
             return;
@@ -130,9 +135,7 @@ export const fireRequest = (
 
           // 4xx Errors
           if (error.response.status > 400 && error.response.status < 500) {
-            if (error.response.status === 429) {
-              return error.response;
-            } else if (error.response.data && error.response.data.detail) {
+            if (error.response.data && error.response.data.detail) {
               Notification.Error({
                 msg: error.response.data.detail,
               });
@@ -140,6 +143,9 @@ export const fireRequest = (
               Notification.Error({
                 msg: "Something went wrong...!",
               });
+            }
+            if (error.response.status === 429) {
+              return error.response;
             }
             return;
           }
@@ -151,6 +157,8 @@ export const fireRequest = (
             });
             return;
           }
+        } else {
+          return error.response;
         }
       });
   };
@@ -160,8 +168,8 @@ export const fireRequestV2 = (
   key: string,
   path: any = [],
   params: any = {},
-  successCallback: any = () => {},
-  errorCallback: any = () => {},
+  successCallback: any = () => undefined,
+  errorCallback: any = () => undefined,
   pathParam?: any,
   altKey?: string
 ) => {
@@ -239,9 +247,7 @@ export const fireRequestV2 = (
 
         // 4xx Errors
         if (error.response.status > 400 && error.response.status < 500) {
-          if (error.response.status === 429) {
-            return error.response;
-          } else if (error.response.data && error.response.data.detail) {
+          if (error.response.data && error.response.data.detail) {
             Notification.Error({
               msg: error.response.data.detail,
             });
@@ -250,6 +256,10 @@ export const fireRequestV2 = (
               msg: "Something went wrong...!",
             });
           }
+          if (error.response.status === 429) {
+            return error.response;
+          }
+          return;
         }
 
         // 5xx Errors
