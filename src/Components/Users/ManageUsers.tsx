@@ -347,10 +347,15 @@ export default function ManageUsers() {
                   )}
                   <div className="flex-shrink-0 text-sm text-gray-600 min-width-50">
                     {user.last_login && cur_online ? (
-                      <span>Currently Online</span>
+                      <span>
+                        {" "}
+                        <i className="fa-solid fa-clock"></i> Currently Online
+                      </span>
                     ) : (
                       <>
-                        <span>Last Online: </span>
+                        <span>
+                          <i className="fa-solid fa-clock"></i> Last Online:{" "}
+                        </span>
                         <span
                           aria-label="Online"
                           className={clsx(
