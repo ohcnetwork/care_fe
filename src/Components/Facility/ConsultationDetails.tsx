@@ -437,35 +437,35 @@ export const ConsultationDetails = (props: any) => {
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
-          <div className="lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+          <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
-              <div className="px-2">
+              <div className="w-full flex flex-col sm:flex-row px-2">
                 <button
                   onClick={() => setShowDoctors(true)}
-                  className="btn m-1 btn-primary hover:text-white"
+                  className="w-full btn m-1 btn-primary hover:text-white"
                 >
                   Doctor Connect
                 </button>
                 {patientData.last_consultation?.id && (
                   <Link
                     href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
-                    className="btn m-1 btn-primary hover:text-white"
+                    className="w-full btn m-1 btn-primary hover:text-white"
                   >
                     Camera Feed
                   </Link>
                 )}
               </div>
             )}
-            <div className="px-2">
+            <div className="w-full flex flex-col sm:flex-row px-2">
               <Link
                 href={`/facility/${patientData.facility}/patient/${patientData.id}`}
-                className="btn m-1 btn-primary hover:text-white"
+                className="w-full btn m-1 btn-primary hover:text-white"
               >
                 Patient Details
               </Link>
               <Link
                 href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
-                className="btn m-1 btn-primary hover:text-white"
+                className="w-full btn m-1 btn-primary hover:text-white"
               >
                 Doctor&apos;s Notes
               </Link>
@@ -617,11 +617,11 @@ export const ConsultationDetails = (props: any) => {
           <div className="flex md:flex-row flex-col">
             <div className="md:w-2/3">
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
-              <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row">
+              <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
                 <TeleICUPatientVitalsCard patient={patientData} />
-                <TeleICUPatientVitalsGraphCard
+                {/*<TeleICUPatientVitalsGraphCard
                   consultationId={patientData.last_consultation?.id}
-                />
+                />*/}
               </section>
               <div className="grid lg:grid-cols-2 gap-4 mt-4">
                 {consultationData.symptoms_text && (
@@ -942,10 +942,19 @@ export const ConsultationDetails = (props: any) => {
                               Medicine
                             </th>
                             <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                              Route
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                              Frequency
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
                               Dosage
                             </th>
                             <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
                               Days
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                              Notes
                             </th>
                           </tr>
                         </thead>
@@ -957,10 +966,19 @@ export const ConsultationDetails = (props: any) => {
                                   {med.medicine}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                  {med.route}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
                                   {med.dosage}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                  {med.dosage_new}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
                                   {med.days}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                  {med.notes}
                                 </td>
                               </tr>
                             )
