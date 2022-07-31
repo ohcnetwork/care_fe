@@ -35,6 +35,11 @@ const routes: Routes = {
     path: "/api/v1/password_reset/",
     method: "POST",
   },
+
+  updatePassword: {
+    path: "/api/v1/password_change/",
+    method: "PUT",
+  },
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
@@ -179,6 +184,10 @@ const routes: Routes = {
   partialUpdateAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PATCH",
+  },
+  deleteAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "DELETE",
   },
 
   // Facility Beds

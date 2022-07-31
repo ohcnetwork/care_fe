@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -9,6 +9,7 @@ import {
   getUserList,
   getUserListFacility,
   deleteUser,
+  getDistrict,
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate, useQueryParams } from "raviger";
@@ -25,6 +26,7 @@ import classNames from "classnames";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
+import clsx from "clsx";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -41,7 +43,9 @@ export default function ManageUsers() {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-
+  const [districtName, setDistrictName] = useState<string | undefined>(
+    undefined
+  );
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const isSuperuser = currentUser.data.is_superuser;
@@ -86,7 +90,16 @@ export default function ManageUsers() {
         phone_number: qParams.phone_number,
         alt_phone_number: qParams.alt_phone_number,
         user_type: qParams.user_type,
+        district_id: qParams.district_id,
       };
+      if (qParams.district_id) {
+        const dis = await dispatch(getDistrict(qParams.district_id));
+        if (!status.aborted) {
+          if (dis && dis.data) {
+            setDistrictName(dis.data.name);
+          }
+        }
+      }
       const res = await dispatch(getUserList(params));
       if (!status.aborted) {
         if (res && res.data) {
@@ -106,6 +119,7 @@ export default function ManageUsers() {
       qParams.last_name,
       qParams.phone_number,
       qParams.alt_phone_number,
+      qParams.district_id,
     ]
   );
 
@@ -207,9 +221,13 @@ export default function ManageUsers() {
   const handleSubmit = async () => {
     const username = userData.username;
     const res = await dispatch(deleteUser(username));
-    if (res.status >= 200) {
+    if (res?.status === 204) {
       Notification.Success({
         msg: "User deleted successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while deleting User: " + (res?.data?.detail || ""),
       });
     }
 
@@ -310,6 +328,9 @@ export default function ManageUsers() {
   users &&
     users.length &&
     (userList = users.map((user: any) => {
+      const cur_online = moment()
+        .subtract(5, "minutes")
+        .isBefore(user.last_login);
       return (
         <div
           key={`usr_${user.id}`}
@@ -325,30 +346,31 @@ export default function ManageUsers() {
                     </div>
                   )}
                   <div className="flex-shrink-0 text-sm text-gray-600 min-width-50">
-                    Last Online:{" "}
-                    <span
-                      aria-label="Online"
-                      className={
-                        "shrink-0 inline-block h-2 w-2 rounded-full " +
-                        (moment()
-                          .subtract(5, "minutes")
-                          .isBefore(user.last_login)
-                          ? "bg-primary-400"
-                          : "bg-gray-300")
-                      }
-                    ></span>
-                    <span className="pl-2">
-                      {user.last_login
-                        ? moment(user.last_login).fromNow()
-                        : "Never"}
-                    </span>
+                    {user.last_login && cur_online ? (
+                      <span>Currently Online</span>
+                    ) : (
+                      <>
+                        <span>Last Online: </span>
+                        <span
+                          aria-label="Online"
+                          className={clsx(
+                            "shrink-0 inline-block h-2 w-2 rounded-full",
+                            cur_online ? "bg-primary-400" : "bg-gray-300"
+                          )}
+                        ></span>
+                        <span className="pl-2">
+                          {user.last_login
+                            ? moment(user.last_login).fromNow()
+                            : "Never"}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
 
-                  {user.last_login &&
-                  moment().subtract(5, "minutes").isBefore(user.last_login) ? (
+                  {user.last_login && cur_online ? (
                     <i
                       className="animate-pulse text-primary-500 fas fa-circle ml-1 opacity-75"
                       aria-label="Online"
@@ -476,11 +498,11 @@ export default function ManageUsers() {
       <PageTitle
         title="User Management"
         hideBack={true}
-        className="mx-3 md:mx-8"
+        className="mx-5 px-2"
         breadcrumbs={false}
       />
 
-      <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-4">
+      <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-2">
         <div className="bg-white overflow-hidden shadow col-span-1 rounded-lg">
           <div className="p-5 w-fit sm:p-6">
             <dl>
@@ -562,7 +584,7 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <div className="flex mt-2 mx-7 flex-wrap gap-2 items-center">
+      <div className="flex mt-2 mx-6 flex-wrap gap-2 items-center">
         {badge("Username", qParams.username, "username")}
         {badge("First Name", qParams.first_name, "first_name")}
         {badge("Last Name", qParams.last_name, "last_name")}
@@ -579,9 +601,12 @@ export default function ManageUsers() {
         {qParams.user_type
           ? badge("Role", qParams.user_type, "user_type")
           : null}
+        {qParams.district_id
+          ? badge("District", districtName, "district_id")
+          : null}
       </div>
 
-      <div className="px-3 md:px-8">
+      <div className="px-3 md:px-6">
         <div>{manageUsers}</div>
       </div>
       {userData.show && (
