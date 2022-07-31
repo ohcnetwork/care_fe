@@ -28,6 +28,7 @@ export interface FacilityModel {
   cover_image_url?: string;
   facility_type?: string;
   address?: string;
+  features? : number[];
   location?: {
     latitude: number;
     longitude: number;
@@ -45,6 +46,8 @@ export interface FacilityModel {
   district_object?: DistrictModel;
   state_object?: StateModel;
   ward_object?: WardModel;
+  modified_date?: string;
+  created_date?: string;
 }
 
 export interface CapacityModal {
@@ -76,7 +79,7 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   examination_details?: string;
-  existing_medication?: string;
+  history_of_present_illness?: string;
   facility?: number;
   facility_name?: string;
   id?: number;

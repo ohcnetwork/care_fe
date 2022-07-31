@@ -63,10 +63,13 @@ const requiredFields: any = {
     errorText: "Shifting approving facility can not be empty.",
   },
   assigned_facility_type: {
-    errorText: "Please Select Facility Type",
+    errorText: "Please select Facility Type",
   },
   preferred_vehicle_choice: {
-    errorText: "Please Preferred Vehicle Type",
+    errorText: "Please select Preferred Vehicle Type",
+  },
+  reason: {
+    errorText: "Please enter a reason for the shift.",
   },
 };
 
@@ -130,17 +133,17 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   }, [dispatchAction, state.form.assigned_to]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
-      if (!state.form[field] || !state.form[field].length) {
+      if (!state.form[field] || !/\S+/.test(state.form[field])) {
         errors[field] = requiredFields[field].errorText;
         isInvalidForm = true;
       }
     });
 
     dispatch({ type: "set_error", errors });
-    return isInvalidForm;
+    return !isInvalidForm;
   };
 
   const handleChange = (e: any) => {
@@ -276,7 +279,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 </div>
               </div>
               <div>
-                <InputLabel>Name of shifting approving facility</InputLabel>
+                <InputLabel>Name of shifting approving facility*</InputLabel>
                 <FacilitySelect
                   multiple={false}
                   name="shifting_approving_facility"
@@ -285,7 +288,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   setSelected={(obj) =>
                     setFacility(obj, "shifting_approving_facility_object")
                   }
-                  errors={state.errors.shifting_approving_facility}
+                  errors={state.errors.shifting_approving_facility_object}
                 />
               </div>
 
@@ -378,19 +381,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 </RadioGroup>
                 <ErrorHelperText error={state.errors.is_up_shift} />
               </div>
-              {/*
-                            <div>
-                                <InputLabel>Vehicle preference</InputLabel>
-                                <TextInputField
-                                    fullWidth
-                                    name="vehicle_preference"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.vehicle_preference}
-                                    onChange={handleChange}
-                                    errors={state.errors.vehicle_preference}
-                                />
-                            </div> */}
               <div className="md:col-span-1">
                 <InputLabel>Preferred Vehicle*</InputLabel>
                 <SelectField
@@ -401,7 +391,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.preferred_vehicle_choice}
                   options={["", ...vehicleOptions]}
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
+                  errors={state.errors.preferred_vehicle_choice}
                 />
               </div>
               <div className="md:col-span-1">
@@ -414,7 +405,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.assigned_facility_type}
                   options={["", ...facilityOptions]}
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
+                  errors={state.errors.assigned_facility_type}
                 />
               </div>
               <div className="md:col-span-1">
@@ -427,7 +419,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.breathlessness_level}
                   options={BREATHLESSNESS_LEVEL}
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
                 />
               </div>
               <div className="md:col-span-2">

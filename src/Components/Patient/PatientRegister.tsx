@@ -61,7 +61,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -75,7 +75,6 @@ interface medicalHistoryModel {
 }
 
 const medicalHistoryTypes = MEDICAL_HISTORY_CHOICES.filter((i) => i.id !== 1);
-
 const medicalHistoryChoices = medicalHistoryTypes.reduce(
   (acc: Array<{ [x: string]: string }>, cur) => [
     ...acc,
@@ -83,7 +82,6 @@ const medicalHistoryChoices = medicalHistoryTypes.reduce(
   ],
   []
 );
-
 const genderTypes = [
   {
     id: 0,
@@ -91,11 +89,8 @@ const genderTypes = [
   },
   ...GENDER_TYPES,
 ];
-
 const diseaseStatus = [...DISEASE_STATUS];
-
 const bloodGroups = [...BLOOD_GROUPS];
-
 const testType = [...TEST_TYPE];
 const vaccines = ["Select", ...VACCINES];
 
@@ -370,14 +365,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
-            blood_group: res.data.blood_group ? res.data.blood_group : "",
+            blood_group: res.data.blood_group
+              ? res.data.blood_group === "UNKNOWN"
+                ? "UNK"
+                : res.data.blood_group
+              : "",
             local_body: res.data.local_body ? res.data.local_body : "",
             ward: res.data.ward_object ? res.data.ward_object.id : initialWard,
             village: res.data.village ? res.data.village : "",
             medical_history: [],
-            is_antenatal: res.data.is_antenatal
-              ? res.data.is_antenatal
-              : "false",
+            is_antenatal: String(!!res.data.is_antenatal),
             allergies: res.data.allergies ? res.data.allergies : "",
             pincode: res.data.pincode ? res.data.pincode : "",
             ongoing_medication: res.data.ongoing_medication
@@ -644,7 +641,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-
         default:
           return;
       }
@@ -950,6 +946,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <PageTitle
         title={headerText}
         className="mb-11"
+        backButtonCB={() => {
+          if (showImport) {
+            setShowImport(false);
+          } else {
+            navigate(`/facility/${facilityId}`);
+          }
+        }}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: { name: patientName },
@@ -1018,7 +1021,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     className="btn btn-primary mb-8 mx-4"
                     onClick={(_) => {
                       setShowImport(true);
-                      setQuery({ extId: "" }, true);
+                      setQuery({ extId: "" }, { replace: true });
                     }}
                   >
                     {" "}
@@ -1119,7 +1122,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           in={String(state.form.gender) === "2"}
                           timeout="auto"
                           unmountOnExit
-                          className="col-span-2"
                         >
                           {
                             <div id="is_antenatal-div" className="col-span-2">
@@ -1449,7 +1451,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               type="text"
                               value={state.form.srf_id}
                               onChange={handleChange}
-                              errors={state.errors.name}
+                              errors={state.errors.srf_id}
                             />
                           </div>
                           <div id="is_declared_positive-div">
@@ -1591,6 +1593,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         value="2"
                                         control={<Radio />}
                                         label="2"
+                                      />
+                                      <FormControlLabel
+                                        value="3"
+                                        control={<Radio />}
+                                        label="3 (Booster/Precautionary Dose)"
                                       />
                                     </Box>
                                   </RadioGroup>
@@ -1815,6 +1822,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_result")
                               }
+                              min={state.form.date_of_test}
                               errors={state.errors.date_of_result}
                               inputVariant="outlined"
                               margin="dense"
@@ -1968,7 +1976,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             Allergies
                           </InputLabel>
                           <MultilineInputField
-                            rows={3}
+                            rows={1}
                             id="allergies"
                             name="allergies"
                             variant="outlined"

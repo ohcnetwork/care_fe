@@ -10,7 +10,7 @@ import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
-import { useCallback, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -25,6 +25,7 @@ import {
   getDistrictByState,
   getLocalbodyByDistrict,
   getStates,
+  getUserDetails,
   getUserListFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
@@ -134,6 +135,32 @@ export const UserAdd = (props: UserProps) => {
   >([]);
   const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
+  const [usernameInput, setUsernameInput] = useState("");
+
+  const userExistsEnums = {
+    idle : 0,
+    checking : 1,
+    exists : 2,
+    avaliable : 3 
+  }
+
+  const [usernameExists, setUsernameExists] = useState<number>(0);
+
+  const checkUsername = async (username : string) => {
+    setUsernameExists(userExistsEnums.checking);
+    const userDetails = await dispatchAction(getUserDetails(username), true);
+    setUsernameExists(userDetails.status === 404 ? userExistsEnums.avaliable : userExistsEnums.exists);
+  }
+
+  useEffect(()=>{
+    setUsernameExists(userExistsEnums.idle);
+    if(usernameInput.length > 1 && !(state.form.username?.length < 2) && /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])){
+      let timeout = setTimeout(() => {
+        checkUsername(usernameInput);
+      }, 500);
+      return ()=>clearTimeout(timeout);
+    }
+  }, [usernameInput])
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -146,7 +173,6 @@ export const UserAdd = (props: UserProps) => {
   const userIndex = USER_TYPES.indexOf(userType);
 
   const defaultAllowedUserTypes = USER_TYPES.slice(0, userIndex + 1);
-
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : userType === "StaffReadOnly"
@@ -178,7 +204,17 @@ export const UserAdd = (props: UserProps) => {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
         if (districtList) {
-          setDistricts([...initialDistricts, ...districtList.data]);
+          if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
+            setDistricts([
+              ...initialDistricts,
+              {
+                id: currentUser.data.district,
+                name: currentUser.data.district_object.name,
+              },
+            ]);
+          } else {
+            setDistricts([...initialDistricts, ...districtList.data]);
+          }
         }
         setIsDistrictLoading(false);
       } else {
@@ -197,7 +233,17 @@ export const UserAdd = (props: UserProps) => {
         );
         setIsLocalbodyLoading(false);
         if (localBodyList) {
-          setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+          if (userIndex <= USER_TYPES.indexOf("LocalBodyAdmin")) {
+            setLocalBody([
+              ...initialLocalbodies,
+              {
+                id: currentUser.data.local_body,
+                name: currentUser.data.local_body_object.name,
+              },
+            ]);
+          } else {
+            setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+          }
         }
       } else {
         setLocalBody(selectDistrict);
@@ -245,7 +291,17 @@ export const UserAdd = (props: UserProps) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        setStates([...initialStates, ...statesRes.data.results]);
+        if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
+          setStates([
+            ...initialStates,
+            {
+              id: currentUser.data.state,
+              name: currentUser.data.state_object.name,
+            },
+          ]);
+        } else {
+          setStates([...initialStates, ...statesRes.data.results]);
+        }
       }
       setIsStateLoading(false);
     },
@@ -375,6 +431,9 @@ export const UserAdd = (props: UserProps) => {
             errors[field] =
               "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
+          } else if (usernameExists !== userExistsEnums.avaliable){
+            errors[field] = "This username already exists";
+            invalidForm = true;
           }
           return;
         case "password":
@@ -501,9 +560,15 @@ export const UserAdd = (props: UserProps) => {
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
       };
+
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
-      if (res && res.data && res.status >= 200 && res.status < 300) {
+      if (
+        res &&
+        (res.data || res.data === "") &&
+        res.status >= 200 &&
+        res.status < 300
+      ) {
         // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
@@ -617,31 +682,53 @@ export const UserAdd = (props: UserProps) => {
                   autoComplete="new-username"
                   variant="outlined"
                   margin="dense"
-                  onChange={handleChange}
+                  value={usernameInput}
+                  onChange={(e)=>{
+                    handleChange(e);
+                    setUsernameInput(e.target.value);
+                  }}
                   errors={state.errors.username}
                   onFocus={() => setUsernameInputInFocus(true)}
                   onBlur={() => setUsernameInputInFocus(false)}
                 />
-
                 {usernameInputInFocus && (
                   <div className="pl-2 text-small text-gray-500">
                     <div>
+                      {usernameExists !== userExistsEnums.idle && (
+                        <>
+                          {usernameExists === userExistsEnums.checking ? 
+                            <span>
+                              <i className="fas fa-circle-dot" /> checking...
+                            </span> 
+                          : (usernameExists === userExistsEnums.exists ? 
+                            <span className="text-red-500">
+                              <i className="fas fa-circle-xmark text-red-500" /> User already exists
+                            </span> 
+                          : (usernameExists === userExistsEnums.avaliable && 
+                            <span className="text-primary-500">
+                              <i className="fas fa-circle-check text-green-500" /> Available!
+                            </span>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                    <div>
                       {state.form.username?.length < 2 ? (
-                        <Cancel fontSize="inherit" color="error" />
+                          <i className="fas fa-circle-xmark text-red-500" />
                       ) : (
-                        <CheckCircle fontSize="inherit" color="primary" />
+                        <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
-                      username should be atleast 2 characters long
+                      Username should be atleast 2 characters long
                     </div>
                     <div>
                       {!/[^.@+_-]/.test(
                         state.form.username[state.form.username?.length - 1]
                       ) ? (
-                        <Cancel fontSize="inherit" color="error" />
+                        <i className="fas fa-circle-xmark text-red-500" />
                       ) : (
-                        <CheckCircle fontSize="inherit" color="primary" />
+                        <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
-                      {"username can't end with ^ . @ + _ -"}
+                      Username can't end with ^ . @ + _ -
                     </div>
                   </div>
                 )}

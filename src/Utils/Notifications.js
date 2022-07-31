@@ -1,8 +1,5 @@
 import { alert, Stack, defaultModules } from "@pnotify/core";
-import "@pnotify/core/dist/PNotify.css";
 import * as PNotifyMobile from "@pnotify/mobile";
-import "@pnotify/mobile/dist/PNotifyMobile.css";
-import "@pnotify/core/dist/BrightTheme.css";
 import _ from "lodash";
 
 defaultModules.set(PNotifyMobile, {});
@@ -74,7 +71,7 @@ export const Error = ({ msg }) => {
 /** 400 Bad Request handler */
 export const BadRequest = ({ errs }) => {
   if (Array.isArray(errs)) {
-    errs.splice(0, 5).forEach((error) => notifyError(error));
+    errs.forEach((error) => notifyError(error));
   } else {
     notifyError(errs);
   }

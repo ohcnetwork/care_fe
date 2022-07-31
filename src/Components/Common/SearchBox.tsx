@@ -37,8 +37,8 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
   };
 
   return (
-    <div className="md:flex sticky top-0 bg-gray-100">
-      <div className="relative rounded-md shadow-sm max-w-sm w-full">
+    <div className="md:flex top-0 bg-gray-100">
+      <div className="relative rounded-md shadow-sm lg:max-w-sm w-full">
         <input
           name="search"
           type="text"

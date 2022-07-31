@@ -65,6 +65,7 @@ import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 import Error404 from "../Components/ErrorPages/404";
+import FacilityUsers from "../Components/Facility/FacilityUsers";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -92,6 +93,9 @@ const routes = {
   ),
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/users": ({ facilityId }: any) => (
+    <FacilityUsers facilityId={facilityId} />
   ),
   "/facility/:facilityId/resource/new": ({ facilityId }: any) => (
     <ResourceCreate facilityId={facilityId} />
@@ -128,7 +132,7 @@ const routes = {
     facilityId,
     patientId,
   }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
-  "/facility/:facilityId/patient/:patientId/files/": ({
+  "/facility/:facilityId/patient/:patientId/files": ({
     facilityId,
     patientId,
   }: any) => (
@@ -177,7 +181,7 @@ const routes = {
       unspecified={true}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation": ({
     facilityId,
     patientId,
     id,
@@ -267,10 +271,23 @@ const routes = {
   "/facility/:facilityId/location/add": ({ facilityId }: any) => (
     <AddLocationForm facilityId={facilityId} />
   ),
+  "/facility/:facilityId/location/:locationId/update": ({
+    facilityId,
+    locationId,
+  }: any) => (
+    <AddLocationForm facilityId={facilityId} locationId={locationId} />
+  ),
   "/facility/:facilityId/location/:locationId/beds/add": ({
     facilityId,
     locationId,
   }: any) => <AddBedForm facilityId={facilityId} locationId={locationId} />,
+  "/facility/:facilityId/location/:locationId/beds/:bedId/update": ({
+    facilityId,
+    locationId,
+    bedId,
+  }: any) => (
+    <AddBedForm facilityId={facilityId} locationId={locationId} bedId={bedId} />
+  ),
   "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (
     <SetInventoryForm facilityId={facilityId} />
   ),
@@ -334,7 +351,7 @@ const routes = {
   "/external_results/:id/update": ({ id }: any) => <ResultUpdate id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
-  "/notice_board/": () => <NoticeBoard />,
+  "/notice_board": () => <NoticeBoard />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId": ({
     facilityId,
     patientId,
@@ -434,7 +451,7 @@ export default function AppRouter() {
 
         <main
           id="pages"
-          className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none"
+          className="flex-1 overflow-y-scroll pb-4 md:py-0 focus:outline-none"
         >
           <div className="max-w-8xl mx-auto px-3 py-3">{pages}</div>
         </main>
