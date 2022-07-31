@@ -53,7 +53,7 @@ export default function BoardView() {
           : a,
       {}
     );
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const applyFilter = (data: any) => {
@@ -92,11 +92,12 @@ export default function BoardView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="w-full flex-col md:flex-row flex items-center justify-center space-x-4">
+      <div className="w-full flex-col md:flex-row flex items-center justify-between">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
             title={"Resource"}
             hideBack={true}
+            className="mx-3 md:mx-5"
             componentRight={
               downloadLoading ? (
                 <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
@@ -111,7 +112,7 @@ export default function BoardView() {
           />
         </div>
 
-        <div className="inline-flex items-start justify-center pt-2 space-y-2 lg:space-x-4 lg:items-center flex-col md:flex-row">
+        <div className="w-full flex items-start justify-center pt-2 lg:space-x-4 lg:items-center flex-col md:flex-row">
           <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex mt-1">
             <button
               className={

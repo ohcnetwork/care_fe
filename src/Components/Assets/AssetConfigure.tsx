@@ -96,6 +96,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
         msg: "Something went wrong..!",
       });
     }
+    fetchData({});
   };
 
   const addPreset = async (e: React.SyntheticEvent) => {
