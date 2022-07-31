@@ -11,9 +11,6 @@
 # production
 /build
 
-src/index.css
-src/style/index.css
-
 # misc
 .DS_Store
 .env.local
@@ -29,7 +26,6 @@ dist
 build
 .swp
 stats.json
-yarn.lock
 public/build-meta.json
 
 
@@ -41,5 +37,16 @@ public/build-meta.json
 *.gen
 .bsb.lock
 
-# Generated CSS file from Tailwind
-src/style/index.css
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+
+# Using NPM
+# package-lock.json
+yarn.lock

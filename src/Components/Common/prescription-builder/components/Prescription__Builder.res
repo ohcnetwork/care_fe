@@ -1,7 +1,7 @@
 let str = React.string
 
 let medicines = %raw(`require("../assets/medicines.json")`)
-let dosages = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk", "sos"]
+let dosages = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
 type prescriptions = array<Prescription__Prescription.t>
 
 let findAndReplace = (index, f, array) =>
@@ -94,7 +94,7 @@ let make = (~prescriptions, ~selectCB) => {
     {prescriptions
     |> Array.mapi((index, item) => showPrescriptionForm(item, index, send))
     |> React.array}
-    <div className="m-1 rounded-md shadow-sm bg-gray-200 rounded">
+    <div className="m-1 shadow-sm bg-gray-200 rounded">
       <button
         type_="button"
         onClick={_ => send(AddPescription)}

@@ -1,4 +1,3 @@
-import { t as Prescription_t } from "../Common/prescription-builder/types/Prescription__Prescription.gen";
 import loadable from "@loadable/component";
 import {
   Box,
@@ -9,6 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
+import type {t as Prescription__Prescription_t} from '../../../src/Components/Common/prescription-builder/types/Prescription__Prescription.gen';
 
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
@@ -48,13 +48,14 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
+import { make as PrescriptionBuilderOld } from "../Common/PrescriptionBuilder.gen";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
+import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -78,20 +79,18 @@ type FormDetails = {
   referred_to: string;
   diagnosis: string;
   verified_by: string;
-  test_id: string;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
-  existing_medication: string;
+  history_of_present_illness: string;
   prescribed_medication: string;
   consultation_notes: string;
   ip_no: string;
-  discharge_advice: Prescription_t[];
+  discharge_advice: PrescriptionType[];
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
-  operation: string;
   special_instruction: string;
   review_time: number;
   weight: string;
@@ -120,11 +119,10 @@ const initForm: FormDetails = {
   referred_to: "",
   diagnosis: "",
   verified_by: "",
-  test_id: "",
   is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
-  existing_medication: "",
+  history_of_present_illness: "",
   prescribed_medication: "",
   consultation_notes: "",
   ip_no: "",
@@ -133,7 +131,6 @@ const initForm: FormDetails = {
   action: "PENDING",
   assigned_to: "",
   assigned_to_object: null,
-  operation: "",
   special_instruction: "",
   review_time: 0,
   weight: "",
@@ -201,12 +198,18 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<Prescription_t[]>([]);
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
+
+  useEffect(()=>{
+    console.log("da", dischargeAdvice);
+  },[dischargeAdvice])
+
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
+  const [diseaseStatus, setDiseaseStatus] = useState("");
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
@@ -218,6 +221,7 @@ export const ConsultationForm = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setDiseaseStatus(res.data.disease_status);
         }
       } else {
         setPatientName("");
@@ -256,14 +260,12 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category ? res.data.category : "",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
-            test_id: res.data.test_id ? res.data.test_id : "",
             diagnosis: res.data.diagnosis ? res.data.diagnosis : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
-            operation: res.data.operation || "",
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
@@ -303,13 +305,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        // case "category":
-        //   if (!state.form[field] || !state.form[field].length) {
-        //     errors[field] = "Please select the category";
-        //     if (!error_div) error_div = field;
-        //     invalidForm = true;
-        //   }
-        //   return;
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
@@ -320,6 +315,10 @@ export const ConsultationForm = (props: any) => {
         case "ip_no":
           if (!state.form[field]) {
             errors[field] = "Please enter IP Number";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          } else if (!state.form[field].replace(/\s/g, "").length) {
+            errors[field] = "IP can not be empty";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -358,6 +357,10 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Required *";
             if (!error_div) error_div = field;
             invalidForm = true;
+          } else if (!state.form[field].replace(/\s/g, "").length) {
+            errors[field] = "Consultation notes can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
           }
           return;
         case "is_telemedicine":
@@ -376,6 +379,23 @@ export const ConsultationForm = (props: any) => {
             errors[
               field
             ] = `Please select an option, ${KASP_STRING} is mandatory`;
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "discharge_advice":
+          let invalid = false;
+          for (let f of dischargeAdvice) {
+            if (
+              !f.dosage?.replace(/\s/g, "").length ||
+              !f.medicine?.replace(/\s/g, "").length
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Prescription field can not be empty";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -415,7 +435,7 @@ export const ConsultationForm = (props: any) => {
         is_kasp: state.form.is_kasp,
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
         examination_details: state.form.examination_details,
-        existing_medication: state.form.existing_medication,
+        history_of_present_illness: state.form.history_of_present_illness,
         prescribed_medication: state.form.prescribed_medication,
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
@@ -424,7 +444,6 @@ export const ConsultationForm = (props: any) => {
         discharge_advice: dischargeAdvice,
         patient: patientId,
         facility: facilityId,
-        test_id: state.form.test_id,
         referred_to:
           state.form.suggestion === "R" ? state.form.referred_to : undefined,
         consultation_notes: state.form.consultation_notes,
@@ -433,7 +452,6 @@ export const ConsultationForm = (props: any) => {
         review_time: state.form.review_time,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
-        operation: state.form.operation,
         special_instruction: state.form.special_instruction,
         weight: Number(state.form.weight),
         height: Number(state.form.height),
@@ -625,17 +643,17 @@ export const ConsultationForm = (props: any) => {
                   </InputLabel>
                   <MultilineInputField
                     rows={5}
-                    name="existing_medication"
+                    name="history_of_present_illness"
                     variant="outlined"
                     margin="dense"
                     type="text"
                     placeholder="Information optional"
                     InputLabelProps={{
-                      shrink: !!state.form.existing_medication,
+                      shrink: !!state.form.history_of_present_illness,
                     }}
-                    value={state.form.existing_medication}
+                    value={state.form.history_of_present_illness}
                     onChange={handleChange}
-                    errors={state.errors.existing_medication}
+                    errors={state.errors.history_of_present_illness}
                   />
                 </div>
 
@@ -736,7 +754,7 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   )}
                 */}
-                {!id && state.form.suggestion === "A" && (
+                {state.form.suggestion === "A" && (
                   <>
                     <div className="flex">
                       <div className="flex-1" id="admission_date-div">
@@ -788,15 +806,20 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.consultation_notes}
                 />
               </div>
-              <div className="mt-4">
-                <InputLabel>Medication</InputLabel>
+              <div id="discharge_advice-div" className="mt-4">
+                <InputLabel>Prescription Medication</InputLabel>
+                {/*<PrescriptionBuilderOld
+                  prescriptions={dischargeAdvice as Prescription__Prescription_t[]}
+                  setPrescriptions={setDischargeAdvice}
+                />*/}
                 <PrescriptionBuilder
                   prescriptions={dischargeAdvice}
                   setPrescriptions={setDischargeAdvice}
                 />
+                <br />
+                <ErrorHelperText error={state.errors.discharge_advice} />
               </div>
-
-              <div id="ip_no-div">
+              <div id="ip_no-div" className="mt-4">
                 <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
                   name="ip_no"
@@ -808,19 +831,6 @@ export const ConsultationForm = (props: any) => {
                   onChange={handleChange}
                   errors={state.errors.ip_no}
                   required
-                />
-              </div>
-              <div id="test_id-div">
-                <InputLabel id="refered-label">State Test ID</InputLabel>
-                <TextInputField
-                  name="test_id"
-                  variant="outlined"
-                  margin="dense"
-                  type="string"
-                  InputLabelProps={{ shrink: !!state.form.test_id }}
-                  value={state.form.test_id}
-                  onChange={handleChange}
-                  errors={state.errors.test_id}
                 />
               </div>
               <div id="verified_by-div">
@@ -840,7 +850,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.verified_by}
                 />
               </div>
-              <div id="diagnosis-div">
+              <div id="diagnosis-div" className="mt-4">
                 <InputLabel id="exam-details-label">Diagnosis</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -885,7 +895,7 @@ export const ConsultationForm = (props: any) => {
                 </div>
               )}
               {/* Telemedicine Fields */}
-              <div className="flex">
+              <div className="flex mt-4">
                 <div className="flex-1" id="is_telemedicine-div">
                   <InputLabel id="admitted-label">Telemedicine</InputLabel>
                   <RadioGroup
@@ -937,6 +947,7 @@ export const ConsultationForm = (props: any) => {
                     selectedUser={state.form.assigned_to_object}
                     onSelect={handleDoctorSelect}
                     user_type={"Doctor"}
+                    outline={false}
                   />
                 </div>
               )}
@@ -960,23 +971,6 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-              <div id="operation-div" className="mt-2">
-                <InputLabel id="exam-details-label">Operation</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="operation"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.operation,
-                  }}
-                  value={state.form.operation}
-                  onChange={handleChange}
-                  errors={state.errors.operation}
-                />
-              </div>
               <div id="special_instruction-div" className="mt-2">
                 <InputLabel id="special-instruction-label">
                   Special Instructions
@@ -997,14 +991,14 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row justify-between md:gap-5">
+              <div className="flex flex-col md:flex-row justify-between md:gap-5 mt-4">
                 <div id="weight-div" className="flex-1">
                   <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
                   <TextInputField
                     name="weight"
                     variant="outlined"
                     margin="dense"
-                    type="string"
+                    type="number"
                     InputLabelProps={{ shrink: !!state.form.weight }}
                     value={state.form.weight}
                     onChange={handleChange}
@@ -1017,7 +1011,7 @@ export const ConsultationForm = (props: any) => {
                     name="height"
                     variant="outlined"
                     margin="dense"
-                    type="string"
+                    type="number"
                     InputLabelProps={{ shrink: !!state.form.height }}
                     value={state.form.height}
                     onChange={handleChange}

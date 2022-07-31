@@ -59,9 +59,14 @@ export default function ShiftDetails(props: { id: string }) {
     setOpenDeleteShiftDialog(true);
 
     const res = await dispatch(deleteShiftRecord(props.id));
-    if (res.status >= 200) {
+    if (res?.status == 204) {
       Notification.Success({
         msg: "Shifting record has been deleted successfully.",
+      });
+    } else {
+      Notification.Error({
+        msg:
+          "Error while deleting Shifting record: " + (res?.data?.detail || ""),
       });
     }
 
@@ -187,7 +192,7 @@ export default function ShiftDetails(props: { id: string }) {
               {patientData?.age}
             </div>
           )}
-          {patientData?.is_antenatal && (
+          {patientData?.gender === 2 && patientData?.is_antenatal && (
             <div>
               <span className="font-semibold leading-relaxed">
                 Is antenatal:{" "}
@@ -385,7 +390,7 @@ export default function ShiftDetails(props: { id: string }) {
             <img alt="logo" src={process.env.REACT_APP_HEADER_LOGO} />
           )}
         </div>
-        <div className="mx-20 p-4">
+        <div className="mx-2">
           <div className="mt-6">
             <span className="font-semibold leading-relaxed mt-4">
               Name of Hospital:{" "}
@@ -398,14 +403,14 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="font-bold text-xl text-center mt-6">
             REFERRAL LETTER
           </div>
-          <div className="text-right mt-4">
+          <div className="text-left mt-4">
             <span className="font-semibold leading-relaxed">
               {" "}
               Date and Time:{" "}
             </span>
             {moment(data.created_date).format("LLL") || "--"}
           </div>
-          <div className="text-right mt-2">
+          <div className="text-left mt-2">
             <span className="font-semibold leading-relaxed"> Unique Id: </span>
             {data.id}
           </div>
@@ -438,8 +443,10 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               {patientData?.nationality === "India" && (
                 <>
-                  <div>{patientData?.ward_object?.name}</div>
-                  <div>{patientData?.local_body_object?.name}</div>
+                  <div>
+                    {patientData?.ward_object?.name},
+                    {patientData?.local_body_object?.name}
+                  </div>
                   <div>{patientData?.district_object?.name || "-"}</div>
                   <div>{patientData?.state_object?.name}</div>
                 </>
@@ -540,7 +547,7 @@ export default function ShiftDetails(props: { id: string }) {
               </span>
             </div>
           </div>
-          <div className="flex justify-center text-center mt-4">
+          <div className="flex justify-center text-center mt-20">
             Auto Generated for Care
           </div>
           <div className="font-xs font-gray-600 text-center font-mono">

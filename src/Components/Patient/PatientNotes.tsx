@@ -13,6 +13,7 @@ import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+import Loading from "../Common/Loading";
 
 interface PatientNotesProps {
   patientId: any;
@@ -25,7 +26,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const { patientId, facilityId } = props;
 
   const dispatch: any = useDispatch();
-  let initialData: any = { notes: [], cPage: 1, count: 1 };
+  const initialData: any = { notes: [], cPage: 1, count: 1 };
   const [state, setState] = useState(initialData);
   const [noteField, setNoteField] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +34,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [patientName, setPatientName] = useState("");
 
   const fetchData = useCallback(
-    async (page: number = 1, status: statusType = { aborted: false }) => {
+    async (page = 1, status: statusType = { aborted: false }) => {
       setIsLoading(true);
       const res = await dispatch(
         getPatientNotes(props.patientId, pageSize, (page - 1) * pageSize)
@@ -84,14 +85,21 @@ const PatientNotes = (props: PatientNotesProps) => {
     const payload = {
       note: noteField,
     };
-    dispatch(addPatientNote(props.patientId, payload)).then((res: any) => {
+    if (!/\S+/.test(noteField)) {
+      Notification.Error({
+        msg: "Note Should Contain At Least 1 Character",
+      });
+      return;
+    }
+    dispatch(addPatientNote(props.patientId, payload)).then(() => {
       Notification.Success({ msg: "Note added successfully" });
+      setNoteField("");
       fetchData();
     });
   };
 
   if (isLoading) {
-    return <div>Loading</div>;
+    return <Loading />;
   }
 
   return (
@@ -108,7 +116,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       <textarea
         rows={3}
         placeholder="Type your Note"
-        className="mx-10 my-4 border border-gray-500 rounded-lg p-4"
+        className="mx-10 my-4 border border-gray-500 rounded-lg p-4 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
         onChange={(e) => setNoteField(e.target.value)}
       />
       <div className="flex w-full justify-end pr-10">
@@ -123,7 +131,10 @@ const PatientNotes = (props: PatientNotesProps) => {
         <h3 className="text-lg">Added Notes</h3>
         <div className="w-full">
           {state.notes.map((note: any) => (
-            <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
+            <div
+              key={note.id}
+              className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+            >
               <div className="flex  w-full ">
                 <p className="text-justify">{note.note}</p>
               </div>

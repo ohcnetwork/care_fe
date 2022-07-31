@@ -9,7 +9,7 @@ export const StackedLinePlot = (props: any) => {
     name: x.name,
     type: "line",
     stack: x.name,
-    data: x.data,
+    data: x.data.map((d: any) => Math.round(d * 100) / 100),
     connectNulls: true,
   }));
 

@@ -53,7 +53,7 @@ export default function BoardView() {
           : a,
       {}
     );
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const applyFilter = (data: any) => {
@@ -92,24 +92,28 @@ export default function BoardView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="lg:grid lg:grid-cols-4 px-4">
-        <PageTitle
-          title={"Resource"}
-          hideBack={true}
-          componentRight={
-            downloadLoading ? (
-              <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
-            ) : (
-              <GetAppIcon
-                className="cursor-pointer mt-2 ml-2"
-                onClick={triggerDownload}
-              />
-            )
-          }
-          breadcrumbs={false}
-        />
-        <div className="sm:flex sm:justify-between items-center sm:flex-wrap w-full col-span-3">
-          <div className="my-1 h-10 bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex w-32">
+      <div className="w-full flex-col md:flex-row flex items-center justify-between">
+        <div className="w-1/3 lg:w-1/4">
+          <PageTitle
+            title={"Resource"}
+            hideBack={true}
+            className="mx-3 md:mx-5"
+            componentRight={
+              downloadLoading ? (
+                <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
+              ) : (
+                <GetAppIcon
+                  className="cursor-pointer mt-2 ml-2"
+                  onClick={triggerDownload}
+                />
+              )
+            }
+            breadcrumbs={false}
+          />
+        </div>
+
+        <div className="w-full flex items-start justify-center pt-2 lg:space-x-4 lg:items-center flex-col md:flex-row">
+          <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex mt-1">
             <button
               className={
                 "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
@@ -133,18 +137,16 @@ export default function BoardView() {
               <span>Completed</span>
             </button>
           </div>
-          <div className="flex items-center my-2">
+          <div className="mt-2 w-fit inline-flex space-x-1 lg:space-x-4">
             <button
-              className="h-fit px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-28 md:w-36 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
               onClick={onListViewBtnClick}
             >
               <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
               List View
             </button>
-          </div>
-          <div className="flex items-center gap-2 my-3">
             <button
-              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-28 md:w-36 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
               onClick={(_) => setShowFilters((show) => !show)}
             >
               <i className="fa fa-filter mr-1" aria-hidden="true"></i>
