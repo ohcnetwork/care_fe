@@ -387,16 +387,16 @@ export default function UserProfile() {
             {!showEdit && (
               <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
                 <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1 my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Username
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.username || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Contact No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -404,95 +404,98 @@ export default function UserProfile() {
                     </dd>
                   </div>
 
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Whatsapp No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.alt_phone_number || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Email address
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.email || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       First Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.first_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Last Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Age
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.age || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Verification Status
                     </dt>
                     {details.verified && (
-                      <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
+                      <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
+                        <i className="fa-solid fa-circle-check mr-1"></i>{" "}
                         Verified
                       </dd>
                     )}
                     {!details.verified && (
-                      <dd className="mt-1 text-sm leading-5 text-gray-900">
-                        Not Verified
+                      <dd className="mt-1 badge badge-pill bg-red-500 text-sm text-white">
+                        <i className="fa-regular fa-circle-xmark mr-1"></i> Not
+                        Verified
                       </dd>
                     )}
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Access Level
                     </dt>
-                    <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
+                      <i className="fa-solid fa-user-check mr-1"></i>{" "}
                       {details.user_type || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Gender
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.gender || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Local Body
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       District
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       State
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
