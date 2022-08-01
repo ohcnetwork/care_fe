@@ -13,6 +13,7 @@ import { FacilityModel } from "../Facility/models";
 
 interface Props {
   username: string;
+  district?: number;
   handleOk: (
     username: string,
     facility: FacilityModel | FacilityModel[] | null
@@ -28,7 +29,7 @@ const styles = {
 };
 
 const LinkFacilityDialog = (props: Props & WithStyles<typeof styles>) => {
-  const { username, handleOk, handleCancel } = props;
+  const { username, handleOk, handleCancel, district } = props;
   const [facility, setFacility] = useState<any>(null);
 
   const okClicked = () => {
@@ -51,6 +52,7 @@ const LinkFacilityDialog = (props: Props & WithStyles<typeof styles>) => {
             name="facility"
             selected={facility}
             setSelected={setFacility}
+            district={district}
             errors=""
           />
         </div>

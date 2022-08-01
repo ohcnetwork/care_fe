@@ -493,6 +493,7 @@ export default function ManageUsers() {
           username={linkFacility.username}
           handleOk={addFacility}
           handleCancel={hideLinkFacilityModal}
+          district={currentUser?.data?.district}
         />
       )}
       <PageTitle

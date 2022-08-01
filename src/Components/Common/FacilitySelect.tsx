@@ -6,6 +6,7 @@ import { FacilityModel } from "../Facility/models";
 const debounce = require("lodash.debounce");
 interface FacilitySelectProps {
   name: string;
+  district?: number;
   margin?: string;
   errors: string;
   className?: string;
@@ -20,6 +21,7 @@ interface FacilitySelectProps {
 export const FacilitySelect = (props: FacilitySelectProps) => {
   const {
     name,
+    district,
     multiple,
     selected,
     setSelected,
@@ -61,6 +63,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
           search_text: text,
           all: searchAll,
           facility_type: facilityType,
+          district: district,
         };
 
         const res = await dispatchAction(
