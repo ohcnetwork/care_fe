@@ -1315,16 +1315,49 @@ export const PatientHome = (props: any) => {
               </div>
               <div
                 className="w-full"
-                onClick={() => setOpenAssignVolunteerDialog(true)}
+                onClick={() => {
+                  if (
+                    !(
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility === facilityId)
+                    )
+                  ) {
+                    setOpenAssignVolunteerDialog(true);
+                  }
+                }}
               >
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 hover:bg-gray-200 hover:cursor-pointer">
-                  <div className="text-green-700 text-center">
+                <div
+                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
+                    !patientData.is_active ||
+                    !(patientData?.last_consultation?.facility === facilityId)
+                      ? " hover:cursor-not-allowed "
+                      : " hover:bg-gray-200 hover:cursor-pointer "
+                  } `}
+                >
+                  <div
+                    className={`${
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility === facilityId)
+                        ? "text-gray-700"
+                        : "text-green-700"
+                    }  text-center `}
+                  >
                     <span>
                       <i className="fa-solid fa-hospital-user fa-4x"></i>
                     </span>
                   </div>
                   <div>
-                    <p className="text-green-700 text-center">
+                    <p
+                      className={`${
+                        !patientData.is_active ||
+                        !(
+                          patientData?.last_consultation?.facility ===
+                          facilityId
+                        )
+                          ? "text-gray-700"
+                          : "text-green-700"
+                      }  text-center `}
+                    >
                       Assign to a volunteer
                     </p>
                   </div>
