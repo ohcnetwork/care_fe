@@ -1,3 +1,4 @@
+import { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { AssignedToObjectModel } from "../Patient/models";
 
 export interface LocalBodyModel {
@@ -101,6 +102,7 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   discharge_advice?: any;
+  prn_prescription? : PRNPrescriptionType[];
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;

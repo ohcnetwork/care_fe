@@ -56,6 +56,7 @@ import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
 import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
+import PRNPrescriptionBuilder, { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -87,6 +88,7 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: PrescriptionType[];
+  prn_prescription : PRNPrescriptionType[],
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
@@ -127,6 +129,7 @@ const initForm: FormDetails = {
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
+  prn_prescription : [],
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
@@ -199,6 +202,7 @@ export const ConsultationForm = (props: any) => {
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
   const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
+  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
 
   useEffect(()=>{
     console.log("da", dischargeAdvice);
@@ -235,14 +239,9 @@ export const ConsultationForm = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
-      if (
-        res &&
-        res.data &&
-        res.data.discharge_advice &&
-        Object.keys(res.data.discharge_advice).length != 0
-      ) {
-        setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      }
+      setDischargeAdvice(res && res.data && res.data.discharge_advice);
+      console.log("recieved", res.data.prn_prescription);
+      setPRNAdvice(!Array.isArray(res.data.prn_prescription) ? [] : res.data.prn_prescription);
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -383,7 +382,7 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "discharge_advice":
+        case "discharge_advice":{
           let invalid = false;
           for (let f of dischargeAdvice) {
             if (
@@ -400,6 +399,26 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        }
+        case "prn_prescription":
+          let invalid = false;
+          for (let f of PRNAdvice) {
+            if (
+              !f.dosage?.replace(/\s/g, "").length ||
+              !f.medicine?.replace(/\s/g, "").length ||
+              f.indicator === "" || f.indicator === " "
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "PRN Prescription field can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+
         default:
           return;
       }
@@ -442,6 +461,7 @@ export const ConsultationForm = (props: any) => {
         diagnosis: state.form.diagnosis,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
+        prn_prescription : PRNAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -818,6 +838,15 @@ export const ConsultationForm = (props: any) => {
                 />
                 <br />
                 <ErrorHelperText error={state.errors.discharge_advice} />
+              </div>
+              <div id="discharge_advice-div" className="mt-4">
+                <InputLabel>PRN Prescription</InputLabel>
+                <PRNPrescriptionBuilder
+                  prescriptions={PRNAdvice}
+                  setPrescriptions={setPRNAdvice}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.prn_prescription} />
               </div>
               <div id="ip_no-div" className="mt-4">
                 <InputLabel id="refered-label">IP number*</InputLabel>
