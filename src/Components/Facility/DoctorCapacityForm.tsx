@@ -284,10 +284,11 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             </CardContent>
             <CardContent>
               <Grid container justify="space-between" spacing={5}>
-                <Grid item>
+                <Grid item className="flex flex-row w-full sm:w-auto gap-4">
                   <Button
                     id="doctor-cancel"
                     color="default"
+                    className="w-full sm:w-auto"
                     variant="contained"
                     onClick={goBack}
                   >
@@ -300,6 +301,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                       id="doctor-save-and-exit"
                       color="primary"
                       variant="contained"
+                      className="w-full sm:w-auto"
                       type="submit"
                       startIcon={
                         <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
@@ -312,6 +314,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                   <Button
                     id="doctor-save"
                     color="primary"
+                    className="w-full sm:w-auto"
                     variant="contained"
                     type="submit"
                     startIcon={
