@@ -365,14 +365,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
-            blood_group: res.data.blood_group ? res.data.blood_group : "",
+            blood_group: res.data.blood_group
+              ? res.data.blood_group === "UNKNOWN"
+                ? "UNK"
+                : res.data.blood_group
+              : "",
             local_body: res.data.local_body ? res.data.local_body : "",
             ward: res.data.ward_object ? res.data.ward_object.id : initialWard,
             village: res.data.village ? res.data.village : "",
             medical_history: [],
-            is_antenatal: res.data.is_antenatal
-              ? res.data.is_antenatal
-              : "false",
+            is_antenatal: String(!!res.data.is_antenatal),
             allergies: res.data.allergies ? res.data.allergies : "",
             pincode: res.data.pincode ? res.data.pincode : "",
             ongoing_medication: res.data.ongoing_medication
@@ -1019,7 +1021,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     className="btn btn-primary mb-8 mx-4"
                     onClick={(_) => {
                       setShowImport(true);
-                      setQuery({ extId: "" }, true);
+                      setQuery({ extId: "" }, { replace: true });
                     }}
                   >
                     {" "}
@@ -1120,7 +1122,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           in={String(state.form.gender) === "2"}
                           timeout="auto"
                           unmountOnExit
-                          className="col-span-2"
                         >
                           {
                             <div id="is_antenatal-div" className="col-span-2">
