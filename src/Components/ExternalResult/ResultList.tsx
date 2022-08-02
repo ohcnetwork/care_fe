@@ -332,13 +332,11 @@ export default function ResultList() {
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <Grid item xs={12} md={12}>
-        <Grid container justify="center" alignItems="center">
-          <h5 className="flex justify-center items-center text-gray-600">
-            No Results Found
-          </h5>
-        </Grid>
-      </Grid>
+      <tr className="bg-white">
+        <td colSpan={5}>
+          <Loading />
+        </td>
+      </tr>
     );
   }
 
