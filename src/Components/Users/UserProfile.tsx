@@ -446,23 +446,6 @@ export default function UserProfile() {
                   </div>
                   <div className="sm:col-span-1  my-2">
                     <dt className="text-sm leading-5 font-medium text-black">
-                      Verification Status
-                    </dt>
-                    {details.verified && (
-                      <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
-                        <i className="fa-solid fa-circle-check mr-1"></i>{" "}
-                        Verified
-                      </dd>
-                    )}
-                    {!details.verified && (
-                      <dd className="mt-1 badge badge-pill bg-red-500 text-sm text-white">
-                        <i className="fa-regular fa-circle-xmark mr-1"></i> Not
-                        Verified
-                      </dd>
-                    )}
-                  </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
                       Access Level
                     </dt>
                     <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
