@@ -467,7 +467,7 @@ export const PatientManager = (props: any) => {
             (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
-          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">      
+          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
             <div>
               <div className="md:flex justify-between w-full">
                 <div className="text-xl font-normal capitalize">
@@ -558,8 +558,8 @@ export const PatientManager = (props: any) => {
               {patient.gender === 2 &&
                 patient.is_antenatal &&
                 patient.is_active && (
-                <Badge color="blue" icon="baby-carriage" text="Antenatal" />
-              )}
+                  <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+                )}
               {patient.is_medical_worker && patient.is_active && (
                 <Badge color="blue" icon="user-md" text="Medical Worker" />
               )}
@@ -722,94 +722,100 @@ export const PatientManager = (props: any) => {
             </dl>
           </div>
         </div>
-        <div>
+        <div className="col-span-2 mt-2">
           <div>
-            <div className="text-sm font-semibold mb-2">Search by Name</div>
-            <InputSearchBox
-              search={searchByName}
-              value={qParams.name}
-              placeholder="Search by Patient Name"
-              errors=""
-            />
-          </div>
-          <div>
-            <div className="text-sm font-semibold mt-2">
-              Search by Primary Number
-            </div>
-            <PhoneNumberField
-              value={qParams.phone_number || "+91"}
-              onChange={(value: string) => searchByPhone(value, "phone_number")}
-              turnOffAutoFormat={false}
-              errors=""
-            />
-          </div>
-        </div>
-        <div className="flex flex-col-reverse md:flex-col">
-          <div>
-            <div className="md:flex items-end gap-2 mb-2">
-              <button
-                className="btn btn-primary-ghost w-full mt-2 md:mt-7 "
-                onClick={(_) => setShowFilters((show) => !show)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
+            <div>
+              <div className="md:flex flex-wrap items-end gap-2 lg:mb-2">
+                <div className="grow">
+                  <div className="text-sm font-semibold mb-2">
+                    Search by Name
+                  </div>
+                  <InputSearchBox
+                    search={searchByName}
+                    value={qParams.name}
+                    placeholder="Search by Patient Name"
+                    errors=""
+                  />
+                </div>
+                <button
+                  className="btn btn-primary-ghost w-full md:w-fit mt-2"
+                  onClick={(_) => setShowFilters((show) => !show)}
                 >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
-              <button
-                className="btn-primary btn md:mt-7 mt-2 w-full md:w-fit"
-                onClick={() => {
-                  if (facilityId) {
-                    navigate(`/facility/${facilityId}/patient`);
-                  } else {
-                    setShowDialog(true);
-                  }
-                }}
-                data-testid="add-patient-button"
-              >
-                <i className="fas fa-plus mr-2 text-white"></i>
-                Add Details of a Patient
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="fill-current w-4 h-4 mr-2"
+                  >
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12">
+                      {" "}
+                    </line>
+                    <line x1="8" y1="18" x2="21" y2="18">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="6" x2="3.01" y2="6">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="12" x2="3.01" y2="12">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="18" x2="3.01" y2="18">
+                      {" "}
+                    </line>
+                  </svg>
+                  <span>Advanced Filters</span>
+                </button>
+                <button
+                  className="btn-primary btn mt-2 w-full md:w-fit"
+                  onClick={() => {
+                    if (facilityId) {
+                      navigate(`/facility/${facilityId}/patient`);
+                    } else {
+                      setShowDialog(true);
+                    }
+                  }}
+                  data-testid="add-patient-button"
+                >
+                  <i className="fas fa-plus mr-2 text-white"></i>
+                  Add Details of a Patient
+                </button>
+              </div>
             </div>
           </div>
-          <div>
-            <div className="text-sm font-semibold mt-2">
-              Search by Emergency Number
+          <div className="md:flex md:gap-4">
+            <div className="grow">
+              <div className="text-sm font-semibold mt-2">
+                Search by Primary Number
+              </div>
+              <PhoneNumberField
+                value={qParams.phone_number || "+91"}
+                onChange={(value: string) =>
+                  searchByPhone(value, "phone_number")
+                }
+                turnOffAutoFormat={false}
+                errors=""
+              />
             </div>
-            <PhoneNumberField
-              value={qParams.emergency_phone_number || "+91"}
-              onChange={(value: string) =>
-                searchByPhone(value, "emergency_phone_number")
-              }
-              turnOffAutoFormat={false}
-              errors=""
-            />
+            <div className="grow">
+              <div className="text-sm font-semibold mt-2">
+                Search by Emergency Number
+              </div>
+              <PhoneNumberField
+                value={qParams.emergency_phone_number || "+91"}
+                onChange={(value: string) =>
+                  searchByPhone(value, "emergency_phone_number")
+                }
+                turnOffAutoFormat={false}
+                errors=""
+              />
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap w-full col-span-3">
