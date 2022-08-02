@@ -1256,12 +1256,13 @@ export const PatientHome = (props: any) => {
                 }}
               >
                 <div
-                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
+                  className={clsx(
+                    "bg-white rounded-lg shadow p-4 h-full space-y-2",
                     !patientData.is_active ||
-                    !(patientData?.last_consultation?.facility === facilityId)
+                      !(patientData?.last_consultation?.facility === facilityId)
                       ? " hover:cursor-not-allowed "
                       : " hover:bg-gray-200 hover:cursor-pointer "
-                  } `}
+                  )}
                 >
                   <div
                     className={`${
@@ -1327,20 +1328,25 @@ export const PatientHome = (props: any) => {
                 }}
               >
                 <div
-                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
+                  className={clsx(
+                    "bg-white rounded-lg shadow p-4 h-full space-y-2",
                     !patientData.is_active ||
-                    !(patientData?.last_consultation?.facility === facilityId)
-                      ? " hover:cursor-not-allowed "
-                      : " hover:bg-gray-200 hover:cursor-pointer "
-                  } `}
+                      !(patientData?.last_consultation?.facility === facilityId)
+                      ? "hover:cursor-not-allowed "
+                      : "hover:bg-gray-200 hover:cursor-pointer "
+                  )}
                 >
                   <div
-                    className={`${
+                    className={clsx(
+                      "text-center",
                       !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility === facilityId)
+                        !(
+                          patientData?.last_consultation?.facility ===
+                          facilityId
+                        )
                         ? "text-gray-700"
                         : "text-green-700"
-                    }  text-center `}
+                    )}
                   >
                     <span>
                       <i className="fa-solid fa-hospital-user fa-4x"></i>
@@ -1348,15 +1354,16 @@ export const PatientHome = (props: any) => {
                   </div>
                   <div>
                     <p
-                      className={`${
+                      className={clsx(
+                        "text-center",
                         !patientData.is_active ||
-                        !(
-                          patientData?.last_consultation?.facility ===
-                          facilityId
-                        )
+                          !(
+                            patientData?.last_consultation?.facility ===
+                            facilityId
+                          )
                           ? "text-gray-700"
                           : "text-green-700"
-                      }  text-center `}
+                      )}
                     >
                       Assign to a volunteer
                     </p>
