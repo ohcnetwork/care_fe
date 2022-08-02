@@ -10,6 +10,7 @@ import {
   getUserListFacility,
   deleteUser,
   getDistrict,
+  partialUpdateUser,
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate, useQueryParams } from "raviger";
@@ -261,6 +262,13 @@ export default function ManageUsers() {
     );
   };
 
+  const updateHomeFacility = async (username: string, facility: any) => {
+    setIsFacilityLoading(true);
+    await dispatch(partialUpdateUser(username, { home_facility: facility.id }));
+    setIsFacilityLoading(false);
+    fetchData({ aborted: false });
+  };
+
   const showFacilities = (username: string, facilities: FacilityModel[]) => {
     if (!facilities || !facilities.length) {
       return (
@@ -280,6 +288,10 @@ export default function ManageUsers() {
             >
               <div className="flex items-center  space-x-1">
                 <div className="font-semibold">{facility.name}</div>
+                <i
+                  className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
+                  onClick={() => updateHomeFacility(username, facility)}
+                ></i>
                 <IconButton
                   size="small"
                   color="secondary"
@@ -425,7 +437,10 @@ export default function ManageUsers() {
                 </div>
 
                 {user.username && (
-                  <UserDetails title="Facilities">
+                  <UserDetails title="Home Facility">
+                    <span className="font-semibold block">
+                      {user.home_facility_object?.name || "No Home Facility"}
+                    </span>
                     {user.facilities &&
                       showFacilities(user.username, user.facilities)}
                     {!user.facilities && (
@@ -434,7 +449,7 @@ export default function ManageUsers() {
                         className={`inline-block ${facilityClassname}`}
                         href="#"
                       >
-                        Click here to show
+                        Click here to show linked facilities
                       </a>
                     )}
                   </UserDetails>
