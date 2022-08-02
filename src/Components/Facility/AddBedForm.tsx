@@ -44,7 +44,6 @@ export const AddBedForm = (props: BedFormProps) => {
   });
 
   const headerText = !bedId ? "Add Bed" : "Update Bed";
-  const buttonText = !bedId ? "Add Bed" : "Update Bed";
 
   useEffect(() => {
     async function fetchFacilityLocationAndBed() {
