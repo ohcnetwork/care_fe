@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { UserSelect } from "../Common/UserSelect2";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import {
+  SelectField,
+  DateInputField,
+  TextInputField,
+  PhoneNumberField,
+} from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
@@ -16,6 +21,7 @@ import { CircularProgress } from "@mui/material";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import parsePhoneNumberFromString from "libphonenumber-js";
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -197,7 +203,9 @@ export default function ListFilter(props: any) {
       assigned_facility: assigned_facility || "",
       emergency: emergency || "",
       is_up_shift: is_up_shift || "",
-      patient_phone_number: patient_phone_number || "",
+      patient_phone_number: patient_phone_number
+        ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164")
+        : "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()
           ? moment(created_date_before).format("YYYY-MM-DD")
@@ -466,13 +474,12 @@ export default function ListFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Patient Phone Number</span>
-          <TextInputField
+          <PhoneNumberField
             name="patient_phone_number"
-            variant="outlined"
-            margin="dense"
-            errors=""
             value={filterState.patient_phone_number}
-            onChange={handleChange}
+            onChange={(value: string) => {
+              handleChange({ target: { name: "patient_phone_number", value } });
+            }}
           />
         </div>
 

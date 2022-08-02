@@ -1,4 +1,3 @@
-import { t as Prescription_t } from "../Common/prescription-builder/types/Prescription__Prescription.gen";
 import loadable from "@loadable/component";
 import {
   Box,
@@ -9,6 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@mui/material";
+import type {t as Prescription__Prescription_t} from '../../../src/Components/Common/prescription-builder/types/Prescription__Prescription.gen';
 
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { navigate } from "raviger";
@@ -48,12 +48,13 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
+import { make as PrescriptionBuilderOld } from "../Common/PrescriptionBuilder.gen";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
+import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -84,7 +85,7 @@ type FormDetails = {
   prescribed_medication: string;
   consultation_notes: string;
   ip_no: string;
-  discharge_advice: Prescription_t[];
+  discharge_advice: PrescriptionType[];
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
@@ -196,7 +197,12 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<Prescription_t[]>([]);
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
+
+  useEffect(()=>{
+    console.log("da", dischargeAdvice);
+  },[dischargeAdvice])
+
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -380,8 +386,8 @@ export const ConsultationForm = (props: any) => {
           let invalid = false;
           for (let f of dischargeAdvice) {
             if (
-              !f.dosage.replace(/\s/g, "").length ||
-              !f.medicine.replace(/\s/g, "").length
+              !f.dosage?.replace(/\s/g, "").length ||
+              !f.medicine?.replace(/\s/g, "").length
             ) {
               invalid = true;
               break;
@@ -799,11 +805,16 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="discharge_advice-div" className="mt-4">
-                <InputLabel>Medication</InputLabel>
+                <InputLabel>Prescription Medication</InputLabel>
+                {/*<PrescriptionBuilderOld
+                  prescriptions={dischargeAdvice as Prescription__Prescription_t[]}
+                  setPrescriptions={setDischargeAdvice}
+                />*/}
                 <PrescriptionBuilder
                   prescriptions={dischargeAdvice}
                   setPrescriptions={setDischargeAdvice}
                 />
+                <br />
                 <ErrorHelperText error={state.errors.discharge_advice} />
               </div>
               <div id="ip_no-div" className="mt-4">

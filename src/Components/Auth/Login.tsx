@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import { postLogin } from "../../Redux/actions";
 import { navigate } from "raviger";
 import {
-  CardActions,
   CardContent,
   Grid,
   CircularProgress,
@@ -127,10 +126,10 @@ export const Login = (props: any) => {
 
   return (
     <div className="flex flex-col md:flex-row h-screen relative">
-      <div className="absolute top-2 right-2">
+      <div className="md:absolute top-2 right-2 p-2 md:p-0 bg-primary-500 md:bg-white">
         <LanguageSelector className="md:bg-primary-500 md:text-white bg-white" />
       </div>
-      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-primary-500">
+      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-primary-500 border-primary-500">
         <div className="pl-1/5">
           <a href={"/"}>
             <img
@@ -189,8 +188,7 @@ export const Login = (props: any) => {
                   />
                 )}
               </div>
-            </CardContent>
-            <CardActions className="padding16">
+
               <Grid container justifyContent="center">
                 {isCaptchaEnabled && (
                   <Grid item className="px-8 py-4">
@@ -202,7 +200,7 @@ export const Login = (props: any) => {
                   </Grid>
                 )}
 
-                <div className="w-full flex justify-between items-center px-4 pb-4">
+                <div className="w-full flex justify-between items-center pb-4">
                   <a
                     href="/forgot-password"
                     className="text-sm text-primary-400 hover:text-primary-500"
@@ -224,7 +222,7 @@ export const Login = (props: any) => {
                   </button>
                 )}
               </Grid>
-            </CardActions>
+            </CardContent>
           </form>
         </div>
       </div>

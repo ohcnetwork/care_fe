@@ -93,9 +93,9 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   };
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "patient":
           if (!state.form[field]) {
@@ -139,7 +139,9 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
         const newFacilityId =
           res.data && res.data.facility_object && res.data.facility_object.id;
         if (newFacilityId) {
-          navigate(`/facility/${newFacilityId}/patient/${res.data.patient}`);
+          navigate(
+            `/facility/${newFacilityId}/patient/${res.data.patient}/consultation`
+          );
         } else {
           navigate("/facility");
         }
