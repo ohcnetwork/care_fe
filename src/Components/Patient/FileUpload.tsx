@@ -99,7 +99,7 @@ interface StateInterface {
 
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [file, setFile] = useState<File>();
+  const [file, setFile] = useState<File | undefined>();
   const {
     facilityId,
     consultationId,
@@ -476,9 +476,15 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleUpload = async (status: any) => {
     const f = file;
-    if (f === undefined) return;
+    if (f === undefined) {
+      Notification.Error({
+        msg: "Please choose a file to upload",
+      });
+      return;
+    }
+    setFile(undefined);
     const category = "UNSPECIFIED";
-    const filename = uploadFileName;
+    const filename = uploadFileName === "" ? f.name : uploadFileName;
     const name = f.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
@@ -738,14 +744,14 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4>Upload New File</h4>
               </div>
               <div>
-                <InputLabel id="spo2-label">Enter File Name*</InputLabel>
+                <InputLabel id="spo2-label">Enter File Name</InputLabel>
                 <TextInputField
                   name="consultation_file"
                   variant="outlined"
                   margin="dense"
                   type="text"
                   InputLabelProps={{ shrink: !!uploadFileName }}
-                  value={uploadFileName}
+                  // value={uploadFileName}
                   disabled={uploadStarted}
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
