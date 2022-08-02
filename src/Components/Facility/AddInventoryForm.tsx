@@ -148,26 +148,31 @@ export const AddInventoryForm = (props: any) => {
     return Number(unitData.quantity);
   };
 
+  // this function determines whether the stock which user has demanded to use is available or not !
+
   const stockValidation = (data: any) => {
     if (inventory && inventory.length) {
+      // get the stock cont of item selected
       const stockBefore = inventory.filter(
         (inventoryItem: any) =>
           Number(inventoryItem.item_object.id) === Number(data.item)
       );
+      // if stock count=0
       if (stockBefore.length === 0) {
         setStockError("No Stock Available ! Please Add Stock.");
         setIsLoading(false);
         return false;
-      } else {
-        const stockAfterQuantity = defaultUnitConverter(data);
-        if (stockAfterQuantity > Number(stockBefore[0].quantity)) {
-          setStockError("Stock Insufficient ! Please Add Stock.");
-          setIsLoading(false);
-          return false;
-        }
-        setStockError("");
-        return true;
       }
+      // unit of item can be in any unit so convert to default unit for calculation
+      const stockEnteredbyUserQuantity = defaultUnitConverter(data);
+      // if stock entered by user is greater than stock present before
+      if (stockEnteredbyUserQuantity > Number(stockBefore[0].quantity)) {
+        setStockError("Stock Insufficient ! Please Add Stock.");
+        setIsLoading(false);
+        return false;
+      }
+      setStockError("");
+      return true;
     } else if (inventory && inventory.length === 0) {
       setStockError("No Stock Available !");
       setIsLoading(false);
@@ -184,7 +189,7 @@ export const AddInventoryForm = (props: any) => {
       item: Number(state.form.id),
       unit: Number(state.form.unit),
     };
-
+    // if user has selected "Add stock" or "stockValidation" function is true
     if (data.is_incoming || stockValidation(data)) {
       const res = await dispatchAction(postInventory(data, { facilityId }));
       setIsLoading(false);
