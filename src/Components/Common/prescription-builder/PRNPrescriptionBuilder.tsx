@@ -19,9 +19,14 @@ export const PRNEmptyValues = {
     min_time: 0
 }
 
-const dosageHrs = [1,2,3,6,12,24];
+const DOSAGE_HRS = [1,2,3,6,12,24];
 
-export default function PRNPrescriptionBuilder(props : {prescriptions :PRNPrescriptionType[], setPrescriptions : React.Dispatch<React.SetStateAction<PRNPrescriptionType[]>>}){
+export interface PrescriptionBuilderProps<T> {
+    prescriptions :T[], 
+    setPrescriptions : React.Dispatch<React.SetStateAction<T[]>>
+};
+
+export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<PRNPrescriptionType>){
 
     const {prescriptions, setPrescriptions} = props;
     console.log("PRN prescriptions", prescriptions);
@@ -110,7 +115,7 @@ export default function PRNPrescriptionBuilder(props : {prescriptions :PRNPrescr
                                                         placeholder="Dosage"
                                                         min={0}
                                                         onChange={(e)=>{
-                                                            let value = parseInt(e.target.value);
+                                                            let value = parseFloat(e.target.value);
                                                             if(value < 0){
                                                                 value = 0;
                                                             }
@@ -164,7 +169,7 @@ export default function PRNPrescriptionBuilder(props : {prescriptions :PRNPrescr
                                                 placeholder="Dosage"
                                                 min={0}
                                                 onChange={(e)=>{
-                                                    let value = parseInt(e.target.value);
+                                                    let value = parseFloat(e.target.value);
                                                     if(value < 0){
                                                         value = 0;
                                                     }
@@ -194,7 +199,7 @@ export default function PRNPrescriptionBuilder(props : {prescriptions :PRNPrescr
                                         <PrescriptionDropdown
                                             type="number"
                                             placeholder="hours"
-                                            options={dosageHrs}
+                                            options={DOSAGE_HRS}
                                             value={prescription.min_time || 0}
                                             setValue={setMinTime}
                                             min={0}
