@@ -685,15 +685,7 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div className="">
-                <InputLabel>
-                  Home Facility{" "}
-                  {JSON.stringify(
-                    selectedFacility?.map((facility: any) => ({
-                      value: facility.id,
-                      label: facility.name,
-                    })) || [{ value: null, label: "Link a Facility First" }]
-                  )}
-                </InputLabel>
+                <InputLabel>Home Facility</InputLabel>
                 <SelectField
                   name="home_facility"
                   variant="outlined"
