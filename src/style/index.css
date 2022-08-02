@@ -832,7 +832,11 @@ button:disabled,
   margin-top: -8px;
   border-radius: 50%;
 }
-=======
+
+textarea {
+  height: auto !important;
+}
+
 /* MUI v5 classes */
 .MuiButtonBase-root.MuiRadio-root.Mui-checked {
   color: #e53935;
@@ -841,7 +845,14 @@ button:disabled,
   background-color: #0e9f6e !important;
 }
 
-.marginDense {
-  margin-top: 8px;
-  margin-bottom: 4px;
-} 
+.MuiInputBase-root {
+  padding: 10.5px 14px !important;
+}
+
+.MuiInputBase-input {
+  padding: 0px !important;
+}
+
+.MuiInputLabel-outlined {
+  transform: translate(14px, 12px) scale(1) !important;
+}
