@@ -48,7 +48,7 @@ const BedDeleteDialog = (
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <button onClick={handleCancel} className="btn btn-primary">
+        <button onClick={handleCancel} className="btn btn-default">
           Cancel
         </button>
         <button
