@@ -1,4 +1,3 @@
-import { t as Prescription_t } from "../Common/prescription-builder/types/Prescription__Prescription.gen";
 import loadable from "@loadable/component";
 import {
   Box,
@@ -9,6 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
+import type {t as Prescription__Prescription_t} from '../../../src/Components/Common/prescription-builder/types/Prescription__Prescription.gen';
 
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
@@ -48,13 +48,14 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
+import { make as PrescriptionBuilderOld } from "../Common/PrescriptionBuilder.gen";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
+import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -85,7 +86,7 @@ type FormDetails = {
   prescribed_medication: string;
   consultation_notes: string;
   ip_no: string;
-  discharge_advice: Prescription_t[];
+  discharge_advice: PrescriptionType[];
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
@@ -197,7 +198,12 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<Prescription_t[]>([]);
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
+
+  useEffect(()=>{
+    console.log("da", dischargeAdvice);
+  },[dischargeAdvice])
+
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -299,13 +305,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        // case "category":
-        //   if (!state.form[field] || !state.form[field].length) {
-        //     errors[field] = "Please select the category";
-        //     if (!error_div) error_div = field;
-        //     invalidForm = true;
-        //   }
-        //   return;
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
@@ -387,7 +386,10 @@ export const ConsultationForm = (props: any) => {
         case "discharge_advice":
           let invalid = false;
           for (let f of dischargeAdvice) {
-            if (!f.dosage.replace(/\s/g, "").length || !f.medicine.replace(/\s/g, "").length) {
+            if (
+              !f.dosage?.replace(/\s/g, "").length ||
+              !f.medicine?.replace(/\s/g, "").length
+            ) {
               invalid = true;
               break;
             }
@@ -483,13 +485,13 @@ export const ConsultationForm = (props: any) => {
   const handleChange:
     | ChangeEventHandler<HTMLInputElement>
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e: any) => {
-      e &&
-        e.target &&
-        dispatch({
-          type: "set_form",
-          form: { ...state.form, [e.target.name]: e.target.value },
-        });
-    };
+    e &&
+      e.target &&
+      dispatch({
+        type: "set_form",
+        form: { ...state.form, [e.target.name]: e.target.value },
+      });
+  };
 
   const handleTelemedicineChange: ChangeEventHandler<HTMLInputElement> = (
     e
@@ -752,7 +754,7 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   )}
                 */}
-                {!id && state.form.suggestion === "A" && (
+                {state.form.suggestion === "A" && (
                   <>
                     <div className="flex">
                       <div className="flex-1" id="admission_date-div">
@@ -805,14 +807,19 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="discharge_advice-div" className="mt-4">
-                <InputLabel>Medication</InputLabel>
+                <InputLabel>Prescription Medication</InputLabel>
+                {/*<PrescriptionBuilderOld
+                  prescriptions={dischargeAdvice as Prescription__Prescription_t[]}
+                  setPrescriptions={setDischargeAdvice}
+                />*/}
                 <PrescriptionBuilder
                   prescriptions={dischargeAdvice}
                   setPrescriptions={setDischargeAdvice}
                 />
+                <br />
                 <ErrorHelperText error={state.errors.discharge_advice} />
               </div>
-              <div id="ip_no-div">
+              <div id="ip_no-div" className="mt-4">
                 <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
                   name="ip_no"
@@ -826,7 +833,6 @@ export const ConsultationForm = (props: any) => {
                   required
                 />
               </div>
-
               <div id="verified_by-div">
                 <InputLabel id="exam-details-label">Verified By</InputLabel>
                 <MultilineInputField
@@ -844,7 +850,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.verified_by}
                 />
               </div>
-              <div id="diagnosis-div">
+              <div id="diagnosis-div" className="mt-4">
                 <InputLabel id="exam-details-label">Diagnosis</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -889,7 +895,7 @@ export const ConsultationForm = (props: any) => {
                 </div>
               )}
               {/* Telemedicine Fields */}
-              <div className="flex">
+              <div className="flex mt-4">
                 <div className="flex-1" id="is_telemedicine-div">
                   <InputLabel id="admitted-label">Telemedicine</InputLabel>
                   <RadioGroup
@@ -941,6 +947,7 @@ export const ConsultationForm = (props: any) => {
                     selectedUser={state.form.assigned_to_object}
                     onSelect={handleDoctorSelect}
                     user_type={"Doctor"}
+                    outline={false}
                   />
                 </div>
               )}
@@ -964,7 +971,6 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-
               <div id="special_instruction-div" className="mt-2">
                 <InputLabel id="special-instruction-label">
                   Special Instructions
@@ -985,7 +991,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row justify-between md:gap-5">
+              <div className="flex flex-col md:flex-row justify-between md:gap-5 mt-4">
                 <div id="weight-div" className="flex-1">
                   <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
                   <TextInputField

@@ -99,7 +99,7 @@ interface StateInterface {
 
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [file, setFile] = useState<File>();
+  const [file, setFile] = useState<File | undefined>();
   const {
     facilityId,
     consultationId,
@@ -117,13 +117,16 @@ export const FileUpload = (props: FileUploadProps) => {
     {},
   ]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
+  const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
   // const [uploadSuccess, setUploadSuccess] = useState(false);
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
-  const [contentType, setContentType] = useState<string>("");
+  const [audioName, setAudioName] = useState<string>("");
+  const [audioNameError, setAudioNameError] = useState<string>("");
+  const [contentType, setcontentType] = useState<string>("");
   // const classes = useStyles();
   // const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
@@ -345,15 +348,38 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
           <div className="flex items-center">
             {item.file_category === "AUDIO" ? (
-              <div>
+              <div className="flex space-x-2">
                 {item.id ? (
                   Object.keys(url).length > 0 ? (
-                    <audio
-                      className="max-h-full max-w-full m-auto object-contain"
-                      src={url[item.id]}
-                      controls
-                      preload="auto"
-                    />
+                    <>
+                      <audio
+                        className="max-h-full max-w-full m-auto object-contain"
+                        src={url[item.id]}
+                        controls
+                        preload="auto"
+                        controlsList="nodownload"
+                      />
+                      <a
+                        href={url[item.id]}
+                        className="text-black p-4"
+                        download={true}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                          />
+                        </svg>
+                      </a>
+                    </>
                   ) : (
                     <CircularProgress />
                   )
@@ -393,8 +419,12 @@ export const FileUpload = (props: FileUploadProps) => {
     }
     const f = e.target.files[0];
     const fileName = f.name;
+    setFile(e.target.files[0]);
+    setUploadFileName(
+      fileName.substring(0, fileName.lastIndexOf(".")) || fileName
+    );
     const ext: string = fileName.split(".")[1];
-    setContentType(header_content_type[ext]);
+    setcontentType(header_content_type[ext]);
 
     if (ExtImage[ext] && ExtImage[ext] === "1") {
       const options = {
@@ -446,9 +476,15 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleUpload = async (status: any) => {
     const f = file;
-    if (f === undefined) return;
+    if (f === undefined) {
+      Notification.Error({
+        msg: "Please choose a file to upload",
+      });
+      return;
+    }
+    setFile(undefined);
     const category = "UNSPECIFIED";
-    const filename = uploadFileName;
+    const filename = uploadFileName === "" ? f.name : uploadFileName;
     const name = f.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
@@ -493,26 +529,36 @@ export const FileUpload = (props: FileUploadProps) => {
     axios
       .put(url, newFile, config)
       .then(() => {
-        setUploadStarted(false);
+        setAudioUploadStarted(false);
         // setUploadSuccess(true);
-        setUploadFileName("");
+        setAudioName("");
         setReload(!reload);
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
       })
       .catch(() => {
-        setUploadStarted(false);
+        setAudioUploadStarted(false);
       });
   };
 
-  const handleAudioUpload = async () => {
+  const validateAudioUpload = () => {
+    const filenameLength = audioName.trim().length;
     const f = audioBlob;
-    if (f === undefined) return;
+    if (f === undefined) {
+      return false;
+    }
+    return true;
+  };
+
+  const handleAudioUpload = async () => {
+    if (!validateAudioUpload()) return;
+    setAudioNameError("");
     const category = "AUDIO";
-    const filename = Date.now().toString();
     const name = "audio.mp3";
-    setUploadStarted(true);
+    const filename =
+      audioName.trim().length === 0 ? Date.now().toString() : audioName.trim();
+    setAudioUploadStarted(true);
     // setUploadSuccess(false);
     const requestData = {
       original_name: name,
@@ -524,8 +570,9 @@ export const FileUpload = (props: FileUploadProps) => {
     dispatch(createUpload(requestData))
       .then(uploadAudiofile)
       .catch(() => {
-        setUploadStarted(false);
+        setAudioUploadStarted(false);
       });
+    setAudioName("");
   };
 
   // For creating the Download File URL
@@ -650,22 +697,44 @@ export const FileUpload = (props: FileUploadProps) => {
               <div>
                 <h4>Record and Upload Audio File</h4>
               </div>
-              <VoiceRecorder createAudioBlob={createAudioBlob} />
-              {audioBlob && (
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                  }
-                  onClick={() => {
-                    handleAudioUpload();
-                  }}
-                >
-                  Save Recording
-                </Button>
+              <InputLabel id="spo2-label">
+                Enter Audio File Name (optional)
+              </InputLabel>
+              <TextInputField
+                name="consultation_audio_file"
+                variant="outlined"
+                margin="dense"
+                type="text"
+                InputLabelProps={{ shrink: !!audioName }}
+                value={audioName}
+                disabled={uploadStarted}
+                onChange={(e: any) => {
+                  setAudioName(e.target.value);
+                }}
+                errors={audioNameError}
+              />
+              {audiouploadStarted ? (
+                <LinearProgressWithLabel value={uploadPercent} />
+              ) : (
+                <>
+                  <VoiceRecorder createAudioBlob={createAudioBlob} />
+                  {audioBlob && (
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      style={{ marginLeft: "auto" }}
+                      startIcon={
+                        <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
+                      }
+                      onClick={() => {
+                        handleAudioUpload();
+                      }}
+                    >
+                      Save Recording
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           ) : null}
@@ -675,14 +744,14 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4>Upload New File</h4>
               </div>
               <div>
-                <InputLabel id="spo2-label">Enter File Name*</InputLabel>
+                <InputLabel id="spo2-label">Enter File Name</InputLabel>
                 <TextInputField
-                  name="temperature"
+                  name="consultation_file"
                   variant="outlined"
                   margin="dense"
                   type="text"
                   InputLabelProps={{ shrink: !!uploadFileName }}
-                  value={uploadFileName}
+                  // value={uploadFileName}
                   disabled={uploadStarted}
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);

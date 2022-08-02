@@ -9,13 +9,13 @@ import {
   InputLabel,
   Box,
   Button,
-  TableRowProps,
 } from "@material-ui/core";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
 import { SelectField, TextInputField } from "../../Common/HelperInputFields";
 import _ from "lodash";
+import clsx from "clsx";
 
 const useStyle = makeStyles(() => ({
   tableCell: {
@@ -51,9 +51,10 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
         {data?.investigation_object?.name || "---"}
       </TableCell>
       <TableCell
-        className={`h-12 text-sm border-l border-r border-gray-400 ${
+        className={clsx(
+          "h-12 text-sm border-l border-r border-gray-400",
           showForm ? "p-0" : "px-2"
-        } `}
+        )}
         align="right"
         style={{
           padding: 0,
@@ -66,7 +67,6 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
             <SelectField
               name="preferred_vehicle_choice"
               variant="outlined"
-              margin="dense"
               optionArray={true}
               value={testValue}
               options={[
@@ -74,15 +74,11 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
                 ...data?.investigation_object?.choices.split(","),
               ]}
               onChange={onChange}
-              className={
-                "w-full px-4 h-full text-right text-sm border-l border-r border-gray-800 m-0"
-              }
+              className="w-full px-4 h-full text-right text-sm m-0"
             />
           ) : (
             <input
-              className={
-                "w-full px-4 h-full text-right text-sm border-l border-r border-gray-800 m-0"
-              }
+              className="w-full px-4 h-full text-right text-sm border-l border-r m-0 focus:border-primary-500 focus:ring-primary-500"
               value={testValue}
               onChange={onChange}
               type={inputType}

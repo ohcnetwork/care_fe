@@ -146,7 +146,7 @@ export default function ListView() {
     return data.map((resource: any) => (
       <div
         key={`resource_${resource.id}`}
-        className="w-full md:w-1/2 mt-6 md:px-4"
+        className="w-full md:w-1/2 mt-6 md:px-7"
       >
         <div className="overflow-hidden shadow rounded-lg bg-white h-full">
           <div className={"p-4 h-full flex flex-col justify-between"}>
@@ -248,7 +248,7 @@ export default function ListView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="md:flex md:items-end md:justify-between px-4">
+      <div className="md:flex md:items-center md:justify-between px-4">
         <PageTitle
           title={"Resource"}
           hideBack={true}

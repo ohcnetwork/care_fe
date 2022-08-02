@@ -90,26 +90,16 @@ export const HospitalList = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const params = qParams.search
-        ? {
-            limit,
-            offset,
-            search_text: qParams.search,
-            state: qParams.state,
-            district: qParams.district,
-            local_body: qParams.local_body,
-            facility_type: qParams.facility_type,
-            kasp_empanelled: qParams.kasp_empanelled,
-          }
-        : {
-            limit,
-            offset,
-            state: qParams.state,
-            district: qParams.district,
-            local_body: qParams.local_body,
-            facility_type: qParams.facility_type,
-            kasp_empanelled: qParams.kasp_empanelled,
-          };
+      const params = {
+        limit,
+        offset,
+        search_text: qParams.search || undefined,
+        state: qParams.state,
+        district: qParams.district,
+        local_body: qParams.local_body,
+        facility_type: qParams.facility_type,
+        kasp_empanelled: qParams.kasp_empanelled,
+      };
 
       const res = await dispatchAction(getPermittedFacilities(params));
       if (!status.aborted) {
@@ -201,9 +191,8 @@ export const HospitalList = (props: any) => {
     return facility_type?.text;
   };
 
-  const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ search }, { replace: true });
-    else setQueryParams({ search: "" }, { replace: true });
+  const onSearchSuspects = (value: string) => {
+    updateQuery({ search: value });
   };
 
   const handleDownload = async () => {
@@ -336,15 +325,9 @@ export const HospitalList = (props: any) => {
     }
   };
 
-  const kaspOptionValues = [
-    { id: "", text: "Not Selected" },
-    { id: "true", text: "Yes" },
-    { id: "false", text: "No" },
-  ];
-
   let facilityList: any[] = [];
   if (data && data.length) {
-    facilityList = data.map((facility: any, idx: number) => {
+    facilityList = data.map((facility: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
@@ -381,8 +364,8 @@ export const HospitalList = (props: any) => {
                     </div>
                     <div className="flex gap-1 flex-wrap mt-2">
                       {facility.features?.map((feature : number, i : number)=>(
-                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs">
-                          {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs" title={FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}>
+                          <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/>
                         </div>
                       ))}
                     </div>
@@ -539,17 +522,16 @@ export const HospitalList = (props: any) => {
 
   return (
     <div className="px-6">
-      <div className="grid grid-cols-2">
+      <div className="grid md:grid-cols-2">
         <PageTitle
           title={t("Facilities")}
           hideBack={true}
-          className="mx-3"
           breadcrumbs={false}
         />
 
-        <div className="flex justify-end w-full mt-4">
+        <div className="flex md:justify-end w-full md:mt-4">
           <div>
-            <Accordion className="mt-10 lg:mt-0 md:mt-0 sm:mt-0">
+            <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"

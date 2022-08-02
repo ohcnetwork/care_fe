@@ -5,7 +5,7 @@ const AdvancedFilterButton = ({ setShowFilters }: any) => {
     <div>
       <div className="flex items-start">
         <button
-          className="btn btn-primary-ghost"
+          className="btn btn-primary-ghost w-full"
           onClick={() => setShowFilters(true)}
         >
           <svg
