@@ -2,7 +2,7 @@ import ReactECharts from "echarts-for-react";
 
 export const LinePlot = (props: any) => {
   const { title, name, xData, yData, low = null, high = null } = props;
-  let generalOptions = {
+  let generalOptions : any = {
     title: {
       text: `${title} [ {0|${yData[yData.length - 1]?.toFixed(2) || "NA"}} ]`,
       textStyle: {
@@ -78,6 +78,58 @@ export const LinePlot = (props: any) => {
     ],
   };
 
+  if(props.type && props.type === "WAVEFORM"){
+    generalOptions = {
+      ...generalOptions,
+      title: {
+        text: `${title}`,
+      },
+      grid: {
+        left: '15px',
+        right: '15px'
+      },
+      animation : false,
+      xAxis : {
+        ...generalOptions.xAxis,
+        show: false
+      },
+      yAxis : {
+        ...generalOptions.yAxis,
+        show: false
+      },
+      toolbox: {
+        ...generalOptions.toolbox,
+        show: false,
+      },
+      legend: {
+        show : false,
+      },
+      series : [
+        {
+          ...generalOptions.series[0],
+          showSymbol: false,
+          lineStyle: {color: 'green'},
+          areaStyle: {
+            ...generalOptions.series[0].areaStyle,
+            color : {
+              ...generalOptions.series[0].areaStyle.color,
+              colorStops: [
+                {
+                  offset: 0,
+                  color: "transparent",
+                },
+                {
+                  offset: 1,
+                  color: "transparent",
+                },
+              ]
+            },
+          },
+        }
+      ]
+    }
+  }
+
   const visualMap: any = {
     visualMap: {
       type: "piecewise",
@@ -105,5 +157,5 @@ export const LinePlot = (props: any) => {
     generalOptions = { ...generalOptions, ...visualMap };
   }
 
-  return <ReactECharts option={generalOptions} />;
+  return <ReactECharts option={generalOptions} className={props.classes} lazyUpdate={props.type === "WAVEFORM"}/>;
 };

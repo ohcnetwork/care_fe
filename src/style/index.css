@@ -56,6 +56,10 @@ h6 {
   @apply outline-none shadow-inner;
 }
 
+[type="text"]:focus {
+  @apply border-black ring-white;
+}
+
 /* Button Styles */
 
 .btn-large {
@@ -475,7 +479,7 @@ button:disabled,
 }
 
 .MuiInputBase-input:focus {
-  @apply ring-0 !important
+  @apply ring-0 !important;
 }
 
 .Mui-selected .MuiSvgIcon-root {
@@ -729,12 +733,16 @@ button:disabled,
   @apply p-0;
 }
 
-.title-text {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin-top: -3rem;
-}
+@media (min-width:770px)
+  {
+    .title-text {
+      position: absolute;
+      top: 0;
+      right: 0;
+      margin-top: -3rem;
+    }
+  }
+
 
 .DateRangePicker_picker__portal {
   z-index: 100000 !important;
@@ -765,8 +773,6 @@ button:disabled,
   padding-left: 5px;
 }
 
-
- 
 ::-webkit-scrollbar {
   width: 10px;
   height: 8px;
@@ -782,7 +788,6 @@ button:disabled,
   background: rgba(0, 0, 0, 0.4);
 }
 
-
 @media (max-width:640px)
   {
     .hideonmobilescreen {
@@ -790,6 +795,12 @@ button:disabled,
         }
   }
 
+@media (min-width:1000px)
+{
+  .manualGrid{
+    display: grid !important
+  }
+}
 
 /*
   Range Sliders for Camera Feed
@@ -820,4 +831,44 @@ button:disabled,
   -webkit-appearance: none;
   margin-top: -8px;
   border-radius: 50%;
+}
+
+@media (min-width:471px)
+  {
+    .csv-input {
+      display: block; 
+      font-size: 0.875rem;
+      line-height: 1.25rem; 
+      margin: auto;
+      width: 50%;
+    }
+  }
+  @media (max-width:470px)
+  {
+    .csv-input {
+      display: block; 
+      font-size: 0.875rem;
+      line-height: 1.25rem; 
+      margin: auto;
+      width: 100%;
+    }
+  }
+  
+.csv-input::file-selector-button{
+padding-top: 0.5rem;
+padding-bottom: 0.5rem; 
+padding-left: 1rem;
+padding-right: 1rem; 
+font-size: 0.875rem;
+line-height: 1.25rem; 
+font-weight: 600; 
+border-width: 0; 
+background-color: #def7ec;
+color:#046c4e;
+
+}
+ 
+
+.csv-input::file-selector-button:hover{
+background-color: #84e1bc;
 }
