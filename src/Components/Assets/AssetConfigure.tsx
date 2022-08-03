@@ -13,7 +13,7 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { Card, CardContent, InputLabel, Button } from "@material-ui/core";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
-import { ASSET_META_TYPE, CAMERA_TYPE } from "../../Common/constants";
+import { CAMERA_TYPE } from "../../Common/constants";
 import { BedModel } from "../Facility/models";
 import axios from "axios";
 import { getCameraConfig } from "../../Utils/transformUtils";
@@ -28,8 +28,8 @@ const AssetConfigure = (props: AssetConfigureProps) => {
   const { assetId } = props;
   const [asset, setAsset] = React.useState<AssetData>();
   const [isLoading, setIsLoading] = React.useState(true);
+  const [port, setPort] = React.useState<number>();
   const [assetType, setAssetType] = React.useState("");
-  const [location, setLocation] = React.useState("");
   const [middlewareHostname, setMiddlewareHostname] = React.useState("");
   const [cameraType, setCameraType] = React.useState("");
   const [cameraAddress, setCameraAddress] = React.useState("");
@@ -53,8 +53,8 @@ const AssetConfigure = (props: AssetConfigureProps) => {
           });
         else {
           setAsset(assetData.data);
-          setAssetType(assetData.data.meta?.asset_type);
-          setLocation(assetData.data.meta?.location);
+          setPort(assetData.data.meta?.port);
+          setAssetType(assetData.data.asset_class);
           setMiddlewareHostname(assetData.data.meta?.middleware_hostname);
           setCameraType(assetData.data.meta?.camera_type);
           setCameraAddress(assetData.data.meta?.local_ip_address);
@@ -76,8 +76,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
     e.preventDefault();
     const data = {
       meta: {
-        asset_type: assetType,
-        location: location,
+        port: port,
         middleware_hostname: middlewareHostname,
         camera_type: cameraType,
         local_ip_address: cameraAddress,
@@ -151,31 +150,15 @@ const AssetConfigure = (props: AssetConfigureProps) => {
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
-                  <InputLabel id="asset-type">Asset Type</InputLabel>
-                  <SelectField
-                    name="asset_type"
-                    id="asset-type"
-                    variant="outlined"
-                    margin="dense"
-                    options={[
-                      { id: "", text: "Select Asset Type" },
-                      ...ASSET_META_TYPE,
-                    ]}
-                    value={assetType}
-                    onChange={(e) => setAssetType(e.target.value)}
-                    optionValue="text"
-                  />
-                </div>
-                <div>
-                  <InputLabel id="location">Location</InputLabel>
+                  <InputLabel id="port">Port</InputLabel>
                   <TextInputField
                     name="name"
-                    id="location"
+                    id="port"
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    value={port}
+                    onChange={(e) => setPort(parseInt(e.target.value))}
                     errors=""
                   />
                 </div>
@@ -254,7 +237,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
           </form>
         </CardContent>
       </Card>
-      {asset?.meta?.asset_type === "CAMERA" ? (
+      {assetType === "ONVIF" ? (
         <CameraConfigure
           asset={asset as AssetData}
           bed={bed}
@@ -264,7 +247,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
           addPreset={addPreset}
           refreshPresetsHash={refreshPresetsHash}
         />
-      ) : asset?.meta?.asset_type === "HL7MONITOR" ? (
+      ) : assetType === "HL7MONITOR" ? (
         <MonitorConfigure asset={asset as AssetData} />
       ) : null}
     </div>
