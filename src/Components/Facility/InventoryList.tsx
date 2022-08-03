@@ -161,9 +161,10 @@ export default function InventoryList(props: any) {
       />
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-4 md:py-8">
-          <div className="flex flex-col md:flex-row items-center">
+          <div className="flex flex-col md:flex-row">
             <div className="mt-2">
               <RoleButton
+                className="w-full"
                 materialButtonProps={{
                   variant: "contained",
                   color: "primary",
@@ -180,7 +181,7 @@ export default function InventoryList(props: any) {
             </div>
             <div className="mt-2">
               <Button
-                className="ml-2"
+                className="md:ml-2 w-full"
                 variant="contained"
                 color="primary"
                 size="small"
