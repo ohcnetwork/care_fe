@@ -50,14 +50,17 @@ export const header_content_type: URLS = {
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 
-// Object for possible extension of image files
-const ExtImage: URLS = {
-  jpeg: "1",
-  jpg: "1",
-  gif: "1",
-  png: "1",
-  svg: "1",
-};
+// Array of image extensions
+const ExtImage: string[] = [
+  "jpeg",
+  "jpg",
+  "png",
+  "gif",
+  "svg",
+  "bmp",
+  "webp",
+  "jfif",
+];
 
 export const LinearProgressWithLabel = (props: any) => {
   return (
@@ -92,6 +95,8 @@ interface URLS {
 interface StateInterface {
   open: boolean;
   isImage: boolean;
+  name: string;
+  extension: string;
   zoom: number;
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
@@ -133,6 +138,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const initialState = {
     open: false,
     isImage: false,
+    name: "",
+    extension: "",
     zoom: 3,
     isZoomInDisabled: false,
     isZoomOutDisabled: false,
@@ -300,14 +307,11 @@ export const FileUpload = (props: FileUploadProps) => {
     [dispatch, fetchData, id, reload]
   );
 
-  // Function to extract the extension of the file and check if its image or not
+  // Function to extract the extension of the file
   const getExtension = (url: string) => {
     const div1 = url.split("?")[0].split(".");
     const ext: string = div1[div1.length - 1].toLowerCase();
-    if (ExtImage[ext] && ExtImage[ext] === "1") {
-      return true;
-    }
-    return false;
+    return ext;
   };
 
   const loadFile = async (id: any) => {
@@ -315,10 +319,13 @@ export const FileUpload = (props: FileUploadProps) => {
     setFileState({ ...file_state, open: true });
     const data = { file_type: type, associating_id: getAssociatedId() };
     const responseData = await dispatch(retrieveUpload(data, id));
+    const file_extension = getExtension(responseData.data.read_signed_url);
     setFileState({
       ...file_state,
       open: true,
-      isImage: getExtension(responseData.data.read_signed_url),
+      name: responseData.data.name,
+      extension: file_extension,
+      isImage: ExtImage.includes(file_extension),
     });
     downloadFileUrl(responseData.data.read_signed_url);
     setFileUrl(responseData.data.read_signed_url);
@@ -426,7 +433,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const ext: string = fileName.split(".")[1];
     setcontentType(header_content_type[ext]);
 
-    if (ExtImage[ext] && ExtImage[ext] === "1") {
+    if (ExtImage.includes(ext)) {
       const options = {
         initialQuality: 0.6,
         alwaysKeepResolution: true,
@@ -632,8 +639,8 @@ export const FileUpload = (props: FileUploadProps) => {
                   <div>
                     <a
                       href={downloadURL}
-                      download
-                      className="text-white p-4 my-2 rounded m-2 bg-primary-500"
+                      download={file_state.name + "." + file_state.extension}
+                      className="text-white p-4 my-2 rounded m-2 bg-primary-500 hover:bg-primary-700 shadow"
                     >
                       <GetApp>load</GetApp>
                       Download
