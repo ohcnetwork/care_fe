@@ -69,6 +69,7 @@ const initForm: any = {
   password: "",
   c_password: "",
   facilities: [],
+  home_facility: null,
   username: "",
   first_name: "",
   last_name: "",
@@ -138,29 +139,37 @@ export const UserAdd = (props: UserProps) => {
   const [usernameInput, setUsernameInput] = useState("");
 
   const userExistsEnums = {
-    idle : 0,
-    checking : 1,
-    exists : 2,
-    avaliable : 3 
-  }
+    idle: 0,
+    checking: 1,
+    exists: 2,
+    avaliable: 3,
+  };
 
   const [usernameExists, setUsernameExists] = useState<number>(0);
 
-  const checkUsername = async (username : string) => {
+  const checkUsername = async (username: string) => {
     setUsernameExists(userExistsEnums.checking);
     const userDetails = await dispatchAction(getUserDetails(username), true);
-    setUsernameExists(userDetails.status === 404 ? userExistsEnums.avaliable : userExistsEnums.exists);
-  }
+    setUsernameExists(
+      userDetails.status === 404
+        ? userExistsEnums.avaliable
+        : userExistsEnums.exists
+    );
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     setUsernameExists(userExistsEnums.idle);
-    if(usernameInput.length > 1 && !(state.form.username?.length < 2) && /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])){
+    if (
+      usernameInput.length > 1 &&
+      !(state.form.username?.length < 2) &&
+      /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
+    ) {
       let timeout = setTimeout(() => {
         checkUsername(usernameInput);
       }, 500);
-      return ()=>clearTimeout(timeout);
+      return () => clearTimeout(timeout);
     }
-  }, [usernameInput])
+  }, [usernameInput]);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -431,7 +440,7 @@ export const UserAdd = (props: UserProps) => {
             errors[field] =
               "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
-          } else if (usernameExists !== userExistsEnums.avaliable){
+          } else if (usernameExists !== userExistsEnums.avaliable) {
             errors[field] = "This username already exists";
             invalidForm = true;
           }
@@ -543,6 +552,7 @@ export const UserAdd = (props: UserProps) => {
         gender: state.form.gender,
         password: state.form.password,
         facilities: state.form.facilities ? state.form.facilities : undefined,
+        home_facility: state.form.home_facility ?? undefined,
         username: state.form.username,
         first_name: state.form.first_name ? state.form.first_name : undefined,
         last_name: state.form.last_name ? state.form.last_name : undefined,
@@ -674,6 +684,23 @@ export const UserAdd = (props: UserProps) => {
                 )}
               </div>
 
+              <div className="">
+                <InputLabel>Home Facility</InputLabel>
+                <SelectField
+                  name="home_facility"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.home_facility}
+                  options={[
+                    { id: null, name: "Select" },
+                    ...(selectedFacility ?? []),
+                  ]}
+                  optionValue="name"
+                  onChange={handleChange}
+                  errors={state.errors.home_facility}
+                />
+              </div>
+
               <div>
                 <InputLabel>Username*</InputLabel>
                 <TextInputField
@@ -683,7 +710,7 @@ export const UserAdd = (props: UserProps) => {
                   variant="outlined"
                   margin="dense"
                   value={usernameInput}
-                  onChange={(e)=>{
+                  onChange={(e) => {
                     handleChange(e);
                     setUsernameInput(e.target.value);
                   }}
@@ -696,25 +723,29 @@ export const UserAdd = (props: UserProps) => {
                     <div>
                       {usernameExists !== userExistsEnums.idle && (
                         <>
-                          {usernameExists === userExistsEnums.checking ? 
+                          {usernameExists === userExistsEnums.checking ? (
                             <span>
                               <i className="fas fa-circle-dot" /> checking...
-                            </span> 
-                          : (usernameExists === userExistsEnums.exists ? 
-                            <span className="text-red-500">
-                              <i className="fas fa-circle-xmark text-red-500" /> User already exists
-                            </span> 
-                          : (usernameExists === userExistsEnums.avaliable && 
-                            <span className="text-primary-500">
-                              <i className="fas fa-circle-check text-green-500" /> Available!
                             </span>
-                          ))}
+                          ) : usernameExists === userExistsEnums.exists ? (
+                            <span className="text-red-500">
+                              <i className="fas fa-circle-xmark text-red-500" />{" "}
+                              User already exists
+                            </span>
+                          ) : (
+                            usernameExists === userExistsEnums.avaliable && (
+                              <span className="text-primary-500">
+                                <i className="fas fa-circle-check text-green-500" />{" "}
+                                Available!
+                              </span>
+                            )
+                          )}
                         </>
                       )}
                     </div>
                     <div>
                       {state.form.username?.length < 2 ? (
-                          <i className="fas fa-circle-xmark text-red-500" />
+                        <i className="fas fa-circle-xmark text-red-500" />
                       ) : (
                         <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
