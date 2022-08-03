@@ -16,6 +16,8 @@ import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
+import { PhoneNumberField } from "../Common/HelperInputFields";
+import parsePhoneNumberFromString from "libphonenumber-js";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -55,7 +57,9 @@ export default function ResultList() {
     const params = {
       page: qParams.page || 1,
       name: qParams.name || "",
-      mobile_number: qParams.mobile_number ? qParams.mobile_number : "",
+      mobile_number: qParams.mobile_number
+        ? parsePhoneNumberFromString(qParams.mobile_number)?.format("E.164")
+        : "",
       wards: qParams.wards || undefined,
       local_bodies: qParams.local_bodies || undefined,
       created_date_before: qParams.created_date_before || undefined,
@@ -382,10 +386,10 @@ export default function ResultList() {
           </div>
           <div className="text-sm font-semibold my-2">Search by number</div>
           <div className="w-full">
-            <InputSearchBox
-              value={qParams.mobile_number || ""}
-              search={searchByPhone}
-              placeholder="Search by Phone Number"
+            <PhoneNumberField
+              value={qParams.mobile_number || "+91"}
+              onChange={(value: string) => searchByPhone(value)}
+              turnOffAutoFormat={false}
               errors=""
             />
           </div>
