@@ -31,6 +31,7 @@ import Modal from "@material-ui/core/Modal";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { RoleButton } from "../Common/RoleButton";
+import clsx from "clsx";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -80,6 +81,14 @@ export const PatientHome = (props: any) => {
   const initErr: any = {};
   const errors = initErr;
 
+  console.log(
+    patientData.is_active,
+    patientData?.last_consultation,
+    patientData.is_active &&
+      (!patientData?.last_consultation ||
+        patientData?.last_consultation?.discharge_date)
+  );
+
   useEffect(() => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
@@ -92,8 +101,6 @@ export const PatientHome = (props: any) => {
       );
     });
   };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
   const handleAssignedVolunteer = () => {
     dispatch(
@@ -1119,46 +1126,32 @@ export const PatientHome = (props: any) => {
           <div className="hidden lg:block">
             <div className="grid 2xl:grid-cols-7 xl:grid-cols-6 lg:grid-cols-5 mt-4 gap-2">
               <div
-                className="w-full"
-                onClick={() => {
-                  if (
-                    !(patientData.is_active && !!consultationListData.length)
-                  ) {
-                    navigate(
-                      `/facility/${patientData?.facility}/patient/${id}/consultation`
-                    );
-                  }
-                }}
+                className={clsx(
+                  "w-full",
+                  patientData.is_active &&
+                    (!patientData?.last_consultation ||
+                      patientData?.last_consultation?.discharge_date)
+                    ? "hover:bg-primary-400 cursor-pointer text-primary-700"
+                    : "hover:cursor-not-allowed text-gray-700"
+                )}
+                onClick={() =>
+                  patientData.is_active &&
+                  (!patientData?.last_consultation ||
+                    patientData?.last_consultation?.discharge_date) &&
+                  navigate(
+                    `/facility/${patientData?.facility}/patient/${id}/consultation`
+                  )
+                }
               >
-                <div
-                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
-                    patientData.is_active && !!consultationListData.length
-                      ? "hover:cursor-not-allowed "
-                      : "hover:bg-gray-200 cursor-pointer"
-                  }`}
-                >
-                  <div
-                    className={`${
-                      patientData.is_active && !!consultationListData.length
-                        ? "text-gray-700 "
-                        : "text-green-700 "
-                    }  text-center `}
-                  >
+                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+                  <div className="text-center">
                     <span>
                       <i className="fa-solid fa-comment-medical fa-4x"></i>
                     </span>
                   </div>
 
                   <div>
-                    <p
-                      className={`${
-                        patientData.is_active && !!consultationListData.length
-                          ? "text-gray-700"
-                          : "text-green-700"
-                      }  text-center `}
-                    >
-                      Add Consultation
-                    </p>
+                    <p className="text-center">Add Consultation</p>
                   </div>
                 </div>
               </div>
@@ -1350,8 +1343,11 @@ export const PatientHome = (props: any) => {
                   <button
                     className="btn btn-primary w-full"
                     disabled={
-                      !patientData.is_active ||
-                      !patientData?.last_consultation?.discharge_date
+                      !(
+                        patientData.is_active &&
+                        (!patientData?.last_consultation ||
+                          patientData?.last_consultation?.discharge_date)
+                      )
                     }
                     onClick={() =>
                       navigate(

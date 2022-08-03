@@ -538,14 +538,14 @@ export const dischargePatient = (params: object, pathParams: object) => {
 };
 
 //Profile
-export const getUserDetails = (username: string, suppress?: true) => {
+export const getUserDetails = (username: string, suppress?: boolean) => {
   return fireRequest(
     "getUserDetails",
     [],
     {},
     { username: username },
     undefined,
-    suppress
+    suppress ?? true
   );
 };
 export const updateUserDetails = (username: string, data: object) => {

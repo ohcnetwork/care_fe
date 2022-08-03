@@ -142,7 +142,7 @@ export default function ManageUsers() {
 
   const addUser = (
     <button
-      className="px-4 py-1 rounded-md bg-primary-500 mt-4 text-white text-lg font-semibold shadow"
+      className="px-4 py-1 w-full md:w-auto rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
       onClick={() => navigate("/user/add")}
     >
       <i className="fas fa-plus mr-2"></i>
@@ -378,7 +378,7 @@ export default function ManageUsers() {
                   ) : null}
                 </div>
 
-                <div className="flex justify-between">
+                <div className="flex flex-col md:flex-row gap-2 justify-between">
                   {user.user_type && (
                     <UserDetails title="Role">
                       <div className="font-semibold">{user.user_type}</div>
@@ -424,32 +424,33 @@ export default function ManageUsers() {
                   )}
                 </div>
 
-                {user.username && (
-                  <UserDetails title="Facilities">
-                    {user.facilities &&
-                      showFacilities(user.username, user.facilities)}
-                    {!user.facilities && (
-                      <a
-                        onClick={() => loadFacilities(user.username)}
-                        className={`inline-block ${facilityClassname}`}
-                        href="#"
-                      >
-                        Click here to show
-                      </a>
-                    )}
-                  </UserDetails>
-                )}
+                <div className="flex flex-col md:flex-row justify-between">
+                  {user.username && (
+                    <UserDetails title="Facilities">
+                      {user.facilities &&
+                        showFacilities(user.username, user.facilities)}
+                      {!user.facilities && (
+                        <a
+                          onClick={() => loadFacilities(user.username)}
+                          className={`inline-block ${facilityClassname}`}
+                          href="#"
+                        >
+                          Click here to show
+                        </a>
+                      )}
+                    </UserDetails>
+                  )}
+                  {showDelete(user) && (
+                    <button
+                      type="button"
+                      className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      onClick={() => handleDelete(user)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               </div>
-
-              {showDelete(user) && (
-                <button
-                  type="button"
-                  className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                  onClick={() => handleDelete(user)}
-                >
-                  Delete
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -535,7 +536,7 @@ export default function ManageUsers() {
           <div>
             <div className="flex items-start mb-2">
               <button
-                className="btn btn-primary-ghost"
+                className="btn btn-primary-ghost w-full"
                 onClick={() => setShowFilters((show) => !show)}
               >
                 <svg

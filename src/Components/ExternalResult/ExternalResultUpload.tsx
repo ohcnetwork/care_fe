@@ -88,7 +88,7 @@ export default function ExternalResultUpload() {
                 <CSVReader
                   cssLabelClass="mx-auto text-sm leading-5 font-medium text-gray-700"
                   cssClass="flex flex-col react-csv-input"
-                  cssInputClass="sm:mx-auto"
+                  cssInputClass="csv-input"
                   label="Select a CSV file in the specified format"
                   onFileLoaded={handleForce}
                   parserOptions={papaparseOptions}
