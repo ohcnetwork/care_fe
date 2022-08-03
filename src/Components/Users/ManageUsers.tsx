@@ -390,18 +390,22 @@ export default function ManageUsers() {
                   ) : null}
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-2 justify-between">
+                <div className="flex flex-row md:grid md:grid-cols-4 gap-2 justify-between">
                   {user.user_type && (
-                    <UserDetails title="Role">
-                      <div className="font-semibold">{user.user_type}</div>
-                    </UserDetails>
+                    <div className="col-span-2">
+                      <UserDetails title="Role">
+                        <div className="font-semibold">{user.user_type}</div>
+                      </UserDetails>
+                    </div>
                   )}
                   {user.district_object && (
-                    <UserDetails title="District">
-                      <div className="font-semibold">
-                        {user.district_object.name}
-                      </div>
-                    </UserDetails>
+                    <div className="col-span-2">
+                      <UserDetails title="District">
+                        <div className="font-semibold">
+                          {user.district_object.name}
+                        </div>
+                      </UserDetails>
+                    </div>
                   )}
                 </div>
                 {user.local_body_object && (
@@ -411,14 +415,16 @@ export default function ManageUsers() {
                     </div>
                   </UserDetails>
                 )}
-                <div className="flex justify-between">
+                <div className="grid grid-cols-4">
                   {user.created_by && (
-                    <UserDetails title="Created by">
-                      <div className="font-semibold">{user.created_by}</div>
-                    </UserDetails>
+                    <div className="col-span-2">
+                      <UserDetails title="Created by">
+                        <div className="font-semibold">{user.created_by}</div>
+                      </UserDetails>
+                    </div>
                   )}
                   {user.phone_number && (
-                    <div className="mt-2 bg-gray-50 border-t px-6 py-2">
+                    <div className="mt-2 bg-gray-50 border-t px-6 py-2 col-span-2">
                       <div className="flex py-4 justify-between">
                         <div>
                           <div className="text-gray-500 leading-relaxed">
@@ -434,26 +440,32 @@ export default function ManageUsers() {
                       </div>
                     </div>
                   )}
-                </div>
-                <div className="flex flex-col md:flex-row justify-between">
-                {user.username && (
-                  <UserDetails title="Home Facility">
-                    <span className="font-semibold block">
-                      {user.home_facility_object?.name || "No Home Facility"}
-                    </span>
-                    {user.facilities &&
-                      showFacilities(user.username, user.facilities)}
-                    {!user.facilities && (
-                      <a
-                        onClick={() => loadFacilities(user.username)}
-                        className={`inline-block ${facilityClassname}`}
-                        href="#"
-                      >
-                        Click here to show linked facilities
-                      </a>
-                    )}
-                  </UserDetails>
-                )}
+                  {user.username && (
+                    <div className="col-span-2">
+                      <UserDetails title="Home Facility">
+                        <span className="font-semibold block">
+                          {user.home_facility_object?.name ||
+                            "No Home Facility"}
+                        </span>
+                      </UserDetails>
+                    </div>
+                  )}
+                  {user.username && user.facilities && (
+                    <div className="col-span-4">
+                      <UserDetails title="Linked Facilities">
+                        {showFacilities(user.username, user.facilities)}
+                      </UserDetails>
+                    </div>
+                  )}
+                  {user.username && !user.facilities && (
+                    <a
+                      onClick={() => loadFacilities(user.username)}
+                      className={`col-span-4 ${facilityClassname}`}
+                      href="#"
+                    >
+                      Click here to show linked facilities
+                    </a>
+                  )}
                   {showDelete(user) && (
                     <button
                       type="button"
