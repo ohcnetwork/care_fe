@@ -679,6 +679,7 @@ export const UserAdd = (props: UserProps) => {
                     name="facilities"
                     selected={selectedFacility}
                     setSelected={setFacility}
+                    district={currentUser.data.district}
                     errors={state.errors.facilities}
                   />
                 )}
