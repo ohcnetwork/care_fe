@@ -1,27 +1,32 @@
 {
     "name": "care_fe",
     "reason": {
-        "react-jsx": 3
+      "react-jsx": 3
     },
     "bsc-flags": ["-bs-super-errors"],
-    "sources": [{
+    "sources": [
+      {
         "dir": "src",
         "subdirs": true
-    }],
-    "package-specs": [{
+      }
+    ],
+    "package-specs": [
+      {
         "module": "es6",
         "in-source": true
-    }],
+      }
+    ],
     "suffix": ".bs.js",
     "bs-dependencies": [
-        "@rescript/react",
-        "@glennsl/bs-json",
-        "bs-webapi",
-        "rescript-material-ui"
+      "@rescript/react",
+      "@glennsl/bs-json",
+      "bs-webapi",
+      "rescript-material-ui"
     ],
     "ppx-flags": [],
     "refmt": 3,
     "gentypeconfig": {
-        "language": "typescript"
+      "language": "typescript"
     }
-}
+  }
+  
