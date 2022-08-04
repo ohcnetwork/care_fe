@@ -328,18 +328,39 @@ const AssetsList = () => {
                   className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-3 justify-center items-center"
                   onClick={() => navigate(`/assets/${asset.id}`)}
                 >
-                  <div className="px-4 md:w-1/2">
-                    <div className="md:flex">
-                      <p className="text-xl font-normal capitalize break-words">
-                        {asset.name}
+                  <div className="flex">
+                    <div>
+                      {asset.asset_class === "HL7MONITOR" ? (
+                        <i className="fa-solid fa-tv fa-2x p-2 text-primary-500"></i>
+                      ) : (
+                        ""
+                      )}
+                      {asset.asset_class === "ONVIF" ? (
+                        <i className="fa-solid fa-camera fa-2x p-2 text-primary-500"></i>
+                      ) : (
+                        ""
+                      )}
+                      {asset.asset_class !== "HL7MONITOR" &&
+                      asset.asset_class !== "ONVIF" ? (
+                        <i className="fa-solid fa-cart-plus fa-2x p-2 text-primary-500"></i>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                    <div className="px-4 md:w-1/2">
+                      <div className="md:flex">
+                        <p className="text-xl font-normal capitalize break-words">
+                          {asset.name}
+                        </p>
+                      </div>
+                      <p className="font-normal text-sm">
+                        {asset?.location_object?.name}
+                        <span className="text-xs ml-2">
+                          Updated at:{" "}
+                          {moment(asset.modified_date).format("lll")}
+                        </span>
                       </p>
                     </div>
-                    <p className="font-normal text-sm">
-                      {asset?.location_object?.name}
-                      <span className="text-xs ml-2">
-                        Updated at: {moment(asset.modified_date).format("lll")}
-                      </span>
-                    </p>
                   </div>
                   <div className="md:flex justify-between pt-2">
                     <div className="md:flex flex-wrap">
