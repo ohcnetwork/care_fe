@@ -45,7 +45,7 @@ const LinkFacilityDialog = (props: Props & WithStyles<typeof styles>) => {
         Link new facility to {username}
       </DialogTitle>
       <DialogContent>
-        <div style={{ minWidth: "400px" }}>
+        <div className="md:min-w-[400px]">
           <FacilitySelect
             multiple={false}
             name="facility"
