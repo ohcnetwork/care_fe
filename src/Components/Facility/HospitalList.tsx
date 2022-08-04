@@ -255,11 +255,11 @@ export const HospitalList = (props: any) => {
 
   const hasFiltersApplied = (qParams: any) => {
     return (
-      qParams.state ||
-      qParams.district ||
-      qParams.local_body ||
-      qParams.facility_type ||
-      qParams.kasp_empanelled ||
+      qParams?.state ||
+      qParams?.district ||
+      qParams?.local_body ||
+      qParams?.facility_type ||
+      qParams?.kasp_empanelled ||
       qParams?.search
     );
   };

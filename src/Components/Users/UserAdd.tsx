@@ -160,6 +160,7 @@ export const UserAdd = (props: UserProps) => {
     if (
       usernameInput.length > 1 &&
       !(state.form.username?.length < 2) &&
+      state.form.username.length > 0 &&
       /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
     ) {
       const timeout = setTimeout(() => {
@@ -167,7 +168,7 @@ export const UserAdd = (props: UserProps) => {
       }, 500);
       return () => clearTimeout(timeout);
     }
-  }, [usernameInput, checkUsername, state.form.username]);
+  }, [usernameInput, state.form.username]);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -734,7 +735,7 @@ export const UserAdd = (props: UserProps) => {
                     <div>
                       {state.form.username &&
                       !/[^.@+_-]/.test(
-                        state.form.username[state.form.username?.length - 1]
+                        state.form.username[state.form.username.length - 1]
                       ) ? (
                         <i className="fas fa-circle-xmark text-red-500" />
                       ) : (
