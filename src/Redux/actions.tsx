@@ -50,6 +50,10 @@ export const deleteFacility = (id: number) => {
 export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
+
+export const partialUpdateUser = (username: string, data: any) => {
+  return fireRequest("partialUpdateUser", [], data, { username });
+};
 export const getUserListFacility = (pathParam: object) => {
   return fireRequest("userListFacility", [], {}, pathParam);
 };
