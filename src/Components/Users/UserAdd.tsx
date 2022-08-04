@@ -40,7 +40,6 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
-import { Cancel, CheckCircle } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -664,13 +663,14 @@ export const UserAdd = (props: UserProps) => {
 
               <div className="md:col-span-2">
                 <InputLabel>Facilities</InputLabel>
-                <FacilitySelect
-                  multiple={true}
-                  name="facilities"
-                  selected={selectedFacility}
-                  setSelected={setFacility}
-                  errors={state.errors.facilities}
-                  showAll={false}
+                  <FacilitySelect
+                    multiple={true}
+                    name="facilities"
+                    selected={selectedFacility}
+                    setSelected={setFacility}
+                    district={currentUser.data.district}
+                    errors={state.errors.facilities}
+                    showAll={false}
                 />
               </div>
 
