@@ -342,7 +342,6 @@ export const UserAdd = (props: UserProps) => {
   );
 
   const handleChange = (e: any) => {
-    console.log(e.target.value);
     const { value, name } = e.target;
     const form = { ...state.form };
     form[name] = value;
@@ -352,6 +351,14 @@ export const UserAdd = (props: UserProps) => {
     if (name === "state") {
       form["district"] = "";
     }
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleChangeHomeFacility = (e: any) => {
+    const { value, name } = e.target;
+    const newValue = value === "" ? null : value;
+    const form = { ...state.form };
+    form[name] = newValue;
     dispatch({ type: "set_form", form });
   };
 
@@ -663,14 +670,14 @@ export const UserAdd = (props: UserProps) => {
 
               <div className="md:col-span-2">
                 <InputLabel>Facilities</InputLabel>
-                  <FacilitySelect
-                    multiple={true}
-                    name="facilities"
-                    selected={selectedFacility}
-                    setSelected={setFacility}
-                    district={currentUser.data.district}
-                    errors={state.errors.facilities}
-                    showAll={false}
+                <FacilitySelect
+                  multiple={true}
+                  name="facilities"
+                  selected={selectedFacility}
+                  setSelected={setFacility}
+                  district={currentUser.data.district}
+                  errors={state.errors.facilities}
+                  showAll={false}
                 />
               </div>
 
@@ -686,7 +693,7 @@ export const UserAdd = (props: UserProps) => {
                     ...(selectedFacility ?? []),
                   ]}
                   optionValue="name"
-                  onChange={handleChange}
+                  onChange={handleChangeHomeFacility}
                   errors={state.errors.home_facility}
                 />
               </div>
@@ -906,7 +913,7 @@ export const UserAdd = (props: UserProps) => {
                       value={state.form.local_body}
                       options={localBody}
                       optionValue="name"
-                      onChange={handleChange}
+                      onChange={(e) => handleChange}
                       errors={state.errors.local_body}
                     />
                   )}
