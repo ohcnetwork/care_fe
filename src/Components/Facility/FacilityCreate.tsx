@@ -19,15 +19,17 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
+  FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
   KASP_ENABLED,
   KASP_STRING,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  validateLocationCoordinates,
   phonePreg,
   validatePincode,
+  validateLatitude,
+  validateLongitude,
 } from "../../Common/validation";
 import {
   createFacility,
@@ -41,6 +43,7 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import {
   MultilineInputField,
+  MultiSelectField,
   PhoneNumberField,
   SelectField,
   TextInputField,
@@ -72,6 +75,7 @@ type FacilityForm = {
   state: string;
   district: string;
   local_body: string;
+  features: string[];
   ward: string;
   kasp_empanelled: string;
   address: string;
@@ -97,6 +101,7 @@ const initForm: FacilityForm = {
   local_body: "",
   ward: "",
   kasp_empanelled: "false",
+  features: [],
   address: "",
   phone_number: "",
   latitude: "",
@@ -228,6 +233,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
             local_body: res.data.local_body ? res.data.local_body : "",
+            features: res.data.features || [],
             ward: res.data.ward_object ? res.data.ward_object.id : initialWards,
             kasp_empanelled: res.data.kasp_empanelled
               ? String(res.data.kasp_empanelled)
@@ -344,7 +350,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         case "state":
         case "local_body":
         case "ward":
-          if (!state.form[field]) {
+          if (!Number(state.form[field])) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -369,13 +375,15 @@ export const FacilityCreate = (props: FacilityProps) => {
           }
           return;
         case "latitude":
+          if (!!state.form.latitude && !validateLatitude(state.form[field])) {
+            errors[field] = "Please enter valid latitude between -90 and 90.";
+            invalidForm = true;
+          }
+          return;
         case "longitude":
-          if (
-            !!state.form.latitude &&
-            !!state.form.longitude &&
-            !validateLocationCoordinates(state.form[field])
-          ) {
-            errors[field] = "Please enter valid coordinates";
+          if (!!state.form.longitude && !validateLongitude(state.form[field])) {
+            errors[field] =
+              "Please enter valid longitude between -180 and 180.";
             invalidForm = true;
           }
           return;
@@ -405,6 +413,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         address: state.form.address,
         pincode: state.form.pincode,
         local_body: state.form.local_body,
+        features: state.form.features,
         ward: state.form.ward,
         kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
         location:
@@ -447,7 +456,8 @@ export const FacilityCreate = (props: FacilityProps) => {
       const res = await dispatchAction(
         facilityId ? updateFacility(facilityId, data) : createFacility(data)
       );
-      if (res && res.data) {
+
+      if (res && (res.status === 200 || res.status === 201) && res.data) {
         const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!facilityId) {
@@ -461,6 +471,10 @@ export const FacilityCreate = (props: FacilityProps) => {
           });
           navigate(`/facility/${facilityId}`);
         }
+      } else {
+        Notification.Error({
+          msg: "Something went wrong: " + (res.data.detail || ""),
+        });
       }
       setIsLoading(false);
     }
@@ -526,7 +540,20 @@ export const FacilityCreate = (props: FacilityProps) => {
                   errors={state.errors.name}
                 />
               </div>
-
+              <div className="">
+                <InputLabel id="features-label">Features</InputLabel>
+                <MultiSelectField
+                  data-test="facility-features"
+                  name="features"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.features}
+                  options={FACILITY_FEATURE_TYPES}
+                  onChange={(e) => handleChange(e)}
+                  optionValue="name"
+                  errors={state.errors.features}
+                />
+              </div>
               <div>
                 <InputLabel id="gender-label">State*</InputLabel>
                 {isStateLoading ? (
@@ -571,7 +598,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 )}
               </div>
 
-              <div className="md:col-span-2">
+              <div className="">
                 <InputLabel id="local_body-label">Localbody*</InputLabel>
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
@@ -861,8 +888,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <InputLabel id="location-label">Location</InputLabel>
                 <TextInputField
                   name="latitude"
-                  label="Latitude"
-                  placeholder=""
+                  placeholder="Latitude"
                   variant="outlined"
                   margin="dense"
                   value={state.form.latitude}
@@ -902,8 +928,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <InputLabel>&nbsp;</InputLabel>
                 <TextInputField
                   name="longitude"
-                  label="Longitude"
-                  placeholder=""
+                  placeholder="Longitude"
                   variant="outlined"
                   margin="dense"
                   value={state.form.longitude}
@@ -912,7 +937,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-6">
+            <div className="flex justify-between mt-6 gap-2">
               <Button color="default" variant="contained" onClick={goBack}>
                 Cancel
               </Button>

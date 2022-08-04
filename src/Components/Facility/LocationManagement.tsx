@@ -1,23 +1,13 @@
 import React, { useCallback, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
-import { Button, CircularProgress } from "@material-ui/core";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  listFacilityAssetLocation,
-  updateFacilityAssetLocation,
-  getAnyFacility,
-} from "../../Redux/actions";
+import { listFacilityAssetLocation, getAnyFacility } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
+import { RoleButton } from "../Common/RoleButton";
 import { LocationModel } from "./models";
 import { ReactElement } from "react";
-import {
-  MultilineInputField,
-  TextInputField,
-} from "../Common/HelperInputFields";
-import * as Notification from "../../Utils/Notifications.js";
-import classNames from "classnames";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -30,150 +20,53 @@ interface LocationRowProps {
   facilityId: string;
   name: string;
   description: string;
-  triggerRerender: () => void;
 }
 
 const LocationRow = (props: LocationRowProps) => {
-  let { id, facilityId, name, description, triggerRerender } = props;
-
-  const dispatchAction: any = useDispatch();
-  const [isEditable, setIsEditable] = useState(false);
-  const [nameField, setNameField] = useState(name);
-  const [descField, setDescField] = useState(description);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSave = async () => {
-    setIsLoading(true);
-    const res = await dispatchAction(
-      updateFacilityAssetLocation(
-        { name: nameField, description: descField },
-        facilityId,
-        id
-      )
-    );
-    setIsLoading(false);
-
-    if (res && res.status === 200) {
-      Notification.Success({
-        msg: "Location updated successfully",
-      });
-    } else {
-      Notification.Error({
-        msg: "Location update failed",
-      });
-    }
-    setIsEditable(false);
-    triggerRerender();
-    // window.location.reload();
-  };
-
-  const handleCancel = () => {
-    setNameField(name);
-    setDescField(description);
-    setIsEditable(false);
-  };
+  let { id, facilityId, name, description } = props;
 
   return (
-    <tr key={id}>
-      <td className="px-5 py-5 border-b border-gray-200 text-sm">
-        {isEditable ? (
-          <TextInputField
-            name="name"
-            variant="outlined"
-            margin="dense"
-            type="text"
-            value={nameField}
-            onChange={(e) => setNameField(e.target.value)}
-            errors=""
-          />
-        ) : (
-          <p className="text-gray-900">
-            {name.slice(0, 25) + (name.length > 25 ? "..." : "")}
+    <div
+      key={id}
+      className="w-full border-b lg:flex justify-between items-center py-4"
+    >
+      <div className="px-4 lg:w-3/4">
+        <div className="lg:flex items-baseline w-full">
+          <p className="text-xl capitalize break-words lg:w-1/4 lg:mr-4">
+            {name}
           </p>
-        )}
-      </td>
-      <td className="px-5 py-5 border-b border-gray-200 text-sm">
-        {isEditable ? (
-          <MultilineInputField
-            rows={2}
-            name="description"
-            variant="outlined"
-            margin="dense"
-            type="float"
-            value={descField}
-            onChange={(e) => setDescField(e.target.value)}
-            errors=""
-          />
-        ) : (
-          <p className="text-gray-900 lowercase">{description}</p>
-        )}
-      </td>
-      <td className="px-5 py-5 border-b border-gray-200 text-sm">
-        {isEditable ? (
-          <div className="flex space-x-2">
-            <Button
-              color={isLoading ? "default" : "primary"}
-              variant="contained"
-              type="submit"
-              size="small"
-              style={{ marginLeft: "auto" }}
-              onClick={handleSave}
-            >
-              <CircularProgress
-                size={20}
-                className={classNames("absolute z-10", { hidden: !isLoading })}
-              />
-              <p> SAVE </p>
-            </Button>
-            <Button
-              color="secondary"
-              variant="contained"
-              type="submit"
-              size="small"
-              style={{ marginLeft: "auto" }}
-              onClick={handleCancel}
-            >
-              CANCEL
-            </Button>
-          </div>
-        ) : (
-          <Button
-            color="inherit"
-            variant="contained"
-            type="submit"
-            size="small"
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "#24a0ed",
-              color: "white",
-            }}
-            onClick={() => setIsEditable(true)}
+          <p className="text-sm break-all lg:w-3/4">{description}</p>
+        </div>
+      </div>
+      <div className="flex">
+        <div className="px-2 py-2 w-full">
+          <RoleButton
+            className="btn btn-default bg-white w-full"
+            handleClickCB={() =>
+              navigate(`/facility/${facilityId}/location/${id}/update`)
+            }
+            disableFor="readOnly"
+            buttonType="html"
           >
-            EDIT
-          </Button>
-        )}
-      </td>
-      <td>
-        {!isEditable && (
-          <Button
-            color="inherit"
-            variant="contained"
-            type="submit"
-            size="small"
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "#4A2310",
-              color: "white",
-            }}
-            onClick={() =>
+            <i className="fas fa-pencil-alt w-4 mr-2"></i>
+            Edit
+          </RoleButton>
+        </div>
+        <div className="px-2 py-2 w-full">
+          <RoleButton
+            className="btn btn-default bg-white w-full"
+            handleClickCB={() =>
               navigate(`/facility/${facilityId}/location/${id}/beds`)
             }
+            disableFor="readOnly"
+            buttonType="html"
           >
+            <i className="fas fa-bed-pulse w-4 mr-2"></i>
             Manage Beds
-          </Button>
-        )}
-      </td>
-    </tr>
+          </RoleButton>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -187,17 +80,16 @@ export const LocationManagement = (props: LocationManagementProps) => {
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [rerender, setRerender] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const limit = 14;
-
-  const triggerRerender = () => {
-    setRerender(!rerender);
-  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
+      const facility = await dispatchAction(getAnyFacility(facilityId));
+
+      setFacilityName(facility?.data?.name || "");
+
       const res = await dispatchAction(
         listFacilityAssetLocation(
           { limit, offset },
@@ -212,7 +104,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset, rerender]
+    [dispatchAction, offset, facilityId]
   );
 
   useAbortableEffect(
@@ -221,19 +113,6 @@ export const LocationManagement = (props: LocationManagementProps) => {
     },
     [fetchData]
   );
-
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -248,49 +127,21 @@ export const LocationManagement = (props: LocationManagementProps) => {
         facilityId={facilityId || ""}
         name={locationItem.name || ""}
         description={locationItem.description || ""}
-        triggerRerender={triggerRerender}
       />
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
-      <tr className="bg-white">
-        <td
-          colSpan={3}
-          className="px-5 py-5 border-b border-gray-200 text-center"
-        >
-          <p className="text-gray-500 whitespace-nowrap">
-            No locations available
-          </p>
-        </td>
-      </tr>
+      <p className="bg-white px-5 py-5 border-b border-gray-200 text-center text-gray-500 whitespace-nowrap">
+        No locations available
+      </p>
     );
   }
 
-  if (isLoading || !locations) {
-    location = <Loading />;
-  } else if (locations) {
+  if (locations) {
     location = (
       <>
-        <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
-          <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
-            <thead>
-              <tr>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Manage
-                </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Beds
-                </th>
-              </tr>
-            </thead>
-            <tbody>{locationsList}</tbody>
-          </table>
+        <div className="grow mt-5 bg-white p-4 flex flex-wrap">
+          {locationsList}
         </div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
@@ -306,6 +157,10 @@ export const LocationManagement = (props: LocationManagementProps) => {
     );
   }
 
+  if (isLoading || !locations) {
+    return <Loading />;
+  }
+
   return (
     <div>
       <PageTitle
@@ -314,15 +169,20 @@ export const LocationManagement = (props: LocationManagementProps) => {
         className="mx-3 md:mx-8"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
-      <div className="container mx-auto px-4 py-4 md:my-8 sm:px-8">
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          onClick={() => navigate(`/facility/${facilityId}/location/add`)}
-        >
-          Add Location
-        </Button>
+      <div className="container mx-auto px-4 py-2 sm:px-8">
+        <div className="flex justify-end">
+          <RoleButton
+            className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
+            handleClickCB={() =>
+              navigate(`/facility/${facilityId}/location/add`)
+            }
+            disableFor="readOnly"
+            buttonType="html"
+          >
+            <i className="fas fa-plus mr-2"></i>
+            Add New Location
+          </RoleButton>
+        </div>
         {location}
       </div>
     </div>

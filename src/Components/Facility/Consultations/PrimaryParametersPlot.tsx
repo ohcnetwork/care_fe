@@ -8,7 +8,15 @@ import { StackedLinePlot } from "./components/StackedLinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
-export const PrimaryParametersPlot = (props: any) => {
+interface PrimaryParametersPlotProps {
+  facilityId: string;
+  patientId: string;
+  consultationId: string;
+}
+
+export const PrimaryParametersPlot = ({
+  consultationId,
+}: PrimaryParametersPlotProps) => {
   const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,7 +43,7 @@ export const PrimaryParametersPlot = (props: any) => {
               "rhythm_detail",
             ],
           },
-          props.consultationId
+          { consultationId }
         )
       );
       if (!status.aborted) {
@@ -45,14 +53,14 @@ export const PrimaryParametersPlot = (props: any) => {
         }
       }
     },
-    [props.consultationId, dispatch, currentPage]
+    [consultationId, dispatch, currentPage]
   );
 
   useAbortableEffect(
     (status: statusType) => {
       fetchDailyRounds(status);
     },
-    [props.consultationId, currentPage]
+    [consultationId, currentPage]
   );
 
   const handlePagination = (page: number) => {

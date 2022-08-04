@@ -13,6 +13,7 @@ import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+import Loading from "../Common/Loading";
 
 interface PatientNotesProps {
   patientId: any;
@@ -92,12 +93,13 @@ const PatientNotes = (props: PatientNotesProps) => {
     }
     dispatch(addPatientNote(props.patientId, payload)).then(() => {
       Notification.Success({ msg: "Note added successfully" });
+      setNoteField("");
       fetchData();
     });
   };
 
   if (isLoading) {
-    return <div>Loading</div>;
+    return <Loading />;
   }
 
   return (
@@ -114,7 +116,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       <textarea
         rows={3}
         placeholder="Type your Note"
-        className="mx-10 my-4 border border-gray-500 rounded-lg p-4"
+        className="mx-10 my-4 border border-gray-500 rounded-lg p-4 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
         onChange={(e) => setNoteField(e.target.value)}
       />
       <div className="flex w-full justify-end pr-10">
