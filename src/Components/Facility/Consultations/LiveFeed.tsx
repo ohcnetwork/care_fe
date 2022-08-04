@@ -18,9 +18,18 @@ import {
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
-import { Card, CardContent, Modal, Tooltip } from "@material-ui/core";
+import {
+  Card,
+  CardContent,
+  InputLabel,
+  Modal,
+  Tooltip,
+} from "@material-ui/core";
 import { FeedCameraPTZHelpButton } from "./Feed";
 import { isNull } from "lodash";
+import { BedSelect } from "../../Common/BedSelect";
+import { BedModel } from "../models";
+import { TextInputField } from "../../Common/HelperInputFields";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -34,6 +43,8 @@ const LiveFeed = (props: any) => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
     StreamStatus.Offline
   );
+  const [bed, setBed] = useState<BedModel>({});
+  const [preset, setNewPreset] = useState<string>("");
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
   const [page, setPage] = useState({
@@ -42,6 +53,7 @@ const LiveFeed = (props: any) => {
     offset: 0,
   });
   const [toDelete, setToDelete] = useState<any>(null);
+  const [toUpdate, setToUpdate] = useState<any>(null);
 
   const liveFeedPlayerRef = useRef<any>(null);
 
@@ -104,6 +116,34 @@ const LiveFeed = (props: any) => {
     setToDelete(null);
   };
 
+  const updatePreset = async (currentPreset: any) => {
+    const data = {
+      bed_id: bed.id,
+      preset_name: preset,
+    };
+    const response = await dispatch(
+      partialUpdateAssetBed(
+        {
+          asset: currentPreset.asset_object.id,
+          bed: bed.id,
+          meta: {
+            ...currentPreset.meta,
+            ...data,
+          },
+        },
+        currentPreset?.id
+      )
+    );
+    if (response && response.status === 200) {
+      Notification.Success({ msg: "Preset Updated" });
+    } else {
+      Notification.Error({ msg: "Something Went Wrong" });
+    }
+    getBedPresets(cameraAsset?.id);
+    getPresets({});
+    setToUpdate(null);
+  };
+
   const gotoBedPreset = (preset: any) => {
     setLoading("Moving");
     absoluteMove(preset.meta.position, {
@@ -113,6 +153,10 @@ const LiveFeed = (props: any) => {
   useEffect(() => {
     getPresets({ onSuccess: (resp) => setPresets(resp.data) });
   }, []);
+  useEffect(() => {
+    setNewPreset(toUpdate?.meta?.preset_name);
+    setBed(toUpdate?.bed_object);
+  }, [toUpdate]);
 
   useEffect(() => {
     getBedPresets(cameraAsset.id);
@@ -253,6 +297,57 @@ const LiveFeed = (props: any) => {
                   Confirm
                 </button>
                 <button className="text-sm" onClick={() => setToDelete(null)}>
+                  Cancel
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </Modal>
+      )}
+      {toUpdate && (
+        <Modal
+          className="flex h-fit justify-center items-center top-1/2"
+          open={!isNull(toUpdate)}
+        >
+          <Card>
+            <CardContent>
+              <h5>Update Preset</h5>
+              <hr />
+              <div>
+                <InputLabel id="asset-type">Bed</InputLabel>
+                <BedSelect
+                  name="bed"
+                  setSelected={(selected) => setBed(selected as BedModel)}
+                  selected={bed}
+                  errors=""
+                  multiple={false}
+                  margin="dense"
+                  location={cameraAsset.location_id}
+                  facility={cameraAsset.facility_id}
+                />
+              </div>
+              <div>
+                <InputLabel id="location">Preset Name</InputLabel>
+                <TextInputField
+                  name="name"
+                  id="location"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  value={preset}
+                  onChange={(e) => setNewPreset(e.target.value)}
+                  errors=""
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end mt-2">
+                <button
+                  onClick={() => updatePreset(toUpdate)}
+                  className="bg-red-500 px-3 text-sm py-1 rounded-md text-white"
+                >
+                  Confirm
+                </button>
+                <button className="text-sm" onClick={() => setToUpdate(null)}>
                   Cancel
                 </button>
               </div>
@@ -444,13 +539,20 @@ const LiveFeed = (props: any) => {
                               : `Unnamed Preset ${index + 1}`}
                           </span>
                         </button>
-                        <button
-                          onClick={() => setToDelete(preset)}
-                          className="text-red-800 text-sm py-1 bg-red-200 justify-center items-center gap-2 flex hover:bg-red-800 hover:text-red-200 rounded-b-md"
-                        >
-                          <i className="fa-solid fa-trash-can"></i>
-                          <span>Delete</span>
-                        </button>
+                        <div className="flex">
+                          <button
+                            onClick={() => setToUpdate(preset)}
+                            className="text-green-800 text-sm py-1 bg-green-200 w-1/2 justify-center items-center gap-2 flex hover:bg-green-800 hover:text-green-200 "
+                          >
+                            <i className="fa-solid fa-pencil"></i>
+                          </button>
+                          <button
+                            onClick={() => setToDelete(preset)}
+                            className="text-red-800 text-sm py-1 bg-red-200 w-1/2 justify-center items-center gap-2 flex hover:bg-red-800 hover:text-red-200 "
+                          >
+                            <i className="fa-solid fa-trash-can"></i>
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </>
