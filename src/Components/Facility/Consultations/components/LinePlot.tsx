@@ -2,11 +2,11 @@ import ReactECharts from "echarts-for-react";
 
 export const LinePlot = (props: any) => {
   const { title, name, xData, yData, low = null, high = null } = props;
-  let generalOptions : any = {
+  let generalOptions: any = {
     title: {
       text: `${title} [ {0|${yData[yData.length - 1]?.toFixed(2) || "NA"}} ]`,
       textStyle: {
-        fontSize: 20,
+        fontSize: 14,
         rich: {
           0: {
             fontSize: 14,
@@ -27,6 +27,8 @@ export const LinePlot = (props: any) => {
     },
     toolbox: {
       show: true,
+      orient: "vertical",
+      top: "9%",
       feature: {
         dataZoom: {
           yAxisIndex: "none",
@@ -78,40 +80,40 @@ export const LinePlot = (props: any) => {
     ],
   };
 
-  if(props.type && props.type === "WAVEFORM"){
+  if (props.type && props.type === "WAVEFORM") {
     generalOptions = {
       ...generalOptions,
       title: {
         text: `${title}`,
       },
       grid: {
-        left: '15px',
-        right: '15px'
+        left: "15px",
+        right: "15px",
       },
-      animation : false,
-      xAxis : {
+      animation: false,
+      xAxis: {
         ...generalOptions.xAxis,
-        show: false
+        show: false,
       },
-      yAxis : {
+      yAxis: {
         ...generalOptions.yAxis,
-        show: false
+        show: false,
       },
       toolbox: {
         ...generalOptions.toolbox,
         show: false,
       },
       legend: {
-        show : false,
+        show: false,
       },
-      series : [
+      series: [
         {
           ...generalOptions.series[0],
           showSymbol: false,
-          lineStyle: {color: 'green'},
+          lineStyle: { color: "green" },
           areaStyle: {
             ...generalOptions.series[0].areaStyle,
-            color : {
+            color: {
               ...generalOptions.series[0].areaStyle.color,
               colorStops: [
                 {
@@ -122,12 +124,12 @@ export const LinePlot = (props: any) => {
                   offset: 1,
                   color: "transparent",
                 },
-              ]
+              ],
             },
           },
-        }
-      ]
-    }
+        },
+      ],
+    };
   }
 
   const visualMap: any = {
@@ -157,5 +159,11 @@ export const LinePlot = (props: any) => {
     generalOptions = { ...generalOptions, ...visualMap };
   }
 
-  return <ReactECharts option={generalOptions} className={props.classes} lazyUpdate={props.type === "WAVEFORM"}/>;
+  return (
+    <ReactECharts
+      option={generalOptions}
+      className={props.classes}
+      lazyUpdate={props.type === "WAVEFORM"}
+    />
+  );
 };
