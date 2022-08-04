@@ -463,11 +463,10 @@ export const PatientManager = (props: any) => {
           key={`usr_${patient.id}`}
           onClick={() => navigate(patientUrl)}
           className={
-            "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 " +
-            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
+            "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 "
           }
         >
-          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">      
+          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
             <div>
               <div className="md:flex justify-between w-full">
                 <div className="text-xl font-normal capitalize">
@@ -544,17 +543,6 @@ export const PatientManager = (props: any) => {
               ) : (
                 <Badge color="primary" icon="lock" text="Transfer Blocked" />
               )}
-              {patient.disease_status === "POSITIVE" && (
-                <Badge color="red" icon="radiation" text="Positive" />
-              )}
-              {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
-                0 && (
-                <Badge
-                  color="primary"
-                  icon="smile-beam"
-                  text={patient.disease_status}
-                />
-              )}
               {patient.gender === 2 &&
                 patient.is_antenatal &&
                 patient.is_active && (
@@ -562,20 +550,6 @@ export const PatientManager = (props: any) => {
               )}
               {patient.is_medical_worker && patient.is_active && (
                 <Badge color="blue" icon="user-md" text="Medical Worker" />
-              )}
-              {patient.contact_with_confirmed_carrier && (
-                <Badge
-                  color="red"
-                  icon="exclamation-triangle"
-                  text="Contact with confirmed carrier"
-                />
-              )}
-              {patient.contact_with_suspected_carrier && (
-                <Badge
-                  color="yellow"
-                  icon="exclamation-triangle"
-                  text="Contact with suspected carrier"
-                />
               )}
               {patient.disease_status === "EXPIRED" && (
                 <Badge
@@ -901,11 +875,6 @@ export const PatientManager = (props: any) => {
           {badge("SRF ID", qParams.srf_id, "srf_id")}
           {badge("LSG Body", localbodyName, "lsgBody")}
           {badge(
-            "Declared Status",
-            qParams.is_declared_positive,
-            "is_declared_positive"
-          )}
-          {badge(
             "Result before",
             qParams.date_of_result_before,
             "date_of_result_before"
@@ -915,19 +884,6 @@ export const PatientManager = (props: any) => {
             qParams.date_of_result_after,
             "date_of_result_after"
           )}
-
-          {badge(
-            "Declared positive before",
-            qParams.date_declared_positive_before,
-            "date_declared_positive_before"
-          )}
-
-          {badge(
-            "Declared positive after",
-            qParams.date_declared_positive_after,
-            "date_declared_positive_after"
-          )}
-
           {badge(
             "Onset of symptoms before",
             qParams.last_consultation_symptoms_onset_date_before,
