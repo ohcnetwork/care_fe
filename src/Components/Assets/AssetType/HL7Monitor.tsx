@@ -65,47 +65,37 @@ const HL7Monitor = (props: HL7MonitorProps) => {
         <CardContent>
           <form onSubmit={handleSubmit}>
             <CardContent>
-              <div className="mt-2 grid grid-cols-1 lg:grid-cols-2">
-                <div className="text-primary-500 m-auto">
-                  <Monitorsvg
-                    className="h-64 w-64"
-                    viewBox="0 0 122.88 78.97"
-                    fill="currentColor"
+              <div className=" mt-2 grid gap-2 md:grid-cols-2 grid-cols-1">
+                <div>
+                  <InputLabel id="middleware-hostname">
+                    Hospital Middleware Hostname
+                  </InputLabel>
+                  <TextInputField
+                    name="name"
+                    id="middleware-hostname"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={middlewareHostname}
+                    onChange={(e) => setMiddlewareHostname(e.target.value)}
+                    errors=""
                   />
                 </div>
-                <div className=" mt-2 grid gap-2 grid-cols-1 col-span-1">
-                  <div>
-                    <InputLabel id="middleware-hostname">
-                      Hospital Middleware Hostname
-                    </InputLabel>
-                    <TextInputField
-                      name="name"
-                      id="middleware-hostname"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      value={middlewareHostname}
-                      onChange={(e) => setMiddlewareHostname(e.target.value)}
-                      errors=""
-                    />
-                  </div>
-                  <div>
-                    <InputLabel id="local-ip-addess">
-                      Local IP Address
-                    </InputLabel>
-                    <TextInputField
-                      name="name"
-                      id="local-ip-addess"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      value={localipAddress}
-                      onChange={(e) => setLocalIPAddress(e.target.value)}
-                      errors={ipadrdress_error}
-                    />
-                  </div>
+                <div>
+                  <InputLabel id="local-ip-addess">Local IP Address</InputLabel>
+                  <TextInputField
+                    name="name"
+                    id="local-ip-addess"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={localipAddress}
+                    onChange={(e) => setLocalIPAddress(e.target.value)}
+                    errors={ipadrdress_error}
+                  />
                 </div>
               </div>
+
               <div className="flex justify-between mt-4">
                 <Button
                   color="primary"

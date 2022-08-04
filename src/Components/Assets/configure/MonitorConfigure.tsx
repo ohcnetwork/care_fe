@@ -42,7 +42,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
         }}
       >
         <CardContent>
-          <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="mt-2 ml-2 grid gap-4 grid-cols-1 md:grid-cols-2">
             <div>
               <InputLabel id="asset-type">Bed</InputLabel>
               <BedSelect
