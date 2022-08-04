@@ -343,6 +343,7 @@ export const UserAdd = (props: UserProps) => {
   );
 
   const handleChange = (e: any) => {
+    console.log(e.target.value);
     const { value, name } = e.target;
     const form = { ...state.form };
     form[name] = value;
@@ -681,7 +682,7 @@ export const UserAdd = (props: UserProps) => {
                   margin="dense"
                   value={state.form.home_facility}
                   options={[
-                    { id: null, name: "Select" },
+                    { id: "", name: "Select" },
                     ...(selectedFacility ?? []),
                   ]}
                   optionValue="name"
