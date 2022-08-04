@@ -663,25 +663,14 @@ export const UserAdd = (props: UserProps) => {
 
               <div className="md:col-span-2">
                 <InputLabel>Facilities</InputLabel>
-                {userType === "Staff" || userType === "StaffReadOnly" ? (
-                  <MultiSelectField
-                    name="facilities"
-                    variant="outlined"
-                    value={state.form.facilities}
-                    options={current_user_facilities}
-                    onChange={handleMultiSelect}
-                    optionValue="name"
-                    errors={state.errors.facilities}
-                  />
-                ) : (
-                  <FacilitySelect
-                    multiple={true}
-                    name="facilities"
-                    selected={selectedFacility}
-                    setSelected={setFacility}
-                    errors={state.errors.facilities}
-                  />
-                )}
+                <FacilitySelect
+                  multiple={true}
+                  name="facilities"
+                  selected={selectedFacility}
+                  setSelected={setFacility}
+                  errors={state.errors.facilities}
+                  showAll={false}
+                />
               </div>
 
               <div className="">
