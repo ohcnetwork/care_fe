@@ -310,14 +310,14 @@ export default function ManageUsers() {
     const STATE_READ_ONLY_ADMIN_LEVEL =
       USER_TYPES.indexOf("StateReadOnlyAdmin");
     const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
-    const level = USER_TYPES.indexOf(user.user_type);
-    const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
-    if (user.is_superuser) return true;
+    const level = USER_TYPES.indexOf(user?.user_type);
+    const currentUserLevel = USER_TYPES.indexOf(currentUser?.data.user_type);
+    if (user?.is_superuser) return true;
     if (
       currentUserLevel >= STATE_ADMIN_LEVEL &&
       currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
     )
-      return user.state_object?.id === currentUser?.data?.state;
+      return user?.state_object?.id === currentUser?.data?.state;
     if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel > level)
       return user?.district_object?.id === currentUser?.data?.district;
     return false;
@@ -416,7 +416,7 @@ export default function ManageUsers() {
                             href={`tel:${user.phone_number}`}
                             className="font-semibold"
                           >
-                            {user.phone_number || "-"}
+                            user.phone_number
                           </a>
                         </div>
                       </div>
@@ -461,7 +461,7 @@ export default function ManageUsers() {
   } else if (users && users.length) {
     manageUsers = (
       <div>
-        {userTypes.length && addUser}
+        {userTypes.length > 0 && addUser}
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
@@ -478,7 +478,7 @@ export default function ManageUsers() {
   } else if (users && users.length === 0) {
     manageUsers = (
       <div>
-        {userTypes.length && addUser}
+        {userTypes.length > 0 && addUser}
         <div>
           <h5> No Users Found</h5>
         </div>
