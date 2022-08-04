@@ -41,6 +41,7 @@ import FacillityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
+import ToolTip from "../Common/utils/Tooltip";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -330,7 +331,7 @@ export const HospitalList = (props: any) => {
     facilityList = data.map((facility: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
-          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
+          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
               <div className="md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center">
                 {facility.cover_image_url ? (
@@ -343,7 +344,7 @@ export const HospitalList = (props: any) => {
                   <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                 )}
               </div>
-              <div className="h-full w-full grow overflow-clip">
+              <div className="h-full w-full grow">
                 <div className="h-full flex flex-col justify-between w-full">
                   <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
                     <div className="flow-root">
@@ -357,8 +358,8 @@ export const HospitalList = (props: any) => {
                       </div>
                     </div>
 
-                    <div className="block">
-                      <div className="inline-flex items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                    <div className="flex gap-1 flex-wrap mt-2">
+                      <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
                     </div>

@@ -35,7 +35,6 @@ import {
   PhoneNumberField,
   SelectField,
   TextInputField,
-  MultiSelectField,
   CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
@@ -68,6 +67,7 @@ const initForm: any = {
   password: "",
   c_password: "",
   facilities: [],
+  home_facility: null,
   username: "",
   first_name: "",
   last_name: "",
@@ -123,6 +123,7 @@ export const UserAdd = (props: UserProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [current_user_facilities, setFacilities] = useState<
     Array<FacilityModel>
   >([]);
@@ -342,6 +343,7 @@ export const UserAdd = (props: UserProps) => {
   );
 
   const handleChange = (e: any) => {
+    console.log(e.target.value);
     const { value, name } = e.target;
     const form = { ...state.form };
     form[name] = value;
@@ -379,13 +381,6 @@ export const UserAdd = (props: UserProps) => {
     form.facilities = selected
       ? (selected as FacilityModel[]).map((i) => i.id)
       : [];
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleMultiSelect = (event: any) => {
-    const { name, value } = event.target;
-    const form = { ...state.form };
-    form[name] = value;
     dispatch({ type: "set_form", form });
   };
 
@@ -551,6 +546,7 @@ export const UserAdd = (props: UserProps) => {
         gender: state.form.gender,
         password: state.form.password,
         facilities: state.form.facilities ? state.form.facilities : undefined,
+        home_facility: state.form.home_facility ?? undefined,
         username: state.form.username,
         first_name: state.form.first_name ? state.form.first_name : undefined,
         last_name: state.form.last_name ? state.form.last_name : undefined,
@@ -661,25 +657,32 @@ export const UserAdd = (props: UserProps) => {
 
               <div className="md:col-span-2">
                 <InputLabel>Facilities</InputLabel>
-                {userType === "Staff" || userType === "StaffReadOnly" ? (
-                  <MultiSelectField
-                    name="facilities"
-                    variant="outlined"
-                    value={state.form.facilities}
-                    options={current_user_facilities}
-                    onChange={handleMultiSelect}
-                    optionValue="name"
-                    errors={state.errors.facilities}
-                  />
-                ) : (
-                  <FacilitySelect
-                    multiple={true}
-                    name="facilities"
-                    selected={selectedFacility}
-                    setSelected={setFacility}
-                    errors={state.errors.facilities}
-                  />
-                )}
+                <FacilitySelect
+                  multiple={true}
+                  name="facilities"
+                  selected={selectedFacility}
+                  setSelected={setFacility}
+                  district={currentUser.data.district}
+                  errors={state.errors.facilities}
+                  showAll={false}
+                />
+              </div>
+
+              <div className="">
+                <InputLabel>Home Facility</InputLabel>
+                <SelectField
+                  name="home_facility"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.home_facility}
+                  options={[
+                    { id: "", name: "Select" },
+                    ...(selectedFacility ?? []),
+                  ]}
+                  optionValue="name"
+                  onChange={handleChange}
+                  errors={state.errors.home_facility}
+                />
               </div>
 
               <div>

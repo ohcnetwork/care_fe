@@ -75,7 +75,7 @@ const routes: Routes = {
   },
 
   partialUpdateUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/{username}/",
     method: "PATCH",
   },
 
