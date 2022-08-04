@@ -328,9 +328,24 @@ export const FacilityHome = (props: any) => {
               <div>
                 <h1 className="text-lg font-bold">Features</h1>
                 <div className="flex gap-2 flex-wrap mt-2">
-                  {facilityData.features?.map((feature, i)=>(
-                    <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
-                      <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/> &nbsp;{FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                  {facilityData.features?.map((feature, i) => (
+                    <div
+                      key={i}
+                      className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm"
+                    >
+                      <i
+                        className={`fas fa-${
+                          FACILITY_FEATURE_TYPES.filter(
+                            (f) => f.id === feature
+                          )[0].icon
+                        }`}
+                      />{" "}
+                      &nbsp;
+                      {
+                        FACILITY_FEATURE_TYPES.filter(
+                          (f) => f.id === feature
+                        )[0].name
+                      }
                     </div>
                   ))}
                 </div>

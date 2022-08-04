@@ -467,7 +467,7 @@ export const PatientManager = (props: any) => {
             (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
-          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">      
+          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
             <div>
               <div className="md:flex justify-between w-full">
                 <div className="text-xl font-normal capitalize">
@@ -558,8 +558,8 @@ export const PatientManager = (props: any) => {
               {patient.gender === 2 &&
                 patient.is_antenatal &&
                 patient.is_active && (
-                <Badge color="blue" icon="baby-carriage" text="Antenatal" />
-              )}
+                  <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+                )}
               {patient.is_medical_worker && patient.is_active && (
                 <Badge color="blue" icon="user-md" text="Medical Worker" />
               )}
