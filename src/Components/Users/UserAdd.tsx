@@ -161,7 +161,7 @@ export const UserAdd = (props: UserProps) => {
       usernameInput.length > 1 &&
       !(state.form.username?.length < 2) &&
       state.form.username.length > 0 &&
-      /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
+      /[^.@+_-]/.test(state.form.username[state.form.username.length - 1])
     ) {
       const timeout = setTimeout(() => {
         checkUsername(usernameInput);
