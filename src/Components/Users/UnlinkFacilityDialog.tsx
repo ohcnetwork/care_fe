@@ -6,7 +6,6 @@ import {
   DialogActions,
   Button,
 } from "@material-ui/core";
-import { WithStyles, withStyles } from "@material-ui/styles";
 
 interface ConfirmDialogProps {
   facilityName: string;
@@ -15,17 +14,8 @@ interface ConfirmDialogProps {
   handleOk: () => void;
 }
 
-const styles = {
-  paper: {
-    "max-width": "650px",
-    "min-width": "400px",
-  },
-};
-
-const UnlinkFacilityDialog = (
-  props: ConfirmDialogProps & WithStyles<typeof styles>
-) => {
-  const { facilityName, userName, handleCancel, handleOk, classes } = props;
+const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
+  const { facilityName, userName, handleCancel, handleOk } = props;
 
   const [disable, setDisable] = useState(false);
 
@@ -34,25 +24,21 @@ const UnlinkFacilityDialog = (
     setDisable(true);
   };
   return (
-    <Dialog
-      open={true}
-      classes={{
-        paper: classes.paper,
-      }}
-      onClose={handleCancel}
-    >
+    <Dialog open={true} onClose={handleCancel}>
       <DialogContent>
-        <DialogContentText
-          id="alert-dialog-description"
-          className="flex text-gray-800 leading-relaxed"
-        >
-          <div>
-            Are you sure you want to unlink the facility{" "}
-            <strong>{facilityName}</strong> from user{" "}
-            <strong>{userName}</strong>? The user will lose access to the
-            facility.
-          </div>
-        </DialogContentText>
+        <div className="md:min-w-[400px] max-w-[650px]">
+          <DialogContentText
+            id="alert-dialog-description"
+            className="flex text-gray-800 leading-relaxed sm:min-w-[400px]"
+          >
+            <div>
+              Are you sure you want to unlink the facility{" "}
+              <strong>{facilityName}</strong> from user{" "}
+              <strong>{userName}</strong>? The user will lose access to the
+              facility.
+            </div>
+          </DialogContentText>
+        </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCancel} color="primary">
@@ -70,4 +56,4 @@ const UnlinkFacilityDialog = (
   );
 };
 
-export default withStyles(styles)(UnlinkFacilityDialog);
+export default UnlinkFacilityDialog;
