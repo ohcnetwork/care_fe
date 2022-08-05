@@ -318,19 +318,19 @@ const AssetsList = () => {
         {badge("Asset Type", asset_type, ["asset_type"])}
         {badge("Status", qParams.status, ["status"])}
       </div>
-      <div className="grow mt-10 bg-white">
+      <div className="grow mt-10">
         <div className="py-8 md:px-5">
-          <div className="flex flex-wrap md:-mx-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 md:-mx-8 gap-2">
             {assetsExist ? (
               assets.map((asset: AssetData) => (
                 <div
                   key={asset.id}
-                  className="w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3"
+                  className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-3 justify-center items-center"
                   onClick={() => navigate(`/assets/${asset.id}`)}
                 >
                   <div className="px-4 md:w-1/2">
-                    <div className="md:flex justify-between w-full">
-                      <p className="text-xl font-normal capitalize">
+                    <div className="md:flex">
+                      <p className="text-xl font-normal capitalize break-words">
                         {asset.name}
                       </p>
                     </div>
@@ -341,8 +341,8 @@ const AssetsList = () => {
                       </span>
                     </p>
                   </div>
-                  <div className="md:flex">
-                    <div className="md:flex flex-wrap justify-end">
+                  <div className="md:flex justify-between pt-2">
+                    <div className="md:flex flex-wrap">
                       {asset.is_working ? (
                         <Badge color="green" icon="cog" text="Working" />
                       ) : (
@@ -372,17 +372,17 @@ const AssetsList = () => {
                 </p>
               </div>
             )}
-            {totalCount > limit && (
-              <div className="mt-4 flex w-full justify-center">
-                <Pagination
-                  cPage={currentPage}
-                  defaultPerPage={limit}
-                  data={{ totalCount }}
-                  onChange={handlePagination}
-                />
-              </div>
-            )}
           </div>
+          {totalCount > limit && (
+            <div className="mt-4 flex w-full justify-center">
+              <Pagination
+                cPage={currentPage}
+                defaultPerPage={limit}
+                data={{ totalCount }}
+                onChange={handlePagination}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

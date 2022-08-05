@@ -102,9 +102,13 @@ export const FacilityHome = (props: any) => {
 
   const handleDeleteSubmit = async () => {
     const res = await dispatch(deleteFacility(facilityId));
-    if (res && res.status == 204) {
+    if (res?.status === 204) {
       Notification.Success({
         msg: "Facility deleted successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while deleting Facility: " + (res?.data?.detail || ""),
       });
     }
     navigate("/facility");
@@ -270,7 +274,7 @@ export const FacilityHome = (props: any) => {
         </DialogActions>
       </Dialog>
       <div className="bg-white rounded-lg p-3 md:p-6 shadow">
-        <div className="md:flex justify-between gap-2">
+        <div className="lg:flex justify-between gap-2">
           <div className="md:flex flex-col justify-between">
             <div className="flex flex-col flex-1 gap-3">
               <div>
@@ -323,11 +327,11 @@ export const FacilityHome = (props: any) => {
                   <div className="lg:flex-1 min-w-[300px] md:flex flex-col">
                     <div className="mb-4">
                       <h1 className="text-lg font-bold">Local Body</h1>
-                      <p className="text-lg">
+                      <p className="text-lg w-2/3 md:w-full">
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex flex-col md:flex-row gap-4">
                       <div>
                         <h1 className="text-lg font-bold">Ward</h1>
                         <p className="text-lg">

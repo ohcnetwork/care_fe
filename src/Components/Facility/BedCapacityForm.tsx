@@ -199,7 +199,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
     return true;
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: any, btnType: string = "Save") => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
@@ -229,7 +229,9 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
           Notification.Success({
             msg: "Bed capacity added successfully",
           });
-          if (isLastOptionType) {
+          if (btnType == "Save and Exit") {
+            navigate(`/facility/${facilityId}`);
+          } else if (isLastOptionType) {
             navigate(`/facility/${facilityId}/doctor`);
           }
         } else {
@@ -321,30 +323,49 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             </CardContent>
             <CardContent>
               <CardActions
-                className="padding16"
+                className="padding16 flex flex-col md:flex-row gap-4"
                 style={{ justifyContent: "space-between" }}
               >
-                <Button
-                  id="bed-capacity-cancel"
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={goBack}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  id="bed-capacity-save"
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  onClick={(e) => handleSubmit(e)}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
-                >
-                  {buttonText}
-                </Button>
+                <div className="w-full md:w-auto">
+                  <Button
+                    id="bed-capacity-cancel"
+                    color="default"
+                    variant="contained"
+                    type="button"
+                    fullWidth
+                    onClick={goBack}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                  {!isLastOptionType && headerText === "Add Bed Capacity" && (
+                    <Button
+                      id="bed-capacity-save-and-exit"
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      onClick={(e) => handleSubmit(e, "Save and Exit")}
+                      startIcon={
+                        <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                      }
+                    >
+                      Save Bed Capacity
+                    </Button>
+                  )}
+                  <Button
+                    id="bed-capacity-save"
+                    color="primary"
+                    variant="contained"
+                    type="submit"
+                    onClick={(e) => handleSubmit(e)}
+                    startIcon={
+                      <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                    }
+                  >
+                    {buttonText}
+                  </Button>
+                </div>
               </CardActions>
             </CardContent>
           </form>
