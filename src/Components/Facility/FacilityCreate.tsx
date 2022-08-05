@@ -457,7 +457,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         facilityId ? updateFacility(facilityId, data) : createFacility(data)
       );
 
-      if (res && res.status === 200 && res.data) {
+      if (res && (res.status === 200 || res.status === 201) && res.data) {
         const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!facilityId) {
@@ -471,6 +471,10 @@ export const FacilityCreate = (props: FacilityProps) => {
           });
           navigate(`/facility/${facilityId}`);
         }
+      } else {
+        Notification.Error({
+          msg: "Something went wrong: " + (res.data.detail || ""),
+        });
       }
       setIsLoading(false);
     }
@@ -884,8 +888,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <InputLabel id="location-label">Location</InputLabel>
                 <TextInputField
                   name="latitude"
-                  label="Latitude"
-                  placeholder=""
+                  placeholder="Latitude"
                   variant="outlined"
                   margin="dense"
                   value={state.form.latitude}
@@ -925,8 +928,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <InputLabel>&nbsp;</InputLabel>
                 <TextInputField
                   name="longitude"
-                  label="Longitude"
-                  placeholder=""
+                  placeholder="Longitude"
                   variant="outlined"
                   margin="dense"
                   value={state.form.longitude}
@@ -935,7 +937,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-6">
+            <div className="flex justify-between mt-6 gap-2">
               <Button color="default" variant="contained" onClick={goBack}>
                 Cancel
               </Button>
