@@ -35,7 +35,6 @@ import {
   PhoneNumberField,
   SelectField,
   TextInputField,
-  MultiSelectField,
   CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
@@ -124,6 +123,7 @@ export const UserAdd = (props: UserProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [current_user_facilities, setFacilities] = useState<
     Array<FacilityModel>
   >([]);
@@ -163,12 +163,12 @@ export const UserAdd = (props: UserProps) => {
       !(state.form.username?.length < 2) &&
       /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
     ) {
-      let timeout = setTimeout(() => {
+      const timeout = setTimeout(() => {
         checkUsername(usernameInput);
       }, 500);
       return () => clearTimeout(timeout);
     }
-  }, [usernameInput]);
+  }, [usernameInput, state.form.username]);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -387,13 +387,6 @@ export const UserAdd = (props: UserProps) => {
     form.facilities = selected
       ? (selected as FacilityModel[]).map((i) => i.id)
       : [];
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleMultiSelect = (event: any) => {
-    const { name, value } = event.target;
-    const form = { ...state.form };
-    form[name] = value;
     dispatch({ type: "set_form", form });
   };
 
@@ -913,7 +906,7 @@ export const UserAdd = (props: UserProps) => {
                       value={state.form.local_body}
                       options={localBody}
                       optionValue="name"
-                      onChange={(e) => handleChange}
+                      onChange={(e) => handleChange(e)}
                       errors={state.errors.local_body}
                     />
                   )}
