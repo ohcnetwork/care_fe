@@ -127,9 +127,9 @@ export const InvestigationTable = ({
 
   return (
     <Box padding="1rem" margin="1rem 0">
-      <div className="flex items-center justify-between mb">
+      <div className="flex flex-col items-center justify-between mb">
         {title && <div className="font-bold text-xl">{title}</div>}
-        <div>
+        <div className="py-5 flex flex-auto">
           <Button
             color="primary"
             variant="outlined"
@@ -172,12 +172,8 @@ export const InvestigationTable = ({
         onChange={(e) => setSearchFilter(e.target.value)}
       />
       <br />
-      <TableContainer
-        component={Paper}
-        className="overflow-hidden"
-        id="section-to-print"
-      >
-        <Table aria-label="simple table overflow-hidden" size="small">
+      <TableContainer component={Paper} id="section-to-print">
+        <Table aria-label="simple table" size="small">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
