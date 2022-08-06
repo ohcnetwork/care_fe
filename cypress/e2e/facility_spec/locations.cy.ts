@@ -8,6 +8,7 @@ describe("Location Management Section", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.wait(1000);
     cy.get("a").contains("Facility").click({ force: true });
     cy.contains("Location Management").click();
   });
