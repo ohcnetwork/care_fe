@@ -189,7 +189,7 @@ export default function UserFilter(props: any) {
                 name="alt_phone_number"
                 value={filterState.alt_phone_number}
                 onChange={handleChange}
-                label="Alt Phone Number"
+                label="WhatsApp Phone Number"
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
               />
             </div>
