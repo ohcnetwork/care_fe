@@ -279,7 +279,7 @@ export default function ShiftDetails(props: { id: string }) {
               {moment(patientData?.estimated_contact_date).format("LL")}
             </div>
           )}
-          <div className="md:col-span-2">
+          <div>
             <span className="font-semibold leading-relaxed">
               Has SARI (Severe Acute Respiratory illness)?:{" "}
             </span>
@@ -289,7 +289,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="badge badge-pill badge-secondary">No</span>
             )}
           </div>
-          <div className="md:col-span-2">
+          <div>
             <span className="font-semibold leading-relaxed">
               Domestic/international Travel (within last 28 days):{" "}
             </span>
