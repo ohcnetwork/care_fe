@@ -295,14 +295,16 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     Cancel
                   </Button>
                 </Grid>
-                <Grid item className="flex flex-row w-full sm:w-auto gap-4 flex-wrap">
+                <Grid
+                  item
+                  className="flex flex-row w-full sm:w-auto gap-4 flex-wrap"
+                >
                   {!id && !isLastOptionType && (
                     <Button
                       id="doctor-save-and-exit"
                       color="primary"
                       className="w-full sm:w-auto"
                       variant="contained"
-                      className="w-full sm:w-auto"
                       type="submit"
                       startIcon={
                         <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
