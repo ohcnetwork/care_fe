@@ -50,6 +50,10 @@ export const deleteFacility = (id: number) => {
 export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
+
+export const partialUpdateUser = (username: string, data: any) => {
+  return fireRequest("partialUpdateUser", [], data, { username });
+};
 export const getUserListFacility = (pathParam: object) => {
   return fireRequest("userListFacility", [], {}, pathParam);
 };
@@ -79,8 +83,13 @@ export const getAnyFacility = (id: number | string, key?: string) => {
   return fireRequest("getAnyFacility", [], {}, { id: id }, key);
 };
 
-export const getFacilityUsers = (id: string) => {
-  return fireRequest("getFacilityUsers", [], {}, { facility_id: id });
+export const getFacilityUsers = (id: string, params?: object) => {
+  return fireRequest(
+    "getFacilityUsers",
+    [],
+    { ...params },
+    { facility_id: id }
+  );
 };
 export const getOnlineDoctors = () => {
   return fireRequest("getOnlineDoctors", [], {}, {});
@@ -538,14 +547,14 @@ export const dischargePatient = (params: object, pathParams: object) => {
 };
 
 //Profile
-export const getUserDetails = (username: string, suppress?: true) => {
+export const getUserDetails = (username: string, suppress?: boolean) => {
   return fireRequest(
     "getUserDetails",
     [],
     {},
     { username: username },
     undefined,
-    suppress
+    suppress ?? true
   );
 };
 export const updateUserDetails = (username: string, data: object) => {
