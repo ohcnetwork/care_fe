@@ -40,7 +40,6 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
-import { Cancel, CheckCircle } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -352,6 +351,14 @@ export const UserAdd = (props: UserProps) => {
     if (name === "state") {
       form["district"] = "";
     }
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleChangeHomeFacility = (e: any) => {
+    const { value, name } = e.target;
+    const newValue = value === "" ? null : value;
+    const form = { ...state.form };
+    form[name] = newValue;
     dispatch({ type: "set_form", form });
   };
 
@@ -668,6 +675,7 @@ export const UserAdd = (props: UserProps) => {
                   name="facilities"
                   selected={selectedFacility}
                   setSelected={setFacility}
+                  district={currentUser.data.district}
                   errors={state.errors.facilities}
                   showAll={false}
                 />
@@ -681,11 +689,11 @@ export const UserAdd = (props: UserProps) => {
                   margin="dense"
                   value={state.form.home_facility}
                   options={[
-                    { id: null, name: "Select" },
+                    { id: "", name: "Select" },
                     ...(selectedFacility ?? []),
                   ]}
                   optionValue="name"
-                  onChange={handleChange}
+                  onChange={handleChangeHomeFacility}
                   errors={state.errors.home_facility}
                 />
               </div>
@@ -905,7 +913,7 @@ export const UserAdd = (props: UserProps) => {
                       value={state.form.local_body}
                       options={localBody}
                       optionValue="name"
-                      onChange={handleChange}
+                      onChange={(e) => handleChange}
                       errors={state.errors.local_body}
                     />
                   )}
