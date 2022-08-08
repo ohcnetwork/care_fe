@@ -18,44 +18,54 @@ export type WaveformType = {
 
 export default function Waveform(props: { wave: WaveformType }) {
   const wave = props.wave;
-  const data = wave.data.split(" ").map(Number);
-  const [viewableData, setViewableData] = useState<number[]>([]);
-  const [xData, setXData] = useState<number[]>([]);
+  const data = wave.data.split(" ").map(Number); // y-axis data
+  const [viewableData, setViewableData] = useState<number[]>([]); // viewable data in the stream
+  const [queueData, setQueueData] = useState<number[]>([]); // overall data in queue
+  const [xData, setXData] = useState<number[]>([]); // x-axis data (just numbers from 1 to yData length)
 
-  const viewable = 800;
-  const seconds = 5000;
-  const length = data.length;
-  const tpf = seconds / length;
-
-  const [pointer, setPointer] = useState(viewable);
-
-  useEffect(() => {
-    let timeout = setTimeout(() => {
-      if (!data[pointer + 1]) {
-        return;
-      }
-      let newArr = viewableData.slice(1);
-      newArr.push(data[pointer + 1]);
-      setViewableData(newArr);
-      setPointer(pointer + 1);
-    }, tpf);
-
-    return () => clearTimeout(timeout);
-  }, [viewableData]);
+  const viewable = 800; // points visible at once
+  const seconds = 5000; // number of seconds to stream a data layer
+  const length = data.length; // length of the data layer
+  const tpf = seconds / length; // time per frame
 
   useEffect(() => {
+
+    // run this everytime we get new data
+
     const wave = props.wave;
     const data = wave.data.split(" ").map(Number);
 
-    setViewableData(data.slice(0, viewable));
-    setPointer(viewable);
+    setQueueData(queueData.concat(data)); // add new data to the queue
 
+    // set up the x-axis data according to the viewable data length
     let newX = [];
     for (let i = 0; i < viewable; i++) {
       newX[i] = i + 1;
     }
     setXData(newX);
+
   }, [props]);
+
+  useEffect(() => {
+    /*
+    *   Set the viewable data to the first viewable points of the queue data
+    */
+
+    setViewableData(queueData.slice(0, viewable));
+  }, [queueData]);
+
+  useEffect(() => {
+
+    /*
+    *   This is the main loop that updates the viewable data.
+    */
+
+    let timeout = setTimeout(() => {
+      setQueueData(queueData.slice(1)); // remove the first point from the queue
+    }, tpf); // do this every tpf seconds
+
+    return () => clearTimeout(timeout);
+  }, [viewableData]);
 
   return (
     <div className="w-full">
