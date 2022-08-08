@@ -362,13 +362,33 @@ export const HospitalList = (props: any) => {
                       <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
-                      {facility.features?.map((feature : number, i : number)=>(
-                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5" title={FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}>
-                          <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/> &nbsp;{FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                      {facility.features?.map((feature: number, i: number) => (
+                        <div
+                          key={i}
+                          className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                          title={
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
+                        >
+                          <i
+                            className={`fas fa-${
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0].icon
+                            }`}
+                          />{" "}
+                          &nbsp;
+                          {
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
                         </div>
                       ))}
                     </div>
-                    
+
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
                         <div className="font-semibold">
@@ -530,7 +550,7 @@ export const HospitalList = (props: any) => {
         />
 
         <div className="flex md:justify-end w-full md:mt-4">
-          <div className="w-full">
+          <div className="w-full md:w-auto">
             <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
@@ -648,8 +668,8 @@ export const HospitalList = (props: any) => {
             </dl>
           </div>
         </div>
-        <div className="flex my-4 gap-2 flex-wrap justify-between flex-grow">
-          <div className="w-full">
+        <div className="flex my-4 gap-2 flex-col md:flex-row justify-between flex-grow">
+          <div className="w-full md:w-72">
             <InputSearchBox
               value={qParams.search}
               search={onSearchSuspects}
@@ -658,9 +678,9 @@ export const HospitalList = (props: any) => {
             />
           </div>
 
-          <div className="flex items-start mb-2 w-full">
+          <div className="flex items-start mb-2 w-full md:w-auto">
             <button
-              className="btn btn-primary-ghost w-full"
+              className="btn btn-primary-ghost w-full md:w-auto"
               onClick={() => setShowFilters(true)}
             >
               <svg
