@@ -1419,6 +1419,27 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </AccordionSummary>
                       <AccordionDetails>
                         <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2 w-full">
+                          <div data-testid="blood-group" id="blood_group-div">
+                            <InputLabel
+                              id="blood_group-label"
+                              htmlFor="blood_group"
+                              required
+                            >
+                              Blood Group
+                            </InputLabel>
+                            <SelectField
+                              labelId="blood_group"
+                              name="blood_group"
+                              variant="outlined"
+                              margin="dense"
+                              showEmpty={true}
+                              optionArray={true}
+                              value={state.form.blood_group}
+                              options={bloodGroups}
+                              onChange={handleChange}
+                              errors={state.errors.blood_group}
+                            />
+                          </div>
                           <div id="test_type-div">
                             <InputLabel
                               id="test_type-label"
@@ -1986,28 +2007,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             value={state.form.allergies}
                             onChange={handleChange}
                             errors={state.errors.allergies}
-                          />
-                        </div>
-
-                        <div data-testid="blood-group" id="blood_group-div">
-                          <InputLabel
-                            id="blood_group-label"
-                            htmlFor="blood_group"
-                            required
-                          >
-                            Blood Group
-                          </InputLabel>
-                          <SelectField
-                            labelId="blood_group"
-                            name="blood_group"
-                            variant="outlined"
-                            margin="dense"
-                            showEmpty={true}
-                            optionArray={true}
-                            value={state.form.blood_group}
-                            options={bloodGroups}
-                            onChange={handleChange}
-                            errors={state.errors.blood_group}
                           />
                         </div>
                       </div>
