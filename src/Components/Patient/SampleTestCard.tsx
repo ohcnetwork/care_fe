@@ -164,7 +164,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </button>
           <button
             onClick={(e) => showUpdateStatus(itemData)}
-            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full my-1"
           >
             UPDATE SAMPLE TEST STATUS
           </button>
