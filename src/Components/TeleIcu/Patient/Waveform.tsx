@@ -18,54 +18,24 @@ export type WaveformType = {
 
 export default function Waveform(props: { wave: WaveformType }) {
   const wave = props.wave;
-  const data = wave.data.split(" ").map(Number); // y-axis data
-  const [viewableData, setViewableData] = useState<number[]>([]); // viewable data in the stream
-  const [queueData, setQueueData] = useState<number[]>([]); // overall data in queue
-  const [xData, setXData] = useState<number[]>([]); // x-axis data (just numbers from 1 to yData length)
+  const data = wave.data.split(" ").map(Number);
+  const [queueData, setQueueData] = useState<number[]>([]);
+  const [xData, setXData] = useState<number[]>([]);
 
-  const viewable = 800; // points visible at once
-  const seconds = 5000; // number of seconds to stream a data layer
-  const length = data.length; // length of the data layer
-  const tpf = seconds / length; // time per frame
+  const viewable = 800;
+  const tpf = 5000 / data.length;
 
   useEffect(() => {
-
-    // run this everytime we get new data
-
-    const wave = props.wave;
-    const data = wave.data.split(" ").map(Number);
-
-    setQueueData(queueData.concat(data)); // add new data to the queue
-
-    // set up the x-axis data according to the viewable data length
-    let newX = [];
-    for (let i = 0; i < viewable; i++) {
-      newX[i] = i + 1;
-    }
-    setXData(newX);
-
+    setQueueData(queueData.concat(data));
+    setXData(Array.from(Array(viewable).keys()));
   }, [props]);
 
   useEffect(() => {
-    /*
-    *   Set the viewable data to the first viewable points of the queue data
-    */
-
-    setViewableData(queueData.slice(0, viewable));
-  }, [queueData]);
-
-  useEffect(() => {
-
-    /*
-    *   This is the main loop that updates the viewable data.
-    */
-
     let timeout = setTimeout(() => {
-      setQueueData(queueData.slice(1)); // remove the first point from the queue
-    }, tpf); // do this every tpf seconds
-
+      setQueueData(queueData.slice(1));
+    }, tpf);
     return () => clearTimeout(timeout);
-  }, [viewableData]);
+  }, [queueData]);
 
   return (
     <div className="w-full">
@@ -73,7 +43,7 @@ export default function Waveform(props: { wave: WaveformType }) {
         title="ECG"
         name="ECG"
         xData={xData}
-        yData={viewableData}
+        yData={queueData.slice(0, viewable)}
         low={wave["data-low-limit"]}
         high={wave["data-high-limit"]}
         classes="h-full"
