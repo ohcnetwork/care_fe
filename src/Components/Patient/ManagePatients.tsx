@@ -463,7 +463,8 @@ export const PatientManager = (props: any) => {
           key={`usr_${patient.id}`}
           onClick={() => navigate(patientUrl)}
           className={
-            "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 "
+            "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 " +
+            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
           }
         >
           <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
@@ -542,6 +543,9 @@ export const PatientManager = (props: any) => {
                 <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
               ) : (
                 <Badge color="primary" icon="lock" text="Transfer Blocked" />
+              )}
+              {patient.disease_status === "POSITIVE" && (
+                <Badge color="red" icon="radiation" text="COVID Positive" />
               )}
               {patient.gender === 2 &&
                 patient.is_antenatal &&
@@ -875,6 +879,11 @@ export const PatientManager = (props: any) => {
           {badge("SRF ID", qParams.srf_id, "srf_id")}
           {badge("LSG Body", localbodyName, "lsgBody")}
           {badge(
+            "Declared Status",
+            qParams.is_declared_positive,
+            "is_declared_positive"
+          )}
+          {badge(
             "Result before",
             qParams.date_of_result_before,
             "date_of_result_before"
@@ -884,6 +893,19 @@ export const PatientManager = (props: any) => {
             qParams.date_of_result_after,
             "date_of_result_after"
           )}
+
+          {badge(
+            "Declared positive before",
+            qParams.date_declared_positive_before,
+            "date_declared_positive_before"
+          )}
+
+          {badge(
+            "Declared positive after",
+            qParams.date_declared_positive_after,
+            "date_declared_positive_after"
+          )}
+
           {badge(
             "Onset of symptoms before",
             qParams.last_consultation_symptoms_onset_date_before,
