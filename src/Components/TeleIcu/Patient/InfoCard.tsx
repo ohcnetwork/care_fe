@@ -17,7 +17,11 @@ export default function TeleICUPatientInfoCard(props: {
 
   return (
     <section className="flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
-      <Modal className="top-0 left-0 flex items-center justify-center" open={open} onClose={() => setOpen(false)}>
+      <Modal
+        className="top-0 left-0 flex items-center justify-center"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
         <div className="bg-white h-screen w-screen md:h-auto md:w-[800px] md:max-h-[90vh] overflow-auto p-4 mx-auto md:rounded-xl">
           <CloseRoundedIcon
             onClick={() => setOpen(false)}
@@ -123,7 +127,7 @@ export default function TeleICUPatientInfoCard(props: {
           </div>
         </div>
       </div>
-      <div className="w-full lg:w-fit flex gap-2 flex-col px-4 py-1 lg:p-6">
+      <div className="w-full lg:w-fit grid gap-2 px-4 py-1 lg:p-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-1">
         {[
           [
             `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`,
