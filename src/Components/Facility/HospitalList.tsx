@@ -20,6 +20,7 @@ import {
   getDistrict,
   getLocalBody,
   sendNotificationMessages,
+  updateFacilityImage,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
@@ -82,9 +83,14 @@ export const HospitalList = (props: any) => {
   const { currentUser } = rootState;
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
-  const [modalFor, setModalFor] = useState(undefined);
+  const [modalFor, setModalFor] = useState<any>(undefined);
+  const [imageFileName, setImageFileName] =
+    useState<string>("No image selected");
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<File | undefined>(
+    undefined
+  );
   const { t } = useTranslation();
   const limit = 14;
 
@@ -326,6 +332,30 @@ export const HospitalList = (props: any) => {
     }
   };
 
+  const handleImageUpload = async (e: string) => {
+    console.log("Just printing some stuff");
+    console.log("From handleImageUpload():");
+    console.log("Image name:");
+    console.log(e);
+    console.log("Image to be uploaded:");
+    console.log(uploadedImage);
+
+    const API_URL = "";
+    const requestImageUpload = updateFacilityImage(
+      modalFor.substring(0, modalFor.lastIndexOf("-image")),
+      { file: uploadedImage }
+    );
+    // send request to backend API here.
+  };
+
+  const handleImageSelection = (e: any) => {
+    const imageFile = e.target.files[0];
+    const imageName: string = imageFile.name;
+    console.log(imageFile);
+    setImageFileName(`Selected image: ${imageName}`);
+    setUploadedImage(imageFile);
+  };
+
   let facilityList: any[] = [];
   if (data && data.length) {
     facilityList = data.map((facility: any) => {
@@ -333,7 +363,12 @@ export const HospitalList = (props: any) => {
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
-              <div className="md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center">
+              <div
+                className="md:flex hidden w-1/4 self-stretch shrink-0 cursor-pointer bg-gray-300 hover:bg-gray-400 items-center justify-center"
+                onClick={(e: React.MouseEvent<HTMLElement>) => {
+                  setModalFor(`${facility.id}-image`);
+                }}
+              >
                 {facility.cover_image_url ? (
                   <img
                     src={facility.cover_image_url}
@@ -362,13 +397,33 @@ export const HospitalList = (props: any) => {
                       <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
-                      {facility.features?.map((feature : number, i : number)=>(
-                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5" title={FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}>
-                          <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/> &nbsp;{FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                      {facility.features?.map((feature: number, i: number) => (
+                        <div
+                          key={i}
+                          className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                          title={
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
+                        >
+                          <i
+                            className={`fas fa-${
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0].icon
+                            }`}
+                          />{" "}
+                          &nbsp;
+                          {
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
                         </div>
                       ))}
                     </div>
-                    
+
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
                         <div className="font-semibold">
@@ -468,6 +523,95 @@ export const HospitalList = (props: any) => {
                           </Link>
                         </div>
                       </div>
+                      <Modal
+                        open={modalFor === `${facility.id}-image`}
+                        onClose={(_) => setModalFor(undefined)}
+                        aria-labelledby="Modify This Facility Image"
+                        aria-describedby="Choose an image to modify this facility's image"
+                        className=""
+                      >
+                        <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+                          <form
+                            encType="multipart/form-data"
+                            onSubmit={(event: any) => {
+                              event.preventDefault();
+                              handleImageUpload(modalFor);
+                            }}
+                            className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
+                          >
+                            <div className="mb-4">
+                              <h1 className="text-2xl">
+                                Upload facility image: {facility.name}
+                              </h1>
+                            </div>
+                            {/* <div>
+                            <TextField
+                              id="NotifyModalMessageInput"
+                              rows={6}
+                              multiline
+                              required
+                              className="w-full border p-2 max-h-64"
+                              onChange={(e) => setNotifyMessage(e.target.value)}
+                              placeholder="Type your message..."
+                              variant="outlined"
+                            />
+                          </div> */}
+                            <div className="my-3 border-2 bg-gray-300">
+                              {facility.cover_image_url ? (
+                                <img src={facility.cover_image_url}></img>
+                              ) : (
+                                <i className="fas fa-hospital text-6xl block text-gray-600 py-3 my-3"></i>
+                              )}
+                            </div>
+                            <div>
+                              <button
+                                className="mx-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                                onClick={(_) =>
+                                  setModalFor(`${facility.id}-image`)
+                                }
+                              >
+                                <label
+                                  htmlFor="facility_image_input"
+                                  className="cursor-pointer"
+                                >
+                                  <i className="fa fa-camera mr-0 md:mr-1"></i>{" "}
+                                  {/* <span className="md:block hidden">Notify</span>{" "} */}
+                                  Select an image
+                                </label>
+                                <input
+                                  id="facility_image_input"
+                                  className="opacity-0"
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e: React.ChangeEvent) =>
+                                    handleImageSelection(e)
+                                  }
+                                  hidden
+                                />
+                              </button>
+                              <div className="py-3">{imageFileName}</div>
+                            </div>
+                            <div className="flex flex-row justify-end">
+                              <button
+                                type="button"
+                                className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
+                                onClick={(_) => {
+                                  setModalFor(undefined);
+                                  setImageFileName("");
+                                }}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="submit"
+                                className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
+                              >
+                                Upload Image
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </Modal>
                     </div>
                   </div>
                 </div>
@@ -507,7 +651,7 @@ export const HospitalList = (props: any) => {
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+          className="p-16 mt-4 bg-white shadow rounded-md border border-gray-500 whitespace-nowrap text-sm font-semibold cursor-pointer text-center"
           onClick={() => navigate("/facility/create")}
         >
           <i className="fas fa-plus text-3xl"></i>
