@@ -594,66 +594,48 @@ export const FileUpload = (props: FileUploadProps) => {
       >
         {fileUrl && fileUrl.length > 0 ? (
           <>
-            <div className="flex absolute w-3/5 right-2">
+            <div className="flex absolute inset-x-4 top-4 justify-between">
+              <div className="flex gap-3">
               {file_state.isImage && (
-                <div className="w-2/6 flex">
-                  <div className="mr-4">
-                    <Button
-                      color="default"
-                      variant="contained"
-                      style={{ marginLeft: "auto" }}
-                      startIcon={<ZoomIn />}
-                      onClick={() => {
-                        handleZoomIn();
-                      }}
-                      disabled={file_state.isZoomInDisabled}
-                    >
-                      Zoom in
-                    </Button>
-                  </div>
-                  <div>
-                    <Button
-                      color="default"
-                      variant="contained"
-                      style={{ marginLeft: "4px" }}
-                      startIcon={<ZoomOut />}
-                      onClick={() => {
-                        handleZoomOut();
-                      }}
-                      disabled={file_state.isZoomOutDisabled}
-                    >
-                      Zoom Out
-                    </Button>
-                  </div>
-                </div>
+                <>
+                  {
+                    [
+                      ["Zoom In", "magnifying-glass-plus", handleZoomIn],
+                      ["Zoom Out", "magnifying-glass-minus", handleZoomOut]
+                    ].map((button, index) => 
+                      <button 
+                        key={index}
+                        onClick={button[2] as () => void}
+                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                      >
+                        <i 
+                          className={`fas fa-${button[1]} mr-2`}
+                        />
+                        {button[0] as String}
+                      </button>
+                    )
+                  }
+                </>
               )}
-              <div className="flex absolute right-2">
+              </div>
+              <div className="flex gap-3">
                 {downloadURL && downloadURL.length > 0 && (
-                  <div>
                     <a
                       href={downloadURL}
                       download
-                      className="text-white p-4 my-2 rounded m-2 bg-primary-500"
+                      className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
                     >
-                      <GetApp>load</GetApp>
+                      <i className="fas fa-download mr-2" />
                       Download
                     </a>
-                  </div>
                 )}
-
-                <div>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    style={{ marginLeft: "auto" }}
-                    startIcon={<Close />}
-                    onClick={() => {
-                      handleClose();
-                    }}
-                  >
-                    Close
-                  </Button>
-                </div>
+                <button
+                  onClick={handleClose}
+                  className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                >
+                  <i className="fas fa-times mr-2" />
+                  Close
+                </button>                  
               </div>
             </div>
             {file_state.isImage ? (
