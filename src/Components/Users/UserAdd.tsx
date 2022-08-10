@@ -40,7 +40,6 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
-import { Cancel, CheckCircle } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -355,6 +354,14 @@ export const UserAdd = (props: UserProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleChangeHomeFacility = (e: any) => {
+    const { value, name } = e.target;
+    const newValue = value === "" ? null : value;
+    const form = { ...state.form };
+    form[name] = newValue;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleDateChange = (date: any, field: string) => {
     if (moment(date).isValid()) {
       const form = { ...state.form };
@@ -663,25 +670,15 @@ export const UserAdd = (props: UserProps) => {
 
               <div className="md:col-span-2">
                 <InputLabel>Facilities</InputLabel>
-                {userType === "Staff" || userType === "StaffReadOnly" ? (
-                  <MultiSelectField
-                    name="facilities"
-                    variant="outlined"
-                    value={state.form.facilities}
-                    options={current_user_facilities}
-                    onChange={handleMultiSelect}
-                    optionValue="name"
-                    errors={state.errors.facilities}
-                  />
-                ) : (
-                  <FacilitySelect
-                    multiple={true}
-                    name="facilities"
-                    selected={selectedFacility}
-                    setSelected={setFacility}
-                    errors={state.errors.facilities}
-                  />
-                )}
+                <FacilitySelect
+                  multiple={true}
+                  name="facilities"
+                  selected={selectedFacility}
+                  setSelected={setFacility}
+                  district={currentUser.data.district}
+                  errors={state.errors.facilities}
+                  showAll={false}
+                />
               </div>
 
               <div className="">
@@ -692,11 +689,11 @@ export const UserAdd = (props: UserProps) => {
                   margin="dense"
                   value={state.form.home_facility}
                   options={[
-                    { id: null, name: "Select" },
+                    { id: "", name: "Select" },
                     ...(selectedFacility ?? []),
                   ]}
                   optionValue="name"
-                  onChange={handleChange}
+                  onChange={handleChangeHomeFacility}
                   errors={state.errors.home_facility}
                 />
               </div>
@@ -916,7 +913,7 @@ export const UserAdd = (props: UserProps) => {
                       value={state.form.local_body}
                       options={localBody}
                       optionValue="name"
-                      onChange={handleChange}
+                      onChange={(e) => handleChange}
                       errors={state.errors.local_body}
                     />
                   )}
