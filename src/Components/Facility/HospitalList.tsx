@@ -362,13 +362,33 @@ export const HospitalList = (props: any) => {
                       <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
-                      {facility.features?.map((feature : number, i : number)=>(
-                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5" title={FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}>
-                          <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/> &nbsp;{FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                      {facility.features?.map((feature: number, i: number) => (
+                        <div
+                          key={i}
+                          className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                          title={
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
+                        >
+                          <i
+                            className={`fas fa-${
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0].icon
+                            }`}
+                          />{" "}
+                          &nbsp;
+                          {
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
                         </div>
                       ))}
                     </div>
-                    
+
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
                         <div className="font-semibold">
@@ -411,7 +431,7 @@ export const HospitalList = (props: any) => {
                                   event.preventDefault();
                                   handleNotifySubmit(modalFor);
                                 }}
-                                className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
+                                className="bg-white rounded shadow p-5 m-4 max-h-full text-center flex flex-col max-w-lg w-fit min-w-max-content"
                               >
                                 <div className="mb-4">
                                   <h1 className="text-2xl">
