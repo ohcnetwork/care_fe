@@ -48,7 +48,6 @@ export default function TeleICUPatientVitalsCard({
           bed: patient.last_consultation?.current_bed?.bed_object?.id,
         })
       );
-      //console.log("Found " + bedAssets?.data?.results?.length + "bedAssets:");
       bedAssets = {
         ...bedAssets,
         data: {
@@ -63,7 +62,6 @@ export default function TeleICUPatientVitalsCard({
       if (bedAssets.data.results.length > 0) {
         setHl7Asset(bedAssets.data.results[0].asset_object);
       }
-      //console.log("Found " + bedAssets.data?.results?.length + "bedAssets:");
     }
   };
 
@@ -161,7 +159,7 @@ export default function TeleICUPatientVitalsCard({
                 <div className="text-xs md:text-base">
                   <i
                     className={`fas fa-circle text-xs mr-2 ${
-                      liveReading ? "text-green-600" : "text-gray-600"
+                      liveReading ? "text-green-600" : "text-gray-400"
                     }`}
                   />
                   {vital[0]}
