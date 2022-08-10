@@ -77,7 +77,10 @@ export default function FacilityUsers(props: any) {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getFacilityUsers(facilityId));
+      const res = await dispatch(
+        getFacilityUsers(facilityId, { offset, limit })
+      );
+
       if (!status.aborted) {
         if (res && res.data) {
           setUsers(res.data.results);
@@ -86,7 +89,7 @@ export default function FacilityUsers(props: any) {
         setIsLoading(false);
       }
     },
-    [dispatch, facilityId]
+    [dispatch, facilityId, offset, limit]
   );
 
   useAbortableEffect(
@@ -150,9 +153,13 @@ export default function FacilityUsers(props: any) {
   const handleSubmit = async () => {
     const username = userData.username;
     const res = await dispatch(deleteUser(username));
-    if (res.status >= 200) {
+    if (res?.status === 204) {
       Notification.Success({
         msg: "User deleted successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while deleting User: " + (res?.data?.detail || ""),
       });
     }
 
