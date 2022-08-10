@@ -6,8 +6,7 @@ import {
   Button,
   Tooltip,
 } from "@material-ui/core";
-import { SelectField, TextInputField } from "../../Common/HelperInputFields";
-import { CAMERA_TYPE } from "../../../Common/constants";
+import { TextInputField } from "../../Common/HelperInputFields";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { AssetData } from "../AssetTypes";
 import { useDispatch } from "react-redux";
@@ -19,7 +18,6 @@ import { getCameraConfig } from "../../../Utils/transformUtils";
 import CameraConfigure from "../configure/CameraConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
-import Camerasvg from "../AssetIcons/Camerasvg";
 
 interface ONVIFCameraProps {
   assetId: string;

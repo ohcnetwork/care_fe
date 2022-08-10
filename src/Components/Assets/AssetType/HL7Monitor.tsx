@@ -9,7 +9,6 @@ import * as Notification from "../../../Utils/Notifications.js";
 import MonitorConfigure from "../configure/MonitorConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
-import Monitorsvg from "../AssetIcons/Monitorsvg";
 
 interface HL7MonitorProps {
   assetId: string;
