@@ -26,8 +26,6 @@ const update_Link = (
   dispatch(
     partialUpdateAssetBed(
       {
-        ...assetBed,
-        bed_object: { ...bed },
         asset: assetId,
         bed: bed.id,
       },
