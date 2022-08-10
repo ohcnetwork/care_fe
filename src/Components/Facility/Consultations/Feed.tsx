@@ -24,6 +24,7 @@ import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
 import { AxiosError } from "axios";
 import ReactPlayer from "react-player";
+import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 
 interface IFeedProps {
   facilityId: string;
@@ -74,6 +75,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     }, 5000);
     return () => clearTimeout(timeout);
   }, [cameraState]);
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
   const fetchData = useCallback(
@@ -154,23 +157,25 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     StreamStatus.Offline
   );
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
   const url = !isIOS
     ? `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
-    : `https://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hlsll/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
+    : `https://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const {
     startStream,
     // setVideoEl,
-  } = useMSEMediaPlayer({
-    config: {
-      middlewareHostname,
-      ...cameraAsset,
-    },
-    url,
-    videoEl: liveFeedPlayerRef.current,
-  });
+  } = isIOS
+    ? // eslint-disable-next-line react-hooks/rules-of-hooks
+      useHLSPLayer()
+    : // eslint-disable-next-line react-hooks/rules-of-hooks
+      useMSEMediaPlayer({
+        config: {
+          middlewareHostname,
+          ...cameraAsset,
+        },
+        url,
+        videoEl: liveFeedPlayerRef.current,
+      });
 
   const {
     absoluteMove,
@@ -404,7 +409,30 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         ref={videoWrapper}
       >
         {isIOS ? (
-          <ReactPlayer url={url} controls={false} />
+          <ReactPlayer
+            url={url}
+            controls={false}
+            playsinline={true}
+            playing={true}
+            muted={true}
+            width="100%"
+            height="100%"
+            fileConfig={{
+              forceHLS: true,
+            }}
+            onBuffer={() => {
+              setStreamStatus(StreamStatus.Loading);
+            }}
+            onError={(e: any, _: any, hlsInstance: any) => {
+              if (e === "hlsError") {
+                const recovered = hlsInstance.recoverMediaError();
+                console.log(recovered);
+              }
+            }}
+            onEnded={() => {
+              setStreamStatus(StreamStatus.Stop);
+            }}
+          />
         ) : (
           <video
             id="mse-video"
@@ -457,10 +485,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           )}
         </div>
         <div className="absolute top-8 right-8 z-20 flex flex-col gap-4">
-          {[10, 9, 7, 5, 6].map((button) => {
+          {[10, 9, 7, 5, 6].map((button, index) => {
             const option = cameraPTZ[button];
             return (
               <FeedButton
+                key={index}
                 camProp={option}
                 styleType="CHHOTUBUTTON"
                 clickAction={() => cameraPTZ[button].callback()}
@@ -498,6 +527,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               const button = c as any;
               out = (
                 <FeedButton
+                  key={i}
                   camProp={button}
                   styleType="BUTTON"
                   clickAction={() => {
