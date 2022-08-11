@@ -129,16 +129,16 @@ const Pagination = (props: PaginationProps) => {
         <button
           disabled={firstBtnDisable}
           onClick={() => handleChangePage("<")}
-          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
+          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 cursor-pointer"
         >
-          Previous
+          {"<"}
         </button>
         <button
           disabled={lastBtnDisable}
           onClick={() => handleChangePage(">")}
-          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
+          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 cursor-pointer"
         >
-          Next
+          {">"}
         </button>
       </div>
       <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
