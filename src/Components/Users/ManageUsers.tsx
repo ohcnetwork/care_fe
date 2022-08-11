@@ -661,7 +661,7 @@ export default function ManageUsers() {
           : null}
         {qParams.alt_phone_number?.trim()
           ? badge(
-              "Alternate Phone Number",
+              "WhatsApp Phone Number",
               qParams.alt_phone_number,
               "alt_phone_number"
             )
