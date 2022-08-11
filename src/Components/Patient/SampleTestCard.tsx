@@ -89,7 +89,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <span className="text-gray-700">Result: </span>
             {_.startCase(_.camelCase(itemData.result))}
           </div>
-          <div className="">
+          <div>
             <span className="text-gray-700">Sample Type: </span>
             {itemData.sample_type !== "OTHER TYPE"
               ? itemData.sample_type
