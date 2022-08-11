@@ -616,7 +616,7 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <div className="flex mt-2 mx-6 flex-wrap gap-2 items-center">
+      <div className="flex my-2 mx-6 flex-wrap gap-2 items-center">
         {badge("Username", qParams.username, "username")}
         {badge("First Name", qParams.first_name, "first_name")}
         {badge("Last Name", qParams.last_name, "last_name")}
