@@ -96,7 +96,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               : itemData.sample_type_other}
           </div>
           {itemData.fast_track && (
-            <div className="">
+            <div>
               <span className="text-gray-700">Fast-Track:</span>{" "}
               {itemData.fast_track}
             </div>
