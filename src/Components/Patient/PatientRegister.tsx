@@ -1546,7 +1546,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             in={String(state.form.is_vaccinated) === "true"}
                             timeout="auto"
                             unmountOnExit
-                            className="col-span-2"
                           >
                             {
                               <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
@@ -1714,7 +1713,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             }
                             timeout="auto"
                             unmountOnExit
-                            className="col-span-2"
                           >
                             <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                               <div id="estimated_contact_date-div">
@@ -1728,7 +1726,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <DateInputField
                                   fullWidth={true}
                                   id="estimated_contact_date"
-                                  label="Estimate date of contact"
                                   value={state.form.estimated_contact_date}
                                   onChange={(date) =>
                                     handleDateChange(
