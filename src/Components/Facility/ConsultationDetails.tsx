@@ -32,7 +32,7 @@ import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
 import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
 import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
-import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
+import { make as SlideOver } from "../Common/SlideOver.gen";
 import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
@@ -67,6 +67,7 @@ export const ConsultationDetails = (props: any) => {
   const [showDoctors, setShowDoctors] = useState(false);
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
+  const [showNav, setShowNav] = useState(false);
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
@@ -269,7 +270,7 @@ export const ConsultationDetails = (props: any) => {
   }
 
   const tabButtonClasses = (selected: boolean) =>
-    `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
+    `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-300 font-bold whitespace-nowrap py-3 px-5 my-2 ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
@@ -561,24 +562,34 @@ export const ConsultationDetails = (props: any) => {
         </div>
 
         <div className="border-b-2 border-gray-200 mt-4 w-full">
-          <div className="sm:flex sm:items-baseline overflow-x-auto">
+          <div className="sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
-              <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
-                {CONSULTATION_TABS.map((p: OptionsType) => {
-                  if (p.text === "FEED") {
-                    if (!consultationData?.current_bed?.bed_object?.id)
-                      return null;
-                  }
-                  return (
-                    <Link
-                      key={p.text}
-                      className={tabButtonClasses(tab === p.text)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
-                    >
-                      {p.desc}
-                    </Link>
-                  );
-                })}
+              <nav className="pl-2 flex space-x-6 items-center pb-2">
+                <span className={tabButtonClasses(true)}>{tab}</span>
+                <i
+                  className="fa-solid fa-bars text-lg cursor-pointer"
+                  onClick={() => setShowNav(true)}
+                ></i>
+                <SlideOver show={showNav} setShow={setShowNav}>
+                  <div className="flex flex-col px-3 py-2">
+                    {CONSULTATION_TABS.map((p: OptionsType) => {
+                      if (p.text === "FEED") {
+                        if (!consultationData?.current_bed?.bed_object?.id)
+                          return null;
+                      }
+                      return (
+                        <Link
+                          key={p.text}
+                          className={tabButtonClasses(tab === p.text)}
+                          href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
+                          onClick={() => setShowNav(false)}
+                        >
+                          {p.desc}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </SlideOver>
               </nav>
             </div>
           </div>
