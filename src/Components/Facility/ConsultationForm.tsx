@@ -8,7 +8,6 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import type {t as Prescription__Prescription_t} from '../../../src/Components/Common/prescription-builder/types/Prescription__Prescription.gen';
 
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
@@ -41,6 +40,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   DateInputField,
+  DateTimeFiled,
   ErrorHelperText,
   MultilineInputField,
   MultiSelectField,
@@ -48,19 +48,28 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { make as PrescriptionBuilderOld } from "../Common/PrescriptionBuilder.gen";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 type BooleanStrings = "true" | "false";
+
+type ProcedureType = {
+  frequency?: "15min" | "30min" | "1hr" | "6hrs" | "12hrs" | "24hrs";
+  isRepetitive: BooleanStrings;
+  procedure: string;
+  notes: string;
+  datetime?: any;
+};
 
 type FormDetails = {
   hasSymptom: boolean;
@@ -84,6 +93,7 @@ type FormDetails = {
   examination_details: string;
   history_of_present_illness: string;
   prescribed_medication: string;
+  procedure: ProcedureType;
   consultation_notes: string;
   ip_no: string;
   discharge_advice: PrescriptionType[];
@@ -124,6 +134,13 @@ const initForm: FormDetails = {
   examination_details: "",
   history_of_present_illness: "",
   prescribed_medication: "",
+  procedure: {
+    isRepetitive: "false",
+    procedure: "",
+    notes: "",
+    datetime: null,
+    frequency: "15min",
+  },
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
@@ -198,18 +215,23 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
+    []
+  );
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log("da", dischargeAdvice);
-  },[dischargeAdvice])
+  }, [dischargeAdvice]);
+  useEffect(() => {
+    console.log(state.form.procedure.isRepetitive);
+  }, [state.form.procedure]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
-  const [diseaseStatus, setDiseaseStatus] = useState("");
+  //const [diseaseStatus, setDiseaseStatus] = useState("");
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
@@ -221,7 +243,7 @@ export const ConsultationForm = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
-          setDiseaseStatus(res.data.disease_status);
+          //setDiseaseStatus(res.data.disease_status);
         }
       } else {
         setPatientName("");
@@ -248,6 +270,21 @@ export const ConsultationForm = (props: any) => {
         if (res && res.data) {
           const formData = {
             ...res.data,
+            procedure: res.data.procedure
+              ? {
+                  datetime: new Date(res.data.procedure.datetime),
+                  notes: res.data.procedure.notes,
+                  procedure: res.data.procedure.procedure,
+                  frequency: res.data.procedure.frequency || null,
+                  isRepetitive: res.data.procedure.isRepetitive,
+                }
+              : {
+                  datetime: new Date(),
+                  notes: "",
+                  procedure: "",
+                  frequency: "15min",
+                  isRepetitive: "false",
+                },
             hasSymptom:
               !!res.data.symptoms &&
               !!res.data.symptoms.length &&
@@ -294,6 +331,7 @@ export const ConsultationForm = (props: any) => {
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
+    let invalid = false;
     let error_div = "";
 
     Object.keys(state.form).forEach((field) => {
@@ -384,8 +422,7 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "discharge_advice":
-          let invalid = false;
-          for (let f of dischargeAdvice) {
+          for (const f of dischargeAdvice) {
             if (
               !f.dosage?.replace(/\s/g, "").length ||
               !f.medicine?.replace(/\s/g, "").length
@@ -442,6 +479,7 @@ export const ConsultationForm = (props: any) => {
         diagnosis: state.form.diagnosis,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
+        procedure: state.form.procedure,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -490,6 +528,23 @@ export const ConsultationForm = (props: any) => {
       dispatch({
         type: "set_form",
         form: { ...state.form, [e.target.name]: e.target.value },
+      });
+  };
+  const handleProcedureChange: ChangeEventHandler<HTMLInputElement> = (
+    e: any
+  ) => {
+    console.log(e.target.value);
+    e &&
+      e.target &&
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          procedure: {
+            ...state.form.procedure,
+            [e.target.name]: e.target.value,
+          },
+        },
       });
   };
 
@@ -545,9 +600,19 @@ export const ConsultationForm = (props: any) => {
   //     dispatch({ type: "set_form", form });
   //   }
 
-  const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
+  const handleDateChange = (
+    date: MaterialUiPickersDate,
+    key: string,
+    nested?: string[]
+  ) => {
+    let newValue: any = { [key]: date };
+    if (nested?.length) {
+      nested?.forEach((i: string) => {
+        newValue = { [i]: newValue };
+      });
+    }
     moment(date).isValid() &&
-      dispatch({ type: "set_form", form: { ...state.form, [key]: date } });
+      dispatch({ type: "set_form", form: { ...state.form, ...newValue } });
   };
 
   const handleDoctorSelect = (doctor: UserModel | null) => {
@@ -818,6 +883,101 @@ export const ConsultationForm = (props: any) => {
                 />
                 <br />
                 <ErrorHelperText error={state.errors.discharge_advice} />
+              </div>
+              <div
+                id="procedure-div"
+                className="mt-4 border-b-2 border-dashed border-gray-500 rounded p-2"
+              >
+                <InputLabel>Procedure</InputLabel>
+                <div className="mt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <InputLabel className="text-sm">Repetitive</InputLabel>
+                      <SelectField
+                        name="isRepetitive"
+                        variant="standard"
+                        value={state.form.procedure.isRepetitive}
+                        options={[
+                          { id: "false", text: "No" },
+                          { id: "true", text: "Yes" },
+                        ]}
+                        onChange={handleProcedureChange}
+                        errors={state.errors.procedure.isRepetitive}
+                      />
+                    </div>
+                    <div>
+                      {state.form.procedure.isRepetitive === "true" ? (
+                        <>
+                          <InputLabel className="text-sm">Frequency</InputLabel>
+                          <SelectField
+                            name="frequency"
+                            variant="standard"
+                            value={state.form.procedure.frequency}
+                            options={[
+                              { id: "15mins", text: "15 Mins" },
+                              { id: "30mins", text: "30 Mins" },
+                              { id: "1hr", text: "1 Hour" },
+                              { id: "6hrs", text: "6 Hours" },
+                              { id: "12hrs", text: "12 Hours" },
+                              { id: "24hrs", text: "24 Hours" },
+                            ]}
+                            onChange={handleProcedureChange}
+                            errors={state.errors.procedure.frequency}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <InputLabel className="text-sm">
+                            Date and Time
+                          </InputLabel>
+                          <DateTimeFiled
+                            name="datetime"
+                            margin={"dense"}
+                            onChange={(date) =>
+                              handleDateChange(date, "datetime", ["procedure"])
+                            }
+                            value={state.form.procedure.datetime}
+                            errors=""
+                          />
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <InputLabel className="text-sm">Procedure</InputLabel>
+                    <MultilineInputField
+                      rows={5}
+                      name="procedure"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Procedure..."
+                      InputLabelProps={{
+                        shrink: !!state.form.procedure.procedure,
+                      }}
+                      value={state.form.procedure.procedure}
+                      onChange={handleProcedureChange}
+                      errors={state.errors.procedure.procedure}
+                    />
+                  </div>
+                  <div>
+                    <InputLabel className="text-sm">Notes</InputLabel>
+                    <MultilineInputField
+                      rows={5}
+                      name="notes"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Procedure Notes..."
+                      InputLabelProps={{
+                        shrink: !!state.form.procedure.notes,
+                      }}
+                      value={state.form.procedure.notes}
+                      onChange={handleProcedureChange}
+                      errors={state.errors.procedure.notes}
+                    />
+                  </div>
+                </div>
               </div>
               <div id="ip_no-div" className="mt-4">
                 <InputLabel id="refered-label">IP number*</InputLabel>
