@@ -28,6 +28,7 @@ import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
 import clsx from "clsx";
+import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -65,6 +66,12 @@ export default function ManageUsers() {
     username: string;
     name: string;
   }>({ show: false, username: "", name: "" });
+
+  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
+    show: boolean;
+    userName: string;
+    facility?: FacilityModel;
+  }>({ show: false, userName: "", facility: undefined });
 
   const limit = RESULTS_PER_PAGE_LIMIT;
 
@@ -171,13 +178,6 @@ export default function ManageUsers() {
     setIsFacilityLoading(false);
   };
 
-  const removeFacility = async (username: string, facility: any) => {
-    setIsFacilityLoading(true);
-    await dispatch(deleteUserFacility(username, String(facility.id)));
-    setIsFacilityLoading(false);
-    loadFacilities(username);
-  };
-
   const showLinkFacilityModal = (username: string) => {
     setLinkFacility({
       show: true,
@@ -208,6 +208,14 @@ export default function ManageUsers() {
     );
   };
 
+  const hideUnlinkFacilityModal = () => {
+    setUnlinkFacilityData({
+      show: false,
+      facility: undefined,
+      userName: "",
+    });
+  };
+
   const hideLinkFacilityModal = () => {
     setLinkFacility({
       show: false,
@@ -234,6 +242,19 @@ export default function ManageUsers() {
 
     setUserData({ show: false, username: "", name: "" });
     window.location.reload();
+  };
+
+  const handleUnlinkFacilitySubmit = async () => {
+    setIsFacilityLoading(true);
+    await dispatch(
+      deleteUserFacility(
+        unlinkFacilityData.userName,
+        String(unlinkFacilityData?.facility?.id)
+      )
+    );
+    setIsFacilityLoading(false);
+    loadFacilities(unlinkFacilityData.userName);
+    hideUnlinkFacilityModal();
   };
 
   const handleDelete = (user: any) => {
@@ -296,7 +317,13 @@ export default function ManageUsers() {
                   size="small"
                   color="secondary"
                   disabled={isFacilityLoading}
-                  onClick={() => removeFacility(username, facility)}
+                  onClick={() =>
+                    setUnlinkFacilityData({
+                      show: true,
+                      facility: facility,
+                      userName: username,
+                    })
+                  }
                 >
                   <CloseIcon />
                 </IconButton>
@@ -646,6 +673,14 @@ export default function ManageUsers() {
           name={userData.name}
           handleCancel={handleCancel}
           handleOk={handleSubmit}
+        />
+      )}
+      {unlinkFacilityData.show && (
+        <UnlinkFacilityDialog
+          facilityName={unlinkFacilityData.facility?.name || ""}
+          userName={unlinkFacilityData.userName}
+          handleCancel={hideUnlinkFacilityModal}
+          handleOk={handleUnlinkFacilitySubmit}
         />
       )}
     </div>
