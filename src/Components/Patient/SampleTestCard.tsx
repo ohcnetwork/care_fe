@@ -104,7 +104,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         </div>
 
         <div className="mt-4 flex flex-col md:flex-row justify-between gap-4">
-          <div className="">
+          <div>
             <div className="text-gray-600 text-sm font-bold">
               <span className="text-gray-800">Date of Sample:</span>{" "}
               {itemData.date_of_sample
