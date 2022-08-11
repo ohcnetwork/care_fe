@@ -13,6 +13,7 @@ interface FacilitySelectProps {
   searchAll?: boolean;
   multiple?: boolean;
   facilityType?: number;
+  district?: string;
   showAll?: boolean;
   selected: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
@@ -31,6 +32,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     showAll = true,
     className = "",
     facilityType,
+    district,
   } = props;
   const dispatchAction: any = useDispatch();
   const [facilityLoading, isFacilityLoading] = useState(false);
