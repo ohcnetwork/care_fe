@@ -85,7 +85,7 @@ export default function MinQuantityList(props: any) {
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
           <RoleButton
-            className="ml-2 bg-primary-400 hover:bg-primary-600"
+            className="ml-2 bg-primary-400 hover:bg-primary-600 text-white"
             handleClickCB={() =>
               navigate(
                 `/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`

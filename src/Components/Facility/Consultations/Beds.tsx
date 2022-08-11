@@ -12,7 +12,6 @@ import { BedSelect } from "../../Common/BedSelect";
 import { Button, InputLabel } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { TextInputField } from "../../Common/HelperInputFields";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
 
 const formatDateTime: () => string = () => {
