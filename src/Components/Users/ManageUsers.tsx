@@ -339,7 +339,16 @@ export default function ManageUsers() {
   const addFacility = async (username: string, facility: any) => {
     hideLinkFacilityModal();
     setIsFacilityLoading(true);
-    await dispatch(addUserFacility(username, String(facility.id)));
+    const res = await dispatch(addUserFacility(username, String(facility.id)));
+    if (res?.status === 201) {
+      Notification.Success({
+        msg: "Facility linked successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while linking facility",
+      });
+    }
     setIsFacilityLoading(false);
     loadFacilities(username);
   };
