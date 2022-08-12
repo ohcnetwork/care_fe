@@ -227,7 +227,7 @@ export const OnlineUsersSelect = (props: Props) => {
           <div
             className={
               !isDropdownExpanded
-                ? "btn btn-default z-50 absolute right-10 top-2 bg-white"
+                ? "btn btn-default z-50 my-2 sm:my-0 sm:absolute sm:right-10 sm:top-2 bg-white"
                 : "hidden"
             }
             onClick={(_) => {
