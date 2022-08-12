@@ -78,7 +78,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-  const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
+  const liveFeedPlayerRef = !isIOS
+    ? // eslint-disable-next-line react-hooks/rules-of-hooks
+      useRef<HTMLVideoElement | null>(null)
+    : // eslint-disable-next-line react-hooks/rules-of-hooks
+      useRef<ReactPlayer | null>(null);
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -166,7 +171,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     // setVideoEl,
   } = isIOS
     ? // eslint-disable-next-line react-hooks/rules-of-hooks
-      useHLSPLayer()
+      useHLSPLayer(liveFeedPlayerRef.current as ReactPlayer)
     : // eslint-disable-next-line react-hooks/rules-of-hooks
       useMSEMediaPlayer({
         config: {
@@ -174,7 +179,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           ...cameraAsset,
         },
         url,
-        videoEl: liveFeedPlayerRef.current,
+        videoEl: liveFeedPlayerRef.current as HTMLVideoElement,
       });
 
   const {
@@ -296,7 +301,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         ? screenfull.request(
             videoWrapper.current
               ? videoWrapper.current
-              : liveFeedPlayerRef.current
+              : (liveFeedPlayerRef.current as any)
           )
         : screenfull.exit();
     },
@@ -411,15 +416,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         {isIOS ? (
           <ReactPlayer
             url={url}
+            ref={liveFeedPlayerRef.current as any}
             controls={false}
             playsinline={true}
             playing={true}
             muted={true}
             width="100%"
             height="100%"
-            fileConfig={{
-              forceHLS: true,
-            }}
             onBuffer={() => {
               setStreamStatus(StreamStatus.Loading);
             }}
@@ -440,7 +443,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             muted
             playsInline
             className="max-h-full max-w-full"
-            ref={liveFeedPlayerRef}
+            ref={liveFeedPlayerRef as any}
           />
         )}
 
