@@ -201,6 +201,17 @@ let isInvalidInputInt = (min, max, val) => {
   }
 }
 
+let isInvalidInputFloat = (minString, maxString, val) => {
+  let min = Js.Float.fromString(minString)
+  let max = Js.Float.fromString(maxString)
+  let value = Js.Option.getWithDefault(min, val)
+  if value < min || value > max {
+    Some("Input outside range")
+  } else {
+    None
+  }
+}
+
 @react.component
 let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(hemodynamicParameter))
@@ -229,6 +240,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
           value={Belt.Option.mapWithDefault(state.systolic, "", string_of_int)}
           setValue={s => send(SetSystolic(int_of_string(s)))}
           getLabel={getStatus(100.0, "Low", 140.0, "High")}
+          hasError={isInvalidInputInt(0, 250, state.systolic)}
         />
         <Slider
           title={"Diastolic"}
@@ -239,6 +251,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
           value={Belt.Option.mapWithDefault(state.diastolic, "", string_of_int)}
           setValue={s => send(SetDiastolic(int_of_string(s)))}
           getLabel={getStatus(50.0, "Low", 90.0, "High")}
+          hasError={isInvalidInputInt(30, 180, state.diastolic)}
         />
       </div>
       <Slider
@@ -250,6 +263,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         value={Belt.Option.mapWithDefault(state.pulse, "", string_of_int)}
         setValue={s => send(SetPulse(int_of_string(s)))}
         getLabel={getStatus(40.0, "Bradycardia", 100.0, "Tachycardia")}
+        hasError={isInvalidInputInt(0, 200, state.pulse)}
       />
       <Slider
         title={"Temperature"}
@@ -267,6 +281,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         getLabel={state.tempInCelcius
           ? getStatus(36.4, "Low", 37.5, "High")
           : getStatus(97.6, "Low", 99.6, "High")}
+        hasError={state.tempInCelcius ? isInvalidInputFloat("35", "41", state.temperature) : isInvalidInputFloat("95", "106", state.temperature)}
       />
       <Slider
         title={"Respiratory Rate (bpm)"}
@@ -277,6 +292,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         value={Belt.Option.mapWithDefault(state.resp, "", string_of_int)}
         setValue={s => send(SetResp(int_of_string(s)))}
         getLabel={getStatus(12.0, "Low", 16.0, "High")}
+        hasError={isInvalidInputInt(10, 70, state.resp)}
       />
       <Slider
         title={"Pain Scale"}

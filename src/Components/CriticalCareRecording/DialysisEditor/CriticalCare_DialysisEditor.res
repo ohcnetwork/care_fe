@@ -73,6 +73,15 @@ let saveData = (id, consultationId, state, send, updateCB) => {
   )
 }
 
+let isInvalidInputInt = (min, max, val) => {
+  let value = Js.Option.getWithDefault(min, val)
+  if value < min || value > max {
+    Some("Input outside range")
+  } else {
+    None
+  }
+}
+
 @react.component
 let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(dialysisParameters))
@@ -90,6 +99,7 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
           value={Belt.Option.mapWithDefault(state.dialysis_fluid_balance, "", string_of_int)}
           setValue={s => send(SetFluidBalance(int_of_string(s)))}
           getLabel={_ => ("", "#ff0000")}
+          hasError={isInvalidInputInt(0, 5000, state.dialysis_fluid_balance)}
         />
         <Slider
           title={"Dialysis Net Balance (ml/h)"}
@@ -100,6 +110,7 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
           value={Belt.Option.mapWithDefault(state.dialysis_net_balance, "", string_of_int)}
           setValue={s => send(SetNetBalance(int_of_string(s)))}
           getLabel={_ => ("", "#ff0000")}
+          hasError={isInvalidInputInt(0, 5000, state.dialysis_net_balance)}
         />
       </div>
       <button
