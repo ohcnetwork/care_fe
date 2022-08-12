@@ -7,7 +7,7 @@ describe("authentication", () => {
       cy.loginByApi(user.username, "passwordR0FL");
 
       // Assert user
-      cy.get("a").contains("Profile").click();
+      cy.get("a[href='/user/profile'] i").click();
       cy.url().should("include", "/user/profile");
       cy.get("dd").should("contain", user.username);
       cy.get("dd").should("contain", user.rolename);
