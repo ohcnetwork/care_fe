@@ -490,22 +490,23 @@ export const DailyRounds = (props: any) => {
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div>
-                <div>
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="w-full md:w-1/2">
                   <DateTimeFiled
                     label="Measured At"
                     margin="dense"
                     value={state.form.taken_at}
+                    fullWidth
                     disableFuture={true}
                     showTodayButton={true}
                     onChange={(date) => handleDateChange(date, "taken_at")}
                     errors={state.errors.taken_at}
                   />
                 </div>
-                <div className="mt-4">
+                <div className="w-full md:w-1/2">
                   <InputLabel id="rounds_type">Round Type</InputLabel>
                   <SelectField
-                    className="md:w-1/2"
+                    className=""
                     name="rounds_type"
                     variant="standard"
                     margin="dense"
@@ -929,7 +930,7 @@ export const DailyRounds = (props: any) => {
                 </div>
               )}
 
-              <div className="mt-4 flex justify-between">
+              <div className="mt-4 flex flex-col md:flex-row gap-2 justify-between">
                 {id && (
                   <Link
                     className="btn btn-default bg-white mt-2"
@@ -946,14 +947,16 @@ export const DailyRounds = (props: any) => {
                     Back
                   </Link>
                 )}
-                <button
-                  type="submit"
-                  className="btn btn-primary ml-auto text-base"
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  <i className="fa-regular fa-circle-check mr-2"></i>{" "}
-                  {buttonText}
-                </button>
+                <div>
+                  <button
+                    type="submit"
+                    className="btn btn-primary ml-auto text-base w-full md:w-auto"
+                    onClick={(e) => handleSubmit(e)}
+                  >
+                    <i className="fa-regular fa-circle-check mr-2"></i>{" "}
+                    {buttonText}
+                  </button>
+                </div>
               </div>
             </CardContent>
           </form>
