@@ -295,7 +295,10 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     Cancel
                   </Button>
                 </Grid>
-                <Grid item className="flex flex-row w-full sm:w-auto gap-4">
+                <Grid
+                  item
+                  className="flex flex-row w-full sm:w-auto gap-4 flex-wrap"
+                >
                   {!id && !isLastOptionType && (
                     <Button
                       id="doctor-save-and-exit"
