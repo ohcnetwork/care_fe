@@ -8,7 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import type {t as Prescription__Prescription_t} from '../../../src/Components/Common/prescription-builder/types/Prescription__Prescription.gen';
+import type { t as Prescription__Prescription_t } from "../../../src/Components/Common/prescription-builder/types/Prescription__Prescription.gen";
 
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
@@ -55,7 +55,9 @@ import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -198,11 +200,13 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
+    []
+  );
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log("da", dischargeAdvice);
-  },[dischargeAdvice])
+  }, [dischargeAdvice]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -819,7 +823,7 @@ export const ConsultationForm = (props: any) => {
                 <br />
                 <ErrorHelperText error={state.errors.discharge_advice} />
               </div>
-              <div id="ip_no-div" className="mt-4">
+              <div id="ip_no-div mt-4">
                 <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
                   name="ip_no"
@@ -894,52 +898,6 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.is_kasp} />
                 </div>
               )}
-              {/* Telemedicine Fields */}
-              <div className="flex mt-4">
-                <div className="flex-1" id="is_telemedicine-div">
-                  <InputLabel id="admitted-label">Telemedicine</InputLabel>
-                  <RadioGroup
-                    aria-label="covid"
-                    name="is_telemedicine"
-                    value={state.form.is_telemedicine}
-                    onChange={handleTelemedicineChange}
-                    style={{ padding: "0px 5px" }}
-                  >
-                    <Box display="flex" flexDirection="row">
-                      <FormControlLabel
-                        value="true"
-                        control={<Radio />}
-                        label="Yes"
-                      />
-                      <FormControlLabel
-                        value="false"
-                        control={<Radio />}
-                        label="No"
-                      />
-                    </Box>
-                  </RadioGroup>
-                  <ErrorHelperText error={state.errors.is_telemedicine} />
-                </div>
-
-                {JSON.parse(state.form.is_telemedicine) && (
-                  <div className="flex-1" id="review_time">
-                    <InputLabel id="review_time-label">
-                      Review After{" "}
-                    </InputLabel>
-                    <SelectField
-                      name="review_time"
-                      variant="standard"
-                      value={state.form.review_time}
-                      options={[
-                        { id: "", text: "select" },
-                        ...REVIEW_AT_CHOICES,
-                      ]}
-                      onChange={handleChange}
-                      errors={state.errors.review_time}
-                    />
-                  </div>
-                )}
-              </div>
               {JSON.parse(state.form.is_telemedicine) && (
                 <div className="md:col-span-1" id="assigned_to-div">
                   <OnlineUsersSelect
@@ -1026,8 +984,54 @@ export const ConsultationForm = (props: any) => {
                 ).toFixed(2)}{" "}
                 m<sup>2</sup>
               </div>
+              {/* Telemedicine Fields */}
+              <div className="flex mt-4">
+                <div className="flex-1" id="is_telemedicine-div">
+                  <InputLabel id="admitted-label">Telemedicine</InputLabel>
+                  <RadioGroup
+                    aria-label="covid"
+                    name="is_telemedicine"
+                    value={state.form.is_telemedicine}
+                    onChange={handleTelemedicineChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.is_telemedicine} />
+                </div>
+
+                {JSON.parse(state.form.is_telemedicine) && (
+                  <div className="flex-1" id="review_time">
+                    <InputLabel id="review_time-label">
+                      Review After{" "}
+                    </InputLabel>
+                    <SelectField
+                      name="review_time"
+                      variant="standard"
+                      value={state.form.review_time}
+                      options={[
+                        { id: "", text: "select" },
+                        ...REVIEW_AT_CHOICES,
+                      ]}
+                      onChange={handleChange}
+                      errors={state.errors.review_time}
+                    />
+                  </div>
+                )}
+              </div>
               {/* End of Telemedicine fields */}
-              <div className="mt-4 flex justify-between">
+              <div className="mt-4 flex flex-col md:flex-row gap-2 justify-between">
                 <Button
                   color="default"
                   variant="contained"
@@ -1043,6 +1047,8 @@ export const ConsultationForm = (props: any) => {
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
+                  fullWidth
+                  className="w-full md:w-auto"
                   startIcon={
                     <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                   }
