@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
-  SelectField,
   MultiSelectField,
   TextInputField,
   AutoCompleteAsyncField,
@@ -15,7 +14,6 @@ import {
   PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
   KASP_ENABLED,
-  OptionsType,
 } from "../../Common/constants";
 import moment from "moment";
 import {
@@ -190,20 +188,17 @@ export default function PatientFilterV2(props: any) {
   }, [dispatch]);
 
   const VACCINATED_FILTER = [
-    { id: "", text: "Show All" },
-    { id: 0, text: "Unvaccinated" },
-    { id: 1, text: "1st dose only" },
-    { id: 2, text: "Both doses" },
+    { id: "0", text: "Unvaccinated" },
+    { id: "1", text: "1st dose only" },
+    { id: "2", text: "Both doses" },
   ];
 
   const DECLARED_FILTER = [
-    { id: "", text: "Show All" },
     { id: "false", text: "Not Declared" },
     { id: "true", text: "Declared" },
   ];
 
   const TELEMEDICINE_FILTER = [
-    { id: "", text: "Show All" },
     { id: "true", text: "Yes" },
     { id: "false", text: "No" },
   ];
@@ -414,7 +409,7 @@ export default function PatientFilterV2(props: any) {
     setFilterState(filterData);
   };
 
-  function _selectMenuOptions(options: any, useIdAsValue = true) {
+  function _filterOptions(options: any, useIdAsValue = true) {
     return [
       {
         title: "Show All",
@@ -428,6 +423,8 @@ export default function PatientFilterV2(props: any) {
       }),
     ];
   }
+
+  console.log(filterState.number_of_doses);
 
   return (
     <div>
@@ -470,7 +467,7 @@ export default function PatientFilterV2(props: any) {
         </div>
       </div>
       <div className="font-light text-md mt-2">Filter By:</div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3">
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">LSG body</span>
           <div className="">
@@ -533,7 +530,7 @@ export default function PatientFilterV2(props: any) {
               onSelect={(facility_type) =>
                 setFilterState({ ...filterState, facility_type })
               }
-              options={_selectMenuOptions(FACILITY_TYPES, false)}
+              options={_filterOptions(FACILITY_TYPES, false)}
             />
           </div>
         </div>
@@ -544,7 +541,7 @@ export default function PatientFilterV2(props: any) {
             <SelectMenu
               selected={filterState.gender}
               onSelect={(gender) => setFilterState({ ...filterState, gender })}
-              options={_selectMenuOptions(GENDER_TYPES)}
+              options={_filterOptions(GENDER_TYPES)}
             />
           </div>
         </div>
@@ -557,9 +554,9 @@ export default function PatientFilterV2(props: any) {
               onSelect={(is_antenatal) =>
                 setFilterState({ ...filterState, is_antenatal })
               }
-              options={_selectMenuOptions([
-                { id: "true", text: "antenatal" },
-                { id: "false", text: "non antenatal" },
+              options={_filterOptions([
+                { id: "true", text: "Antenatal" },
+                { id: "false", text: "Non-Antenatal" },
               ])}
             />
           </div>
@@ -574,7 +571,7 @@ export default function PatientFilterV2(props: any) {
                 onSelect={(is_kasp) =>
                   setFilterState({ ...filterState, is_kasp })
                 }
-                options={_selectMenuOptions([
+                options={_filterOptions([
                   { id: "true", text: `Show ${KASP_STRING}` },
                   { id: "false", text: `Show Non ${KASP_STRING}` },
                 ])}
@@ -591,7 +588,7 @@ export default function PatientFilterV2(props: any) {
               onSelect={(category) =>
                 setFilterState({ ...filterState, category })
               }
-              options={_selectMenuOptions(PATIENT_FILTER_CATEGORY)}
+              options={_filterOptions(PATIENT_FILTER_CATEGORY)}
             />
           </div>
         </div>
@@ -604,7 +601,7 @@ export default function PatientFilterV2(props: any) {
               onSelect={(disease_status) =>
                 setFilterState({ ...filterState, disease_status })
               }
-              options={_selectMenuOptions(
+              options={_filterOptions(
                 DISEASE_STATUS.map((status) => {
                   return { id: status, text: status };
                 })
@@ -620,46 +617,36 @@ export default function PatientFilterV2(props: any) {
               onSelect={(number_of_doses) =>
                 setFilterState({ ...filterState, number_of_doses })
               }
-              options={_selectMenuOptions(
-                DISEASE_STATUS.map((status) => {
-                  return { id: status, text: status };
-                })
-              )}
+              options={_filterOptions(VACCINATED_FILTER)}
             />
           </div>
-          <SelectField
-            name="number_of_doses"
-            variant="outlined"
-            margin="dense"
-            value={filterState.number_of_doses}
-            options={VACCINATED_FILTER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
         </div>
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Declared</span>
-          <SelectField
-            name="is_declared_positive"
-            variant="outlined"
-            margin="dense"
-            value={filterState.is_declared_positive}
-            options={DECLARED_FILTER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
+          <div className="py-2">
+            <SelectMenu
+              selected={filterState.is_declared_positive}
+              onSelect={(is_declared_positive) =>
+                setFilterState({ ...filterState, is_declared_positive })
+              }
+              options={_filterOptions(DECLARED_FILTER)}
+            />
+          </div>
         </div>
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Telemedicine</span>
-          <SelectField
-            name="last_consultation_is_telemedicine"
-            variant="outlined"
-            margin="dense"
-            value={filterState.last_consultation_is_telemedicine}
-            options={TELEMEDICINE_FILTER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
+          <div className="py-2">
+            <SelectMenu
+              selected={filterState.last_consultation_is_telemedicine}
+              onSelect={(last_consultation_is_telemedicine) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation_is_telemedicine,
+                })
+              }
+              options={_filterOptions(TELEMEDICINE_FILTER)}
+            />
+          </div>
         </div>
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">SRF ID</span>
