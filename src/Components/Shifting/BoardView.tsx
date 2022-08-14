@@ -48,7 +48,7 @@ export default function BoardView() {
           : a,
       {}
     );
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const searchByName = (patient_name: string) => {
@@ -92,10 +92,11 @@ export default function BoardView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="w-full flex flex-col md:flex-row items-center justify-between space-x-4">
+      <div className="w-full flex flex-col md:flex-row items-center justify-between">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
             title={"Shifting"}
+            className="mx-3 md:mx-5"
             hideBack={true}
             componentRight={
               downloadLoading ? (
@@ -110,7 +111,7 @@ export default function BoardView() {
             breadcrumbs={false}
           />
         </div>
-        <div className="w-full md:w-full flex items-start pt-2 space-y-2 lg:space-x-4 lg:items-center flex-end flex-col lg:flex-row">
+        <div className="w-full flex pt-2 lg:space-x-4 items-center flex-col lg:flex-row justify-between">
           <InputSearchBox
             value={qParams.patient_name || ""}
             search={searchByName}
@@ -165,7 +166,7 @@ export default function BoardView() {
         local={local}
         updateFilter={updateFilter}
       />
-      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-2">
+      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
         {isLoading ? (
           <Loading />
         ) : (
