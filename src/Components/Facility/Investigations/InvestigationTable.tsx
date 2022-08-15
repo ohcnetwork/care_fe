@@ -127,9 +127,9 @@ export const InvestigationTable = ({
 
   return (
     <Box padding="1rem" margin="1rem 0">
-      <div className="flex flex-col items-center justify-between mb">
+      <div className="flex flex-col sm:flex-row items-center justify-between mb">
         {title && <div className="font-bold text-xl">{title}</div>}
-        <div className="py-5 flex flex-auto">
+        <div className="py-5 flex flex-row">
           <Button
             color="primary"
             variant="outlined"
