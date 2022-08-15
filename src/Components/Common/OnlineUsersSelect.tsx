@@ -227,7 +227,7 @@ export const OnlineUsersSelect = (props: Props) => {
           <div
             className={
               !isDropdownExpanded
-                ? "btn btn-default z-50 my-2 sm:my-0 sm:absolute sm:right-10 sm:top-2 bg-white"
+                ? "z-50  absolute right-10 top-[14px]"
                 : "hidden"
             }
             onClick={(_) => {
@@ -235,8 +235,9 @@ export const OnlineUsersSelect = (props: Props) => {
               setDropdownExpand(false);
             }}
           >
-            {" "}
-            Clear
+            <div className="px-2 rounded-lg hover:bg-gray-100 cursor-pointer bg-white">
+              <i className="fa-solid fa-xmark text-lg text-gray-600"></i>
+            </div>
           </div>
         </div>
       </div>
