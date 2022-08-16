@@ -343,7 +343,7 @@ export const PatientHome = (props: any) => {
             <div className="text-sm leading-5 font-medium text-gray-500">
               {item.disease}
             </div>
-            <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+            <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
               {item.details}
             </div>
           </>
@@ -398,7 +398,7 @@ export const PatientHome = (props: any) => {
     ));
   }
 
-  const isPatientInactive = (patientData: PatientModel, facilityId : number) => {
+  const isPatientInactive = (patientData: PatientModel, facilityId: number) => {
     return (
       !patientData.is_active ||
       !(patientData?.last_consultation?.facility === facilityId)
