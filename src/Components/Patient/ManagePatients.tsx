@@ -196,16 +196,13 @@ export const PatientManager = (props: any) => {
 
   let managePatients: any = null;
   const handleDownload = async (isFiltered: boolean) => {
-    const res = await dispatch(
-      getAllPatient(
-        {
-          ...params,
-          csv: true,
-          facility: facilityId,
-        },
-        "downloadPatients"
-      )
-    );
+    const filters = {
+      ...params,
+      csv: true,
+      facility: facilityId,
+    };
+    if (!isFiltered) delete filters.is_active;
+    const res = await dispatch(getAllPatient(filters, "downloadPatients"));
     if (res && res.data && res.status === 200) {
       setDownloadFile(res.data);
       document.getElementById("downloadlink")?.click();
