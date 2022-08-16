@@ -81,14 +81,6 @@ export const PatientHome = (props: any) => {
   const initErr: any = {};
   const errors = initErr;
 
-  console.log(
-    patientData.is_active,
-    patientData?.last_consultation,
-    patientData.is_active &&
-      (!patientData?.last_consultation ||
-        patientData?.last_consultation?.discharge_date)
-  );
-
   useEffect(() => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
@@ -338,9 +330,9 @@ export const PatientHome = (props: any) => {
     const medHis = patientData.medical_history;
     patientMedHis = medHis.map((item: any, idx: number) => (
       <div className="sm:col-span-1" key={`med_his_${idx}`}>
-        {item?.disease != "NO" && (
+        {item?.disease !== "NO" && (
           <>
-            <div className="text-sm leading-5 font-medium text-gray-500">
+            <div className="text-sm leading-5 font-medium text-gray-700">
               {item.disease}
             </div>
             <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
@@ -1073,12 +1065,13 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Medical
               </div>
-              {/* No medical data found */}
               {!patientData.present_health &&
                 !patientData.allergies &&
                 !patientData.ongoing_medication &&
-                patientData.gender === 2 &&
-                !patientData.is_antenatal && (
+                !(patientData.gender === 2 && patientData.is_antenatal) &&
+                !patientData.medical_history?.some(
+                  (history) => history.disease !== "NO"
+                ) && (
                   <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
                     No Medical History Available
                   </div>
