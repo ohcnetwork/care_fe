@@ -375,14 +375,22 @@ export const PatientManager = (props: any) => {
     updateQuery(filter);
     setShowFilters(false);
   };
-  const removeFilter = (paramKey: any) => {
+  const removeFilter = (paramKey: string) => {
     updateQuery({
       ...qParams,
       [paramKey]: "",
     });
   };
 
-  const badge = (key: string, value: any, paramKey: string) => {
+  const removeMultipleFilters = (paramKeys: string[]) => {
+    const filter = { ...qParams };
+    paramKeys.forEach((key) => {
+      filter[key] = "";
+    });
+    updateQuery(filter);
+  };
+
+  const badge = (key: string, value: string, paramKey: string | string[]) => {
     return (
       value && (
         <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
@@ -391,7 +399,11 @@ export const PatientManager = (props: any) => {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() =>
+              Array.isArray(paramKey)
+                ? removeMultipleFilters(paramKey)
+                : removeFilter(paramKey)
+            }
           ></i>
         </span>
       )
@@ -844,15 +856,29 @@ export const PatientManager = (props: any) => {
             qParams.created_date_after,
             "created_date_after"
           )}
-          {badge(
-            "Admitted Before",
-            qParams.last_consultation_admission_date_before,
-            "last_consultation_admission_date_before"
-          )}
-          {badge(
-            "Admitted After",
-            qParams.last_consultation_admission_date_after,
-            "last_consultation_admission_date_after"
+          {qParams.last_consultation_admission_date_before ===
+          qParams.last_consultation_admission_date_after ? (
+            badge(
+              "Admission Date",
+              qParams.last_consultation_admission_date_before,
+              [
+                "last_consultation_admission_date_before",
+                "last_consultation_admission_date_after",
+              ]
+            )
+          ) : (
+            <>
+              {badge(
+                "Admitted Before",
+                qParams.last_consultation_admission_date_before,
+                "last_consultation_admission_date_before"
+              )}
+              {badge(
+                "Admitted After",
+                qParams.last_consultation_admission_date_after,
+                "last_consultation_admission_date_after"
+              )}
+            </>
           )}
           {badge(
             "Discharged Before",
