@@ -29,7 +29,6 @@ const BedTypeCard = (props: BedTypeProps) => {
 
   const handleDeleteSubmit = async () => {
     if (props.room_type) {
-      console.log(props);
       const res = await dispatchAction(
         deleteCapacity({
           facilityId: props.facilityId,
