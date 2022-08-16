@@ -176,7 +176,7 @@ export default function InventoryList(props: any) {
                 disableFor="readOnly"
                 buttonType="materialUI"
               >
-                Add Inventory
+                Manage Inventory
               </RoleButton>
             </div>
             <div className="mt-2">

@@ -374,7 +374,7 @@ export default function ResultList() {
             </dl>
           </div>
         </div>
-        <div className="md:mt-2">
+        <div className="mt-2">
           <div>
             <div className="text-sm font-semibold mb-2">Search by Name</div>
             <InputSearchBox
@@ -395,14 +395,14 @@ export default function ResultList() {
           </div>
         </div>
         <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
-          <div className="flex justify-end gap-2">
-            <div
+          <div className="flex flex-col md:flex-row md:justify-end gap-2">
+            <button
               className="btn btn-primary"
               onClick={(_) => navigate("external_results/upload")}
             >
               Upload List
-            </div>
-            <div
+            </button>
+            <button
               className={clsx(
                 "btn btn-primary",
                 downloadLoading && "pointer-events-none"
@@ -417,7 +417,7 @@ export default function ResultList() {
                 )}
                 Export
               </span>
-            </div>
+            </button>
           </div>
           <div className="flex ml-auto gap-2 md:pt-0 pt-2">
             <button
