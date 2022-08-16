@@ -15,7 +15,7 @@ describe("Shifting Page", () => {
 
   it("checks if all download button works", () => {
     cy.get("svg.MuiSvgIcon-root.cursor-pointer").each(($button) => {
-      cy.wrap($button).click().wait(100);
+      cy.wrap($button).click({ force: true }).wait(100);
     });
   });
 

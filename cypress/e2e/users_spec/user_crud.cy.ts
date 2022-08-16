@@ -21,7 +21,7 @@ describe("User management", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000").wait(1000);
+    cy.visit("http://localhost:4000").wait(2000);
     cy.get("a").contains("Users").click();
     cy.url().should("include", "/user");
   });
@@ -96,15 +96,21 @@ describe("User management", () => {
   it("deletes user", () => {
     cy.get("[name='search']").type(username);
     cy.wait(2000);
-    cy.contains("Delete").click();
+    cy.get("button").contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
   });
 
   it("Next/Previous Page", () => {
     cy.wait(1000);
     // only works for desktop mode
-    cy.get("button").should("contain", ">").contains(">").click();
-    cy.get("button").should("contain", "<").contains("<").click();
+    cy.get("button")
+      .should("contain", ">")
+      .contains(">")
+      .click({ force: true });
+    cy.get("button")
+      .should("contain", "<")
+      .contains("<")
+      .click({ force: true });
   });
 
   afterEach(() => {

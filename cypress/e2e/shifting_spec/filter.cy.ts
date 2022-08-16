@@ -71,7 +71,10 @@ describe("Shifting section filter", () => {
 
   it("filter by KASP", () => {
     ["yes", "no"].forEach((select) => {
-      cy.get("[name='is_kasp']").select(select);
+      cy.get("input")
+        .should("contain", "[name='is_kasp']")
+        .get("[name='is_kasp']")
+        .select(select);
       cy.contains("Apply").click().wait(1000);
       cy.contains("Filters").click();
     });
