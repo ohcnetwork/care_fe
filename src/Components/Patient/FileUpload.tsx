@@ -480,6 +480,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const filenameLength = uploadFileName.trim().length;
     const f = file;
     if (f === undefined) {
+      setUploadFileNameError("Please choose a file to upload");
       return false;
     }
     if (filenameLength === 0) {
@@ -779,12 +780,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       title="Choose File"
                       onChange={onFileChange}
                       type="file"
-                      className="block w-full text-sm text-slate-500
-                      file:mr-4 file:py-2 file:px-4 
-                            file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-primary-100 file:text-primary-700
-                      hover:file:bg-primary-300"
+                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-primary-100 file:text-primary-700 hover:file:bg-primary-300"
                     />
                     <div className="mt-2">
                       <Button
