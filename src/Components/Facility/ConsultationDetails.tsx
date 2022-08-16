@@ -901,14 +901,14 @@ export const ConsultationDetails = (props: any) => {
             )}
             {consultationData.discharge_advice && (
               <div className="mt-4">
-                <h3 className="flex flex-wrap justify-between text-lg font-semibold leading-relaxed text-gray-900">
+                <div className="flex flex-wrap justify-between text-lg font-semibold leading-relaxed text-gray-900">
                   Prescription
-                  <div className="text-xs text-gray-600 mt-2">
+                  <div className="text-xs text-gray-600 ">
                     <i className="fas fa-history text-sm pr-2"></i>
                     {consultationData.modified_date &&
                       moment(consultationData.modified_date).format("lll")}
                   </div>
-                </h3>
+                </div>
                 <div className="flex flex-col">
                   <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                     <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
