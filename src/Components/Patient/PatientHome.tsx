@@ -387,15 +387,19 @@ export const PatientHome = (props: any) => {
       </div>
     );
   } else if (sampleListData.length > 0) {
-    sampleList = sampleListData.map((itemData, idx) => (
-      <SampleTestCard
-        itemData={itemData}
-        key={idx}
-        handleApproval={confirmApproval}
-        facilityId={facilityId}
-        patientId={id}
-      />
-    ));
+    sampleList = (
+      <div className="lg:grid lg:grid-cols-2 lg:gap-4">
+        {sampleListData.map((itemData, idx) => (
+          <SampleTestCard
+            itemData={itemData}
+            key={idx}
+            handleApproval={confirmApproval}
+            facilityId={facilityId}
+            patientId={id}
+          />
+        ))}
+      </div>
+    );
   }
 
   const isPatientInactive = (patientData: PatientModel, facilityId : number) => {
