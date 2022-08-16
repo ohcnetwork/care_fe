@@ -14,7 +14,7 @@ interface ConsultationProps {
 export const ConsultationCard = (props: ConsultationProps) => {
   const { itemData, isLastConsultation } = props;
   return (
-    <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4">
+    <div className="block border rounded-lg bg-white shadow cursor-pointer hover:border-primary-500 text-black mt-4">
       {itemData.is_kasp && (
         <div className="ml-3 mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
           {KASP_STRING}
