@@ -67,6 +67,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         Notification.Success({
           msg: "Asset Configured Successfully",
         });
+        window.location.reload();
       } else {
         Notification.Error({
           msg: "Something went wrong..!",
