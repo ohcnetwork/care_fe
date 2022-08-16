@@ -60,7 +60,7 @@ function TabPanel(props: TabPanelProps) {
 export function Badge(props: { color: string; icon: string; text: string }) {
   return (
     <span
-      className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+      className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 shadow text-gray-700"
       title={props.text}
     >
       <i
@@ -464,10 +464,10 @@ export const PatientManager = (props: any) => {
           onClick={() => navigate(patientUrl)}
           className={
             "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 " +
-            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
+            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "bg-white")
           }
         >
-          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">      
+          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
             <div>
               <div className="md:flex justify-between w-full">
                 <div className="text-xl font-normal capitalize">
@@ -537,7 +537,7 @@ export const PatientManager = (props: any) => {
               )}
           </div>
 
-          <div className="flex w-full">
+          <div className="flex w-full mt-4 md:mt-0">
             <div className="flex flex-wrap flex-row justify-start">
               {patient.allow_transfer ? (
                 <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
@@ -558,8 +558,8 @@ export const PatientManager = (props: any) => {
               {patient.gender === 2 &&
                 patient.is_antenatal &&
                 patient.is_active && (
-                <Badge color="blue" icon="baby-carriage" text="Antenatal" />
-              )}
+                  <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+                )}
               {patient.is_medical_worker && patient.is_active && (
                 <Badge color="blue" icon="user-md" text="Medical Worker" />
               )}
@@ -600,8 +600,8 @@ export const PatientManager = (props: any) => {
               )}
             </div>
           </div>
-          <div className="px-2">
-            <div className="btn btn-default bg-white">Details</div>
+          <div className="px-2 mt-4 md:mt-0 flex justify-end">
+            <div className="btn btn-default bg-white shadow ">Details</div>
           </div>
         </div>
       );
