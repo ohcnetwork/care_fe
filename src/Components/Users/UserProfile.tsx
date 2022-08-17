@@ -9,7 +9,11 @@ import {
   SIDEBAR,
 } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserDetails, updateUserDetails } from "../../Redux/actions";
+import {
+  getUserDetails,
+  updateUserDetails,
+  updateUserPassword,
+} from "../../Redux/actions";
 import {
   PhoneNumberField,
   SelectField,
@@ -21,12 +25,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import Switch from "@material-ui/core/Switch";
-import {
-  ProfileLabel,
-  LabelValueCard,
-  ProfileValue,
-  ValueBadge,
-} from "./ProfileComponents";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -93,12 +91,33 @@ const editFormReducer = (state: State, action: Action) => {
 };
 export default function UserProfile() {
   const [states, dispatch] = useReducer(editFormReducer, initialState);
+  const reduxDispatch: any = useDispatch();
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const username = currentUser.data.username;
 
-  const [showEdit, setShowEdit] = React.useState<boolean | false>(false);
+  const [changePasswordForm, setChangePasswordForm] = useState<{
+    username: string;
+    old_password: string;
+    new_password_1: string;
+    new_password_2: string;
+  }>({
+    username: username,
+    old_password: "",
+    new_password_1: "",
+    new_password_2: "",
+  });
+
+  const [changePasswordErrors] = useState<{
+    old_password: string;
+    password_confirmation: string;
+  }>({
+    old_password: "",
+    password_confirmation: "",
+  });
+
+  const [showEdit, setShowEdit] = useState<boolean | false>(false);
   const [updateBtnText, setUpdateBtnText] = React.useState<string>("Update");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -122,7 +141,7 @@ export default function UserProfile() {
               .filter((el) => {
                 return el.text === res.data.gender;
               })[0]
-              ?.id.toString(),
+              .id.toString(),
             email: res.data.email,
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
@@ -169,14 +188,14 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        // variables declared inside case, gets outside there "case" scope
-        // so explicitly declare there scope to pass eslint test
-        case "phoneNumber": {
+        case "phoneNumber":
+          // eslint-disable-next-line no-case-declarations
           const phoneNumber = parsePhoneNumberFromString(
             states.form[field],
             "IN"
           );
 
+          // eslint-disable-next-line no-case-declarations
           let is_valid = false;
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
@@ -187,9 +206,8 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        }
-        // limit variables scope inside case block
-        case "altPhoneNumber": {
+        case "altPhoneNumber":
+          // eslint-disable-next-line no-case-declarations
           let alt_is_valid = false;
           if (states.form[field] && states.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
@@ -210,8 +228,6 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        }
-
         case "email":
           if (states.form[field] && !validateEmailAddress(states.form[field])) {
             errors[field] = "Enter a valid email address";
@@ -230,10 +246,8 @@ export default function UserProfile() {
   };
 
   const handleValueChange = (phoneNo: string, name: string) => {
-    if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
-      const form: EditForm = { ...states.form, [name]: phoneNo };
-      dispatch({ type: "set_form", form });
-    }
+    const form: EditForm = { ...states.form, [name]: phoneNo };
+    dispatch({ type: "set_form", form });
   };
 
   const handleWhatsappNumChange = (phoneNo: string, name: string) => {
@@ -310,10 +324,48 @@ export default function UserProfile() {
   if (isLoading) {
     return <Loading />;
   }
+
+  const changePassword = (e: any) => {
+    e.preventDefault();
+    //validating form
+    if (
+      changePasswordForm.new_password_1 != changePasswordForm.new_password_2
+    ) {
+      Notification.Error({
+        msg: "Passwords are different in the new and the confirmation column.",
+      });
+    } else {
+      setIsLoading(true);
+      const form = {
+        old_password: changePasswordForm.old_password,
+        username: username,
+        new_password: changePasswordForm.new_password_1,
+      };
+      reduxDispatch(updateUserPassword(form)).then((resp: any) => {
+        setIsLoading(false);
+        const res = resp && resp.data;
+        if (res.message === "Password updated successfully") {
+          Notification.Success({
+            msg: "Password changed!",
+          });
+        } else {
+          Notification.Error({
+            msg: "There was some error. Please try again in some time.",
+          });
+        }
+        setChangePasswordForm({
+          ...changePasswordForm,
+          new_password_1: "",
+          new_password_2: "",
+          old_password: "",
+        });
+      });
+    }
+  };
   return (
     <div>
-      <div className="lg:px-20 py-10 md:px-10 px-5">
-        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+      <div className="md:p-20 p-10">
+        <div className="md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -325,209 +377,344 @@ export default function UserProfile() {
               <button
                 onClick={(_) => setShowEdit(!showEdit)}
                 type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:ring-primary focus:border-primary-700 active:bg-primary-700 mt-4"
+                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
               >
                 {showEdit ? "Cancel" : "Edit User Profile"}
               </button>
             </div>
           </div>
-          <div className="mt-5 lg:mt-0 md:col-span-2">
+          <div className="mt-5 md:mt-0 md:col-span-2">
             {!showEdit && (
               <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
-                <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                  <LabelValueCard>
-                    <ProfileLabel text="Username" />
-                    <ProfileValue text={details.username} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="Contact No" />
-                    <ProfileValue text={details.phone_number} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="Whatsapp No" />
-                    <ProfileValue text={details.alt_phone_number} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="Email address" />
-                    <ProfileValue text={details.email} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="First Name" />
-                    <ProfileValue text={details.first_name} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="Last Name" />
-                    <ProfileValue text={details.last_name} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="Age" />
-                    <ProfileValue text={details.age} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="Verification Status" />
-                    {details.verified && <ValueBadge text="Verified" />}
-                    {!details.verified && (
-                      <dd className="mt-2 mb-1 text-sm leading-5 text-gray-900">
-                        Not Verified
-                      </dd>
-                    )}
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="Access Level" />
-                    <ValueBadge text={details.user_type} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="Gender" />
-                    <ProfileValue text={details.gender} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="Local Body" />
-                    <ProfileValue text={details.local_body_object?.name} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="District" />
-                    <ProfileValue text={details.district_object?.name} />
-                  </LabelValueCard>
-                  <LabelValueCard>
-                    <ProfileLabel text="State" />
-                    <ProfileValue text={details.state_object?.name} />
-                  </LabelValueCard>
+                <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
+                  <div className="sm:col-span-1 my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      Username
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.username || "-"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      Contact No
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.phone_number || "-"}
+                    </dd>
+                  </div>
+
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      Whatsapp No
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.alt_phone_number || "-"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      Email address
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.email || "-"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      First Name
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.first_name || "-"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      Last Name
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.last_name || "-"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      Age
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.age || "-"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      Access Level
+                    </dt>
+                    <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
+                      <i className="fa-solid fa-user-check mr-1"></i>{" "}
+                      {details.user_type || "-"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      Gender
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.gender || "-"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      Local Body
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.local_body_object?.name || "-"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      District
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.district_object?.name || "-"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
+                      State
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.state_object?.name || "-"}
+                    </dd>
+                  </div>
                 </dl>
               </div>
             )}
 
             {showEdit && (
-              <form action="#" method="POST">
-                <div className="shadow overflow-hidden sm:rounded-md">
-                  <div className="px-4 py-5 bg-white sm:p-6">
-                    <div className="grid grid-cols-6 gap-6">
-                      <div className="col-span-6 sm:col-span-3">
-                        <label
-                          htmlFor="firstName"
-                          className="block text-sm font-medium leading-5 text-gray-700"
-                        >
-                          First name*
-                        </label>
-                        <TextInputField
-                          name="firstName"
-                          variant="outlined"
-                          margin="dense"
-                          type="text"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                          value={states.form.firstName}
-                          onChange={handleChangeInput}
-                          errors={states.errors.firstName}
-                        />
-                      </div>
+              <div>
+                <form action="#" method="POST">
+                  <div className="shadow overflow-hidden sm:rounded-md">
+                    <div className="px-4 py-5 bg-white sm:p-6">
+                      <div className="grid grid-cols-6 gap-6">
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="firstName"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            First name*
+                          </label>
+                          <TextInputField
+                            name="firstName"
+                            variant="outlined"
+                            margin="dense"
+                            type="text"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            value={states.form.firstName}
+                            onChange={handleChangeInput}
+                            errors={states.errors.firstName}
+                          />
+                        </div>
 
-                      <div className="col-span-6 sm:col-span-3">
-                        <label
-                          htmlFor="lastName"
-                          className="block text-sm font-medium leading-5 text-gray-700"
-                        >
-                          Last name*
-                        </label>
-                        <TextInputField
-                          name="lastName"
-                          variant="outlined"
-                          margin="dense"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                          type="text"
-                          value={states.form.lastName}
-                          onChange={handleChangeInput}
-                          errors={states.errors.lastName}
-                        />
-                      </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="lastName"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            Last name*
+                          </label>
+                          <TextInputField
+                            name="lastName"
+                            variant="outlined"
+                            margin="dense"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            type="text"
+                            value={states.form.lastName}
+                            onChange={handleChangeInput}
+                            errors={states.errors.lastName}
+                          />
+                        </div>
 
-                      <div className="col-span-6 sm:col-span-3">
-                        <label
-                          htmlFor="age"
-                          className="block text-sm font-medium leading-5 text-gray-700"
-                        >
-                          Age*
-                        </label>
-                        <TextInputField
-                          name="age"
-                          className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                          variant="outlined"
-                          margin="dense"
-                          value={states.form.age}
-                          onChange={handleChangeInput}
-                          errors={states.errors.age}
-                        />
-                      </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="age"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            Age*
+                          </label>
+                          <TextInputField
+                            name="age"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            variant="outlined"
+                            margin="dense"
+                            value={states.form.age}
+                            onChange={handleChangeInput}
+                            errors={states.errors.age}
+                          />
+                        </div>
 
-                      <div className="col-span-6 sm:col-span-3">
-                        <label
-                          htmlFor="gender"
-                          className="block text-sm font-medium leading-5 text-gray-700"
-                        >
-                          Gender*
-                        </label>
-                        <SelectField
-                          name="gender"
-                          variant="outlined"
-                          margin="dense"
-                          value={states.form.gender}
-                          options={genderTypes}
-                          onChange={handleChangeInput}
-                          errors={states.errors.gender}
-                        />
-                      </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="gender"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            Gender*
+                          </label>
+                          <SelectField
+                            name="gender"
+                            variant="outlined"
+                            margin="dense"
+                            value={states.form.gender}
+                            options={genderTypes}
+                            onChange={handleChangeInput}
+                            errors={states.errors.gender}
+                          />
+                        </div>
 
-                      <div className="col-span-6 sm:col-span-3">
-                        <PhoneNumberField
-                          label="Phone Number*"
-                          value={states.form.phoneNumber}
-                          onChange={(value: string) =>
-                            handleValueChange(value, "phoneNumber")
-                          }
-                          errors={states.errors.phoneNumber}
-                        />
-                      </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <PhoneNumberField
+                            label="Phone Number*"
+                            value={states.form.phoneNumber}
+                            onChange={(value: string) =>
+                              handleValueChange(value, "phoneNumber")
+                            }
+                            errors={states.errors.phoneNumber}
+                          />
+                        </div>
 
-                      <div className="col-span-6 sm:col-span-3">
-                        <PhoneNumberField
-                          name="altPhoneNumber"
-                          label="Whatsapp Number"
-                          value={states.form.altPhoneNumber}
-                          onChange={(value: string) =>
-                            handleWhatsappNumChange(value, "altPhoneNumber")
-                          }
-                          errors={states.errors.altPhoneNumber}
-                        />
-                      </div>
-                      <div className="col-span-6 sm:col-span-3">
-                        <InputLabel id="email-label">Email</InputLabel>
-                        <TextInputField
-                          name="email"
-                          variant="outlined"
-                          margin="dense"
-                          type="text"
-                          value={states.form.email}
-                          onChange={handleChangeInput}
-                          errors={states.errors.email}
-                        />
+                        <div className="col-span-6 sm:col-span-3">
+                          <PhoneNumberField
+                            name="altPhoneNumber"
+                            label="Whatsapp Number"
+                            value={states.form.altPhoneNumber}
+                            onChange={(value: string) =>
+                              handleWhatsappNumChange(value, "altPhoneNumber")
+                            }
+                            errors={states.errors.altPhoneNumber}
+                          />
+                        </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <InputLabel id="email-label">Email</InputLabel>
+                          <TextInputField
+                            name="email"
+                            variant="outlined"
+                            margin="dense"
+                            type="text"
+                            value={states.form.email}
+                            onChange={handleChangeInput}
+                            errors={states.errors.email}
+                          />
+                        </div>
                       </div>
                     </div>
+                    <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        type="submit"
+                        style={{ marginLeft: "auto" }}
+                        startIcon={
+                          <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                        }
+                        onClick={(e) => handleSubmit(e)}
+                      >
+                        {" "}
+                        UPDATE{" "}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                    <Button
-                      color="primary"
-                      variant="contained"
-                      type="submit"
-                      style={{ marginLeft: "auto" }}
-                      startIcon={
-                        <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                      }
-                      onClick={(e) => handleSubmit(e)}
-                    >
-                      {" "}
-                      UPDATE{" "}
-                    </Button>
+                </form>
+                <form action="#" method="POST">
+                  <div className="shadow overflow-hidden sm:rounded-md">
+                    <div className="px-4 py-5 bg-white sm:p-6">
+                      <div className="grid grid-cols-6 gap-6">
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="old_password"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            Current Password*
+                          </label>
+                          <TextInputField
+                            name="old_password"
+                            variant="outlined"
+                            margin="dense"
+                            type="password"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            value={changePasswordForm.old_password}
+                            onChange={(e) =>
+                              setChangePasswordForm({
+                                ...changePasswordForm,
+                                old_password: e.target.value,
+                              })
+                            }
+                            errors={changePasswordErrors.old_password}
+                          />
+                        </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="new_password_1"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            New Password*
+                          </label>
+                          <TextInputField
+                            name="new_password_1"
+                            variant="outlined"
+                            margin="dense"
+                            type="password"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            value={changePasswordForm.new_password_1}
+                            onChange={(e) =>
+                              setChangePasswordForm({
+                                ...changePasswordForm,
+                                new_password_1: e.target.value,
+                              })
+                            }
+                            errors=""
+                          />
+                        </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <label
+                            htmlFor="new_password_2"
+                            className="block text-sm font-medium leading-5 text-gray-700"
+                          >
+                            New Password Confirmation*
+                          </label>
+                          <TextInputField
+                            name="new_password_2"
+                            variant="outlined"
+                            margin="dense"
+                            type="password"
+                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            value={changePasswordForm.new_password_2}
+                            onChange={(e) =>
+                              setChangePasswordForm({
+                                ...changePasswordForm,
+                                new_password_2: e.target.value,
+                              })
+                            }
+                            errors={changePasswordErrors.password_confirmation}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        type="submit"
+                        style={{ marginLeft: "auto" }}
+                        startIcon={
+                          <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                        }
+                        onClick={(e) => changePassword(e)}
+                      >
+                        {" "}
+                        CHANGE PASSWORD{" "}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </form>
+                </form>
+              </div>
             )}
           </div>
         </div>

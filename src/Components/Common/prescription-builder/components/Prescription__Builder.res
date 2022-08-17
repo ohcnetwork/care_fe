@@ -94,7 +94,7 @@ let make = (~prescriptions, ~selectCB) => {
     {prescriptions
     |> Array.mapi((index, item) => showPrescriptionForm(item, index, send))
     |> React.array}
-    <div className="m-1 rounded-md shadow-sm bg-gray-200 rounded">
+    <div className="m-1 shadow-sm bg-gray-200 rounded">
       <button
         type_="button"
         onClick={_ => send(AddPescription)}

@@ -1,12 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import loadable from "@loadable/component";
-import Box from "@material-ui/core/Box";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Button from "@material-ui/core/Button";
-import Grid from "@material-ui/core/Grid";
-import { makeStyles, Theme, useTheme } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
-import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
@@ -59,11 +52,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`full-width-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box p={3}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+      {value === index && <div>{children}</div>}
     </div>
   );
 }
@@ -71,7 +60,7 @@ function TabPanel(props: TabPanelProps) {
 export function Badge(props: { color: string; icon: string; text: string }) {
   return (
     <span
-      className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+      className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 shadow text-gray-700"
       title={props.text}
     >
       <i
@@ -84,31 +73,12 @@ export function Badge(props: { color: string; icon: string; text: string }) {
   );
 }
 
-const useStylesTab = makeStyles((theme: Theme) => ({
-  root: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.background.paper,
-  },
-}));
-
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
-
-const useStyles = makeStyles((theme) => ({
-  paginateTopPadding: {
-    paddingTop: "50px",
-  },
-  displayFlex: {
-    display: "flex",
-  },
-}));
 
 const RESULT_LIMIT = 14;
 
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
-  const classes = useStyles();
-  const classesTab = useStylesTab();
-  const theme = useTheme();
   const dispatch: any = useDispatch();
 
   const [data, setData] = useState<any[]>([]);
@@ -400,10 +370,6 @@ export const PatientManager = (props: any) => {
     updateQuery({ [name]: value, page: 1 });
   };
 
-  const handleFilter = (value: string) => {
-    updateQuery({ disease_status: value, page: 1 });
-  };
-
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
     updateQuery(filter);
@@ -498,24 +464,10 @@ export const PatientManager = (props: any) => {
           onClick={() => navigate(patientUrl)}
           className={
             "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 " +
-            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
+            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "bg-white")
           }
         >
-          <div className="px-4 flex gap-2 w-full">
-            {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed && (
-                <div className="w-32 self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
-                  <span className="text-center text-gray-900 text-sm">
-                    {
-                      patient?.last_consultation?.current_bed?.bed_object
-                        ?.location_object?.name
-                    }
-                  </span>
-                  <span className="text-md font-bold">
-                    {patient?.last_consultation?.current_bed?.bed_object.name}
-                  </span>
-                </div>
-              )}
+          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
             <div>
               <div className="md:flex justify-between w-full">
                 <div className="text-xl font-normal capitalize">
@@ -556,8 +508,36 @@ export const PatientManager = (props: any) => {
                 </div>
               )}
             </div>
+            {patient?.last_consultation &&
+              patient?.last_consultation?.current_bed && (
+                <div
+                  className="w-fit self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex items-center justify-center rounded-md pr-2 mt-2
+                "
+                >
+                  <div className="grid grid-cols-2">
+                    <div className="ml-2 mt-2">
+                      <i className="fa-solid fa-bed-pulse"></i>
+                    </div>
+                    <div>
+                      <div className="text-gray-900 text-sm">
+                        {
+                          patient?.last_consultation?.current_bed?.bed_object
+                            ?.location_object?.name
+                        }
+                      </div>
+                      <div className="text-md font-bold">
+                        {
+                          patient?.last_consultation?.current_bed?.bed_object
+                            .name
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
           </div>
-          <div className="flex w-full">
+
+          <div className="flex w-full mt-4 md:mt-0">
             <div className="flex flex-wrap flex-row justify-start">
               {patient.allow_transfer ? (
                 <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
@@ -575,9 +555,11 @@ export const PatientManager = (props: any) => {
                   text={patient.disease_status}
                 />
               )}
-              {patient.is_antenatal && patient.is_active && (
-                <Badge color="blue" icon="baby-carriage" text="Antenatal" />
-              )}
+              {patient.gender === 2 &&
+                patient.is_antenatal &&
+                patient.is_active && (
+                  <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+                )}
               {patient.is_medical_worker && patient.is_active && (
                 <Badge color="blue" icon="user-md" text="Medical Worker" />
               )}
@@ -618,8 +600,8 @@ export const PatientManager = (props: any) => {
               )}
             </div>
           </div>
-          <div className="px-2">
-            <div className="btn btn-default bg-white">Details</div>
+          <div className="px-2 mt-4 md:mt-0 flex justify-end">
+            <div className="btn btn-default bg-white shadow ">Details</div>
           </div>
         </div>
       );
@@ -646,16 +628,14 @@ export const PatientManager = (props: any) => {
     );
   } else if (data && data.length === 0) {
     managePatients = (
-      <Grid item xs={12} md={12} className={classes.displayFlex}>
-        <Grid container justify="center" alignItems="center">
-          <h5> No Patients Found</h5>
-        </Grid>
-      </Grid>
+      <div className="w-full text-center">
+        <p className="text-lg font-semibold ">No Patients Found</p>
+      </div>
     );
   }
 
   return (
-    <div className="px-6">
+    <div>
       {showDialog && (
         <FacilitiesSelectDialogue
           setSelected={(e) => setSelectedFacility(e)}
@@ -670,17 +650,16 @@ export const PatientManager = (props: any) => {
         breadcrumbs={!!facilityId}
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
-      <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="title-text sm:flex align-center">
           <div className="text-center">
-            <Button
-              color="primary"
-              size="small"
+            <button
               onClick={handleDownloadFiltered}
-              startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
+              className="btn text-green-500 font-medium hover:bg-green-50 border border-solid"
             >
-              Download {tabValue === 0 ? "Live" : "Discharged"} List
-            </Button>
+              <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
+              {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
+            </button>
             <CSVLink
               id="downloadlink"
               className="hidden"
@@ -690,15 +669,14 @@ export const PatientManager = (props: any) => {
             ></CSVLink>
           </div>
           <div className="flex flex-col gap-2">
-            <Button
-              color="primary"
-              onClick={handleDownloadAll}
-              size="small"
-              startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
+            <button
               disabled={!isDownloadAllowed}
+              onClick={handleDownloadAll}
+              className="btn text-green-500 disabled:text-gray-500 font-medium border border-solid"
             >
-              Download All Patients
-            </Button>
+              <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD ALL
+              PATIENTS
+            </button>
             {!isDownloadAllowed && (
               <p className="self-end text-sm italic text-red-400">
                 * Select a 7 day period
@@ -715,7 +693,26 @@ export const PatientManager = (props: any) => {
               {/* Show spinner until count is fetched from server */}
               {isLoading ? (
                 <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-10 w-10 text-primary-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
                 </dd>
               ) : (
                 <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
@@ -747,7 +744,7 @@ export const PatientManager = (props: any) => {
             />
           </div>
         </div>
-        <div>
+        <div className="flex flex-col-reverse md:flex-col">
           <div>
             <div className="md:flex items-end gap-2 mb-2">
               <button
@@ -960,7 +957,7 @@ export const PatientManager = (props: any) => {
           )}
         </div>
       </div>
-      <div className={classesTab.root}>
+      <div>
         <SlideOver show={showFilters} setShow={setShowFilters}>
           <div className="bg-white min-h-screen p-4">
             <PatientFilterV2
@@ -978,15 +975,12 @@ export const PatientManager = (props: any) => {
           ]}
           active={tabValue}
         />
-        <SwipeableViews
-          axis={theme.direction === "rtl" ? "x-reverse" : "x"}
-          index={tabValue}
-        >
-          <TabPanel value={tabValue} index={0} dir={theme.direction}>
-            <div className="flex flex-wrap md:-mx-6">{managePatients}</div>
+        <SwipeableViews index={tabValue}>
+          <TabPanel value={tabValue} index={0}>
+            <div className="flex flex-wrap">{managePatients}</div>
           </TabPanel>
-          <TabPanel value={tabValue} index={1} dir={theme.direction}>
-            <div className="flex flex-wrap md:-mx-6">{managePatients}</div>
+          <TabPanel value={tabValue} index={1}>
+            <div className="flex flex-wrap">{managePatients}</div>
           </TabPanel>
         </SwipeableViews>
       </div>

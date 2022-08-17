@@ -374,9 +374,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ward: res.data.ward_object ? res.data.ward_object.id : initialWard,
             village: res.data.village ? res.data.village : "",
             medical_history: [],
-            is_antenatal: res.data.is_antenatal
-              ? res.data.is_antenatal
-              : "false",
+            is_antenatal: String(!!res.data.is_antenatal),
             allergies: res.data.allergies ? res.data.allergies : "",
             pincode: res.data.pincode ? res.data.pincode : "",
             ongoing_medication: res.data.ongoing_medication
@@ -529,21 +527,30 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "local_body":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select local body";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "ward":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select ward";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "district":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select district";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -826,6 +833,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   const handleChange = (e: any) => {
     const form = { ...state.form };
+    switch (e.target.name) {
+      case "state":
+        form["district"] = "0";
+        form["local_body"] = "0";
+        form["ward"] = "0";
+        break;
+
+      case "district":
+        form["local_body"] = "0";
+        form["ward"] = "0";
+        break;
+
+      case "local_body":
+        form["ward"] = "0";
+        break;
+    }
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -1548,7 +1571,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             in={String(state.form.is_vaccinated) === "true"}
                             timeout="auto"
                             unmountOnExit
-                            className="col-span-2"
                           >
                             {
                               <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
@@ -1716,7 +1738,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             }
                             timeout="auto"
                             unmountOnExit
-                            className="col-span-2"
                           >
                             <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                               <div id="estimated_contact_date-div">
@@ -1730,7 +1751,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <DateInputField
                                   fullWidth={true}
                                   id="estimated_contact_date"
-                                  label="Estimate date of contact"
                                   value={state.form.estimated_contact_date}
                                   onChange={(date) =>
                                     handleDateChange(
