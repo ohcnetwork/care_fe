@@ -59,6 +59,8 @@ export const VoiceRecorder = (props: any) => {
             style={{ marginLeft: "auto" }}
             startIcon={<MicIcon />}
             onClick={startRecording}
+            fullWidth
+            className="w-full md:w-auto"
             disabled={isRecording}
           >
             {audioURL ? "Re-Record" : "Record"}

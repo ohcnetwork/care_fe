@@ -388,12 +388,14 @@ export const FileUpload = (props: FileUploadProps) => {
                 )}
               </div>
             ) : (
-              <div>
+              <div className="w-full">
                 <Button
                   color="primary"
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
+                  fullWidth
+                  className="w-full md:w-auto"
                   startIcon={<Visibility />}
                   onClick={() => {
                     loadFile(item.id);
@@ -724,6 +726,8 @@ export const FileUpload = (props: FileUploadProps) => {
                       variant="contained"
                       type="submit"
                       style={{ marginLeft: "auto" }}
+                      fullWidth
+                      className="w-full md:w-auto"
                       startIcon={
                         <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                       }
@@ -774,6 +778,8 @@ export const FileUpload = (props: FileUploadProps) => {
                         color="primary"
                         variant="contained"
                         type="submit"
+                        fullWidth
+                        className="w-full md:w-auto"
                         startIcon={
                           <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                         }
