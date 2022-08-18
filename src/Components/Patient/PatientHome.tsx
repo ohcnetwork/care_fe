@@ -154,7 +154,7 @@ export const PatientHome = (props: any) => {
   function Badge(props: { color: string; icon: string; text: string }) {
     return (
       <span
-        className="inline-flex m-2 items-center py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+        className="inline-flex items-center py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
         title={props.text}
       >
         <i
@@ -343,7 +343,7 @@ export const PatientHome = (props: any) => {
             <div className="text-sm leading-5 font-medium text-gray-500">
               {item.disease}
             </div>
-            <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
+            <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
               {item.details}
             </div>
           </>
