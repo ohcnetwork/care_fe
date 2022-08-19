@@ -629,11 +629,12 @@ export const PatientManager = (props: any) => {
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="title-text sm:flex align-center">
+        <div className="title-text sm:flex align-center gap-2">
           <div className="text-center">
             <button
               onClick={handleDownloadFiltered}
-              className="btn text-green-500 font-medium hover:bg-green-50 border border-solid"
+              disabled={!isDownloadAllowed}
+              className="btn text-green-500 disabled:text-gray-500 disabled:hover:bg-gray-50 font-medium hover:bg-green-50 border border-solid"
             >
               <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
               {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
@@ -650,7 +651,7 @@ export const PatientManager = (props: any) => {
             <button
               disabled={!isDownloadAllowed}
               onClick={handleDownloadAll}
-              className="btn text-green-500 disabled:text-gray-500 font-medium border border-solid"
+              className="btn text-green-500 disabled:text-gray-500 disabled:hover:bg-gray-50 hover:bg-green-50 font-medium border border-solid"
             >
               <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD ALL
               PATIENTS
