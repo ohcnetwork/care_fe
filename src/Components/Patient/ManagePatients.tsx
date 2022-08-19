@@ -453,27 +453,7 @@ export const PatientManager = (props: any) => {
             // patient.disease_status == "POSITIVE" && "bg-red-100"
           )}
         >
-          <div className="flex gap-4 items-start">
-            <div className="w-20 h-20 min-w-[5rem] bg-gray-200 rounded border border-gray-500">
-              {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed ? (
-                <div className="flex flex-col items-center justify-center h-full">
-                  <p className="text-gray-900 text-sm">
-                    {
-                      patient?.last_consultation?.current_bed?.bed_object
-                        ?.location_object?.name
-                    }
-                  </p>
-                  <p className="text-base font-bold text-center text-ellipsis">
-                    {patient?.last_consultation?.current_bed?.bed_object.name}
-                  </p>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <i className="fas fa-user-injured text-3xl text-gray-500"></i>
-                </div>
-              )}
-            </div>
+          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
             <div>
               <div className="md:flex justify-between w-full">
                 <div className="text-xl font-bold capitalize">
@@ -654,11 +634,12 @@ export const PatientManager = (props: any) => {
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="title-text sm:flex align-center">
+        <div className="title-text sm:flex align-center gap-2">
           <div className="text-center">
             <button
               onClick={handleDownloadFiltered}
-              className="btn text-green-500 font-medium hover:bg-green-50 border border-solid"
+              disabled={!isDownloadAllowed}
+              className="btn text-green-500 disabled:text-gray-500 disabled:hover:bg-gray-50 font-medium hover:bg-green-50 border border-solid"
             >
               <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
               {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
@@ -675,7 +656,7 @@ export const PatientManager = (props: any) => {
             <button
               disabled={!isDownloadAllowed}
               onClick={handleDownloadAll}
-              className="btn text-green-500 disabled:text-gray-500 font-medium border border-solid"
+              className="btn text-green-500 disabled:text-gray-500 disabled:hover:bg-gray-50 hover:bg-green-50 font-medium border border-solid"
             >
               <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD ALL
               PATIENTS

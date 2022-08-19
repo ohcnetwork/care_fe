@@ -182,7 +182,7 @@ export default function UserFilter(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Alt Phone Number</span>
+          <span className="text-sm font-semibold">WhatsApp Phone Number</span>
           <div className="flex justify-between">
             <div className="w-full">
               <PhoneNumberField
