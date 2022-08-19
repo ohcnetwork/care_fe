@@ -931,32 +931,20 @@ export const DailyRounds = (props: any) => {
               )}
 
               <div className="mt-4 flex flex-col md:flex-row gap-2 justify-between">
-                {id && (
-                  <Link
-                    className="btn btn-default bg-white mt-2"
-                    href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${id}/update`}
-                  >
-                    Back
-                  </Link>
-                )}
-                {!id && (
-                  <Link
-                    className="btn btn-default bg-white mt-2"
-                    href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/updates`}
-                  >
-                    Back
-                  </Link>
-                )}
-                <div>
-                  <button
-                    type="submit"
-                    className="btn btn-primary ml-auto text-base w-full md:w-auto"
-                    onClick={(e) => handleSubmit(e)}
-                  >
-                    <i className="fa-regular fa-circle-check mr-2"></i>{" "}
-                    {buttonText}
-                  </button>
-                </div>
+                <Link
+                  className="btn btn-default bg-white mt-2"
+                  href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
+                >
+                  Back
+                </Link>
+                <button
+                  type="submit"
+                  className="btn btn-primary ml-auto text-base"
+                  onClick={(e) => handleSubmit(e)}
+                >
+                  <i className="fa-regular fa-circle-check mr-2"></i>{" "}
+                  {buttonText}
+                </button>
               </div>
             </CardContent>
           </form>
