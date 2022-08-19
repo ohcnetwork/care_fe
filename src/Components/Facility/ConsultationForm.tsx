@@ -789,7 +789,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="mt-4" id="consultation_notes-div">
-                <InputLabel>Advice*</InputLabel>
+                <InputLabel>General Instructions (Advice)*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   className="mt-2"
