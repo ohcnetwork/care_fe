@@ -545,15 +545,7 @@ export const PatientManager = (props: any) => {
                 <Badge color="primary" icon="lock" text="Transfer Blocked" />
               )}
               {patient.disease_status === "POSITIVE" && (
-                <Badge color="red" icon="radiation" text="Positive" />
-              )}
-              {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
-                0 && (
-                <Badge
-                  color="primary"
-                  icon="smile-beam"
-                  text={patient.disease_status}
-                />
+                <Badge color="red" icon="radiation" text="COVID Positive" />
               )}
               {patient.gender === 2 &&
                 patient.is_antenatal &&
@@ -562,20 +554,6 @@ export const PatientManager = (props: any) => {
                 )}
               {patient.is_medical_worker && patient.is_active && (
                 <Badge color="blue" icon="user-md" text="Medical Worker" />
-              )}
-              {patient.contact_with_confirmed_carrier && (
-                <Badge
-                  color="red"
-                  icon="exclamation-triangle"
-                  text="Contact with confirmed carrier"
-                />
-              )}
-              {patient.contact_with_suspected_carrier && (
-                <Badge
-                  color="yellow"
-                  icon="exclamation-triangle"
-                  text="Contact with suspected carrier"
-                />
               )}
               {patient.disease_status === "EXPIRED" && (
                 <Badge
