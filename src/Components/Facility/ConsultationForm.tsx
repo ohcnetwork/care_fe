@@ -240,7 +240,6 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
       setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      console.log("recieved", res.data.prn_prescription);
       setPRNAdvice(!Array.isArray(res.data.prn_prescription) ? [] : res.data.prn_prescription);
 
       if (!status.aborted) {
