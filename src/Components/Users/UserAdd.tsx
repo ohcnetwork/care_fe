@@ -40,6 +40,7 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
+import clsx from "clsx";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -746,7 +747,15 @@ export const UserAdd = (props: UserProps) => {
                       ) : (
                         <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
-                      Username should be atleast 2 characters long
+                      <span
+                        className={clsx(
+                          state.form.username?.length < 2
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Username should be atleast 2 characters long
+                      </span>
                     </div>
                     <div>
                       {!/[^.@+_-]/.test(
@@ -756,7 +765,17 @@ export const UserAdd = (props: UserProps) => {
                       ) : (
                         <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
-                      Username can't end with ^ . @ + _ -
+                      <span
+                        className={clsx(
+                          !/[^.@+_-]/.test(
+                            state.form.username[state.form.username?.length - 1]
+                          )
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Username can't end with ^ . @ + _ -
+                      </span>
                     </div>
                   </div>
                 )}
