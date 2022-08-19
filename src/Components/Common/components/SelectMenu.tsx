@@ -64,7 +64,7 @@ export default function SelectMenu<T>(props: Props<T>) {
               <Listbox.Options
                 className={clsx(
                   props.position ? "md:right-0 md:left-auto" : "left-0",
-                  "origin-top-right absolute z-10 mt-2 w-72 rounded-md shadow-lg overflow-hidden bg-white divide-y divide-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  "origin-top-right absolute z-10 mt-2 w-auto lg:w-72 rounded-md shadow-lg overflow-hidden bg-white divide-y divide-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none"
                 )}
               >
                 {options.map((option) => (
