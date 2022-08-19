@@ -206,7 +206,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(hemodynamicParameter))
 
   <div>
-    <h2> {str("Hemodynamic Parameters")} </h2>
+    <h2> {str("Vitals")} </h2>
     <div className="flex items-center flex-col">
       <div className="w-full">
         <div className="mx-2 mt-5 md:flex justify-between">
