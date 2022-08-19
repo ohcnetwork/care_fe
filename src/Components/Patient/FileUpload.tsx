@@ -606,14 +606,13 @@ export const FileUpload = (props: FileUploadProps) => {
       >
         {fileUrl && fileUrl.length > 0 ? (
           <>
-            <div className="flex absolute w-3/5 right-2">
+            <div className="flex absolute w-3/5 top-16 md:top-0 md:right-4">
               {file_state.isImage && (
-                <div className="w-2/6 flex">
-                  <div className="mr-4">
+                <div className="flex flex-col gap-2 md:flex-row">
+                  <div>
                     <Button
                       color="default"
                       variant="contained"
-                      style={{ marginLeft: "auto" }}
                       startIcon={<ZoomIn />}
                       onClick={() => {
                         handleZoomIn();
@@ -627,7 +626,6 @@ export const FileUpload = (props: FileUploadProps) => {
                     <Button
                       color="default"
                       variant="contained"
-                      style={{ marginLeft: "4px" }}
                       startIcon={<ZoomOut />}
                       onClick={() => {
                         handleZoomOut();
@@ -639,34 +637,30 @@ export const FileUpload = (props: FileUploadProps) => {
                   </div>
                 </div>
               )}
-              <div className="flex absolute right-2">
-                {downloadURL && downloadURL.length > 0 && (
-                  <div>
-                    <a
-                      href={downloadURL}
-                      download
-                      className="text-white p-4 my-2 rounded m-2 bg-primary-500"
-                    >
-                      <GetApp>load</GetApp>
-                      Download
-                    </a>
-                  </div>
-                )}
-
-                <div>
+            </div>
+            <div className="flex justify-center md:absolute md:right-2">
+              {downloadURL && downloadURL.length > 0 && (
+                <a href={downloadURL} download>
                   <Button
                     color="primary"
                     variant="contained"
-                    style={{ marginLeft: "auto" }}
-                    startIcon={<Close />}
-                    onClick={() => {
-                      handleClose();
-                    }}
+                    startIcon={<GetApp />}
                   >
-                    Close
+                    Download
                   </Button>
-                </div>
-              </div>
+                </a>
+              )}
+              <Button
+                color="primary"
+                variant="contained"
+                style={{ marginLeft: "10px" }}
+                startIcon={<Close />}
+                onClick={() => {
+                  handleClose();
+                }}
+              >
+                Close
+              </Button>
             </div>
             {file_state.isImage ? (
               <img
