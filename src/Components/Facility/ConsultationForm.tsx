@@ -533,7 +533,6 @@ export const ConsultationForm = (props: any) => {
   const handleProcedureChange: ChangeEventHandler<HTMLInputElement> = (
     e: any
   ) => {
-    console.log(e.target.value);
     e &&
       e.target &&
       dispatch({
