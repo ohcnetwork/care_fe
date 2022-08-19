@@ -939,7 +939,7 @@ export const DailyRounds = (props: any) => {
                 </Link>
                 <button
                   type="submit"
-                  className="btn btn-primary ml-auto text-base"
+                  className="btn btn-primary ml-auto text-base w-full md:w-auto"
                   onClick={(e) => handleSubmit(e)}
                 >
                   <i className="fa-regular fa-circle-check mr-2"></i>{" "}
