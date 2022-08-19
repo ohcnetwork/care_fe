@@ -3,7 +3,7 @@ import { PrescriptionDropdown } from "./PrescriptionDropdown";
 const medicines = require("./assets/medicines");
 const frequency = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
 const routes = ["Oral", "IV", "IM", "S/C"]
-const units = ["mg", "ml", "drops"]
+const units = ["mg", "ml", "drops", "ampule", "tsp"]
 
 export type PrescriptionType = {
     medicine?: string; 
