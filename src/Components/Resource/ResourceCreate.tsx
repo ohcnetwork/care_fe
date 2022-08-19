@@ -124,7 +124,7 @@ export default function ResourceCreate(props: resourceProps) {
   }, [dispatchAction, facilityId]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
       switch (field) {
@@ -260,37 +260,38 @@ export default function ResourceCreate(props: resourceProps) {
                 />
               </div>
 
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-              <div>
-                <InputLabel>Category</InputLabel>
-                <div className="py-4">
-                  <SelectMenu
-                    options={RESOURCE_CATEGORY_CHOICES.map(
-                      (option: string) => ({
-                        title: option,
-                        value: option,
-                      })
-                    )}
-                    selected={state.form.category}
-                    onSelect={(value: any) =>
-                      handleValueChange(value, "category")
-                    }
-                  />
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                <div>
+                  <InputLabel>Category</InputLabel>
+                  <div className="py-4">
+                    <SelectMenu
+                      options={RESOURCE_CATEGORY_CHOICES.map(
+                        (option: string) => ({
+                          title: option,
+                          value: option,
+                        })
+                      )}
+                      selected={state.form.category}
+                      onSelect={(value: any) =>
+                        handleValueChange(value, "category")
+                      }
+                    />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <InputLabel>Subcategory</InputLabel>
-                <div className="py-4">
-                  <SelectMenu
-                    options={RESOURCE_SUBCATEGORIES.map((option) => ({
-                      title: option.text,
-                      value: option.text,
-                    }))}
-                    selected={state.form.sub_category}
-                    onSelect={(value: any) =>
-                      handleValueChange(value, "sub_category")
-                    }
-                  />
+                <div>
+                  <InputLabel>Subcategory</InputLabel>
+                  <div className="py-4">
+                    <SelectMenu
+                      options={RESOURCE_SUBCATEGORIES.map((option) => ({
+                        title: option.text,
+                        value: option.text,
+                      }))}
+                      selected={state.form.sub_category}
+                      onSelect={(value: any) =>
+                        handleValueChange(value, "sub_category")
+                      }
+                    />
+                  </div>
                 </div>
               </div>
               <div className="">
@@ -307,24 +308,17 @@ export default function ResourceCreate(props: resourceProps) {
                   errors={state.errors.title}
                 />
               </div>
-              <div>
-                <InputLabel>Is this an emergency?</InputLabel>
-                <div className="py-2">
-                  <SelectMenu
-                    options={[
-                      {
-                        title: "Yes",
-                        value: "true",
-                      },
-                      {
-                        title: "No",
-                        value: "false",
-                      },
-                    ]}
-                    selected={state.form.emergency}
-                    onSelect={(value: any) =>
-                      handleValueChange(value, "emergency")
-                    }
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                <div>
+                  <InputLabel>Required Quantity</InputLabel>
+                  <TextInputField
+                    name="requested_quantity"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.required_quantity}
+                    onChange={handleChange}
+                    errors=""
                   />
                 </div>
                 <div>
@@ -341,8 +335,10 @@ export default function ResourceCreate(props: resourceProps) {
                           value: "false",
                         },
                       ]}
-                      selected={isEmergency}
-                      onSelect={setIsEmergency}
+                      selected={state.form.emergency}
+                      onSelect={(value: any) =>
+                        handleValueChange(value, "emergency")
+                      }
                     />
                   </div>
                   <ErrorHelperText error={state.errors.emergency} />
