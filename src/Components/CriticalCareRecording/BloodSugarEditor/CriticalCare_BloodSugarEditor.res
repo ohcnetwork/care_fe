@@ -87,26 +87,6 @@ let saveData = (id, consultationId, state, send, updateCB) => {
   )
 }
 
-let isInvalidInputInt = (min, max, val) => {
-  let value = Js.Option.getWithDefault(min, val)
-  if value < min || value > max {
-    Some("Input outside range")
-  } else {
-    None
-  }
-}
-
-let isInvalidInputFloat = (minString, maxString, val) => {
-  let min = Js.Float.fromString(minString)
-  let max = Js.Float.fromString(maxString)
-  let value = Js.Option.getWithDefault(min, val)
-  if value < min || value > max {
-    Some("Input outside range")
-  } else {
-    None
-  }
-}
-
 @react.component
 let make = (~bloodsugarParameters, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(bloodsugarParameters))
@@ -123,7 +103,7 @@ let make = (~bloodsugarParameters, ~updateCB, ~id, ~consultationId) => {
         value={Belt.Option.mapWithDefault(state.blood_sugar_level, "", string_of_int)}
         setValue={s => send(SetBloodSugarLevel(int_of_string(s)))}
         getLabel={getStatus(70.0, 110.0)}
-        hasError={isInvalidInputInt(0, 700, state.blood_sugar_level)}
+        hasError={ValidationUtils.isInputInRangeInt(0, 700, state.blood_sugar_level)}
       />
       <h4 className="self-start"> {str("Insulin Intake")} </h4>
       <Slider
@@ -135,7 +115,7 @@ let make = (~bloodsugarParameters, ~updateCB, ~id, ~consultationId) => {
         value={Belt.Option.mapWithDefault(state.insulin_intake_dose, "", Js.Float.toString)}
         setValue={s => send(SetDosage(float_of_string(s)))}
         getLabel={_ => ("", "#ff0000")}
-        hasError={isInvalidInputFloat("0", "100", state.insulin_intake_dose)}
+        hasError={ValidationUtils.isInputInRangeFloat("0", "100", state.insulin_intake_dose)}
       />
       <div className="w-full mb-10 px-3">
         <label className="block mb-2 font-bold"> {str("Frequency")} </label>
