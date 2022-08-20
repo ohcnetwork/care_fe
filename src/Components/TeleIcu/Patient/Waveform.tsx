@@ -22,23 +22,22 @@ export default function Waveform(props: { wave: WaveformType }) {
   const [queueData, setQueueData] = useState<number[]>([]);
   const [xData, setXData] = useState<number[]>([]);
 
-  const viewable = 600;
-  const tpf = 3500 / data.length;
+  const viewable = 300;
+  const tpf = 4000 / data.length;
 
   useEffect(() => {
     setQueueData(queueData.concat(data));
     setXData(Array.from(Array(viewable).keys()));
-
+    
+    /* // Uncoment to see data intervals
     let seconds = 1;
-
     console.log("Data recieved");
-
     let timer = setInterval(() => {
       console.log(seconds);
       seconds++;
     }, 1000);
-
     return () => clearInterval(timer);
+    */
   }, [props]);
 
   useEffect(() => {
