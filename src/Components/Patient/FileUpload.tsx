@@ -2,6 +2,7 @@ import axios from "axios";
 import { Button, CircularProgress, InputLabel } from "@material-ui/core";
 import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
+import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -586,6 +587,11 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
+  // upload file on click of custom button
+  const uploadFileFromCustomButton = () => {
+    document.getElementById("filePicker")?.click();
+  };
+
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
       <Modal
@@ -755,7 +761,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   margin="dense"
                   type="text"
                   InputLabelProps={{ shrink: !!uploadFileName }}
-                  // value={uploadFileName}
+                  value={uploadFileName}
                   disabled={uploadStarted}
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
@@ -768,8 +774,23 @@ export const FileUpload = (props: FileUploadProps) => {
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
                   <div className="md:flex justify-between">
+                    <div>
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        onClick={uploadFileFromCustomButton}
+                        startIcon={<InsertDriveFileIcon />}
+                        type="submit"
+                        fullWidth
+                        className="w-full md:w-auto"
+                      >
+                        Browse
+                      </Button>
+                    </div>
                     <input
+                      id="filePicker"
                       title="changeFile"
+                      className="hidden"
                       onChange={onFileChange}
                       type="file"
                     />
