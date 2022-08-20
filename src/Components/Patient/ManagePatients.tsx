@@ -43,6 +43,8 @@ interface TabPanelProps {
   value: any;
 }
 
+type ParamsTypes = Record<string, number | boolean | string>;
+
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
@@ -61,7 +63,7 @@ function TabPanel(props: TabPanelProps) {
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const RESULT_LIMIT = 14;
+const RESULT_LIMIT = 12;
 
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
@@ -87,6 +89,7 @@ export const PatientManager = (props: any) => {
 
   const params = {
     page: qParams.page || 1,
+    limit: RESULT_LIMIT,
     name: qParams.name || undefined,
     is_active: qParams.is_active || "True",
     disease_status: qParams.disease_status || undefined,
@@ -331,7 +334,7 @@ export const PatientManager = (props: any) => {
     [fetchFacilityBadgeName]
   );
 
-  const updateQuery = (params: any) => {
+  const updateQuery = (params: ParamsTypes) => {
     const nParams = Object.assign({}, qParams, params);
     setQueryParams(nParams, { replace: true });
   };
@@ -356,12 +359,12 @@ export const PatientManager = (props: any) => {
     updateQuery({ [name]: value, page: 1 });
   };
 
-  const applyFilter = (data: any) => {
+  const applyFilter = (data: ParamsTypes) => {
     const filter = { ...qParams, ...data };
     updateQuery(filter);
     setShowFilters(false);
   };
-  const removeFilter = (paramKey: any) => {
+  const removeFilter = (paramKey: string) => {
     updateQuery({
       ...qParams,
       [paramKey]: "",
@@ -494,24 +497,24 @@ export const PatientManager = (props: any) => {
                   {patient.allow_transfer ? (
                     <Badge
                       color="yellow"
-                      icon="unlock"
+                      startIcon="unlock"
                       text="Transfer Allowed"
                     />
                   ) : (
                     <Badge
                       color="primary"
-                      icon="lock"
+                      startIcon="lock"
                       text="Transfer Blocked"
                     />
                   )}
                   {patient.disease_status === "POSITIVE" && (
-                    <Badge color="red" icon="radiation" text="Positive" />
+                    <Badge color="red" startIcon="radiation" text="Positive" />
                   )}
                   {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
                     0 && (
                     <Badge
                       color="primary"
-                      icon="smile-beam"
+                      startIcon="smile-beam"
                       text={patient.disease_status}
                     />
                   )}
@@ -520,31 +523,35 @@ export const PatientManager = (props: any) => {
                     patient.is_active && (
                       <Badge
                         color="blue"
-                        icon="baby-carriage"
+                        startIcon="baby-carriage"
                         text="Antenatal"
                       />
                     )}
                   {patient.is_medical_worker && patient.is_active && (
-                    <Badge color="blue" icon="user-md" text="Medical Worker" />
+                    <Badge
+                      color="blue"
+                      startIcon="user-md"
+                      text="Medical Worker"
+                    />
                   )}
                   {patient.contact_with_confirmed_carrier && (
                     <Badge
                       color="red"
-                      icon="exclamation-triangle"
+                      startIcon="exclamation-triangle"
                       text="Contact with confirmed carrier"
                     />
                   )}
                   {patient.contact_with_suspected_carrier && (
                     <Badge
                       color="yellow"
-                      icon="exclamation-triangle"
+                      startIcon="exclamation-triangle"
                       text="Contact with suspected carrier"
                     />
                   )}
                   {patient.disease_status === "EXPIRED" && (
                     <Badge
                       color="yellow"
-                      icon="exclamation-triangle"
+                      startIcon="exclamation-triangle"
                       text="Patient Expired"
                     />
                   )}
@@ -554,7 +561,7 @@ export const PatientManager = (props: any) => {
                     <span className="relative inline-flex">
                       <Badge
                         color="red"
-                        icon="notes-medical"
+                        startIcon="notes-medical"
                         text="No Consultation Filed"
                       />
                       <span className="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">

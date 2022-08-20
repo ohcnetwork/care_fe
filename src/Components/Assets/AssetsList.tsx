@@ -344,13 +344,13 @@ const AssetsList = () => {
                   <div className="md:flex justify-between pt-2">
                     <div className="md:flex flex-wrap">
                       {asset.is_working ? (
-                        <Badge color="green" icon="cog" text="Working" />
+                        <Badge color="green" startIcon="cog" text="Working" />
                       ) : (
-                        <Badge color="red" icon="cog" text="Not Working" />
+                        <Badge color="red" startIcon="cog" text="Not Working" />
                       )}
                       <Badge
                         color="blue"
-                        icon="location-arrow"
+                        startIcon="location-arrow"
                         text={asset.status}
                       />
                     </div>

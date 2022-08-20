@@ -1,15 +1,37 @@
-export function Badge(props: { color: string; icon: string; text: string }) {
+import { MouseEventHandler } from "react";
+
+interface Props {
+  color?: string;
+  startIcon?: string;
+  endIcon?: string;
+  text: string;
+  onStartIconClick?: MouseEventHandler<HTMLElement>;
+  onEndIconClick?: MouseEventHandler<HTMLElement>;
+}
+
+export function Badge(props: Props) {
   return (
     <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-${props.color}-100 text-gray-700`}
+      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium leading-4 bg-${props.color}-100 text-gray-700`}
       title={props.text}
     >
-      <i
-        className={
-          "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-        }
-      ></i>
+      {props.startIcon && (
+        <i
+          className={
+            "text-md text-" + props.color + "-500 fas fa-" + props.startIcon
+          }
+          onClick={props.onEndIconClick}
+        />
+      )}
       {props.text}
+      {props.endIcon && (
+        <i
+          className={
+            "text-md text-" + props.color + "-500 fas fa-" + props.endIcon
+          }
+          onClick={props.onEndIconClick}
+        />
+      )}
     </span>
   );
 }

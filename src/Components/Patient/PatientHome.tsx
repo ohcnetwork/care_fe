@@ -606,47 +606,59 @@ export const PatientHome = (props: any) => {
               </div>
               <div className="flex flex-wrap mt-2 space-x-2">
                 {patientData.is_vaccinated ? (
-                  <Badge color="blue" icon="syringe" text="Vaccinated" />
+                  <Badge color="blue" startIcon="syringe" text="Vaccinated" />
                 ) : (
                   <Badge
                     color="yellow"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Not Vaccinated"
                   />
                 )}
                 {patientData.allow_transfer ? (
-                  <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
+                  <Badge
+                    color="yellow"
+                    startIcon="unlock"
+                    text="Transfer Allowed"
+                  />
                 ) : (
-                  <Badge color="primary" icon="lock" text="Transfer Blocked" />
+                  <Badge
+                    color="primary"
+                    startIcon="lock"
+                    text="Transfer Blocked"
+                  />
                 )}
                 {patientData.gender === 2 &&
                   patientData.is_antenatal &&
                   patientData.is_active && (
-                    <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+                    <Badge
+                      color="blue"
+                      startIcon="baby-carriage"
+                      text="Antenatal"
+                    />
                   )}
                 {patientData.contact_with_confirmed_carrier && (
                   <Badge
                     color="red"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Contact with confirmed carrier"
                   />
                 )}
                 {patientData.contact_with_suspected_carrier && (
                   <Badge
                     color="yellow"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Contact with suspected carrier"
                   />
                 )}
                 {patientData.past_travel && (
                   <Badge
                     color="yellow"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Travel (within last 28 days)"
                   />
                 )}
                 {patientData.last_consultation?.is_telemedicine && (
-                  <Badge color="purple" icon="phone" text="Telemedicine" />
+                  <Badge color="purple" startIcon="phone" text="Telemedicine" />
                 )}
               </div>
             </div>
