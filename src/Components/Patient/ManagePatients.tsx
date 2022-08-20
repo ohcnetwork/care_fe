@@ -545,15 +545,7 @@ export const PatientManager = (props: any) => {
                 <Badge color="primary" icon="lock" text="Transfer Blocked" />
               )}
               {patient.disease_status === "POSITIVE" && (
-                <Badge color="red" icon="radiation" text="Positive" />
-              )}
-              {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
-                0 && (
-                <Badge
-                  color="primary"
-                  icon="smile-beam"
-                  text={patient.disease_status}
-                />
+                <Badge color="red" icon="radiation" text="COVID Positive" />
               )}
               {patient.gender === 2 &&
                 patient.is_antenatal &&
@@ -562,20 +554,6 @@ export const PatientManager = (props: any) => {
                 )}
               {patient.is_medical_worker && patient.is_active && (
                 <Badge color="blue" icon="user-md" text="Medical Worker" />
-              )}
-              {patient.contact_with_confirmed_carrier && (
-                <Badge
-                  color="red"
-                  icon="exclamation-triangle"
-                  text="Contact with confirmed carrier"
-                />
-              )}
-              {patient.contact_with_suspected_carrier && (
-                <Badge
-                  color="yellow"
-                  icon="exclamation-triangle"
-                  text="Contact with suspected carrier"
-                />
               )}
               {patient.disease_status === "EXPIRED" && (
                 <Badge
@@ -651,11 +629,12 @@ export const PatientManager = (props: any) => {
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="title-text sm:flex align-center">
+        <div className="title-text sm:flex align-center gap-2">
           <div className="text-center">
             <button
               onClick={handleDownloadFiltered}
-              className="btn text-green-500 font-medium hover:bg-green-50 border border-solid"
+              disabled={!isDownloadAllowed}
+              className="btn text-green-500 disabled:text-gray-500 disabled:hover:bg-gray-50 font-medium hover:bg-green-50 border border-solid"
             >
               <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
               {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
@@ -672,7 +651,7 @@ export const PatientManager = (props: any) => {
             <button
               disabled={!isDownloadAllowed}
               onClick={handleDownloadAll}
-              className="btn text-green-500 disabled:text-gray-500 font-medium border border-solid"
+              className="btn text-green-500 disabled:text-gray-500 disabled:hover:bg-gray-50 hover:bg-green-50 font-medium border border-solid"
             >
               <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD ALL
               PATIENTS
