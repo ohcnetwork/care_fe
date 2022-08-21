@@ -650,7 +650,6 @@ export const FileUpload = (props: FileUploadProps) => {
                 <a
                   href={downloadURL}
                   download={file_state.name + "." + file_state.extension}
-                  className="text-white p-4 my-2 rounded m-2 bg-primary-500 hover:bg-primary-700 shadow"
                 >
                   <Button
                     color="primary"
