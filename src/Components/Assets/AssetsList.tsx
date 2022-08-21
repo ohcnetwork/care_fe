@@ -330,7 +330,7 @@ const AssetsList = () => {
                 >
                   <div className="px-4 md:w-1/2">
                     <div className="md:flex">
-                      <p className="text-xl font-normal capitalize">
+                      <p className="text-xl font-normal capitalize break-words">
                         {asset.name}
                       </p>
                     </div>
