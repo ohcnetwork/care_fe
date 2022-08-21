@@ -75,7 +75,7 @@ const routes: Routes = {
   },
 
   partialUpdateUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/{username}/",
     method: "PATCH",
   },
 
@@ -322,6 +322,11 @@ const routes: Routes = {
 
   getCapacityBed: {
     path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
+  },
+
+  deleteCapacityBed: {
+    path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
+    method: "DELETE",
   },
 
   listDoctor: {
