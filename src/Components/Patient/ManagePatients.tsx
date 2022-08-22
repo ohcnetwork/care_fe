@@ -456,133 +456,137 @@ export const PatientManager = (props: any) => {
             // patient.disease_status == "POSITIVE" && "bg-red-100"
           )}
         >
-          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
-            <div>
-              <div className="md:flex justify-between w-full">
-                <div className="text-xl font-bold capitalize">
-                  {patient.name} - {patient.age}
-                  {patient.action && patient.action != 10 && (
-                    <span className="font-semibold ml-2 text-gray-700">
-                      -{" "}
-                      {
-                        TELEMEDICINE_ACTIONS.find(
-                          (i) => i.id === patient.action
-                        )?.desc
-                      }
-                    </span>
-                  )}
+          <div className="flex gap-4 items-start">
+            <div className="w-20 h-20 min-w-[5rem] bg-gray-200 rounded border border-gray-500">
+              {patient?.last_consultation &&
+              patient?.last_consultation?.current_bed ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <p className="text-gray-900 text-sm">
+                    {
+                      patient?.last_consultation?.current_bed?.bed_object
+                        ?.location_object?.name
+                    }
+                  </p>
+                  <p className="text-base font-bold text-center text-ellipsis">
+                    {patient?.last_consultation?.current_bed?.bed_object.name}
+                  </p>
                 </div>
-              </div>
-              {patient.facility_object && (
-                <div className="mb-2">
-                  <div className="flex flex-wrap items-center">
-                    <p className="text-sm font-medium text-gray-700 mr-2">
-                      {" "}
-                      {patient.facility_object.name}
-                    </p>
-                    <p className="text-base">
-                      <span className="text-sm text-gray-600">
-                        last updated
-                      </span>{" "}
-                      <span className="font-medium text-gray-900">
-                        {" "}
-                        {moment(patient.modified_date).fromNow()}
-                      </span>
-                    </p>
-                  </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <i className="fas fa-user-injured text-3xl text-gray-500"></i>
                 </div>
               )}
-              <div className="flex w-full">
-                <div className="flex flex-wrap gap-2 flex-row justify-start">
-                  {patient.allow_transfer ? (
-                    <Badge
-                      color="yellow"
-                      startIcon="unlock"
-                      text="Transfer Allowed"
-                    />
-                  ) : (
-                    <Badge
-                      color="primary"
-                      startIcon="lock"
-                      text="Transfer Blocked"
-                    />
-                  )}
-                  {patient.disease_status === "POSITIVE" && (
-                    <Badge color="red" startIcon="radiation" text="Positive" />
-                  )}
-                  {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
-                    0 && (
-                    <Badge
-                      color="primary"
-                      startIcon="smile-beam"
-                      text={patient.disease_status}
-                    />
-                  )}
-                  {patient.gender === 2 &&
-                    patient.is_antenatal &&
-                    patient.is_active && (
+            </div>
+            <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
+              <div>
+                <div className="md:flex justify-between w-full">
+                  <div className="text-xl font-bold capitalize">
+                    {patient.name} - {patient.age}
+                    {patient.action && patient.action != 10 && (
+                      <span className="font-semibold ml-2 text-gray-700">
+                        -{" "}
+                        {
+                          TELEMEDICINE_ACTIONS.find(
+                            (i) => i.id === patient.action
+                          )?.desc
+                        }
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {patient.facility_object && (
+                  <div className="mb-2">
+                    <div className="flex flex-wrap items-center">
+                      <p className="text-sm font-medium text-gray-700 mr-2">
+                        {" "}
+                        {patient.facility_object.name}
+                      </p>
+                      <p className="text-base">
+                        <span className="text-sm text-gray-600">
+                          last updated
+                        </span>{" "}
+                        <span className="font-medium text-gray-900">
+                          {" "}
+                          {moment(patient.modified_date).fromNow()}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex w-full">
+                  <div className="flex flex-wrap gap-2 flex-row justify-start">
+                    {patient.allow_transfer ? (
                       <Badge
-                        color="blue"
-                        startIcon="baby-carriage"
-                        text="Antenatal"
+                        color="yellow"
+                        startIcon="unlock"
+                        text="Transfer Allowed"
+                      />
+                    ) : (
+                      <Badge
+                        color="primary"
+                        startIcon="lock"
+                        text="Transfer Blocked"
                       />
                     )}
-                  {patient.is_medical_worker && patient.is_active && (
-                    <Badge
-                      color="blue"
-                      startIcon="user-md"
-                      text="Medical Worker"
-                    />
-                  )}
-                  {patient.contact_with_confirmed_carrier && (
-                    <Badge
-                      color="red"
-                      startIcon="exclamation-triangle"
-                      text="Contact with confirmed carrier"
-                    />
-                  )}
-                  {patient.contact_with_suspected_carrier && (
-                    <Badge
-                      color="yellow"
-                      startIcon="exclamation-triangle"
-                      text="Contact with suspected carrier"
-                    />
-                  )}
-                  {patient.disease_status === "EXPIRED" && (
-                    <Badge
-                      color="yellow"
-                      startIcon="exclamation-triangle"
-                      text="Patient Expired"
-                    />
-                  )}
-                  {(!patient.last_consultation ||
-                    patient.last_consultation?.facility !==
-                      patient.facility) && (
-                    <span className="relative inline-flex">
+                    {patient.disease_status === "POSITIVE" && (
                       <Badge
                         color="red"
-                        startIcon="notes-medical"
-                        text="No Consultation Filed"
+                        startIcon="radiation"
+                        text="Positive"
                       />
-                      <span className="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
-                      </span>
-                    </span>
-                  )}
-                  {showReviewAlert(patient) &&
-                    moment().isBefore(patient.review_time) && (
-                      <span
-                        className={
-                          "m-1 inline-block items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
-                          (moment().isBefore(patient.review_time)
-                            ? " bg-gray-100"
-                            : "rounded p-1 bg-red-400 text-white")
-                        }
-                      >
-                        Review Missed
+                    )}
+                    {patient.gender === 2 &&
+                      patient.is_antenatal &&
+                      patient.is_active && (
+                        <Badge
+                          color="blue"
+                          startIcon="baby-carriage"
+                          text="Antenatal"
+                        />
+                      )}
+                    {patient.is_medical_worker && patient.is_active && (
+                      <Badge
+                        color="blue"
+                        startIcon="user-md"
+                        text="Medical Worker"
+                      />
+                    )}
+                    {patient.disease_status === "EXPIRED" && (
+                      <Badge
+                        color="yellow"
+                        startIcon="exclamation-triangle"
+                        text="Patient Expired"
+                      />
+                    )}
+                    {(!patient.last_consultation ||
+                      patient.last_consultation?.facility !==
+                        patient.facility) && (
+                      <span className="relative inline-flex">
+                        <Badge
+                          color="red"
+                          startIcon="notes-medical"
+                          text="No Consultation Filed"
+                        />
+                        <span className="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                        </span>
                       </span>
                     )}
+                    {showReviewAlert(patient) &&
+                      moment().isBefore(patient.review_time) && (
+                        <span
+                          className={
+                            "m-1 inline-block items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
+                            (moment().isBefore(patient.review_time)
+                              ? " bg-gray-100"
+                              : "rounded p-1 bg-red-400 text-white")
+                          }
+                        >
+                          Review Missed
+                        </span>
+                      )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -696,7 +700,7 @@ export const PatientManager = (props: any) => {
                       cy="12"
                       r="10"
                       stroke="currentColor"
-                      stroke-width="4"
+                      strokeWidth="4"
                     ></circle>
                     <path
                       className="opacity-75"
