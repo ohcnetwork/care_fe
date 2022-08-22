@@ -211,7 +211,7 @@ const AssetManage = (props: AssetManageProps) => {
                 <span>{asset?.support_name || "--"}</span>
               </Typography>
               <Typography className="flex flex-col">
-                <span className="font-bold">Contact Phone Number</span>
+                <span className="font-bold">Customer Support Number</span>
                 <span>{asset?.support_phone || "--"}</span>
               </Typography>
               <Typography className="flex flex-col">
