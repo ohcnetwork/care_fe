@@ -8,8 +8,6 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import type {t as Prescription__Prescription_t} from '../../../src/Components/Common/prescription-builder/types/Prescription__Prescription.gen';
-
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
@@ -48,14 +46,16 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { make as PrescriptionBuilderOld } from "../Common/PrescriptionBuilder.gen";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
+import DiagnosisSelect from "../Common/DiagnosisSelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -198,18 +198,14 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
-
-  useEffect(()=>{
-    console.log("da", dischargeAdvice);
-  },[dischargeAdvice])
-
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
+    []
+  );
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
-  const [diseaseStatus, setDiseaseStatus] = useState("");
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
@@ -221,7 +217,6 @@ export const ConsultationForm = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
-          setDiseaseStatus(res.data.disease_status);
         }
       } else {
         setPatientName("");
@@ -383,9 +378,9 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "discharge_advice":
+        case "discharge_advice": {
           let invalid = false;
-          for (let f of dischargeAdvice) {
+          for (const f of dischargeAdvice) {
             if (
               !f.dosage?.replace(/\s/g, "").length ||
               !f.medicine?.replace(/\s/g, "").length
@@ -400,6 +395,7 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        }
         default:
           return;
       }
@@ -851,20 +847,17 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="diagnosis-div" className="mt-4">
-                <InputLabel id="exam-details-label">Diagnosis</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="diagnosis"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.diagnosis,
-                  }}
+                <DiagnosisSelect
                   value={state.form.diagnosis}
-                  onChange={handleChange}
-                  errors={state.errors.diagnosis}
+                  setDiagnosis={(diagnosis: { id: number; label: string }) =>
+                    dispatch({
+                      type: "set_form",
+                      form: {
+                        ...state.form,
+                        diagnosis: diagnosis?.label || "",
+                      },
+                    })
+                  }
                 />
               </div>
 

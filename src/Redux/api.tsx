@@ -660,6 +660,11 @@ const routes: Routes = {
     method: "PUT",
   },
 
+  // ICD11
+  listICD11Diagnosis: {
+    path: "/api/v1/icd11/",
+  },
+
   // Resource
   createResource: {
     path: "/api/v1/resource/",
