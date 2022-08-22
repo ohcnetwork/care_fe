@@ -169,6 +169,16 @@ const AssetManage = (props: AssetManageProps) => {
 
   if (isLoading) return <Loading />;
   if (isPrintMode) return <PrintPreview />;
+
+  const renderDetail = (key: string, value: any) => {
+    return (
+      <Typography className="flex flex-col">
+        <span className="font-bold">{key}</span>
+        <span>{value || "--"}</span>
+      </Typography>
+    );
+  };
+
   return (
     <div className="px-2 pb-2">
       <PageTitle
@@ -182,56 +192,31 @@ const AssetManage = (props: AssetManageProps) => {
         <div className="md:flex justify-between">
           <div className="mb-2">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Typography className="flex flex-col">
-                <span className="font-bold">Location</span>
-                <span>{asset?.location_object.name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Facility</span>
-                <span>{asset?.location_object.facility.name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Serial Number</span>
-                <span>{asset?.serial_number || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Warranty Details</span>
-                <span>{asset?.warranty_details || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Type</span>
-                <span>{asset?.asset_type || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Vendor Name</span>
-                <span>{asset?.vendor_name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Customer Support Name</span>
-                <span>{asset?.support_name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Customer Support Number</span>
-                <span>{asset?.support_phone || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Contact Email</span>
-                <span>{asset?.support_email || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Status</span>
-                <span>{status(asset?.status)}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Working status</span>
-                <span>{working_status(asset?.is_working)}</span>
-              </Typography>
-              {!asset?.is_working && (
-                <Typography className="flex flex-col">
-                  <span className="font-bold">Not working reason</span>
-                  <span>{asset?.not_working_reason || "--"}</span>
-                </Typography>
+              {renderDetail("Location", asset?.location_object.name)}
+              {renderDetail("Facility", asset?.location_object.facility.name)}
+              {renderDetail("Serial Number", asset?.serial_number)}
+              {renderDetail("Warranty Details", asset?.warranty_details)}
+              {renderDetail("Type", asset?.asset_type)}
+              {renderDetail("Vendor Name", asset?.vendor_name)}
+              {renderDetail("Customer Support Name", asset?.support_name)}
+              {renderDetail("Customer Support Number", asset?.support_phone)}
+              {renderDetail("Contact Email", asset?.support_email)}
+              {renderDetail("Manufacturer", asset?.manufacturer)}
+              {renderDetail(
+                "Warranty / AMC Expiry",
+                moment(asset?.warranty_amc_end_of_validity).format("DD-MM-YYYY")
               )}
+              {renderDetail(
+                "Last serviced on",
+                moment(asset?.last_serviced_on).format("DD-MM-YYYY")
+              )}
+              {renderDetail("Status", status(asset?.status))}
+              {renderDetail(
+                "Working status",
+                working_status(asset?.is_working)
+              )}
+              {!asset?.is_working &&
+                renderDetail("Not working reason", asset?.not_working_reason)}
             </div>
           </div>
           <div className="flex mt-2 flex-col gap-1">
