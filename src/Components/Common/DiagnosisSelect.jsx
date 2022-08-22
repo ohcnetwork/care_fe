@@ -31,7 +31,7 @@ const DiagnosisSelect = ({ value, setDiagnosis }) => {
       options={diagnosisOptions}
       onSearch={(e) => setSearchTerm(e.target.value)}
       onChange={(_e: any, diagnosis: any) => setDiagnosis(diagnosis)}
-      renderOption={(option: any) => <div>{option?.label || }</div>}
+      renderOption={(option: any) => <div>{option?.label}</div>}
       getOptionSelected={(option: any, value: any) => option?.label === value}
       getOptionLabel={(option: any) => option?.label || ""}
       variant="outlined"
