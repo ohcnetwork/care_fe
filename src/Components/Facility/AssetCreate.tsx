@@ -11,16 +11,7 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import CancelOutlineIcon from "@material-ui/icons/CancelOutlined";
 import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  FormControlLabel,
-  InputLabel,
-  Radio,
-  RadioGroup,
-} from "@material-ui/core";
+import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
@@ -30,6 +21,7 @@ import {
   MultilineInputField,
   PhoneNumberField,
   ErrorHelperText,
+  DateInputField,
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
@@ -38,9 +30,10 @@ import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
 import SelectMenu from "../Common/components/SelectMenu";
+import moment from "moment";
 const Loading = loadable(() => import("../Common/Loading"));
 
-const initError: any = {
+const initError = {
   name: "",
   asset_type: "",
   asset_class: "",
@@ -53,6 +46,10 @@ const initError: any = {
   support_name: "",
   support_phone: "",
   support_email: "",
+  manufacturer: "",
+  warranty_amc_end_of_validity: "",
+  last_serviced_on: "",
+  notes: "",
 };
 
 const initialState = {
@@ -99,11 +96,16 @@ const AssetCreate = (props: AssetProps) => {
   const [support_email, setSupportEmail] = useState("");
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const dispatchAction: any = useDispatch();
   const [locations, setLocations] = useState([]);
   const [asset, setAsset] = useState<AssetData>();
   const [facilityName, setFacilityName] = useState("");
   const [qrCodeId, setQrCodeId] = useState("");
+  const [manufacturer, setManufacturer] = useState("");
+  const [warranty_amc_end_of_validity, setWarrantyAmcEndOfValidity] =
+    useState<any>(null);
+  const [last_serviced_on, setLastServicedOn] = useState<any>(null);
+  const [notes, setNotes] = useState("");
+  const dispatchAction: any = useDispatch();
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
 
   useEffect(() => {
@@ -143,6 +145,15 @@ const AssetCreate = (props: AssetProps) => {
       setSupportEmail(asset.support_email);
       setSupportPhone(asset.support_phone);
       setQrCodeId(asset.qr_code_id);
+      // Add the new fields
+      setManufacturer(asset.manufacturer);
+      asset.warranty_amc_end_of_validity &&
+        setWarrantyAmcEndOfValidity(
+          moment(asset.warranty_amc_end_of_validity).format("YYYY-MM-DD")
+        );
+      asset.last_serviced_on &&
+        setLastServicedOn(moment(asset.last_serviced_on).format("YYYY-MM-DD"));
+      setNotes(asset.notes);
     }
   }, [asset]);
 
@@ -226,6 +237,10 @@ const AssetCreate = (props: AssetProps) => {
         support_phone:
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
+        manufacturer: manufacturer,
+        warranty_amc_end_of_validity: warranty_amc_end_of_validity,
+        last_serviced_on: last_serviced_on,
+        notes: notes,
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -452,7 +467,7 @@ const AssetCreate = (props: AssetProps) => {
                   rows={3}
                   fullWidth
                   name="description"
-                  placeholder=""
+                  placeholder="Eg. Details about the equipment"
                   variant="outlined"
                   margin="dense"
                   value={description}
@@ -536,7 +551,7 @@ const AssetCreate = (props: AssetProps) => {
               </div>
               <div>
                 <PhoneNumberField
-                  label="Phone Number*"
+                  label="Customer Support No.*"
                   value={support_phone}
                   onChange={(value: any) => setSupportPhone(value)}
                   errors={state.errors.support_phone}
@@ -599,6 +614,72 @@ const AssetCreate = (props: AssetProps) => {
                   actionIcon={<CropFreeIcon className="cursor-pointer" />}
                   action={() => setIsScannerActive(true)}
                   errors={state.errors.qr_code_id}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="manufacturer" id="name=label">
+                  Manufacturer
+                </InputLabel>
+                <TextInputField
+                  id="manufacturer"
+                  fullWidth
+                  name="manufacturer"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={manufacturer}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setManufacturer(e.target.value)
+                  }
+                  errors={state.errors.manufacturer}
+                />
+              </div>
+              <div>
+                <InputLabel>{"Warranty / AMC Details"}</InputLabel>
+                <div className="flex flex-wrap gap-2 lg:gap-4 transition-all ease-linear">
+                  <DateInputField
+                    className="w-36"
+                    label="Expiry"
+                    value={warranty_amc_end_of_validity}
+                    onChange={(date) =>
+                      setWarrantyAmcEndOfValidity(
+                        moment(date).format("YYYY-MM-DD")
+                      )
+                    }
+                    disablePast={true}
+                    errors={state.errors.warranty_amc_end_of_validity}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                  <DateInputField
+                    className="w-36"
+                    label="Last serviced on"
+                    value={last_serviced_on}
+                    onChange={(date) =>
+                      setLastServicedOn(moment(date).format("YYYY-MM-DD"))
+                    }
+                    disableFuture={true}
+                    errors={state.errors.last_serviced_on}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </div>
+              </div>
+              <div>
+                <InputLabel htmlFor="notes" id="name=label">
+                  Notes
+                </InputLabel>
+                <MultilineInputField
+                  id="notes"
+                  rows={3}
+                  fullWidth
+                  name="notes"
+                  placeholder="Eg. Details on functionality, service, etc."
+                  variant="outlined"
+                  margin="dense"
+                  value={notes}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNotes(e.target.value)
+                  }
+                  errors={state.errors.notes}
                 />
               </div>
             </div>

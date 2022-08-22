@@ -33,6 +33,10 @@ export interface AssetData {
   support_email: string;
   support_phone: string;
   qr_code_id: string;
+  manufacturer: string;
+  warranty_amc_end_of_validity: string;
+  last_serviced_on: string;
+  notes: string;
   meta?: {
     [key: string]: any;
   };
