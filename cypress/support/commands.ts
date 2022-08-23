@@ -73,3 +73,9 @@ Cypress.Commands.add("verifyNotification", (text) => {
   cy.get(".pnotify-container").should("exist").contains(text);
   return cy.get(".pnotify-container").click();
 });
+
+Cypress.on("uncaught:exception", () => {
+  // returning false here prevents Cypress from
+  // failing the test
+  return false;
+});

@@ -11,6 +11,7 @@ describe("Assets List", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.visit("http://localhost:4000");
+    cy.wait(1000);
     cy.get("a").contains("Assets").click();
     cy.url().should("include", "/assets");
   });
