@@ -178,16 +178,6 @@ describe("Facility", () => {
     });
   });
 
-  it("deletes facility", () => {
-    cy.visit(current_url);
-    cy.get("[id=facility-delete]").click();
-    cy.get("[id=facility-delete-confirm]").click();
-    cy.verifyNotification("Facility deleted successfully");
-    cy.url().then((url) => {
-      current_url = url;
-    });
-  });
-
   afterEach(() => {
     cy.saveLocalStorage();
   });
