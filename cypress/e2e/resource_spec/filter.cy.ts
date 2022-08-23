@@ -74,7 +74,7 @@ describe("Resource filter", () => {
   });
 
   afterEach(() => {
-    cy.contains("Filters").click();
+    cy.contains("Filters").click({ force: true });
     cy.contains("Clear Filters").click();
     cy.saveLocalStorage();
   });
