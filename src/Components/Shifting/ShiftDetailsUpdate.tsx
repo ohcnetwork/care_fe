@@ -262,7 +262,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
               <div className="flex-none">
                 <InputLabel>Assigned To</InputLabel>
-                <div className="">
+                <div>
                   {assignedUserLoading ? (
                     <CircularProgress size={20} />
                   ) : (
