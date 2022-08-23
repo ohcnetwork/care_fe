@@ -930,22 +930,12 @@ export const DailyRounds = (props: any) => {
               )}
 
               <div className="mt-4 flex justify-between">
-                {id && (
-                  <Link
-                    className="btn btn-default bg-white mt-2"
-                    href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${id}/update`}
-                  >
-                    Back
-                  </Link>
-                )}
-                {!id && (
-                  <Link
-                    className="btn btn-default bg-white mt-2"
-                    href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/updates`}
-                  >
-                    Back
-                  </Link>
-                )}
+                <Link
+                  className="btn btn-default bg-white mt-2"
+                  href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
+                >
+                  Back
+                </Link>
                 <button
                   type="submit"
                   className="btn btn-primary ml-auto text-base"
