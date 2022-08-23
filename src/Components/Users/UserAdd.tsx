@@ -616,7 +616,7 @@ export const UserAdd = (props: UserProps) => {
         title={headerText}
         componentRight={<Link
           href="https://school.coronasafe.network/targets/12953"
-          className="text-primary-600 border border-primary-600 bg-primary-100 hover:bg-primary-200 transition rounded px-4 py-2 inline-block"
+          className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
           target="_blank"
         >
           <i className="fas fa-info-circle" /> &nbsp;Need Help?
