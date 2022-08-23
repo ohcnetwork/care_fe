@@ -117,7 +117,7 @@ const LiveFeed = (props: any) => {
       onError: (resp) => {
         resp instanceof AxiosError &&
           resp.response?.data?.errors &&
-          resp.response?.data?.errors.map((error: { message: string }) => {
+          resp.response?.data?.errors.forEach((error: { message: string }) => {
             Notification.Error({
               msg: "Presets failed: " + error.message,
             });
