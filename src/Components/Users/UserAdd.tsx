@@ -612,16 +612,20 @@ export const UserAdd = (props: UserProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={headerText} />
-
-      <Card className="mt-4">
-        <Link
+      <PageTitle 
+        title={headerText}
+        componentRight={<Link
           href="https://school.coronasafe.network/targets/12953"
-          className="text-purple-600 border border-purple-600 bg-purple-50 hover:bg-purple-100 transition rounded px-4 py-2 inline-block m-4"
+          className="text-primary-600 border border-primary-600 bg-primary-100 hover:bg-primary-200 transition rounded px-4 py-2 inline-block"
           target="_blank"
         >
           <i className="fas fa-info-circle" /> &nbsp;Need Help?
-        </Link>
+        </Link>}
+        justifyContents="justify-between"
+      />
+
+      <Card className="mt-4">
+        
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
