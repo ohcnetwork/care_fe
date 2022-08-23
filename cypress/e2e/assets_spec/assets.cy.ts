@@ -29,8 +29,8 @@ describe("Assets List", () => {
   it("Next/Previous Page", () => {
     cy.wait(1000);
     // only works for desktop mode
-    cy.get("button").contains(">").click();
+    cy.get("button").contains(">").click({ force: true });
     cy.wait(1000);
-    cy.get("button").contains("<").click();
+    cy.get("button").contains("<").click({ force: true });
   });
 });
