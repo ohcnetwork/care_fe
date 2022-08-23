@@ -241,16 +241,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
           getLabel={getStatus(50.0, "Low", 90.0, "High")}
         />
       </div>
-      <Slider
-        title={"Pulse (bpm)"}
-        start={"0"}
-        end={"200"}
-        interval={"10"}
-        step={1.0}
-        value={Belt.Option.mapWithDefault(state.pulse, "", string_of_int)}
-        setValue={s => send(SetPulse(int_of_string(s)))}
-        getLabel={getStatus(40.0, "Bradycardia", 100.0, "Tachycardia")}
-      />
+      <div className="border-b border-b-gray-500 w-full my-10" />
       <Slider
         title={"Temperature"}
         titleNeighbour={<div
@@ -289,8 +280,19 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         getLabel={val => getPainStatus(val)}
         hasError={isInvalidInputInt(0, 10, state.pain)}
       />
+      <div className="border-b border-b-gray-500 w-full mt-10" />
+      <Slider
+        title={"Pulse (bpm)"}
+        start={"0"}
+        end={"200"}
+        interval={"10"}
+        step={1.0}
+        value={Belt.Option.mapWithDefault(state.pulse, "", string_of_int)}
+        setValue={s => send(SetPulse(int_of_string(s)))}
+        getLabel={getStatus(40.0, "Bradycardia", 100.0, "Tachycardia")}
+      />
       <div className="w-full mb-10 px-3">
-        <label className="block mb-2 font-bold"> {str("Rhythm")} </label>
+        <label className="block mb-2 font-bold"> {str("Heartbeat Rhythm")} </label>
         <div className="flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">
           {Js.Array.map(
             r =>
@@ -306,7 +308,9 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         </div>
       </div>
       <div className="w-full mb-10 px-3">
-        <label htmlFor="description" className="block mb-2 font-bold"> {str("Description")} </label>
+        <label htmlFor="description" className="block mb-2 font-bold">
+          {str("Heartbeat Description")}
+        </label>
         <textarea
           id="description"
           className="block w-full border-gray-500 border-2 rounded px-2 py-1 focus:outline-green-500 focus:outline-offset-0 focus:outline-1 focus:border-green-500"
