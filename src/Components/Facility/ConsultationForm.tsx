@@ -55,7 +55,7 @@ import Beds from "./Consultations/Beds";
 import PrescriptionBuilder, {
   PrescriptionType,
 } from "../Common/prescription-builder/PrescriptionBuilder";
-import DiagnosisSelect from "../Common/DiagnosisSelect";
+import { DiagnosisSelect } from "../Common/DiagnosisSelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -847,9 +847,14 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="diagnosis-div" className="mt-4">
+                <InputLabel id="diagnosis-label">Diagnosis</InputLabel>
                 <DiagnosisSelect
-                  value={state.form.diagnosis}
-                  setDiagnosis={(diagnosis: { id: number; label: string }) =>
+                  name="diagnosis"
+                  selected={{
+                    id: state.form.diagnosis,
+                    label: state.form.diagnosis,
+                  }}
+                  setSelected={(diagnosis: any) =>
                     dispatch({
                       type: "set_form",
                       form: {
