@@ -347,49 +347,58 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 />
               </div>
               <div className="md:col-span-2 flex justify-between mt-4">
-                <Button color="secondary" variant="contained" onClick={goBack}>
-              <div>
-                <InputLabel>Is this an emergency?</InputLabel>
-                <RadioGroup
-                  aria-label="emergency"
-                  name="emergency"
-                  value={[true, "true"].includes(state.form.emergency)}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
-              </div>
-              <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Button color="secondary" variant="contained" onClick={goBack}>
-                  Cancel
-                </Button>
                 <Button
-                  color="primary"
-                  fullWidth
-                  className="w-full md:w-auto"
+                  color="secondary"
                   variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  onClick={(e) => handleSubmit(e)}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
-                >
-                  Submit
-                </Button>
+                  onClick={goBack}
+                />
+                <div>
+                  <InputLabel>Is this an emergency?</InputLabel>
+                  <RadioGroup
+                    aria-label="emergency"
+                    name="emergency"
+                    value={[true, "true"].includes(state.form.emergency)}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box>
+                      <FormControlLabel
+                        value={true}
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value={false}
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.emergency} />
+                </div>
+                <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    onClick={goBack}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    color="primary"
+                    fullWidth
+                    className="w-full md:w-auto"
+                    variant="contained"
+                    type="submit"
+                    style={{ marginLeft: "auto" }}
+                    onClick={(e) => handleSubmit(e)}
+                    startIcon={
+                      <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                    }
+                  >
+                    Submit
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
