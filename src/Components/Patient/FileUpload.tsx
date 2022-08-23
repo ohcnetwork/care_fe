@@ -122,6 +122,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
+  const [uploadFileNameError, setUploadFileNameError] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
   const [audioName, setAudioName] = useState<string>("");
@@ -468,21 +469,31 @@ export const FileUpload = (props: FileUploadProps) => {
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
+        setUploadFileNameError("");
       })
       .catch(() => {
         setUploadStarted(false);
       });
   };
 
-  const handleUpload = async (status: any) => {
+  const validateFileUpload = () => {
+    const filenameLength = uploadFileName.trim().length;
     const f = file;
     if (f === undefined) {
-      Notification.Error({
-        msg: "Please choose a file to upload",
-      });
-      return;
+      setUploadFileNameError("Please choose a file to upload");
+      return false;
     }
-    setFile(undefined);
+    if (filenameLength === 0) {
+      setUploadFileNameError("Please give a name !!");
+      return false;
+    }
+    return true;
+  };
+
+  const handleUpload = async (status: any) => {
+    if (!validateFileUpload()) return;
+    const f = file;
+
     const category = "UNSPECIFIED";
     const filename = uploadFileName === ""  && f ? f.name : uploadFileName;
     const name = f?.name;
@@ -503,6 +514,7 @@ export const FileUpload = (props: FileUploadProps) => {
       .then(fetchData(status).then(() => {}));
 
     // setting the value of file name to empty
+    setUploadFileNameError("");
     setUploadFileName("");
   };
 
@@ -594,14 +606,13 @@ export const FileUpload = (props: FileUploadProps) => {
       >
         {fileUrl && fileUrl.length > 0 ? (
           <>
-            <div className="flex absolute w-3/5 right-2">
+            <div className="flex absolute w-3/5 top-16 md:top-0 md:right-4">
               {file_state.isImage && (
-                <div className="w-2/6 flex">
-                  <div className="mr-4">
+                <div className="flex flex-col gap-2 md:flex-row">
+                  <div>
                     <Button
                       color="default"
                       variant="contained"
-                      style={{ marginLeft: "auto" }}
                       startIcon={<ZoomIn />}
                       onClick={() => {
                         handleZoomIn();
@@ -615,7 +626,6 @@ export const FileUpload = (props: FileUploadProps) => {
                     <Button
                       color="default"
                       variant="contained"
-                      style={{ marginLeft: "4px" }}
                       startIcon={<ZoomOut />}
                       onClick={() => {
                         handleZoomOut();
@@ -627,34 +637,30 @@ export const FileUpload = (props: FileUploadProps) => {
                   </div>
                 </div>
               )}
-              <div className="flex absolute right-2">
-                {downloadURL && downloadURL.length > 0 && (
-                  <div>
-                    <a
-                      href={downloadURL}
-                      download
-                      className="text-white p-4 my-2 rounded m-2 bg-primary-500"
-                    >
-                      <GetApp>load</GetApp>
-                      Download
-                    </a>
-                  </div>
-                )}
-
-                <div>
+            </div>
+            <div className="flex justify-center md:absolute md:right-2">
+              {downloadURL && downloadURL.length > 0 && (
+                <a href={downloadURL} download>
                   <Button
                     color="primary"
                     variant="contained"
-                    style={{ marginLeft: "auto" }}
-                    startIcon={<Close />}
-                    onClick={() => {
-                      handleClose();
-                    }}
+                    startIcon={<GetApp />}
                   >
-                    Close
+                    Download
                   </Button>
-                </div>
-              </div>
+                </a>
+              )}
+              <Button
+                color="primary"
+                variant="contained"
+                style={{ marginLeft: "10px" }}
+                startIcon={<Close />}
+                onClick={() => {
+                  handleClose();
+                }}
+              >
+                Close
+              </Button>
             </div>
             {file_state.isImage ? (
               <img
@@ -756,7 +762,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
                   }}
-                  errors={`${[]}`}
+                  errors={uploadFileNameError}
                 />
               </div>
               <div className="mt-4">
@@ -812,7 +818,7 @@ export const FileUpload = (props: FileUploadProps) => {
         uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))
       ) : (
         <div className="mt-4 border bg-white shadow rounded-lg p-4">
-          <div className="font-bold text-gray-500 text-3xl flex justify-center items-center">
+          <div className="font-bold text-gray-500 text-md flex justify-center items-center">
             {"No Data Found"}
           </div>
         </div>
