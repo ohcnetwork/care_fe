@@ -99,7 +99,7 @@ interface StateInterface {
 
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [file, setFile] = useState<File | undefined>();
+  const [file, setFile] = useState<File | null>();
   const {
     facilityId,
     consultationId,
@@ -122,6 +122,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
+  const [uploadFileNameError, setUploadFileNameError] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
   const [audioName, setAudioName] = useState<string>("");
@@ -443,7 +444,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const url = response.data.signed_url;
     const internal_name = response.data.internal_name;
     const f = file;
-    if (f === undefined) return;
+    if (!f) return;
     const newFile = new File([f], `${internal_name}`);
 
     const config = {
@@ -468,24 +469,34 @@ export const FileUpload = (props: FileUploadProps) => {
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
+        setUploadFileNameError("");
       })
       .catch(() => {
         setUploadStarted(false);
       });
   };
 
-  const handleUpload = async (status: any) => {
+  const validateFileUpload = () => {
+    const filenameLength = uploadFileName.trim().length;
     const f = file;
     if (f === undefined) {
-      Notification.Error({
-        msg: "Please choose a file to upload",
-      });
-      return;
+      setUploadFileNameError("Please choose a file to upload");
+      return false;
     }
-    setFile(undefined);
+    if (filenameLength === 0) {
+      setUploadFileNameError("Please give a name !!");
+      return false;
+    }
+    return true;
+  };
+
+  const handleUpload = async (status: any) => {
+    if (!validateFileUpload()) return;
+    const f = file;
+
     const category = "UNSPECIFIED";
-    const filename = uploadFileName === "" ? f.name : uploadFileName;
-    const name = f.name;
+    const filename = uploadFileName === ""  && f ? f.name : uploadFileName;
+    const name = f?.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
     const requestData = {
@@ -503,6 +514,7 @@ export const FileUpload = (props: FileUploadProps) => {
       .then(fetchData(status).then(() => {}));
 
     // setting the value of file name to empty
+    setUploadFileNameError("");
     setUploadFileName("");
   };
 
@@ -733,41 +745,52 @@ export const FileUpload = (props: FileUploadProps) => {
                   margin="dense"
                   type="text"
                   InputLabelProps={{ shrink: !!uploadFileName }}
-                  // value={uploadFileName}
+                  value={uploadFileName}
                   disabled={uploadStarted}
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
                   }}
-                  errors={`${[]}`}
+                  errors={uploadFileNameError}
                 />
               </div>
               <div className="mt-4">
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="md:flex justify-between">
-                    <input
-                      title="changeFile"
-                      onChange={onFileChange}
-                      type="file"
-                    />
-                    <div className="mt-2">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        startIcon={
-                          <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                        }
-                        onClick={() => {
-                          handleUpload({ status });
-                        }}
-                      >
-                        Upload
-                      </Button>
-                    </div>
+                  <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
+                    <label
+                      className="flex items-center btn btn-primary"
+                    >
+                      <i className="fas fa-file-arrow-down mr-2" /> Choose file
+                      <input
+                        title="changeFile"
+                        onChange={onFileChange}
+                        type="file"
+                        hidden
+                      />
+                    </label>
+                    <button
+                      className="btn btn-primary"
+                      disabled={!file || !uploadFileName}
+                      onClick={() => {
+                        handleUpload({ status });
+                      }}
+                    >
+                      <i className="fas fa-cloud-arrow-up mr-2" /> Upload
+                    </button>
                   </div>
                 )}
+                {file && <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                  {file?.name}
+                  <button
+                    onClick={()=>{
+                      setFile(null);
+                      setUploadFileName("");
+                    }}
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>}
               </div>
             </div>
           ) : null}
@@ -783,7 +806,7 @@ export const FileUpload = (props: FileUploadProps) => {
         uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))
       ) : (
         <div className="mt-4 border bg-white shadow rounded-lg p-4">
-          <div className="font-bold text-gray-500 text-3xl flex justify-center items-center">
+          <div className="font-bold text-gray-500 text-md flex justify-center items-center">
             {"No Data Found"}
           </div>
         </div>
