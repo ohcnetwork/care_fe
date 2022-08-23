@@ -2,8 +2,7 @@ import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 const makeid = (length: number) => {
   let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -11,7 +10,12 @@ const makeid = (length: number) => {
   return result;
 };
 
+const makePhoneNumber = () =>
+  "9199" + Math.floor(Math.random() * 99999999).toString();
+
 const username = makeid(20);
+const phone_number = makePhoneNumber();
+const alt_phone_number = makePhoneNumber();
 
 describe("User management", () => {
   before(() => {
@@ -29,13 +33,17 @@ describe("User management", () => {
   it("create user", () => {
     cy.contains("Add New User").click();
     cy.get("[name='user_type']").select("Volunteer");
-    cy.get("[placeholder='phone_number']").type("9343234277");
+    cy.get("[placeholder='Phone Number']").type(phone_number);
+    cy.get("input[type='checkbox']").click();
+    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
+      force: true,
+    });
     cy.get("[name='facilities']")
-      .type("Harsha", { delay: 200 })
+      .type("Mysore", { delay: 200 })
       .wait(2000)
       .type("{downarrow}{enter}");
     cy.wait(2000);
-    cy.get("[name='username']").type(username);
+    cy.get("[name='username']").type(username, { force: true });
     cy.get("[name='dob']").type("02/03/2001");
     cy.get("[name='password']").type("#@Cypress_test123");
     cy.get("[name='c_password']").type("#@Cypress_test123");
@@ -57,8 +65,8 @@ describe("User management", () => {
     cy.wait(2000);
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
-    cy.get("[name='phone_number']").type("9343234277");
-    cy.get("[name='alt_phone_number']").type("9239342343");
+    cy.get("[placeholder='Phone Number']").type(phone_number);
+    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
     cy.wait(2000);
     cy.get("[name='search']").type(username);
@@ -70,15 +78,15 @@ describe("User management", () => {
     cy.contains("Advanced Filters").click().wait(2000);
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
-    cy.get("[name='phone_number']").type("9343234277");
-    cy.get("[name='alt_phone_number']").type("9239342343");
+    cy.get("[placeholder='Phone Number']").type(phone_number);
+    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
     cy.wait(2000);
     cy.get("[name='search']").type(username);
     cy.wait(1000);
     cy.get("a")
       .should("contain", "Click here to show")
-      .contains("Click here to show")
+      .contains("Click here to show linked facilities")
       .click({ force: true })
       .then(() => {
         cy.get("a")
