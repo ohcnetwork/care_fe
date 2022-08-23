@@ -832,7 +832,6 @@ button:disabled,
   margin-top: -8px;
   border-radius: 50%;
 }
-
 textarea {
   height: auto !important;
 }
@@ -855,4 +854,43 @@ textarea {
 
 .MuiInputLabel-outlined {
   transform: translate(14px, 12px) scale(1) !important;
+}
+@media (min-width:471px)
+  {
+    .csv-input {
+      display: block; 
+      font-size: 0.875rem;
+      line-height: 1.25rem; 
+      margin: auto;
+      width: 50%;
+    }
+  }
+  @media (max-width:470px)
+  {
+    .csv-input {
+      display: block; 
+      font-size: 0.875rem;
+      line-height: 1.25rem; 
+      margin: auto;
+      width: 100%;
+    }
+  }
+  
+.csv-input::file-selector-button{
+padding-top: 0.5rem;
+padding-bottom: 0.5rem; 
+padding-left: 1rem;
+padding-right: 1rem; 
+font-size: 0.875rem;
+line-height: 1.25rem; 
+font-weight: 600; 
+border-width: 0; 
+background-color: #def7ec;
+color:#046c4e;
+
+}
+ 
+
+.csv-input::file-selector-button:hover{
+background-color: #84e1bc;
 }

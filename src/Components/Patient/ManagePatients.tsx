@@ -60,7 +60,7 @@ function TabPanel(props: TabPanelProps) {
 export function Badge(props: { color: string; icon: string; text: string }) {
   return (
     <span
-      className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+      className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 shadow text-gray-700"
       title={props.text}
     >
       <i
@@ -464,7 +464,7 @@ export const PatientManager = (props: any) => {
           onClick={() => navigate(patientUrl)}
           className={
             "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 " +
-            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
+            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "bg-white")
           }
         >
           <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
@@ -537,7 +537,7 @@ export const PatientManager = (props: any) => {
               )}
           </div>
 
-          <div className="flex w-full">
+          <div className="flex w-full mt-4 md:mt-0">
             <div className="flex flex-wrap flex-row justify-start">
               {patient.allow_transfer ? (
                 <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
@@ -545,15 +545,7 @@ export const PatientManager = (props: any) => {
                 <Badge color="primary" icon="lock" text="Transfer Blocked" />
               )}
               {patient.disease_status === "POSITIVE" && (
-                <Badge color="red" icon="radiation" text="Positive" />
-              )}
-              {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
-                0 && (
-                <Badge
-                  color="primary"
-                  icon="smile-beam"
-                  text={patient.disease_status}
-                />
+                <Badge color="red" icon="radiation" text="COVID Positive" />
               )}
               {patient.gender === 2 &&
                 patient.is_antenatal &&
@@ -562,20 +554,6 @@ export const PatientManager = (props: any) => {
                 )}
               {patient.is_medical_worker && patient.is_active && (
                 <Badge color="blue" icon="user-md" text="Medical Worker" />
-              )}
-              {patient.contact_with_confirmed_carrier && (
-                <Badge
-                  color="red"
-                  icon="exclamation-triangle"
-                  text="Contact with confirmed carrier"
-                />
-              )}
-              {patient.contact_with_suspected_carrier && (
-                <Badge
-                  color="yellow"
-                  icon="exclamation-triangle"
-                  text="Contact with suspected carrier"
-                />
               )}
               {patient.disease_status === "EXPIRED" && (
                 <Badge
@@ -600,8 +578,8 @@ export const PatientManager = (props: any) => {
               )}
             </div>
           </div>
-          <div className="px-2">
-            <div className="btn btn-default bg-white">Details</div>
+          <div className="px-2 mt-4 md:mt-0 flex justify-end">
+            <div className="btn btn-default bg-white shadow ">Details</div>
           </div>
         </div>
       );
@@ -651,11 +629,12 @@ export const PatientManager = (props: any) => {
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="title-text sm:flex align-center">
+        <div className="title-text sm:flex align-center gap-2">
           <div className="text-center">
             <button
               onClick={handleDownloadFiltered}
-              className="btn text-green-500 font-medium hover:bg-green-50 border border-solid"
+              disabled={!isDownloadAllowed}
+              className="btn text-green-500 disabled:text-gray-500 disabled:hover:bg-gray-50 font-medium hover:bg-green-50 border border-solid"
             >
               <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
               {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
@@ -672,7 +651,7 @@ export const PatientManager = (props: any) => {
             <button
               disabled={!isDownloadAllowed}
               onClick={handleDownloadAll}
-              className="btn text-green-500 disabled:text-gray-500 font-medium border border-solid"
+              className="btn text-green-500 disabled:text-gray-500 disabled:hover:bg-gray-50 hover:bg-green-50 font-medium border border-solid"
             >
               <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD ALL
               PATIENTS

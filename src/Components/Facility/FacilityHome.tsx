@@ -163,8 +163,16 @@ export const FacilityHome = (props: any) => {
         return data.room_type === x.id;
       });
       if (res) {
+        const removeCurrentBedType = (bedTypeId: number | undefined) => {
+          setCapacityData((state) => state.filter((i) => i.id !== bedTypeId));
+        };
         return (
-          <BedTypeCard facilityId={facilityId} key={`bed_${res.id}`} {...res} />
+          <BedTypeCard
+            facilityId={facilityId}
+            key={`bed_${res.id}`}
+            {...res}
+            removeBedType={removeCurrentBedType}
+          />
         );
       }
     });

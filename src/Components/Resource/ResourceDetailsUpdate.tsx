@@ -241,8 +241,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                   optionArray={true}
                   value={state.form.status}
                   options={resourceStatusOptions}
+                  fullWidth
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-14 w-full mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
               <div className="md:col-span-1">
@@ -315,30 +316,6 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                   errors=""
                 />
               </div>
-              <div>
-                <InputLabel>Is this an emergency?</InputLabel>
-                <RadioGroup
-                  aria-label="emergency"
-                  name="emergency"
-                  value={[true, "true"].includes(state.form.emergency)}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
-              </div>
 
               <div className="md:col-span-2">
                 <InputLabel>Request Title*</InputLabel>
@@ -369,13 +346,40 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                   errors={state.errors.reason}
                 />
               </div>
-
               <div className="md:col-span-2 flex justify-between mt-4">
+                <Button color="secondary" variant="contained" onClick={goBack}>
+              <div>
+                <InputLabel>Is this an emergency?</InputLabel>
+                <RadioGroup
+                  aria-label="emergency"
+                  name="emergency"
+                  value={[true, "true"].includes(state.form.emergency)}
+                  onChange={handleChange}
+                  style={{ padding: "0px 5px" }}
+                >
+                  <Box>
+                    <FormControlLabel
+                      value={true}
+                      control={<Radio />}
+                      label="Yes"
+                    />
+                    <FormControlLabel
+                      value={false}
+                      control={<Radio />}
+                      label="No"
+                    />
+                  </Box>
+                </RadioGroup>
+                <ErrorHelperText error={state.errors.emergency} />
+              </div>
+              <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
                 <Button color="secondary" variant="contained" onClick={goBack}>
                   Cancel
                 </Button>
                 <Button
                   color="primary"
+                  fullWidth
+                  className="w-full md:w-auto"
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}

@@ -108,42 +108,46 @@ const ReportRow = ({ data, name, min, max }: any) => {
 };
 
 interface ReportTableProps {
-  title: string;
-  patientDetails: {
+  title?: string;
+  patientDetails?: {
     name: string;
     age: number;
     hospitalName: string;
   };
   investigationData: InvestigationResponse;
+  hidePrint?: boolean;
 }
 
 const ReportTable: React.FC<ReportTableProps> = ({
   title,
   investigationData,
   patientDetails,
+  hidePrint = false,
 }) => {
   const className = useStyle();
   const { data, sessions } = transformData(investigationData);
 
   return (
     <>
-      <Box
-        display="flex"
-        flexDirection="row"
-        justifyContent="flex-end"
-        displayPrint="none"
-        margin="10px"
-        paddingTop="10px"
-      >
-        <Button
-          color="primary"
-          variant="contained"
-          size="small"
-          onClick={() => window.print()}
+      {!hidePrint && (
+        <Box
+          display="flex"
+          flexDirection="row"
+          justifyContent="flex-end"
+          displayPrint="none"
+          margin="10px"
+          paddingTop="10px"
         >
-          Print Report
-        </Button>
-      </Box>
+          <Button
+            color="primary"
+            variant="contained"
+            size="small"
+            onClick={() => window.print()}
+          >
+            Print Report
+          </Button>
+        </Box>
+      )}
 
       <Box padding="1rem" margin="1rem 0" id="section-to-print">
         {title && (
@@ -152,14 +156,16 @@ const ReportTable: React.FC<ReportTableProps> = ({
           </Typography>
         )}
         <br />
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <p>Name: {patientDetails.name}</p>
+        {patientDetails && (
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <p>Name: {patientDetails.name}</p>
 
-            <p>Age: {patientDetails.age}</p>
-            <p>Hospital: {patientDetails.hospitalName}</p>
+              <p>Age: {patientDetails.age}</p>
+              <p>Hospital: {patientDetails.hospitalName}</p>
+            </Grid>
           </Grid>
-        </Grid>
+        )}
         <br />
         <div className="my-4">
           <span className="inline-block  bg-yellow-200 py-1 m-1 px-6 rounded-full text-yellow-900 font-medium">
