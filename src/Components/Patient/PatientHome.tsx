@@ -146,7 +146,7 @@ export const PatientHome = (props: any) => {
   function Badge(props: { color: string; icon: string; text: string }) {
     return (
       <span
-        className="inline-flex items-center py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+        className="inline-flex items-center m-1 py-1 rounded-full text-xs font-medium shadow leading-4 bg-gray-100 p-1 text-gray-700"
         title={props.text}
       >
         <i
@@ -394,7 +394,7 @@ export const PatientHome = (props: any) => {
     );
   }
 
-  const isPatientInactive = (patientData: PatientModel, facilityId : number) => {
+  const isPatientInactive = (patientData: PatientModel, facilityId: number) => {
     return (
       !patientData.is_active ||
       !(patientData?.last_consultation?.facility === facilityId)
@@ -619,7 +619,7 @@ export const PatientHome = (props: any) => {
                     </div>
                   )}
               </div>
-              <div className="flex flex-wrap mt-2 space-x-2">
+              <div className="flex flex-wrap mt-2 space-4">
                 {patientData.is_vaccinated ? (
                   <Badge color="blue" icon="syringe" text="Vaccinated" />
                 ) : (
@@ -796,7 +796,7 @@ export const PatientHome = (props: any) => {
         </section>
         <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
           <div
-            className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
+            className="flex justify-between border-b border-dashed cursor-pointer text-gray-900 font-semibold text-left text-lg pb-2"
             onClick={() => {
               setShowShifts(!showShifts);
               setIsShiftClicked(true);
