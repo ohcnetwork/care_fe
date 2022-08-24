@@ -331,27 +331,26 @@ export default function UpdateResult(props: any) {
               </RadioGroup>
             </div>
           </div>
-          <div className="flex justify-end mt-4">
+          <div className="flex flex-col md:flex-row gap-2 justify-end mt-4">
             <Button
               color="default"
               variant="contained"
               type="button"
+              className="w-full md:w-auto"
               onClick={goBack}
             >
-              {" "}
-              Cancel{" "}
+              Cancel
             </Button>
             <Button
               color="primary"
               variant="contained"
               type="submit"
-              style={{ marginLeft: "10px" }}
               startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
               onClick={(e) => handleSubmit(e)}
               data-testid="submit-button"
+              className="w-full md:w-auto"
             >
-              {" "}
-              Submit{" "}
+              Submit
             </Button>
           </div>
         </form>

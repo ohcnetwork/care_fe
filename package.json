@@ -79,7 +79,7 @@
     "raviger": "^4.1.0",
     "react": "18.1.0",
     "react-copy-to-clipboard": "^5.0.3",
-    "react-csv": "^2.0.3",
+    "react-csv": "2.1.9",
     "react-csv-reader": "^3.3.1",
     "react-dates": "^21.8.0",
     "react-dom": "18.1.0",
