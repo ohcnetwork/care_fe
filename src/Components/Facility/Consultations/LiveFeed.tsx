@@ -514,7 +514,13 @@ const LiveFeed = (props: any) => {
                   className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full"
                   onClick={() => {
                     getBedPresets(cameraAsset?.id);
-                    getPresets({});
+                    getPresets({
+                      onError: () => {
+                        Notification.Error({
+                          msg: "Fetching presets failed",
+                        });
+                      },
+                    });
                   }}
                 >
                   <RefreshIcon /> Refresh
