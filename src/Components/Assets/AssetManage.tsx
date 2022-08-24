@@ -194,6 +194,7 @@ const AssetManage = (props: AssetManageProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {renderDetail("Location", asset?.location_object.name)}
               {renderDetail("Facility", asset?.location_object.facility.name)}
+              {renderDetail("Description", asset?.description)}
               {renderDetail("Serial Number", asset?.serial_number)}
               {renderDetail("Warranty Details", asset?.warranty_details)}
               {renderDetail("Type", asset?.asset_type)}
@@ -210,6 +211,7 @@ const AssetManage = (props: AssetManageProps) => {
                 "Last serviced on",
                 moment(asset?.last_serviced_on).format("DD-MM-YYYY")
               )}
+              {renderDetail("Notes", asset?.notes)}
               {renderDetail("Status", status(asset?.status))}
               {renderDetail(
                 "Working status",
