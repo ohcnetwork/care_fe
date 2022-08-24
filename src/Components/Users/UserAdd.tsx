@@ -124,9 +124,7 @@ export const UserAdd = (props: UserProps) => {
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   // eslint-disable-next-line no-unused-vars
-  const [current_user_facilities, setFacilities] = useState<
-    Array<FacilityModel>
-  >([]);
+  // const [current_user_facilities, setFacilities] = useState<Array<FacilityModel>>([]);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
@@ -320,9 +318,9 @@ export const UserAdd = (props: UserProps) => {
     async (status: any) => {
       setIsStateLoading(true);
       const res = await dispatchAction(getUserListFacility({ username }));
-      if (!status.aborted && res && res.data) {
-        setFacilities(res.data);
-      }
+      // if (!status.aborted && res && res.data) {
+      //   setFacilities(res.data);
+      // }
       setIsStateLoading(false);
     },
     [dispatchAction, username]
