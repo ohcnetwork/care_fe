@@ -192,14 +192,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         onSuccess: (resp) => setPresets(resp.data),
         onError: (resp) => {
           resp instanceof AxiosError &&
-            resp.response?.data?.errors &&
-            resp.response?.data?.errors.forEach(
-              (error: { message: string }) => {
-                Notification.Error({
-                  msg: "Presets failed: " + error.message,
-                });
-              }
-            );
+            Notification.Error({
+              msg: "Fetching presets failed",
+            });
         },
       });
       getBedPresets(cameraAsset);
