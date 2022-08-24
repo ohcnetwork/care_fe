@@ -1,5 +1,4 @@
 import loadable from "@loadable/component";
-import Grid from "@material-ui/core/Grid";
 import { Button } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate, useQueryParams } from "raviger";
@@ -310,7 +309,7 @@ export default function ResultList() {
     });
   }
 
-  if (isLoading || !data) {
+  if (isLoading || !data || (data && data.length === 0)) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
@@ -333,16 +332,6 @@ export default function ResultList() {
           </div>
         )}
       </>
-    );
-  } else if (data && data.length === 0) {
-    manageResults = (
-      <Grid item xs={12} md={12}>
-        <Grid container justify="center" alignItems="center">
-          <h5 className="flex justify-center items-center text-gray-600">
-            No Results Found
-          </h5>
-        </Grid>
-      </Grid>
     );
   }
 
