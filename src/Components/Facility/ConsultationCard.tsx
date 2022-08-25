@@ -98,7 +98,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap justify-between w-full">
+          <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between w-full">
             <button
               className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
               onClick={() =>
