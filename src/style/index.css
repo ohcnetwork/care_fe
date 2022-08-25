@@ -56,6 +56,10 @@ h6 {
   @apply outline-none shadow-inner;
 }
 
+[type="text"]:focus {
+  @apply border-black ring-white;
+}
+
 /* Button Styles */
 
 .btn-large {
@@ -475,7 +479,7 @@ button:disabled,
 }
 
 .MuiInputBase-input:focus {
-  @apply ring-0 !important
+  @apply ring-0 !important;
 }
 
 .Mui-selected .MuiSvgIcon-root {
@@ -484,6 +488,10 @@ button:disabled,
 
 .Mui-selected .MuiListItemText-root {
   color: #0085ad !important;
+}
+
+.MuiSelect-select:focus {
+  background-color: #ffffff !important;
 }
 
 .main-content {
@@ -725,12 +733,16 @@ button:disabled,
   @apply p-0;
 }
 
-.title-text {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin-top: -3rem;
-}
+@media (min-width:770px)
+  {
+    .title-text {
+      position: absolute;
+      top: 0;
+      right: 0;
+      margin-top: -3rem;
+    }
+  }
+
 
 .DateRangePicker_picker__portal {
   z-index: 100000 !important;
@@ -761,22 +773,19 @@ button:disabled,
   padding-left: 5px;
 }
 
-@screen md {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: theme(colors.gray.500) theme(colors.gray.100);
-  }
-  ::-webkit-scrollbar {
-    width: 12px;
-  }
-  ::-webkit-scrollbar-track {
-    background: theme(colors.gray.100);
-  }
-  ::-webkit-scrollbar-thumb {
-    background-color: theme(colors.gray.500);
-    border-radius: 6px;
-    border: 3px solid theme(colors.gray.100);
-  }
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
 }
 
 @media (max-width:640px)
@@ -785,3 +794,81 @@ button:disabled,
             display: none;
         }
   }
+
+@media (min-width:1000px)
+{
+  .manualGrid{
+    display: grid !important
+  }
+}
+
+/*
+  Range Sliders for Camera Feed
+*/
+
+#feed-range {
+  -webkit-appearance: none;
+  margin: 18px 0;
+  width: 100%;
+}
+#feed-range:focus {
+  outline: none;
+}
+#feed-range::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 1px;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 5px;
+}
+#feed-range::-webkit-slider-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 3px;
+  border: 1px solid white;
+  background: black;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -8px;
+  border-radius: 50%;
+}
+
+@media (min-width:471px)
+  {
+    .csv-input {
+      display: block; 
+      font-size: 0.875rem;
+      line-height: 1.25rem; 
+      margin: auto;
+      width: 50%;
+    }
+  }
+  @media (max-width:470px)
+  {
+    .csv-input {
+      display: block; 
+      font-size: 0.875rem;
+      line-height: 1.25rem; 
+      margin: auto;
+      width: 100%;
+    }
+  }
+  
+.csv-input::file-selector-button{
+padding-top: 0.5rem;
+padding-bottom: 0.5rem; 
+padding-left: 1rem;
+padding-right: 1rem; 
+font-size: 0.875rem;
+line-height: 1.25rem; 
+font-weight: 600; 
+border-width: 0; 
+background-color: #def7ec;
+color:#046c4e;
+
+}
+ 
+
+.csv-input::file-selector-button:hover{
+background-color: #84e1bc;
+}

@@ -58,6 +58,11 @@ const notifyError = (error) => {
   notify(errorMsg, "error");
 };
 
+/** Close all Notifications **/
+export const closeAllNotifications = () => {
+  notifyStack.close();
+};
+
 /** Success message handler */
 export const Success = ({ msg }) => {
   notify(msg, "success");
@@ -71,7 +76,7 @@ export const Error = ({ msg }) => {
 /** 400 Bad Request handler */
 export const BadRequest = ({ errs }) => {
   if (Array.isArray(errs)) {
-    errs.splice(0, 5).forEach((error) => notifyError(error));
+    errs.forEach((error) => notifyError(error));
   } else {
     notifyError(errs);
   }

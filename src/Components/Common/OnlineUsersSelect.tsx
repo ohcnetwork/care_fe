@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
-import classNames from "classnames";
+import clsx from "clsx";
 import { UserModel } from "../Users/models";
 
 type UserFetchState = {
@@ -19,6 +19,7 @@ type Props = {
   userId: string;
   onSelect: (user: UserModel | null) => void;
   user_type: string;
+  outline?: boolean;
 };
 
 const initialState: UserFetchState = {
@@ -30,7 +31,7 @@ const initialState: UserFetchState = {
 
 export const OnlineUsersSelect = (props: Props) => {
   const dispatchAction: any = useDispatch();
-  const { selectedUser, userId, onSelect, user_type } = props;
+  const { selectedUser, userId, onSelect, user_type, outline } = props;
   const [state, setState] = useState(initialState);
   const { loading, users, searchTerm, searchFieldRef } = state;
   const [isDropdownExpanded, setDropdownExpand] = useState(false);
@@ -79,23 +80,27 @@ export const OnlineUsersSelect = (props: Props) => {
           Assigned to
         </label>
         <div className="relative">
-          <span className="inline-block w-full rounded-md shadow-sm">
+          <span className="flex w-full rounded-md flex-col md:flex-row">
             <button
               onClick={(_) => setDropdownExpand(true)}
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-labelledby="listbox-label"
-              className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:ring-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+              className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:ring-green-500 focus:border-green-500 transition ease-in-out duration-150 sm:text-sm sm:leading-5 mb-1"
             >
               <input
                 ref={searchFieldRef}
                 name="searchTerm"
                 type="text"
                 placeholder="Search by name or username"
-                className={classNames("py-2 pl-3 w-full outline-none", {
-                  hidden: !isDropdownExpanded,
-                })}
+                className={clsx(
+                  "py-2 pl-3 w-full focus:outline-none",
+                  outline
+                    ? "focus:ring-primary-500 focus:border-primary-500"
+                    : "ring-transparent border-transparent",
+                  !isDropdownExpanded && "hidden"
+                )}
                 value={searchTerm}
                 onChange={(e) =>
                   setState({ ...state, searchTerm: e.target.value })
@@ -103,11 +108,11 @@ export const OnlineUsersSelect = (props: Props) => {
                 onKeyUp={(e) => e.preventDefault()}
               />
               <div
-                className={classNames("flex items-center justify-between", {
+                className={clsx("flex items-center justify-between", {
                   hidden: isDropdownExpanded,
                 })}
               >
-                <div className="space-x-3 flex items-center">
+                <div className="space-x-3 flex items-center overflow-hidden">
                   <span
                     aria-label="Online"
                     className={
@@ -129,14 +134,8 @@ export const OnlineUsersSelect = (props: Props) => {
                         }`}
                   </span>
                 </div>
-                <div
-                  className="btn btn-default"
-                  onClick={(_) => onSelect(null)}
-                >
-                  {" "}
-                  Clear
-                </div>
               </div>
+
               <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg
                   className="h-5 w-5 text-gray-400"
@@ -153,6 +152,13 @@ export const OnlineUsersSelect = (props: Props) => {
                 </svg>
               </span>
             </button>
+            <div
+              className="btn btn-default md:ml-2"
+              onClick={(_) => onSelect(null)}
+            >
+              {" "}
+              Clear
+            </div>
           </span>
           {isDropdownExpanded && (
             <div
