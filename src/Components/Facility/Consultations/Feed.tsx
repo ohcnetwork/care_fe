@@ -16,7 +16,6 @@ import {
   partialUpdateAssetBed,
 } from "../../../Redux/actions";
 import Loading from "../../Common/Loading";
-import PageTitle from "../../Common/PageTitle";
 import { ConsultationModel } from "../models";
 import * as Notification from "../../../Utils/Notifications.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -79,13 +78,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
-      const consultation = res.data as ConsultationModel;
-      if (!status.aborted) {
-        if (consultation?.current_bed?.bed_object?.id) {
+      if (!status.aborted && res.data) {
+        const consultation = res.data as ConsultationModel;
+        const consultationBedId = consultation.current_bed?.bed_object?.id;
+        if (consultationBedId) {
           let bedAssets = await dispatch(
-            listAssetBeds({ bed: consultation?.current_bed?.bed_object?.id })
+            listAssetBeds({ bed: consultationBedId })
           );
-          setBed(consultation?.current_bed?.bed_object?.id);
+          setBed(consultationBedId);
           bedAssets = {
             ...bedAssets,
             data: {
@@ -188,7 +188,15 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   useEffect(() => {
     if (cameraAsset.hostname) {
-      getPresets({ onSuccess: (resp) => setPresets(resp.data) });
+      getPresets({
+        onSuccess: (resp) => setPresets(resp.data),
+        onError: (resp) => {
+          resp instanceof AxiosError &&
+            Notification.Error({
+              msg: "Fetching presets failed",
+            });
+        },
+      });
       getBedPresets(cameraAsset);
     }
   }, [cameraAsset]);
@@ -346,13 +354,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   return (
     <div className="px-2 flex flex-col h-[calc(100vh-1.5rem)]">
       <div className="flex items-center flex-wrap justify-between gap-2">
-        <PageTitle
-          title={
-            "Camera Feed | " +
-            (bedPresets?.[0]?.asset_object?.location_object?.name ?? "")
-          }
-          breadcrumbs={false}
-        />
         <div className="flex items-center gap-4 px-3">
           <p className="block text-lg font-medium"> Camera Presets :</p>
           <div className="flex items-center">

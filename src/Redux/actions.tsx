@@ -83,8 +83,13 @@ export const getAnyFacility = (id: number | string, key?: string) => {
   return fireRequest("getAnyFacility", [], {}, { id: id }, key);
 };
 
-export const getFacilityUsers = (id: string) => {
-  return fireRequest("getFacilityUsers", [], {}, { facility_id: id });
+export const getFacilityUsers = (id: string, params?: object) => {
+  return fireRequest(
+    "getFacilityUsers",
+    [],
+    { ...params },
+    { facility_id: id }
+  );
 };
 export const getOnlineDoctors = () => {
   return fireRequest("getOnlineDoctors", [], {}, {});
@@ -341,6 +346,9 @@ export const getCapacityBed = (pathParam: object) => {
 
 export const getDoctor = (pathParam: object) => {
   return fireRequest("getDoctor", [], {}, pathParam);
+};
+export const deleteCapacity = (pathParam: object) => {
+  return fireRequest("deleteCapacityBed", [], {}, pathParam);
 };
 
 //Patient

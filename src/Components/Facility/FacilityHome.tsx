@@ -1,4 +1,4 @@
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
@@ -42,7 +42,6 @@ export const FacilityHome = (props: any) => {
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
-  const [facilityNotFound, setFacilityNotFound] = useState(false);
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
@@ -82,7 +81,7 @@ export const FacilityHome = (props: any) => {
           }
         }
       } else {
-        setFacilityNotFound(true);
+        navigate("/not-found");
         setIsLoading(false);
       }
     },
@@ -120,36 +119,6 @@ export const FacilityHome = (props: any) => {
   if (isLoading) {
     return <Loading />;
   }
-
-  if (facilityNotFound) {
-    return (
-      <div className="flex justify-center text-center items-center h-screen">
-        <div className="text-center error-page-wrap">
-          <div>
-            <div className="w-28  -rotate-45 mx-auto relative top-14">
-              <div className="bg-gray-900 h-1 w-full"></div>
-              <div className="bg-gray-100 h-1 w-full"></div>
-            </div>
-            <i className="fas fa-hospital text-6xl my-4"></i>
-          </div>
-
-          <h1>Facility Not Found</h1>
-          <p>
-            A facility with ID: {facilityId}, does not exist!
-            <br />
-            <br />
-            <Link
-              href="/"
-              className="rounded-lg px-4 py-2 inline-block bg-primary-600 text-white hover:text-white hover:bg-primary-700"
-            >
-              Return to CARE
-            </Link>
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   let capacityList: any = null;
   if (!capacityData || !capacityData.length) {
     capacityList = (
@@ -163,8 +132,16 @@ export const FacilityHome = (props: any) => {
         return data.room_type === x.id;
       });
       if (res) {
+        const removeCurrentBedType = (bedTypeId: number | undefined) => {
+          setCapacityData((state) => state.filter((i) => i.id !== bedTypeId));
+        };
         return (
-          <BedTypeCard facilityId={facilityId} key={`bed_${res.id}`} {...res} />
+          <BedTypeCard
+            facilityId={facilityId}
+            key={`bed_${res.id}`}
+            {...res}
+            removeBedType={removeCurrentBedType}
+          />
         );
       }
     });
@@ -296,6 +273,25 @@ export const FacilityHome = (props: any) => {
                         </a>
                       </div>
                     </div>
+                    <div className="flex items-center gap-3 mt-4">
+                      <div>
+                        <h1 className="text-lg font-bold">Features</h1>
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          {facilityData.features?.map((feature, i) => (
+                            <div
+                              key={i}
+                              className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm"
+                            >
+                              {
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0].name
+                              }
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div className="lg:flex-1 min-w-[300px] md:flex flex-col">
                     <div className="mb-4">
@@ -328,9 +324,24 @@ export const FacilityHome = (props: any) => {
               <div>
                 <h1 className="text-lg font-bold">Features</h1>
                 <div className="flex gap-2 flex-wrap mt-2">
-                  {facilityData.features?.map((feature, i)=>(
-                    <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
-                      <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/> &nbsp;{FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                  {facilityData.features?.map((feature, i) => (
+                    <div
+                      key={i}
+                      className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm"
+                    >
+                      <i
+                        className={`fas fa-${
+                          FACILITY_FEATURE_TYPES.filter(
+                            (f) => f.id === feature
+                          )[0].icon
+                        }`}
+                      />{" "}
+                      &nbsp;
+                      {
+                        FACILITY_FEATURE_TYPES.filter(
+                          (f) => f.id === feature
+                        )[0].name
+                      }
                     </div>
                   ))}
                 </div>

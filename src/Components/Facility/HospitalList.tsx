@@ -362,13 +362,33 @@ export const HospitalList = (props: any) => {
                       <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
-                      {facility.features?.map((feature : number, i : number)=>(
-                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5" title={FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}>
-                          <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/> &nbsp;{FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
+                      {facility.features?.map((feature: number, i: number) => (
+                        <div
+                          key={i}
+                          className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                          title={
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
+                        >
+                          <i
+                            className={`fas fa-${
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0].icon
+                            }`}
+                          />{" "}
+                          &nbsp;
+                          {
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0].name
+                          }
                         </div>
                       ))}
                     </div>
-                    
+
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
                         <div className="font-semibold">
@@ -389,7 +409,7 @@ export const HospitalList = (props: any) => {
                         <div>
                           {userType !== "Staff" ? (
                             <button
-                              className="mx-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                              className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                               onClick={(_) => setModalFor(facility.id)}
                             >
                               <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
@@ -432,17 +452,17 @@ export const HospitalList = (props: any) => {
                                     variant="outlined"
                                   />
                                 </div>
-                                <div className="flex flex-row justify-end">
+                                <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
                                   <button
                                     type="button"
-                                    className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
+                                    className="btn-danger btn mr-2 w-full md:w-auto"
                                     onClick={(_) => setModalFor(undefined)}
                                   >
                                     Cancel
                                   </button>
                                   <button
                                     type="submit"
-                                    className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
+                                    className="btn-primary btn mr-2 w-full md:w-auto"
                                   >
                                     Send Notification
                                   </button>
@@ -530,7 +550,7 @@ export const HospitalList = (props: any) => {
         />
 
         <div className="flex md:justify-end w-full md:mt-4">
-          <div>
+          <div className="w-full md:w-auto">
             <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
@@ -648,8 +668,8 @@ export const HospitalList = (props: any) => {
             </dl>
           </div>
         </div>
-        <div className="flex my-4 gap-2 flex-wrap justify-between flex-grow">
-          <div className="w-72">
+        <div className="flex my-4 gap-2 flex-col md:flex-row justify-between flex-grow">
+          <div className="w-full md:w-72">
             <InputSearchBox
               value={qParams.search}
               search={onSearchSuspects}
@@ -658,46 +678,42 @@ export const HospitalList = (props: any) => {
             />
           </div>
 
-          <div className="flex">
-            <div>
-              <div className="flex items-start mb-2">
-                <button
-                  className="btn btn-primary-ghost"
-                  onClick={() => setShowFilters(true)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="fill-current w-4 h-4 mr-2"
-                  >
-                    <line x1="8" y1="6" x2="21" y2="6"></line>
-                    <line x1="8" y1="12" x2="21" y2="12">
-                      {" "}
-                    </line>
-                    <line x1="8" y1="18" x2="21" y2="18">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="6" x2="3.01" y2="6">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="12" x2="3.01" y2="12">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="18" x2="3.01" y2="18">
-                      {" "}
-                    </line>
-                  </svg>
-                  <span>{t("advanced_filters")}</span>
-                </button>
-              </div>
-            </div>
+          <div className="flex items-start mb-2 w-full md:w-auto">
+            <button
+              className="btn btn-primary-ghost w-full md:w-auto"
+              onClick={() => setShowFilters(true)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="fill-current w-4 h-4 mr-2"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12">
+                  {" "}
+                </line>
+                <line x1="8" y1="18" x2="21" y2="18">
+                  {" "}
+                </line>
+                <line x1="3" y1="6" x2="3.01" y2="6">
+                  {" "}
+                </line>
+                <line x1="3" y1="12" x2="3.01" y2="12">
+                  {" "}
+                </line>
+                <line x1="3" y1="18" x2="3.01" y2="18">
+                  {" "}
+                </line>
+              </svg>
+              <span>{t("advanced_filters")}</span>
+            </button>
           </div>
         </div>
       </div>
