@@ -253,6 +253,8 @@ export const ConsultationDetails = (props: any) => {
             };
             setPatientData(data);
           }
+        } else {
+          navigate("/not-found");
         }
         setIsLoading(false);
       }
