@@ -179,39 +179,19 @@ export const FileUpload = (props: FileUploadProps) => {
   ];
 
   const handleZoomIn = () => {
-    const len = zoom_values.length - 1;
-    if (file_state.zoom + 1 === len) {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom + 1,
-        isZoomOutDisabled: false,
-        isZoomInDisabled: true,
-      });
-      // setZoomInDisabled(true);
-    } else {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom + 1,
-        isZoomOutDisabled: false,
-      });
-    }
+    const checkFull = file_state.zoom === zoom_values.length;
+    setFileState({
+      ...file_state,
+      zoom: !checkFull ? file_state.zoom + 1 : file_state.zoom,
+    });
   };
 
   const handleZoomOut = () => {
-    if (file_state.zoom - 1 === 0) {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom - 1,
-        isZoomOutDisabled: true,
-        isZoomInDisabled: false,
-      });
-    } else {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom - 1,
-        isZoomInDisabled: false,
-      });
-    }
+    const checkFull = file_state.zoom === 1;
+    setFileState({
+      ...file_state,
+      zoom: !checkFull ? file_state.zoom - 1 : file_state.zoom,
+    });
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
@@ -612,13 +592,14 @@ export const FileUpload = (props: FileUploadProps) => {
                 <>
                   {
                     [
-                      ["Zoom In", "magnifying-glass-plus", handleZoomIn],
-                      ["Zoom Out", "magnifying-glass-minus", handleZoomOut]
+                      ["Zoom In", "magnifying-glass-plus", handleZoomIn, file_state.zoom === zoom_values.length],
+                      ["Zoom Out", "magnifying-glass-minus", handleZoomOut, file_state.zoom === 1],
                     ].map((button, index) => 
                       <button 
                         key={index}
                         onClick={button[2] as () => void}
                         className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                        disabled={button[3] as boolean}
                       >
                         <i 
                           className={`fas fa-${button[1]} mr-2`}
