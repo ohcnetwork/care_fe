@@ -7,7 +7,7 @@ import {
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
 import { useCallback, useEffect, useReducer, useState } from "react";
@@ -41,6 +41,9 @@ import {
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
 import clsx from "clsx";
+
+import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
+
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -610,13 +613,20 @@ export const UserAdd = (props: UserProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={headerText} />
+      <PageTitle 
+        title={headerText}
+        componentRight={<Link
+          href="https://school.coronasafe.network/targets/12953"
+          className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
+          target="_blank"
+        >
+          <i className="fas fa-info-circle" /> &nbsp;Need Help?
+        </Link>}
+        justifyContents="justify-between"
+      />
 
       <Card className="mt-4">
-        <HelpToolTip
-          text="Need help? Go to the docs "
-          link="https://school.coronasafe.network/targets/12953"
-        />
+        
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
