@@ -4,11 +4,7 @@ export default function Error404() {
   return (
     <div className="flex justify-center text-center items-center h-screen">
       <div className="text-center w-[500px]">
-        <img 
-          src="images/404.png" 
-          alt="Error 404"
-          className="w-full"
-        />
+        <img src="images/404.png" alt="Error 404" className="w-full" />
         <h1>Page Not Found</h1>
         <p>
           It appears that you have stumbled upon a page that either does not
