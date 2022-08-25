@@ -126,20 +126,18 @@ const Pagination = (props: PaginationProps) => {
   return (
     <div className="mx-auto mb-4">
       <div className="flex-1 flex justify-between sm:hidden">
-        <button
-          disabled={firstBtnDisable}
+        <div
           onClick={() => handleChangePage("<")}
-          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 cursor-pointer"
+          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
         >
-          {"<"}
-        </button>
-        <button
-          disabled={lastBtnDisable}
+          Previous
+        </div>
+        <div
           onClick={() => handleChangePage(">")}
-          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 cursor-pointer"
+          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:ring-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
         >
-          {">"}
-        </button>
+          Next
+        </div>
       </div>
       <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
         <div>

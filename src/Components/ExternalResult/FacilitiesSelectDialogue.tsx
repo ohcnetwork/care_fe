@@ -28,20 +28,12 @@ const styles = {
 const FacilitiesSelectDialog = (props: Props & WithStyles<typeof styles>) => {
   const { handleOk, handleCancel, classes, selectedFacility, setSelected } =
     props;
-
-  const handleEscKeyPress = (event: any) => {
-    if (event.key === "Escape") {
-      handleCancel();
-    }
-  };
-
   return (
     <Dialog
       open={true}
       classes={{
         paper: classes.paper,
       }}
-      onKeyDown={(e) => handleEscKeyPress(e)}
     >
       <DialogTitle
         className=" font-semibold text-3xl"
@@ -65,7 +57,7 @@ const FacilitiesSelectDialog = (props: Props & WithStyles<typeof styles>) => {
           color="secondary"
           onClick={() => handleCancel()}
         >
-          Cancel
+          Cancel Creation
         </Button>
         <Button
           onClick={handleOk}

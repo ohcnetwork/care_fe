@@ -7,6 +7,7 @@ import {
 } from "@material-ui/core";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import { WithStyles, withStyles } from "@material-ui/styles";
 import React, { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
@@ -27,6 +28,13 @@ interface Props {
   handleCancel: () => void;
   userType: "Staff" | "DistrictAdmin" | "StateLabAdmin";
 }
+
+const styles = {
+  paper: {
+    "max-width": "600px",
+    "min-width": "400px",
+  },
+};
 
 const statusChoices = [...SAMPLE_TEST_STATUS];
 
@@ -64,8 +72,8 @@ const updateStatusReducer = (state = initialState, action: any) => {
   }
 };
 
-const UpdateStatusDialog = (props: Props) => {
-  const { sample, handleOk, handleCancel } = props;
+const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
+  const { sample, handleOk, handleCancel, classes } = props;
   const [state, dispatch] = useReducer(updateStatusReducer, initialState);
   const [file, setfile] = useState<File>();
   const [contentType, setcontentType] = useState<string>("");
@@ -85,7 +93,7 @@ const UpdateStatusDialog = (props: Props) => {
 
   useEffect(() => {
     const form = { ...state.form };
-    form.status = 0;
+    form.status = currentStatus?.id;
     dispatch({ type: "set_form", form });
   }, []);
 
@@ -186,7 +194,13 @@ const UpdateStatusDialog = (props: Props) => {
   };
 
   return (
-    <Dialog open={true} onKeyDown={(e) => handleEscKeyPress(e)}>
+    <Dialog
+      open={true}
+      classes={{
+        paper: classes.paper,
+      }}
+      onKeyDown={(e) => handleEscKeyPress(e)}
+    >
       <DialogTitle id="test-sample-title">
         Update Sample Test Status
       </DialogTitle>
@@ -280,4 +294,4 @@ const UpdateStatusDialog = (props: Props) => {
   );
 };
 
-export default UpdateStatusDialog;
+export default withStyles(styles)(UpdateStatusDialog);

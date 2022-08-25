@@ -48,8 +48,7 @@ export const fireRequest = (
   path: any = [],
   params: any = {},
   pathParam?: any,
-  altKey?: string,
-  suppressNotif?: boolean
+  altKey?: string
 ) => {
   return (dispatch: any) => {
     // cancel previous api call
@@ -102,7 +101,7 @@ export const fireRequest = (
       .catch((error: any) => {
         dispatch(fetchDataRequestError(key, error));
 
-        if (!(suppressNotif ?? false) && error.response) {
+        if (error.response) {
           // temporarily don't show invalid phone number error on duplicate patient check
           if (error.response.status === 400 && key === "searchPatient") {
             return;
@@ -135,7 +134,9 @@ export const fireRequest = (
 
           // 4xx Errors
           if (error.response.status > 400 && error.response.status < 500) {
-            if (error.response.data && error.response.data.detail) {
+            if (error.response.status === 429) {
+              return error.response;
+            } else if (error.response.data && error.response.data.detail) {
               Notification.Error({
                 msg: error.response.data.detail,
               });
@@ -143,9 +144,6 @@ export const fireRequest = (
               Notification.Error({
                 msg: "Something went wrong...!",
               });
-            }
-            if (error.response.status === 429) {
-              return error.response;
             }
             return;
           }
@@ -157,8 +155,6 @@ export const fireRequest = (
             });
             return;
           }
-        } else {
-          return error.response;
         }
       });
   };
@@ -247,7 +243,9 @@ export const fireRequestV2 = (
 
         // 4xx Errors
         if (error.response.status > 400 && error.response.status < 500) {
-          if (error.response.data && error.response.data.detail) {
+          if (error.response.status === 429) {
+            return error.response;
+          } else if (error.response.data && error.response.data.detail) {
             Notification.Error({
               msg: error.response.data.detail,
             });
@@ -256,10 +254,6 @@ export const fireRequestV2 = (
               msg: "Something went wrong...!",
             });
           }
-          if (error.response.status === 429) {
-            return error.response;
-          }
-          return;
         }
 
         // 5xx Errors

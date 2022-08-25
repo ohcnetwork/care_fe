@@ -172,9 +172,7 @@ export default function BadgesList(props: any) {
       )}
       {badge(
         "Is Antenatal",
-        (local.gender === 2 || appliedFilters.gender === 2) &&
-          (local.is_antenatal === "yes" ||
-            appliedFilters.is_antenatal === "true")
+        local.is_antenatal === "yes" || appliedFilters.is_antenatal === "true"
           ? "yes"
           : local.is_antenatal === "no" ||
             appliedFilters.is_antenatal === "false"

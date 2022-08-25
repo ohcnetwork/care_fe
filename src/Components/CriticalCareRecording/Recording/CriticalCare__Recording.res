@@ -46,7 +46,7 @@ let basicEditor = (~facilityId, ~patientId, ~consultationId, ~id) => {
 let editorNameToString = editor => {
   switch editor {
   | NeurologicalMonitoringEditor => "Neurological Monitoring"
-  | HemodynamicParametersEditor => "Vitals"
+  | HemodynamicParametersEditor => "Hemodynamic Parameters (Vitals)"
   | VentilatorParametersEditor => "Ventilator Parameters"
   | ArterialBloodGasAnalysisEditor => "Arterial Blood Gas Analysis"
   | BloodSugarEditor => "Blood Sugar"
@@ -113,8 +113,8 @@ let updateDailyRound = (send, editor, dailyRound) => {
   send(UpdateDailyRound(dailyRound, editor))
 }
 
-@genType @react.component
-let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
+@react.component
+export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
   let (state, send) = React.useReducer(reducer, initialState(dailyRound))
 
   <div className=" px-4 py-5 sm:px-6 max-w-5xl mx-auto mt-4">

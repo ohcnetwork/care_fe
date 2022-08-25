@@ -7,7 +7,6 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getInventorySummary, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { RoleButton } from "../Common/RoleButton";
-import clsx from "clsx";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -72,10 +71,11 @@ export default function InventoryList(props: any) {
     inventoryList = inventory.map((inventoryItem: any) => (
       <tr
         key={inventoryItem.id}
-        className={clsx(
-          "cursor-pointer hover:bg-gray-200",
-          inventoryItem.is_low ? "bg-red-100" : "bg-white"
-        )}
+        className={`${
+          inventoryItem.is_low
+            ? "bg-red-100 hover:bg-gray-200"
+            : "bg-white hover:bg-gray-200"
+        }`}
         onClick={() =>
           navigate(
             `/facility/${facilityId}/inventory/${inventoryItem.item_object?.id}`
@@ -84,12 +84,16 @@ export default function InventoryList(props: any) {
       >
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
           <div className="flex items-center">
-            <p className="text-gray-900 whitespace-nowrap">
-              {inventoryItem.item_object?.name}
-              {inventoryItem.is_low && (
-                <span className="ml-2 badge badge badge-danger">Low Stock</span>
-              )}
-            </p>
+            <div className="ml-3">
+              <p className="text-gray-900 whitespace-nowrap">
+                {inventoryItem.item_object?.name}
+                {inventoryItem.is_low && (
+                  <span className="ml-2 badge badge badge-danger">
+                    Low Stock
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
@@ -154,17 +158,16 @@ export default function InventoryList(props: any) {
   return (
     <div>
       <PageTitle
-        title="Inventory Manager"
+        title="Inventory Summary"
         hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-4 md:py-8">
-          <div className="flex flex-col md:flex-row">
+          <div className="flex flex-col md:flex-row items-center">
             <div className="mt-2">
               <RoleButton
-                className="w-full"
                 materialButtonProps={{
                   variant: "contained",
                   color: "primary",
@@ -176,12 +179,12 @@ export default function InventoryList(props: any) {
                 disableFor="readOnly"
                 buttonType="materialUI"
               >
-                Manage Inventory
+                Add Inventory
               </RoleButton>
             </div>
             <div className="mt-2">
               <Button
-                className="md:ml-2 w-full"
+                className="ml-2"
                 variant="contained"
                 color="primary"
                 size="small"

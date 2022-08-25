@@ -103,7 +103,6 @@ let make = (~bloodsugarParameters, ~updateCB, ~id, ~consultationId) => {
         value={Belt.Option.mapWithDefault(state.blood_sugar_level, "", string_of_int)}
         setValue={s => send(SetBloodSugarLevel(int_of_string(s)))}
         getLabel={getStatus(70.0, 110.0)}
-        hasError={ValidationUtils.isInputInRangeInt(0, 700, state.blood_sugar_level)}
       />
       <h4 className="self-start"> {str("Insulin Intake")} </h4>
       <Slider
@@ -115,7 +114,6 @@ let make = (~bloodsugarParameters, ~updateCB, ~id, ~consultationId) => {
         value={Belt.Option.mapWithDefault(state.insulin_intake_dose, "", Js.Float.toString)}
         setValue={s => send(SetDosage(float_of_string(s)))}
         getLabel={_ => ("", "#ff0000")}
-        hasError={ValidationUtils.isInputInRangeFloat("0", "100", state.insulin_intake_dose)}
       />
       <div className="w-full mb-10 px-3">
         <label className="block mb-2 font-bold"> {str("Frequency")} </label>

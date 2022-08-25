@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { Check, KeyboardArrowDown } from "@material-ui/icons";
-import clsx from "clsx";
+import classNames from "classnames";
 
 type Props<T> = {
   options: {
@@ -12,7 +12,6 @@ type Props<T> = {
   onSelect: (value: T) => void;
   selected?: T;
   label?: string;
-  position?: string;
 };
 
 export default function SelectMenu<T>(props: Props<T>) {
@@ -36,23 +35,23 @@ export default function SelectMenu<T>(props: Props<T>) {
         <>
           <Listbox.Label className="sr-only">{props.label}</Listbox.Label>
           <div className="relative">
-            <Listbox.Button className="inline-flex shadow-sm rounded-md divide-x divide-primary-600">
+            <div className="inline-flex shadow-sm rounded-md divide-x divide-primary-600">
               <div className="relative z-0 inline-flex shadow-sm rounded-md divide-x divide-primary-600">
-                <div className="relative inline-flex items-center bg-primary-500 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white hover:bg-primary-600 focus:outline-none focus:z-10">
+                <div className="relative inline-flex items-center bg-primary-500 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white">
                   {selected.value && (
                     <Check className="h-5 w-5" aria-hidden="true" />
                   )}
                   <p className="ml-2.5 text-sm font-medium">{selected.title}</p>
                 </div>
-                <div className="relative inline-flex items-center bg-primary-500 p-2 rounded-l-none rounded-r-md text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:z-10 ">
+                <Listbox.Button className="relative inline-flex items-center bg-primary-500 p-2 rounded-l-none rounded-r-md text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:z-10 ">
                   <span className="sr-only">Change published status</span>
                   <KeyboardArrowDown
                     className="h-5 w-5 text-white"
                     aria-hidden="true"
                   />
-                </div>
+                </Listbox.Button>
               </div>
-            </Listbox.Button>
+            </div>
 
             <Transition
               show={open}
@@ -61,17 +60,12 @@ export default function SelectMenu<T>(props: Props<T>) {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options
-                className={clsx(
-                  props.position ? "md:right-0 md:left-auto" : "left-0",
-                  "origin-top-right absolute z-10 mt-2 w-auto lg:w-72 rounded-md shadow-lg overflow-hidden bg-white divide-y divide-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none"
-                )}
-              >
+              <Listbox.Options className="origin-top-right absolute z-10 left-0 mt-2 w-72 rounded-md shadow-lg overflow-hidden bg-white divide-y divide-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none">
                 {options.map((option) => (
                   <Listbox.Option
                     key={option.title}
                     className={({ active }) =>
-                      clsx(
+                      classNames(
                         active ? "text-white bg-primary-500" : "text-gray-900",
                         "cursor-default select-none relative p-4 text-sm"
                       )
@@ -82,9 +76,9 @@ export default function SelectMenu<T>(props: Props<T>) {
                       <div className="flex flex-col">
                         <div className="flex justify-between">
                           <p
-                            className={clsx(
+                            className={
                               selected ? "font-semibold" : "font-normal"
-                            )}
+                            }
                           >
                             {option.title}
                           </p>
@@ -100,7 +94,7 @@ export default function SelectMenu<T>(props: Props<T>) {
                         </div>
                         {option.description && (
                           <p
-                            className={clsx(
+                            className={classNames(
                               active ? "text-primary-200" : "text-gray-500",
                               "mt-2"
                             )}

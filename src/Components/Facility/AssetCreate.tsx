@@ -8,10 +8,18 @@ import {
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import CancelOutlineIcon from "@material-ui/icons/CancelOutlined";
 import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  FormControlLabel,
+  InputLabel,
+  Radio,
+  RadioGroup,
+} from "@material-ui/core";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
@@ -81,7 +89,7 @@ const AssetCreate = (props: AssetProps) => {
   const [asset_class, setAssetClass] = useState<AssetClass>();
   const [not_working_reason, setNotWorkingReason] = useState("");
   const [description, setDescription] = useState("");
-  const [is_working, setIsWorking] = useState<string | undefined>(undefined);
+  const [is_working, setIsWorking] = useState("0");
   const [serial_number, setSerialNumber] = useState("");
   const [warranty_details, setWarrantyDetails] = useState("");
   const [vendor_name, setVendorName] = useState("");
@@ -149,7 +157,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "is_working":
-          if (is_working === undefined) {
+          if (is_working == "0") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -204,7 +212,7 @@ const AssetCreate = (props: AssetProps) => {
       const data = {
         name: name,
         asset_type: asset_type,
-        asset_class: asset_class || "",
+        asset_class: asset_class,
         description: description,
         is_working: is_working,
         not_working_reason: is_working === "true" ? "" : not_working_reason,
@@ -347,72 +355,92 @@ const AssetCreate = (props: AssetProps) => {
                   errors={state.errors.name}
                 />
               </div>
-              <div className="flex flex-wrap justify-between">
-                <div>
-                  <InputLabel htmlFor="asset-type" id="name=label" required>
-                    Asset Type
-                  </InputLabel>
-                  <div className="my-2">
-                    <SelectMenu
-                      options={[
-                        {
-                          title: "Select",
-                          description:
-                            "Select an Asset Type from the following",
-                          value: undefined,
-                        },
-                        {
-                          title: "Internal",
-                          description: "Asset is inside the facility premises.",
-                          value: "INTERNAL",
-                        },
-                        {
-                          title: "External",
-                          description:
-                            "Asset is outside the facility premises.",
-                          value: "EXTERNAL",
-                        },
-                      ]}
-                      selected={asset_type}
-                      onSelect={setAssetType}
-                    />
-                  </div>
-                  <ErrorHelperText error={state.errors.asset_type} />
+              <div>
+                <InputLabel htmlFor="asset-type" id="name=label" required>
+                  Asset Type
+                </InputLabel>
+                <div className="my-2">
+                  <SelectMenu
+                    options={[
+                      {
+                        title: "Internal",
+                        description: "Asset is inside the facility premises.",
+                        value: "INTERNAL",
+                      },
+                      {
+                        title: "External",
+                        description: "Asset is outside the facility premises.",
+                        value: "EXTERNAL",
+                      },
+                    ]}
+                    selected={asset_type}
+                    onSelect={setAssetType}
+                  />
                 </div>
-                <div>
-                  <InputLabel htmlFor="asset-class" id="name=label">
-                    Asset Class
-                  </InputLabel>
-                  <div className="my-2">
-                    <SelectMenu
-                      options={[
-                        { title: "Select", value: undefined },
-                        { title: "ONVIF Camera", value: "ONVIF" },
-                        { title: "HL7 Vitals Monitor", value: "HL7MONITOR" },
-                      ]}
-                      selected={asset_class}
-                      onSelect={setAssetClass}
-                    />
-                  </div>
+                <ErrorHelperText error={state.errors.asset_type} />
+              </div>
+              <div>
+                <InputLabel htmlFor="asset-class" id="name=label">
+                  Asset Class
+                </InputLabel>
+                <div className="my-2">
+                  <SelectMenu
+                    options={[
+                      { title: "Select", value: undefined },
+                      { title: "ONVIF Camera", value: "ONVIF" },
+                      { title: "HL7 Vitals Monitor", value: "HL7MONITOR" },
+                    ]}
+                    selected={asset_class}
+                    onSelect={setAssetClass}
+                  />
                 </div>
-                <div>
-                  <InputLabel htmlFor="is_working" id="name=label" required>
-                    Working Status
-                  </InputLabel>
-                  <div className="my-2">
-                    <SelectMenu
-                      options={[
-                        { title: "Select", value: undefined },
-                        { title: "Working", value: "true" },
-                        { title: "Not Working", value: "false" },
-                      ]}
-                      selected={is_working}
-                      onSelect={setIsWorking}
-                      position="right"
+              </div>
+              <div>
+                <InputLabel htmlFor="location" id="name=label" required>
+                  Location
+                </InputLabel>
+
+                <SelectField
+                  id="location"
+                  fullWidth
+                  name="location"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  options={[{ id: "0", name: "Select" }, ...locations]}
+                  optionValue="name"
+                  value={location}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setLocation(e.target.value)
+                  }
+                  errors={state.errors.location}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="is_working" id="name=label" required>
+                  Is Working
+                </InputLabel>
+                <RadioGroup
+                  aria-label="is_working"
+                  name="is_working"
+                  value={is_working}
+                  onChange={(e) => setIsWorking(e.target.value)}
+                  className="flex flex-col justify-center mt-2"
+                >
+                  <Box display="flex" flexDirection="row">
+                    <FormControlLabel
+                      value={"true"}
+                      control={<Radio />}
+                      label="Yes"
                     />
-                  </div>
-                  <ErrorHelperText error={state.errors.is_working} />
-                </div>
+                    <FormControlLabel
+                      value={"false"}
+                      control={<Radio />}
+                      label="No"
+                    />
+                  </Box>
+                </RadioGroup>
+                <ErrorHelperText error={state.errors.is_working} />
               </div>
               {is_working === "false" && (
                 <div>
@@ -553,27 +581,6 @@ const AssetCreate = (props: AssetProps) => {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="location" id="name=label" required>
-                  Location
-                </InputLabel>
-
-                <SelectField
-                  id="location"
-                  fullWidth
-                  name="location"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  options={[{ id: "0", name: "Select" }, ...locations]}
-                  optionValue="name"
-                  value={location}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setLocation(e.target.value)
-                  }
-                  errors={state.errors.location}
-                />
-              </div>
-              <div>
                 <InputLabel htmlFor="qr_code_id" id="name=label">
                   Asset QR Code ID
                 </InputLabel>
@@ -594,36 +601,17 @@ const AssetCreate = (props: AssetProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-center sm:justify-start gap-x-4 gap-y-2 flex-wrap">
-              <Button
-                id="asset-create"
-                color="primary"
-                variant="contained"
-                type="submit"
-                onClick={(e) => handleSubmit(e)}
-                startIcon={
-                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                }
-                className="w-full sm:w-auto"
-              >
-                {assetId ? "Update" : "Create"}
-              </Button>
-              <Button
-                id="asset-cancel"
-                color="primary"
-                variant="outlined"
-                type="button"
-                onClick={() =>
-                  navigate(
-                    assetId ? `/assets/${assetId}` : `/facility/${facilityId}`
-                  )
-                }
-                startIcon={<CancelOutlineIcon>cancel</CancelOutlineIcon>}
-                className="w-full sm:w-auto"
-              >
-                Cancel
-              </Button>
-            </div>
+            <Button
+              id="asset-create"
+              color="primary"
+              variant="contained"
+              type="submit"
+              style={{ marginLeft: "auto" }}
+              onClick={(e) => handleSubmit(e)}
+              startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
+            >
+              {assetId ? "Update" : "Create"}
+            </Button>
           </form>
         </CardContent>
       </Card>

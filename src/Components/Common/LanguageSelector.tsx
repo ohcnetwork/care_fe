@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_NAMES } from "../../Locale/config";
-import clsx from "clsx";
 
 export const LanguageSelector = (props: any) => {
   const { i18n } = useTranslation();
@@ -19,13 +18,16 @@ export const LanguageSelector = (props: any) => {
     }
   };
 
+  const { className } = props;
+
   return (
-    <div className="flex justify-end items-center relative w-full">
+    <div className="flex items-center relative w-full">
       <select
-        className={clsx(
-          props.className,
-          "py-2 pl-2 pr-10 appearance-none rounded-md shadow-lg cursor-pointer focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-        )}
+        {...props}
+        className={
+          className +
+          " py-2 pl-2 pr-10 appearance-none rounded-md shadow-lg cursor-auto"
+        }
         id="language-selector"
         name="language"
         value={i18n.language}
@@ -38,7 +40,7 @@ export const LanguageSelector = (props: any) => {
         ))}
       </select>
       <div className="absolute right-0 mr-1 z-10 h-auto w-8 pointer-events-none">
-        <ExpandMoreIcon className={props.className} />
+        <ExpandMoreIcon className={className} />
       </div>
     </div>
   );

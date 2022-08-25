@@ -45,11 +45,10 @@ const LinkFacilityDialog = (props: Props & WithStyles<typeof styles>) => {
         Link new facility to {username}
       </DialogTitle>
       <DialogContent>
-        <div className="md:min-w-[400px]">
+        <div style={{ minWidth: "400px" }}>
           <FacilitySelect
             multiple={false}
             name="facility"
-            showAll={false} // Show only facilities that user has access to link (not all facilities)
             selected={facility}
             setSelected={setFacility}
             errors=""
@@ -60,12 +59,7 @@ const LinkFacilityDialog = (props: Props & WithStyles<typeof styles>) => {
         <Button onClick={cancelClicked} color="secondary">
           Cancel
         </Button>
-        <Button
-          color="primary"
-          disabled={!facility}
-          onClick={okClicked}
-          autoFocus
-        >
+        <Button color="primary" onClick={okClicked} autoFocus>
           Add
         </Button>
       </DialogActions>

@@ -393,7 +393,7 @@ export const SampleTest = (props: any) => {
                   {state.form.isFastTrack && (
                     <div>
                       <InputLabel>
-                        Provide reasons for fast-track testing*
+                        Provide reasons for fast-track testing
                       </InputLabel>
                       <MultilineInputField
                         rows={4}

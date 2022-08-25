@@ -49,15 +49,18 @@ const TestRow = ({ data, value, onChange }: any) => {
           <SelectField
             name="preferred_vehicle_choice"
             variant="outlined"
+            margin="dense"
             optionArray={true}
             value={value}
             options={["Unselected", ...data.choices.split(",")]}
             onChange={onChange}
-            className="border-l border-r border-gray-400"
+            className={"bg-white border-l border-r border-gray-400"}
           />
         ) : (
           <input
-            className="w-full px-4 h-12 text-right text-sm border-l border-r focus:ring-primary-500 focus:border-primary-500"
+            className={
+              "w-full px-4 h-12 text-right text-sm border-l border-r border-gray-400"
+            }
             value={value}
             onChange={onChange}
             type={inputType}
@@ -83,6 +86,8 @@ const TestRow = ({ data, value, onChange }: any) => {
 };
 
 export const TestTable = ({ title, data, state, dispatch }: any) => {
+  const className = useStyle();
+
   const [searchFilter, setSearchFilter] = useState("");
 
   const filterTests = data.filter((i: any) => {

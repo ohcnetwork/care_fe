@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Typography, CardContent, Button } from "@material-ui/core";
+import {
+  Typography,
+  Grid,
+  Card,
+  CardHeader,
+  CardContent,
+  CardActions,
+  Button,
+} from "@material-ui/core";
 import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
@@ -9,6 +17,12 @@ import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import { postResetPassword } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+
+const useStyles = makeStyles((theme) => ({
+  formTop: {
+    marginTop: "100px",
+  },
+}));
 
 const panelStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -22,6 +36,7 @@ const panelStyles = makeStyles((theme: Theme) =>
 );
 
 export const ResetPassword = (props: any) => {
+  const classes = useStyles();
   const panel = panelStyles();
 
   const dispatch: any = useDispatch();
@@ -100,76 +115,68 @@ export const ResetPassword = (props: any) => {
     }
   };
   return (
-    <div className="py-10 md:py-40">
-      <div>
-        <div>
-          <form
-            className="max-w-xl bg-white shadow rounded-lg mx-auto"
-            onSubmit={(e) => {
-              handleSubmit(e);
-            }}
-          >
-            <div className="text-xl font-bold pt-4 text-center">
-              {t("reset_password")}
-            </div>
-            <CardContent>
-              <TextInputField
-                type="password"
-                name="password"
-                placeholder={t("new_password")}
-                variant="outlined"
-                margin="dense"
-                onChange={handleChange}
-                errors={errors.password}
-              />
-              {passReg === 0 && (
-                <div className={panel.root}>
-                  <ExpansionPanel>
-                    <ExpansionPanelDetails>
-                      <Typography className="text-red-500">
-                        <li>Minimum password length 8</li>
-                        <li>Require at least one digit</li>
-                        <li>Require at least one upper case</li>
-                        <li>Require at least one lower case letter</li>
-                        <li>Require at least one symbol</li>
-                      </Typography>
-                    </ExpansionPanelDetails>
-                  </ExpansionPanel>
-                </div>
-              )}
-              <TextInputField
-                type="password"
-                name="confirm"
-                placeholder={t("confirm_password")}
-                variant="outlined"
-                margin="dense"
-                onChange={handleChange}
-                errors={errors.confirm}
-              />
-              <ErrorHelperText error={errors.token} />
-            </CardContent>
-            <div className="mt-4 sm:flex sm:justify-between grid p-4">
-              <Button
-                color="default"
-                variant="contained"
-                onClick={() => navigate(`/login`)}
-                type="button"
-              >
-                Cancel{" "}
-              </Button>
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                onClick={(e) => handleSubmit(e)}
-              >
-                {t("reset")}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
+    <div>
+      <Grid container className={classes.formTop}>
+        <Grid item xs={12} md={4} className="marginAuto marginTop50">
+          <Card>
+            <form
+              onSubmit={(e) => {
+                handleSubmit(e);
+              }}
+            >
+              <CardHeader title={t("reset_password")} />
+              <CardContent>
+                <TextInputField
+                  type="password"
+                  name="password"
+                  placeholder={t("new_password")}
+                  variant="outlined"
+                  margin="dense"
+                  onChange={handleChange}
+                  errors={errors.password}
+                />
+                {passReg === 0 && (
+                  <div className={panel.root}>
+                    <ExpansionPanel>
+                      <ExpansionPanelDetails>
+                        <Typography className="text-red-500">
+                          <li>Minimum password length 8</li>
+                          <li>Require at least one digit</li>
+                          <li>Require at least one upper case</li>
+                          <li>Require at least one lower case letter</li>
+                          <li>Require at least one symbol</li>
+                        </Typography>
+                      </ExpansionPanelDetails>
+                    </ExpansionPanel>
+                  </div>
+                )}
+                <TextInputField
+                  type="password"
+                  name="confirm"
+                  placeholder={t("confirm_password")}
+                  variant="outlined"
+                  margin="dense"
+                  onChange={handleChange}
+                  errors={errors.confirm}
+                />
+                <ErrorHelperText error={errors.token} />
+              </CardContent>
+
+              <CardActions className="padding16">
+                <Button
+                  color="primary"
+                  variant="contained"
+                  type="submit"
+                  style={{ marginLeft: "auto" }}
+                  onClick={(e) => handleSubmit(e)}
+                >
+                  {t("reset")}
+                </Button>
+              </CardActions>
+            </form>
+          </Card>
+        </Grid>
+      </Grid>
     </div>
   );
 };

@@ -74,7 +74,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
     return {
       id: patient.patient_id,
-      text: `${patient.name} (${patient.gender})`,
+      text: `#${patient.patient_id} - ${patient.name} (${patient.gender})`,
     };
   });
 
@@ -93,9 +93,9 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   };
 
   const validateForm = () => {
-    const errors = { ...initError };
+    let errors = { ...initError };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field) => {
+    Object.keys(state.form).forEach((field, i) => {
       switch (field) {
         case "patient":
           if (!state.form[field]) {
@@ -139,9 +139,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
         const newFacilityId =
           res.data && res.data.facility_object && res.data.facility_object.id;
         if (newFacilityId) {
-          navigate(
-            `/facility/${newFacilityId}/patient/${res.data.patient}/consultation`
-          );
+          navigate(`/facility/${newFacilityId}/patient/${res.data.patient}`);
         } else {
           navigate("/facility");
         }

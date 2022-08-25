@@ -74,7 +74,7 @@ const CommentSection = (props: CommentSectionProps) => {
       <textarea
         rows={3}
         placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4 focus:border-primary-600 focus:ring-primary-600"
+        className="mt-4 border border-gray-500 rounded-lg p-4"
         value={commentBox}
         onChange={(e) => setCommentBox(e.target.value)}
       />

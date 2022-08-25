@@ -306,12 +306,10 @@ export const TriageForm = (props: triageFormProps) => {
                   />
                 </div>
               </div>
-              <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
+              <div className="flex justify-between mt-4">
                 <Button
                   color="default"
                   variant="contained"
-                  fullWidth
-                  className="w-full md:w-auto"
                   type="button"
                   onClick={goBack}
                 >
@@ -321,8 +319,6 @@ export const TriageForm = (props: triageFormProps) => {
                   color="primary"
                   variant="contained"
                   type="submit"
-                  fullWidth
-                  className="w-full md:w-auto"
                   style={{ marginLeft: "auto" }}
                   startIcon={
                     <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>

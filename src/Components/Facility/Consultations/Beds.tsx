@@ -12,6 +12,7 @@ import { BedSelect } from "../../Common/BedSelect";
 import { Button, InputLabel } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { TextInputField } from "../../Common/HelperInputFields";
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
 
 const formatDateTime: () => string = () => {
@@ -30,13 +31,12 @@ interface BedsProps {
   patientId: number;
   consultationId: number;
   smallLoader?: boolean;
-  discharged?: boolean;
-  setState?: Dispatch<SetStateAction<boolean>>;
+  setState? : Dispatch<SetStateAction<boolean>>;
 }
 
 const Beds = (props: BedsProps) => {
   const dispatch = useDispatch();
-  const { facilityId, consultationId, discharged } = props;
+  const { facilityId, consultationId } = props;
   const [bed, setBed] = React.useState<BedModel>({});
   const [startDate, setStartDate] = React.useState<string>(formatDateTime());
   const [consultationBeds, setConsultationBeds] = React.useState<CurrentBed[]>(
@@ -89,6 +89,10 @@ const Beds = (props: BedsProps) => {
         msg: "Bed allocated successfully",
       });
       window.location.reload();
+    } else {
+      Notification.Error({
+        msg: "Something went wrong..!",
+      });
     }
   };
 
@@ -106,66 +110,63 @@ const Beds = (props: BedsProps) => {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <div className="text-2xl font-bold">
-          {!discharged ? "Move to bed:" : "Bed History"}
-        </div>
-        {props.setState && (
-          <button
-            className="text-xl"
-            onClick={() => props.setState && props.setState(false)}
-          >
-            <i className="fas fa-times"></i>
-          </button>
-        )}
+        <div className="text-2xl font-bold">Move to bed:</div>
+        {
+          props.setState && (
+            <button
+              className="text-xl"
+              onClick={()=>props.setState && props.setState(false)}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          )
+        }
+        
       </div>
-      {!discharged ? (
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-            <div>
-              <InputLabel id="asset-type">Bed</InputLabel>
-              <BedSelect
-                name="bed"
-                setSelected={(selected) => setBed(selected as BedModel)}
-                selected={bed}
-                errors=""
-                multiple={false}
-                margin="dense"
-                facility={facilityId}
-              />
-            </div>
-            <div>
-              <InputLabel htmlFor="date_declared_positive">
-                Date of Shift
-              </InputLabel>
-              <TextInputField
-                name="date_declared_positive"
-                id="date_declared_positive"
-                variant="outlined"
-                margin="dense"
-                type="datetime-local"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                errors=""
-              />
-            </div>
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+          <div>
+            <InputLabel id="asset-type">Bed</InputLabel>
+            <BedSelect
+              name="bed"
+              setSelected={(selected) => setBed(selected as BedModel)}
+              selected={bed}
+              errors=""
+              multiple={false}
+              margin="dense"
+              facility={facilityId}
+            />
           </div>
-          <div className="flex flex-row justify-center mt-4">
-            <div>
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                startIcon={<i className="fas fa-bed" />}
-              >
-                Move to bed
-              </Button>
-            </div>
+          <div>
+            <InputLabel htmlFor="date_declared_positive">
+              Date of Shift
+            </InputLabel>
+            <TextInputField
+              name="date_declared_positive"
+              id="date_declared_positive"
+              variant="outlined"
+              margin="dense"
+              type="datetime-local"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              errors=""
+            />
           </div>
-        </form>
-      ) : (
-        ""
-      )}
+        </div>
+        <div className="flex flex-row justify-center mt-4">
+          <div>
+            <Button
+              color="primary"
+              variant="contained"
+              type="submit"
+              style={{ marginLeft: "auto" }}
+              startIcon={<i className="fas fa-bed"/>}
+            >
+              Move to bed
+            </Button>
+          </div>
+        </div>
+      </form>
       <div>
         <h3 className="my-4 text-lg">Previous beds: </h3>
         <div className="overflow-hidden rounded-xl">
@@ -189,7 +190,7 @@ const Beds = (props: BedsProps) => {
                 <div className="text-center bg-primary-100 p-2 break-words">
                   {bed?.bed_object?.name}
                 </div>
-                <div className="text-center bg-primary-100 py-2">
+                 <div className="text-center bg-primary-100 py-2">
                   {bed?.bed_object?.location_object?.name}
                 </div>
                 <div className="text-center bg-primary-100 p-2 break-words">

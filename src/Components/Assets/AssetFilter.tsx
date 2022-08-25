@@ -22,7 +22,7 @@ const initialLocation = {
 };
 
 function AssetFilter(props: any) {
-  const { filter, onChange, closeFilter } = props;
+  let { filter, onChange, closeFilter } = props;
   const dispatch: any = useDispatch();
   const [facility, setFacility] = useState<FacilityModel>({ name: "" });
   const [location, setLocation] =
@@ -113,19 +113,16 @@ function AssetFilter(props: any) {
 
   return (
     <div>
-      <div className="flex flex-wrap justify-between">
-        <button className="btn btn-default mr-1 my-1" onClick={closeFilter}>
+      <div className="flex justify-between">
+        <button className="btn btn-default" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
-        <button
-          className="btn btn-default mx-1 my-1 "
-          onClick={handleClearFilter}
-        >
+        <button className="btn btn-default" onClick={handleClearFilter}>
           <i className="fas fa-times mr-2" />
           Clear Filter
         </button>
-        <button className="btn btn-primary ml-1 my-1" onClick={applyFilter}>
+        <button className="btn btn-primary" onClick={applyFilter}>
           <i className="fas fa-check mr-2" />
           Apply
         </button>

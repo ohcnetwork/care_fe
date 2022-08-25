@@ -155,12 +155,10 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
             switch state.ventilator_peep {
             | Some(value) => value
             | _ => 0.0
-            },
-            ~digits=1,
+            }, ~digits=1
           )}
           setValue={s => send(SetPeep(Belt.Float.fromString(s)))}
           getLabel={VentilatorParameters.getStatus(10.0, "Low", 30.0, "High")}
-          hasError={ValidationUtils.isInputInRangeFloat("0", "30", state.ventilator_peep)}
         />
 
         {silderOptionArray
@@ -206,7 +204,6 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
             )}
             setValue={s => send(handleChange(Belt.Int.fromString(s)))}
             getLabel={VentilatorParameters.getStatus(option["min"], "Low", option["max"], "High")}
-            hasError={ValidationUtils.isInputInRangeFloat(option["start"], option["end"], Some(Belt.Int.toFloat(switch value { | None => 0 | Some(v) => v })))}
           />
         })
         |> React.array}

@@ -57,6 +57,11 @@ const menus = [
     icon: "fas fa-users",
   },
   {
+    title: "Profile",
+    link: "/user/profile",
+    icon: "fas fa-user-circle",
+  },
+  {
     title: "Notice Board",
     link: "/notice_board/",
     icon: "fas fa-comment-alt",
@@ -77,11 +82,11 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     ""
   )}`;
   const path = usePath();
-  const url = path?.replaceAll("/", "");
+  const url = path.replaceAll("/", "");
 
   const active = menus.reduce((acc, menu) => {
     const tag = menu.link.replaceAll("/", "");
-    return url?.includes(tag) ? tag : acc;
+    return url.includes(tag) ? tag : acc;
   }, "");
 
   const theme = useTheme();
@@ -232,20 +237,14 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
           )}
         >
           <div className="shrink-0 flex items-center justify-center w-10">
-            <Link
-              href="/user/profile"
-              className="flex items-center justify-center bg-white rounded-full w-8 h-8"
-            >
+            <div className="flex items-center justify-center bg-white rounded-full w-8 h-8">
               <i className="block fas fa-user text-base text-primary-800"></i>
-            </Link>
+            </div>
           </div>
           <div className="ml-3 overflow-hidden whitespace-nowrap">
-            <Link
-              href="/user/profile"
-              className="text-base leading-5 font-medium text-white mb-1"
-            >
+            <p className="text-base leading-5 font-medium text-white mb-1">
               {loginUser}
-            </Link>
+            </p>
             <p
               onClick={handleSignOut}
               className="cursor-pointer text-sm leading-4 font-medium text-primary-200 group-hover:text-primary-100 transition ease-in-out duration-150"

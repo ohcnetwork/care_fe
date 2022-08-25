@@ -1,15 +1,7 @@
-import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { getDistrict } from "../../Redux/actions";
-import {
-  PhoneNumberField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { useState } from "react";
+import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { USER_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
-import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
-import parsePhoneNumberFromString from "libphonenumber-js";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -19,16 +11,14 @@ const useMergeState = (initialState: any) => {
 };
 
 export default function UserFilter(props: any) {
-  const { filter, onChange, closeFilter } = props;
-  const dispatch: any = useDispatch();
+  let { filter, onChange, closeFilter } = props;
+
   const [filterState, setFilterState] = useMergeState({
     first_name: filter.first_name || "",
     last_name: filter.last_name || "",
     phone_number: filter.phone_number || "",
     alt_phone_number: filter.alt_phone_number || "",
     user_type: filter.user_type || "",
-    district_id: filter.district_id || "",
-    district_ref: null,
   });
 
   const clearFilterState = {
@@ -37,8 +27,6 @@ export default function UserFilter(props: any) {
     phone_number: "",
     alt_phone_number: "",
     user_type: "",
-    district_id: "",
-    district_ref: null,
   };
 
   const USER_TYPE_OPTIONS = [
@@ -60,48 +48,18 @@ export default function UserFilter(props: any) {
     setFilterState(filterData);
   };
 
-  const setDistrict = (selected: any) => {
-    const filterData: any = { ...filterState };
-    filterData["district_ref"] = selected;
-    filterData["district_id"] = (selected || {}).id;
-    setFilterState(filterData);
-  };
-
   const applyFilter = () => {
-    const {
-      first_name,
-      last_name,
-      phone_number,
-      alt_phone_number,
-      user_type,
-      district_id,
-    } = filterState;
+    const { first_name, last_name, phone_number, alt_phone_number, user_type } =
+      filterState;
     const data = {
       first_name: first_name || "",
       last_name: last_name || "",
-      phone_number: phone_number
-        ? parsePhoneNumberFromString(phone_number)?.format("E.164")
-        : "",
-      alt_phone_number: alt_phone_number
-        ? parsePhoneNumberFromString(alt_phone_number)?.format("E.164")
-        : "",
+      phone_number: phone_number || "",
+      alt_phone_number: alt_phone_number || "",
       user_type: user_type || "",
-      district_id: district_id || "",
     };
     onChange(data);
   };
-
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.district_id) {
-        const { data: districtData } = await dispatch(
-          getDistrict(filter.district_id, "district")
-        );
-        setFilterState({ district_ref: districtData });
-      }
-    }
-    fetchData();
-  }, [dispatch]);
 
   return (
     <div>
@@ -170,27 +128,35 @@ export default function UserFilter(props: any) {
           <span className="text-sm font-semibold">Phone Number</span>
           <div className="flex justify-between">
             <div className="w-full">
-              <PhoneNumberField
+              <TextInputField
+                id="phone_number"
                 name="phone_number"
+                variant="outlined"
+                margin="dense"
+                errors=""
                 value={filterState.phone_number}
-                onChange={(value: string) => {
-                  handleChange({ target: { name: "phone_number", value } });
-                }}
+                onChange={handleChange}
+                label="Phone Number"
+                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
               />
             </div>
           </div>
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">WhatsApp Phone Number</span>
+          <span className="text-sm font-semibold">Alt Phone Number</span>
           <div className="flex justify-between">
             <div className="w-full">
-              <PhoneNumberField
+              <TextInputField
+                id="alt_phone_number"
                 name="alt_phone_number"
+                variant="outlined"
+                margin="dense"
+                errors=""
                 value={filterState.alt_phone_number}
-                onChange={(value: string) => {
-                  handleChange({ target: { name: "alt_phone_number", value } });
-                }}
+                onChange={handleChange}
+                label="Alt Phone Number"
+                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
               />
             </div>
           </div>
@@ -206,20 +172,6 @@ export default function UserFilter(props: any) {
             options={USER_TYPE_OPTIONS}
             onChange={handleChange}
             errors=""
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">District</span>
-          <DistrictSelect
-            multiple={false}
-            name="district"
-            selected={filterState.district_ref}
-            setSelected={(obj: any) => {
-              setDistrict(obj);
-            }}
-            className="shifting-page-filter-dropdown"
-            errors={""}
           />
         </div>
       </div>

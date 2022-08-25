@@ -32,14 +32,8 @@ const AlertDialog = (props: Props) => {
     primaryButton,
     secondaryButton,
   } = props;
-
-  const handleEscKeyPress = (event: any) => {
-    if (event.key === "Escape") {
-      handleCancel ? handleCancel() : null;
-    }
-  };
   return (
-    <Dialog open={true} onKeyDown={(e) => handleEscKeyPress(e)}>
+    <Dialog open={true}>
       <DialogTitle id="alert-dialog-title">{title || ""}</DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description">

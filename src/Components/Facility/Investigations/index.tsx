@@ -213,7 +213,7 @@ const Investigation = (props: {
   return (
     <div className="max-w-7xl mx-auto px-4">
       <PageTitle
-        title={"Log Lab Result"}
+        title={"Create Investigation"}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },

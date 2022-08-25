@@ -70,7 +70,6 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
           )}
           setValue={s => send(SetOxygenModalityFlowRate(Belt.Int.fromString(s)))}
           getLabel={VentilatorParameters.getStatus(35.0, "Low", 60.0, "High")}
-          hasError={ValidationUtils.isInputInRangeInt(0, 70, state.ventilator_oxygen_modality_flow_rate)}
         />
       : <Slider
           title={"Oxygen Flow Rate"}
@@ -86,7 +85,6 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
           )}
           setValue={s => send(SetOxygenModalityOxygenRate(Belt.Int.fromString(s)))}
           getLabel={getOxygenFlowRateLabel}
-          hasError={ValidationUtils.isInputInRangeInt(0, 50, state.ventilator_oxygen_modality_oxygen_rate)}
         />}
     {silderOptionArray
     |> Array.map(option => {
@@ -118,7 +116,6 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
         )}
         setValue={s => send(handleChange(Belt.Int.fromString(s)))}
         getLabel={VentilatorParameters.getStatus(option["min"], "Low", option["max"], "High")}
-        hasError={ValidationUtils.isInputInRangeFloat(option["start"], option["end"], Some(Belt.Int.toFloat(switch value { | None => 0 | Some(v) => v })))}
       />
     })
     |> React.array}

@@ -5,9 +5,9 @@ import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
+  getItemName,
   updateMinQuantity,
   getAnyFacility,
-  getMinQuantityOfItem,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
@@ -60,14 +60,11 @@ export const UpdateMinQuantity = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(
-        getMinQuantityOfItem(facilityId, inventoryId)
-      );
+      const id = Number(itemId);
+      const res = await dispatchAction(getItemName(id));
       if (!status.aborted) {
         if (res && res.data) {
-          setData(res.data.item_object.name);
-          let form = { ...state.form, quantity: res.data.min_quantity };
-          dispatch({ type: "set_form", form });
+          setData(res.data.name);
         }
         setIsLoading(false);
       }
@@ -150,7 +147,7 @@ export const UpdateMinQuantity = (props: any) => {
                   </InputLabel>
                   <TextInputField
                     name="id"
-                    variant="outlined"
+                    variant="standard"
                     margin="dense"
                     type="string"
                     value={data}

@@ -3,9 +3,9 @@ import React from "react";
 const AdvancedFilterButton = ({ setShowFilters }: any) => {
   return (
     <div>
-      <div className="flex items-start">
+      <div className="flex items-start mb-2">
         <button
-          className="btn btn-primary-ghost w-full"
+          className="btn btn-primary-ghost"
           onClick={() => setShowFilters(true)}
         >
           <svg

@@ -280,7 +280,7 @@ export const TimeInputField = (props: any) => {
   );
 };
 
-export const ErrorHelperText = (props: { error: string }) => {
+export const ErrorHelperText = (props: { error: string | number }) => {
   const { error } = props;
   return <div className="error-text">{error}</div>;
 };
@@ -496,28 +496,9 @@ export const CheckboxField = (props: CheckboxProps) => {
   );
 };
 
-interface AutoCompleteMultiFieldProps {
-  id: string;
-  options: Array<any>;
-  label: string;
-  variant: string;
-  placeholder: string;
-  errors?: string;
-  value: any;
-  onChange: (e: any, selected: any) => void;
-}
-
-export const AutoCompleteMultiField = (props: AutoCompleteMultiFieldProps) => {
-  const {
-    id,
-    options,
-    label,
-    variant,
-    placeholder,
-    errors = "",
-    onChange,
-    value,
-  } = props;
+export const AutoCompleteMultiField = (props: any) => {
+  const { id, options, label, variant, placeholder, errors, onChange, value } =
+    props;
   return (
     <>
       <Autocomplete
@@ -542,31 +523,7 @@ export const AutoCompleteMultiField = (props: AutoCompleteMultiFieldProps) => {
   );
 };
 
-interface AutoCompleteAsyncFieldProps {
-  multiple?: boolean;
-  className?: string;
-  autoSelect?: boolean;
-  margin?: string;
-  variant: string;
-  label?: string;
-  onSearch?: (e: any) => void;
-  onChange: (e: any, selected: any) => void;
-  options: Array<any>;
-  getOptionSelected: (option: any, value: any) => boolean;
-  getOptionLabel: (option: any) => string;
-  renderOption: (option: any) => JSX.Element;
-  placeholder: string;
-  noOptionsText?: string;
-  value: any;
-  loading?: boolean;
-  errors?: string;
-  onOpen?: (e: any) => void;
-  filterOptions?: (options: any) => any;
-  name?: string;
-  freeSolo?: boolean;
-}
-
-export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
+export const AutoCompleteAsyncField = (props: any) => {
   const {
     margin,
     options,
@@ -576,7 +533,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
     renderOption,
     variant,
     placeholder,
-    errors = "",
+    errors,
     onChange,
     onSearch,
     value,
@@ -585,16 +542,15 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
     noOptionsText,
     filterOptions,
     multiple = false,
-    autoSelect = true,
     className = "",
   } = props;
   return (
     <>
       <Autocomplete
         openOnFocus
+        autoSelect
         autoComplete
         autoHighlight
-        autoSelect={autoSelect}
         multiple={multiple}
         onOpen={onOpen}
         options={options}

@@ -18,13 +18,13 @@ const DataTable = (props: any) => {
       <div className="text-xl font-semibold">{title}</div>
       <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-gray-200 mb-4 w-max-content max-w-full">
         <div className="flex flex-col justify-between">
-          <div className="px-2 py-6 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
+          <div className="px-2 py-6 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
             Time
           </div>
-          <div className="px-2 py-5 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
+          <div className="px-2 py-5 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
             Left
           </div>
-          <div className="px-2 py-5 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
+          <div className="px-2 py-5 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
             Right
           </div>
         </div>
@@ -38,13 +38,13 @@ const DataTable = (props: any) => {
                 key={`${title}_${i}`}
                 className="flex flex-col divide-x divide-gray-200"
               >
-                <div className="px-2 py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-900 w-20">
+                <div className="px-2 py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 w-20">
                   {x.date}
                 </div>
-                <div className="px-2 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-900">
+                <div className="px-2 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                   {x.left}
                 </div>
-                <div className="px-2 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-900">
+                <div className="px-2 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                   {x.right}
                 </div>
               </div>
@@ -67,7 +67,7 @@ const DataDescription = (props: any) => {
         {data.length ? (
           data.map((x: any, i: any) => (
             <div key={`${title}_${i}`} className="mb-2">
-              <div className="text-sm font-bold text-gray-800">{`- ${x.date}`}</div>
+              <div className="text-sm font-bold">{`- ${x.date}`}</div>
               <div className="text-gray-800 pl-2">
                 <span className="font-semibold">Left: </span>
                 {x.left}
@@ -79,7 +79,7 @@ const DataDescription = (props: any) => {
             </div>
           ))
         ) : (
-          <div className="text-gray-700 font-semibold text-sm text-center">
+          <div className="text-gray-500 text-sm text-center">
             No Data Available!
           </div>
         )}
@@ -306,10 +306,10 @@ export const NeurologicalTable = (props: any) => {
                 key={`loc_${i}`}
                 className="flex flex-col  min-w-max-content  divide-x divide-gray-200"
               >
-                <div className="px-2 border-r py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-700">
+                <div className="px-2 border-r py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500">
                   {x.date}
                 </div>
-                <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-700">
+                <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                   {x.loc}
                 </div>
               </div>
@@ -329,7 +329,7 @@ export const NeurologicalTable = (props: any) => {
                 </div>
               ))
             ) : (
-              <div className="text-gray-800 font-semibold text-sm text-center">
+              <div className="text-gray-500 text-sm text-center">
                 No Data Available!
               </div>
             )}
@@ -360,19 +360,19 @@ export const NeurologicalTable = (props: any) => {
         <div className="mb-6 mt-2">
           <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-gray-200 mb-4 w-max-content max-w-full">
             <div className="flex flex-col ">
-              <div className="px-2 py-7 bg-gray-50 text-center text-sm leading-4 font-medium text-gray-700 uppercase tracking-wider">
+              <div className="px-2 py-7 bg-gray-50 text-center text-sm leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Time
               </div>
-              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-700 uppercase tracking-wider">
+              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-500 uppercase tracking-wider">
                 Eye
               </div>
-              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-700 uppercase tracking-wider">
+              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-500 uppercase tracking-wider">
                 Verbal
               </div>
-              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-700 uppercase tracking-wider">
+              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-500 uppercase tracking-wider">
                 Motor
               </div>
-              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-700 uppercase tracking-wider">
+              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-500 uppercase tracking-wider">
                 Total
               </div>
             </div>
@@ -386,19 +386,19 @@ export const NeurologicalTable = (props: any) => {
                     key={`glascow_${i}`}
                     className="flex flex-col divide-x divide-gray-200"
                   >
-                    <div className="px-2 py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-800 w-20">
+                    <div className="px-2 py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 w-20">
                       {x.date}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-800">
+                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                       {x.eye}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-800">
+                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                       {x.verbal}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-800">
+                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-500">
                       {x.motor}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 font-semibold text-gray-800 border-t-2 border-gray-500">
+                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 font-semibold text-gray-700 border-t-2 border-gray-500">
                       {x.total}
                     </div>
                   </div>

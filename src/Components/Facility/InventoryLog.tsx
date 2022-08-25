@@ -89,15 +89,11 @@ export default function InventoryLog(props: any) {
       })
     );
 
-    if (res?.status === 201) {
+    if (res && res.status === 201) {
       Notification.Success({
-        msg: "Last entry deleted Successfully",
+        msg: "Deleted Successfully",
       });
       window.location.reload();
-    } else {
-      Notification.Error({
-        msg: "Error while deleting last entry: " + (res?.data?.detail || ""),
-      });
     }
     setSaving(false);
   };

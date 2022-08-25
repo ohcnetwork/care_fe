@@ -96,7 +96,6 @@ const AssetConfigure = (props: AssetConfigureProps) => {
         msg: "Something went wrong..!",
       });
     }
-    fetchData({});
   };
 
   const addPreset = async (e: React.SyntheticEvent) => {
@@ -243,8 +242,6 @@ const AssetConfigure = (props: AssetConfigureProps) => {
                   color="primary"
                   variant="contained"
                   type="submit"
-                  fullWidth
-                  className="w-full md:w-auto"
                   style={{ marginLeft: "auto" }}
                   startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
                   onClick={handleSubmit}

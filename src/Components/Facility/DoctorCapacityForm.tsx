@@ -184,7 +184,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any, btnType: string = "Save") => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
@@ -211,7 +211,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
           Notification.Success({
             msg: "Doctor count added successfully",
           });
-          if (btnType === "Save and Exit" || isLastOptionType) {
+          if (isLastOptionType) {
             navigate(`/facility/${facilityId}`);
           }
         } else {
@@ -284,10 +284,9 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             </CardContent>
             <CardContent>
               <Grid container justify="space-between" spacing={5}>
-                <Grid item className="flex flex-row w-full sm:w-auto gap-4">
+                <Grid item>
                   <Button
                     id="doctor-cancel"
-                    className="w-full sm:w-auto"
                     color="default"
                     variant="contained"
                     onClick={goBack}
@@ -295,29 +294,10 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     Cancel
                   </Button>
                 </Grid>
-                <Grid
-                  item
-                  className="flex flex-row w-full sm:w-auto gap-4 flex-wrap"
-                >
-                  {!id && !isLastOptionType && (
-                    <Button
-                      id="doctor-save-and-exit"
-                      color="primary"
-                      className="w-full sm:w-auto"
-                      variant="contained"
-                      type="submit"
-                      startIcon={
-                        <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                      }
-                      onClick={(e) => handleSubmit(e, "Save and Exit")}
-                    >
-                      Save Doctor Capacity
-                    </Button>
-                  )}
+                <Grid item>
                   <Button
                     id="doctor-save"
                     color="primary"
-                    className="w-full sm:w-auto"
                     variant="contained"
                     type="submit"
                     startIcon={

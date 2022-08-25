@@ -31,8 +31,6 @@ export const SampleDetails = (props: SampleDetailsProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           setSampleDetails(res.data);
-        } else {
-          navigate("/not-found");
         }
         setIsLoading(false);
       }
@@ -64,7 +62,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
     return (
       <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
         <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="mt-2 flex flex-col gap-2">
+          <div className="mt-2">
             <div>
               <span className="font-semibold leading-relaxed">Name: </span>
               {patientData?.name}
@@ -137,7 +135,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
               {patientData?.nationality || "-"}
             </div>
           </div>
-          <div className="mt-2 flex flex-col gap-2">
+          <div className="mt-2">
             <div>
               <span className="font-semibold leading-relaxed">
                 Blood Group:{" "}

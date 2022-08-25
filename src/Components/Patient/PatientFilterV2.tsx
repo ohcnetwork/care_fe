@@ -826,7 +826,6 @@ export default function PatientFilterV2(props: any) {
             <TextInputField
               id="age_min"
               name="age_min"
-              type="number"
               variant="outlined"
               margin="dense"
               errors=""
@@ -838,7 +837,6 @@ export default function PatientFilterV2(props: any) {
             <TextInputField
               id="age_max"
               name="age_max"
-              type="number"
               variant="outlined"
               margin="dense"
               errors=""

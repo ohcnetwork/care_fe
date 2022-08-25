@@ -1,18 +1,10 @@
 import { Link } from "raviger";
-import * as Notification from "../../Utils/Notifications";
-import { useEffect } from "react";
+
 export default function Error404() {
-  useEffect(() => {
-    Notification.closeAllNotifications();
-  }, []);
   return (
     <div className="flex justify-center text-center items-center h-screen">
-      <div className="text-center w-[500px]">
-        <img
-          src={`${process.env.PUBLIC_URL}/images/404.png`}
-          alt="Error 404"
-          className="w-full"
-        />
+      <div className="text-center error-page-wrap">
+        <img src="images/404.png" alt="Error 404" />
         <h1>Page Not Found</h1>
         <p>
           It appears that you have stumbled upon a page that either does not
