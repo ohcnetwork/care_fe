@@ -50,7 +50,7 @@ export default function Breadcrumbs(props: any) {
   return (
     <div className="w-full">
       <nav className="flex" aria-label="Breadcrumb">
-        <ol className="flex items-center space-x-1">
+        <ol className="flex flex-wrap items-center space-x-1">
           <li>
             <div>
               <Link href="/" className="text-gray-500 hover:text-gray-700">
@@ -139,7 +139,7 @@ export default function Breadcrumbs(props: any) {
                           <span>{crumb.name.slice(0, 13) + "..."}</span>
                         </div>
                       ) : (
-                        <div>
+                        <div className="truncate w-20 md:w-full">
                           <span>{crumb.name}</span>
                         </div>
                       )}

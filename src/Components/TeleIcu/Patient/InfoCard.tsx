@@ -3,6 +3,7 @@ import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { Modal } from "@material-ui/core";
 import Beds from "../../Facility/Consultations/Beds";
+import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
 import { useState } from "react";
 
 export default function TeleICUPatientInfoCard(props: {
@@ -14,7 +15,6 @@ export default function TeleICUPatientInfoCard(props: {
   const patient = props.patient;
   const ip_no = props.ip_no;
 
-  console.log(patient);
   return (
     <section className="flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
       <Modal
@@ -23,6 +23,10 @@ export default function TeleICUPatientInfoCard(props: {
         onClose={() => setOpen(false)}
       >
         <div className="bg-white h-screen w-screen md:h-auto md:w-[800px] md:max-h-[90vh] overflow-auto p-4 mx-auto md:rounded-xl">
+          <CloseRoundedIcon
+            onClick={() => setOpen(false)}
+            className="absolute z-20 top-3 right-3 cursor-pointer"
+          />
           {patient?.facility &&
           patient?.id &&
           patient?.last_consultation?.id ? (

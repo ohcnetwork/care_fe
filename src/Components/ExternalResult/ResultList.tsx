@@ -16,6 +16,8 @@ import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
+import { PhoneNumberField } from "../Common/HelperInputFields";
+import parsePhoneNumberFromString from "libphonenumber-js";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -55,7 +57,9 @@ export default function ResultList() {
     const params = {
       page: qParams.page || 1,
       name: qParams.name || "",
-      mobile_number: qParams.mobile_number ? qParams.mobile_number : "",
+      mobile_number: qParams.mobile_number
+        ? parsePhoneNumberFromString(qParams.mobile_number)?.format("E.164")
+        : "",
       wards: qParams.wards || undefined,
       local_bodies: qParams.local_bodies || undefined,
       created_date_before: qParams.created_date_before || undefined,
@@ -370,7 +374,7 @@ export default function ResultList() {
             </dl>
           </div>
         </div>
-        <div className="md:mt-2">
+        <div className="mt-2">
           <div>
             <div className="text-sm font-semibold mb-2">Search by Name</div>
             <InputSearchBox
@@ -382,23 +386,23 @@ export default function ResultList() {
           </div>
           <div className="text-sm font-semibold my-2">Search by number</div>
           <div className="w-full">
-            <InputSearchBox
-              value={qParams.mobile_number || ""}
-              search={searchByPhone}
-              placeholder="Search by Phone Number"
+            <PhoneNumberField
+              value={qParams.mobile_number || "+91"}
+              onChange={(value: string) => searchByPhone(value)}
+              turnOffAutoFormat={false}
               errors=""
             />
           </div>
         </div>
         <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
-          <div className="flex justify-end gap-2">
-            <div
+          <div className="flex flex-col md:flex-row md:justify-end gap-2">
+            <button
               className="btn btn-primary"
               onClick={(_) => navigate("external_results/upload")}
             >
               Upload List
-            </div>
-            <div
+            </button>
+            <button
               className={clsx(
                 "btn btn-primary",
                 downloadLoading && "pointer-events-none"
@@ -413,7 +417,7 @@ export default function ResultList() {
                 )}
                 Export
               </span>
-            </div>
+            </button>
           </div>
           <div className="flex ml-auto gap-2 md:pt-0 pt-2">
             <button

@@ -79,8 +79,8 @@ let title = text => {
   <div className="text-lg font-bold mt-2"> {str(text)} </div>
 }
 
-@react.component
-export make = (
+@genType @react.component
+let make = (
   ~id,
   ~facilityId,
   ~patientId,
@@ -150,7 +150,7 @@ export make = (
         </div>
         <div className="grow border-t border-gray-400 mt-4" />
         <div>
-          <CriticalCare__PageTitle title="Hemodynamic Parameters" />
+          <CriticalCare__PageTitle title="Vitals" />
           <DailyRound__HemodynamicParameters
             hemodynamicParameter
             renderOptionalIntWithIndicators
