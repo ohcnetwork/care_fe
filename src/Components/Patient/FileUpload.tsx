@@ -104,7 +104,7 @@ interface StateInterface {
 
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [file, setFile] = useState<File | undefined>();
+  const [file, setFile] = useState<File | null>();
   const {
     facilityId,
     consultationId,
@@ -451,7 +451,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const url = response.data.signed_url;
     const internal_name = response.data.internal_name;
     const f = file;
-    if (f === undefined) return;
+    if (!f) return;
     const newFile = new File([f], `${internal_name}`);
 
     const config = {
@@ -502,7 +502,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = file;
 
     const category = "UNSPECIFIED";
-    const filename = uploadFileName;
+    const filename = uploadFileName === ""  && f ? f.name : uploadFileName;
     const name = f?.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
@@ -767,7 +767,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   margin="dense"
                   type="text"
                   InputLabelProps={{ shrink: !!uploadFileName }}
-                  // value={uploadFileName}
+                  value={uploadFileName}
                   disabled={uploadStarted}
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
@@ -779,30 +779,40 @@ export const FileUpload = (props: FileUploadProps) => {
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="md:flex justify-between">
-                    <input
-                      title="Choose File"
-                      onChange={onFileChange}
-                      type="file"
-                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-primary-100 file:text-primary-700 hover:file:bg-primary-300"
-                    />
-                    <div className="mt-2">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        startIcon={
-                          <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                        }
-                        onClick={() => {
-                          handleUpload({ status });
-                        }}
-                      >
-                        Upload
-                      </Button>
-                    </div>
+                  <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
+                    <label
+                      className="flex items-center btn btn-primary"
+                    >
+                      <i className="fas fa-file-arrow-down mr-2" /> Choose file
+                      <input
+                        title="changeFile"
+                        onChange={onFileChange}
+                        type="file"
+                        hidden
+                      />
+                    </label>
+                    <button
+                      className="btn btn-primary"
+                      disabled={!file || !uploadFileName}
+                      onClick={() => {
+                        handleUpload({ status });
+                      }}
+                    >
+                      <i className="fas fa-cloud-arrow-up mr-2" /> Upload
+                    </button>
                   </div>
                 )}
+                {file && <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                  {file?.name}
+                  <button
+                    onClick={()=>{
+                      setFile(null);
+                      setUploadFileName("");
+                    }}
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>}
               </div>
             </div>
           ) : null}
