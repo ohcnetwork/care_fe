@@ -42,14 +42,12 @@ const AssetManage = (props: AssetManageProps) => {
       ]);
       if (!status.aborted) {
         setIsLoading(false);
-        if (!assetData.data)
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        else {
+        if (assetData && assetData.data) {
           setAsset(assetData.data);
           setTransactions(transactionsData.data.results);
           setTotalCount(transactionsData.data.count);
+        } else {
+          navigate("/not-found");
         }
       }
     },
