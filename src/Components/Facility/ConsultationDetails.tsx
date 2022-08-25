@@ -865,6 +865,7 @@ export const ConsultationDetails = (props: any) => {
               title="Camera Feed"
               breadcrumbs={false}
               hideBack={true}
+              focusOnLoad={true}
             />
             <Feed
               facilityId={facilityId}
