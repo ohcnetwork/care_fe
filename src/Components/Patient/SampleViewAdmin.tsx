@@ -450,7 +450,7 @@ export default function SampleViewAdmin() {
           <div>
             <div className="flex items-start mt-2 mb-2 ">
               <button
-                className="btn btn-primary-ghost md:mt-7 "
+                className="btn btn-primary-ghost md:mt-7 w-full"
                 onClick={() => setShowFilters((show) => !show)}
               >
                 <svg

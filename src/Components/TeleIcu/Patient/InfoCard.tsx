@@ -17,7 +17,11 @@ export default function TeleICUPatientInfoCard(props: {
 
   return (
     <section className="flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
-      <Modal className="top-0 left-0 flex items-center justify-center" open={open} onClose={() => setOpen(false)}>
+      <Modal
+        className="top-0 left-0 flex items-center justify-center"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
         <div className="bg-white h-screen w-screen md:h-auto md:w-[800px] md:max-h-[90vh] overflow-auto p-4 mx-auto md:rounded-xl">
           <CloseRoundedIcon
             onClick={() => setOpen(false)}

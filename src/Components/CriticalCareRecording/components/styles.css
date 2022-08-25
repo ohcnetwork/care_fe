@@ -361,9 +361,6 @@ input[type="number"] {
 }
 
 .slider-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   font-family: sans-serif;
   margin-bottom: 2rem;
 }

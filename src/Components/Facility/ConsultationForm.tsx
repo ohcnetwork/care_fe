@@ -8,7 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import type {t as Prescription__Prescription_t} from '../../../src/Components/Common/prescription-builder/types/Prescription__Prescription.gen';
+import type { t as Prescription__Prescription_t } from "../../../src/Components/Common/prescription-builder/types/Prescription__Prescription.gen";
 
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
@@ -55,7 +55,9 @@ import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -198,11 +200,13 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
+    []
+  );
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log("da", dischargeAdvice);
-  },[dischargeAdvice])
+  }, [dischargeAdvice]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
