@@ -620,6 +620,19 @@ export const UserAdd = (props: UserProps) => {
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <InputLabel>Facilities</InputLabel>
+                <FacilitySelect
+                  multiple={true}
+                  name="facilities"
+                  selected={selectedFacility}
+                  setSelected={setFacility}
+                  district={currentUser.data.district}
+                  errors={state.errors.facilities}
+                  showAll={false}
+                />
+              </div>
+
               <div>
                 <InputLabel>User Type*</InputLabel>
                 <SelectField
@@ -632,6 +645,22 @@ export const UserAdd = (props: UserProps) => {
                   options={userTypes}
                   onChange={handleChange}
                   errors={state.errors.user_type}
+                />
+              </div>
+              <div>
+                <InputLabel>Home Facility</InputLabel>
+                <SelectField
+                  name="home_facility"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.home_facility}
+                  options={[
+                    { id: "", name: "Select" },
+                    ...(selectedFacility ?? []),
+                  ]}
+                  optionValue="name"
+                  onChange={handleChangeHomeFacility}
+                  errors={state.errors.home_facility}
                 />
               </div>
 
@@ -666,36 +695,6 @@ export const UserAdd = (props: UserProps) => {
                   disabled={phoneIsWhatsApp}
                   errors={state.errors.alt_phone_number}
                   onlyIndia={true}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Facilities</InputLabel>
-                <FacilitySelect
-                  multiple={true}
-                  name="facilities"
-                  selected={selectedFacility}
-                  setSelected={setFacility}
-                  district={currentUser.data.district}
-                  errors={state.errors.facilities}
-                  showAll={false}
-                />
-              </div>
-
-              <div className="">
-                <InputLabel>Home Facility</InputLabel>
-                <SelectField
-                  name="home_facility"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.home_facility}
-                  options={[
-                    { id: "", name: "Select" },
-                    ...(selectedFacility ?? []),
-                  ]}
-                  optionValue="name"
-                  onChange={handleChangeHomeFacility}
-                  errors={state.errors.home_facility}
                 />
               </div>
 
@@ -939,12 +938,14 @@ export const UserAdd = (props: UserProps) => {
                 </div>
               )}
             </div>
-            <div className="flex justify-between mt-4">
+            <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
               <Button color="default" variant="contained" onClick={goBack}>
                 Cancel
               </Button>
               <Button
                 color="primary"
+                fullWidth
+                className="w-full md:w-auto"
                 variant="contained"
                 type="submit"
                 style={{ marginLeft: "auto" }}
