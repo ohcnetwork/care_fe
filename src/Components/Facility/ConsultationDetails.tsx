@@ -253,6 +253,8 @@ export const ConsultationDetails = (props: any) => {
             };
             setPatientData(data);
           }
+        } else {
+          navigate("/not-found");
         }
         setIsLoading(false);
       }
@@ -1099,7 +1101,7 @@ export const ConsultationDetails = (props: any) => {
                     )
                   }
                 >
-                  <i className="fas fa-plus w-4 mr-3"></i> Create Investigation
+                  <i className="fas fa-plus w-4 mr-3"></i> Log Lab Result
                 </button>
               </div>
             </div>

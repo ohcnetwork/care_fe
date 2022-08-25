@@ -414,13 +414,13 @@ export default function PatientFilterV2(props: any) {
 
   return (
     <div>
-      <div className="flex justify-between flex-wrap">
-        <button className="btn btn-default" onClick={closeFilter}>
+      <div className="flex flex-wrap justify-between">
+        <button className="btn btn-default mt-1" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
         <button
-          className="btn btn-default"
+          className="btn btn-default mt-1"
           onClick={(_) => {
             navigate("/patients");
             setFilterState(clearFilterState);
