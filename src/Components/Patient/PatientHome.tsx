@@ -317,10 +317,10 @@ export const PatientHome = (props: any) => {
       <div className="sm:col-span-1" key={`med_his_${idx}`}>
         {item?.disease !== "NO" && (
           <>
-            <div className="text-sm leading-5 font-medium text-gray-700">
+            <div className="text-sm leading-5 font-medium text-gray-700 overflow-x-scroll">
               {item.disease}
             </div>
-            <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+            <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
               {item.details}
             </div>
           </>
@@ -1079,7 +1079,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Present Health
                     </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
                       {patientData.present_health}
                     </div>
                   </div>
@@ -1089,7 +1089,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Ongoing Medications
                     </div>
-                    <div className="my-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="my-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
                       {patientData.ongoing_medication}
                     </div>
                   </div>
@@ -1099,7 +1099,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Allergies
                     </div>
-                    <div className="my-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="my-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
                       {patientData.allergies}
                     </div>
                   </div>
