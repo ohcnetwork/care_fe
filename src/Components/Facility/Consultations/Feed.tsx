@@ -24,6 +24,7 @@ import FeedButton from "./FeedButton";
 import { AxiosError } from "axios";
 import ReactPlayer from "react-player";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
+import { findDOMNode } from "react-dom";
 
 interface IFeedProps {
   facilityId: string;
@@ -77,11 +78,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-  const liveFeedPlayerRef = !isIOS
-    ? // eslint-disable-next-line react-hooks/rules-of-hooks
-      useRef<HTMLVideoElement | null>(null)
-    : // eslint-disable-next-line react-hooks/rules-of-hooks
-      useRef<ReactPlayer | null>(null);
+  const liveFeedPlayerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -306,11 +303,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       !screenfull.isFullscreen
-        ? screenfull.request(
-            videoWrapper.current
-              ? videoWrapper.current
-              : (liveFeedPlayerRef.current as any)
-          )
+        ? isIOS
+          ? screenfull.request(
+              videoWrapper.current
+                ? videoWrapper.current
+                : (liveFeedPlayerRef.current as HTMLElement)
+            )
+          : screenfull.request(findDOMNode(liveFeedPlayerRef.current) as any)
         : screenfull.exit();
     },
     updatePreset: (option) => {
