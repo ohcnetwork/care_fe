@@ -72,7 +72,7 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                 <div
                                     className="w-full"    
                                 >
-                                    Medicine :
+                                    Medicine
                                     <PrescriptionDropdown
                                         placeholder="Medicine"
                                         options={medicines}
@@ -82,7 +82,7 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                 </div>
                                 <div className="flex gap-2">
                                     <div>
-                                        Route :
+                                        Route
                                         <PrescriptionDropdown
                                             placeholder="Route"
                                             options={routes}
@@ -91,7 +91,7 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                         />
                                     </div>
                                     <div>
-                                        Frequency :
+                                        Frequency
                                         <PrescriptionDropdown
                                             placeholder="Frequency"
                                             options={frequency}
@@ -104,7 +104,7 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                             <div className="flex gap-2 mt-2 flex-col md:flex-row">
                                 <div className="w-full md:w-[260px] flex gap-2 shrink-0">
                                     <div>
-                                        Dosage :
+                                        Dosage
                                         <div className="flex gap-1">
                                             <input 
                                                 type="number"
@@ -125,7 +125,7 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                                 required
                                             />
                                             <div
-                                                className="w-[70px] shrink-0"    
+                                                className="w-[85px] shrink-0"    
                                             >
                                                 <PrescriptionDropdown
                                                     placeholder="Unit"
@@ -162,7 +162,7 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                 </div>
                                 
                                 <div className="w-full">
-                                    Notes : 
+                                    Notes
                                     <input 
                                         type="text"
                                         className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
