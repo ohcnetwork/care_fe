@@ -80,14 +80,14 @@ export const OnlineUsersSelect = (props: Props) => {
           Assigned to
         </label>
         <div className="relative">
-          <span className="inline-block w-full rounded-md shadow-sm">
+          <span className="flex w-full rounded-md flex-col md:flex-row">
             <button
               onClick={(_) => setDropdownExpand(true)}
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-labelledby="listbox-label"
-              className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:ring-green-500 focus:border-green-500 transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+              className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:ring-green-500 focus:border-green-500 transition ease-in-out duration-150 sm:text-sm sm:leading-5 mb-1"
             >
               <input
                 ref={searchFieldRef}
@@ -112,7 +112,7 @@ export const OnlineUsersSelect = (props: Props) => {
                   hidden: isDropdownExpanded,
                 })}
               >
-                <div className="space-x-3 flex items-center">
+                <div className="space-x-3 flex items-center overflow-hidden">
                   <span
                     aria-label="Online"
                     className={
@@ -134,14 +134,8 @@ export const OnlineUsersSelect = (props: Props) => {
                         }`}
                   </span>
                 </div>
-                <div
-                  className="btn btn-default"
-                  onClick={(_) => onSelect(null)}
-                >
-                  {" "}
-                  Clear
-                </div>
               </div>
+
               <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg
                   className="h-5 w-5 text-gray-400"
@@ -158,6 +152,13 @@ export const OnlineUsersSelect = (props: Props) => {
                 </svg>
               </span>
             </button>
+            <div
+              className="btn btn-default md:ml-2"
+              onClick={(_) => onSelect(null)}
+            >
+              {" "}
+              Clear
+            </div>
           </span>
           {isDropdownExpanded && (
             <div
