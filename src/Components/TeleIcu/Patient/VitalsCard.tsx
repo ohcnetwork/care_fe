@@ -48,7 +48,6 @@ export default function TeleICUPatientVitalsCard({
           bed: patient.last_consultation?.current_bed?.bed_object?.id,
         })
       );
-      //console.log("Found " + bedAssets?.data?.results?.length + "bedAssets:");
       bedAssets = {
         ...bedAssets,
         data: {
@@ -63,7 +62,6 @@ export default function TeleICUPatientVitalsCard({
       if (bedAssets.data.results.length > 0) {
         setHl7Asset(bedAssets.data.results[0].asset_object);
       }
-      //console.log("Found " + bedAssets.data?.results?.length + "bedAssets:");
     }
   };
 
@@ -76,7 +74,9 @@ export default function TeleICUPatientVitalsCard({
     wsClient.current.addEventListener("message", (e) => {
       const newObservations = JSON.parse(e.data || "{}");
       if (newObservations.length > 0) {
-        setWaveForm(newObservations.filter((o : any)=>o.observation_id === "waveform")[0])
+        setWaveForm(
+          newObservations.filter((o: any) => o.observation_id === "waveform")[0]
+        );
         const newObservationsMap = newObservations.reduce(
           (acc: any, curr: { observation_id: any }) => ({
             ...acc,
@@ -107,52 +107,66 @@ export default function TeleICUPatientVitalsCard({
     };
   }, []);
 
-  const vitals : [ReactNode, string, string | null][] = [
-    [(<>Pulse Rate</>), "pulse-rate", "pulse"],
-    [(<>Blood Pressure</>),"bp","bp"],
-    [(<>SpO<sub>2</sub></>),"SpO2","ventilator_spo2"],
-    [(<>R. Rate</>), "respiratory-rate", "resp"],
-    [(<>Temperature (F)</>),"body-temperature1", "temperature"], 
-  ]
+  const vitals: [ReactNode, string, string | null][] = [
+    [<>Pulse Rate</>, "pulse-rate", "pulse"],
+    [<>Blood Pressure</>, "bp", "bp"],
+    [
+      <>
+        SpO<sub>2</sub>
+      </>,
+      "SpO2",
+      "ventilator_spo2",
+    ],
+    [<>R. Rate</>, "respiratory-rate", "resp"],
+    [<>Temperature (F)</>, "body-temperature1", "temperature"],
+  ];
 
   return (
     <div className=" w-full">
       <div className="flex w-full items-stretch flex-col md:flex-row">
         <div className="w-full flex items-stretch py-3 px-5 bg-black h-[50vw] md:h-auto text-gray-400">
-          { waveform ? <Waveform wave = {waveform} /> : (
+          {waveform ? (
+            <Waveform wave={waveform} />
+          ) : (
             <div className="h-full w-full flex items-center justify-center">
               <div className="text-center w-[150px] text-gray-800">
                 <i className="fas fa-plug-circle-exclamation text-4xl mb-4" />
-                <div>
-                  No Live data at the moment!
-                </div>
+                <div>No Live data at the moment!</div>
               </div>
             </div>
           )}
         </div>
         <div className="flex flex-row md:flex-col w-full md:w-[220px] border-l border-l-gray-400 p-3 justify-between md:justify-start">
-          {
-            vitals.map((vital, i)=>{
-              const liveReading = getVital(patientObservations, vital[1])
-              return (
-                <div key={i} className="p-2">
-                  <h2 className="font-bold text-xl md:text-3xl">
-                    {liveReading
-                    || (
-                      vital[2] === "bp" ? 
-                      `${patient.last_consultation?.last_daily_round?.bp.systolic || "--"}/${patient.last_consultation?.last_daily_round?.bp.diastolic || "--"}` : 
-                      patient.last_consultation?.last_daily_round?.[vital[2] || ""]
-                      )
-                    || "--"}
-                  </h2>
-                  <div className="text-xs md:text-base">
-                    <i className={`fas fa-circle text-xs mr-2 ${liveReading ? "text-green-600" : "text-gray-600"}`} />
-                    {vital[0]}
-                  </div>
+          {vitals.map((vital, i) => {
+            const liveReading = getVital(patientObservations, vital[1]);
+            return (
+              <div key={i} className="p-2">
+                <h2 className="font-bold text-xl md:text-3xl">
+                  {liveReading ||
+                    (vital[2] === "bp"
+                      ? `${
+                          patient.last_consultation?.last_daily_round?.bp
+                            .systolic || "--"
+                        }/${
+                          patient.last_consultation?.last_daily_round?.bp
+                            .diastolic || "--"
+                        }`
+                      : patient.last_consultation?.last_daily_round?.[
+                          vital[2] || ""
+                        ]) ||
+                    "--"}
+                </h2>
+                <div className="text-xs md:text-base">
+                  <i
+                    className={`fas fa-circle text-xs mr-2 ${
+                      liveReading ? "text-green-600" : "text-gray-400"
+                    }`}
+                  />
+                  {vital[0]}
                 </div>
-              )
-            })
-          }
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

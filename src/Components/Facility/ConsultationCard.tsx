@@ -98,9 +98,9 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap justify-between w-full">
+          <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between w-full">
             <button
-              className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+              className="w-full md:w-auto px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
               onClick={() =>
                 navigate(
                   `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`
@@ -110,7 +110,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               View Consultation / Consultation Updates
             </button>
             <button
-              className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+              className="w-full md:w-auto px-4 py-2 shadow bg-white rounded-md border border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
               onClick={() =>
                 navigate(
                   `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`
@@ -121,7 +121,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </button>
             {isLastConsultation && (
               <RoleButton
-                className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+                className="w-full md:w-auto mr-4 px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
                 handleClickCB={() =>
                   navigate(
                     `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`
