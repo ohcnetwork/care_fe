@@ -150,14 +150,14 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
                 e.stopPropagation();
                 handleApproval(4, itemData);
               }}
-              className="w-full md:w-auto px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+              className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
             >
               Send to Collection Centre
             </button>
           )}
           <button
             onClick={(e) => showUpdateStatus(itemData)}
-            className="w-full md:w-auto px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
           >
             Update Sample Test Status
           </button>
