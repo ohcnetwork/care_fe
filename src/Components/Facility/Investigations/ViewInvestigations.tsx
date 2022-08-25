@@ -78,7 +78,7 @@ export default function ViewInvestigations(props: any) {
         <Loading />
       ) : (
         <div className="mt-4 space-y-2 ">
-          {investigations.length && (
+          {investigations.length > 0 && (
             <div>
               <h4 className="text-gray-700 -mb-14">Summary</h4>
               <ReportTable

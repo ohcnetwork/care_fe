@@ -73,6 +73,7 @@ let saveData = (id, consultationId, state, send, updateCB) => {
   )
 }
 
+
 @react.component
 let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(dialysisParameters))
@@ -90,6 +91,7 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
           value={Belt.Option.mapWithDefault(state.dialysis_fluid_balance, "", string_of_int)}
           setValue={s => send(SetFluidBalance(int_of_string(s)))}
           getLabel={_ => ("", "#ff0000")}
+          hasError={ValidationUtils.isInputInRangeInt(0, 5000, state.dialysis_fluid_balance)}
         />
         <Slider
           title={"Dialysis Net Balance (ml/h)"}
@@ -100,6 +102,7 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
           value={Belt.Option.mapWithDefault(state.dialysis_net_balance, "", string_of_int)}
           setValue={s => send(SetNetBalance(int_of_string(s)))}
           getLabel={_ => ("", "#ff0000")}
+          hasError={ValidationUtils.isInputInRangeInt(0, 5000, state.dialysis_net_balance)}
         />
       </div>
       <button

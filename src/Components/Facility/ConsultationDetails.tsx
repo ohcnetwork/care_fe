@@ -1101,7 +1101,7 @@ export const ConsultationDetails = (props: any) => {
                     )
                   }
                 >
-                  <i className="fas fa-plus w-4 mr-3"></i> Create Investigation
+                  <i className="fas fa-plus w-4 mr-3"></i> Log Lab Result
                 </button>
               </div>
             </div>
