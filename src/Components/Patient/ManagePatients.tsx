@@ -727,7 +727,7 @@ export const PatientManager = (props: any) => {
               errors=""
             />
           </div>
-          <div>
+          <div className="mt-4">
             <div className="text-sm font-semibold mt-2">
               Search by Primary Number
             </div>
