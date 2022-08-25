@@ -54,7 +54,8 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
         <div className="grid gap-4 grid-cols-1">
           <div>
             <p className="leading-relaxed text-sm">
-              It appears that there are patient records that contain the same phone number as the one you just entered. (
+              It appears that there are patient records that contain the same
+              phone number as the one you just entered. (
               <span className="font-bold">{patientList[0].phone_number}</span>)
             </p>
           </div>
@@ -63,40 +64,33 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
               <table className="w-full relative border-collapse">
                 <thead>
                   <tr className="border-separate">
-                    {
-                      ["Patient Name and ID", "Gender"].map((heading, i)=>(
-                        <th key={i} className={tdClass + " sticky top-0 bg-white/90"}>
-                          {heading}
-                        </th>
-                      ))
-                    }
+                    {["Patient Name and ID", "Gender"].map((heading, i) => (
+                      <th
+                        key={i}
+                        className={tdClass + " sticky top-0 bg-white/90"}
+                      >
+                        {heading}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {
-                    patientList.map((patient, i)=>{
-                      return (
-                        <tr key={i}>
-                          <td className={tdClass}>
-                            <div className="font-semibold">
-                              {patient.name}
-                            </div>
-                            <div className="text-xs break-words">
-                              ID : {patient.patient_id}
-                            </div>
-                          </td>
-                          <td className={tdClass}>
-                            {patient.gender}
-                          </td>
-                        </tr>
-
-                      )
-                    })
-                  }
+                  {patientList.map((patient, i) => {
+                    return (
+                      <tr key={i}>
+                        <td className={tdClass}>
+                          <div className="font-semibold">{patient.name}</div>
+                          <div className="text-xs break-words">
+                            ID : {patient.patient_id}
+                          </div>
+                        </td>
+                        <td className={tdClass}>{patient.gender}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-            
           </div>
           <div>
             <InputLabel className="mb-2">
@@ -123,8 +117,8 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
                 />
                 <p>
                   Please contact your district care coordinator, the shifting
-                  facility or the patient themselves if you are not sure about the patient's date of
-                  birth.
+                  facility or the patient themselves if you are not sure about
+                  the patient's date of birth.
                 </p>
               </Box>
             </RadioGroup>

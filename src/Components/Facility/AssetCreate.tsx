@@ -432,6 +432,7 @@ const AssetCreate = (props: AssetProps) => {
                       ]}
                       selected={is_working}
                       onSelect={setIsWorking}
+                      position="right"
                     />
                   </div>
                   <ErrorHelperText error={state.errors.is_working} />
