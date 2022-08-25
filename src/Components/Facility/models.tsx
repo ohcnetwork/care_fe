@@ -29,7 +29,7 @@ export interface FacilityModel {
   cover_image_url?: string;
   facility_type?: string;
   address?: string;
-  features? : number[];
+  features?: number[];
   location?: {
     latitude: number;
     longitude: number;

@@ -34,28 +34,23 @@ const BedDeleteDialog = (
     setDisable(true);
   };
   return (
-    <Dialog
-      open={props.show}
-      classes={{
-        paper: classes.paper,
-      }}
-      onClose={handleCancel}
-    >
+    <Dialog open={props.show} onClose={handleCancel}>
       <DialogContent>
         <DialogContentText
           id="alert-dialog-description"
-          className="flex text-gray-800 leading-relaxed"
+          className="text-gray-800 leading-relaxed"
         >
-          <div className="flex">
-            Are you sure you want to delete bed{" "}
-            <p className="mx-1 font-semibold capitalize">{name}</p> ?
-          </div>
+          <p className="inline">Are you sure you want to delete bed</p>
+          <p className="inline mx-1 font-semibold capitalize break-words">
+            {name}
+          </p>
+          <p className="inline">?</p>
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel} color="primary">
+        <button onClick={handleCancel} className="btn btn-default">
           Cancel
-        </Button>
+        </button>
         <button
           onClick={handleSubmit}
           className="font-medium btn btn-danger"

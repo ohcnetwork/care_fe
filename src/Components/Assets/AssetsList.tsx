@@ -9,7 +9,6 @@ import {
   listAssets,
   getFacilityAssetLocation,
 } from "../../Redux/actions";
-import { Badge } from "../Patient/ManagePatients";
 import { AssetData } from "./AssetTypes";
 import { getAsset } from "../../Redux/actions";
 import React, { useState, useCallback, useEffect } from "react";
@@ -22,6 +21,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
+import { Badge } from "../Common/Badge";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -330,7 +330,7 @@ const AssetsList = () => {
                 >
                   <div className="px-4 md:w-1/2">
                     <div className="md:flex">
-                      <p className="text-xl font-normal capitalize">
+                      <p className="text-xl font-normal capitalize break-words">
                         {asset.name}
                       </p>
                     </div>
@@ -344,13 +344,13 @@ const AssetsList = () => {
                   <div className="md:flex justify-between pt-2">
                     <div className="md:flex flex-wrap">
                       {asset.is_working ? (
-                        <Badge color="green" icon="cog" text="Working" />
+                        <Badge color="green" startIcon="cog" text="Working" />
                       ) : (
-                        <Badge color="red" icon="cog" text="Not Working" />
+                        <Badge color="red" startIcon="cog" text="Not Working" />
                       )}
                       <Badge
                         color="blue"
-                        icon="location-arrow"
+                        startIcon="location-arrow"
                         text={asset.status}
                       />
                     </div>
