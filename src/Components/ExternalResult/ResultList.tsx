@@ -498,8 +498,8 @@ export default function ResultList() {
             {manageResults}
           </tbody>
         </table>
-        <div className="bg-white divide-y divide-gray-200">{pagination}</div>
       </div>
+      <div className="bg-white divide-y divide-gray-200">{pagination}</div>
       <CSVLink
         data={downloadFile}
         filename={`external-result--${now}.csv`}
