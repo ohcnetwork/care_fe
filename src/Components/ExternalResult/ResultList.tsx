@@ -45,7 +45,6 @@ export default function ResultList() {
   });
 
   let manageResults: any = null;
-  let pagination: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
     localStorage.getItem("lsg-ward-data") ||
@@ -378,13 +377,13 @@ export default function ResultList() {
         </div>
         <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
           <div className="flex justify-end gap-2">
-            <div
+            <button
               className="btn btn-primary"
               onClick={(_) => navigate("external_results/upload")}
             >
               Upload List
-            </div>
-            <div
+            </button>
+            <button
               className={clsx(
                 "btn btn-primary",
                 downloadLoading && "pointer-events-none"
@@ -399,7 +398,7 @@ export default function ResultList() {
                 )}
                 Export
               </span>
-            </div>
+            </button>
           </div>
           <div className="flex ml-auto gap-2 md:pt-0 pt-2">
             <button
@@ -480,7 +479,6 @@ export default function ResultList() {
             {manageResults}
           </tbody>
         </table>
-        <div className="bg-white divide-y divide-gray-200">{pagination}</div>
       </div>
       {totalCount > RESULT_LIMIT && (
         <div className="flex w-full pt-5 pb-1 items-center justify-center shadow sm:rounded-b-lg min-w-full bg-gray-50 border-t border-gray-200">
