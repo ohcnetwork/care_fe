@@ -449,7 +449,7 @@ export const PatientManager = (props: any) => {
           key={`usr_${patient.id}`}
           href={patientUrl}
           className={clsx(
-            "w-full cursor-pointer p-4 rounded-lg bg-gray-50 shadow text-black"
+            "w-full cursor-pointer p-4 rounded-lg bg-gray-50 shadow text-black hover:bg-white hover:shadow-lg transition-all duration-200 ease-in-out"
             // patient.disease_status == "POSITIVE" && "bg-red-100"
           )}
         >
