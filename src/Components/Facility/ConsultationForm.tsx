@@ -201,6 +201,7 @@ export const ConsultationForm = (props: any) => {
   const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
     []
   );
+
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
