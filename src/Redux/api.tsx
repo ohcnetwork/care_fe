@@ -662,7 +662,7 @@ const routes: Routes = {
 
   // ICD11
   listICD11Diagnosis: {
-    path: "/api/v1/icd11/",
+    path: "/api/v1/icd/",
   },
 
   // Resource
