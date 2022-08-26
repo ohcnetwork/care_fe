@@ -51,10 +51,10 @@ export const DiagnosisSelect = (props: DiagnosisSelectProps) => {
         const res = await dispatchAction(
           listICD11Diagnosis({ query: text }, "")
         );
-        
+
         if (res && res.data) {
           setDiagnosisList(
-            res.data.results.map((item: DiagnosisModel) => ({
+            res.data.map((item: DiagnosisModel) => ({
               id: item.label,
               label: item.label,
             }))
