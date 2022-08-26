@@ -65,6 +65,69 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 const RESULT_LIMIT = 12;
 
+interface ShowPatientBedStatusProps {
+  currentBed: any;
+  consultationFiled: boolean;
+  consultationSuggestionText?: string;
+}
+
+const ShowPatientBedStatus = ({
+  currentBed,
+  consultationFiled,
+  consultationSuggestionText,
+}: ShowPatientBedStatusProps) => {
+  if (currentBed) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full rounded border border-gray-500">
+        <p className="text-gray-900 text-sm">
+          {currentBed?.bed_object?.location_object?.name}
+        </p>
+        <p className="text-base font-bold text-center text-ellipsis">
+          {currentBed?.bed_object.name}
+        </p>
+      </div>
+    );
+  }
+
+  if (!consultationFiled) {
+    return (
+      <div
+        className={clsx(
+          "flex items-center justify-center h-full relative rounded",
+          "border bg-red-50 border-red-300"
+        )}
+      >
+        <p className="text-sm font-bold text-center text-ellipsis text-red-800 relative">
+          No Consultation Filed
+        </p>
+        <span className="flex absolute h-3 w-3 -top-1 -right-1">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+        </span>
+      </div>
+    );
+  }
+  if (consultationSuggestionText) {
+    return (
+      <div
+        className={clsx(
+          "flex items-center justify-center h-full relative rounded",
+          "border bg-indigo-50 border-indigo-300"
+        )}
+      >
+        <p className="text-sm font-bold text-center text-ellipsis text-indigo-800 relative">
+          {consultationSuggestionText}
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center justify-center h-full border bg-gray-50 border-gray-300">
+      <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+    </div>
+  );
+};
+
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
   const dispatch: any = useDispatch();
@@ -457,25 +520,16 @@ export const PatientManager = (props: any) => {
           )}
         >
           <div className="flex gap-4 items-start">
-            <div className="w-20 h-20 min-w-[5rem] bg-gray-200 rounded border border-gray-500">
-              {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed ? (
-                <div className="flex flex-col items-center justify-center h-full">
-                  <p className="text-gray-900 text-sm">
-                    {
-                      patient?.last_consultation?.current_bed?.bed_object
-                        ?.location_object?.name
-                    }
-                  </p>
-                  <p className="text-base font-bold text-center text-ellipsis">
-                    {patient?.last_consultation?.current_bed?.bed_object.name}
-                  </p>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <i className="fas fa-user-injured text-3xl text-gray-500"></i>
-                </div>
-              )}
+            <div className="w-24 h-24 min-w-[6rem] bg-gray-200 rounded capitalize">
+              <ShowPatientBedStatus
+                currentBed={patient?.last_consultation?.current_bed}
+                consultationSuggestionText={
+                  patient?.last_consultation?.suggestion_text
+                }
+                consultationFiled={
+                  patient.last_consultation?.facility === patient?.facility
+                }
+              />
             </div>
             <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
               <div>
@@ -557,21 +611,6 @@ export const PatientManager = (props: any) => {
                         startIcon="exclamation-triangle"
                         text="Patient Expired"
                       />
-                    )}
-                    {(!patient.last_consultation ||
-                      patient.last_consultation?.facility !==
-                        patient.facility) && (
-                      <span className="relative inline-flex">
-                        <Badge
-                          color="red"
-                          startIcon="notes-medical"
-                          text="No Consultation Filed"
-                        />
-                        <span className="flex absolute h-3 w-3 -top-1 -right-1">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
-                        </span>
-                      </span>
                     )}
                     {showReviewAlert(patient) &&
                       moment().isBefore(patient.review_time) && (
