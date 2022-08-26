@@ -40,7 +40,6 @@ const initError = {
   description: "",
   is_working: "",
   serial_number: "",
-  warranty_details: "",
   location: "",
   vendor_name: "",
   support_name: "",
@@ -89,7 +88,6 @@ const AssetCreate = (props: AssetProps) => {
   const [description, setDescription] = useState("");
   const [is_working, setIsWorking] = useState<string | undefined>(undefined);
   const [serial_number, setSerialNumber] = useState("");
-  const [warranty_details, setWarrantyDetails] = useState("");
   const [vendor_name, setVendorName] = useState("");
   const [support_name, setSupportName] = useState("");
   const [support_phone, setSupportPhone] = useState("");
@@ -139,7 +137,6 @@ const AssetCreate = (props: AssetProps) => {
       setIsWorking(String(asset.is_working));
       setNotWorkingReason(asset.not_working_reason);
       setSerialNumber(asset.serial_number);
-      setWarrantyDetails(asset.warranty_details);
       setVendorName(asset.vendor_name);
       setSupportName(asset.support_name);
       setSupportEmail(asset.support_email);
@@ -229,7 +226,6 @@ const AssetCreate = (props: AssetProps) => {
         is_working: is_working,
         not_working_reason: is_working === "true" ? "" : not_working_reason,
         serial_number: serial_number,
-        warranty_details: warranty_details,
         location: location,
         vendor_name: vendor_name,
         support_name: support_name,
@@ -494,24 +490,6 @@ const AssetCreate = (props: AssetProps) => {
                     setSerialNumber(e.target.value)
                   }
                   errors={state.errors.serial_number}
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="warranty_details" id="name=label">
-                  Warranty Details
-                </InputLabel>
-                <TextInputField
-                  id="warranty_details"
-                  fullWidth
-                  name="warranty_details"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={warranty_details}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWarrantyDetails(e.target.value)
-                  }
-                  errors={state.errors.warranty_details}
                 />
               </div>
               <div>

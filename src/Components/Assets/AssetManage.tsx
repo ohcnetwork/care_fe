@@ -194,7 +194,6 @@ const AssetManage = (props: AssetManageProps) => {
               {renderDetail("Facility", asset?.location_object.facility.name)}
               {renderDetail("Description", asset?.description)}
               {renderDetail("Serial Number", asset?.serial_number)}
-              {renderDetail("Warranty Details", asset?.warranty_details)}
               {renderDetail("Type", asset?.asset_type)}
               {renderDetail("Vendor Name", asset?.vendor_name)}
               {renderDetail("Customer Support Name", asset?.support_name)}

@@ -23,7 +23,6 @@ export interface AssetData {
   created_date: string;
   modified_date: string;
   serial_number: string;
-  warranty_details: string;
   asset_type: AssetType;
   asset_class?: AssetClass;
   location_object: AssetLocationObject;
