@@ -69,12 +69,9 @@ describe("Shifting section filter", () => {
     cy.contains("Cancel").click();
   });
 
-  it("filter by KASP", () => {
+  it("filter by antenatal", () => {
     ["yes", "no"].forEach((select) => {
-      cy.get("input")
-        .should("contain", "[name='is_kasp']")
-        .get("[name='is_kasp']")
-        .select(select);
+      cy.get("[name='is_antenatal']").select(select);
       cy.contains("Apply").click().wait(1000);
       cy.contains("Filters").click();
     });
@@ -107,7 +104,7 @@ describe("Shifting section filter", () => {
       .invoke("text")
       .then((phoneNumber) => {
         cy.contains("Filters").click();
-        cy.get("[name='patient_phone_number']").type(phoneNumber);
+        cy.get("[placeholder='Patinet phone number']").type(phoneNumber);
         cy.contains("Apply").click().wait(1000);
       });
   });
