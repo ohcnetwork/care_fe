@@ -451,7 +451,7 @@ export const PatientManager = (props: any) => {
           className="w-full cursor-pointer p-4 rounded-lg bg-white shadow text-black border border-transparent hover:border-primary-500  transition-all duration-200 ease-in-out"
         >
           <div className="flex gap-4 items-start">
-            <div className="w-20 h-20 min-w-[5rem] bg-gray-200 rounded-lg border border-gray-500">
+            <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
               {patient?.last_consultation &&
               patient?.last_consultation?.current_bed ? (
                 <div className="flex flex-col items-center justify-center h-full">
