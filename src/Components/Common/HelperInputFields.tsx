@@ -28,6 +28,7 @@ import {
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import clsx from "clsx";
 import { debounce } from "lodash";
 import React, { ChangeEvent } from "react";
 import PhoneInput, { ICountryData } from "react-phone-input-2";
@@ -282,7 +283,17 @@ export const TimeInputField = (props: any) => {
 
 export const ErrorHelperText = (props: { error: string }) => {
   const { error } = props;
-  return <div className="error-text">{error}</div>;
+  return (
+    <span
+      className={clsx(
+        "error-text mt-2 ml-1",
+        (error && "opacity-100") || "opacity-0",
+        "transition-all duration-300"
+      )}
+    >
+      {error}
+    </span>
+  );
 };
 
 export const ShowRadioOptions = (props: OptionsProps) => {
