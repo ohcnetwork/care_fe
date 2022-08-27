@@ -30,14 +30,20 @@ describe("User management", () => {
     cy.url().should("include", "/user");
   });
 
+  // it("debug", () => {
+  //   cy.visit("http://localhost:4000/user/add").wait(2000);
+  //   cy.get("button").contains("Save User").click();
+  //   cy.wait(2000);
+  // });
+
   it("create user", () => {
     cy.contains("Add New User").click();
     cy.get("[name='user_type']").select("Volunteer");
     cy.get("[placeholder='Phone Number']").type(phone_number);
-    cy.get("input[type='checkbox']").click();
-    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
-      force: true,
-    });
+    // cy.get("input[type='checkbox']").click();
+    // cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
+    //   force: true,
+    // });
     cy.get("[name='facilities']")
       .type("Mysore", { delay: 200 })
       .wait(2000)
@@ -54,7 +60,7 @@ describe("User management", () => {
     cy.get("[name='state']").select("Kerala");
     cy.get("[name='district']").select("Ernakulam");
     //cy.get("[name='local_body']").select("");
-    cy.contains("Save User").click();
+    cy.get("button[type='submit']").contains("Save User").click();
     cy.wait(2000);
     cy.verifyNotification("User added successfully");
   });
@@ -82,10 +88,11 @@ describe("User management", () => {
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
     cy.wait(2000);
+    cy.intercept(/\/api\/v1\/users/).as("getUsers");
     cy.get("[name='search']").type(username);
+    cy.wait("@getUsers");
     cy.wait(1000);
     cy.get("a")
-      .should("contain", "Click here to show")
       .contains("Click here to show linked facilities")
       .click({ force: true })
       .then(() => {
