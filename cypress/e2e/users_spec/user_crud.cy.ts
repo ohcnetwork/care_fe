@@ -32,18 +32,19 @@ describe("User management", () => {
 
   // it("debug", () => {
   //   cy.visit("http://localhost:4000/user/add").wait(2000);
-  //   cy.get("button").contains("Save User").click();
   //   cy.wait(2000);
   // });
 
   it("create user", () => {
     cy.contains("Add New User").click();
     cy.get("[name='user_type']").select("Volunteer");
+    cy.get("input[type='checkbox']").click();
+    cy.wait(1000);
     cy.get("[placeholder='Phone Number']").type(phone_number);
-    // cy.get("input[type='checkbox']").click();
-    // cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
-    //   force: true,
-    // });
+    cy.wait(1000);
+    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
+      force: true,
+    });
     cy.get("[name='facilities']")
       .type("Mysore", { delay: 200 })
       .wait(2000)
