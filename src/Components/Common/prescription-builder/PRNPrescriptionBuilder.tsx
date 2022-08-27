@@ -85,7 +85,7 @@ export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<
                                 <div
                                     className="w-full"    
                                 >
-                                    Medicine :
+                                    Medicine
                                     <PrescriptionDropdown
                                         placeholder="Medicine"
                                         options={medicines}
@@ -95,7 +95,7 @@ export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<
                                 </div>
                                 <div className="flex gap-2">
                                     <div className="w-[100px]">
-                                        Route :
+                                        Route
                                         <PrescriptionDropdown
                                             placeholder="Route"
                                             options={routes}
@@ -106,7 +106,7 @@ export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<
                                     <div>
                                         <div className="w-full md:w-[160px] flex gap-2 shrink-0">
                                             <div>
-                                                Dosage :
+                                                Dosage
                                                 <div className="flex gap-1">
                                                     <input 
                                                         type="number"
@@ -144,7 +144,7 @@ export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<
                             </div>
                             <div className="flex gap-2 mt-2 flex-col md:flex-row">
                                 <div className="w-full">
-                                    Indicator :
+                                    Indicator
                                     <input 
                                         type="text"
                                         className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
@@ -160,7 +160,7 @@ export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<
                                 </div>
                                 <div className="w-full md:w-[160px] flex gap-2 shrink-0">
                                     <div>
-                                        Max Dosage in 24 hrs. :
+                                        Max Dosage in 24 hrs.
                                         <div className="flex gap-1">
                                             <input 
                                                 type="number"
