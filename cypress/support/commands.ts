@@ -71,7 +71,7 @@ Cypress.Commands.add("loginByApi", (username, password) => {
 
 Cypress.Commands.add("verifyNotification", (text) => {
   cy.get(".pnotify-container").should("exist").contains(text);
-  return cy.get(".pnotify-container").click();
+  return cy.get(".pnotify-container").click({ force: true });
 });
 
 Cypress.on("uncaught:exception", () => {

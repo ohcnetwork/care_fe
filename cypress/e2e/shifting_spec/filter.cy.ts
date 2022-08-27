@@ -126,7 +126,10 @@ describe("Shifting section filter", () => {
   });
 
   afterEach(() => {
-    cy.get("span").should("contain", "Filters").contains("Filters").click();
+    cy.get("span")
+      .should("contain", "Filters")
+      .contains("Filters")
+      .click({ force: true });
     cy.get("a")
       .should("contain", "Clear Filters")
       .contains("Clear Filters")

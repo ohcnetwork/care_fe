@@ -76,7 +76,7 @@ describe("User management", () => {
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
     cy.wait(2000);
-    cy.get("[name='search']").type(username);
+    cy.get("[name='search']").type(username, { force: true });
     cy.wait(1000);
     // TODO: some verify task
   });
@@ -90,7 +90,7 @@ describe("User management", () => {
     cy.contains("Apply").click();
     cy.wait(2000);
     cy.intercept(/\/api\/v1\/users/).as("getUsers");
-    cy.get("[name='search']").type(username);
+    cy.get("[name='search']").type(username, { force: true });
     cy.wait("@getUsers");
     cy.wait(1000);
     cy.get("a")

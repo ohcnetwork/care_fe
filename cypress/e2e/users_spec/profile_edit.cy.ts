@@ -16,7 +16,7 @@ describe("Edit Profile Testing", () => {
     cy.restoreLocalStorage();
     cy.visit(base_url + "/user/profile");
     cy.url().should("include", "/user/profile");
-    cy.contains("Edit User Profile").click();
+    cy.contains("Edit User Profile").click({ force: true });
   });
 
   it("Empty First-Name field of " + username, () => {
