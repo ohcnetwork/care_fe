@@ -325,7 +325,7 @@ const AssetsList = () => {
               assets.map((asset: AssetData) => (
                 <div
                   key={asset.id}
-                  className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center hover:bg-gray-100"
+                  className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
                   onClick={() => navigate(`/assets/${asset.id}`)}
                 >
                   
