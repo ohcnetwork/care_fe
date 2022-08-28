@@ -656,6 +656,19 @@ export const retrieveUpload = (params: object, fileId: string) => {
   return fireRequest("retrieveUpload", [], params, { fileId: fileId });
 };
 
+export const partialUpdateUploadFileName = (params: object, fileId: string) => {
+  return fireRequest(
+    "partialUpdateUploadFileName",
+    [],
+    { ...params },
+    { fileId: fileId }
+  );
+};
+
+export const deleteUpload = (params: object, fileId: string) => {
+  return fireRequest("deleteUpload", [], params, { fileId: fileId });
+};
+
 export const retrieveUploadFilesURL = (params: object, fileId: string) => {
   return fireRequestForFiles("retrieveUpload", [], params, { fileId: fileId });
 };

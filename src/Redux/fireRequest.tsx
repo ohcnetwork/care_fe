@@ -66,13 +66,20 @@ export const fireRequest = (
     if (request.path.slice(-1) !== "/" && request.path.indexOf("?") === -1) {
       request.path += "/";
     }
-    if (request.method === undefined || request.method === "GET") {
+    if (request.method === undefined) {
       request.method = "GET";
+    }
+    if (
+      request.method === "GET" ||
+      request.method === "DELETE" ||
+      request.method === "PATCH"
+    ) {
       const qs = querystring.stringify(params);
       if (qs !== "") {
         request.path += `?${qs}`;
       }
     }
+
     // set dynamic params in the URL
     if (pathParam) {
       Object.keys(pathParam).forEach((param: any) => {

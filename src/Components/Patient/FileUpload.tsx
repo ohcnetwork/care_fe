@@ -4,13 +4,15 @@ import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
   retrieveUpload,
   createUpload,
   getPatient,
+  deleteUpload,
+  partialUpdateUploadFileName,
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
 import { TextInputField } from "../Common/HelperInputFields";
@@ -26,6 +28,7 @@ import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
+import clsx from "clsx";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -83,6 +86,11 @@ interface FileUploadProps {
   audio: boolean;
   unspecified: boolean;
   sampleId?: number;
+}
+
+interface ModalDetails {
+  name?: string;
+  id?: string;
 }
 
 interface URLS {
@@ -145,6 +153,15 @@ export const FileUpload = (props: FileUploadProps) => {
   const [offset, setOffset] = useState(0);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [modalOpenForEdit, setModalOpenForEdit] = useState(false);
+  const [modalDetails, setModalDetails] = useState<ModalDetails>();
+  const [editFileName, setEditFileName] = useState<any>("");
+  const [editFileNameError, setEditFileNameError] = useState("");
+  const [modalOpenForDelete, setModalOpenForDelete] = useState(false);
+  const [btnloader, setbtnloader] = useState(false);
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+  const currentuser_username = currentUser.data.username;
   const limit = RESULTS_PER_PAGE_LIMIT;
 
   useEffect(() => {
@@ -325,9 +342,174 @@ export const FileUpload = (props: FileUploadProps) => {
     setFileUrl(responseData.data.read_signed_url);
   };
 
+  const deleteFile = async (id: any) => {
+    const data = { file_type: type, associating_id: getAssociatedId() };
+
+    const res = await dispatch(deleteUpload(data, id));
+    if (res && res.status === 204) {
+      fetchData(res.status);
+      Notification.Success({
+        msg: "File deleted successfully",
+      });
+      setbtnloader(false);
+      setModalOpenForDelete(false);
+    } else {
+      setbtnloader(false);
+    }
+  };
+
+  const validateEditFileName = (name: any) => {
+    if (name.trim() === "") {
+      setEditFileNameError("Please enter a name!");
+      return false;
+    } else {
+      setEditFileNameError("");
+      return true;
+    }
+  };
+
+  const partialupdateFileName = async (id: any, name: string) => {
+    const data = {
+      file_type: type,
+      name: name,
+      associating_id: getAssociatedId(),
+    };
+    if (validateEditFileName(name)) {
+      const res = await dispatch(partialUpdateUploadFileName(data, id));
+      if (res && res.status === 200) {
+        fetchData(res.status);
+        Notification.Success({
+          msg: "File name changed successfully",
+        });
+        setbtnloader(false);
+        setModalOpenForEdit(false);
+      } else {
+        setbtnloader(false);
+      }
+    } else {
+      setbtnloader(false);
+    }
+  };
+
   const renderFileUpload = (item: FileUploadModel) => {
     return (
       <div className="mt-4 border bg-white shadow rounded-lg p-4" key={item.id}>
+        <Modal open={modalOpenForEdit}>
+          <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+            <form
+              onSubmit={(event: any) => {
+                event.preventDefault();
+                setbtnloader(true);
+                partialupdateFileName(modalDetails?.id, editFileName);
+              }}
+              className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content"
+            >
+              <div>
+                <InputLabel className="text-xl" id="editfilenamelabel">
+                  Please enter the file name
+                </InputLabel>
+                <TextInputField
+                  name="editFileName"
+                  variant="outlined"
+                  margin="dense"
+                  value={editFileName}
+                  onChange={(e) => setEditFileName(e.target.value)}
+                  errors={editFileNameError}
+                />
+              </div>
+              <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+                <button
+                  type="submit"
+                  className="btn-primary btn mr-2 w-full md:w-auto"
+                >
+                  <svg
+                    className={clsx(
+                      "animate-spin -ml-1 mr-3 h-5 w-5 text-white",
+                      !btnloader ? " hidden" : ""
+                    )}
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Proceed
+                </button>
+                <button
+                  type="button"
+                  className="btn-danger btn mr-2 w-full md:w-auto"
+                  onClick={(_) => setModalOpenForEdit(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </Modal>
+        <Modal open={modalOpenForDelete}>
+          <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+            <div className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content">
+              <h1 className="text-xl">
+                Are you sure you want to delete the "{modalDetails?.name}" file
+                ?
+              </h1>
+              <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+                <button
+                  type="submit"
+                  onClick={() => {
+                    setbtnloader(true);
+                    deleteFile(modalDetails?.id);
+                  }}
+                  className="btn-primary btn mr-2 w-full md:w-auto"
+                >
+                  <svg
+                    className={clsx(
+                      "animate-spin -ml-1 mr-3 h-5 w-5 text-white",
+                      !btnloader ? " hidden" : ""
+                    )}
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  className="btn-danger btn mr-2 w-full md:w-auto"
+                  onClick={(_) => setModalOpenForDelete(false)}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          </div>
+        </Modal>
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
           <div>
             <div>
@@ -352,7 +534,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <div className="flex space-x-2">
                 {item.id ? (
                   Object.keys(url).length > 0 ? (
-                    <>
+                    <div className="flex flex-wrap">
                       <audio
                         className="max-h-full max-w-full m-auto object-contain"
                         src={url[item.id]}
@@ -380,7 +562,32 @@ export const FileUpload = (props: FileUploadProps) => {
                           />
                         </svg>
                       </a>
-                    </>
+                      {item?.uploaded_by?.username === currentuser_username ? (
+                        <>
+                          <button
+                            type="submit"
+                            onClick={() => {
+                              setModalDetails({ name: item.name, id: item.id });
+                              setEditFileName(item?.name);
+                              setModalOpenForEdit(true);
+                            }}
+                          >
+                            <i className="fa-solid fa-pencil mr-1"></i>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setModalDetails({ name: item.name, id: item.id });
+                              setModalOpenForDelete(true);
+                            }}
+                          >
+                            <i className="fa-solid fa-trash-can ml-3"></i>
+                          </button>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
                   ) : (
                     <CircularProgress />
                   )
@@ -390,18 +597,44 @@ export const FileUpload = (props: FileUploadProps) => {
               </div>
             ) : (
               <div>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={<Visibility />}
+                <button
                   onClick={() => {
                     loadFile(item.id);
                   }}
+                  type="submit"
+                  className="btn btn-primary m-1"
                 >
-                  Preview File
-                </Button>
+                  {" "}
+                  <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
+                </button>
+                {item?.uploaded_by?.username === currentuser_username ? (
+                  <>
+                    {" "}
+                    <button
+                      onClick={() => {
+                        setModalDetails({ name: item.name, id: item.id });
+                        setEditFileName(item?.name);
+                        setModalOpenForEdit(true);
+                      }}
+                      type="submit"
+                      className="btn btn-primary m-1"
+                    >
+                      <i className="fa-solid fa-pencil mr-2"></i> EDIT FILE NAME
+                    </button>
+                    <button
+                      onClick={() => {
+                        setModalDetails({ name: item.name, id: item.id });
+                        setModalOpenForDelete(true);
+                      }}
+                      type="submit"
+                      className="btn btn-primary m-1"
+                    >
+                      <i className="fa-solid fa-trash-can mr-2"></i> DELETE FILE
+                    </button>
+                  </>
+                ) : (
+                  <></>
+                )}
               </div>
             )}
           </div>

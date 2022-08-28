@@ -625,9 +625,17 @@ const routes: Routes = {
     path: "/api/v1/files/",
     method: "GET",
   },
+  partialUpdateUploadFileName: {
+    path: "/api/v1/files/{fileId}/",
+    method: "PATCH",
+  },
   retrieveUpload: {
     path: "/api/v1/files/{fileId}/",
     method: "GET",
+  },
+  deleteUpload: {
+    path: "/api/v1/files/{fileId}/",
+    method: "DELETE",
   },
 
   // Investigation
