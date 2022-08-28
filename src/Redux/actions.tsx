@@ -731,6 +731,11 @@ export const editInvestigation = (
   });
 };
 
+// ICD11
+export const listICD11Diagnosis = (params: object, key: string) => {
+  return fireRequest("listICD11Diagnosis", [], params, null, key);
+}
+
 // Resource
 export const createResource = (params: object) => {
   return fireRequest("createResource", [], params);
