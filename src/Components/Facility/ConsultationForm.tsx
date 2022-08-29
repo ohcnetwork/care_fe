@@ -88,6 +88,7 @@ type FormDetails = {
   ip_no: string;
   discharge_advice: PrescriptionType[];
   prn_prescription : PRNPrescriptionType[],
+  investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
@@ -129,6 +130,7 @@ const initForm: FormDetails = {
   ip_no: "",
   discharge_advice: [],
   prn_prescription : [],
+  investigation: [],
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
@@ -235,6 +237,7 @@ export const ConsultationForm = (props: any) => {
       const res = await dispatchAction(getConsultation(id));
       setDischargeAdvice(res && res.data && res.data.discharge_advice);
       setPRNAdvice(!Array.isArray(res.data.prn_prescription) ? [] : res.data.prn_prescription);
+      setInvestigationAdvice(!Array.isArray(res.data.investigation) ? [] : res.data.investigation);
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -393,7 +396,7 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
-        case "prn_prescription":
+        case "prn_prescription": {
           let invalid = false;
           for (let f of PRNAdvice) {
             if (
@@ -411,7 +414,27 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        }
 
+        case "investigation":{
+          let invalid = false;
+          for (let f of InvestigationAdvice) {
+            if (
+              !f.type?.replace(/\s/g, "").length ||
+              !f.frequency?.replace(/\s/g, "").length ||
+              (f.repetitive ? !f.frequency?.replace(/\s/g, "").length : !f.time?.replace(/\s/g, "").length)
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Investigation Suggestion field can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        }
         default:
           return;
       }
@@ -455,6 +478,7 @@ export const ConsultationForm = (props: any) => {
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
         prn_prescription : PRNAdvice,
+        investigation: InvestigationAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -1057,7 +1081,7 @@ export const ConsultationForm = (props: any) => {
                   setInvestigations={setInvestigationAdvice}
                 />
                 <br />
-                <ErrorHelperText error={state.errors.prn_prescription} />
+                <ErrorHelperText error={state.errors.investigation} />
               </div>
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">

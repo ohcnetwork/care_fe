@@ -1,4 +1,3 @@
-import { medicines, routes, units } from "./PrescriptionBuilder";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
 
 export type InvestigationType = {
@@ -140,7 +139,7 @@ export default function InvestigationBuilder(props : InvestigationBuilderProps<I
                 onClick={()=>{
                     setInvestigations([
                         ...investigations,
-                        {}
+                        {repetitive : false}
                     ])
                 }}
                 className="shadow-sm mt-4 bg-gray-200 w-full font-bold block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
