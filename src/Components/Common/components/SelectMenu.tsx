@@ -15,6 +15,18 @@ type Props<T> = {
   position?: string;
 };
 
+// type SelectOption<T> = {
+//   label: React.ReactNode;
+//   description?: React.ReactNode;
+//   icon?: React.ReactNode;
+//   value: T;
+// };
+
+// type SelectProps<T> = {
+//   value: T;
+//   children: SelectOption<T>[];
+// };
+
 export default function SelectMenu<T>(props: Props<T>) {
   const options = props.options.map((option) => {
     return {
@@ -36,20 +48,16 @@ export default function SelectMenu<T>(props: Props<T>) {
         <>
           <Listbox.Label className="sr-only">{props.label}</Listbox.Label>
           <div className="relative">
-            <Listbox.Button className="inline-flex shadow-sm rounded-md divide-x divide-primary-600">
-              <div className="relative z-0 inline-flex shadow-sm rounded-md divide-x divide-primary-600">
-                <div className="relative inline-flex items-center bg-primary-500 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white hover:bg-primary-600 focus:outline-none focus:z-10">
+            <Listbox.Button className="inline-flex shadow-sm rounded bg-gray-50 hover:bg-gray-200 focus:ring-primary-500 border focus:ring-1 ring-gray-400 focus:border-primary-500 border-gray-400 transition-all duration-200 ease-in-out">
+              <div className="relative z-0 inline-flex">
+                <div className="relative inline-flex items-center py-2 pl-3 pr-4 border border-transparent rounded-l focus:outline-none focus:z-10">
                   {selected.value && (
                     <Check className="h-5 w-5" aria-hidden="true" />
                   )}
                   <p className="ml-2.5 text-sm font-medium">{selected.title}</p>
                 </div>
-                <div className="relative inline-flex items-center bg-primary-500 p-2 rounded-l-none rounded-r-md text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:z-10 ">
-                  <span className="sr-only">Change published status</span>
-                  <KeyboardArrowDown
-                    className="h-5 w-5 text-white"
-                    aria-hidden="true"
-                  />
+                <div className="relative inline-flex items-center p-2 rounded-r text-sm font-medium focus:outline-none focus:z-10">
+                  <KeyboardArrowDown className="h-5 w-5" aria-hidden="true" />
                 </div>
               </div>
             </Listbox.Button>
@@ -57,14 +65,17 @@ export default function SelectMenu<T>(props: Props<T>) {
             <Transition
               show={open}
               as={Fragment}
-              leave="transition ease-in duration-100"
+              leave="transition ease-in duration-200"
+              enter="transition ease-out duration-100"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
               <Listbox.Options
                 className={clsx(
                   props.position ? "md:right-0 md:left-auto" : "left-0",
-                  "origin-top-right absolute z-10 mt-2 w-auto lg:w-72 rounded-md shadow-lg overflow-hidden bg-white divide-y divide-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  "origin-top-right absolute z-10 mt-2 w-auto lg:w-72 rounded-md shadow-lg overflow-hidden bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none"
                 )}
               >
                 {options.map((option) => (
@@ -73,7 +84,7 @@ export default function SelectMenu<T>(props: Props<T>) {
                     className={({ active }) =>
                       clsx(
                         active ? "text-white bg-primary-500" : "text-gray-900",
-                        "cursor-default select-none relative p-4 text-sm"
+                        "cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out"
                       )
                     }
                     value={option}
@@ -90,9 +101,10 @@ export default function SelectMenu<T>(props: Props<T>) {
                           </p>
                           {selected ? (
                             <span
-                              className={
-                                active ? "text-white" : "text-primary-500"
-                              }
+                              className={clsx(
+                                active ? "text-white" : "text-primary-500",
+                                "transition-all duration-100 ease-in-out"
+                              )}
                             >
                               <Check className="h-5 w-5" aria-hidden="true" />
                             </span>

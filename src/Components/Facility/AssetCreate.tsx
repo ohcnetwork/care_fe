@@ -358,7 +358,7 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Asset Name */}
-                  <div className="col-span-6">
+                  <div className="col-span-6 sm:col-span-4">
                     <label htmlFor="asset-name">Asset Name * </label>
                     <input
                       id="asset-name"
@@ -377,37 +377,62 @@ const AssetCreate = (props: AssetProps) => {
                     <ErrorHelperText error={state.errors.name} />
                   </div>
 
+                  {/* Asset Type */}
+                  <div className="col-span-6 sm:col-span-2">
+                    <label htmlFor="asset-type">Asset Type * </label>
+                    <div className="mt-2">
+                      <SelectMenu
+                        options={[
+                          {
+                            title: "Select",
+                            description:
+                              "Select an Asset Type from the following",
+                            value: undefined,
+                          },
+                          {
+                            title: "Internal",
+                            description:
+                              "Asset is inside the facility premises.",
+                            value: "INTERNAL",
+                          },
+                          {
+                            title: "External",
+                            description:
+                              "Asset is outside the facility premises.",
+                            value: "EXTERNAL",
+                          },
+                        ]}
+                        selected={asset_type}
+                        onSelect={setAssetType}
+                      />
+                    </div>
+                    <ErrorHelperText error={state.errors.asset_type} />
+                  </div>
+
                   <div className="col-span-6 flex flex-col sm:flex-row gap-x-6">
-                    {/* Asset Type */}
-                    <div>
-                      <label htmlFor="asset-type">Asset Type * </label>
+                    {/* Location */}
+                    <div className="">
+                      <label htmlFor="asset-location">Location * </label>
                       <div className="mt-2">
                         <SelectMenu
                           options={[
                             {
                               title: "Select",
                               description:
-                                "Select an Asset Type from the following",
-                              value: undefined,
+                                "Select an Asset Location from the following",
+                              value: "",
                             },
-                            {
-                              title: "Internal",
-                              description:
-                                "Asset is inside the facility premises.",
-                              value: "INTERNAL",
-                            },
-                            {
-                              title: "External",
-                              description:
-                                "Asset is outside the facility premises.",
-                              value: "EXTERNAL",
-                            },
+                            ...locations.map((location: any) => ({
+                              title: location.name,
+                              description: location.facility.name,
+                              value: location.id,
+                            })),
                           ]}
-                          selected={asset_type}
-                          onSelect={setAssetType}
+                          selected={location}
+                          onSelect={setLocation}
                         />
                       </div>
-                      <ErrorHelperText error={state.errors.asset_type} />
+                      <ErrorHelperText error={state.errors.location} />
                     </div>
 
                     {/* Asset Class */}
@@ -425,36 +450,10 @@ const AssetCreate = (props: AssetProps) => {
                           ]}
                           selected={asset_class}
                           onSelect={setAssetClass}
-                          position="right"
                         />
                       </div>
                       <ErrorHelperText error={state.errors.asset_class} />
                     </div>
-                  </div>
-
-                  {/* Location */}
-                  <div className="col-span-6">
-                    <label htmlFor="asset-location">Location * </label>
-                    <div className="mt-2">
-                      <SelectMenu
-                        options={[
-                          {
-                            title: "Select",
-                            description:
-                              "Select an Asset Location from the following",
-                            value: "",
-                          },
-                          ...locations.map((location: any) => ({
-                            title: location.name,
-                            description: location.facility.name,
-                            value: location.id,
-                          })),
-                        ]}
-                        selected={location}
-                        onSelect={setLocation}
-                      />
-                    </div>
-                    <ErrorHelperText error={state.errors.location} />
                   </div>
 
                   {/* Description */}
@@ -492,6 +491,37 @@ const AssetCreate = (props: AssetProps) => {
                   {/* Working Status */}
                   <div className="col-span-6">
                     <label htmlFor="is_working">Working Status * </label>
+                    <div className="flex gap-4 p-4 items-center">
+                      <div className="flex gap-2 items-center">
+                        <input
+                          className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500 rounded-full focus:ring-2"
+                          type="radio"
+                          id="is_working_yes"
+                          name="is_working"
+                          value="true"
+                          checked={is_working === "true"}
+                          onChange={() => {
+                            setIsWorking("true");
+                          }}
+                        />
+                        <label htmlFor="is_working_yes">Yes</label>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <input
+                          className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500 rounded-full focus:ring-2"
+                          type="radio"
+                          id="is_working_no"
+                          name="is_working"
+                          value="false"
+                          checked={is_working === "false"}
+                          onChange={() => {
+                            setIsWorking("false");
+                          }}
+                        />
+                        <label htmlFor="is_working_no">No</label>
+                      </div>
+                      {JSON.stringify({ is_working })}
+                    </div>
                     <div className="mt-2">
                       <SelectMenu
                         options={[
@@ -543,44 +573,25 @@ const AssetCreate = (props: AssetProps) => {
                     />
                   </div>
 
-                  {/* Vendor Name */}
-                  <div className="col-span-6 sm:col-span-3">
-                    <label htmlFor="vendor-name">Vendor Name</label>
-                    <input
-                      id="vendor-name"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.vendor_name && "border-red-500"
-                      )}
-                      type="text"
-                      name="vendor-name"
-                      placeholder="Eg. XYZ"
-                      value={vendor_name}
+                  {/* Asset QR ID */}
+                  <div className="col-span-6">
+                    <label htmlFor="asset-qr-id">Asset QR ID</label>
+                    <ActionTextInputField
+                      id="qr_code_id"
+                      fullWidth
+                      name="qr_code_id"
+                      placeholder=""
+                      variant="outlined"
+                      margin="dense"
+                      value={qrCodeId}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setVendorName(e.target.value)
+                        setQrCodeId(e.target.value)
                       }
+                      actionIcon={<CropFreeIcon className="cursor-pointer" />}
+                      action={() => setIsScannerActive(true)}
+                      errors={state.errors.qr_code_id}
                     />
-                    <ErrorHelperText error={state.errors.vendor_name} />
-                  </div>
-
-                  {/* Serial Number */}
-                  <div className="col-span-6 sm:col-span-3">
-                    <label htmlFor="serial-number">Serial Number</label>
-                    <input
-                      id="serial-number"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.serial_number && "border-red-500"
-                      )}
-                      type="text"
-                      name="serial-number"
-                      placeholder="Eg. 123456789"
-                      value={serial_number}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSerialNumber(e.target.value)
-                      }
-                    />
-                    <ErrorHelperText error={state.errors.serial_number} />
+                    <ErrorHelperText error={state.errors.qr_id} />
                   </div>
                 </div>
                 <div className="grid grid-cols-6 gap-x-6">
@@ -686,6 +697,46 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   <div className="sm:col-span-3" />
+
+                  {/* Vendor Name */}
+                  <div className="col-span-6 sm:col-span-3">
+                    <label htmlFor="vendor-name">Vendor Name</label>
+                    <input
+                      id="vendor-name"
+                      className={clsx(
+                        "mt-2 block w-full input",
+                        state.errors.vendor_name && "border-red-500"
+                      )}
+                      type="text"
+                      name="vendor-name"
+                      placeholder="Eg. XYZ"
+                      value={vendor_name}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setVendorName(e.target.value)
+                      }
+                    />
+                    <ErrorHelperText error={state.errors.vendor_name} />
+                  </div>
+
+                  {/* Serial Number */}
+                  <div className="col-span-6 sm:col-span-3">
+                    <label htmlFor="serial-number">Serial Number</label>
+                    <input
+                      id="serial-number"
+                      className={clsx(
+                        "mt-2 block w-full input",
+                        state.errors.serial_number && "border-red-500"
+                      )}
+                      type="text"
+                      name="serial-number"
+                      placeholder="Eg. 123456789"
+                      value={serial_number}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setSerialNumber(e.target.value)
+                      }
+                    />
+                    <ErrorHelperText error={state.errors.serial_number} />
+                  </div>
 
                   {/* Service Details Section */}
                   <div className="col-span-6 flex flex-row gap-6 items-center my-6 -ml-2">
