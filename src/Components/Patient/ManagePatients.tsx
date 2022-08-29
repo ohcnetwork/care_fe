@@ -466,10 +466,10 @@ export const PatientManager = (props: any) => {
           )}
         >
           <div className="flex gap-4 items-start">
-            <div className="w-20 h-20 min-w-[5rem] bg-gray-200 rounded border border-gray-500">
+            <div className="min-h-[5rem] min-w-[5rem] bg-gray-200 rounded border border-gray-500">
               {patient?.last_consultation &&
               patient?.last_consultation?.current_bed ? (
-                <div className="flex flex-col items-center justify-center h-full">
+                <div className="flex flex-col items-center justify-center min-h-[5rem]">
                   <p className="text-gray-900 text-sm">
                     {
                       patient?.last_consultation?.current_bed?.bed_object
@@ -481,7 +481,7 @@ export const PatientManager = (props: any) => {
                   </p>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex items-center justify-center min-h-[5rem]">
                   <i className="fas fa-user-injured text-3xl text-gray-500"></i>
                 </div>
               )}
