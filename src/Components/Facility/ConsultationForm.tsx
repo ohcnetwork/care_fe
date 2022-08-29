@@ -55,6 +55,7 @@ import Beds from "./Consultations/Beds";
 import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
 import PRNPrescriptionBuilder, { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { DiagnosisSelect } from "../Common/DiagnosisSelect";
+import InvestigationBuilder, { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -201,6 +202,7 @@ export const ConsultationForm = (props: any) => {
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
   const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
+  const [InvestigationAdvice, setInvestigationAdvice] = useState<InvestigationType[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -1047,6 +1049,15 @@ export const ConsultationForm = (props: any) => {
                   (Number(state.form.weight) * Number(state.form.height)) / 3600
                 ).toFixed(2)}{" "}
                 m<sup>2</sup>
+              </div>
+              <div id="investigation-div" className="mt-10">
+                <InputLabel>Investigation Suggestion</InputLabel>
+                <InvestigationBuilder
+                  investigations={InvestigationAdvice}
+                  setInvestigations={setInvestigationAdvice}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.prn_prescription} />
               </div>
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
