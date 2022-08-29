@@ -40,6 +40,8 @@ export default function ResourceDetails(props: { id: string }) {
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data);
+        } else {
+          navigate("/not-found");
         }
         setIsLoading(false);
       }

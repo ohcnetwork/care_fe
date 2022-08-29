@@ -15,10 +15,10 @@ interface PTZPayload {
 }
 
 export interface PTZState {
-  x : number,
-  y : number,
-  zoom : number,
-  precision : number
+  x: number;
+  y: number;
+  zoom: number;
+  precision: number;
 }
 
 interface UseMSEMediaPlayerOption {
@@ -43,7 +43,11 @@ export enum StreamStatus {
 interface UseMSEMediaPlayerReturnType {
   absoluteMove: (payload: PTZPayload, options: IOptions) => void;
   relativeMove: (payload: PTZPayload, options: IOptions) => void;
-  getPTZPayload: (action: PTZ, precision?: number, value? : number) => PTZPayload;
+  getPTZPayload: (
+    action: PTZ,
+    precision?: number,
+    value?: number
+  ) => PTZPayload;
   getCameraStatus: (options: IOptions) => void;
   getPresets: (options: IOptions) => void;
   gotoPreset: (payload: IGotoPresetPayload, options: IOptions) => void;
@@ -100,7 +104,9 @@ const gotoPreset =
         ...payload,
         ...config,
       })
-      .then((resp: AxiosResponse) => options?.onSuccess && options.onSuccess(resp))
+      .then(
+        (resp: AxiosResponse) => options?.onSuccess && options.onSuccess(resp)
+      )
       .catch((err: AxiosError) => options?.onError && options.onError(err));
   };
 
@@ -130,11 +136,15 @@ const relativeMove =
       .catch((err: any) => options?.onError && options.onError(err));
   };
 
-export const getPTZPayload = (action: PTZ, precision = 1, value? : number): PTZPayload => {
+export const getPTZPayload = (
+  action: PTZ,
+  precision = 1,
+  value?: number
+): PTZPayload => {
   let x = 0;
   let y = 0;
   let zoom = 0;
-  const delta = !value ? (0.1 / Math.max(1, precision)) : value;
+  const delta = !value ? 0.1 / Math.max(1, precision) : value;
   switch (action) {
     case PTZ.Up:
       y = delta;
