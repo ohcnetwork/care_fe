@@ -78,7 +78,7 @@ const ShowPatientBedStatus = ({
 }: ShowPatientBedStatusProps) => {
   if (currentBed) {
     return (
-      <div className="flex flex-col items-center justify-center h-full rounded border border-gray-500">
+      <div className="flex flex-col items-center justify-center h-full rounded border border-gray-500 text-center">
         <p className="text-gray-900 text-sm">
           {currentBed?.bed_object?.location_object?.name}
         </p>
