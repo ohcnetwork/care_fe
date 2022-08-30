@@ -243,6 +243,8 @@ const AssetConfigure = (props: AssetConfigureProps) => {
                   color="primary"
                   variant="contained"
                   type="submit"
+                  fullWidth
+                  className="w-full md:w-auto"
                   style={{ marginLeft: "auto" }}
                   startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
                   onClick={handleSubmit}
