@@ -101,6 +101,8 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
+                  fullWidth
+                  className="w-full md:w-auto"
                   startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
                   onClick={handleSubmit}
                 >

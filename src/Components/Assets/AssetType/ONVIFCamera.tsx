@@ -188,6 +188,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
+                  fullWidth
+                  className="w-full md:w-auto"
                   startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
                   onClick={handleSubmit}
                 >
