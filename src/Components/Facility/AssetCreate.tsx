@@ -11,16 +11,7 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import CancelOutlineIcon from "@material-ui/icons/CancelOutlined";
 import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  FormControlLabel,
-  InputLabel,
-  Radio,
-  RadioGroup,
-} from "@material-ui/core";
+import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
@@ -417,6 +408,7 @@ const AssetCreate = (props: AssetProps) => {
                       ]}
                       selected={is_working}
                       onSelect={setIsWorking}
+                      position="right"
                     />
                   </div>
                   <ErrorHelperText error={state.errors.is_working} />
