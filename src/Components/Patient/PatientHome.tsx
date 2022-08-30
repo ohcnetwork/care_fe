@@ -604,7 +604,7 @@ export const PatientHome = (props: any) => {
                     </div>
                   )}
               </div>
-              <div className="flex flex-wrap mt-2 space-4">
+              <div className="flex flex-wrap mt-2 gap-2">
                 {patientData.is_vaccinated ? (
                   <Badge color="blue" startIcon="syringe" text="Vaccinated" />
                 ) : (
