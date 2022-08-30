@@ -45,7 +45,7 @@ const AssetsList = () => {
   const [facilityName, setFacilityName] = useState<string>();
   const [asset_type, setAssetType] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
-  const limit = 14;
+  const limit = 24;
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const fetchData = useCallback(
@@ -341,20 +341,17 @@ const AssetsList = () => {
                     </span>
                   </p>
                   
-                  <div className="md:flex justify-between pt-2">
-                    <div className="md:flex flex-wrap gap-2">
-                      {asset.is_working ? (
-                        <Badge color="green" startIcon="cog" text="Working" />
-                      ) : (
-                        <Badge color="red" startIcon="cog" text="Not Working" />
-                      )}
-                      <Badge
-                        color="blue"
-                        startIcon="location-arrow"
-                        text={asset.status}
-                      />
-                    </div>
-                    
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {asset.is_working ? (
+                      <Badge color="green" startIcon="cog" text="Working" />
+                    ) : (
+                      <Badge color="red" startIcon="cog" text="Not Working" />
+                    )}
+                    <Badge
+                      color="blue"
+                      startIcon="location-arrow"
+                      text={asset.status}
+                    />
                   </div>
                 </div>
               ))
