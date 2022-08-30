@@ -73,7 +73,7 @@ export const VoiceRecorder = (props: any) => {
             className="max-h-full max-w-full m-auto object-contain"
             src={audioURL}
             controls
-          />{" "}
+          />
         </div>
       )}
     </div>

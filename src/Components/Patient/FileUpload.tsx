@@ -505,7 +505,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = file;
 
     const category = "UNSPECIFIED";
-    const filename = uploadFileName === ""  && f ? f.name : uploadFileName;
+    const filename = uploadFileName === "" && f ? f.name : uploadFileName;
     const name = f?.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
@@ -789,7 +789,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="md:flex justify-between">
+                  <div className="flex flex-col md:flex-row justify-between gap-2">
                     <div>
                       <Button
                         color="primary"
@@ -829,17 +829,19 @@ export const FileUpload = (props: FileUploadProps) => {
                     </div>
                   </div>
                 )}
-                {file && <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
-                  {file?.name}
-                  <button
-                    onClick={()=>{
-                      setFile(null);
-                      setUploadFileName("");
-                    }}
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
-                </div>}
+                {file && (
+                  <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                    {file?.name}
+                    <button
+                      onClick={() => {
+                        setFile(null);
+                        setUploadFileName("");
+                      }}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ) : null}
