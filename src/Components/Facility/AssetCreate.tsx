@@ -32,6 +32,7 @@ import { parseQueryParams } from "../../Utils/primitives";
 import SelectMenu from "../Common/components/SelectMenu";
 import moment from "moment";
 import clsx from "clsx";
+import RadioInputs from "../Common/components/RadioGroup";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError = {
@@ -489,52 +490,19 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Working Status */}
-                  <div className="col-span-6">
-                    <label htmlFor="is_working">Working Status * </label>
-                    <div className="flex gap-4 p-4 items-center">
-                      <div className="flex gap-2 items-center">
-                        <input
-                          className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500 rounded-full focus:ring-2"
-                          type="radio"
-                          id="is_working_yes"
-                          name="is_working"
-                          value="true"
-                          checked={is_working === "true"}
-                          onChange={() => {
-                            setIsWorking("true");
-                          }}
-                        />
-                        <label htmlFor="is_working_yes">Yes</label>
-                      </div>
-                      <div className="flex gap-2 items-center">
-                        <input
-                          className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500 rounded-full focus:ring-2"
-                          type="radio"
-                          id="is_working_no"
-                          name="is_working"
-                          value="false"
-                          checked={is_working === "false"}
-                          onChange={() => {
-                            setIsWorking("false");
-                          }}
-                        />
-                        <label htmlFor="is_working_no">No</label>
-                      </div>
-                      {JSON.stringify({ is_working })}
-                    </div>
-                    <div className="mt-2">
-                      <SelectMenu
-                        options={[
-                          { title: "Select", value: undefined },
-                          { title: "Working", value: "true" },
-                          { title: "Not Working", value: "false" },
-                        ]}
-                        selected={is_working}
-                        onSelect={setIsWorking}
-                      />
-                    </div>
-                    <ErrorHelperText error={state.errors.working_status} />
-                  </div>
+                  <RadioInputs
+                    className="col-span-6"
+                    required
+                    label="Working Status"
+                    name="is_working"
+                    options={[
+                      { label: "Working", value: "true" },
+                      { label: "Not Working", value: "false" },
+                    ]}
+                    selected={is_working}
+                    onSelect={setIsWorking}
+                    error={state.errors.is_working}
+                  />
 
                   {/* Not Working Reason */}
                   <div

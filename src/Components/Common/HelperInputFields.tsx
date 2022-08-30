@@ -281,7 +281,7 @@ export const TimeInputField = (props: any) => {
   );
 };
 
-export const ErrorHelperText = (props: { error: string }) => {
+export const ErrorHelperText = (props: { error?: string }) => {
   const { error } = props;
   return (
     <span
