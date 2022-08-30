@@ -165,7 +165,7 @@ let make = (
         </div>
         <div className="grow border-t border-gray-400 mt-4" />
         <div>
-          <CriticalCare__PageTitle title="I/O Balance" />
+          <CriticalCare__PageTitle title="Administration Record" />
           <DailyRound__IOBalance ioBalance title renderOptionalDescription />
         </div>
         <div className="grow border-t border-gray-400 mt-4" />

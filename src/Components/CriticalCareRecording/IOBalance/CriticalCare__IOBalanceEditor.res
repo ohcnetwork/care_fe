@@ -100,7 +100,7 @@ let make = (~ioBalance, ~updateCB, ~id, ~consultationId) => {
   let totalInput = sumOfArray(ArrayUtils.flatten([state.infusions, state.ivfluids, state.feeds]))
 
   <div>
-    <CriticalCare__PageTitle title="I/O Balance Editor" />
+    <CriticalCare__PageTitle title="Administration Record" />
     <div id="intake" className="pb-3">
       <h3> {str("Intake")} </h3>
       <IOBalance__UnitSection

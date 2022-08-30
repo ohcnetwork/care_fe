@@ -50,7 +50,7 @@ let editorNameToString = editor => {
   | VentilatorParametersEditor => "Ventilator Parameters"
   | ArterialBloodGasAnalysisEditor => "Arterial Blood Gas Analysis"
   | BloodSugarEditor => "Blood Sugar"
-  | IOBalanceEditor => "I/O Balance"
+  | IOBalanceEditor => "Administration Record"
   | DialysisEditor => "Dialysis"
   | PressureSoreEditor => "Pressure Sore"
   | NursingCareEditor => "Nursing Care"
