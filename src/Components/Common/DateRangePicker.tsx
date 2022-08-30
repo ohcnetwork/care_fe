@@ -43,7 +43,7 @@ export const DateRangePicker: React.FC<IDateRangePickerProps> = ({
         onFocusChange={(focus) => setFocusInput(focus)}
         startDate={startDate}
         startDateId={startDateId}
-        // showDefaultInputIcon
+        minimumNights={0}
         numberOfMonths={1}
         showClearDates
         isOutsideRange={(date) => date.isAfter(new Date())}

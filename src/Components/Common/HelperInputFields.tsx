@@ -560,6 +560,7 @@ interface AutoCompleteAsyncFieldProps {
   value: any;
   loading?: boolean;
   errors?: string;
+  onBlur?: (e: any) => void;
   onOpen?: (e: any) => void;
   filterOptions?: (options: any) => any;
   name?: string;
@@ -581,6 +582,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
     onSearch,
     value,
     loading,
+    onBlur,
     onOpen,
     noOptionsText,
     filterOptions,
@@ -597,6 +599,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         autoSelect={autoSelect}
         multiple={multiple}
         onOpen={onOpen}
+        onBlur={onBlur}
         options={options}
         onChange={onChange}
         value={value}

@@ -58,6 +58,11 @@ const notifyError = (error) => {
   notify(errorMsg, "error");
 };
 
+/** Close all Notifications **/
+export const closeAllNotifications = () => {
+  notifyStack.close();
+};
+
 /** Success message handler */
 export const Success = ({ msg }) => {
   notify(msg, "success");
