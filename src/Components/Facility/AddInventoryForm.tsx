@@ -219,7 +219,7 @@ export const AddInventoryForm = (props: any) => {
   return (
     <div className="px-2">
       <PageTitle
-        title="Add Inventory"
+        title="Manage Inventory"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
       <div className="mt-4">
@@ -306,7 +306,7 @@ export const AddInventoryForm = (props: any) => {
                   startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
                   onClick={(e) => handleSubmit(e)}
                 >
-                  Add Inventory
+                  Add/Update Inventory
                 </Button>
               </div>
             </CardContent>
