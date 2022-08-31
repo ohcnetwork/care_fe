@@ -143,7 +143,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             )}
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap w-full gap-4">
+        <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between w-full">
           {itemData.status === "APPROVED" && (
             <button
               onClick={(e) => {
