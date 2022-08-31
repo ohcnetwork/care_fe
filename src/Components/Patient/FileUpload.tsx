@@ -4,7 +4,7 @@ import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import loadable from "@loadable/component";
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -154,6 +154,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const limit = RESULTS_PER_PAGE_LIMIT;
+
+  const filePicker = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -608,7 +610,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   // upload file on click of custom button
   const uploadFileFromCustomButton = () => {
-    document.getElementById("filePicker")?.click();
+    filePicker?.current?.click();
   };
 
   return (
@@ -804,8 +806,8 @@ export const FileUpload = (props: FileUploadProps) => {
                       </Button>
                     </div>
                     <input
-                      id="filePicker"
                       title="Choose File"
+                      ref={filePicker}
                       onChange={onFileChange}
                       type="file"
                       className="hidden w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-primary-100 file:text-primary-700 hover:file:bg-primary-300"
