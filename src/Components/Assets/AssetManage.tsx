@@ -111,48 +111,105 @@ const AssetManage = (props: AssetManageProps) => {
 
   const warrantyCard = (asset?: AssetData) => {
     return (
-      <div className="flex flex-wrap gap-8 m-3 md:m-6">
+      <div className="flex flex-wrap gap-8 my-3 mx-6">
         {/* Front Side */}
         <div className="rounded-2xl shadow-xl hover:shadow-2xl bg-fuchsia-700 hover:scale-[1.01] hover:bg-fuchsia-600 text-white p-6 w-96 h-56 transition-all">
           <div className="flex justify-end px-2">
-            <i className="font-bold text-2xl">{asset?.manufacturer}</i>
+            {asset?.manufacturer ? (
+              <i className="font-bold text-2xl">{asset?.manufacturer}</i>
+            ) : (
+              <i className="text-2xl text-fuchsia-400">Manufacturer Unknown</i>
+            )}
           </div>
           <div className="flex justify-center pt-6 flex-col">
-            <span className="uppercase tracking-widest font-bold text-xl">
-              {asset?.serial_number}
+            <span
+              className={`uppercase tracking-widest font-bold text-xl ${
+                !asset?.serial_number && "text-fuchsia-400"
+              }`}
+            >
+              {asset?.serial_number || "--"}
             </span>
             <span className="tracking-wide text-sm">SERIAL NUMBER</span>
           </div>
           <div className="flex justify-between pt-6">
             <div className=" flex flex-col justify-start">
-              <span className="uppercase tracking-widest font-bold text-xl">
+              <span
+                className={`uppercase tracking-widest font-bold text-xl ${
+                  !asset?.warranty_amc_end_of_validity && "text-fuchsia-400"
+                }`}
+              >
                 {(asset?.warranty_amc_end_of_validity &&
                   moment(asset?.warranty_amc_end_of_validity).format(
                     "DD/MM/YY"
                   )) ||
-                  ""}
+                  "--"}
               </span>
               <span className="tracking-wide text-sm">EXPIRY</span>
             </div>
             <div className=" flex flex-col items-end">
-              <span className="tracking-wide font-bold text-lg">
-                {asset?.vendor_name}
+              <span
+                className={`tracking-wide font-bold text-lg ${
+                  !asset?.serial_number && "text-fuchsia-400"
+                }`}
+              >
+                {asset?.vendor_name || "--"}
               </span>
               <span className="tracking-wide text-sm mr-2">VENDOR</span>
             </div>
           </div>
-          {/*
-              <span className="col-span-1 uppercase text-base">
-                {item.label}
-              </span>
-              <span className="col-span-2 rounded-lg px-4 py-2 bg-red-300 font-medium tracking-wide">
-                {item.value}
-              </span>*/}
         </div>
 
         {/* Back Side */}
         <div className="rounded-2xl shadow-xl hover:shadow-2xl bg-fuchsia-700 hover:scale-[1.01] hover:bg-fuchsia-600 text-white p-6 w-96 h-56 transition-all">
-          hello
+          <div className="flex flex-col px-2 items-center">
+            <span className="tracking-wide text-sm mb-6 justify-center">
+              CUSTOMER SUPPORT DETAILS
+            </span>
+            {/* Support Name */}
+            {asset?.support_name && (
+              <span className="tracking-wide font-bold text-lg mb-2">
+                {asset?.support_name}
+              </span>
+            )}
+            {/* Support Phone */}
+            {asset?.support_phone ? (
+              <a
+                href={`tel:${asset?.support_phone}`}
+                className="group flex items-center justify-between text-white rounded hover:bg-fuchsia-500 py-2 px-3 transition-all"
+              >
+                <span className="tracking-wide font-medium text-fuchsia-50">
+                  {asset?.support_phone}
+                </span>
+                <div className="ml-3 text-fuchsia-300 group-hover:text-fuchsia-100 transition-all">
+                  <span className="text-sm">CALL</span>
+                  <i className="fas fa-phone-alt ml-2" />
+                </div>
+              </a>
+            ) : (
+              <span className="tracking-wide text-sm text-fuchsia-400">
+                No Support Number Provided
+              </span>
+            )}
+            {/* Support Email */}
+            {asset?.support_email ? (
+              <a
+                href={`mailto:${asset?.support_email}`}
+                className="group flex items-center justify-between text-white rounded hover:bg-fuchsia-500 py-2 px-3 transition-all"
+              >
+                <span className="tracking-wide font-medium text-fuchsia-50">
+                  {asset?.support_email}
+                </span>
+                <div className="ml-3 text-fuchsia-300 group-hover:text-fuchsia-100 transition-all">
+                  <span className="text-sm">MAIL</span>
+                  <i className="fas fa-envelope ml-2" />
+                </div>
+              </a>
+            ) : (
+              <span className="tracking-wide text-sm text-fuchsia-400">
+                No Support Email Provided
+              </span>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -237,63 +294,103 @@ const AssetManage = (props: AssetManageProps) => {
         </div>
 
         <div className="md:flex justify-between">
-          <div className="mb-2">
+          <div className="m-2 sm:m-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {renderDetail("Location", asset?.location_object.name)}
-              {renderDetail("Facility", asset?.location_object.facility.name)}
-              {renderDetail("Type", asset?.asset_type)}
-              {renderDetail("Customer Support Name", asset?.support_name)}
-              {renderDetail("Customer Support Number", asset?.support_phone)}
-              {renderDetail("Contact Email", asset?.support_email)}
-              {renderDetail(
-                "Last serviced on",
-                moment(asset?.last_serviced_on).format("DD-MM-YYYY")
+              {/* Location Detail */}
+              <div className="flex flex-row items-center gap-4">
+                <i className="fas fa-map-marker-alt text-xl text-gray-600" />
+                <div className="flex flex-col">
+                  <span className="text-gray-700">
+                    {asset?.location_object.facility.name}
+                  </span>
+                  <span className="font-medium text-lg text-gray-900">
+                    {asset?.location_object.name}
+                  </span>
+                </div>
+              </div>
+
+              {/* Asset Type */}
+              <div className="flex flex-row items-center gap-4">
+                <i className="fas fa-cubes text-xl text-gray-600" />
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Asset Type</span>
+                  <span className="font-medium text-lg text-gray-900">
+                    {asset?.asset_type === "INTERNAL"
+                      ? "Internal Asset"
+                      : "External Asset"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Not working reason */}
+              {asset?.is_working === false && (
+                <div className="flex flex-row items-center gap-4">
+                  {/* description icon */}
+                  <i className="fas fa-exclamation-circle text-xl text-gray-600" />
+                  <div className="flex flex-col">
+                    <span className="text-gray-700">Not working reason</span>
+                    <span className="text-gray-900">
+                      {asset?.not_working_reason || "--"}
+                    </span>
+                  </div>
+                </div>
               )}
-              {renderDetail("Notes", asset?.notes)}
-              {!asset?.is_working &&
-                renderDetail("Not working reason", asset?.not_working_reason)}
+
+              <div className="md:col-span-2 lg:col-span-3 grid grid-cols-3">
+                <span className="text-gray-700 md:col-span-2 lg:col-span-3 mb-2">
+                  Service Details
+                </span>
+                {/* Last Serviced On */}
+                <div className="flex flex-row items-center gap-4">
+                  <i className="fas fa-tools text-xl text-gray-600" />
+                  <div className="flex flex-col">
+                    <span className="text-gray-700">Last serviced on</span>
+                    <span className="font-medium text-lg text-gray-900">
+                      {asset?.last_serviced_on
+                        ? moment(asset?.last_serviced_on).format("MMM DD, YYYY")
+                        : "--"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div className="flex flex-row items-center gap-4 lg:col-span-2">
+                  <i className="fas fa-sticky-note text-xl text-gray-600" />
+                  <div className="flex flex-col">
+                    <span className="text-gray-700">Notes</span>
+                    <span className="text-gray-900">
+                      {asset?.notes || "--"}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            {warrantyCard(asset)}
           </div>
-          <div className="flex mt-2 flex-col gap-1">
-            <div className="mb-3 flex justify-center">
-              <QRCode
-                bgColor="#FFFFFF"
-                fgColor="#000000"
-                level="Q"
-                size={128}
-                value={asset?.id || ""}
-              />
-            </div>
+          {warrantyCard(asset)}
+        </div>
+        <div className="flex mt-2 gap-1">
+          <button
+            onClick={() =>
+              navigate(
+                `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
+              )
+            }
+            id="update-asset"
+            className="btn-primary"
+          >
+            <i className="fas fa-pencil-alt text-white mr-4"></i>
+            Update
+          </button>
+          {asset?.asset_class && (
             <button
-              className="btn btn-primary"
-              onClick={() => setIsPrintMode(true)}
+              onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+              id="configure-asset"
+              className="btn-primary"
             >
-              Print QR
+              <i className="fas fa-cog text-white mr-4"></i>
+              Configure
             </button>
-            <button
-              onClick={() =>
-                navigate(
-                  `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
-                )
-              }
-              id="update-asset"
-              className="btn-primary btn"
-            >
-              <i className="fas fa-pencil-alt text-white mr-2"></i>
-              Update Asset
-            </button>
-            {asset?.asset_class && (
-              <button
-                onClick={() => navigate(`/assets/${asset?.id}/configure`)}
-                id="update-asset"
-                className="btn-primary btn"
-              >
-                <i className="fas fa-cog text-white mr-2"></i>
-                Configure Asset
-              </button>
-            )}
-          </div>
+          )}
         </div>
       </div>
       <div className="bg-white rounded-lg md:p-6 p-3 shadow mt-2">

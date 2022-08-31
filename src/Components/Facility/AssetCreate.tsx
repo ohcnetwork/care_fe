@@ -752,7 +752,7 @@ const AssetCreate = (props: AssetProps) => {
 
                 <div className="flex justify-end gap-x-4 gap-y-2 flex-wrap mb-8">
                   <button
-                    className="primary-button"
+                    className="btn-primary"
                     id="asset-create"
                     type="submit"
                     onClick={handleSubmit}
