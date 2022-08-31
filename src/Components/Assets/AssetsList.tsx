@@ -341,7 +341,7 @@ const AssetsList = () => {
                       </span>
                     </p>
                   </div>
-                  <div className=" px-4 md:flex justify-between pt-2">
+                  <div className="px-4 md:flex justify-between pt-2">
                     <div className="md:flex flex-wrap gap-4">
                       {asset.is_working ? (
                         <div>
