@@ -350,7 +350,7 @@ const AssetCreate = (props: AssetProps) => {
         <form onSubmit={handleSubmit}>
           <div className="shadow overflow-hidden sm:rounded-md">
             <div className="px-5 sm:px-6 bg-white">
-              <div className="grid grid-cols-1 2xl:grid-cols-2 gap-x-12 gap-y-6 items-start">
+              <div className="grid grid-cols-1 2xl:grid-cols-2 gap-x-12 items-start">
                 <div className="grid grid-cols-6 gap-x-6">
                   {/* Asset Details Section */}
                   <div className="col-span-6 flex flex-row gap-6 items-center my-6 -ml-2">

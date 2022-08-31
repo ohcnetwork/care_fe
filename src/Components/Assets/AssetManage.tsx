@@ -3,7 +3,6 @@ import React, { useState, useCallback, useEffect, ReactElement } from "react";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { AssetData, AssetTransaction } from "./AssetTypes";
-import * as Notification from "../../Utils/Notifications.js";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch } from "react-redux";
 import { Typography } from "@material-ui/core";
@@ -90,31 +89,72 @@ const AssetManage = (props: AssetManageProps) => {
     </div>
   );
 
-  const working_status = (is_working: boolean | undefined) => {
-    const bgColorClass = is_working ? "bg-green-500" : "bg-red-500";
+  const badge = (label: string, className: string) => {
     return (
       <span
-        className={`${bgColorClass} text-white text-sm px-2 py-1 uppercase rounded-full`}
+        className={`font-medium tracking-wider py-1 px-3 uppercase rounded-full shadow text-sm ${className}`}
       >
-        {!is_working && "Not "} Working
+        {label}
       </span>
     );
   };
 
-  const status = (
-    asset_status: "ACTIVE" | "TRANSFER_IN_PROGRESS" | undefined
-  ) => {
-    if (asset_status === "ACTIVE") {
-      return (
-        <span className="bg-green-500 text-white text-sm px-2 py-1 uppercase rounded-full">
-          ACTIVE
-        </span>
-      );
-    }
+  const workingStatus = (is_working: boolean | undefined) =>
+    is_working
+      ? badge("Working", "border border-green-500 text-primary-500 bg-white")
+      : badge("Not Working", "animate-pulse bg-red-500 text-white");
+
+  const status = (status: "ACTIVE" | "TRANSFER_IN_PROGRESS" | undefined) =>
+    status === "ACTIVE"
+      ? badge("Active", "border border-green-500 text-primary-500 bg-white")
+      : badge("Transfer in progress", "animate-pulse bg-yellow-500 text-white");
+
+  const warrantyCard = (asset?: AssetData) => {
     return (
-      <span className="bg-yellow-500 text-white text-sm px-2 py-1 uppercase rounded-full">
-        TRANSFER IN PROGRESS
-      </span>
+      <div className="flex flex-wrap gap-8 m-3 md:m-6">
+        {/* Front Side */}
+        <div className="rounded-2xl shadow-xl hover:shadow-2xl bg-fuchsia-700 hover:scale-[1.01] hover:bg-fuchsia-600 text-white p-6 w-96 h-56 transition-all">
+          <div className="flex justify-end px-2">
+            <i className="font-bold text-2xl">{asset?.manufacturer}</i>
+          </div>
+          <div className="flex justify-center pt-6 flex-col">
+            <span className="uppercase tracking-widest font-bold text-xl">
+              {asset?.serial_number}
+            </span>
+            <span className="tracking-wide text-sm">SERIAL NUMBER</span>
+          </div>
+          <div className="flex justify-between pt-6">
+            <div className=" flex flex-col justify-start">
+              <span className="uppercase tracking-widest font-bold text-xl">
+                {(asset?.warranty_amc_end_of_validity &&
+                  moment(asset?.warranty_amc_end_of_validity).format(
+                    "DD/MM/YY"
+                  )) ||
+                  ""}
+              </span>
+              <span className="tracking-wide text-sm">EXPIRY</span>
+            </div>
+            <div className=" flex flex-col items-end">
+              <span className="tracking-wide font-bold text-lg">
+                {asset?.vendor_name}
+              </span>
+              <span className="tracking-wide text-sm mr-2">VENDOR</span>
+            </div>
+          </div>
+          {/*
+              <span className="col-span-1 uppercase text-base">
+                {item.label}
+              </span>
+              <span className="col-span-2 rounded-lg px-4 py-2 bg-red-300 font-medium tracking-wide">
+                {item.value}
+              </span>*/}
+        </div>
+
+        {/* Back Side */}
+        <div className="rounded-2xl shadow-xl hover:shadow-2xl bg-fuchsia-700 hover:scale-[1.01] hover:bg-fuchsia-600 text-white p-6 w-96 h-56 transition-all">
+          hello
+        </div>
+      </div>
     );
   };
 
@@ -180,43 +220,40 @@ const AssetManage = (props: AssetManageProps) => {
   return (
     <div className="px-2 pb-2">
       <PageTitle
-        title={asset?.name || "Asset"}
+        title="Asset Details"
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
-      <div className="bg-white rounded-lg md:p-6 p-3 shadow">
-        <div className="text-2xl font-semibold mb-4 break-words">
-          {asset?.name}
+      <div className="bg-white rounded-lg md:rounded-xl md:p-8 p-6 shadow">
+        <div className="mb-4 flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-2xl md:text-3xl font-semibold break-words">
+              {asset?.name}
+            </span>
+            <div className="flex-1" />
+            {status(asset?.status)}
+            {workingStatus(asset?.is_working)}
+          </div>
+          <span className="text-gray-700">{asset?.description}</span>
         </div>
+
         <div className="md:flex justify-between">
           <div className="mb-2">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {renderDetail("Location", asset?.location_object.name)}
               {renderDetail("Facility", asset?.location_object.facility.name)}
-              {renderDetail("Description", asset?.description)}
-              {renderDetail("Serial Number", asset?.serial_number)}
               {renderDetail("Type", asset?.asset_type)}
-              {renderDetail("Vendor Name", asset?.vendor_name)}
               {renderDetail("Customer Support Name", asset?.support_name)}
               {renderDetail("Customer Support Number", asset?.support_phone)}
               {renderDetail("Contact Email", asset?.support_email)}
-              {renderDetail("Manufacturer", asset?.manufacturer)}
-              {renderDetail(
-                "Warranty / AMC Expiry",
-                moment(asset?.warranty_amc_end_of_validity).format("DD-MM-YYYY")
-              )}
               {renderDetail(
                 "Last serviced on",
                 moment(asset?.last_serviced_on).format("DD-MM-YYYY")
               )}
               {renderDetail("Notes", asset?.notes)}
-              {renderDetail("Status", status(asset?.status))}
-              {renderDetail(
-                "Working status",
-                working_status(asset?.is_working)
-              )}
               {!asset?.is_working &&
                 renderDetail("Not working reason", asset?.not_working_reason)}
             </div>
+            {warrantyCard(asset)}
           </div>
           <div className="flex mt-2 flex-col gap-1">
             <div className="mb-3 flex justify-center">
