@@ -1458,9 +1458,7 @@ export const PatientHome = (props: any) => {
           <div>
             <OnlineUsersSelect
               userId={assignedVolunteerObject?.id || patientData.assigned_to}
-              selectedUser={
-                assignedVolunteerObject || patientData.assigned_to_object
-              }
+              selectedUser={assignedVolunteerObject}
               onSelect={handleVolunteerSelect}
               user_type={"Volunteer"}
               outline={false}
@@ -1471,7 +1469,7 @@ export const PatientHome = (props: any) => {
           <DialogActions>
             <Button
               onClick={() => {
-                handleVolunteerSelect("");
+                handleVolunteerSelect(patientData.assigned_to_object);
                 setOpenAssignVolunteerDialog(false);
               }}
               color="primary"
