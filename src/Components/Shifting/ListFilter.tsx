@@ -348,6 +348,7 @@ export default function ListFilter(props: any) {
               <CircularProgress size={20} />
             ) : (
               <UserSelect
+                name="assigned_to"
                 multiple={false}
                 selected={filterState.assigned_user_ref}
                 setSelected={(obj) => setAssignedUser(obj)}
@@ -476,6 +477,7 @@ export default function ListFilter(props: any) {
           <span className="text-sm font-semibold">Patient Phone Number</span>
           <PhoneNumberField
             name="patient_phone_number"
+            placeholder="Patinet phone number"
             value={filterState.patient_phone_number}
             onChange={(value: string) => {
               handleChange({ target: { name: "patient_phone_number", value } });

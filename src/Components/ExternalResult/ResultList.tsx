@@ -389,6 +389,7 @@ export default function ResultList() {
             <PhoneNumberField
               value={qParams.mobile_number || "+91"}
               onChange={(value: string) => searchByPhone(value)}
+              placeholder="Search by Phone Number"
               turnOffAutoFormat={false}
               errors=""
             />

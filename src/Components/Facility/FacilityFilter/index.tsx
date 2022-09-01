@@ -112,13 +112,13 @@ function FacillityFilter(props: any) {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
+      <div className="flex flex-wrap justify-between">
+        <button className="btn btn-default mt-1" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
         <button
-          className="btn btn-default"
+          className="btn btn-default mt-1"
           onClick={(_) => {
             closeFilter();
             navigate("/facility");
@@ -127,7 +127,7 @@ function FacillityFilter(props: any) {
           <i className="fas fa-times mr-2" />
           Clear Filter
         </button>
-        <button className="btn btn-primary" onClick={applyFilter}>
+        <button className="btn btn-primary mt-1" onClick={applyFilter}>
           <i className="fas fa-check mr-2" />
           Apply
         </button>
