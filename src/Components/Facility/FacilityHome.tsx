@@ -221,8 +221,8 @@ export const FacilityHome = (props: any) => {
         open={openDeleteDialog}
         onClose={handleDeleteClose}
       >
-        <DialogTitle className="flex justify-center bg-primary-100">
-          Are you sure you want to delete {facilityData.name || "Facility"}
+        <DialogTitle className="flex justify-center bg-red-100">
+          Are you sure you want to delete {facilityData.name || "Facility"}?
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -230,16 +230,21 @@ export const FacilityHome = (props: any) => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <button onClick={handleDeleteClose} className="btn btn-primary">
-            Cancel
-          </button>
-          <button
-            onClick={handleDeleteSubmit}
-            id="facility-delete-confirm"
-            className="btn btn-danger"
-          >
-            Delete
-          </button>
+          <div className="flex flex-col md:flex-row gap-2 w-full justify-between">
+            <button
+              onClick={handleDeleteClose}
+              className="btn btn-primary w-full md:w-auto"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteSubmit}
+              id="facility-delete-confirm"
+              className="btn btn-danger w-full md:w-auto"
+            >
+              Delete
+            </button>
+          </div>
         </DialogActions>
       </Dialog>
       <div className="bg-white rounded-lg p-3 md:p-6 shadow">
