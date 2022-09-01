@@ -76,7 +76,7 @@ type FormDetails = {
   admission_date: string;
   discharge_date: null;
   referred_to: string;
-  diagnosis: string;
+  diagnosis: string[];
   verified_by: string;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
@@ -86,7 +86,7 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: PrescriptionType[];
-  prn_prescription : PRNPrescriptionType[],
+  prn_prescription: PRNPrescriptionType[];
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
@@ -117,7 +117,7 @@ const initForm: FormDetails = {
   admission_date: new Date().toISOString(),
   discharge_date: null,
   referred_to: "",
-  diagnosis: "",
+  diagnosis: [],
   verified_by: "",
   is_kasp: "false",
   kasp_enabled_date: null,
@@ -127,7 +127,7 @@ const initForm: FormDetails = {
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
-  prn_prescription : [],
+  prn_prescription: [],
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
@@ -199,7 +199,9 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
+    []
+  );
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
@@ -232,7 +234,11 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
       setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(!Array.isArray(res.data.prn_prescription) ? [] : res.data.prn_prescription);
+      setPRNAdvice(
+        !Array.isArray(res.data.prn_prescription)
+          ? []
+          : res.data.prn_prescription
+      );
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -250,7 +256,9 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category ? res.data.category : "",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
-            diagnosis: res.data.diagnosis ? res.data.diagnosis : "",
+            diagnosis: !Array.isArray(res.data.diagnosis)
+              ? []
+              : res.data.diagnosis,
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
@@ -391,13 +399,14 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
-        case "prn_prescription":
+        case "prn_prescription": {
           let invalid = false;
-          for (let f of PRNAdvice) {
+          for (const f of PRNAdvice) {
             if (
               !f.dosage?.replace(/\s/g, "").length ||
               !f.medicine?.replace(/\s/g, "").length ||
-              f.indicator === "" || f.indicator === " "
+              f.indicator === "" ||
+              f.indicator === " "
             ) {
               invalid = true;
               break;
@@ -409,7 +418,7 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-
+        }
         default:
           return;
       }
@@ -452,7 +461,7 @@ export const ConsultationForm = (props: any) => {
         diagnosis: state.form.diagnosis,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
-        prn_prescription : PRNAdvice,
+        prn_prescription: PRNAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -874,19 +883,21 @@ export const ConsultationForm = (props: any) => {
                 <InputLabel id="diagnosis-label">Diagnosis</InputLabel>
                 <DiagnosisSelect
                   name="diagnosis"
-                  selected={{
-                    id: state.form.diagnosis,
-                    label: state.form.diagnosis,
-                  }}
-                  setSelected={(diagnosis: any) =>
+                  selected={state.form.diagnosis.map((diagnosis) => ({
+                    id: diagnosis,
+                    label: diagnosis,
+                  }))}
+                  setSelected={(selected: any) => {
                     dispatch({
                       type: "set_form",
                       form: {
                         ...state.form,
-                        diagnosis: diagnosis?.label || "",
+                        diagnosis: selected.map(
+                          (diagnosis: any) => diagnosis.id
+                        ),
                       },
-                    })
-                  }
+                    });
+                  }}
                 />
               </div>
 

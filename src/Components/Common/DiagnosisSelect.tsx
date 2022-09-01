@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { listICD11Diagnosis } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "./HelperInputFields";
@@ -18,14 +18,13 @@ interface DiagnosisSelectProps {
   facility?: string;
   location?: string;
   showAll?: boolean;
-  selected: DiagnosisModel | null;
-  setSelected: (selected: DiagnosisModel | null) => void;
+  selected: DiagnosisModel[] | null;
+  setSelected: (selected: DiagnosisModel | DiagnosisModel[] | null) => void;
 }
 
 export const DiagnosisSelect = (props: DiagnosisSelectProps) => {
   const { name, selected, setSelected, margin, errors, className = "" } = props;
   const dispatchAction: any = useDispatch();
-  const [searchText, setSearchText] = useState(selected?.label || "");
   const [isLoading, setIsLoading] = useState(false);
   const [diagnosisList, setDiagnosisList] = useState<Array<DiagnosisModel>>([]);
 
@@ -34,13 +33,11 @@ export const DiagnosisSelect = (props: DiagnosisSelectProps) => {
       setDiagnosisList([]);
       setIsLoading(false);
     }
-    setSearchText(current?.label || "");
     setSelected(current);
   };
 
   const handelSearch = (e: any) => {
     setIsLoading(true);
-    setSearchText(e.target.value);
     fetchDiagnosis(e.target.value);
     setIsLoading(false);
   };
@@ -64,22 +61,18 @@ export const DiagnosisSelect = (props: DiagnosisSelectProps) => {
     [dispatchAction]
   );
 
-  useEffect(() => {
-    fetchDiagnosis(selected?.label || "");
-  }, []);
-
   return (
     <AutoCompleteAsyncField
       name={name}
+      multiple={true}
       variant="outlined"
       margin={margin}
-      value={{ ...selected, label: searchText || selected?.label }}
+      defaultValue={selected}
       options={diagnosisList}
       onSearch={handelSearch}
       onChange={(e: object, selected: DiagnosisModel) =>
         handleValueChange(selected)
       }
-      onBlur={() => setSearchText("")}
       loading={isLoading}
       placeholder="Search diagnosis"
       noOptionsText="No results found"
