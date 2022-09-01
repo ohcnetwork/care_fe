@@ -342,7 +342,7 @@ const AssetsList = () => {
                     </p>
                   </div>
                   <div className="md:flex justify-between pt-2">
-                    <div className="md:flex flex-wrap">
+                    <div className="md:flex flex-wrap px-4">
                       {asset.is_working ? (
                         <Badge color="green" startIcon="cog" text="Working" />
                       ) : (
