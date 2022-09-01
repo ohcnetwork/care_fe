@@ -715,9 +715,19 @@ export const PatientHome = (props: any) => {
                         {patientData?.created_by?.first_name}{" "}
                         {patientData?.created_by?.last_name}
                       </div>
-                      <div className="text-xs">
-                        {patientData.created_date &&
-                          moment(patientData.created_date).format("lll")}
+                      <div className="text-xs flex justify-center">
+                        {patientData.created_date && (
+                          <div className="flex flex-col md:flex-row gap-1">
+                            <div>
+                              {moment(patientData.created_date).format("ll")}
+                            </div>
+                            <div>
+                              {moment(patientData.created_date).format(
+                                "hh:mm A"
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -730,9 +740,19 @@ export const PatientHome = (props: any) => {
                         {patientData?.last_edited?.first_name}{" "}
                         {patientData?.last_edited?.last_name}
                       </div>
-                      <div className="text-xs">
-                        {patientData.modified_date &&
-                          moment(patientData.modified_date).format("lll")}
+                      <div className="text-xs flex justify-center">
+                        {patientData.modified_date && (
+                          <div className="flex flex-col md:flex-row gap-1">
+                            <div>
+                              {moment(patientData.modified_date).format("ll")}
+                            </div>
+                            <div>
+                              {moment(patientData.modified_date).format(
+                                "hh:mm A"
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
