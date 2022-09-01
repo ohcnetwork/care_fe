@@ -143,7 +143,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             )}
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap w-full gap-4">
+        <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between w-full">
           {itemData.status === "APPROVED" && (
             <button
               onClick={(e) => {
@@ -163,7 +163,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </button>
           <button
             onClick={(e) => navigate(`/sample/${itemData.id}`)}
-            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
           >
             Sample Report
           </button>
