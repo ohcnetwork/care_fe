@@ -1,15 +1,15 @@
-import React, { useState, useCallback, useEffect, ReactElement } from "react";
+import { useState, useCallback, useEffect, ReactElement } from "react";
 
 import loadable from "@loadable/component";
 import moment from "moment";
 import { AssetData, AssetTransaction } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch } from "react-redux";
-import { Typography } from "@material-ui/core";
 import { getAsset, listAssetTransaction } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
+import AssetWarrantyCard from "./AssetWarrantyCard";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -109,112 +109,6 @@ const AssetManage = (props: AssetManageProps) => {
       ? badge("Active", "border border-green-500 text-primary-500 bg-white")
       : badge("Transfer in progress", "animate-pulse bg-yellow-500 text-white");
 
-  const warrantyCard = (asset?: AssetData) => {
-    return (
-      <div className="flex flex-wrap gap-8 my-3 mx-6">
-        {/* Front Side */}
-        <div className="rounded-2xl shadow-xl hover:shadow-2xl bg-gray-700 hover:scale-[1.01] hover:bg-gray-600 text-white p-6 w-96 h-56 transition-all">
-          <div className="flex justify-end px-2">
-            {asset?.manufacturer ? (
-              <i className="font-bold text-2xl">{asset?.manufacturer}</i>
-            ) : (
-              <i className="text-2xl text-gray-400">Manufacturer Unknown</i>
-            )}
-          </div>
-          <div className="flex justify-center pt-6 flex-col">
-            <span
-              className={`uppercase tracking-widest font-bold text-xl ${
-                !asset?.serial_number && "text-gray-400"
-              }`}
-            >
-              {asset?.serial_number || "--"}
-            </span>
-            <span className="tracking-wide text-sm">SERIAL NUMBER</span>
-          </div>
-          <div className="flex justify-between pt-6">
-            <div className=" flex flex-col justify-start">
-              <span
-                className={`uppercase tracking-widest font-bold text-xl ${
-                  !asset?.warranty_amc_end_of_validity && "text-gray-400"
-                }`}
-              >
-                {(asset?.warranty_amc_end_of_validity &&
-                  moment(asset?.warranty_amc_end_of_validity).format(
-                    "DD/MM/YY"
-                  )) ||
-                  "--"}
-              </span>
-              <span className="tracking-wide text-sm">EXPIRY</span>
-            </div>
-            <div className=" flex flex-col items-end">
-              <span
-                className={`tracking-wide font-bold text-lg ${
-                  !asset?.serial_number && "text-gray-400"
-                }`}
-              >
-                {asset?.vendor_name || "--"}
-              </span>
-              <span className="tracking-wide text-sm mr-2">VENDOR</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Back Side */}
-        <div className="rounded-2xl shadow-xl hover:shadow-2xl bg-gray-700 hover:scale-[1.01] hover:bg-gray-600 text-white p-6 w-96 h-56 transition-all">
-          <div className="flex flex-col px-2 items-center">
-            <span className="tracking-wide text-sm mb-6 justify-center">
-              CUSTOMER SUPPORT DETAILS
-            </span>
-            {/* Support Name */}
-            {asset?.support_name && (
-              <span className="tracking-wide font-bold text-lg mb-2">
-                {asset?.support_name}
-              </span>
-            )}
-            {/* Support Phone */}
-            {asset?.support_phone ? (
-              <a
-                href={`tel:${asset?.support_phone}`}
-                className="group flex items-center justify-between text-white rounded hover:bg-gray-500 py-2 px-3 transition-all"
-              >
-                <span className="tracking-wide font-medium text-gray-50">
-                  {asset?.support_phone}
-                </span>
-                <div className="ml-3 text-gray-300 group-hover:text-gray-100 transition-all">
-                  <span className="text-sm">CALL</span>
-                  <i className="fas fa-phone-alt ml-2" />
-                </div>
-              </a>
-            ) : (
-              <span className="tracking-wide text-sm text-gray-400">
-                No Support Number Provided
-              </span>
-            )}
-            {/* Support Email */}
-            {asset?.support_email ? (
-              <a
-                href={`mailto:${asset?.support_email}`}
-                className="group flex items-center justify-between text-white rounded hover:bg-gray-500 py-2 px-3 transition-all"
-              >
-                <span className="tracking-wide font-medium text-gray-50">
-                  {asset?.support_email}
-                </span>
-                <div className="ml-3 text-gray-300 group-hover:text-gray-100 transition-all">
-                  <span className="text-sm">MAIL</span>
-                  <i className="fas fa-envelope ml-2" />
-                </div>
-              </a>
-            ) : (
-              <span className="tracking-wide text-sm text-gray-400">
-                No Support Email Provided
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const populateTableRows = (txns: AssetTransaction[]) => {
     if (txns.length > 0) {
       setTransactionDetails(
@@ -265,15 +159,6 @@ const AssetManage = (props: AssetManageProps) => {
   if (isLoading) return <Loading />;
   if (isPrintMode) return <PrintPreview />;
 
-  const renderDetail = (key: string, value: any) => {
-    return (
-      <Typography className="flex flex-col">
-        <span className="font-bold">{key}</span>
-        <span>{value || "--"}</span>
-      </Typography>
-    );
-  };
-
   return (
     <div className="px-2 pb-2">
       <PageTitle
@@ -293,7 +178,7 @@ const AssetManage = (props: AssetManageProps) => {
           <span className="text-gray-700">{asset?.description}</span>
         </div>
 
-        <div className="md:flex justify-between">
+        <div className="2xl:flex justify-between">
           <div className="m-2 sm:m-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Location Detail */}
@@ -366,7 +251,12 @@ const AssetManage = (props: AssetManageProps) => {
               </div>
             </div>
           </div>
-          {warrantyCard(asset)}
+          {asset && (
+            <div className="flex flex-wrap gap-8 my-8 justify-center 2xl:justify-end">
+              <AssetWarrantyCard asset={asset} view="front" />
+              <AssetWarrantyCard asset={asset} view="back" />
+            </div>
+          )}
         </div>
         <div className="flex mt-2 gap-1">
           <button
