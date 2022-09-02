@@ -15,18 +15,6 @@ type Props<T> = {
   position?: string;
 };
 
-// type SelectOption<T> = {
-//   label: React.ReactNode;
-//   description?: React.ReactNode;
-//   icon?: React.ReactNode;
-//   value: T;
-// };
-
-// type SelectProps<T> = {
-//   value: T;
-//   children: SelectOption<T>[];
-// };
-
 export default function SelectMenu<T>(props: Props<T>) {
   const options = props.options.map((option) => {
     return {
