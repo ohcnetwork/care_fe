@@ -5,7 +5,7 @@ export const medicines = require("./assets/medicines");
 const frequency = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
 
 export const routes = ["Oral", "IV", "IM", "S/C"]
-export const units = ["mg", "ml", "drops", "tsp"]
+export const units = ["mg", "ml", "drops", "ampule", "tsp"]
 
 export type PrescriptionType = {
     medicine?: string; 
