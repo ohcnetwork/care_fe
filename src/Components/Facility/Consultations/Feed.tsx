@@ -44,7 +44,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     accessKey: "",
   });
   const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);

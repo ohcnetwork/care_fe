@@ -721,7 +721,7 @@ export const editInvestigation = (
 // ICD11
 export const listICD11Diagnosis = (params: object, key: string) => {
   return fireRequest("listICD11Diagnosis", [], params, null, key);
-}
+};
 
 // Resource
 export const createResource = (params: object) => {
@@ -763,6 +763,8 @@ export const updateAsset = (id: string, params: object) =>
   fireRequest("updateAsset", [], params, { external_id: id });
 export const partialUpdateAsset = (id: string, params: object) =>
   fireRequest("partialUpdateAsset", [], params, { external_id: id });
+export const operateAsset = (id: string, params: object) =>
+  fireRequest("operateAsset", [], params, { external_id: id });
 
 export const listAssetTransaction = (params: object) =>
   fireRequest("listAssetTransaction", [], params);
