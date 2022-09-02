@@ -52,9 +52,14 @@ import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder, { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
+import PRNPrescriptionBuilder, {
+  PRNPrescriptionType,
+} from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { DiagnosisSelect } from "../Common/DiagnosisSelect";
+import goBack from "../../Utils/goBack";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -86,7 +91,7 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: PrescriptionType[];
-  prn_prescription : PRNPrescriptionType[],
+  prn_prescription: PRNPrescriptionType[];
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
@@ -127,7 +132,7 @@ const initForm: FormDetails = {
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
-  prn_prescription : [],
+  prn_prescription: [],
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
@@ -185,10 +190,6 @@ const categoryChoices = [
   ...PATIENT_CATEGORY,
 ];
 
-const goBack = () => {
-  window.history.go(-1);
-};
-
 const scrollTo = (id: any) => {
   const element = document.querySelector(`#${id}-div`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -199,7 +200,9 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
+    []
+  );
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
@@ -232,7 +235,11 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
       setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(!Array.isArray(res.data.prn_prescription) ? [] : res.data.prn_prescription);
+      setPRNAdvice(
+        !Array.isArray(res.data.prn_prescription)
+          ? []
+          : res.data.prn_prescription
+      );
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -397,7 +404,8 @@ export const ConsultationForm = (props: any) => {
             if (
               !f.dosage?.replace(/\s/g, "").length ||
               !f.medicine?.replace(/\s/g, "").length ||
-              f.indicator === "" || f.indicator === " "
+              f.indicator === "" ||
+              f.indicator === " "
             ) {
               invalid = true;
               break;
@@ -452,7 +460,7 @@ export const ConsultationForm = (props: any) => {
         diagnosis: state.form.diagnosis,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
-        prn_prescription : PRNAdvice,
+        prn_prescription: PRNAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:

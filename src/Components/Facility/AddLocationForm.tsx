@@ -15,12 +15,9 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
+import goBack from "../../Utils/goBack";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const goBack = () => {
-  window.history.go(-1);
-};
 
 interface LocationFormProps {
   facilityId: string;
@@ -142,7 +139,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={goBack}
+                  onClick={() => goBack()}
                 >
                   Cancel
                 </Button>

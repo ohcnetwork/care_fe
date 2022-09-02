@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useReducer } from "react";
+import { useCallback, useState, useReducer } from "react";
 import {
   Button,
   CardContent,
@@ -20,12 +20,9 @@ import {
   externalResult,
   partialUpdateExternalResult,
 } from "../../Redux/actions";
-import {
-  MultilineInputField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
+import goBack from "../../Utils/goBack";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -190,10 +187,6 @@ export default function UpdateResult(props: any) {
     return true;
   };
 
-  const goBack = () => {
-    window.history.go(-1);
-  };
-
   const handleChange = (e: any) => {
     const form = { ...state.form };
     form[e.target.name] = e.target.value;
@@ -337,7 +330,7 @@ export default function UpdateResult(props: any) {
               variant="contained"
               type="button"
               className="w-full md:w-auto"
-              onClick={goBack}
+              onClick={() => goBack()}
             >
               Cancel
             </Button>

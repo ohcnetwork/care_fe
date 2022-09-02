@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useEffect } from "react";
+import { useReducer, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
@@ -31,6 +31,7 @@ import {
 import { phonePreg } from "../../Common/validation";
 
 import { createShift, getPatient } from "../../Redux/actions";
+import goBack from "../../Utils/goBack";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -88,10 +89,6 @@ const initError = Object.assign(
 const initialState = {
   form: { ...initForm },
   errors: { ...initError },
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 export const ShiftCreate = (props: patientShiftProps) => {
@@ -433,7 +430,11 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div className="md:col-span-2 flex justify-between mt-4">
-                <Button color="default" variant="contained" onClick={goBack}>
+                <Button
+                  color="default"
+                  variant="contained"
+                  onClick={() => goBack()}
+                >
                   Cancel
                 </Button>
                 <Button

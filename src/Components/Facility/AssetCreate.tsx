@@ -29,6 +29,7 @@ import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
 import SelectMenu from "../Common/components/SelectMenu";
+import goBack from "../../Utils/goBack";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError: any = {
@@ -66,10 +67,6 @@ const asset_create_reducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 const AssetCreate = (props: AssetProps) => {

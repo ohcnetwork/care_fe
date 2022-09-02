@@ -13,6 +13,7 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
+import goBack from "../../Utils/goBack";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -43,10 +44,6 @@ const inventoryFormReducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 export const AddInventoryForm = (props: any) => {
@@ -294,7 +291,7 @@ export const AddInventoryForm = (props: any) => {
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={goBack}
+                  onClick={() => goBack()}
                 >
                   Cancel
                 </Button>

@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useCallback, useEffect } from "react";
+import { useReducer, useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -34,6 +34,7 @@ import {
   FormControlLabel,
   Button,
 } from "@material-ui/core";
+import goBack from "../../Utils/goBack";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -81,10 +82,6 @@ const initError = Object.assign(
 const initialState = {
   form: { ...initForm },
   errors: { ...initError },
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
@@ -457,7 +454,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   color="default"
                   variant="contained"
                   className="w-full md:w-auto"
-                  onClick={goBack}
+                  onClick={() => goBack()}
                 >
                   Cancel
                 </Button>
