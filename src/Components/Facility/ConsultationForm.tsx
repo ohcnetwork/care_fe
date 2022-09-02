@@ -843,6 +843,15 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.consultation_notes}
                 />
               </div>
+              <div id="investigation-div" className="mt-4">
+                <InputLabel>Investigation Suggestion</InputLabel>
+                <InvestigationBuilder
+                  investigations={InvestigationAdvice}
+                  setInvestigations={setInvestigationAdvice}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.investigation} />
+              </div>
               <div id="discharge_advice-div" className="mt-4">
                 <InputLabel>Prescription Medication</InputLabel>
                 {/*<PrescriptionBuilderOld
@@ -1073,15 +1082,6 @@ export const ConsultationForm = (props: any) => {
                   (Number(state.form.weight) * Number(state.form.height)) / 3600
                 ).toFixed(2)}{" "}
                 m<sup>2</sup>
-              </div>
-              <div id="investigation-div" className="mt-10">
-                <InputLabel>Investigation Suggestion</InputLabel>
-                <InvestigationBuilder
-                  investigations={InvestigationAdvice}
-                  setInvestigations={setInvestigationAdvice}
-                />
-                <br />
-                <ErrorHelperText error={state.errors.investigation} />
               </div>
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
