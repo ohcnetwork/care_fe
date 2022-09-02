@@ -1,7 +1,11 @@
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { listInvestigationGroups, listInvestigations } from "../../../Redux/actions";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
+import { PrescriptionMultiDropdown } from "./PrescriptionMultiselect";
 
 export type InvestigationType = {
-    type?: any; 
+    type?: string[]; 
     repetitive?: boolean;
     time? : string;
     frequency? : string; 
@@ -18,13 +22,78 @@ export interface InvestigationBuilderProps<T> {
 export default function InvestigationBuilder(props : InvestigationBuilderProps<InvestigationType>){
 
     const {investigations, setInvestigations} = props;
+    const [investigationsList, setInvestigationsList] = useState<string[]>([]);
+    const dispatch: any = useDispatch();
+
+    const additionalInvestigations = [
+        [
+            "Vitals",
+            [
+                "Temp",
+                "Blood",
+                "Pressure",
+                "Respiratory Rate", 
+                "Pulse Rate"
+            ]
+        ],
+        [
+            "ABG",
+            [
+                "PO2",
+                "PCO2", 
+                "PH", 
+                "HCO3", 
+                "Base excess",
+                "Lactate", 
+                "Sodium", 
+                "Potassium"
+            ]
+        ]
+    ]
 
     const setItem = (object : InvestigationType, i : number) => {
         setInvestigations(investigations.map((investigation, index)=>
             index === i ? object : investigation
         ))
     }
+
+    useEffect(()=>{
+        loadInvestigations();
+    }, [])
+
+    const loadInvestigations = async () => {
+        const invs = await fetchInvestigations();
+        const groups = await fetchInvestigationGroups();
+
+        let additionalStrings : string[] = [];
+        additionalInvestigations.forEach((investigation)=>{
+            additionalStrings.push((investigation[0] as string) + " (GROUP)");
+            additionalStrings = [...additionalStrings, ...((investigation[1] as string[]).map((i : any) => i + " -- ( " + investigation[0] + " )"))]
+        });
+
+        setInvestigationsList([
+            ...groups,
+            ...invs,
+            ...additionalStrings
+        ])
+    }
+
+    const fetchInvestigations = async () => {
+        const res = await dispatch(listInvestigations({}));
+        if (res && res.data) {
+             return res.data.results.map((investigation : any) => investigation.name + " -- " + investigation.groups.map((group : any) => " ( " + group.name + " ) ").join(", "));
+        }
+        return [];
+    };
     
+    const fetchInvestigationGroups = async () => {
+        const res = await dispatch(listInvestigationGroups({}));
+        if (res && res.data) {
+            return res.data.results.map((group : any) => group.name + " (GROUP)");
+        }
+        return [];
+    };
+
     return (
         <div className="mt-2">
             {
@@ -37,7 +106,7 @@ export default function InvestigationBuilder(props : InvestigationBuilderProps<I
                         },i)
                     }
 
-                    const setType = (type : string) => {
+                    const setType = (type : string[]) => {
                         setItem({
                             ...investigation,
                             type
@@ -50,78 +119,83 @@ export default function InvestigationBuilder(props : InvestigationBuilderProps<I
                                 <div
                                     className="w-full"    
                                 >
-                                    Investigation Recommended
-                                    <PrescriptionDropdown
-                                        placeholder="Investigation"
-                                        options={["ABP"]}
-                                        value={investigation.type || ""}
-                                        setValue={setType}
+                                    Investigations Recommended
+                                    <PrescriptionMultiDropdown
+                                        options={investigationsList}
+                                        placeholder="Search Investigations"
+                                        selectedValues={investigation.type?.constructor === Array ? investigation.type : []}
+                                        setSelectedValues={setType}
                                     />
                                 </div>
-                                <div
-                                    className="shrink-0"    
-                                >
-                                    Repetitive
-                                    <br />
-                                    <input 
-                                        type="checkbox"
-                                        className="mt-2 inline-block"
-                                        checked={investigation?.repetitive || false}
-                                        onChange={(e)=>{
-                                            setItem({
-                                                ...investigation,
-                                                repetitive: e.currentTarget.checked
-                                            }, i)
-                                        }}
-                                    />
-                                </div>
-                                {investigation.repetitive ? (
-                                    <div
-                                        className="w-[80px] shrink-0"    
-                                    >
-                                        Frequency
-                                        <PrescriptionDropdown
-                                            placeholder="Frequency"
-                                            options={FREQUENCY}
-                                            value={investigation.frequency || ""}
-                                            setValue={setFrequency}
-                                        />
+                                <div className="flex flex-col w-full md:w-[250px] shrink-0">
+                                    <div className="flex gap-2">
+                                        <div
+                                            className="shrink-0"    
+                                        >
+                                            Repetitive
+                                            <br />
+                                            <input 
+                                                type="checkbox"
+                                                className="mt-2 inline-block"
+                                                checked={investigation?.repetitive || false}
+                                                onChange={(e)=>{
+                                                    setItem({
+                                                        ...investigation,
+                                                        repetitive: e.currentTarget.checked
+                                                    }, i)
+                                                }}
+                                            />
+                                        </div>
+                                        {investigation.repetitive ? (
+                                            <div
+                                                className="w-full"    
+                                            >
+                                                Frequency
+                                                <PrescriptionDropdown
+                                                    placeholder="Frequency"
+                                                    options={FREQUENCY}
+                                                    value={investigation.frequency || ""}
+                                                    setValue={setFrequency}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="w-full"
+                                            >
+                                                Time
+                                                <input
+                                                    type="datetime-local"
+                                                    className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                                                    value={investigation.time || ""}
+                                                    onChange={(e)=>{
+                                                        setItem({
+                                                            ...investigation,
+                                                            time: e.currentTarget.value
+                                                        }, i)
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                ) : (
                                     <div
-                                        className="w-[170px] shrink-0"
+                                        className="w-full"    
                                     >
-                                        Time
+                                        Notes
                                         <input
-                                            type="datetime-local"
+                                            type="text"
                                             className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                                            value={investigation.time || ""}
+                                            placeholder="Notes"
+                                            value={investigation.notes || ""}
                                             onChange={(e)=>{
                                                 setItem({
                                                     ...investigation,
-                                                    time: e.currentTarget.value
+                                                    notes : e.currentTarget.value
                                                 }, i)
                                             }}
                                         />
                                     </div>
-                                )}
-                                <div
-                                    className="w-full"    
-                                >
-                                    Notes
-                                    <input
-                                        type="text"
-                                        className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                                        placeholder="Notes"
-                                        value={investigation.notes || ""}
-                                        onChange={(e)=>{
-                                            setItem({
-                                                ...investigation,
-                                                notes : e.currentTarget.value
-                                            }, i)
-                                        }}
-                                    />
                                 </div>
+                                
                                 <button
                                     type="button"
                                     className="text-gray-400 text-base transition hover:text-red-500"

@@ -1,0 +1,76 @@
+import moment from "moment";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { getConsultation } from "../../../Redux/actions";
+import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
+
+export default function ViewInvestigationSuggestions(props: {
+    consultationId : any,
+}) {
+
+    const { consultationId } = props;
+    const dispatch = useDispatch();
+
+    const [investigations, setInvestigations] = useState<InvestigationType[] | null>(null);
+
+    useEffect(()=>{
+        getConsultationData();
+    },[consultationId])
+
+    const getConsultationData = async () => {
+        const res = (await dispatch(getConsultation(consultationId))) as any;
+        setInvestigations(res.data.investigation || []);
+    }
+
+    return (
+        <div className="mt-5">
+            <h3>
+                Investigation Suggestions
+            </h3>
+            <table className="w-full bg-white shadow rounded-xl mt-3">
+                <thead className="text-left bg-gray-200">
+                    <tr>
+                        <th className="p-4">
+                            Investigations
+                        </th>
+                        <th className="p-4">
+                            To be conducted...
+                        </th>
+                        <th className="p-4">
+                            Notes
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {investigations?.map((investigation, index) => (
+                        <tr key={index} className="border-b border-b-gray-200">
+                            <td className="p-4">
+                                <ul className="list-decimal ml-4">
+                                    {investigation.type?.map((type, index) => (
+                                        <li key={index}>
+                                            {type}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </td>
+                            <td className="p-4">
+                                {investigation.repetitive ? (
+                                    <div>
+                                        after every {investigation.frequency}
+                                    </div>
+                                ) : (
+                                    <div>
+                                        at {moment(investigation.time).format("h:mm a, MMM D YYYY")}
+                                    </div>
+                                )}
+                            </td>
+                            <td className="p-4">
+                                {investigation.notes}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    )
+}

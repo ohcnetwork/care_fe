@@ -420,8 +420,7 @@ export const ConsultationForm = (props: any) => {
           let invalid = false;
           for (let f of InvestigationAdvice) {
             if (
-              !f.type?.replace(/\s/g, "").length ||
-              !f.frequency?.replace(/\s/g, "").length ||
+              f.type?.length === 0 ||
               (f.repetitive ? !f.frequency?.replace(/\s/g, "").length : !f.time?.replace(/\s/g, "").length)
             ) {
               invalid = true;
@@ -844,7 +843,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="investigation-div" className="mt-4">
-                <InputLabel>Investigation Suggestion</InputLabel>
+                <InputLabel>Investigation Suggestions</InputLabel>
                 <InvestigationBuilder
                   investigations={InvestigationAdvice}
                   setInvestigations={setInvestigationAdvice}
