@@ -784,19 +784,25 @@ export default function ShiftDetails(props: { id: string }) {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={() => setOpenDeleteShiftDialog(false)}
-                      color="primary"
-                    >
-                      No
-                    </Button>
-                    <Button
-                      color="primary"
-                      onClick={handleShiftDelete}
-                      autoFocus
-                    >
-                      Yes
-                    </Button>
+                    <div className="flex flex-col md:flex-row w-full gap-2">
+                      <div>
+                        <button
+                          onClick={() => setOpenDeleteShiftDialog(false)}
+                          className="btn btn-primary w-full md:w-auto"
+                        >
+                          No
+                        </button>
+                      </div>
+                      <div>
+                        <button
+                          onClick={handleShiftDelete}
+                          id="facility-delete-confirm"
+                          className="btn btn-danger w-full md:w-auto"
+                        >
+                          Yes
+                        </button>
+                      </div>
+                    </div>
                   </DialogActions>
                 </Dialog>
               </div>
