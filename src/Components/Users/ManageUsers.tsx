@@ -363,7 +363,7 @@ export default function ManageUsers() {
     if (user.is_superuser) return true;
     if (
       currentUserLevel >= STATE_ADMIN_LEVEL &&
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
+      currentUserLevel !== STATE_READ_ONLY_ADMIN_LEVEL
     )
       return user.state_object?.id === currentUser?.data?.state;
     if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel > level)
