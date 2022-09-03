@@ -5,12 +5,7 @@ import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications";
-import {
-  getConsultation,
-  getDailyReport,
-  getPatient,
-  listAssetBeds,
-} from "../../Redux/actions";
+import { getConsultation, getPatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel } from "./models";
 import { PatientModel } from "../Patient/models";
@@ -35,11 +30,10 @@ import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
-import LiveFeed from "./Consultations/LiveFeed";
 import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
 import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
-import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
 import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
+import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -77,9 +71,6 @@ export const ConsultationDetails = (props: any) => {
     {}
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [cameraAsset, setCameraAsset] = useState({});
-  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState({});
-  const [cameraConfig, setCameraConfig] = useState({});
   const [open, setOpen] = useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
@@ -217,10 +208,7 @@ export const ConsultationDetails = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [res, dailyRounds] = await Promise.all([
-        dispatch(getConsultation(consultationId)),
-        dispatch(getDailyReport({ limit: 1, offset: 0 }, { consultationId })),
-      ]);
+      const res = await dispatch(getConsultation(consultationId));
       if (!status.aborted) {
         if (res && res.data) {
           const data: ConsultationModel = {
@@ -243,6 +231,9 @@ export const ConsultationDetails = (props: any) => {
                 ? []
                 : res.data.discharge_advice;
           }
+          if (!Array.isArray(res.data.prn_prescription)) {
+            data.prn_prescription = [];
+          }
           setConsultationData(data);
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
@@ -264,26 +255,9 @@ export const ConsultationDetails = (props: any) => {
             };
             setPatientData(data);
           }
+        } else {
+          navigate("/not-found");
         }
-        const current_bed = (res as ConsultationModel)?.current_bed?.bed_object
-          ?.id;
-        if (dailyRounds?.data?.results?.length && current_bed) {
-          const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
-          if (bedAssets?.data?.results?.length) {
-            const { local_ip_address, camera_access_key, middleware_hostname } =
-              bedAssets.data.results[0].asset_object.meta;
-            setCameraAsset({
-              id: bedAssets.data.results[0].asset_object.id,
-              hostname: local_ip_address,
-              username: camera_access_key.split(":")[0],
-              password: camera_access_key.split(":")[1],
-              port: 80,
-            });
-            setCameraMiddlewareHostname(middleware_hostname);
-            setCameraConfig(bedAssets.data.results[0].meta);
-          }
-        }
-
         setIsLoading(false);
       }
     },
@@ -703,7 +677,7 @@ export const ConsultationDetails = (props: any) => {
                   <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
                       <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                        Advice
+                        General Instructions
                       </h3>
                       <div className="mt-2">
                         <ReadMore
@@ -888,11 +862,19 @@ export const ConsultationDetails = (props: any) => {
           </div>
         )}
         {tab === "FEED" && (
-          <LiveFeed
-            asset={cameraAsset}
-            middlewareHostname={cameraMiddlewareHostname}
-            config={cameraConfig}
-          />
+          <div>
+            <PageTitle
+              title="Camera Feed"
+              breadcrumbs={false}
+              hideBack={true}
+              focusOnLoad={true}
+            />
+            <Feed
+              facilityId={facilityId}
+              patientId={patientId}
+              consultationId={consultationId}
+            />
+          </div>
         )}
         {tab === "SUMMARY" && (
           <div className="mt-4">
@@ -979,6 +961,79 @@ export const ConsultationDetails = (props: any) => {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
                                   {med.notes}
+                                </td>
+                              </tr>
+                            )
+                          )}
+                        </tbody>
+                      </table>
+                      {consultationData.discharge_advice.length === 0 && (
+                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
+                          No data found
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {consultationData.prn_prescription && (
+              <div className="mt-4">
+                <h3 className="flex text-lg font-semibold leading-relaxed text-gray-900">
+                  PRN Prescription
+                  <div className="ml-3 text-xs text-gray-600 mt-2">
+                    <i className="fas fa-history text-sm pr-2"></i>
+                    {consultationData.modified_date &&
+                      moment(consultationData.modified_date).format("lll")}
+                  </div>
+                </h3>
+                <div className="flex flex-col">
+                  <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+                    <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
+                      <table className="min-w-full">
+                        <thead>
+                          <tr>
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                              Medicine
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                              Route
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                              Dosage
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                              Indicator Event
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                              Max. Dosage in 24 hrs
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                              Min. time between 2 doses
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {consultationData.prn_prescription.map(
+                            (med, index) => (
+                              <tr className="bg-white" key={index}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
+                                  {med.medicine}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                  {med.route}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                  {med.dosage}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                  {med.indicator}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                  {med.max_dosage}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                  {med.min_time}
                                 </td>
                               </tr>
                             )
@@ -1122,7 +1177,7 @@ export const ConsultationDetails = (props: any) => {
                     )
                   }
                 >
-                  <i className="fas fa-plus w-4 mr-3"></i> Create Investigation
+                  <i className="fas fa-plus w-4 mr-3"></i> Log Lab Result
                 </button>
               </div>
             </div>

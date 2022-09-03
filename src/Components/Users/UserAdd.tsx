@@ -7,7 +7,7 @@ import {
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
 import { useCallback, useEffect, useReducer, useState } from "react";
@@ -40,7 +40,10 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
-import { Cancel, CheckCircle } from "@material-ui/icons";
+import clsx from "clsx";
+
+import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
+
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -343,7 +346,6 @@ export const UserAdd = (props: UserProps) => {
   );
 
   const handleChange = (e: any) => {
-    console.log(e.target.value);
     const { value, name } = e.target;
     const form = { ...state.form };
     form[name] = value;
@@ -353,6 +355,14 @@ export const UserAdd = (props: UserProps) => {
     if (name === "state") {
       form["district"] = "";
     }
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleChangeHomeFacility = (e: any) => {
+    const { value, name } = e.target;
+    const newValue = value === "" ? null : value;
+    const form = { ...state.form };
+    form[name] = newValue;
     dispatch({ type: "set_form", form });
   };
 
@@ -603,16 +613,36 @@ export const UserAdd = (props: UserProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={headerText} />
+      <PageTitle 
+        title={headerText}
+        componentRight={<Link
+          href="https://school.coronasafe.network/targets/12953"
+          className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
+          target="_blank"
+        >
+          <i className="fas fa-info-circle" /> &nbsp;Need Help?
+        </Link>}
+        justifyContents="justify-between"
+      />
 
       <Card className="mt-4">
-        <HelpToolTip
-          text="Need help? Go to the docs "
-          link="https://school.coronasafe.network/targets/12953"
-        />
+        
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <InputLabel>Facilities</InputLabel>
+                <FacilitySelect
+                  multiple={true}
+                  name="facilities"
+                  selected={selectedFacility}
+                  setSelected={setFacility}
+                  district={currentUser.data.district}
+                  errors={state.errors.facilities}
+                  showAll={false}
+                />
+              </div>
+
               <div>
                 <InputLabel>User Type*</InputLabel>
                 <SelectField
@@ -627,9 +657,26 @@ export const UserAdd = (props: UserProps) => {
                   errors={state.errors.user_type}
                 />
               </div>
+              <div>
+                <InputLabel>Home Facility</InputLabel>
+                <SelectField
+                  name="home_facility"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.home_facility}
+                  options={[
+                    { id: "", name: "Select" },
+                    ...(selectedFacility ?? []),
+                  ]}
+                  optionValue="name"
+                  onChange={handleChangeHomeFacility}
+                  errors={state.errors.home_facility}
+                />
+              </div>
 
               <div>
                 <PhoneNumberField
+                  placeholder="Phone Number"
                   label="Phone Number*"
                   value={state.form.phone_number}
                   onChange={(value: any) =>
@@ -651,6 +698,7 @@ export const UserAdd = (props: UserProps) => {
 
               <div>
                 <PhoneNumberField
+                  placeholder="WhatsApp Phone Number"
                   label="Whatsapp Number"
                   value={state.form.alt_phone_number}
                   onChange={(value: any) =>
@@ -659,35 +707,6 @@ export const UserAdd = (props: UserProps) => {
                   disabled={phoneIsWhatsApp}
                   errors={state.errors.alt_phone_number}
                   onlyIndia={true}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Facilities</InputLabel>
-                <FacilitySelect
-                  multiple={true}
-                  name="facilities"
-                  selected={selectedFacility}
-                  setSelected={setFacility}
-                  errors={state.errors.facilities}
-                  showAll={false}
-                />
-              </div>
-
-              <div className="">
-                <InputLabel>Home Facility</InputLabel>
-                <SelectField
-                  name="home_facility"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.home_facility}
-                  options={[
-                    { id: "", name: "Select" },
-                    ...(selectedFacility ?? []),
-                  ]}
-                  optionValue="name"
-                  onChange={handleChange}
-                  errors={state.errors.home_facility}
                 />
               </div>
 
@@ -739,7 +758,15 @@ export const UserAdd = (props: UserProps) => {
                       ) : (
                         <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
-                      Username should be atleast 2 characters long
+                      <span
+                        className={clsx(
+                          state.form.username?.length < 2
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Username should be atleast 2 characters long
+                      </span>
                     </div>
                     <div>
                       {!/[^.@+_-]/.test(
@@ -749,7 +776,17 @@ export const UserAdd = (props: UserProps) => {
                       ) : (
                         <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
-                      Username can't end with ^ . @ + _ -
+                      <span
+                        className={clsx(
+                          !/[^.@+_-]/.test(
+                            state.form.username[state.form.username?.length - 1]
+                          )
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Username can't end with ^ . @ + _ -
+                      </span>
                     </div>
                   </div>
                 )}
@@ -758,6 +795,7 @@ export const UserAdd = (props: UserProps) => {
               <div>
                 <InputLabel>Date of birth*</InputLabel>
                 <DateInputField
+                  name="dob"
                   fullWidth={true}
                   value={state.form.date_of_birth}
                   onChange={(date) => handleDateChange(date, "date_of_birth")}
@@ -906,19 +944,21 @@ export const UserAdd = (props: UserProps) => {
                       value={state.form.local_body}
                       options={localBody}
                       optionValue="name"
-                      onChange={handleChange}
+                      onChange={(e) => handleChange}
                       errors={state.errors.local_body}
                     />
                   )}
                 </div>
               )}
             </div>
-            <div className="flex justify-between mt-4">
+            <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
               <Button color="default" variant="contained" onClick={goBack}>
                 Cancel
               </Button>
               <Button
                 color="primary"
+                fullWidth
+                className="w-full md:w-auto"
                 variant="contained"
                 type="submit"
                 style={{ marginLeft: "auto" }}

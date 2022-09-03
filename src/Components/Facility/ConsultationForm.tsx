@@ -8,8 +8,6 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import type {t as Prescription__Prescription_t} from '../../../src/Components/Common/prescription-builder/types/Prescription__Prescription.gen';
-
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
@@ -48,7 +46,6 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { make as PrescriptionBuilderOld } from "../Common/PrescriptionBuilder.gen";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
@@ -56,6 +53,8 @@ import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
 import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
+import PRNPrescriptionBuilder, { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import { DiagnosisSelect } from "../Common/DiagnosisSelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -87,6 +86,7 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: PrescriptionType[];
+  prn_prescription : PRNPrescriptionType[],
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
@@ -127,6 +127,7 @@ const initForm: FormDetails = {
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
+  prn_prescription : [],
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
@@ -199,17 +200,13 @@ export const ConsultationForm = (props: any) => {
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
   const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
-
-  useEffect(()=>{
-    console.log("da", dischargeAdvice);
-  },[dischargeAdvice])
+  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
-  const [diseaseStatus, setDiseaseStatus] = useState("");
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
@@ -221,7 +218,6 @@ export const ConsultationForm = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
-          setDiseaseStatus(res.data.disease_status);
         }
       } else {
         setPatientName("");
@@ -235,14 +231,8 @@ export const ConsultationForm = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
-      if (
-        res &&
-        res.data &&
-        res.data.discharge_advice &&
-        Object.keys(res.data.discharge_advice).length != 0
-      ) {
-        setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      }
+      setDischargeAdvice(res && res.data && res.data.discharge_advice);
+      setPRNAdvice(!Array.isArray(res.data.prn_prescription) ? [] : res.data.prn_prescription);
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -383,9 +373,9 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "discharge_advice":
+        case "discharge_advice": {
           let invalid = false;
-          for (let f of dischargeAdvice) {
+          for (const f of dischargeAdvice) {
             if (
               !f.dosage?.replace(/\s/g, "").length ||
               !f.medicine?.replace(/\s/g, "").length
@@ -400,6 +390,26 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        }
+        case "prn_prescription":
+          let invalid = false;
+          for (let f of PRNAdvice) {
+            if (
+              !f.dosage?.replace(/\s/g, "").length ||
+              !f.medicine?.replace(/\s/g, "").length ||
+              f.indicator === "" || f.indicator === " "
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "PRN Prescription field can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+
         default:
           return;
       }
@@ -442,6 +452,7 @@ export const ConsultationForm = (props: any) => {
         diagnosis: state.form.diagnosis,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
+        prn_prescription : PRNAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -789,7 +800,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="mt-4" id="consultation_notes-div">
-                <InputLabel>Advice*</InputLabel>
+                <InputLabel>General Instructions (Advice)*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   className="mt-2"
@@ -818,6 +829,15 @@ export const ConsultationForm = (props: any) => {
                 />
                 <br />
                 <ErrorHelperText error={state.errors.discharge_advice} />
+              </div>
+              <div id="discharge_advice-div" className="mt-4">
+                <InputLabel>PRN Prescription</InputLabel>
+                <PRNPrescriptionBuilder
+                  prescriptions={PRNAdvice}
+                  setPrescriptions={setPRNAdvice}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.prn_prescription} />
               </div>
               <div id="ip_no-div" className="mt-4">
                 <InputLabel id="refered-label">IP number*</InputLabel>
@@ -851,20 +871,22 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="diagnosis-div" className="mt-4">
-                <InputLabel id="exam-details-label">Diagnosis</InputLabel>
-                <MultilineInputField
-                  rows={5}
+                <InputLabel id="diagnosis-label">Diagnosis</InputLabel>
+                <DiagnosisSelect
                   name="diagnosis"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.diagnosis,
+                  selected={{
+                    id: state.form.diagnosis,
+                    label: state.form.diagnosis,
                   }}
-                  value={state.form.diagnosis}
-                  onChange={handleChange}
-                  errors={state.errors.diagnosis}
+                  setSelected={(diagnosis: any) =>
+                    dispatch({
+                      type: "set_form",
+                      form: {
+                        ...state.form,
+                        diagnosis: diagnosis?.label || "",
+                      },
+                    })
+                  }
                 />
               </div>
 
