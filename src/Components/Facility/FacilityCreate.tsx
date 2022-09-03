@@ -472,9 +472,10 @@ export const FacilityCreate = (props: FacilityProps) => {
           navigate(`/facility/${facilityId}`);
         }
       } else {
-        Notification.Error({
-          msg: "Something went wrong: " + (res.data.detail || ""),
-        });
+        if (res?.data)
+          Notification.Error({
+            msg: "Something went wrong: " + (res.data.detail || ""),
+          });
       }
       setIsLoading(false);
     }

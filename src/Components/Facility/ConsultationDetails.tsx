@@ -32,7 +32,6 @@ import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
 import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
 import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
-import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
 import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
@@ -231,6 +230,9 @@ export const ConsultationDetails = (props: any) => {
               Object.keys(res.data.discharge_advice).length === 0
                 ? []
                 : res.data.discharge_advice;
+          }
+          if (!Array.isArray(res.data.prn_prescription)) {
+            data.prn_prescription = [];
           }
           setConsultationData(data);
           const id = res.data.patient;
@@ -675,7 +677,7 @@ export const ConsultationDetails = (props: any) => {
                   <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
                       <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                        Advice
+                        General Instructions
                       </h3>
                       <div className="mt-2">
                         <ReadMore
@@ -865,6 +867,7 @@ export const ConsultationDetails = (props: any) => {
               title="Camera Feed"
               breadcrumbs={false}
               hideBack={true}
+              focusOnLoad={true}
             />
             <Feed
               facilityId={facilityId}

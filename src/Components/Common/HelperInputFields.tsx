@@ -569,6 +569,7 @@ interface AutoCompleteAsyncFieldProps {
 
 export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
   const {
+    name,
     margin,
     options,
     label,
@@ -613,6 +614,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         renderInput={(params: any) => (
           <TextField
             {...params}
+            name={name}
             variant={variant}
             margin={margin || "normal"}
             label={label}

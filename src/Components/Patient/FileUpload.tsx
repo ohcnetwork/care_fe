@@ -704,6 +704,7 @@ export const FileUpload = (props: FileUploadProps) => {
       .then(() => {
         setUploadStarted(false);
         // setUploadSuccess(true);
+        setFile(null);
         setUploadFileName("");
         setReload(!reload);
         Notification.Success({
