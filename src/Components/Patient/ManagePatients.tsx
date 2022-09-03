@@ -8,6 +8,8 @@ import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import { Tooltip } from "@material-ui/core";
+
 import {
   getAllPatient,
   getDistrict,
@@ -466,19 +468,32 @@ export const PatientManager = (props: any) => {
           )}
         >
           <div className="flex gap-4 items-start">
-            <div className="min-h-[5rem] min-w-[5rem] bg-gray-200 rounded border border-gray-500">
+            <div className="w-20 h-20 min-w-[5rem] bg-gray-200 rounded border border-gray-500">
               {patient?.last_consultation &&
               patient?.last_consultation?.current_bed ? (
-                <div className="flex flex-col items-center justify-center min-h-[5rem]">
-                  <p className="text-gray-900 text-sm">
-                    {
+                <div className="flex flex-col items-center justify-center h-full">
+                  <Tooltip
+                    title={
                       patient?.last_consultation?.current_bed?.bed_object
                         ?.location_object?.name
                     }
-                  </p>
-                  <p className="text-base font-bold text-center text-ellipsis">
-                    {patient?.last_consultation?.current_bed?.bed_object.name}
-                  </p>
+                  >
+                    <p className="text-gray-900 text-sm text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                      {
+                        patient?.last_consultation?.current_bed?.bed_object
+                          ?.location_object?.name
+                      }
+                    </p>
+                  </Tooltip>
+                  <Tooltip
+                    title={
+                      patient?.last_consultation?.current_bed?.bed_object?.name
+                    }
+                  >
+                    <p className="text-base font-bold text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                      {patient?.last_consultation?.current_bed?.bed_object.name}
+                    </p>
+                  </Tooltip>
                 </div>
               ) : (
                 <div className="flex items-center justify-center min-h-[5rem]">
