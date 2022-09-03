@@ -82,7 +82,7 @@ export const HospitalList = (props: any) => {
   const { currentUser } = rootState;
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
-  const [modalFor, setModalFor] = useState(undefined);
+  const [notifyModalFor, setNotifyModalFor] = useState(undefined);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
@@ -315,7 +315,7 @@ export const HospitalList = (props: any) => {
         Notification.Success({
           msg: "Facility Notified",
         });
-        setModalFor(undefined);
+        setNotifyModalFor(undefined);
       } else {
         Notification.Error({ msg: "Something went wrong..." });
       }
@@ -331,9 +331,9 @@ export const HospitalList = (props: any) => {
     facilityList = data.map((facility: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
-          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500">
+          <div className="block rounded-lg overflow-clip bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
-              <div className="md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center">
+              <div className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
                 {facility.cover_image_url ? (
                   <img
                     src={facility.cover_image_url}
@@ -343,6 +343,10 @@ export const HospitalList = (props: any) => {
                 ) : (
                   <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                 )}
+                <div className="opacity-0 group-hover:opacity-70 transition-all bg-gray-900 h-8 left-0 right-0 -bottom-8 group-hover:bottom-0 absolute flex justify-start items-center z-10 gap-2 px-2 text-gray-300">
+                  <i className="fa-solid fa-pen"></i>
+                  <span>Edit Cover</span>
+                </div>
               </div>
               <div className="h-full w-full grow">
                 <div className="h-full flex flex-col justify-between w-full">
@@ -410,7 +414,7 @@ export const HospitalList = (props: any) => {
                           {userType !== "Staff" ? (
                             <button
                               className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                              onClick={(_) => setModalFor(facility.id)}
+                              onClick={(_) => setNotifyModalFor(facility.id)}
                             >
                               <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
                               <span className="md:block hidden">Notify</span>
@@ -419,8 +423,8 @@ export const HospitalList = (props: any) => {
                             <></>
                           )}
                           <Modal
-                            open={modalFor === facility.id}
-                            onClose={(_) => setModalFor(undefined)}
+                            open={notifyModalFor === facility.id}
+                            onClose={(_) => setNotifyModalFor(undefined)}
                             aria-labelledby="Notify This Facility"
                             aria-describedby="Type a message and notify this facility"
                             className=""
@@ -429,7 +433,7 @@ export const HospitalList = (props: any) => {
                               <form
                                 onSubmit={(event: any) => {
                                   event.preventDefault();
-                                  handleNotifySubmit(modalFor);
+                                  handleNotifySubmit(notifyModalFor);
                                 }}
                                 className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
                               >
@@ -456,7 +460,9 @@ export const HospitalList = (props: any) => {
                                   <button
                                     type="button"
                                     className="btn-danger btn mr-2 w-full md:w-auto"
-                                    onClick={(_) => setModalFor(undefined)}
+                                    onClick={(_) =>
+                                      setNotifyModalFor(undefined)
+                                    }
                                   >
                                     Cancel
                                   </button>
