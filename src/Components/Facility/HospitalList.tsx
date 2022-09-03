@@ -42,6 +42,7 @@ import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import ToolTip from "../Common/utils/Tooltip";
+import { CoverImageUploadModal } from "./CoverImageEditModal";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -83,6 +84,7 @@ export const HospitalList = (props: any) => {
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
+  const [coverImageModalFor, setCoverImageModalFor] = useState(undefined);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
@@ -333,7 +335,10 @@ export const HospitalList = (props: any) => {
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg overflow-clip bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
-              <div className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
+              <div
+                className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0 cursor-pointer"
+                onClick={() => setCoverImageModalFor(facility.id)}
+              >
                 {facility.cover_image_url ? (
                   <img
                     src={facility.cover_image_url}
@@ -347,6 +352,10 @@ export const HospitalList = (props: any) => {
                   <i className="fa-solid fa-pen"></i>
                   <span>Edit Cover</span>
                 </div>
+                <CoverImageUploadModal
+                  open={coverImageModalFor === facility.id}
+                  onCloseCB={() => setCoverImageModalFor(undefined)}
+                />
               </div>
               <div className="h-full w-full grow">
                 <div className="h-full flex flex-col justify-between w-full">
