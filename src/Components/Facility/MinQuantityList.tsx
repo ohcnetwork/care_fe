@@ -69,35 +69,60 @@ export default function MinQuantityList(props: any) {
   let inventoryList: any = [];
   if (inventory && inventory.length) {
     inventoryList = inventory.map((inventoryItem: any) => (
-      <tr key={inventoryItem.id} className="bg-white">
-        <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <div className="flex items-center">
-            <p className="text-gray-900 whitespace-nowrap">
-              {inventoryItem.item_object?.name}
-            </p>
-          </div>
-        </td>
-        <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <p className="text-gray-900 whitespace-nowrap lowercase">
-            {inventoryItem.min_quantity}{" "}
-            {inventoryItem.item_object?.default_unit?.name}
-          </p>
-        </td>
-        <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <RoleButton
-            className="ml-2 bg-primary-400 hover:bg-primary-600 text-white"
-            handleClickCB={() =>
-              navigate(
-                `/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`
-              )
-            }
-            disableFor="readOnly"
-            buttonType="materialUI"
-          >
-            UPDATE
-          </RoleButton>
-        </td>
-      </tr>
+      <div className="bg-white rounded-lg p-4 shadow-md" key={inventoryItem.id}>
+        <h3 className="text-lg font-bold text-gray-900">Item Name</h3>
+        <p className="text-gray-900 whitespace-nowrap">
+          {inventoryItem.item_object?.name}
+        </p>
+        <h3 className="text-lg font-bold mt-4 text-gray-900">
+          Minimum Quantity
+        </h3>
+        <p className="text-gray-900 whitespace-nowrap lowercase">
+          {inventoryItem.min_quantity}{" "}
+          {inventoryItem.item_object?.default_unit?.name}
+        </p>
+        <RoleButton
+          className="mt-4 bg-primary-400 hover:bg-primary-600 text-white w-full"
+          handleClickCB={() =>
+            navigate(
+              `/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`
+            )
+          }
+          disableFor="readOnly"
+          buttonType="materialUI"
+        >
+          UPDATE
+        </RoleButton>
+      </div>
+      // <tr key={inventoryItem.id} className="bg-white">
+      //   <td className="px-5 py-5 border-b border-gray-200 text-sm ">
+      //     <div className="flex items-center">
+      //       <p className="text-gray-900 whitespace-nowrap">
+      //         {inventoryItem.item_object?.name}
+      //       </p>
+      //     </div>
+      //   </td>
+      //   <td className="px-5 py-5 border-b border-gray-200 text-sm ">
+      //     <p className="text-gray-900 whitespace-nowrap lowercase">
+      //       {inventoryItem.min_quantity}{" "}
+      //       {inventoryItem.item_object?.default_unit?.name}
+      //     </p>
+      //   </td>
+      //   <td className="px-5 py-5 border-b border-gray-200 text-sm ">
+      //     <RoleButton
+      //       className="ml-2 bg-primary-400 hover:bg-primary-600 text-white"
+      //       handleClickCB={() =>
+      //         navigate(
+      //           `/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`
+      //         )
+      //       }
+      //       disableFor="readOnly"
+      //       buttonType="materialUI"
+      //     >
+      //       UPDATE
+      //     </RoleButton>
+      //   </td>
+      // </tr>
     ));
   } else if (inventory && inventory.length === 0) {
     inventoryList = (
@@ -119,7 +144,7 @@ export default function MinQuantityList(props: any) {
   } else if (inventory) {
     inventoryItem = (
       <>
-        <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+        {/* <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4">
           <div className="inline-block min-w-full">
             <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
               <thead>
@@ -132,11 +157,15 @@ export default function MinQuantityList(props: any) {
                   </th>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider"></th>
                 </tr>
-              </thead>
-              <tbody>{inventoryList}</tbody>
-            </table>
+              </thead> */}
+        {/* <tbody>{</tbody> */}
+        {/* </table>
           </div>
+        </div> */}
+        <div className="my-6 flex flex-wrap gap-5 justify-center sm:justify-start">
+          {inventoryList}
         </div>
+
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
