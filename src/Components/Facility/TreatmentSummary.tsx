@@ -253,7 +253,7 @@ const TreatmentSummary = (props: any) => {
               </div>
 
               <div className="border-b-2 border-gray-800 px-5 py-2">
-                <b>Advice :</b>
+                <b>General Instructions :</b>
                 {patientData.last_consultation &&
                 patientData.last_consultation.consultation_notes ? (
                   <div className="mx-5">
