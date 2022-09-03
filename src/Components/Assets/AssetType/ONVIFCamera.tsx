@@ -54,7 +54,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       const data = {
         meta: {
           asset_type: assetType,
-          camera_type: "ONVIF Camera (HIKVISION)",
           middleware_hostname: middlewareHostname,
           local_ip_address: cameraAddress,
           camera_access_key: cameraAccessKey,
