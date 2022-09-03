@@ -656,7 +656,7 @@ export const PatientManager = (props: any) => {
             <button
               onClick={handleDownloadFiltered}
               disabled={!isDownloadAllowed}
-              className="btn text-green-500 disabled:text-gray-500 disabled:hover:bg-gray-50 font-medium hover:bg-green-50 border border-solid"
+              className="btn text-green-500 disabled:text-gray-500 disabled:hover:bg-gray-50 font-medium hover:bg-green-50 border border-solid w-full mb-1"
             >
               <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
               {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
