@@ -517,135 +517,161 @@ export const FileUpload = (props: FileUploadProps) => {
             </div>
           </div>
         </Modal>
-        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
-          <div>
+        {item.file_category === "AUDIO" ? (
+          <div className="flex flex-wrap justify-between space-y-2">
             <div>
-              <span className="font-semibold leading-relaxed">File Name: </span>{" "}
-              {item.name}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">Created By:</span>{" "}
-              {item.uploaded_by ? item.uploaded_by.username : null}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Created On :
-              </span>{" "}
-              {item.created_date
-                ? moment(item.created_date).format("lll")
-                : "-"}
-            </div>
-          </div>
-          <div className="flex items-center">
-            {item.file_category === "AUDIO" ? (
-              <div className="flex space-x-2">
-                {item.id ? (
-                  Object.keys(url).length > 0 ? (
-                    <div className="flex flex-wrap">
-                      <audio
-                        className="max-h-full max-w-full m-auto object-contain"
-                        src={url[item.id]}
-                        controls
-                        preload="auto"
-                        controlsList="nodownload"
-                      />
-                      <a
-                        href={url[item.id]}
-                        className="text-black p-4"
-                        download={true}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-6 w-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                          />
-                        </svg>
-                      </a>
-                      {item?.uploaded_by?.username === currentuser_username ? (
-                        <>
-                          <button
-                            type="submit"
-                            onClick={() => {
-                              setModalDetails({ name: item.name, id: item.id });
-                              setEditFileName(item?.name);
-                              setModalOpenForEdit(true);
-                            }}
-                          >
-                            <i className="fa-solid fa-pencil mr-1"></i>
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              setModalDetails({ name: item.name, id: item.id });
-                              setModalOpenForDelete(true);
-                            }}
-                          >
-                            <i className="fa-solid fa-trash-can ml-3"></i>
-                          </button>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                    </div>
-                  ) : (
-                    <CircularProgress />
-                  )
-                ) : (
-                  <div>File Not found</div>
-                )}
-              </div>
-            ) : (
               <div>
-                <button
-                  onClick={() => {
-                    loadFile(item.id);
-                  }}
-                  type="submit"
-                  className="btn btn-primary m-1"
-                >
-                  {" "}
-                  <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
-                </button>
-                {item?.uploaded_by?.username === currentuser_username ? (
-                  <>
-                    {" "}
-                    <button
-                      onClick={() => {
-                        setModalDetails({ name: item.name, id: item.id });
-                        setEditFileName(item?.name);
-                        setModalOpenForEdit(true);
-                      }}
-                      type="submit"
-                      className="btn btn-primary m-1"
-                    >
-                      <i className="fa-solid fa-pencil mr-2"></i> EDIT FILE NAME
-                    </button>
-                    <button
-                      onClick={() => {
-                        setModalDetails({ name: item.name, id: item.id });
-                        setModalOpenForDelete(true);
-                      }}
-                      type="submit"
-                      className="btn btn-primary m-1"
-                    >
-                      <i className="fa-solid fa-trash-can mr-2"></i> DELETE FILE
-                    </button>
-                  </>
-                ) : (
-                  <></>
-                )}
+                <span className="font-semibold leading-relaxed">
+                  File Name:{" "}
+                </span>{" "}
+                {item.name}
               </div>
-            )}
+              <div>
+                <span className="font-semibold leading-relaxed">
+                  Created By:
+                </span>{" "}
+                {item.uploaded_by ? item.uploaded_by.username : null}
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">
+                  Created On :
+                </span>{" "}
+                {item.created_date
+                  ? moment(item.created_date).format("lll")
+                  : "-"}
+              </div>
+            </div>
+            <div className="flex items-center">
+              {item.id ? (
+                Object.keys(url).length > 0 ? (
+                  <div className="flex flex-wrap">
+                    <audio
+                      className="max-h-full max-w-full m-auto object-contain"
+                      src={url[item.id]}
+                      controls
+                      preload="auto"
+                      controlsList="nodownload"
+                    />
+                  </div>
+                ) : (
+                  <CircularProgress />
+                )
+              ) : (
+                <div>File Not found</div>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center">
+              {item.id ? (
+                Object.keys(url).length > 0 ? (
+                  <div className="flex flex-wrap">
+                    <a
+                      href={url[item.id]}
+                      download={true}
+                      className="btn btn-primary m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
+                    >
+                      <i className="fa-solid fa-circle-arrow-down mr-2"></i>{" "}
+                      DOWNLOAD
+                    </a>
+                    {item?.uploaded_by?.username === currentuser_username ? (
+                      <>
+                        <label
+                          onClick={() => {
+                            setModalDetails({ name: item.name, id: item.id });
+                            setEditFileName(item?.name);
+                            setModalOpenForEdit(true);
+                          }}
+                          className="btn btn-primary m-1 sm:w-auto w-full"
+                        >
+                          <i className="fa-solid fa-pencil mr-2"></i>EDIT FILE
+                          NAME
+                        </label>
+
+                        <label
+                          onClick={() => {
+                            setModalDetails({ name: item.name, id: item.id });
+                            setModalOpenForDelete(true);
+                          }}
+                          className="btn btn-primary m-1 sm:w-auto w-full"
+                        >
+                          <i className="fa-solid fa-trash-can mr-2"></i>DELETE
+                          FILE
+                        </label>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                ) : (
+                  <CircularProgress />
+                )
+              ) : (
+                <div>File Not found</div>
+              )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-wrap justify-between space-y-2">
+            <div>
+              <div>
+                <span className="font-semibold leading-relaxed">
+                  File Name:{" "}
+                </span>{" "}
+                {item.name}
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">
+                  Created By:
+                </span>{" "}
+                {item.uploaded_by ? item.uploaded_by.username : null}
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">
+                  Created On :
+                </span>{" "}
+                {item.created_date
+                  ? moment(item.created_date).format("lll")
+                  : "-"}
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center">
+              <label
+                onClick={() => {
+                  loadFile(item.id);
+                }}
+                className="btn btn-primary m-1 sm:w-auto w-full"
+              >
+                {" "}
+                <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
+              </label>
+              {item?.uploaded_by?.username === currentuser_username ? (
+                <>
+                  {" "}
+                  <label
+                    onClick={() => {
+                      setModalDetails({ name: item.name, id: item.id });
+                      setEditFileName(item?.name);
+                      setModalOpenForEdit(true);
+                    }}
+                    className="btn btn-primary m-1 sm:w-auto w-full"
+                  >
+                    <i className="fa-solid fa-pencil mr-2"></i> EDIT FILE NAME
+                  </label>
+                  <label
+                    onClick={() => {
+                      setModalDetails({ name: item.name, id: item.id });
+                      setModalOpenForDelete(true);
+                    }}
+                    className="btn btn-primary m-1 sm:w-auto w-full"
+                  >
+                    <i className="fa-solid fa-trash-can mr-2"></i> DELETE FILE
+                  </label>
+                </>
+              ) : (
+                <></>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -736,7 +762,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = file;
 
     const category = "UNSPECIFIED";
-    const filename = uploadFileName === ""  && f ? f.name : uploadFileName;
+    const filename = uploadFileName === "" && f ? f.name : uploadFileName;
     const name = f?.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
@@ -1014,9 +1040,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
                   <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
-                    <label
-                      className="flex items-center btn btn-primary"
-                    >
+                    <label className="flex items-center btn btn-primary">
                       <i className="fas fa-file-arrow-down mr-2" /> Choose file
                       <input
                         title="changeFile"
@@ -1036,17 +1060,19 @@ export const FileUpload = (props: FileUploadProps) => {
                     </button>
                   </div>
                 )}
-                {file && <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
-                  {file?.name}
-                  <button
-                    onClick={()=>{
-                      setFile(null);
-                      setUploadFileName("");
-                    }}
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
-                </div>}
+                {file && (
+                  <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                    {file?.name}
+                    <button
+                      onClick={() => {
+                        setFile(null);
+                        setUploadFileName("");
+                      }}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ) : null}
