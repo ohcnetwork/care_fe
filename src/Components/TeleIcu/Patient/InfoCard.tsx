@@ -46,17 +46,22 @@ export default function TeleICUPatientInfoCard(props: {
       <div className="bg-white px-4 py-2 lg:p-6 flex flex-col lg:flex-row lg:w-7/12 w-full">
         {/* Can support for patient picture in the future */}
         <div className="mt-2 flex flex-col items-center">
-          <div className="w-20 h-20 min-w-[5rem] bg-gray-200 rounded border border-gray-500">
+          <div className="w-24 h-24 min-w-[5rem] bg-gray-200 rounded border border-gray-500 overflow-">
             {patient?.last_consultation &&
             patient?.last_consultation?.current_bed ? (
-              <div className="flex flex-col items-center justify-center h-full">
-                <p className="text-gray-900 text-sm">
+              <div
+                className="flex flex-col items-center justify-center h-full"
+                title={`
+                ${patient?.last_consultation?.current_bed?.bed_object?.location_object?.name}\n${patient?.last_consultation?.current_bed?.bed_object.name}
+              `}
+              >
+                <p className="overflow-hidden px-2 whitespace-nowrap w-full text-gray-900 text-sm text-center text-ellipsis ">
                   {
                     patient?.last_consultation?.current_bed?.bed_object
                       ?.location_object?.name
                   }
                 </p>
-                <p className="text-base font-bold text-center text-ellipsis">
+                <p className="w-full text-base px-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold text-center">
                   {patient?.last_consultation?.current_bed?.bed_object.name}
                 </p>
               </div>
