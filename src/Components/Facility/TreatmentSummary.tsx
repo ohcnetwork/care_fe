@@ -355,7 +355,13 @@ const TreatmentSummary = (props: any) => {
               </div>
 
               <div className="border-b-2 border-gray-800 py-2 px-5">
-                <b className="mb-2">Treatment summary :</b>
+                <b>Treatment :</b>
+                {consultationData.prescribed_medication && (
+                  <p className="ml-4">
+                    {consultationData.prescribed_medication}
+                  </p>
+                )}
+                <b className="mb-2">Treatment summary/Treament Plan :</b>
 
                 <div className="mx-5">
                   <table className="border-collapse border border-gray-800 w-full">
@@ -397,10 +403,6 @@ const TreatmentSummary = (props: any) => {
                       )}
                     </tbody>
                   </table>
-
-                  {consultationData.prescribed_medication && (
-                    <p>{consultationData.prescribed_medication}</p>
-                  )}
                 </div>
               </div>
             </div>
