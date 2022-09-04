@@ -13,7 +13,7 @@ jobs:
         uses: cypress-io/github-action@v4
         with:
           install: false
-          build: yarn build
+          build: yarn install && yarn build
           start: yarn start
           browser: chrome
 
