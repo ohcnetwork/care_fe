@@ -9,11 +9,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - run: yarn install
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
-          install: false
-          build: yarn install && yarn build
+          build: yarn build
           start: yarn start
           browser: chrome
 
