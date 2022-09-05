@@ -3,11 +3,8 @@ import { useDispatch } from "react-redux";
 import { listICD11Diagnosis } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "./HelperInputFields";
 import { debounce } from "lodash";
+import { ICD11DiagnosisModel } from "../Facility/models";
 
-interface DiagnosisModel {
-  id: string;
-  label: string;
-}
 interface DiagnosisSelectProps {
   name: string;
   margin?: string;
@@ -18,17 +15,19 @@ interface DiagnosisSelectProps {
   facility?: string;
   location?: string;
   showAll?: boolean;
-  selected: DiagnosisModel[] | null;
-  setSelected: (selected: DiagnosisModel | DiagnosisModel[] | null) => void;
+  selected: ICD11DiagnosisModel[] | null;
+  setSelected: (selected: ICD11DiagnosisModel[] | null) => void;
 }
 
 export const DiagnosisSelect = (props: DiagnosisSelectProps) => {
   const { name, selected, setSelected, margin, errors, className = "" } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [diagnosisList, setDiagnosisList] = useState<Array<DiagnosisModel>>([]);
+  const [diagnosisList, setDiagnosisList] = useState<
+    Array<ICD11DiagnosisModel>
+  >([]);
 
-  const handleValueChange = (current: DiagnosisModel | null) => {
+  const handleValueChange = (current: ICD11DiagnosisModel[] | null) => {
     if (!current) {
       setDiagnosisList([]);
       setIsLoading(false);
@@ -50,12 +49,7 @@ export const DiagnosisSelect = (props: DiagnosisSelectProps) => {
         );
 
         if (res && res.data) {
-          setDiagnosisList(
-            res.data.map((item: DiagnosisModel) => ({
-              id: item.label,
-              label: item.label,
-            }))
-          );
+          setDiagnosisList(res.data);
         }
       }, 300),
     [dispatchAction]
@@ -70,18 +64,19 @@ export const DiagnosisSelect = (props: DiagnosisSelectProps) => {
       defaultValue={selected}
       options={diagnosisList}
       onSearch={handelSearch}
-      onChange={(e: object, selected: DiagnosisModel) =>
+      onChange={(e: object, selected: ICD11DiagnosisModel[]) =>
         handleValueChange(selected)
       }
       loading={isLoading}
       placeholder="Search diagnosis"
       noOptionsText="No results found"
-      renderOption={(option: DiagnosisModel) => <div>{option.label}</div>}
-      getOptionSelected={(option: DiagnosisModel, value: DiagnosisModel) =>
-        option.id === value.id
-      }
-      getOptionLabel={(option: DiagnosisModel) => option?.label || ""}
-      filterOptions={(options: DiagnosisModel[]) => options}
+      renderOption={(option: ICD11DiagnosisModel) => <div>{option.label}</div>}
+      getOptionSelected={(
+        option: ICD11DiagnosisModel,
+        value: ICD11DiagnosisModel
+      ) => option.id === value.id}
+      getOptionLabel={(option: ICD11DiagnosisModel) => option?.label || ""}
+      filterOptions={(options: ICD11DiagnosisModel[]) => options}
       errors={errors}
       className={className}
     />

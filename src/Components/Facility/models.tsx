@@ -188,3 +188,9 @@ export interface CurrentBed {
   end_date: string;
   meta: Record<string, any>;
 }
+
+export interface ICD11DiagnosisModel {
+  id: string;
+  label: string;
+  parentId: string | null;
+}
