@@ -42,7 +42,7 @@ export default function ViewInvestigationSuggestions(props: {
                     </tr>
                 </thead>
                 <tbody>
-                    {investigations?.map((investigation, index) => (
+                    {Array.isArray(investigations) ? investigations.map((investigation, index) => (
                         <tr key={index} className="border-b border-b-gray-200">
                             <td className="p-4">
                                 <ul className="list-decimal ml-4">
@@ -68,7 +68,13 @@ export default function ViewInvestigationSuggestions(props: {
                                 {investigation.notes}
                             </td>
                         </tr>
-                    ))}
+                    )) : (
+                        <tr>
+                            <td className="p-4" colSpan={3}>
+                                No Investigation Suggestions
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
         </div>

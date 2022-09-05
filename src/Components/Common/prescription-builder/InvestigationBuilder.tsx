@@ -117,7 +117,7 @@ export default function InvestigationBuilder(props : InvestigationBuilderProps<I
                         <div key={i} className="border-b border-b-gray-500 border-dashed py-2 text-xs text-gray-600">
                             <div className="flex gap-2 flex-col md:flex-row">
                                 <div
-                                    className="w-full"    
+                                    className="w-full flex flex-col justify-between"    
                                 >
                                     Investigations Recommended
                                     <PrescriptionMultiDropdown
