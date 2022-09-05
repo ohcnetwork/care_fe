@@ -67,11 +67,6 @@ describe("Death Report", () => {
 
     // Print Death Report
     cy.get("button").contains("Print Death Report").click();
-    cy.window().then((win) => {
-      // TODO: Do something with print window
-
-      // Close print window
-      win.close();
-    });
+    cy.window().its("print").should("be.called");
   });
 });
