@@ -784,7 +784,7 @@ export default function ShiftDetails(props: { id: string }) {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <div className="flex flex-col md:flex-row w-full gap-2 justify-between">
+                    <div className="flex flex-col md:flex-row w-full gap-2 justify-end">
                       <div>
                         <button
                           onClick={() => setOpenDeleteShiftDialog(false)}
