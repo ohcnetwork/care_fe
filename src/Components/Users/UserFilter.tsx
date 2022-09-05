@@ -171,7 +171,7 @@ export default function UserFilter(props: any) {
           <div className="flex justify-between">
             <div className="w-full">
               <PhoneNumberField
-                name="phone_number"
+                placeholder="Phone Number"
                 value={filterState.phone_number}
                 onChange={(value: string) => {
                   handleChange({ target: { name: "phone_number", value } });
@@ -186,7 +186,7 @@ export default function UserFilter(props: any) {
           <div className="flex justify-between">
             <div className="w-full">
               <PhoneNumberField
-                name="alt_phone_number"
+                placeholder="WhatsApp Phone Number"
                 value={filterState.alt_phone_number}
                 onChange={(value: string) => {
                   handleChange({ target: { name: "alt_phone_number", value } });
