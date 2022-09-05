@@ -112,7 +112,7 @@ describe("User management", () => {
   it("deletes user", () => {
     cy.get("[name='search']").type(username);
     cy.wait(2000);
-    cy.get("button").contains("Delete").click();
+    cy.get("button").should("contain", "Delete").contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
   });
 

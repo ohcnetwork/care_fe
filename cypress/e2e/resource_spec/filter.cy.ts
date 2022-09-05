@@ -14,6 +14,8 @@ describe("Resource filter", () => {
     cy.wait("@fontawesome");
     cy.wait("@currentuser");
     cy.get("a").contains("Resource").click();
+    cy.wait("@fontawesome");
+    cy.wait("@currentuser");
     cy.url().should("include", "/resource");
     cy.contains("Filters").click();
   });
