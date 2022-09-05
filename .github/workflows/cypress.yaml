@@ -20,7 +20,7 @@ jobs:
           start: yarn start
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
-          browser: chrome
+          browser: electron
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
