@@ -243,8 +243,6 @@ export const ConsultationForm = (props: any) => {
           : res.data.prn_prescription
       );
 
-      console.log("consultation Data", res.data);
-
       if (!status.aborted) {
         if (res && res.data) {
           const formData = {
