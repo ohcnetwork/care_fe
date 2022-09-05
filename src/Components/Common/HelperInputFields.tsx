@@ -557,7 +557,8 @@ interface AutoCompleteAsyncFieldProps {
   renderOption: (option: any) => JSX.Element;
   placeholder: string;
   noOptionsText?: string;
-  value: any;
+  value?: any;
+  defaultValue?: any;
   loading?: boolean;
   errors?: string;
   onBlur?: (e: any) => void;
@@ -582,6 +583,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
     onChange,
     onSearch,
     value,
+    defaultValue,
     loading,
     onBlur,
     onOpen,
@@ -604,6 +606,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         options={options}
         onChange={onChange}
         value={value}
+        defaultValue={defaultValue}
         loading={loading}
         noOptionsText={noOptionsText}
         getOptionSelected={getOptionSelected}
