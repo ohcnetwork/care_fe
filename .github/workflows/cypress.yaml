@@ -15,5 +15,3 @@ jobs:
         with:
           start: yarn start
           browser: chrome
-          quiet: true
-
