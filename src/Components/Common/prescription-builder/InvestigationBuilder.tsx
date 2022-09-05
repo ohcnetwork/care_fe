@@ -127,7 +127,7 @@ export default function InvestigationBuilder(props : InvestigationBuilderProps<I
                                         setSelectedValues={setType}
                                     />
                                 </div>
-                                <div className="flex flex-col w-full md:w-[250px] shrink-0">
+                                <div className="flex flex-col w-full md:w-[250px] shrink-0 justify-between">
                                     <div className="flex gap-2">
                                         <div
                                             className="shrink-0"    
@@ -165,7 +165,7 @@ export default function InvestigationBuilder(props : InvestigationBuilderProps<I
                                                 Time
                                                 <input
                                                     type="datetime-local"
-                                                    className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                                                    className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                                                     value={investigation.time || ""}
                                                     onChange={(e)=>{
                                                         setItem({
