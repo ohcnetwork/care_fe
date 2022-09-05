@@ -27,7 +27,7 @@ export default function ViewInvestigationSuggestions(props: {
             <h3>
                 Investigation Suggestions
             </h3>
-            <table className="w-full bg-white shadow rounded-xl mt-3">
+            <table className="hidden md:table w-full bg-white shadow rounded-xl mt-3">
                 <thead className="text-left bg-gray-200">
                     <tr>
                         <th className="p-4">
@@ -77,6 +77,41 @@ export default function ViewInvestigationSuggestions(props: {
                     )}
                 </tbody>
             </table>
+            <div className="flex flex-col gap-4 md:hidden">
+                {Array.isArray(investigations) ? investigations.map((investigation, index) => (
+                    <div key={index} className="bg-white shadow rounded-xl p-4">
+                        <b>Investigations :</b>
+                        <ul className="list-decimal ml-4">
+                            {investigation.type?.map((type, index) => (
+                                <li key={index}>
+                                    {type}
+                                </li>
+                            ))}
+                        </ul>
+                        <br />
+                        <b>To be conducted&nbsp;
+                        {investigation.repetitive ? (
+                            <>
+                                after every {investigation.frequency}
+                            </>
+                        ) : (
+                            <>
+                                at {moment(investigation.time).format("h:mm a, MMM D YYYY")}
+                            </>
+                        )}
+                        </b>
+                        <br />
+                        <br />
+                        <b>Notes :</b>
+                        <br /> 
+                        {investigation.notes || "none"}
+                    </div>
+                )) : (
+                    <div className="bg-white shadow rounded-xl">
+                        No Investigation Suggestions
+                    </div>
+                )}                
+            </div>
         </div>
     )
 }
