@@ -339,9 +339,9 @@ export const HospitalList = (props: any) => {
                 className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0 cursor-pointer"
                 onClick={() => setCoverImageModalFor(facility.id)}
               >
-                {facility.cover_image_url ? (
+                {facility.read_cover_image_url ? (
                   <img
-                    src={facility.cover_image_url}
+                    src={facility.read_cover_image_url}
                     alt="Facility"
                     className="w-full h-full object-cover"
                   />
@@ -355,6 +355,7 @@ export const HospitalList = (props: any) => {
                 <CoverImageUploadModal
                   open={coverImageModalFor === facility.id}
                   onCloseCB={() => setCoverImageModalFor(undefined)}
+                  facility={facility}
                 />
               </div>
               <div className="h-full w-full grow">
@@ -433,14 +434,14 @@ export const HospitalList = (props: any) => {
                           )}
                           <Modal
                             open={notifyModalFor === facility.id}
-                            onClose={(_) => setNotifyModalFor(undefined)}
+                            onClose={() => setNotifyModalFor(undefined)}
                             aria-labelledby="Notify This Facility"
                             aria-describedby="Type a message and notify this facility"
                             className=""
                           >
                             <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
                               <form
-                                onSubmit={(event: any) => {
+                                onSubmit={(event) => {
                                   event.preventDefault();
                                   handleNotifySubmit(notifyModalFor);
                                 }}
@@ -469,9 +470,7 @@ export const HospitalList = (props: any) => {
                                   <button
                                     type="button"
                                     className="btn-danger btn mr-2 w-full md:w-auto"
-                                    onClick={(_) =>
-                                      setNotifyModalFor(undefined)
-                                    }
+                                    onClick={() => setNotifyModalFor(undefined)}
                                   >
                                     Cancel
                                   </button>

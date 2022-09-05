@@ -44,6 +44,9 @@ export const createFacility = (params: object) => {
 export const updateFacility = (id: number, params: object) => {
   return fireRequest("updateFacility", [id], params);
 };
+export const createFacilityCoverImage = (id: number, params: object) => {
+  return fireRequest("facilityCoverImageCreate", [id], params);
+};
 export const deleteFacility = (id: number) => {
   return fireRequest("deleteFacility", [id], {});
 };
@@ -721,7 +724,7 @@ export const editInvestigation = (
 // ICD11
 export const listICD11Diagnosis = (params: object, key: string) => {
   return fireRequest("listICD11Diagnosis", [], params, null, key);
-}
+};
 
 // Resource
 export const createResource = (params: object) => {

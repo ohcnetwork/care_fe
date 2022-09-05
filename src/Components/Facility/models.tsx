@@ -26,7 +26,7 @@ export interface FacilityModel {
   id?: number;
   name?: string;
   district?: number;
-  cover_image_url?: string;
+  read_cover_image_url?: string;
   facility_type?: string;
   address?: string;
   features?: number[];
@@ -102,7 +102,7 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   discharge_advice?: any;
-  prn_prescription? : PRNPrescriptionType[];
+  prn_prescription?: PRNPrescriptionType[];
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
