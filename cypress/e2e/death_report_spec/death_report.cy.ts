@@ -21,7 +21,11 @@ describe("Death Report", () => {
     cy.contains("Details").click();
     cy.url().then((url) => {
       const patient_id = url.split("/")[6];
-      cy.visit(`http://localhost:4000/death_report/${patient_id}`);
+      cy.visit(`http://localhost:4000/death_report/${patient_id}`, {
+        onBeforeLoad: (win) => {
+          cy.stub(win, "print");
+        },
+      });
     });
   });
 
@@ -63,5 +67,11 @@ describe("Death Report", () => {
 
     // Print Death Report
     cy.get("button").contains("Print Death Report").click();
+    cy.window().then((win) => {
+      // TODO: Do something with print window
+
+      // Close print window
+      win.close();
+    });
   });
 });
