@@ -2,7 +2,7 @@ import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 class facility {
   static create(facility) {
-    cy.visitWait("/facility/create");
+    cy.awaitUrl("/facility/create");
     this.fillForm(facility);
     cy.get("[id=facility-save]").should("exist").click();
     cy.verifyNotification("Facility added successfully");
@@ -102,7 +102,7 @@ describe("Facility", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait(current_url);
+    cy.awaitUrl(current_url);
   });
 
   it("creats facility", () => {

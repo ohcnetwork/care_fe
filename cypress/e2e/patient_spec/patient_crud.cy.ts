@@ -14,7 +14,7 @@ describe("Patient Creation", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/");
+    cy.awaitUrl("/");
   });
 
   it("Create", () => {
@@ -57,7 +57,7 @@ describe("Patient Creation", () => {
   });
 
   it("Dashboard", () => {
-    cy.visitWait(patient_url);
+    cy.awaitUrl(patient_url);
     cy.url().should("include", "/patient/");
     cy.get("[data-testid=patient-dashboard]").should("contain", "22");
     cy.get("[data-testid=patient-dashboard]").should(
@@ -74,7 +74,7 @@ describe("Patient Creation", () => {
   });
 
   it("Edit", () => {
-    cy.visitWait(patient_url + "/update");
+    cy.awaitUrl(patient_url + "/update");
     cy.get("[data-testid=state] select").should("contain", "Kerala");
     cy.get("[data-testid=district] select").should("contain", "Ernakulam");
     cy.get("[data-testid=localbody] select").should("contain", "Alangad");

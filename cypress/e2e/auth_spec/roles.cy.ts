@@ -5,7 +5,7 @@ describe("authentication", () => {
   users.forEach((user) => {
     it("Login as " + user.username + " - " + user.rolename, () => {
       cy.loginByApi(user.username, "passwordR0FL");
-      cy.visitWait("/user/profile");
+      cy.awaitUrl("/user/profile");
       cy.get("dd").should("contain", user.username);
       cy.get("dd").should("contain", user.rolename);
     });

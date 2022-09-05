@@ -8,7 +8,7 @@ describe("Resource Page", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/resource");
+    cy.awaitUrl("/resource");
   });
 
   it("checks if all download button works", () => {

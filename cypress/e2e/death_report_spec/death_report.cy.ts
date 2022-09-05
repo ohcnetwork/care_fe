@@ -11,7 +11,7 @@ describe("Death Report", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/");
+    cy.awaitUrl("/");
     cy.get("a").contains("Patients").click();
     cy.url().should("include", "/patients");
     cy.contains("Details").click();

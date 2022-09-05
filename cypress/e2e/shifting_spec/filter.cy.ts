@@ -8,7 +8,7 @@ describe("Shifting section filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/shifting");
+    cy.awaitUrl("/shifting");
     cy.get("button").should("contain", "Filters").contains("Filters").click();
   });
 

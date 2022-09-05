@@ -10,7 +10,7 @@ describe("Assets List", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/assets");
+    cy.awaitUrl("/assets");
   });
 
   it("Search Asset Name", () => {
