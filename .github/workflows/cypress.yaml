@@ -18,6 +18,17 @@ jobs:
         uses: cypress-io/github-action@v4
         with:
           start: yarn start
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
           browser: chrome
-          screenshotOnRunFailure: false
-          video: false
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+            # Test run video was always captured, so this action uses "always()" condition
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
