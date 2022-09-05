@@ -57,7 +57,7 @@ const TestRow = ({ data, value, onChange }: any) => {
           />
         ) : (
           <input
-            className="w-full px-4 h-12 text-right text-sm border-l border-r focus:ring-primary-500 focus:border-primary-500"
+            className="h-12 text-right text-sm border-l border-r focus:ring-primary-500 focus:border-primary-500"
             value={value}
             onChange={onChange}
             type={inputType}
