@@ -19,3 +19,4 @@ jobs:
         with:
           start: yarn start
           browser: chrome
+          record: false
