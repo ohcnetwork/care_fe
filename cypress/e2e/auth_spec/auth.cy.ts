@@ -15,7 +15,6 @@ describe("Authorisation/Authentication", () => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.visit("/facility");
     cy.get("p").contains("Sign Out").click();
-    cy.wait(1000);
     cy.url().should("include", "/");
   });
 

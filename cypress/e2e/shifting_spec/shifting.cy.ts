@@ -25,7 +25,6 @@ describe("Shifting Page", () => {
 
   it("switch between list view and board view", () => {
     cy.contains("List View").click();
-    cy.wait(1000);
     cy.contains("Board View").click();
   });
 

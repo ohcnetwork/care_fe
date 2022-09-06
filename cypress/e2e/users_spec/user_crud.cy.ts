@@ -46,7 +46,6 @@ describe("User management", () => {
       .type("Mysore", { delay: 200 })
       .wait(2000)
       .type("{downarrow}{enter}");
-    cy.wait(2000);
     cy.get("[name='username']").type(username, { force: true });
     cy.get("[name='dob']").type("02/03/2001");
     cy.get("[name='password']").type("#@Cypress_test123");
@@ -58,22 +57,17 @@ describe("User management", () => {
     cy.get("[name='state']").select("Kerala");
     cy.get("[name='district']").select("Ernakulam");
     cy.get("button[type='submit']").contains("Save User").click();
-    cy.wait(2000);
     cy.verifyNotification("User added successfully");
   });
 
   it("view user and verify details", () => {
-    cy.wait(1000);
     cy.contains("Advanced Filters").click();
-    cy.wait(2000);
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
     cy.get("[placeholder='Phone Number']").type(phone_number);
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
-    cy.wait(2000);
     cy.get("[name='search']").type(username, { force: true });
-    cy.wait(1000);
     // TODO: some verify task
   });
 
@@ -84,11 +78,9 @@ describe("User management", () => {
     cy.get("[placeholder='Phone Number']").type(phone_number);
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
-    cy.wait(2000);
     cy.intercept(/\/api\/v1\/users/).as("getUsers");
     cy.get("[name='search']").type(username, { force: true });
     cy.wait("@getUsers");
-    cy.wait(1000);
     cy.get("a")
       .contains("Click here to show linked facilities")
       .click({ force: true })
@@ -107,13 +99,11 @@ describe("User management", () => {
 
   it("deletes user", () => {
     cy.get("[name='search']").type(username);
-    cy.wait(2000);
     cy.get("button").should("contain", "Delete").contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
   });
 
   it("Next/Previous Page", () => {
-    cy.wait(1000);
     // only works for desktop mode
     cy.get("button")
       .should("contain", ">")

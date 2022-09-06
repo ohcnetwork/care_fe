@@ -180,7 +180,6 @@ describe("Facility", () => {
       type_d_cylinders: "64",
       expected_type_d_cylinders: "4",
     });
-    cy.wait(1000);
     cy.url().then((url) => {
       current_url = url;
     });

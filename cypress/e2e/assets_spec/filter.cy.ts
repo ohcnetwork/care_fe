@@ -16,7 +16,6 @@ describe("Assets Filter", () => {
     cy.wait("@fontawesome");
     cy.wait("@currentuser");
     cy.contains("Advanced Filters").click();
-    cy.wait(1000);
   });
 
   it("Filter by Facility", () => {

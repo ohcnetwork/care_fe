@@ -31,7 +31,6 @@ describe("Death Report", () => {
 
   it("Add Data And Submit " + user.username, () => {
     // Wait For Form Data To Prepopulate
-    cy.wait(1000);
 
     // Clear Exisiting Data And Fill New Data
     cy.get("input[name='name']").clear().type("Apurva Nagar");
