@@ -8,10 +8,8 @@ describe("Shifting section filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/");
-    cy.get("a").contains("Shifting").click().wait(1000);
-    cy.url().should("include", "/shifting");
-    cy.contains("Filters").click();
+    cy.visitWait("/shifting");
+    cy.should("contain", "Filters").contains("Filters").click();
   });
 
   it("filter by origin facility", () => {
