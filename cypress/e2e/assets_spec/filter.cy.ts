@@ -10,7 +10,7 @@ describe("Assets Filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/assets");
+    cy.awaitUrl("/assets");
     cy.contains("Advanced Filters").click();
   });
 

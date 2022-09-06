@@ -26,7 +26,7 @@ describe("User management", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/user");
-});
+  });
 
   it("create user", () => {
     cy.contains("Add New User").click();

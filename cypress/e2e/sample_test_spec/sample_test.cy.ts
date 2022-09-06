@@ -8,7 +8,7 @@ describe("Sample List", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/");
+    cy.awaitUrl("/");
     cy.get("a").contains("Sample Test").click();
   });
 

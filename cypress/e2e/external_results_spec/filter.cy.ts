@@ -8,7 +8,7 @@ describe("External Results Filters", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/external_results");
+    cy.awaitUrl("/external_results");
     cy.contains("Filters").click();
   });
 

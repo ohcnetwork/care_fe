@@ -8,7 +8,7 @@ describe("Edit Profile Testing", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/external_results");
+    cy.awaitUrl("/external_results");
   });
 
   it("Search by Patient name", () => {

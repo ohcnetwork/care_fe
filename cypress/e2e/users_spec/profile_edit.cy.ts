@@ -13,7 +13,7 @@ describe("Edit Profile Testing", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/user/profile");
+    cy.awaitUrl("/user/profile");
     cy.contains("Edit User Profile").click({ force: true });
   });
 

@@ -8,7 +8,7 @@ describe("Shifting Page", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visitWait("/shifting");
+    cy.awaitUrl("/shifting");
   });
 
   it("checks if all download button works", () => {
