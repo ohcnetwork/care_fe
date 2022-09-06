@@ -2,11 +2,7 @@ import { cy, describe, beforeEach, it } from "local-cypress";
 
 describe("Forgot Password", () => {
   beforeEach(() => {
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("http://localhost:4000");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.visitWait("/");
     cy.get("a").contains("Forgot password?").click().wait(100);
   });
 

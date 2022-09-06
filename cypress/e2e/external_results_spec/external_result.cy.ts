@@ -8,11 +8,7 @@ describe("Edit Profile Testing", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("http://localhost:4000/external_results");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.visitWait("/external_results");
   });
 
   it("Search by Patient name", () => {

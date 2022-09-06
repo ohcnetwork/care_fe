@@ -25,11 +25,7 @@ describe("User management", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("/user");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.visitWait("/user");
   });
 
   it("create user", () => {

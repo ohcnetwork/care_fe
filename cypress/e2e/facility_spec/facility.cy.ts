@@ -2,11 +2,7 @@ import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 class facility {
   static create(facility) {
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("/facility/create");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.visitWait("/facility/create");
     this.fillForm(facility);
     cy.get("[id=facility-save]").should("exist").click();
     cy.verifyNotification("Facility added successfully");
@@ -106,11 +102,7 @@ describe("Facility", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit(current_url);
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.visitWait(current_url);
   });
 
   it("creats facility", () => {
@@ -160,7 +152,6 @@ describe("Facility", () => {
   });
 
   it("updates facility", () => {
-    cy.visit(current_url);
     facility.update({
       type: "Private Hosp",
       name: " update",

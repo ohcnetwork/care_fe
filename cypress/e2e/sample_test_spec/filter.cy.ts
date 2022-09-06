@@ -8,11 +8,7 @@ describe("Sample Filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("/");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.visitWait("/");
     cy.get("a").contains("Sample Test").click();
     cy.contains("Advanced Filters").click();
   });

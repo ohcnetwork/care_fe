@@ -8,11 +8,7 @@ describe("Inventory Management Section", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("/");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.visitWait("/");
     cy.get("a")
       .should("contain", "Facility")
       .contains("Facility")

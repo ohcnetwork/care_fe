@@ -8,13 +8,7 @@ describe("Shifting Page", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("/");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
-    cy.get("a").contains("Shifting").click();
-    cy.url().should("include", "/shifting");
+    cy.visitWait("/shifting");
   });
 
   it("checks if all download button works", () => {

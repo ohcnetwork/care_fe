@@ -8,11 +8,7 @@ describe("Shifting section filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("/");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.visitWait("/");
     cy.get("a").contains("Shifting").click().wait(1000);
     cy.url().should("include", "/shifting");
     cy.contains("Filters").click();

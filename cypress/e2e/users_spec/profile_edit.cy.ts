@@ -13,11 +13,7 @@ describe("Edit Profile Testing", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("/user/profile");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.visitWait("/user/profile");
     cy.contains("Edit User Profile").click({ force: true });
   });
 

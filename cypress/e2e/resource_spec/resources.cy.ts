@@ -8,11 +8,7 @@ describe("Resource Page", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("/resource");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.visitWait("/resource");
   });
 
   it("checks if all download button works", () => {
