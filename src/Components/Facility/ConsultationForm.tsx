@@ -55,6 +55,7 @@ import Beds from "./Consultations/Beds";
 import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
 import PRNPrescriptionBuilder, { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { DiagnosisSelect } from "../Common/DiagnosisSelect";
+import { ICD11DiagnosisModel } from "./models";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -76,7 +77,8 @@ type FormDetails = {
   admission_date: string;
   discharge_date: null;
   referred_to: string;
-  diagnosis: string;
+  icd11_diagnoses: string[];
+  icd11_diagnoses_object: ICD11DiagnosisModel[];
   verified_by: string;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
@@ -86,7 +88,7 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: PrescriptionType[];
-  prn_prescription : PRNPrescriptionType[],
+  prn_prescription: PRNPrescriptionType[];
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
@@ -117,7 +119,8 @@ const initForm: FormDetails = {
   admission_date: new Date().toISOString(),
   discharge_date: null,
   referred_to: "",
-  diagnosis: "",
+  icd11_diagnoses: [],
+  icd11_diagnoses_object: [],
   verified_by: "",
   is_kasp: "false",
   kasp_enabled_date: null,
@@ -127,7 +130,7 @@ const initForm: FormDetails = {
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
-  prn_prescription : [],
+  prn_prescription: [],
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
@@ -199,7 +202,9 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>([]);
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
+    []
+  );
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
@@ -232,7 +237,11 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
       setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(!Array.isArray(res.data.prn_prescription) ? [] : res.data.prn_prescription);
+      setPRNAdvice(
+        !Array.isArray(res.data.prn_prescription)
+          ? []
+          : res.data.prn_prescription
+      );
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -250,7 +259,6 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category ? res.data.category : "",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
-            diagnosis: res.data.diagnosis ? res.data.diagnosis : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
@@ -391,13 +399,14 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
-        case "prn_prescription":
+        case "prn_prescription": {
           let invalid = false;
-          for (let f of PRNAdvice) {
+          for (const f of PRNAdvice) {
             if (
               !f.dosage?.replace(/\s/g, "").length ||
               !f.medicine?.replace(/\s/g, "").length ||
-              f.indicator === "" || f.indicator === " "
+              f.indicator === "" ||
+              f.indicator === " "
             ) {
               invalid = true;
               break;
@@ -409,7 +418,7 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-
+        }
         default:
           return;
       }
@@ -449,10 +458,10 @@ export const ConsultationForm = (props: any) => {
         prescribed_medication: state.form.prescribed_medication,
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
-        diagnosis: state.form.diagnosis,
+        icd11_diagnoses: state.form.icd11_diagnoses,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
-        prn_prescription : PRNAdvice,
+        prn_prescription: PRNAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -800,7 +809,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="mt-4" id="consultation_notes-div">
-                <InputLabel>Advice*</InputLabel>
+                <InputLabel>General Instructions (Advice)*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   className="mt-2"
@@ -873,20 +882,20 @@ export const ConsultationForm = (props: any) => {
               <div id="diagnosis-div" className="mt-4">
                 <InputLabel id="diagnosis-label">Diagnosis</InputLabel>
                 <DiagnosisSelect
-                  name="diagnosis"
-                  selected={{
-                    id: state.form.diagnosis,
-                    label: state.form.diagnosis,
-                  }}
-                  setSelected={(diagnosis: any) =>
+                  name="icd11_diagnoses"
+                  selected={state.form.icd11_diagnoses_object}
+                  setSelected={(selected: ICD11DiagnosisModel[] | null) => {
                     dispatch({
                       type: "set_form",
                       form: {
                         ...state.form,
-                        diagnosis: diagnosis?.label || "",
+                        icd11_diagnoses:
+                          selected?.map(
+                            (diagnosis: ICD11DiagnosisModel) => diagnosis.id
+                          ) || [],
                       },
-                    })
-                  }
+                    });
+                  }}
                 />
               </div>
 
