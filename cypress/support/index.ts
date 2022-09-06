@@ -8,6 +8,7 @@ declare global {
       refreshApiLogin(username: string, password: string): Chainable<Subject>;
       loginByApi(username: string, password: string): Chainable<Subject>;
       verifyNotification(msg: string): Chainable<Subject>;
+      visitWait(url: string): Chainable<Subject>;
     }
   }
 }
