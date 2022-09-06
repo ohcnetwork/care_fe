@@ -74,6 +74,7 @@ export const ConsultationDetails = (props: any) => {
   const [open, setOpen] = useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
+  const [diagnosisShowMore, setDiagnosisShowMore] = useState(false);
 
   const initDischargeSummaryForm: { email: string } = {
     email: "",
@@ -263,6 +264,8 @@ export const ConsultationDetails = (props: any) => {
     },
     [consultationId, dispatch, patientData.is_vaccinated]
   );
+
+  console.log("consultationData", consultationData);
 
   useAbortableEffect((status: statusType) => {
     fetchData(status);
@@ -487,7 +490,7 @@ export const ConsultationDetails = (props: any) => {
               )}
             </div>
 
-            <div className="flex px-4 flex-col lg:flex-row gap-2">
+            <div className="flex px-4 flex-col-reverse lg:flex-row gap-2">
               <div className="flex flex-col w-3/4 h-full">
                 {/*consultationData.other_symptoms && (
                   <div className="capitalize">
@@ -498,12 +501,43 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )*/}
 
-                {consultationData.diagnosis && (
+                {(consultationData?.icd11_diagnoses_object?.length ||
+                  consultationData.diagnosis) && (
                   <div className="text-sm w-full">
-                    <span className="font-semibold leading-relaxed">
-                      Diagnosis:{" "}
-                    </span>
-                    {consultationData.diagnosis}
+                    <p className="font-semibold leading-relaxed">Diagnosis:</p>
+
+                    {
+                      // shows the old diagnosis data
+                      consultationData.diagnosis && (
+                        <p>{consultationData.diagnosis}</p>
+                      )
+                    }
+
+                    {consultationData?.icd11_diagnoses_object
+                      ?.slice(0, !diagnosisShowMore ? 3 : undefined)
+                      .map((diagnosis) => (
+                        <p>{diagnosis.label}</p>
+                      ))}
+                    {consultationData?.icd11_diagnoses_object &&
+                      consultationData.icd11_diagnoses_object.length > 3 && (
+                        <>
+                          {!diagnosisShowMore ? (
+                            <a
+                              onClick={() => setDiagnosisShowMore(true)}
+                              className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+                            >
+                              show more
+                            </a>
+                          ) : (
+                            <a
+                              onClick={() => setDiagnosisShowMore(false)}
+                              className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+                            >
+                              show less
+                            </a>
+                          )}{" "}
+                        </>
+                      )}
                   </div>
                 )}
                 {consultationData.verified_by && (

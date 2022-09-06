@@ -8,9 +8,11 @@ describe("Resource Page", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
-    cy.get("a").contains("Resource").click();
-    cy.url().should("include", "/resource");
+    cy.intercept(/fontawesome/).as("fontawesome");
+    cy.intercept(/currentuser/).as("currentuser");
+    cy.visit("http://localhost:4000/resource");
+    cy.wait("@fontawesome");
+    cy.wait("@currentuser");
   });
 
   it("checks if all download button works", () => {
