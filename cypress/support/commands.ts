@@ -64,9 +64,7 @@ Cypress.Commands.add("loginByApi", (username, password) => {
       }
     })
     .then(() => {
-      cy.intercept(/currentuser/).as("currentuser");
       cy.visit("/");
-      cy.wait("@currentuser").its("response.statusCode").should("eq", 200);
       return cy.url().should("include", "/facility");
     });
 });
