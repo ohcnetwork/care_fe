@@ -2,7 +2,11 @@ import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 class facility {
   static create(facility) {
-    cy.visit("http://localhost:4000/facility/create");
+    cy.intercept(/fontawesome/).as("fontawesome");
+    cy.intercept(/currentuser/).as("currentuser");
+    cy.visit("/facility/create");
+    cy.wait("@fontawesome");
+    cy.wait("@currentuser");
     this.fillForm(facility);
     cy.get("[id=facility-save]").should("exist").click();
     cy.verifyNotification("Facility added successfully");
