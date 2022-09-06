@@ -4,7 +4,7 @@ import { cy, describe, beforeEach, it } from "local-cypress";
 
 describe("Authorisation/Authentication", () => {
   beforeEach(() => {
-    cy.visitWait("/");
+    cy.visitWait("/", true);
   });
 
   it("Try login as admin with correct password", () => {
@@ -17,7 +17,7 @@ describe("Authorisation/Authentication", () => {
   it("Try login admin with incorrect password", () => {
     cy.log("Logging in the user: devdistrictadmin:Coronasafe@123");
 
-    cy.visitWait("/");
+    cy.visitWait("/", true);
     cy.get("input[name='username']").type("devdistrictadmin");
     cy.get("input[name='password']").type("coronasafe@123");
     cy.get("button").contains("Login").click();
