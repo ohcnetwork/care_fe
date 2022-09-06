@@ -22,8 +22,10 @@ describe("Patient Creation", () => {
   });
 
   it("Create", () => {
-    cy.wait(1000);
-    cy.get("a").contains("Facility").click({ force: true });
+    cy.get("a")
+      .should("contain", "Facility")
+      .contains("Facility")
+      .click({ force: true });
     cy.get("button").should("contain", "Add Details of a Patient");
     cy.get("button")
       .contains("Add Details of a Patient")
@@ -59,7 +61,11 @@ describe("Patient Creation", () => {
   });
 
   it("Dashboard", () => {
+    cy.intercept(/fontawesome/).as("fontawesome");
+    cy.intercept(/currentuser/).as("currentuser");
     cy.visit(patient_url);
+    cy.wait("@fontawesome");
+    cy.wait("@currentuser");
     cy.url().should("include", "/patient/");
     cy.get("[data-testid=patient-dashboard]").should("contain", "22");
     cy.get("[data-testid=patient-dashboard]").should(
@@ -76,7 +82,11 @@ describe("Patient Creation", () => {
   });
 
   it("Edit", () => {
+    cy.intercept(/fontawesome/).as("fontawesome");
+    cy.intercept(/currentuser/).as("currentuser");
     cy.visit(patient_url + "/update");
+    cy.wait("@fontawesome");
+    cy.wait("@currentuser");
     cy.get("[data-testid=state] select").should("contain", "Kerala");
     cy.get("[data-testid=district] select").should("contain", "Ernakulam");
     cy.get("[data-testid=localbody] select").should("contain", "Alangad");
