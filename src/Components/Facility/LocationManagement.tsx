@@ -133,15 +133,14 @@ export const LocationManagement = (props: LocationManagementProps) => {
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
-      // <p className="bg-white px-5 py-5 border-b border-gray-200 text-center text-gray-500 whitespace-nowrap">
-      //   No locations available
-      // </p>
-      <div className="mt-5 grid justify-items-center">
-        <img
-          className="self-center w-5/12"
-          src={"https://cdn.coronasafe.network/location-finding-error.png"}
-          alt={"No locations found"}
-        />
+      <div className="mt-5 pb-48 h-screen grid content-center justify-items-center">
+        <div className="flex justify-center">
+          <img
+            className="w-full"
+            src={"https://cdn.coronasafe.network/location-finding-error.png"}
+            alt={"No locations found"}
+          />
+        </div>
         <p className="font-sans text-xl text-center text-teal-500">
           No locations found.
         </p>
