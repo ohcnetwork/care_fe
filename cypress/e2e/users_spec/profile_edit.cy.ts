@@ -4,7 +4,6 @@ const username = "dummy_user_2";
 const password = "Dummyuser1";
 const backspace =
   "{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}";
-const base_url = "http://localhost:4000";
 
 describe("Edit Profile Testing", () => {
   before(() => {
@@ -14,8 +13,11 @@ describe("Edit Profile Testing", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit(base_url + "/user/profile");
-    cy.url().should("include", "/user/profile");
+    cy.intercept(/fontawesome/).as("fontawesome");
+    cy.intercept(/currentuser/).as("currentuser");
+    cy.visit("/user/profile");
+    cy.wait("@fontawesome");
+    cy.wait("@currentuser");
     cy.contains("Edit User Profile").click({ force: true });
   });
 

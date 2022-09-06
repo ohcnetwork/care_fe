@@ -6,7 +6,7 @@ describe("Authorisation/Authentication", () => {
   beforeEach(() => {
     cy.intercept(/fontawesome/).as("fontawesome");
     cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("http://localhost:4000");
+    cy.visit("/");
     cy.wait("@fontawesome");
     cy.wait("@currentuser");
   });

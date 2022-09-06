@@ -5,11 +5,13 @@ describe("authentication", () => {
   users.forEach((user) => {
     it("Login as " + user.username + " - " + user.rolename, () => {
       cy.loginByApi(user.username, "passwordR0FL");
-
-      cy.visit("/user/profile").then(() => {
-        cy.get("dd").should("contain", user.username);
-        cy.get("dd").should("contain", user.rolename);
-      });
+      cy.intercept(/fontawesome/).as("fontawesome");
+      cy.intercept(/currentuser/).as("currentuser");
+      cy.visit("/user/profile");
+      cy.wait("@fontawesome");
+      cy.wait("@currentuser");
+      cy.get("dd").should("contain", user.username);
+      cy.get("dd").should("contain", user.rolename);
     });
   });
   afterEach(() => {
