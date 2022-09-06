@@ -102,7 +102,11 @@ describe("Facility", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.intercept(/fontawesome/).as("fontawesome");
+    cy.intercept(/currentuser/).as("currentuser");
     cy.visit(current_url);
+    cy.wait("@fontawesome");
+    cy.wait("@currentuser");
   });
 
   it("creats facility", () => {

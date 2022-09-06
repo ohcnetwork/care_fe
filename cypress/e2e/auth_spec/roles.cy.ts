@@ -6,11 +6,10 @@ describe("authentication", () => {
     it("Login as " + user.username + " - " + user.rolename, () => {
       cy.loginByApi(user.username, "passwordR0FL");
 
-      // Assert user
-      cy.get("a[href='/user/profile'] i").click();
-      cy.url().should("include", "/user/profile");
-      cy.get("dd").should("contain", user.username);
-      cy.get("dd").should("contain", user.rolename);
+      cy.visit("/user/profile").then(() => {
+        cy.get("dd").should("contain", user.username);
+        cy.get("dd").should("contain", user.rolename);
+      });
     });
   });
   afterEach(() => {

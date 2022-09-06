@@ -94,6 +94,7 @@ export interface ConsultationModel {
   is_kasp?: boolean;
   kasp_enabled_date?: string;
   diagnosis?: string;
+  icd11_diagnoses_object?: ICD11DiagnosisModel[];
   verified_by?: string;
   suggestion_text?: string;
   symptoms?: Array<number>;
@@ -102,7 +103,7 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   discharge_advice?: any;
-  prn_prescription? : PRNPrescriptionType[];
+  prn_prescription?: PRNPrescriptionType[];
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
@@ -187,4 +188,10 @@ export interface CurrentBed {
   start_date: string;
   end_date: string;
   meta: Record<string, any>;
+}
+
+export interface ICD11DiagnosisModel {
+  id: string;
+  label: string;
+  parentId: string | null;
 }
