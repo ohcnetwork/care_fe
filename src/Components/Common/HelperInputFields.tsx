@@ -557,9 +557,11 @@ interface AutoCompleteAsyncFieldProps {
   renderOption: (option: any) => JSX.Element;
   placeholder: string;
   noOptionsText?: string;
-  value: any;
+  value?: any;
+  defaultValue?: any;
   loading?: boolean;
   errors?: string;
+  onBlur?: (e: any) => void;
   onOpen?: (e: any) => void;
   filterOptions?: (options: any) => any;
   name?: string;
@@ -568,6 +570,7 @@ interface AutoCompleteAsyncFieldProps {
 
 export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
   const {
+    name,
     margin,
     options,
     label,
@@ -580,7 +583,9 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
     onChange,
     onSearch,
     value,
+    defaultValue,
     loading,
+    onBlur,
     onOpen,
     noOptionsText,
     filterOptions,
@@ -597,9 +602,11 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         autoSelect={autoSelect}
         multiple={multiple}
         onOpen={onOpen}
+        onBlur={onBlur}
         options={options}
         onChange={onChange}
         value={value}
+        defaultValue={defaultValue}
         loading={loading}
         noOptionsText={noOptionsText}
         getOptionSelected={getOptionSelected}
@@ -610,6 +617,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         renderInput={(params: any) => (
           <TextField
             {...params}
+            name={name}
             variant={variant}
             margin={margin || "normal"}
             label={label}
