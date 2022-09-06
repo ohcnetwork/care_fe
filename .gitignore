@@ -46,6 +46,11 @@ public/build-meta.json
 !.yarn/sdks
 !.yarn/versions
 
+
+# Using NPM
+# package-lock.json
+yarn.lock
+
 # Cypress
 cypress/downloads
 cypress/fixtures/token.json
