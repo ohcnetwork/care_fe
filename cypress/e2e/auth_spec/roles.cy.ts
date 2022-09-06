@@ -13,6 +13,8 @@ describe("authentication", () => {
   afterEach(() => {
     cy.log("Logging out");
     cy.get("p").contains("Sign Out").click();
+    cy.getLocalStorage("care_access_token").should("be.null");
+    cy.getLocalStorage("care_refresh_token").should("be.null");
     cy.url().should("include", "/");
   });
 });
