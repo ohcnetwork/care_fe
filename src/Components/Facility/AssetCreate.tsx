@@ -25,10 +25,11 @@ import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
-import SelectMenu from "../Common/components/SelectMenu";
+import SelectMenuV2 from "../Common/components/SelectMenuV2";
 import moment from "moment";
 import clsx from "clsx";
 import RadioInputs from "../Common/components/RadioGroup";
+import SearchSelectV2 from "../Common/components/SearchSelectV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError = {
@@ -92,7 +93,7 @@ const AssetCreate = (props: AssetProps) => {
   const [support_email, setSupportEmail] = useState("");
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [locations, setLocations] = useState([]);
+  const [locations, setLocations] = useState<any>([]);
   const [asset, setAsset] = useState<AssetData>();
   const [facilityName, setFacilityName] = useState("");
   const [qrCodeId, setQrCodeId] = useState("");
@@ -378,7 +379,7 @@ const AssetCreate = (props: AssetProps) => {
                   <div className="col-span-6 sm:col-span-2">
                     <label htmlFor="asset-type">Asset Type * </label>
                     <div className="mt-2">
-                      <SelectMenu
+                      <SelectMenuV2
                         options={[
                           {
                             title: "Select",
@@ -410,8 +411,17 @@ const AssetCreate = (props: AssetProps) => {
                     {/* Location */}
                     <div className="">
                       <label htmlFor="asset-location">Location * </label>
+                      <SearchSelectV2
+                        options={locations}
+                        value={locations.filter((l: any) => l.id === location)}
+                        onChange={(location: any) => setLocation(location.id)}
+                        placeholder="Select a Location"
+                        name="location"
+                        optionLabel={(loc: any) => loc.name}
+                        optionDescription={(loc: any) => loc.facility.name}
+                      />
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
                           options={[
                             {
                               title: "Select",
@@ -436,7 +446,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div>
                       <label htmlFor="asset-class">Asset Class</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
                           options={[
                             { title: "Not Applicable", value: undefined },
                             { title: "ONVIF Camera", value: "ONVIF" },

@@ -15,7 +15,7 @@ type Props<T> = {
   position?: string;
 };
 
-export default function SelectMenu<T>(props: Props<T>) {
+export default function SelectMenuV2<T>(props: Props<T>) {
   const options = props.options.map((option) => {
     return {
       ...option,
