@@ -29,10 +29,10 @@ import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
 import SelectMenu from "../Common/components/SelectMenu";
-import goBack from "../../Utils/goBack";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 
-const initError: any = {
+const initError = {
   name: "",
   asset_type: "",
   asset_class: "",

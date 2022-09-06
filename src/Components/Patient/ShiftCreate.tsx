@@ -31,7 +31,7 @@ import {
 import { phonePreg } from "../../Common/validation";
 
 import { createShift, getPatient } from "../../Redux/actions";
-import goBack from "../../Utils/goBack";
+import { goBack } from "../../Utils/utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 

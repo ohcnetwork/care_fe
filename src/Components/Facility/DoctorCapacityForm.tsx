@@ -19,7 +19,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
-import goBack from "../../Utils/goBack";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../../Components/Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 

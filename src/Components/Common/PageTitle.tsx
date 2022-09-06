@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import clsx from "clsx";
-import goBack from "../../Utils/goBack";
+import { goBack } from "../../Utils/utils";
 
 interface PageTitleProps {
   title: string;

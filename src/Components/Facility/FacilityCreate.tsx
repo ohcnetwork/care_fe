@@ -49,7 +49,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
-import goBack from "../../Utils/goBack";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 

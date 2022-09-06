@@ -32,7 +32,7 @@ import {
   FormControlLabel,
   Button,
 } from "@material-ui/core";
-import goBack from "../../Utils/goBack";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
