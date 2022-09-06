@@ -105,7 +105,7 @@ describe("Facility", () => {
     cy.awaitUrl(current_url);
   });
 
-  it("creats facility", () => {
+  it("create facility", () => {
     facility.create({
       type: "Private Hospital",
       name: "cypress facility",
@@ -151,7 +151,7 @@ describe("Facility", () => {
     });
   });
 
-  it("updates facility", () => {
+  it("update facility", () => {
     facility.update({
       type: "Private Hosp",
       name: " update",
