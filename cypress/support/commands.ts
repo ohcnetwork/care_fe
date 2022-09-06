@@ -65,12 +65,18 @@ Cypress.Commands.add("loginByApi", (username, password) => {
   );
 });
 
-Cypress.Commands.add("visitWait", (url: string) => {
-  cy.intercept(/fontawesome/).as("fontawesome");
-  cy.intercept(/currentuser/).as("currentuser");
-  cy.visit(url);
-  cy.wait(["@fontawesome", "@currentuser"]);
-});
+Cypress.Commands.add(
+  "visitWait",
+  (url: string, disableLoginVerification = false) => {
+    cy.intercept(/fontawesome/).as("fontawesome");
+    cy.intercept(/currentuser/).as("currentuser");
+    cy.visit(url);
+    cy.wait("@fontawesome");
+    disableLoginVerification
+      ? cy.wait("@currentuser")
+      : cy.wait("@currentuser").its("response.statusCode").should("eq", 200);
+  }
+);
 
 Cypress.Commands.add("verifyNotification", (text) => {
   cy.get(".pnotify-container").should("exist").contains(text);
