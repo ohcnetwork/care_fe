@@ -3,13 +3,13 @@ FROM node:lts-buster-slim as build-stage
 
 WORKDIR /app
 
-COPY package.json yarn.lock ./
+COPY package.json package-lock.json ./
 
-RUN yarn install
+RUN npm install --legacy-peer-deps
 
 COPY . .
 
-RUN yarn run build
+RUN npm run build
 
 
 #production-stage
