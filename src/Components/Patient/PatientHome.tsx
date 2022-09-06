@@ -32,6 +32,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { RoleButton } from "../Common/RoleButton";
 import clsx from "clsx";
+import { Badge } from "../Common/Badge";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -142,22 +143,6 @@ export const PatientHome = (props: any) => {
       }
     });
   };
-
-  function Badge(props: { color: string; icon: string; text: string }) {
-    return (
-      <span
-        className="inline-flex items-center py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
-        title={props.text}
-      >
-        <i
-          className={
-            "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-          }
-        ></i>
-        {props.text}
-      </span>
-    );
-  }
 
   const handleVolunteerSelect = (volunteer: any) => {
     setAssignedVolunteerObject(volunteer);
@@ -332,10 +317,10 @@ export const PatientHome = (props: any) => {
       <div className="sm:col-span-1" key={`med_his_${idx}`}>
         {item?.disease !== "NO" && (
           <>
-            <div className="text-sm leading-5 font-medium text-gray-700">
+            <div className="text-sm leading-5 font-medium text-gray-700 overflow-x-scroll">
               {item.disease}
             </div>
-            <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+            <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
               {item.details}
             </div>
           </>
@@ -394,7 +379,7 @@ export const PatientHome = (props: any) => {
     );
   }
 
-  const isPatientInactive = (patientData: PatientModel, facilityId : number) => {
+  const isPatientInactive = (patientData: PatientModel, facilityId: number) => {
     return (
       !patientData.is_active ||
       !(patientData?.last_consultation?.facility === facilityId)
@@ -619,49 +604,61 @@ export const PatientHome = (props: any) => {
                     </div>
                   )}
               </div>
-              <div className="flex flex-wrap mt-2 space-x-2">
+              <div className="flex flex-wrap mt-2 gap-2">
                 {patientData.is_vaccinated ? (
-                  <Badge color="blue" icon="syringe" text="Vaccinated" />
+                  <Badge color="blue" startIcon="syringe" text="Vaccinated" />
                 ) : (
                   <Badge
                     color="yellow"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Not Vaccinated"
                   />
                 )}
                 {patientData.allow_transfer ? (
-                  <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
+                  <Badge
+                    color="yellow"
+                    startIcon="unlock"
+                    text="Transfer Allowed"
+                  />
                 ) : (
-                  <Badge color="primary" icon="lock" text="Transfer Blocked" />
+                  <Badge
+                    color="primary"
+                    startIcon="lock"
+                    text="Transfer Blocked"
+                  />
                 )}
                 {patientData.gender === 2 &&
                   patientData.is_antenatal &&
                   patientData.is_active && (
-                    <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+                    <Badge
+                      color="blue"
+                      startIcon="baby-carriage"
+                      text="Antenatal"
+                    />
                   )}
                 {patientData.contact_with_confirmed_carrier && (
                   <Badge
                     color="red"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Contact with confirmed carrier"
                   />
                 )}
                 {patientData.contact_with_suspected_carrier && (
                   <Badge
                     color="yellow"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Contact with suspected carrier"
                   />
                 )}
                 {patientData.past_travel && (
                   <Badge
                     color="yellow"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Travel (within last 28 days)"
                   />
                 )}
                 {patientData.last_consultation?.is_telemedicine && (
-                  <Badge color="purple" icon="phone" text="Telemedicine" />
+                  <Badge color="purple" startIcon="phone" text="Telemedicine" />
                 )}
               </div>
             </div>
@@ -718,9 +715,19 @@ export const PatientHome = (props: any) => {
                         {patientData?.created_by?.first_name}{" "}
                         {patientData?.created_by?.last_name}
                       </div>
-                      <div className="text-xs">
-                        {patientData.created_date &&
-                          moment(patientData.created_date).format("lll")}
+                      <div className="text-xs flex justify-center">
+                        {patientData.created_date && (
+                          <div className="flex flex-col md:flex-row gap-1">
+                            <div>
+                              {moment(patientData.created_date).format("ll")}
+                            </div>
+                            <div>
+                              {moment(patientData.created_date).format(
+                                "hh:mm A"
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -733,9 +740,19 @@ export const PatientHome = (props: any) => {
                         {patientData?.last_edited?.first_name}{" "}
                         {patientData?.last_edited?.last_name}
                       </div>
-                      <div className="text-xs">
-                        {patientData.modified_date &&
-                          moment(patientData.modified_date).format("lll")}
+                      <div className="text-xs flex justify-center">
+                        {patientData.modified_date && (
+                          <div className="flex flex-col md:flex-row gap-1">
+                            <div>
+                              {moment(patientData.modified_date).format("ll")}
+                            </div>
+                            <div>
+                              {moment(patientData.modified_date).format(
+                                "hh:mm A"
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -796,7 +813,7 @@ export const PatientHome = (props: any) => {
         </section>
         <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
           <div
-            className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
+            className="flex justify-between border-b border-dashed cursor-pointer text-gray-900 font-semibold text-left text-lg pb-2"
             onClick={() => {
               setShowShifts(!showShifts);
               setIsShiftClicked(true);
@@ -1082,7 +1099,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Present Health
                     </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
                       {patientData.present_health}
                     </div>
                   </div>
@@ -1092,7 +1109,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Ongoing Medications
                     </div>
-                    <div className="my-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="my-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
                       {patientData.ongoing_medication}
                     </div>
                   </div>
@@ -1102,7 +1119,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Allergies
                     </div>
-                    <div className="my-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="my-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
                       {patientData.allergies}
                     </div>
                   </div>
@@ -1461,9 +1478,7 @@ export const PatientHome = (props: any) => {
           <div>
             <OnlineUsersSelect
               userId={assignedVolunteerObject?.id || patientData.assigned_to}
-              selectedUser={
-                assignedVolunteerObject || patientData.assigned_to_object
-              }
+              selectedUser={assignedVolunteerObject}
               onSelect={handleVolunteerSelect}
               user_type={"Volunteer"}
               outline={false}
@@ -1474,7 +1489,7 @@ export const PatientHome = (props: any) => {
           <DialogActions>
             <Button
               onClick={() => {
-                handleVolunteerSelect("");
+                handleVolunteerSelect(patientData.assigned_to_object);
                 setOpenAssignVolunteerDialog(false);
               }}
               color="primary"
