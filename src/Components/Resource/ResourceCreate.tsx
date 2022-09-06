@@ -271,58 +271,6 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div>
-                <InputLabel>Is this an emergency?</InputLabel>
-                <RadioGroup
-                  aria-label="emergency"
-                  name="emergency"
-                  value={state.form.emergency === "true"}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
-              </div>
-
-              <div>
-                <InputLabel>Category</InputLabel>
-                <SelectField
-                  name="category"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.category}
-                  options={RESOURCE_CATEGORY_CHOICES}
-                  onChange={handleChange}
-                  className="bg-white h-14 lg:w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-
-              <div>
-                <InputLabel>Subcategory</InputLabel>
-                <SelectField
-                  name="sub_category"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.sub_category}
-                  options={RESOURCE_SUBCATEGORIES}
-                  onChange={handleChange}
-                  className="bg-white h-14 lg:w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-
-              <div>
                 <InputLabel>Required Quantity</InputLabel>
                 <TextInputField
                   name="requested_quantity"
@@ -332,6 +280,35 @@ export default function ResourceCreate(props: resourceProps) {
                   value={state.form.required_quantity}
                   onChange={handleChange}
                   errors=""
+                />
+              </div>
+
+              <div>
+                <InputLabel>Category</InputLabel>
+                <SelectField
+                  name="category"
+                  variant="outlined"
+                  fullWidth
+                  margin="dense"
+                  optionArray={true}
+                  value={state.form.category}
+                  options={RESOURCE_CATEGORY_CHOICES}
+                  onChange={handleChange}
+                  className="bg-white h-14 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
+
+              <div>
+                <InputLabel>Subcategory</InputLabel>
+                <SelectField
+                  name="sub_category"
+                  variant="outlined"
+                  margin="dense"
+                  fullWidth
+                  value={state.form.sub_category}
+                  options={RESOURCE_SUBCATEGORIES}
+                  onChange={handleChange}
+                  className="bg-white h-14 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
 
@@ -365,14 +342,47 @@ export default function ResourceCreate(props: resourceProps) {
                 />
               </div>
 
-              <div className="md:col-span-2 flex justify-between mt-4">
-                <Button color="default" variant="contained" onClick={goBack}>
+              <div>
+                <InputLabel>Is this an emergency?</InputLabel>
+                <RadioGroup
+                  aria-label="emergency"
+                  name="emergency"
+                  value={state.form.emergency === "true"}
+                  onChange={handleChange}
+                  style={{ padding: "0px 5px" }}
+                >
+                  <Box>
+                    <FormControlLabel
+                      value={true}
+                      control={<Radio />}
+                      label="Yes"
+                    />
+                    <FormControlLabel
+                      value={false}
+                      control={<Radio />}
+                      label="No"
+                    />
+                  </Box>
+                </RadioGroup>
+                <ErrorHelperText error={state.errors.emergency} />
+              </div>
+
+              <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
+                <Button
+                  color="default"
+                  variant="contained"
+                  className="w-full md:w-auto"
+                  fullWidth
+                  onClick={goBack}
+                >
                   Cancel
                 </Button>
                 <Button
                   color="primary"
                   variant="contained"
                   type="submit"
+                  fullWidth
+                  className="w-full md:w-auto"
                   style={{ marginLeft: "auto" }}
                   onClick={(e) => handleSubmit(e)}
                   startIcon={
