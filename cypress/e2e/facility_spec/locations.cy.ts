@@ -8,8 +8,15 @@ describe("Location Management Section", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.wait(1000);
-    cy.get("a").contains("Facility").click({ force: true });
+    cy.intercept(/fontawesome/).as("fontawesome");
+    cy.intercept(/currentuser/).as("currentuser");
+    cy.visit("/");
+    cy.wait("@fontawesome");
+    cy.wait("@currentuser");
+    cy.get("a")
+      .should("contain", "Facility")
+      .contains("Facility")
+      .click({ force: true });
     cy.contains("Location Management").click();
   });
 
