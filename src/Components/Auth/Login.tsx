@@ -121,7 +121,7 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row relative">
+    <div className="flex flex-col md:flex-row md:h-screen relative">
       <div className="md:absolute top-2 right-2 p-2 md:p-0 bg-primary-500 md:bg-white">
         <LanguageSelector className="md:bg-primary-500 md:text-white bg-white" />
       </div>
