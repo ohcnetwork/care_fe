@@ -95,10 +95,6 @@ describe("User management", () => {
 
   it("deletes user", () => {
     cy.get("[name='search']").type(username);
-<<<<<<< HEAD
-=======
-    cy.wait(2000);
->>>>>>> 442685c0 (Fix cypress workflow errors (#3541))
     cy.get("button").should("contain", "Delete").contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
   });
