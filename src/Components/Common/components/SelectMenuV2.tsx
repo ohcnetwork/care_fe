@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { Check, KeyboardArrowDown } from "@material-ui/icons";
-import clsx from "clsx";
 
 type Props<T> = {
   options: {
@@ -61,19 +60,17 @@ export default function SelectMenuV2<T>(props: Props<T>) {
               leaveTo="opacity-0"
             >
               <Listbox.Options
-                className={clsx(
-                  props.position ? "md:right-0 md:left-auto" : "left-0",
-                  "origin-top-right absolute z-10 mt-2 w-auto lg:w-72 rounded-md shadow-lg overflow-hidden bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none"
-                )}
+                className={`origin-top-right absolute z-10 mt-2 w-auto lg:w-72 rounded-md shadow-lg overflow-hidden bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none ${
+                  props.position ? "md:right-0 md:left-auto" : "left-0"
+                }`}
               >
                 {options.map((option) => (
                   <Listbox.Option
                     key={option.title}
                     className={({ active }) =>
-                      clsx(
-                        active ? "text-white bg-primary-500" : "text-gray-900",
-                        "cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out"
-                      )
+                      `cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
+                        active ? "text-white bg-primary-500" : "text-gray-900"
+                      }`
                     }
                     value={option}
                   >
@@ -81,18 +78,17 @@ export default function SelectMenuV2<T>(props: Props<T>) {
                       <div className="flex flex-col">
                         <div className="flex justify-between">
                           <p
-                            className={clsx(
+                            className={
                               selected ? "font-semibold" : "font-normal"
-                            )}
+                            }
                           >
                             {option.title}
                           </p>
                           {selected ? (
                             <span
-                              className={clsx(
-                                active ? "text-white" : "text-primary-500",
-                                "transition-all duration-100 ease-in-out"
-                              )}
+                              className={`transition-all duration-100 ease-in-out ${
+                                active ? "text-white" : "text-primary-500"
+                              }`}
                             >
                               <Check className="h-5 w-5" aria-hidden="true" />
                             </span>
@@ -100,10 +96,9 @@ export default function SelectMenuV2<T>(props: Props<T>) {
                         </div>
                         {option.description && (
                           <p
-                            className={clsx(
-                              active ? "text-primary-200" : "text-gray-500",
-                              "mt-2"
-                            )}
+                            className={`mt-2 ${
+                              active ? "text-primary-200" : "text-gray-500"
+                            }`}
                           >
                             {option.description}
                           </p>

@@ -27,7 +27,6 @@ import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
 import SelectMenuV2 from "../Common/components/SelectMenuV2";
 import moment from "moment";
-import clsx from "clsx";
 import RadioInputsV2 from "../Common/components/RadioInputsV2";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -453,10 +452,10 @@ const AssetCreate = (props: AssetProps) => {
                     </label>
                     <textarea
                       id="asset-description"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.description && "border-red-500"
-                      )}
+                      className={
+                        "mt-2 block w-full input" +
+                        ((state.errors.description && " border-red-500") || "")
+                      }
                       name="asset-description"
                       placeholder="Eg. Details about the equipment"
                       value={description}
@@ -470,11 +469,12 @@ const AssetCreate = (props: AssetProps) => {
                   {/* Divider */}
                   <div className="col-span-6">
                     <hr
-                      className={clsx(
-                        "transition-all",
-                        (is_working === "true" && "opacity-0 my-0") ||
-                          "opacity-100 my-4"
-                      )}
+                      className={
+                        "transition-all " +
+                        (is_working === "true"
+                          ? "opacity-0 my-0"
+                          : "opacity-100 my-4")
+                      }
                     />
                   </div>
 
@@ -495,20 +495,22 @@ const AssetCreate = (props: AssetProps) => {
 
                   {/* Not Working Reason */}
                   <div
-                    className={clsx(
-                      "col-span-6",
-                      is_working !== "false" && "hidden"
-                    )}
+                    className={
+                      "col-span-6" +
+                      ((is_working !== "false" && " hidden") || "")
+                    }
                   >
                     <label htmlFor="not_working_reason">
                       Why the asset is not working?
                     </label>
                     <textarea
                       id="not_working_reason"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.not_working_reason && "border-red-500"
-                      )}
+                      className={
+                        "mt-2 block w-full input" +
+                        ((state.errors.not_working_reason &&
+                          " border-red-500") ||
+                          "")
+                      }
                       name="not_working_reason"
                       placeholder="Describe why the asset is not working"
                       value={not_working_reason}
@@ -522,11 +524,12 @@ const AssetCreate = (props: AssetProps) => {
                   {/* Divider */}
                   <div className="col-span-6">
                     <hr
-                      className={clsx(
-                        "transition-all",
-                        (is_working === "true" && "opacity-0 my-0") ||
-                          "opacity-100 mb-7"
-                      )}
+                      className={
+                        "transition-all " +
+                        (is_working === "true"
+                          ? "opacity-0 my-0"
+                          : "opacity-100 mb-7")
+                      }
                     />
                   </div>
 
@@ -678,10 +681,10 @@ const AssetCreate = (props: AssetProps) => {
                     <label htmlFor="notes">Notes</label>
                     <textarea
                       id="notes"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.notes && "border-red-500"
-                      )}
+                      className={
+                        "mt-2 block w-full input" +
+                        ((state.errors.notes && " border-red-500") || "")
+                      }
                       name="notes"
                       placeholder="Eg. Details on functionality, service, etc."
                       value={notes}
@@ -697,7 +700,7 @@ const AssetCreate = (props: AssetProps) => {
 
                 <div className="flex justify-end gap-x-4 gap-y-2 flex-wrap mb-8">
                   <button
-                    className="btn-primary"
+                    className="primary-button"
                     id="asset-create"
                     type="submit"
                     onClick={handleSubmit}

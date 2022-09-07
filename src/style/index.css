@@ -135,7 +135,16 @@ button:focus {
 }
 
 .btn-primary {
-  @apply focus:outline-none text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-6 py-2.5 mr-2 mb-2 transition-all ease-in-out duration-200;
+  @apply bg-primary-500 text-white;
+}
+
+.btn-primary:hover {
+  @apply bg-primary-600;
+}
+
+.btn-primary:focus {
+  @apply bg-primary-800;
+  background-image: none;
 }
 
 .btn-warning {
@@ -338,7 +347,7 @@ button:disabled:focus,
 .checkbox__input:checked + .checkbox__label span:first-child svg {
   stroke-dashoffset: 0;
 }
-pm
+
 .checkbox__input:checked + .checkbox__label span:first-child:before {
   transform: scale(3.5);
   opacity: 0;

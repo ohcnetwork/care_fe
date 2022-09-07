@@ -266,7 +266,7 @@ const AssetManage = (props: AssetManageProps) => {
               )
             }
             id="update-asset"
-            className="btn-primary"
+            className="primary-button"
           >
             <i className="fas fa-pencil-alt text-white mr-4"></i>
             Update
@@ -275,7 +275,7 @@ const AssetManage = (props: AssetManageProps) => {
             <button
               onClick={() => navigate(`/assets/${asset?.id}/configure`)}
               id="configure-asset"
-              className="btn-primary"
+              className="primary-button"
             >
               <i className="fas fa-cog text-white mr-4"></i>
               Configure
