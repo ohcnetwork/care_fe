@@ -303,7 +303,9 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="flex items-center gap-3 mt-4">
               <div>
-                <h1 className="text-lg font-bold">Features</h1>
+                {facilityData.features?.some((feature) =>
+                  FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
+                ) && <h1 className="text-lg font-bold">Features</h1>}
                 <div className="flex gap-2 flex-wrap mt-2">
                   {facilityData.features?.map(
                     (feature, i) =>
