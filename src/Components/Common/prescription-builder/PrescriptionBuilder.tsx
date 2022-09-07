@@ -127,7 +127,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                                                 required
                                             />
                                             <div
-                                                className="w-[85px] shrink-0"    
+                                                className="w-[80px] shrink-0"    
                                             >
                                                 <PrescriptionDropdown
                                                     placeholder="Unit"
@@ -140,7 +140,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                                             
                                     </div>
                                             
-                                    <div className="w-[65px] shrink-0">
+                                    <div className="w-[55px] shrink-0">
                                         Days
                                         <input 
                                             type="number"
