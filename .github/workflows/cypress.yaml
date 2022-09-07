@@ -9,19 +9,23 @@ on:
 
 jobs:
   cypress-run:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - run: yarn install
-      - name: Cypress run
+    - name: Wait for Netlify Deploy Preview Commit
+        uses: kamranayub/wait-for-netlify-action@v2.0.3
+        id: wait-for-netflify-preview
+        with:
+          site_name: "care-egov-staging"
+          max_timeout: 300
+        env:
+          NETLIFY_TOKEN: ${{secrets.NETLIFY_TOKEN}}
+    - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
           install: false
-          start: yarn start
-          wait-on: 'http://localhost:4000'
-          wait-on-timeout: 300
           browser: electron
+        env:
+          CYPRESS_BASE_URL: ${{ steps.wait-for-netflify-preview.outputs.url }}
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
