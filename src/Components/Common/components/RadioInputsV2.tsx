@@ -16,7 +16,7 @@ interface Props<T extends RadioValue> {
   required?: boolean;
 }
 
-export default function RadioInputs<T extends RadioValue>(props: Props<T>) {
+export default function RadioInputsV2<T extends RadioValue>(props: Props<T>) {
   return (
     <div className={props.className}>
       {props.label && (

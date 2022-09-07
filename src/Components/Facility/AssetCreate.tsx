@@ -28,7 +28,7 @@ import { parseQueryParams } from "../../Utils/primitives";
 import SelectMenuV2 from "../Common/components/SelectMenuV2";
 import moment from "moment";
 import clsx from "clsx";
-import RadioInputs from "../Common/components/RadioGroup";
+import RadioInputsV2 from "../Common/components/RadioInputsV2";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -479,7 +479,7 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Working Status */}
-                  <RadioInputs
+                  <RadioInputsV2
                     className="col-span-6"
                     required
                     label="Working Status"
