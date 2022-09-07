@@ -25,15 +25,12 @@ describe("User management", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000").wait(2000);
-    cy.get("a").contains("Users").click();
-    cy.url().should("include", "/user");
+    cy.intercept(/fontawesome/).as("fontawesome");
+    cy.intercept(/currentuser/).as("currentuser");
+    cy.visit("/user");
+    cy.wait("@fontawesome");
+    cy.wait("@currentuser");
   });
-
-  // it("debug", () => {
-  //   cy.visit("http://localhost:4000/user/add").wait(2000);
-  //   cy.wait(2000);
-  // });
 
   it("create user", () => {
     cy.contains("Add New User").click();
@@ -60,7 +57,6 @@ describe("User management", () => {
     cy.get("[name='gender']").select("Male");
     cy.get("[name='state']").select("Kerala");
     cy.get("[name='district']").select("Ernakulam");
-    //cy.get("[name='local_body']").select("");
     cy.get("button[type='submit']").contains("Save User").click();
     cy.wait(2000);
     cy.verifyNotification("User added successfully");
@@ -106,13 +102,13 @@ describe("User management", () => {
       .type("test")
       .wait(2000)
       .type("{downarrow}{enter}");
-    cy.get("button > span").contains("Add").click().wait(1000);
+    cy.get("button > span").contains("Add").click({ force: true }).wait(1000);
   });
 
   it("deletes user", () => {
     cy.get("[name='search']").type(username);
     cy.wait(2000);
-    cy.get("button").contains("Delete").click();
+    cy.get("button").should("contain", "Delete").contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
   });
 
