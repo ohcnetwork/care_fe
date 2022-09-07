@@ -9,7 +9,6 @@ import {
   listAssets,
   getFacilityAssetLocation,
 } from "../../Redux/actions";
-import { Badge } from "../Patient/ManagePatients";
 import { AssetData } from "./AssetTypes";
 import { getAsset } from "../../Redux/actions";
 import React, { useState, useCallback, useEffect } from "react";
@@ -22,6 +21,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
+import { Badge } from "../Common/Badge";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -341,18 +341,28 @@ const AssetsList = () => {
                       </span>
                     </p>
                   </div>
-                  <div className="md:flex justify-between pt-2">
-                    <div className="md:flex flex-wrap">
+                  <div className="px-4 md:flex justify-between pt-2">
+                    <div className="md:flex flex-wrap gap-4">
                       {asset.is_working ? (
-                        <Badge color="green" icon="cog" text="Working" />
+                        <div>
+                          <Badge color="green" startIcon="cog" text="Working" />
+                        </div>
                       ) : (
-                        <Badge color="red" icon="cog" text="Not Working" />
+                        <div>
+                          <Badge
+                            color="red"
+                            startIcon="cog"
+                            text="Not Working"
+                          />
+                        </div>
                       )}
-                      <Badge
-                        color="blue"
-                        icon="location-arrow"
-                        text={asset.status}
-                      />
+                      <div>
+                        <Badge
+                          color="blue"
+                          startIcon="location-arrow"
+                          text={asset.status}
+                        />
+                      </div>
                     </div>
                     <div className="px-2">
                       <div

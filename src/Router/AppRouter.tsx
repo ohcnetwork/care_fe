@@ -392,6 +392,7 @@ const routes = {
   "/teleicu/facility/:facilityId": ({ facilityId }: any) => (
     <TeleICUPatientsList facilityId={facilityId} />
   ),
+  "/not-found": () => <Error404 />,
 };
 
 export default function AppRouter() {

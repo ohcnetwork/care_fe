@@ -50,14 +50,17 @@ export const header_content_type: URLS = {
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 
-// Object for possible extension of image files
-const ExtImage: URLS = {
-  jpeg: "1",
-  jpg: "1",
-  gif: "1",
-  png: "1",
-  svg: "1",
-};
+// Array of image extensions
+const ExtImage: string[] = [
+  "jpeg",
+  "jpg",
+  "png",
+  "gif",
+  "svg",
+  "bmp",
+  "webp",
+  "jfif",
+];
 
 export const LinearProgressWithLabel = (props: any) => {
   return (
@@ -92,6 +95,8 @@ interface URLS {
 interface StateInterface {
   open: boolean;
   isImage: boolean;
+  name: string;
+  extension: string;
   zoom: number;
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
@@ -99,7 +104,7 @@ interface StateInterface {
 
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [file, setFile] = useState<File | undefined>();
+  const [file, setFile] = useState<File | null>();
   const {
     facilityId,
     consultationId,
@@ -134,6 +139,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const initialState = {
     open: false,
     isImage: false,
+    name: "",
+    extension: "",
     zoom: 3,
     isZoomInDisabled: false,
     isZoomOutDisabled: false,
@@ -301,14 +308,11 @@ export const FileUpload = (props: FileUploadProps) => {
     [dispatch, fetchData, id, reload]
   );
 
-  // Function to extract the extension of the file and check if its image or not
+  // Function to extract the extension of the file
   const getExtension = (url: string) => {
     const div1 = url.split("?")[0].split(".");
     const ext: string = div1[div1.length - 1].toLowerCase();
-    if (ExtImage[ext] && ExtImage[ext] === "1") {
-      return true;
-    }
-    return false;
+    return ext;
   };
 
   const loadFile = async (id: any) => {
@@ -316,10 +320,13 @@ export const FileUpload = (props: FileUploadProps) => {
     setFileState({ ...file_state, open: true });
     const data = { file_type: type, associating_id: getAssociatedId() };
     const responseData = await dispatch(retrieveUpload(data, id));
+    const file_extension = getExtension(responseData.data.read_signed_url);
     setFileState({
       ...file_state,
       open: true,
-      isImage: getExtension(responseData.data.read_signed_url),
+      name: responseData.data.name,
+      extension: file_extension,
+      isImage: ExtImage.includes(file_extension),
     });
     downloadFileUrl(responseData.data.read_signed_url);
     setFileUrl(responseData.data.read_signed_url);
@@ -427,7 +434,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const ext: string = fileName.split(".")[1];
     setcontentType(header_content_type[ext]);
 
-    if (ExtImage[ext] && ExtImage[ext] === "1") {
+    if (ExtImage.includes(ext)) {
       const options = {
         initialQuality: 0.6,
         alwaysKeepResolution: true,
@@ -444,7 +451,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const url = response.data.signed_url;
     const internal_name = response.data.internal_name;
     const f = file;
-    if (f === undefined) return;
+    if (!f) return;
     const newFile = new File([f], `${internal_name}`);
 
     const config = {
@@ -464,6 +471,7 @@ export const FileUpload = (props: FileUploadProps) => {
       .then(() => {
         setUploadStarted(false);
         // setUploadSuccess(true);
+        setFile(null);
         setUploadFileName("");
         setReload(!reload);
         Notification.Success({
@@ -495,7 +503,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = file;
 
     const category = "UNSPECIFIED";
-    const filename = uploadFileName;
+    const filename = uploadFileName === ""  && f ? f.name : uploadFileName;
     const name = f?.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
@@ -640,7 +648,10 @@ export const FileUpload = (props: FileUploadProps) => {
             </div>
             <div className="flex justify-center md:absolute md:right-2">
               {downloadURL && downloadURL.length > 0 && (
-                <a href={downloadURL} download>
+                <a
+                  href={downloadURL}
+                  download={file_state.name + "." + file_state.extension}
+                >
                   <Button
                     color="primary"
                     variant="contained"
@@ -757,7 +768,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   margin="dense"
                   type="text"
                   InputLabelProps={{ shrink: !!uploadFileName }}
-                  // value={uploadFileName}
+                  value={uploadFileName}
                   disabled={uploadStarted}
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
@@ -769,30 +780,40 @@ export const FileUpload = (props: FileUploadProps) => {
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="md:flex justify-between">
-                    <input
-                      title="Choose File"
-                      onChange={onFileChange}
-                      type="file"
-                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-primary-100 file:text-primary-700 hover:file:bg-primary-300"
-                    />
-                    <div className="mt-2">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        startIcon={
-                          <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                        }
-                        onClick={() => {
-                          handleUpload({ status });
-                        }}
-                      >
-                        Upload
-                      </Button>
-                    </div>
+                  <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
+                    <label
+                      className="flex items-center btn btn-primary"
+                    >
+                      <i className="fas fa-file-arrow-down mr-2" /> Choose file
+                      <input
+                        title="changeFile"
+                        onChange={onFileChange}
+                        type="file"
+                        hidden
+                      />
+                    </label>
+                    <button
+                      className="btn btn-primary"
+                      disabled={!file || !uploadFileName}
+                      onClick={() => {
+                        handleUpload({ status });
+                      }}
+                    >
+                      <i className="fas fa-cloud-arrow-up mr-2" /> Upload
+                    </button>
                   </div>
                 )}
+                {file && <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                  {file?.name}
+                  <button
+                    onClick={()=>{
+                      setFile(null);
+                      setUploadFileName("");
+                    }}
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>}
               </div>
             </div>
           ) : null}
