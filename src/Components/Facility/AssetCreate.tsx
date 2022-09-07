@@ -29,7 +29,7 @@ import SelectMenuV2 from "../Common/components/SelectMenuV2";
 import moment from "moment";
 import clsx from "clsx";
 import RadioInputs from "../Common/components/RadioGroup";
-import SearchSelectV2 from "../Common/components/SearchSelectV2";
+import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError = {
@@ -357,22 +357,14 @@ const AssetCreate = (props: AssetProps) => {
 
                   {/* Asset Name */}
                   <div className="col-span-6 sm:col-span-4">
-                    <label htmlFor="asset-name">Asset Name * </label>
-                    <input
+                    <TextInputFieldV2
                       id="asset-name"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.name && "border-red-500"
-                      )}
-                      type="text"
-                      name="asset-name"
-                      autoComplete="asset-name"
+                      label="Asset Name"
                       value={name}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setName(e.target.value)
-                      }
+                      onValueChange={setName}
+                      error={state.errors.name}
+                      required
                     />
-                    <ErrorHelperText error={state.errors.name} />
                   </div>
 
                   {/* Asset Type */}
@@ -411,15 +403,6 @@ const AssetCreate = (props: AssetProps) => {
                     {/* Location */}
                     <div className="">
                       <label htmlFor="asset-location">Location * </label>
-                      <SearchSelectV2
-                        options={locations}
-                        value={locations.filter((l: any) => l.id === location)}
-                        onChange={(location: any) => setLocation(location.id)}
-                        placeholder="Select a Location"
-                        name="location"
-                        optionLabel={(loc: any) => loc.name}
-                        optionDescription={(loc: any) => loc.facility.name}
-                      />
                       <div className="mt-2">
                         <SelectMenuV2
                           options={[
@@ -577,22 +560,14 @@ const AssetCreate = (props: AssetProps) => {
 
                   {/* Manufacturer */}
                   <div className="col-span-6 sm:col-span-3">
-                    <label htmlFor="manufacturer">Manufacturer</label>
-                    <input
+                    <TextInputFieldV2
                       id="manufacturer"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.manufacturer && "border-red-500"
-                      )}
-                      type="text"
-                      name="manufacturer"
-                      placeholder="Eg. XYZ"
+                      label="Manufacturer"
                       value={manufacturer}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setManufacturer(e.target.value)
-                      }
+                      placeholder="Eg. XYZ"
+                      onValueChange={setManufacturer}
+                      error={state.errors.manufacturer}
                     />
-                    <ErrorHelperText error={state.errors.manufacturer} />
                   </div>
 
                   {/* Warranty / AMC Expiry */}
@@ -618,22 +593,14 @@ const AssetCreate = (props: AssetProps) => {
 
                   {/* Customer Support Name */}
                   <div className="col-span-6 sm:col-span-3">
-                    <label htmlFor="support-name">Customer Support Name</label>
-                    <input
+                    <TextInputFieldV2
                       id="support-name"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.customer_support_name && "border-red-500"
-                      )}
-                      type="text"
-                      name="support-name"
+                      label="Customer Support Name"
                       placeholder="Eg. ABC"
                       value={support_name}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSupportName(e.target.value)
-                      }
+                      onValueChange={setSupportName}
+                      error={state.errors.support_name}
                     />
-                    <ErrorHelperText error={state.errors.support_name} />
                   </div>
 
                   {/* Customer Support Number */}
@@ -650,66 +617,38 @@ const AssetCreate = (props: AssetProps) => {
 
                   {/* Customer Support Email */}
                   <div className="col-span-6 sm:col-span-3">
-                    <label htmlFor="support-email">
-                      Customer Support Email
-                    </label>
-                    <input
+                    <TextInputFieldV2
                       id="support-email"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.support_email && "border-red-500"
-                      )}
-                      type="text"
-                      name="support-email"
-                      placeholder="Eg. mail@example.xyz"
+                      label="Customer Support Email"
+                      placeholder="Eg. mail@example.com"
                       value={support_email}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSupportEmail(e.target.value)
-                      }
+                      onValueChange={setSupportEmail}
+                      error={state.errors.support_email}
                     />
-                    <ErrorHelperText error={state.errors.support_email} />
                   </div>
 
                   <div className="sm:col-span-3" />
 
                   {/* Vendor Name */}
                   <div className="col-span-6 sm:col-span-3">
-                    <label htmlFor="vendor-name">Vendor Name</label>
-                    <input
+                    <TextInputFieldV2
+                      label="Vendor Name"
                       id="vendor-name"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.vendor_name && "border-red-500"
-                      )}
-                      type="text"
-                      name="vendor-name"
                       placeholder="Eg. XYZ"
-                      value={vendor_name}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setVendorName(e.target.value)
-                      }
+                      onValueChange={setVendorName}
+                      error={state.errors.vendor_name}
                     />
-                    <ErrorHelperText error={state.errors.vendor_name} />
                   </div>
 
                   {/* Serial Number */}
                   <div className="col-span-6 sm:col-span-3">
-                    <label htmlFor="serial-number">Serial Number</label>
-                    <input
+                    <TextInputFieldV2
+                      label="Serial Number"
                       id="serial-number"
-                      className={clsx(
-                        "mt-2 block w-full input",
-                        state.errors.serial_number && "border-red-500"
-                      )}
-                      type="text"
-                      name="serial-number"
-                      placeholder="Eg. 123456789"
                       value={serial_number}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSerialNumber(e.target.value)
-                      }
+                      onValueChange={setSerialNumber}
+                      error={state.errors.serial_number}
                     />
-                    <ErrorHelperText error={state.errors.serial_number} />
                   </div>
 
                   {/* Service Details Section */}
