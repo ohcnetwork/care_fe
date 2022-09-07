@@ -593,7 +593,7 @@ button:disabled,
 }
 
 .error-text {
-  @apply font-medium tracking-wide text-red-500 text-xs
+  @apply font-medium tracking-wide text-error text-xs
 }
 
 .textMarginCenter {
