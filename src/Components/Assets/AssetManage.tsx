@@ -85,7 +85,14 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
       <h2 className="text-center">Print Preview</h2>
       <div id="section-to-print" className="print flex justify-center">
-        <QRCode size={200} value={asset?.id || ""} />
+        <QRCode
+          size={200}
+          value={
+            asset?.id
+              ? `https://dashboard.coronasafe.network/asset/${asset?.id}`
+              : ""
+          }
+        />
       </div>
     </div>
   );
@@ -239,7 +246,11 @@ const AssetManage = (props: AssetManageProps) => {
                 fgColor="#000000"
                 level="Q"
                 size={128}
-                value={asset?.id || ""}
+                value={
+                  asset?.id
+                    ? `https://dashboard.coronasafe.network/asset/${asset?.id}`
+                    : ""
+                }
               />
             </div>
             <button

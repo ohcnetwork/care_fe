@@ -249,6 +249,10 @@ const AssetCreate = (props: AssetProps) => {
         setQrCodeId(assetId);
         setIsScannerActive(false);
         return;
+      } else {
+        setQrCodeId(assetUrl.split("/asset/")[1]);
+        setIsScannerActive(false);
+        return;
       }
     } catch (err) {
       console.log(err);

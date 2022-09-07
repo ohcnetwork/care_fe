@@ -208,6 +208,7 @@ const AssetsList = () => {
         );
         return data.results[0].id;
       }
+      return assetUrl.split("/asset/")[1];
     } catch (err) {
       console.log(err);
     }
