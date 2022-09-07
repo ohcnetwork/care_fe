@@ -12,20 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Wait for Netlify Deploy Preview Commit
-        uses: kamranayub/wait-for-netlify-action@v2.0.3
-        id: wait-for-netflify-preview
-        with:
-          site_name: "care-egov-staging"
-          max_timeout: 300
-        env:
-          NETLIFY_TOKEN: ${{secrets.NETLIFY_TOKEN}}
+      uses: kamranayub/wait-for-netlify-action@v2.0.3
+      id: wait-for-netflify-preview
+      with:
+        site_name: "care-egov-staging"
+        max_timeout: 300
+      env:
+        NETLIFY_TOKEN: ${{secrets.NETLIFY_TOKEN}}
     - name: Cypress run
-        uses: cypress-io/github-action@v4
-        with:
-          install: false
-          browser: electron
-        env:
-          CYPRESS_BASE_URL: ${{ steps.wait-for-netflify-preview.outputs.url }}
+      uses: cypress-io/github-action@v4
+      with:
+        install: false
+        browser: electron
+      env:
+        CYPRESS_BASE_URL: ${{ steps.wait-for-netflify-preview.outputs.url }}
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
