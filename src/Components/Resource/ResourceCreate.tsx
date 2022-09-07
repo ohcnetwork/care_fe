@@ -270,17 +270,19 @@ export default function ResourceCreate(props: resourceProps) {
                 />
               </div>
 
-              <div>
-                <InputLabel>Required Quantity</InputLabel>
-                <TextInputField
-                  name="requested_quantity"
-                  variant="outlined"
-                  margin="dense"
-                  type="number"
-                  value={state.form.required_quantity}
-                  onChange={handleChange}
-                  errors=""
-                />
+              <div className="flex items-center w-full">
+                <div className="w-full">
+                  <InputLabel>Required Quantity</InputLabel>
+                  <TextInputField
+                    name="requested_quantity"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.required_quantity}
+                    onChange={handleChange}
+                    errors=""
+                  />
+                </div>
               </div>
 
               <div>
