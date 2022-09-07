@@ -604,7 +604,7 @@ export const PatientHome = (props: any) => {
                     </div>
                   )}
               </div>
-              <div className="flex flex-wrap mt-2 space-x-2">
+              <div className="flex flex-wrap mt-2 gap-2">
                 {patientData.is_vaccinated ? (
                   <Badge color="blue" startIcon="syringe" text="Vaccinated" />
                 ) : (
@@ -715,9 +715,19 @@ export const PatientHome = (props: any) => {
                         {patientData?.created_by?.first_name}{" "}
                         {patientData?.created_by?.last_name}
                       </div>
-                      <div className="text-xs">
-                        {patientData.created_date &&
-                          moment(patientData.created_date).format("lll")}
+                      <div className="text-xs flex justify-center">
+                        {patientData.created_date && (
+                          <div className="flex flex-col md:flex-row gap-1">
+                            <div>
+                              {moment(patientData.created_date).format("ll")}
+                            </div>
+                            <div>
+                              {moment(patientData.created_date).format(
+                                "hh:mm A"
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -730,9 +740,19 @@ export const PatientHome = (props: any) => {
                         {patientData?.last_edited?.first_name}{" "}
                         {patientData?.last_edited?.last_name}
                       </div>
-                      <div className="text-xs">
-                        {patientData.modified_date &&
-                          moment(patientData.modified_date).format("lll")}
+                      <div className="text-xs flex justify-center">
+                        {patientData.modified_date && (
+                          <div className="flex flex-col md:flex-row gap-1">
+                            <div>
+                              {moment(patientData.modified_date).format("ll")}
+                            </div>
+                            <div>
+                              {moment(patientData.modified_date).format(
+                                "hh:mm A"
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -793,7 +813,7 @@ export const PatientHome = (props: any) => {
         </section>
         <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
           <div
-            className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
+            className="flex justify-between border-b border-dashed cursor-pointer text-gray-900 font-semibold text-left text-lg pb-2"
             onClick={() => {
               setShowShifts(!showShifts);
               setIsShiftClicked(true);
@@ -1458,9 +1478,7 @@ export const PatientHome = (props: any) => {
           <div>
             <OnlineUsersSelect
               userId={assignedVolunteerObject?.id || patientData.assigned_to}
-              selectedUser={
-                assignedVolunteerObject || patientData.assigned_to_object
-              }
+              selectedUser={assignedVolunteerObject}
               onSelect={handleVolunteerSelect}
               user_type={"Volunteer"}
               outline={false}
@@ -1471,7 +1489,7 @@ export const PatientHome = (props: any) => {
           <DialogActions>
             <Button
               onClick={() => {
-                handleVolunteerSelect("");
+                handleVolunteerSelect(patientData.assigned_to_object);
                 setOpenAssignVolunteerDialog(false);
               }}
               color="primary"
