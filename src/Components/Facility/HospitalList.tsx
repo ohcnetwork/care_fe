@@ -362,31 +362,36 @@ export const HospitalList = (props: any) => {
                       <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
-                      {facility.features?.map((feature: number, i: number) => (
-                        <div
-                          key={i}
-                          className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
-                          title={
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0]?.name
-                          }
-                        >
-                          <i
-                            className={`fas fa-${
-                              FACILITY_FEATURE_TYPES.filter(
-                                (f) => f.id === feature
-                              )[0]?.icon
-                            }`}
-                          />{" "}
-                          &nbsp;
-                          {
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0]?.name
-                          }
-                        </div>
-                      ))}
+                      {facility.features?.map(
+                        (feature: number, i: number) =>
+                          FACILITY_FEATURE_TYPES.some(
+                            (f) => f.id === feature
+                          ) && (
+                            <div
+                              key={i}
+                              className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                              title={
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            >
+                              <i
+                                className={`fas fa-${
+                                  FACILITY_FEATURE_TYPES.filter(
+                                    (f) => f.id === feature
+                                  )[0]?.icon
+                                }`}
+                              />{" "}
+                              &nbsp;
+                              {
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            </div>
+                          )
+                      )}
                     </div>
 
                     <div className="mt-2 flex justify-between">
