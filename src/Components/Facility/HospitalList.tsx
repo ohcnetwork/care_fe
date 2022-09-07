@@ -369,21 +369,21 @@ export const HospitalList = (props: any) => {
                           title={
                             FACILITY_FEATURE_TYPES.filter(
                               (f) => f.id === feature
-                            )[0].name
+                            )[0]?.name
                           }
                         >
                           <i
                             className={`fas fa-${
                               FACILITY_FEATURE_TYPES.filter(
                                 (f) => f.id === feature
-                              )[0].icon
+                              )[0]?.icon
                             }`}
                           />{" "}
                           &nbsp;
                           {
                             FACILITY_FEATURE_TYPES.filter(
                               (f) => f.id === feature
-                            )[0].name
+                            )[0]?.name
                           }
                         </div>
                       ))}
