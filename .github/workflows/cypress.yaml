@@ -11,9 +11,13 @@ jobs:
   cypress-run:
     runs-on: ubuntu-20.04
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - run: yarn install
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
+          install: false
           start: yarn start
           wait-on: 'http://localhost:4000'
           wait-on-timeout: 300
