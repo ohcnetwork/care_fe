@@ -594,7 +594,7 @@ export const FileUpload = (props: FileUploadProps) => {
       >
         {fileUrl && fileUrl.length > 0 ? (
           <>
-            <div className="flex absolute inset-x-4 top-4 justify-between">
+            <div className="flex absolute h-full sm:h-auto sm:inset-x-4 sm:top-4 p-4 sm:p-0 justify-between flex-col sm:flex-row">
               <div className="flex gap-3">
               {file_state.isImage && (
                 <>
