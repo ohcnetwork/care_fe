@@ -48,6 +48,7 @@ import {
 } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
+import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -1219,6 +1220,9 @@ export const ConsultationDetails = (props: any) => {
               consultationId={consultationId}
               facilityId={facilityId}
               patientId={patientId}
+            />
+            <ViewInvestigationSuggestions
+              consultationId={consultationId}
             />
           </div>
         )}
