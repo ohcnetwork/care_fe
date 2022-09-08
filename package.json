@@ -101,7 +101,7 @@
     "screenfull": "^5.1.0",
     "tslib": "^2.2.0",
     "typescript": "^4.3.2",
-    "use-keyboard-shortcut": "^1.1.4",
+    "use-keyboard-shortcut": "1.1.4",
     "uuid": "^8.3.2"
   },
   "scripts": {
@@ -116,6 +116,7 @@
     "test": "snyk test",
     "cypress:open": "cross-env NODE_ENV=development cypress open",
     "cypress:run": "cross-env NODE_ENV=development cypress run",
+    "cypress:run:gui": "cross-env NODE_ENV=development cypress run --headed",
     "cypress:install": "cross-env NODE_ENV=development cypress install",
     "prepare": "husky install",
     "lint": "eslint ./src",

@@ -8,11 +8,7 @@ describe("Resource Page", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("http://localhost:4000/resource");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.awaitUrl("/resource");
   });
 
   it("checks if all download button works", () => {
@@ -23,7 +19,6 @@ describe("Resource Page", () => {
 
   it("switch between list view and board view", () => {
     cy.contains("List View").click();
-    cy.wait(1000);
     cy.contains("Board View").click();
   });
 
