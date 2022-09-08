@@ -13,7 +13,7 @@ const makeid = (length: number) => {
 const makePhoneNumber = () =>
   "9199" + Math.floor(Math.random() * 99999999).toString();
 
-const username = makeid(20);
+const username = makeid(25);
 const phone_number = makePhoneNumber();
 const alt_phone_number = makePhoneNumber();
 
@@ -42,7 +42,9 @@ describe("User management", () => {
       .type("Mysore", { delay: 200 })
       .wait(2000)
       .type("{downarrow}{enter}");
+    cy.intercept(/users/).as("checkUsername");
     cy.get("[name='username']").type(username, { force: true });
+    cy.wait("@checkUsername").its("response.statusCode").should("eq", 404);
     cy.get("[name='dob']").type("02/03/2001");
     cy.get("[name='password']").type("#@Cypress_test123");
     cy.get("[name='c_password']").type("#@Cypress_test123");
@@ -77,8 +79,11 @@ describe("User management", () => {
     cy.intercept(/\/api\/v1\/users/).as("getUsers");
     cy.get("[name='search']").type(username, { force: true });
     cy.wait("@getUsers");
+    cy.wait(500);
+    const linkFacilityString = "Click here to show linked facilities";
     cy.get("a")
-      .contains("Click here to show linked facilities")
+      .should("contain", linkFacilityString)
+      .contains(linkFacilityString)
       .click({ force: true })
       .then(() => {
         cy.get("a")
@@ -163,8 +168,14 @@ describe("Edit Profile Testing", () => {
       .type(`${backspace}${whatsapp_num}`)
       .trigger("change", { force: true })
       .should("have.attr", "value", `+91 ${whatsapp_num}`);
-    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
-    cy.get(".error-text").contains("Please enter valid mobile number");
+    cy.wait(1000);
+    cy.get("form")
+      .get("button[type='submit']")
+      .contains("UPDATE")
+      .click()
+      .then(() => {
+        cy.get(".error-text").contains("Please enter valid mobile number");
+      });
   });
 
   it("Valid Whatsapp Number of " + username, () => {
@@ -177,6 +188,7 @@ describe("Edit Profile Testing", () => {
       .type(`${backspace}${whatsapp_num}`)
       .trigger("change", { force: true })
       .should("have.attr", "value", `+91 ${whatsapp_num}`);
+    cy.wait(1000);
     cy.get("form").get("button[type='submit']").contains("UPDATE").click();
     cy.get("dt")
       .contains("Whatsapp No")
@@ -195,8 +207,14 @@ describe("Edit Profile Testing", () => {
       .type(`${backspace}${phone_num}`)
       .trigger("change", { force: true })
       .should("have.attr", "value", `+91 ${phone_num}`);
-    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
-    cy.get(".error-text").contains("Please enter valid phone number");
+    cy.wait(1000);
+    cy.get("form")
+      .get("button[type='submit']")
+      .contains("UPDATE")
+      .click()
+      .then(() => {
+        cy.get(".error-text").contains("Please enter valid phone number");
+      });
   });
 
   it("Valid Phone Number of " + username, () => {
@@ -209,6 +227,7 @@ describe("Edit Profile Testing", () => {
       .type(`${backspace}${phone_num}`)
       .trigger("change", { force: true })
       .should("have.attr", "value", `+91 ${phone_num}`);
+    cy.wait(1000);
     cy.get("form").get("button[type='submit']").contains("UPDATE").click();
     cy.get("dt")
       .contains("Contact No")
