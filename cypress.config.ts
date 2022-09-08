@@ -6,7 +6,7 @@ export default defineConfig({
   defaultCommandTimeout: 10000,
 
   e2e: {
-    setupNodeEvents(on, config) {
+    setupNodeEvents(on, _) {
       // implement node event listeners here
       on("task", {
         readFileMaybe(filename) {
