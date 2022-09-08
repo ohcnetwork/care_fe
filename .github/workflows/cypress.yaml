@@ -16,10 +16,8 @@ jobs:
       - name: Cache node modules
         uses: actions/cache@v3
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - name: Install packages
-        run: yarn install
+          node-version: '16'
+          cache: 'yarn'
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
