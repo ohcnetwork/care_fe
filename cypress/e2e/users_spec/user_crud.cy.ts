@@ -67,7 +67,7 @@ describe("User management", () => {
     // TODO: some verify task
   });
 
-  it("update user", () => {
+  it("link facility for user", () => {
     cy.contains("Advanced Filters").click().wait(2000);
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
@@ -93,12 +93,6 @@ describe("User management", () => {
     cy.get("button > span").contains("Add").click({ force: true }).wait(1000);
   });
 
-  it("deletes user", () => {
-    cy.get("[name='search']").type(username);
-    cy.get("button").should("contain", "Delete").contains("Delete").click();
-    cy.get("button.font-medium.btn.btn-danger").click();
-  });
-
   it("Next/Previous Page", () => {
     // only works for desktop mode
     cy.get("button")
@@ -109,6 +103,126 @@ describe("User management", () => {
       .should("contain", "<")
       .contains("<")
       .click({ force: true });
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
+  });
+});
+
+const backspace =
+  "{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}";
+
+describe("Edit Profile Testing", () => {
+  before(() => {
+    cy.loginByApi(username, "#@Cypress_test123");
+    cy.saveLocalStorage();
+  });
+
+  beforeEach(() => {
+    cy.restoreLocalStorage();
+    cy.awaitUrl("/user/profile");
+    cy.contains("Edit User Profile").click({ force: true });
+  });
+
+  it("Empty First-Name field of " + username, () => {
+    cy.get("input[name=firstName]").clear().trigger("change", { force: true });
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get(".error-text").contains("Field is required");
+  });
+
+  it("Valid First-Name field of " + username, () => {
+    cy.get("input[name=firstName]")
+      .type(backspace + "User 1")
+      .trigger("change", { force: true });
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("dt").contains("First Name").siblings().first().contains("User 1");
+  });
+
+  it("Empty Last-Name field of " + username, () => {
+    cy.get("input[name=lastName]").clear().trigger("change", { force: true });
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get(".error-text").contains("Field is required");
+  });
+
+  it("Valid Last-Name field of " + username, () => {
+    cy.get("input[name=lastName]")
+      .type(backspace + "User 1")
+      .trigger("change", { force: true });
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("dt").contains("Last Name").siblings().first().contains("User 1");
+  });
+
+  it("Invalid Whatsapp Number of " + username, () => {
+    const whatsapp_num = "11111-11111";
+
+    cy.get(".flag-dropdown").last().find(".arrow").click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
+    cy.get("[placeholder='WhatsApp Number']")
+      .focus()
+      .type(`${backspace}${whatsapp_num}`)
+      .trigger("change", { force: true })
+      .should("have.attr", "value", `+91 ${whatsapp_num}`);
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get(".error-text").contains("Please enter valid mobile number");
+  });
+
+  it("Valid Whatsapp Number of " + username, () => {
+    const whatsapp_num = "91111-11111";
+
+    cy.get(".flag-dropdown").last().find(".arrow").click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
+    cy.get("[placeholder='WhatsApp Number']")
+      .focus()
+      .type(`${backspace}${whatsapp_num}`)
+      .trigger("change", { force: true })
+      .should("have.attr", "value", `+91 ${whatsapp_num}`);
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("dt")
+      .contains("Whatsapp No")
+      .siblings()
+      .first()
+      .contains(`+91 ${whatsapp_num}`);
+  });
+
+  it("Invalid Phone Number of " + username, () => {
+    const phone_num = "11111-11111";
+
+    cy.get(".flag-dropdown").first().find(".arrow").click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
+    cy.get("[placeholder='Phone Number']")
+      .focus()
+      .type(`${backspace}${phone_num}`)
+      .trigger("change", { force: true })
+      .should("have.attr", "value", `+91 ${phone_num}`);
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get(".error-text").contains("Please enter valid phone number");
+  });
+
+  it("Valid Phone Number of " + username, () => {
+    const phone_num = "99999-99999";
+
+    cy.get(".flag-dropdown").first().find(".arrow").click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
+    cy.get("[placeholder='Phone Number']")
+      .focus()
+      .type(`${backspace}${phone_num}`)
+      .trigger("change", { force: true })
+      .should("have.attr", "value", `+91 ${phone_num}`);
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("dt")
+      .contains("Contact No")
+      .siblings()
+      .first()
+      .contains(`+91 ${phone_num}`);
+  });
+
+  it("deletes user", () => {
+    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    cy.awaitUrl("/user");
+    cy.get("[name='search']").type(username);
+    cy.get("button").should("contain", "Delete").contains("Delete").click();
+    cy.get("button.font-medium.btn.btn-danger").click();
   });
 
   afterEach(() => {
