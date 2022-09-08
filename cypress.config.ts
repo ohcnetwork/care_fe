@@ -6,7 +6,7 @@ export default defineConfig({
   defaultCommandTimeout: 10000,
 
   e2e: {
-    setupNodeEvents(on, config) {
+    setupNodeEvents(on, _) {
       // implement node event listeners here
       on("task", {
         readFileMaybe(filename) {
@@ -19,5 +19,8 @@ export default defineConfig({
       });
     },
     baseUrl: "http://localhost:4000",
+    retries: 2,
+    requestTimeout: 15000,
+    excludeSpecPattern: "**/*roles.cy.ts",
   },
 });

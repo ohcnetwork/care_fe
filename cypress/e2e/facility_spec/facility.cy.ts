@@ -2,7 +2,7 @@ import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 class facility {
   static create(facility) {
-    cy.visit("http://localhost:4000/facility/create");
+    cy.awaitUrl("/facility/create");
     this.fillForm(facility);
     cy.get("[id=facility-save]").should("exist").click();
     cy.verifyNotification("Facility added successfully");
@@ -102,14 +102,10 @@ describe("Facility", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit(current_url);
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.awaitUrl(current_url);
   });
 
-  it("creats facility", () => {
+  it("create facility", () => {
     facility.create({
       type: "Private Hospital",
       name: "cypress facility",
@@ -155,8 +151,7 @@ describe("Facility", () => {
     });
   });
 
-  it("updates facility", () => {
-    cy.visit(current_url);
+  it("update facility", () => {
     facility.update({
       type: "Private Hosp",
       name: " update",
@@ -176,7 +171,6 @@ describe("Facility", () => {
       type_d_cylinders: "64",
       expected_type_d_cylinders: "4",
     });
-    cy.wait(1000);
     cy.url().then((url) => {
       current_url = url;
     });
