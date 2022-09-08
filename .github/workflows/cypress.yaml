@@ -11,9 +11,11 @@ jobs:
   cypress-run:
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - run: yarn install
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+        cache: 'yarn'
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
