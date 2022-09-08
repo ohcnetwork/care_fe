@@ -217,15 +217,17 @@ describe("Edit Profile Testing", () => {
       .contains(`+91 ${phone_num}`);
   });
 
+  afterEach(() => {
+    cy.saveLocalStorage();
+  });
+});
+
+describe("Delete User", () => {
   it("deletes user", () => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.awaitUrl("/user");
     cy.get("[name='search']").type(username);
     cy.get("button").should("contain", "Delete").contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
-  });
-
-  afterEach(() => {
-    cy.saveLocalStorage();
   });
 });
