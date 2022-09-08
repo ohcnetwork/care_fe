@@ -15,7 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - name: Cache node modules
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
@@ -29,13 +30,15 @@ jobs:
           wait-on: 'http://localhost:4000'
           wait-on-timeout: 300
           browser: electron
-      - uses: actions/upload-artifact@v2
+      - name: Upload cypress test error screenshots
+        uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-      # Test run video was always captured, so this action uses "always()" condition
-      - uses: actions/upload-artifact@v2
+            # Test run video was always captured, so this action uses "always()" condition
+      - name: Upload cypress test videos
+        uses: actions/upload-artifact@v2
         if: always()
         with:
           name: cypress-videos
