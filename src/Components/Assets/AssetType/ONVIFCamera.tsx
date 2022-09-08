@@ -88,7 +88,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       const presetData = await axios.get(
         `https://${asset?.meta?.middleware_hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
-      console.log(presetData);
       const res: any = await Promise.resolve(
         dispatch(
           createAssetBed(
