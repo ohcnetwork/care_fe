@@ -4,25 +4,51 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { AssetData } from "../AssetTypes";
-import { createAssetBed, listAssetBeds } from "../../../Redux/actions";
+import {
+  createAssetBed,
+  listAssetBeds,
+  partialUpdateAssetBed,
+} from "../../../Redux/actions";
+import * as Notification from "../../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const saveLink = (assetId: string, bedId: string, dispatch: Dispatch<any>) => {
-  console.log("Saving Link");
   dispatch(createAssetBed({}, assetId, bedId));
-  //   { meta: { ...data, ...presetData.data } },
-  //   assetId,
-  //   bed?.id as string
+  Notification.Success({ msg: "AssetBed Link created successfully" });
+};
+const update_Link = (
+  assetbedId: string,
+  assetId: string,
+  bed: BedModel,
+  assetBed: any,
+  dispatch: Dispatch<any>
+) => {
+  dispatch(
+    partialUpdateAssetBed(
+      {
+        asset: assetId,
+        bed: bed.id,
+      },
+      assetbedId
+    )
+  );
+  Notification.Success({ msg: "AssetBed Link updated successfully" });
 };
 
 export default function MonitorConfigure({ asset }: { asset: AssetData }) {
   const [bed, setBed] = React.useState<BedModel>({});
+  const [updateLink, setUpdateLink] = React.useState<boolean>(false);
+  const [assetBed, setAssetBed] = React.useState<any>();
   const dispatch: any = useDispatch();
 
   const getAssetBeds = async (id: string) => {
     const assetBeds = await dispatch(listAssetBeds({ asset: id }));
     if (assetBeds.data?.results?.length > 0) {
+      setUpdateLink(true);
+      setAssetBed(assetBeds.data.results[0]);
       setBed(assetBeds.data.results[0].bed_object);
+    } else {
+      setUpdateLink(false);
     }
   };
 
@@ -38,11 +64,21 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          saveLink(asset.id as string, bed?.id as string, dispatch);
+          if (updateLink) {
+            update_Link(
+              assetBed?.id as string,
+              asset.id as string,
+              bed as BedModel,
+              assetBed,
+              dispatch
+            );
+          } else {
+            saveLink(asset.id as string, bed?.id as string, dispatch);
+          }
         }}
       >
         <CardContent>
-          <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="mt-2 ml-2 grid gap-4 grid-cols-1 md:grid-cols-2">
             <div>
               <InputLabel id="asset-type">Bed</InputLabel>
               <BedSelect
@@ -66,7 +102,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
               style={{ marginLeft: "auto" }}
               startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
             >
-              Save Link
+              {updateLink ? "Update Link" : "Save Link"}
             </Button>
           </div>
         </CardContent>
