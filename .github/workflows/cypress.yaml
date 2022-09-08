@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: '16'
           cache: 'yarn'
+      - run: yarn install
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
