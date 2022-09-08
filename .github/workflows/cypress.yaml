@@ -13,12 +13,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/cache@v3
         with:
-          node-version: '16'
-          cache: 'yarn'
-      - run: yarn install
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Install packages
+        run: yarn install
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
