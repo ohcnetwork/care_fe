@@ -8,6 +8,8 @@ import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import { Tooltip } from "@material-ui/core";
+
 import {
   getAllPatient,
   getDistrict,
@@ -467,18 +469,31 @@ export const PatientManager = (props: any) => {
               {patient?.last_consultation &&
               patient?.last_consultation?.current_bed ? (
                 <div className="flex flex-col items-center justify-center h-full">
-                  <p className="text-gray-900 text-sm">
-                    {
+                  <Tooltip
+                    title={
                       patient?.last_consultation?.current_bed?.bed_object
                         ?.location_object?.name
                     }
-                  </p>
-                  <p className="text-base font-bold text-center text-ellipsis">
-                    {patient?.last_consultation?.current_bed?.bed_object.name}
-                  </p>
+                  >
+                    <p className="text-gray-900 text-sm text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                      {
+                        patient?.last_consultation?.current_bed?.bed_object
+                          ?.location_object?.name
+                      }
+                    </p>
+                  </Tooltip>
+                  <Tooltip
+                    title={
+                      patient?.last_consultation?.current_bed?.bed_object?.name
+                    }
+                  >
+                    <p className="text-base font-bold text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                      {patient?.last_consultation?.current_bed?.bed_object.name}
+                    </p>
+                  </Tooltip>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex items-center justify-center min-h-[5rem]">
                   <i className="fas fa-user-injured text-3xl text-gray-500"></i>
                 </div>
               )}
