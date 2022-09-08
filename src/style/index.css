@@ -891,3 +891,7 @@ color:#046c4e;
 .csv-input::file-selector-button:hover{
 background-color: #84e1bc;
 }
+
+[type="checkbox"]{
+  @apply text-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none;
+}
