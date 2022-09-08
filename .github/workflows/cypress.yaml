@@ -13,17 +13,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-          cache: 'yarn'
-      - name: Install packages
-        run: yarn install
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
-          install: false
           start: yarn start
           wait-on: 'http://localhost:4000'
           wait-on-timeout: 300
