@@ -18,7 +18,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
-          start: npm start
+          start: yarn start
           wait-on: 'http://localhost:4000'
           wait-on-timeout: 300
           browser: electron
