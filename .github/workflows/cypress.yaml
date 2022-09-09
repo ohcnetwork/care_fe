@@ -2,7 +2,7 @@ name: Cypress Tests
 
 on:
   schedule:
-    - cron: '20 4 * * *'
+    - cron: '10 10 * * *'
   pull_request:
     branches:
       - develop
