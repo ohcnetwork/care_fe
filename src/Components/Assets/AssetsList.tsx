@@ -328,7 +328,6 @@ const AssetsList = () => {
                   className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
                   onClick={() => navigate(`/assets/${asset.id}`)}
                 >
-                  
                   <div className="md:flex">
                     <p className="text-xl font-normal capitalize break-words">
                       {asset.name}
@@ -336,11 +335,7 @@ const AssetsList = () => {
                   </div>
                   <p className="font-normal text-sm">
                     {asset?.location_object?.name}
-                    <span className="text-xs ml-2">
-                      Updated at: {moment(asset.modified_date).format("lll")}
-                    </span>
                   </p>
-                  
                   <div className="flex flex-wrap gap-2 mt-2">
                     {asset.is_working ? (
                       <Badge color="green" startIcon="cog" text="Working" />
