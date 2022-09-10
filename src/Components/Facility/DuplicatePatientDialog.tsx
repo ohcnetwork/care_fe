@@ -11,7 +11,6 @@ import {
   InputLabel,
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { WithStyles, withStyles } from "@material-ui/styles";
 import { useState } from "react";
 import { DupPatientModel } from "./models";
 
@@ -22,28 +21,16 @@ interface Props {
   isNew: boolean;
 }
 
-const styles = {
-  paper: {
-    "max-width": "650px",
-    "min-width": "400px",
-  },
-};
-
 const tdClass = "border border-gray-400 p-2 text-left";
 
-const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
-  const { patientList, handleOk, handleCancel, classes, isNew } = props;
+const DuplicatePatientDialog = (props: Props) => {
+  const { patientList, handleOk, handleCancel, isNew } = props;
   const [action, setAction] = useState("");
 
   const text = isNew ? "registration" : "update";
 
   return (
-    <Dialog
-      open={true}
-      classes={{
-        paper: classes.paper,
-      }}
-    >
+    <Dialog open={true} maxWidth={"sm"}>
       <DialogTitle
         className=" font-semibold text-3xl"
         id="font-semibold text-3xl"
@@ -100,19 +87,18 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
               name="confirm_action"
               value={action}
               onChange={(e: any) => setAction(e.target.value)}
-              style={{ padding: "0px 5px" }}
             >
               <Box display="flex" flexDirection="column">
                 <FormControlLabel
                   value="transfer"
                   control={<Radio />}
-                  className="bg-primary-500 text-white mb-2"
+                  className="bg-primary-500 text-white mb-2 pr-2 py-2 rounded-md w-full ml-0"
                   label="Admit the patient record to your facility by adding the date of birth"
                 />
                 <FormControlLabel
                   value="close"
                   control={<Radio />}
-                  className="bg-red-500 text-white mb-2"
+                  className="bg-red-500 text-white mb-2 pr-2 py-2 rounded-md w-full ml-0"
                   label="I confirm that the suspect / patient i want to create is not on the list."
                 />
                 <p>
@@ -125,7 +111,7 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
           </div>
         </div>
       </DialogContent>
-      <DialogActions style={{ justifyContent: "space-between" }}>
+      <DialogActions className="justify-between flex flex-col md:flex-row">
         <Button
           className="capitalize"
           color="secondary"
@@ -147,4 +133,4 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
   );
 };
 
-export default withStyles(styles)(DuplicatePatientDialog);
+export default DuplicatePatientDialog;
