@@ -11,19 +11,22 @@ describe("Death Report", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
+    cy.awaitUrl("/");
     cy.get("a").contains("Patients").click();
     cy.url().should("include", "/patients");
     cy.contains("Details").click();
     cy.url().then((url) => {
       const patient_id = url.split("/")[6];
-      cy.visit(`http://localhost:4000/death_report/${patient_id}`);
+      cy.visit(`/death_report/${patient_id}`, {
+        onBeforeLoad: (win) => {
+          cy.stub(win, "print");
+        },
+      });
     });
   });
 
   it("Add Data And Submit " + user.username, () => {
     // Wait For Form Data To Prepopulate
-    cy.wait(1000);
 
     // Clear Exisiting Data And Fill New Data
     cy.get("input[name='name']").clear().type("Apurva Nagar");
@@ -59,5 +62,6 @@ describe("Death Report", () => {
 
     // Print Death Report
     cy.get("button").contains("Print Death Report").click();
+    cy.window().its("print").should("be.called");
   });
 });

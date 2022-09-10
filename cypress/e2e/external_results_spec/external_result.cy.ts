@@ -8,9 +8,7 @@ describe("Edit Profile Testing", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
-    cy.get("a").contains("External Result").click();
-    cy.url().should("include", "/external_results");
+    cy.awaitUrl("/external_results");
   });
 
   it("Search by Patient name", () => {
