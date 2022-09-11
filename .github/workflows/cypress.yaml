@@ -1,0 +1,37 @@
+name: Cypress Tests
+
+on:
+  schedule:
+    - cron: '18 0 * * *'
+  pull_request:
+    branches:
+      - develop
+      - master
+  workflow_dispatch:
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - run: yarn install
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        with:
+          install: false
+          start: yarn start
+          wait-on: 'http://localhost:4000'
+          wait-on-timeout: 300
+          browser: electron
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      # Test run video was always captured, so this action uses "always()" condition
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos

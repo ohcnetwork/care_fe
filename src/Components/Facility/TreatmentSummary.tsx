@@ -1,30 +1,17 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { navigate } from "raviger";
+import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  getPatient,
-  getInvestigation,
-  getDailyReport,
-} from "../../Redux/actions";
+import { getPatient, getInvestigation } from "../../Redux/actions";
 import { ConsultationModel } from "./models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { PatientModel, DailyRoundsModel } from "../Patient/models";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { getConsultation } from "../../Redux/actions";
-import {
-  PATIENT_CATEGORY,
-  SYMPTOM_CHOICES,
-  CONSULTATION_TABS,
-  OptionsType,
-  GENDER_TYPES,
-} from "../../Common/constants";
-const symptomChoices = [...SYMPTOM_CHOICES];
-const patientCategoryChoices = [...PATIENT_CATEGORY];
+import { GENDER_TYPES } from "../../Common/constants";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
-  const { consultationId, patientId, dailyRoundsListData } = props;
+  const { consultationId, patientId } = props;
   const date = new Date();
   const dispatch: any = useDispatch();
   const [patientData, setPatientData] = useState<PatientModel>({});
@@ -237,8 +224,8 @@ const TreatmentSummary = (props: any) => {
                 <div className="mx-5">
                   <div>
                     <b>History of present illness :</b>
-                    {consultationData.existing_medication
-                      ? consultationData.existing_medication
+                    {consultationData.history_of_present_illness
+                      ? consultationData.history_of_present_illness
                       : "    ---"}
                   </div>
 
@@ -258,16 +245,15 @@ const TreatmentSummary = (props: any) => {
 
                   <div>
                     <b>Physical Examination info :</b>
-                    {dailyRoundsListData.length > 0 &&
-                    dailyRoundsListData["0"]["physical_examination_info"]
-                      ? dailyRoundsListData["0"]["physical_examination_info"]
+                    {dailyRounds.physical_examination_info
+                      ? dailyRounds.physical_examination_info
                       : "    ---"}
                   </div>
                 </div>
               </div>
 
               <div className="border-b-2 border-gray-800 px-5 py-2">
-                <b>Advice :</b>
+                <b>General Instructions :</b>
                 {patientData.last_consultation &&
                 patientData.last_consultation.consultation_notes ? (
                   <div className="mx-5">
@@ -369,7 +355,15 @@ const TreatmentSummary = (props: any) => {
               </div>
 
               <div className="border-b-2 border-gray-800 py-2 px-5">
-                <b className="mb-2">Treatment summary :</b>
+                <b>Treatment :</b>
+                {consultationData.prescribed_medication ? (
+                  <p className="ml-4">
+                    {consultationData.prescribed_medication}
+                  </p>
+                ) : (
+                  <p className="ml-4">---</p>
+                )}
+                <b className="mb-2">Treatment summary/Treament Plan :</b>
 
                 <div className="mx-5">
                   <table className="border-collapse border border-gray-800 w-full">
@@ -411,10 +405,6 @@ const TreatmentSummary = (props: any) => {
                       )}
                     </tbody>
                   </table>
-
-                  {consultationData.prescribed_medication && (
-                    <p>{consultationData.prescribed_medication}</p>
-                  )}
                 </div>
               </div>
             </div>

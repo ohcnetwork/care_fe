@@ -1,3 +1,4 @@
+import { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { AssignedToObjectModel } from "../Patient/models";
 
 export interface LocalBodyModel {
@@ -28,6 +29,7 @@ export interface FacilityModel {
   cover_image_url?: string;
   facility_type?: string;
   address?: string;
+  features?: number[];
   location?: {
     latitude: number;
     longitude: number;
@@ -45,6 +47,8 @@ export interface FacilityModel {
   district_object?: DistrictModel;
   state_object?: StateModel;
   ward_object?: WardModel;
+  modified_date?: string;
+  created_date?: string;
 }
 
 export interface CapacityModal {
@@ -76,7 +80,7 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   examination_details?: string;
-  existing_medication?: string;
+  history_of_present_illness?: string;
   facility?: number;
   facility_name?: string;
   id?: number;
@@ -90,6 +94,7 @@ export interface ConsultationModel {
   is_kasp?: boolean;
   kasp_enabled_date?: string;
   diagnosis?: string;
+  icd11_diagnoses_object?: ICD11DiagnosisModel[];
   verified_by?: string;
   suggestion_text?: string;
   symptoms?: Array<number>;
@@ -98,6 +103,7 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   discharge_advice?: any;
+  prn_prescription?: PRNPrescriptionType[];
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
@@ -182,4 +188,10 @@ export interface CurrentBed {
   start_date: string;
   end_date: string;
   meta: Record<string, any>;
+}
+
+export interface ICD11DiagnosisModel {
+  id: string;
+  label: string;
+  parentId: string | null;
 }

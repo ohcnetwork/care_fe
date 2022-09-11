@@ -7,7 +7,6 @@ import {
 } from "@material-ui/core";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { WithStyles, withStyles } from "@material-ui/styles";
 import React, { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
@@ -28,13 +27,6 @@ interface Props {
   handleCancel: () => void;
   userType: "Staff" | "DistrictAdmin" | "StateLabAdmin";
 }
-
-const styles = {
-  paper: {
-    "max-width": "600px",
-    "min-width": "400px",
-  },
-};
 
 const statusChoices = [...SAMPLE_TEST_STATUS];
 
@@ -72,8 +64,8 @@ const updateStatusReducer = (state = initialState, action: any) => {
   }
 };
 
-const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
-  const { sample, handleOk, handleCancel, classes } = props;
+const UpdateStatusDialog = (props: Props) => {
+  const { sample, handleOk, handleCancel } = props;
   const [state, dispatch] = useReducer(updateStatusReducer, initialState);
   const [file, setfile] = useState<File>();
   const [contentType, setcontentType] = useState<string>("");
@@ -90,10 +82,10 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   const validStatusChoices = statusChoices.filter(
     (i) => status && statusFlow[status] && statusFlow[status].includes(i.text)
   );
-  
+
   useEffect(() => {
     const form = { ...state.form };
-    form.status = currentStatus?.id;
+    form.status = 0;
     dispatch({ type: "set_form", form });
   }, []);
 
@@ -156,6 +148,12 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
       });
   };
 
+  const handleEscKeyPress = (event: any) => {
+    if (event.key === "Escape") {
+      cancelClicked();
+    }
+  };
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
@@ -188,12 +186,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   };
 
   return (
-    <Dialog
-      open={true}
-      classes={{
-        paper: classes.paper,
-      }}
-    >
+    <Dialog open={true} onKeyDown={(e) => handleEscKeyPress(e)}>
       <DialogTitle id="test-sample-title">
         Update Sample Test Status
       </DialogTitle>
@@ -287,4 +280,4 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   );
 };
 
-export default withStyles(styles)(UpdateStatusDialog);
+export default UpdateStatusDialog;

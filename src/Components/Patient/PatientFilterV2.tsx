@@ -414,13 +414,13 @@ export default function PatientFilterV2(props: any) {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
+      <div className="flex flex-wrap justify-between">
+        <button className="btn btn-default mt-1" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
         <button
-          className="btn btn-default"
+          className="btn btn-default mt-1"
           onClick={(_) => {
             navigate("/patients");
             setFilterState(clearFilterState);
@@ -429,7 +429,10 @@ export default function PatientFilterV2(props: any) {
           <i className="fas fa-times mr-2" />
           Clear Filter
         </button>
-        <button className="btn btn-primary" onClick={applyFilter}>
+        <button
+          className="btn btn-primary w-full sm:w-fit mt-2 sm:mt-0"
+          onClick={applyFilter}
+        >
           <i className="fas fa-check mr-2" />
           Apply
         </button>
@@ -826,6 +829,7 @@ export default function PatientFilterV2(props: any) {
             <TextInputField
               id="age_min"
               name="age_min"
+              type="number"
               variant="outlined"
               margin="dense"
               errors=""
@@ -837,6 +841,7 @@ export default function PatientFilterV2(props: any) {
             <TextInputField
               id="age_max"
               name="age_max"
+              type="number"
               variant="outlined"
               margin="dense"
               errors=""

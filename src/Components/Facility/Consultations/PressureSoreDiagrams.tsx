@@ -86,11 +86,11 @@ export const PressureSoreDiagrams = (props: any) => {
 
   const dropdown = (dates: Array<any>) => {
     return dates && dates.length > 0 ? (
-      <div className="flex mx-auto">
+      <div className="flex mx-auto flex-wrap">
         <div className="p-2">Choose Date and Time</div>
         <select
           title="date"
-          className="border-2 border-gray-800 p-2"
+          className="pl-3 pr-8 py-2 text-slate-600 relative bg-white rounded border-gray-200 shadow outline-none focus:outline-none  focus:ring-gray-300 focus:border-gray-300 focus:ring-1"
           onChange={(e) => {
             setSelectedDateData(results, e.target.value);
           }}
