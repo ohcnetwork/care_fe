@@ -81,7 +81,7 @@ export const OnlineUsersSelect = (props: Props) => {
         </label>
         <div className="relative">
           <div className="relative flex-1">
-            <span className="inline-block w-full rounded-md shadow-sm">
+            <span className="flex w-full rounded-md flex-col md:flex-row">
               <button
                 onClick={(_) => {
                   setDropdownExpand(true);
@@ -115,7 +115,7 @@ export const OnlineUsersSelect = (props: Props) => {
                     hidden: isDropdownExpanded,
                   })}
                 >
-                  <div className="space-x-3 flex items-center">
+                  <div className="space-x-3 flex items-center overflow-hidden">
                     <span
                       aria-label="Online"
                       className={
