@@ -1,3 +1,5 @@
+import { ErrorHelperText } from "../HelperInputFields";
+
 type SwitchProps<T> = {
   name?: string;
   className?: string;
@@ -5,10 +7,10 @@ type SwitchProps<T> = {
   value?: T;
   options: T[];
   optionLabel?: (option: T) => string;
-  //   optionIcon?: (option: T) => React.ReactNode;
+  optionClassName?: (option: T) => string | false;
   required?: boolean;
   onChange: (option: T) => void;
-  errors?: string;
+  error?: string;
 };
 
 export default function SwitchV2<T>(props: SwitchProps<T>) {
@@ -23,16 +25,21 @@ export default function SwitchV2<T>(props: SwitchProps<T>) {
       <ul role="list" className="flex">
         {props.options.map((option, index) => {
           const selected = option === props.value;
+          const additionalClassNames = selected
+            ? (props.optionClassName && props.optionClassName(option)) ||
+              "bg-primary-500 hover:bg-primary-600 text-white border-primary-500 focus:ring-primary-500 focus:border-primary-500"
+            : "bg-gray-50 hover:bg-gray-200 border-gray-400 focus:ring-primary-500 focus:border-primary-500";
+
           return (
             <li
               tabIndex={0}
-              className="active:bg-gray-500 cursor-pointer px-4 p-2 first:rounded-l-lg last:rounded-r-lg shadow-sm bg-gray-50 hover:bg-gray-200 focus:ring-primary-500 border focus:ring-1 ring-gray-400 focus:border-primary-500 border-gray-400 transition-all duration-200 ease-in-out outline-none"
+              className={`cursor-pointer px-4 p-2 first:rounded-l-lg last:rounded-r-lg shadow-sm focus:ring-1 border transition-all duration-200 ease-in-out outline-none ${additionalClassNames}`}
               key={index}
               onClick={() => props.onChange(option)}
             >
               <span
                 className={`select-none text-sm ${
-                  selected ? "font-semibold" : "font-medium"
+                  selected ? "font-semibold" : "font-normal"
                 }`}
               >
                 {(props.optionLabel && props.optionLabel(option)) ||
@@ -42,6 +49,7 @@ export default function SwitchV2<T>(props: SwitchProps<T>) {
           );
         })}
       </ul>
+      <ErrorHelperText error={props.error} />
     </div>
   );
 }

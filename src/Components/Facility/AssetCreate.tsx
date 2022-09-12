@@ -27,7 +27,6 @@ import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
 import SelectMenuV2 from "../Common/components/SelectMenuV2";
 import moment from "moment";
-import RadioInputsV2 from "../Common/components/RadioInputsV2";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -482,27 +481,24 @@ const AssetCreate = (props: AssetProps) => {
                   {/* Working Status */}
                   <SwitchV2
                     className="col-span-6"
+                    required
                     name="is_working"
                     label="Working Status"
-                    required
-                    value={is_working}
                     options={["true", "false"]}
-                    optionLabel={(option) =>
-                      (option === "false" ? "Not " : "") + "Working"
+                    optionLabel={(option) => {
+                      return (
+                        {
+                          true: "Working",
+                          false: "Not Working",
+                        }[option] || "undefined"
+                      );
+                    }}
+                    optionClassName={(option) =>
+                      option === "false" &&
+                      "bg-error text-white border-error focus:ring-error"
                     }
+                    value={is_working}
                     onChange={setIsWorking}
-                  />
-                  <RadioInputsV2
-                    className="col-span-6"
-                    required
-                    label="Working Status"
-                    name="is_working"
-                    options={[
-                      { label: "Working", value: "true" },
-                      { label: "Not Working", value: "false" },
-                    ]}
-                    selected={is_working}
-                    onSelect={setIsWorking}
                     error={state.errors.is_working}
                   />
 
