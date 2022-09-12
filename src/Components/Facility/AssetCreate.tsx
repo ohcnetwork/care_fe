@@ -29,6 +29,7 @@ import SelectMenuV2 from "../Common/components/SelectMenuV2";
 import moment from "moment";
 import RadioInputsV2 from "../Common/components/RadioInputsV2";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
+import SwitchV2 from "../Common/components/Switch";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError = {
@@ -479,6 +480,18 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Working Status */}
+                  <SwitchV2
+                    className="col-span-6"
+                    name="is_working"
+                    label="Working Status"
+                    required
+                    value={is_working}
+                    options={["true", "false"]}
+                    optionLabel={(option) =>
+                      (option === "false" ? "Not " : "") + "Working"
+                    }
+                    onChange={setIsWorking}
+                  />
                   <RadioInputsV2
                     className="col-span-6"
                     required
