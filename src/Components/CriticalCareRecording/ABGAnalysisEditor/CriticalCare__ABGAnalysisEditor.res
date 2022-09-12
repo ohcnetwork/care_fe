@@ -108,25 +108,7 @@ let getStatus = (min, minText, max, maxText, val) => {
   }
 }
 
-let isInvalidInputFloat = (minString, maxString, val) => {
-  let min = Js.Float.fromString(minString)
-  let max = Js.Float.fromString(maxString)
-  let value = Js.Option.getWithDefault(min, val)
-  if value < min || value > max {
-    Some("Input outside range")
-  } else {
-    None
-  }
-}
 
-let isInvalidInputInt = (min, max, val) => {
-  let value = Js.Option.getWithDefault(min, val)
-  if value < min || value > max {
-    Some("Input outside range")
-  } else {
-    None
-  }
-}
 
 @react.component
 let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
@@ -144,7 +126,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         value={string_of_int(state.po2)}
         setValue={s => send(SetPO2(int_of_string(s)))}
         getLabel={getStatus(50.0, "Low", 200.0, "High")}
-        hasError={isInvalidInputInt(10, 400, state.po2)}
+        hasError={ValidationUtils.isInputInRangeInt(10, 400, state.po2)}
       />
       <Slider
         title={"PCO2 (mm Hg)"}
@@ -155,7 +137,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         value={string_of_int(state.pco2)}
         setValue={s => send(SetPCO2(int_of_string(s)))}
         getLabel={getStatus(35.0, "Low", 45.0, "High")}
-        hasError={isInvalidInputInt(10, 200, state.pco2)}
+        hasError={ValidationUtils.isInputInRangeInt(10, 200, state.pco2)}
       />
       <Slider
         title={"pH"}
@@ -166,7 +148,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         value={string_of_float(state.pH)}
         setValue={s => send(SetpH(float_of_string(s)))}
         getLabel={getStatus(7.35, "Low", 7.45, "High")}
-        hasError={isInvalidInputFloat("0.0", "10.0", state.pH)}
+        hasError={ValidationUtils.isInputInRangeFloat("0.0", "10.0", state.pH)}
       />
       <Slider
         title={"HCO3 (mmol/L)"}
@@ -177,7 +159,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         value={string_of_float(state.hco3)}
         setValue={s => send(SetHCO3(float_of_string(s)))}
         getLabel={getStatus(22.0, "Low", 26.0, "High")}
-        hasError={isInvalidInputFloat("5.0", "80.0", state.hco3)}
+        hasError={ValidationUtils.isInputInRangeFloat("5.0", "80.0", state.hco3)}
       />
       <Slider
         title={"Base Excess (mmol/L)"}
@@ -188,7 +170,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         value={string_of_int(state.baseExcess)}
         setValue={s => send(SetBaseExcess(int_of_string(s)))}
         getLabel={getStatus(-2.0, "Low", 2.0, "High")}
-        hasError={isInvalidInputInt(-20, 20, state.baseExcess)}
+        hasError={ValidationUtils.isInputInRangeInt(-20, 20, state.baseExcess)}
       />
       <Slider
         title={"Lactate (mmol/L)"}
@@ -199,7 +181,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         value={string_of_float(state.lactate)}
         setValue={s => send(SetLactate(float_of_string(s)))}
         getLabel={getStatus(0.0, "Low", 2.0, "High")}
-        hasError={isInvalidInputFloat("0.0", "20.0", state.lactate)}
+        hasError={ValidationUtils.isInputInRangeFloat("0.0", "20.0", state.lactate)}
       />
       <Slider
         title={"Sodium (mmol/L)"}
@@ -210,7 +192,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         value={string_of_float(state.sodium)}
         setValue={s => send(SetSodium(float_of_string(s)))}
         getLabel={getStatus(135.0, "Low", 145.0, "High")}
-        hasError={isInvalidInputFloat("100.0", "170.0", state.sodium)}
+        hasError={ValidationUtils.isInputInRangeFloat("100.0", "170.0", state.sodium)}
       />
       <Slider
         title={"Potassium (mmol/L)"}
@@ -221,7 +203,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         value={string_of_float(state.potassium)}
         setValue={s => send(SetPotassium(float_of_string(s)))}
         getLabel={getStatus(3.5, "Low", 5.5, "High")}
-        hasError={isInvalidInputFloat("1.0", "10.0", state.potassium)}
+        hasError={ValidationUtils.isInputInRangeFloat("1.0", "10.0", state.potassium)}
       />
     </div>
     <button

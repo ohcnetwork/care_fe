@@ -135,7 +135,7 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
-        <div className="mt-2">
+        <div className="mt-2 grid grid-cols-1 md:grid-cols-2 justify-between gap-4">
           <div>
             <span className="font-semibold leading-relaxed">Name: </span>
             <Link href={`/patient/${patientData?.id}`}>
@@ -590,7 +590,7 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="my-4 md:flex justify-between items-center mx-1">
             <PageTitle title={"Shifting details"} />
             <div className="md:flex items-center space-y-2 md:space-y-0 md:space-x-2">
-              <div className="">
+              <div>
                 <Button
                   fullWidth
                   variant="contained"
@@ -603,12 +603,17 @@ export default function ShiftDetails(props: { id: string }) {
                   Update Status/Details
                 </Button>
               </div>
-              <button
-                onClick={(_) => setIsPrintMode(true)}
-                className="btn btn-primary"
-              >
-                <i className="fas fa-file-alt mr-2"></i> Referral Letter
-              </button>
+              <div>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="medium"
+                  onClick={() => setIsPrintMode(true)}
+                >
+                  <i className="fas fa-file-alt mr-2"></i> Referral Letter
+                </Button>
+              </div>
             </div>
           </div>
           {data.assigned_to_object && (
@@ -754,7 +759,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
 
-            <div className="flex justify-end mt-4 hidden">
+            <div className="flex justify-end mt-4">
               <div>
                 <Button
                   fullWidth
@@ -779,19 +784,25 @@ export default function ShiftDetails(props: { id: string }) {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={() => setOpenDeleteShiftDialog(false)}
-                      color="primary"
-                    >
-                      No
-                    </Button>
-                    <Button
-                      color="primary"
-                      onClick={handleShiftDelete}
-                      autoFocus
-                    >
-                      Yes
-                    </Button>
+                    <div className="flex flex-col md:flex-row w-full gap-2 justify-end">
+                      <div>
+                        <button
+                          onClick={() => setOpenDeleteShiftDialog(false)}
+                          className="btn btn-primary w-full md:w-auto"
+                        >
+                          No
+                        </button>
+                      </div>
+                      <div>
+                        <button
+                          onClick={handleShiftDelete}
+                          id="facility-delete-confirm"
+                          className="btn btn-danger w-full md:w-auto"
+                        >
+                          Yes
+                        </button>
+                      </div>
+                    </div>
                   </DialogActions>
                 </Dialog>
               </div>
@@ -815,7 +826,7 @@ export default function ShiftDetails(props: { id: string }) {
             <div className="col-span-2">
               <h4 className="mt-8">Audit Log</h4>
 
-              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
+              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2 flex flex-col md:flex-row gap-4 justify-center">
                 <div className="border-r-2">
                   <div className="text-sm leading-5 font-medium text-gray-500">
                     Created

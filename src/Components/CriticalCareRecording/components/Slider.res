@@ -28,8 +28,8 @@ let str = React.string
 // %%raw(`import ("./styles.css")`)
 %%raw(`import ('@yaireo/ui-range')`)
 
-@react.component
-export make = (
+@genType @react.component
+let make = (
   ~title: string,
   ~titleNeighbour: React.element=<div className="hidden" />,
   ~start: string,
@@ -75,11 +75,11 @@ export make = (
 
   <>
     <section className={"slider-box " ++ className}>
-      <div className="slider-head">
+      <div className="slider-head flex justify-between flex-col sm:flex-row sm:items-center">
         <div className="flex items-center">
           <h1 className="m-2"> {title->str} </h1> titleNeighbour
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col items-end mt-2 sm:mt-0">
           <label htmlFor="measure" style={ReactDOM.Style.make(~color=textColor, ())}>
             {switch value->Belt.Float.fromString {
             | Some(_) => text->str
