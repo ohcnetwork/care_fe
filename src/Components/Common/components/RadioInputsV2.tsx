@@ -20,7 +20,7 @@ export default function RadioInputsV2<T extends RadioValue>(props: Props<T>) {
   return (
     <div className={props.className}>
       {props.label && (
-        <label htmlFor="is_working">
+        <label htmlFor={props.name}>
           {props.label}
           {props.required && " *"}
         </label>
