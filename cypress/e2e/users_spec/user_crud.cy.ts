@@ -13,7 +13,7 @@ const makeid = (length: number) => {
 const makePhoneNumber = () =>
   "9199" + Math.floor(Math.random() * 99999999).toString();
 
-const username = makeid(20);
+const username = makeid(25);
 const phone_number = makePhoneNumber();
 const alt_phone_number = makePhoneNumber();
 
@@ -25,15 +25,8 @@ describe("User management", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000").wait(2000);
-    cy.get("a").contains("Users").click();
-    cy.url().should("include", "/user");
+    cy.awaitUrl("/user");
   });
-
-  // it("debug", () => {
-  //   cy.visit("http://localhost:4000/user/add").wait(2000);
-  //   cy.wait(2000);
-  // });
 
   it("create user", () => {
     cy.contains("Add New User").click();
@@ -49,8 +42,9 @@ describe("User management", () => {
       .type("Mysore", { delay: 200 })
       .wait(2000)
       .type("{downarrow}{enter}");
-    cy.wait(2000);
+    cy.intercept(/users/).as("checkUsername");
     cy.get("[name='username']").type(username, { force: true });
+    cy.wait("@checkUsername").its("response.statusCode").should("eq", 404);
     cy.get("[name='dob']").type("02/03/2001");
     cy.get("[name='password']").type("#@Cypress_test123");
     cy.get("[name='c_password']").type("#@Cypress_test123");
@@ -60,41 +54,36 @@ describe("User management", () => {
     cy.get("[name='gender']").select("Male");
     cy.get("[name='state']").select("Kerala");
     cy.get("[name='district']").select("Ernakulam");
-    //cy.get("[name='local_body']").select("");
     cy.get("button[type='submit']").contains("Save User").click();
-    cy.wait(2000);
     cy.verifyNotification("User added successfully");
   });
 
   it("view user and verify details", () => {
-    cy.wait(1000);
     cy.contains("Advanced Filters").click();
-    cy.wait(2000);
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
     cy.get("[placeholder='Phone Number']").type(phone_number);
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
-    cy.wait(2000);
     cy.get("[name='search']").type(username, { force: true });
-    cy.wait(1000);
     // TODO: some verify task
   });
 
-  it("update user", () => {
+  it("link facility for user", () => {
     cy.contains("Advanced Filters").click().wait(2000);
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
     cy.get("[placeholder='Phone Number']").type(phone_number);
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
-    cy.wait(2000);
     cy.intercept(/\/api\/v1\/users/).as("getUsers");
     cy.get("[name='search']").type(username, { force: true });
     cy.wait("@getUsers");
-    cy.wait(1000);
+    cy.wait(500);
+    const linkFacilityString = "Click here to show linked facilities";
     cy.get("a")
-      .contains("Click here to show linked facilities")
+      .should("contain", linkFacilityString)
+      .contains(linkFacilityString)
       .click({ force: true })
       .then(() => {
         cy.get("a")
@@ -106,18 +95,10 @@ describe("User management", () => {
       .type("test")
       .wait(2000)
       .type("{downarrow}{enter}");
-    cy.get("button > span").contains("Add").click().wait(1000);
-  });
-
-  it("deletes user", () => {
-    cy.get("[name='search']").type(username);
-    cy.wait(2000);
-    cy.get("button").contains("Delete").click();
-    cy.get("button.font-medium.btn.btn-danger").click();
+    cy.get("button > span").contains("Add").click({ force: true }).wait(1000);
   });
 
   it("Next/Previous Page", () => {
-    cy.wait(1000);
     // only works for desktop mode
     cy.get("button")
       .should("contain", ">")
@@ -131,5 +112,141 @@ describe("User management", () => {
 
   afterEach(() => {
     cy.saveLocalStorage();
+  });
+});
+
+const backspace =
+  "{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}";
+
+describe("Edit Profile Testing", () => {
+  before(() => {
+    cy.loginByApi(username, "#@Cypress_test123");
+    cy.saveLocalStorage();
+  });
+
+  beforeEach(() => {
+    cy.restoreLocalStorage();
+    cy.awaitUrl("/user/profile");
+    cy.contains("Edit User Profile").click({ force: true });
+  });
+
+  it("Empty First-Name field of " + username, () => {
+    cy.get("input[name=firstName]").clear().trigger("change", { force: true });
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get(".error-text").contains("Field is required");
+  });
+
+  it("Valid First-Name field of " + username, () => {
+    cy.get("input[name=firstName]")
+      .type(backspace + "User 1")
+      .trigger("change", { force: true });
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("dt").contains("First Name").siblings().first().contains("User 1");
+  });
+
+  it("Empty Last-Name field of " + username, () => {
+    cy.get("input[name=lastName]").clear().trigger("change", { force: true });
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get(".error-text").contains("Field is required");
+  });
+
+  it("Valid Last-Name field of " + username, () => {
+    cy.get("input[name=lastName]")
+      .type(backspace + "User 1")
+      .trigger("change", { force: true });
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("dt").contains("Last Name").siblings().first().contains("User 1");
+  });
+
+  it("Invalid Whatsapp Number of " + username, () => {
+    const whatsapp_num = "11111-11111";
+
+    cy.get(".flag-dropdown").last().find(".arrow").click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
+    cy.get("[placeholder='WhatsApp Number']")
+      .focus()
+      .type(`${backspace}${whatsapp_num}`)
+      .trigger("change", { force: true })
+      .should("have.attr", "value", `+91 ${whatsapp_num}`);
+    cy.wait(1000);
+    cy.get("form")
+      .get("button[type='submit']")
+      .contains("UPDATE")
+      .click()
+      .then(() => {
+        cy.get(".error-text").contains("Please enter valid mobile number");
+      });
+  });
+
+  it("Valid Whatsapp Number of " + username, () => {
+    const whatsapp_num = "91111-11111";
+
+    cy.get(".flag-dropdown").last().find(".arrow").click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
+    cy.get("[placeholder='WhatsApp Number']")
+      .focus()
+      .type(`${backspace}${whatsapp_num}`)
+      .trigger("change", { force: true })
+      .should("have.attr", "value", `+91 ${whatsapp_num}`);
+    cy.wait(1000);
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("dt")
+      .contains("Whatsapp No")
+      .siblings()
+      .first()
+      .contains(`+91 ${whatsapp_num}`);
+  });
+
+  it("Invalid Phone Number of " + username, () => {
+    const phone_num = "11111-11111";
+
+    cy.get(".flag-dropdown").first().find(".arrow").click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
+    cy.get("[placeholder='Phone Number']")
+      .focus()
+      .type(`${backspace}${phone_num}`)
+      .trigger("change", { force: true })
+      .should("have.attr", "value", `+91 ${phone_num}`);
+    cy.wait(1000);
+    cy.get("form")
+      .get("button[type='submit']")
+      .contains("UPDATE")
+      .click()
+      .then(() => {
+        cy.get(".error-text").contains("Please enter valid phone number");
+      });
+  });
+
+  it("Valid Phone Number of " + username, () => {
+    const phone_num = "99999-99999";
+
+    cy.get(".flag-dropdown").first().find(".arrow").click();
+    cy.get("li[data-flag-key='flag_no_84']").click();
+    cy.get("[placeholder='Phone Number']")
+      .focus()
+      .type(`${backspace}${phone_num}`)
+      .trigger("change", { force: true })
+      .should("have.attr", "value", `+91 ${phone_num}`);
+    cy.wait(1000);
+    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("dt")
+      .contains("Contact No")
+      .siblings()
+      .first()
+      .contains(`+91 ${phone_num}`);
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
+  });
+});
+
+describe("Delete User", () => {
+  it("deletes user", () => {
+    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    cy.awaitUrl("/user");
+    cy.get("[name='search']").type(username);
+    cy.get("button").should("contain", "Delete").contains("Delete").click();
+    cy.get("button.font-medium.btn.btn-danger").click();
   });
 });

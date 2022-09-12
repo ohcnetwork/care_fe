@@ -31,7 +31,7 @@ export default function SessionRouter(props: any) {
         {content}
       </div>
       <div className="bg-white flex items-center">
-        <div className="max-w-5xl mx-auto flex md:flex-row flex-col p-4 f-full items-center">
+        <div className="max-w-5xl mx-auto flex md:flex-row flex-col p-4 items-center">
           <div className="mx-auto p-2">
             <img
               className="h-20"
