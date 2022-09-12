@@ -2,6 +2,7 @@ import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
 import { useState } from "react";
+//@ts-ignore
 import CSVReader from "react-csv-reader";
 import { useDispatch } from "react-redux";
 import { externalResultUploadCsv } from "../../Redux/actions";

@@ -347,6 +347,9 @@ export const getCapacityBed = (pathParam: object) => {
 export const getDoctor = (pathParam: object) => {
   return fireRequest("getDoctor", [], {}, pathParam);
 };
+export const deleteCapacity = (pathParam: object) => {
+  return fireRequest("deleteCapacityBed", [], {}, pathParam);
+};
 
 //Patient
 export const searchPatient = (params: object) => {
@@ -714,6 +717,11 @@ export const editInvestigation = (
     consultation_external_id: consultation_external_id,
   });
 };
+
+// ICD11
+export const listICD11Diagnosis = (params: object, key: string) => {
+  return fireRequest("listICD11Diagnosis", [], params, null, key);
+}
 
 // Resource
 export const createResource = (params: object) => {

@@ -75,15 +75,6 @@ let saveData = (id, consultationId, state, send, updateCB) => {
   )
 }
 
-let isInvalidInputInt = (min, max, val) => {
-  let value = Js.Option.getWithDefault(min, val)
-  if value < min || value > max {
-    Some("Input outside range")
-  } else {
-    None
-  }
-}
-
 let getStatus = (min, minText, max, maxText, val) => {
   if val >= min && val <= max {
     ("Normal", "#059669")
@@ -135,7 +126,7 @@ let make = (~others, ~updateCB, ~id, ~consultationId) => {
         value={string_of_int(state.etco2)}
         setValue={s => send(SetETCO2(int_of_string(s)))}
         getLabel={getStatus(35.0, "Low", 45.0, "High")}
-        hasError={isInvalidInputInt(0, 200, state.etco2)}
+        hasError={ValidationUtils.isInputInRangeInt(0, 200, state.etco2)}
       />
     </div>
     <button
