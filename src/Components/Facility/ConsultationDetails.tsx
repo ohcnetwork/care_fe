@@ -602,14 +602,50 @@ export const ConsultationDetails = (props: any) => {
         </div>
 
         <div className="border-b-2 border-gray-200 mt-4 w-full">
-          <div className="sm:flex sm:items-baseline">
+          <div className="sm:flex sm:items-baseline overflow-x-auto">
             <div className="mt-4 sm:mt-0">
-              <nav className="pl-2 flex space-x-6 items-center pb-2">
-                <span className={tabButtonClasses(true)}>{tab}</span>
-                <i
-                  className="fa-solid fa-bars text-lg cursor-pointer"
-                  onClick={() => setShowNav(true)}
-                ></i>
+              <nav className="">
+                <div className="hidden pl-2 md:flex space-x-6 overflow-x-auto items-center pb-2">
+                  {CONSULTATION_TABS.map((p: OptionsType) => {
+                    if (p.text === "FEED") {
+                      if (!consultationData?.current_bed?.bed_object?.id)
+                        return null;
+                    }
+                    return (
+                      <Link
+                        key={p.text}
+                        className={tabButtonClasses(tab === p.text)}
+                        href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
+                      >
+                        {p.desc}
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className="md:hidden pl-2 flex space-x-6 overflow-x-auto items-center pb-2">
+                  {CONSULTATION_TABS.map((p: OptionsType, idx: number) => {
+                    if (idx > 3) return null;
+                    if (p.text === "FEED") {
+                      if (!consultationData?.current_bed?.bed_object?.id)
+                        return null;
+                    }
+                    return (
+                      <Link
+                        key={p.text}
+                        className={tabButtonClasses(tab === p.text)}
+                        href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
+                      >
+                        {p.desc}
+                      </Link>
+                    );
+                  })}
+                  <span
+                    className={tabButtonClasses(false)}
+                    onClick={() => setShowNav(true)}
+                  >
+                    More +{" "}
+                  </span>
+                </div>
                 <SlideOver show={showNav} setShow={setShowNav}>
                   <div className="flex flex-col px-3 py-2">
                     {CONSULTATION_TABS.map((p: OptionsType) => {
