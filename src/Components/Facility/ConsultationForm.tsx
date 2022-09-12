@@ -55,6 +55,7 @@ import Beds from "./Consultations/Beds";
 import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
 import PRNPrescriptionBuilder, { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { DiagnosisSelect } from "../Common/DiagnosisSelect";
+import InvestigationBuilder, { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
 import { ICD11DiagnosisModel } from "./models";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -88,7 +89,8 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: PrescriptionType[];
-  prn_prescription: PRNPrescriptionType[];
+  prn_prescription : PRNPrescriptionType[],
+  investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
@@ -130,7 +132,8 @@ const initForm: FormDetails = {
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
-  prn_prescription: [],
+  prn_prescription : [],
+  investigation: [],
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
@@ -206,6 +209,7 @@ export const ConsultationForm = (props: any) => {
     []
   );
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
+  const [InvestigationAdvice, setInvestigationAdvice] = useState<InvestigationType[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -237,11 +241,8 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
       setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(
-        !Array.isArray(res.data.prn_prescription)
-          ? []
-          : res.data.prn_prescription
-      );
+      setPRNAdvice(!Array.isArray(res.data.prn_prescription) ? [] : res.data.prn_prescription);
+      setInvestigationAdvice(!Array.isArray(res.data.investigation) ? [] : res.data.investigation);
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -419,6 +420,25 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
+
+        case "investigation":{
+          let invalid = false;
+          for (let f of InvestigationAdvice) {
+            if (
+              f.type?.length === 0 ||
+              (f.repetitive ? !f.frequency?.replace(/\s/g, "").length : !f.time?.replace(/\s/g, "").length)
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Investigation Suggestion field can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        }
         default:
           return;
       }
@@ -461,7 +481,8 @@ export const ConsultationForm = (props: any) => {
         icd11_diagnoses: state.form.icd11_diagnoses,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
-        prn_prescription: PRNAdvice,
+        prn_prescription : PRNAdvice,
+        investigation: InvestigationAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -571,8 +592,7 @@ export const ConsultationForm = (props: any) => {
   };
 
   const handleDoctorSelect = (doctor: UserModel | null) => {
-    doctor &&
-      doctor.id &&
+    if (doctor?.id) {
       dispatch({
         type: "set_form",
         form: {
@@ -581,6 +601,16 @@ export const ConsultationForm = (props: any) => {
           assigned_to_object: doctor,
         },
       });
+    } else {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          assigned_to: "",
+          assigned_to_object: null,
+        },
+      });
+    }
   };
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
@@ -825,6 +855,15 @@ export const ConsultationForm = (props: any) => {
                   onChange={handleChange}
                   errors={state.errors.consultation_notes}
                 />
+              </div>
+              <div id="investigation-div" className="mt-4">
+                <InputLabel>Investigation Suggestions</InputLabel>
+                <InvestigationBuilder
+                  investigations={InvestigationAdvice}
+                  setInvestigations={setInvestigationAdvice}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.investigation} />
               </div>
               <div id="discharge_advice-div" className="mt-4">
                 <InputLabel>Prescription Medication</InputLabel>

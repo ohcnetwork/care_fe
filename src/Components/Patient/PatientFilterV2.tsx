@@ -429,7 +429,10 @@ export default function PatientFilterV2(props: any) {
           <i className="fas fa-times mr-2" />
           Clear Filter
         </button>
-        <button className="btn btn-primary mt-1" onClick={applyFilter}>
+        <button
+          className="btn btn-primary w-full sm:w-fit mt-2 sm:mt-0"
+          onClick={applyFilter}
+        >
           <i className="fas fa-check mr-2" />
           Apply
         </button>
