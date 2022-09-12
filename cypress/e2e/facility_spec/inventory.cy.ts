@@ -8,6 +8,7 @@ describe("Inventory Management Section", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.awaitUrl("/");
     cy.get("a")
       .should("contain", "Facility")
       .contains("Facility")

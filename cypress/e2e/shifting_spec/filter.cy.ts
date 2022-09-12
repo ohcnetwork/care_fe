@@ -8,20 +8,14 @@ describe("Shifting section filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("http://localhost:4000");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
-    cy.get("a").contains("Shifting").click().wait(1000);
-    cy.url().should("include", "/shifting");
-    cy.contains("Filters").click();
+    cy.awaitUrl("/shifting");
+    cy.get("button").should("contain", "Filters").contains("Filters").click();
   });
 
   it("filter by origin facility", () => {
     cy.get("[name='orgin_facility']")
       .type("harsha")
-      .wait(3000)
+      .wait(2000)
       .type("{downarrow}{enter}");
     cy.contains("Apply").click().wait(1000);
   });
@@ -29,7 +23,7 @@ describe("Shifting section filter", () => {
   it("filter by shifting approval facility", () => {
     cy.get("[name='shifting_approving_facility']")
       .type("test")
-      .wait(3000)
+      .wait(2000)
       .type("{downarrow}{enter}");
     cy.contains("Apply").click().wait(1000);
   });
@@ -37,7 +31,7 @@ describe("Shifting section filter", () => {
   it("filter by assigned facility", () => {
     cy.get("[name='assigned_facility']")
       .type("center")
-      .wait(3000)
+      .wait(2000)
       .type("{downarrow}{enter}");
     cy.contains("Apply").click().wait(1000);
   });
@@ -45,7 +39,7 @@ describe("Shifting section filter", () => {
   it("filter by assigned to facility", () => {
     cy.get("[name='assigned_to']")
       .type("test")
-      .wait(3000)
+      .wait(2000)
       .type("{downarrow}{enter}");
     cy.contains("Apply").click().wait(1000);
   });
