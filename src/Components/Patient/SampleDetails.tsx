@@ -31,6 +31,8 @@ export const SampleDetails = (props: SampleDetailsProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           setSampleDetails(res.data);
+        } else {
+          navigate("/not-found");
         }
         setIsLoading(false);
       }

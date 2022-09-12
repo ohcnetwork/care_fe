@@ -1,7 +1,14 @@
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 
-export function PrescriptionDropdown(props : {options : string[], value : string, setValue : (value: string) => void, placeholder? : string}){
+export function PrescriptionDropdown(props : {
+    options : string[] | number[],
+    value : string | number, 
+    setValue : (value: any) => void, 
+    placeholder? : string, 
+    type? : "string" | "number",
+    min? : number,
+}){
 
     const {options, value, setValue} = props;
     const [open, setOpen] = useState(false);
@@ -26,12 +33,14 @@ export function PrescriptionDropdown(props : {options : string[], value : string
     return (
         <div className="w-full relative">
             <input
+                type={props.type}
                 placeholder={props.placeholder}
                 className="w-full relative focus:ring-primary-500 focus:border-primary-500 border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                 onClick={()=>setOpen(!open)}
                 value={value}
                 onChange={(e)=>setValue(e.target.value)}
                 required
+                min={props.min}
             />
             <div
                 ref={dropRef}

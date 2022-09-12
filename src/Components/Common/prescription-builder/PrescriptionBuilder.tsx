@@ -1,9 +1,10 @@
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
+import { PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
 
-const medicines = require("./assets/medicines");
+export const medicines = require("./assets/medicines");
 const frequency = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
-const routes = ["Oral", "IV", "IM", "S/C"]
-const units = ["mg", "ml", "drops"]
+export const routes = ["Oral", "IV", "IM", "S/C"]
+export const units = ["mg", "ml", "drops"]
 
 export type PrescriptionType = {
     medicine?: string; 
@@ -23,7 +24,7 @@ export const emptyValues = {
     notes: ""
 }
 
-export default function PrescriptionBuilder(props : {prescriptions : PrescriptionType[], setPrescriptions : React.Dispatch<React.SetStateAction<PrescriptionType[]>>}){
+export default function PrescriptionBuilder(props : PrescriptionBuilderProps<PrescriptionType>){
 
     const {prescriptions, setPrescriptions} = props;
 
@@ -113,7 +114,7 @@ export default function PrescriptionBuilder(props : {prescriptions : Prescriptio
                                                 placeholder="Dosage"
                                                 min={0}
                                                 onChange={(e)=>{
-                                                    let value = parseInt(e.target.value);
+                                                    let value = parseFloat(e.target.value);
                                                     if(value < 0){
                                                         value = 0;
                                                     }
