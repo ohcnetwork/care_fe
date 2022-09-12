@@ -781,4 +781,9 @@ export const FACILITY_FEATURE_TYPES = [
     name: "Operation Theater",
     icon: "syringe",
   },
+  {
+    id: 6,
+    name: "Blood Bank",
+    icon: "droplet",
+  },
 ];
