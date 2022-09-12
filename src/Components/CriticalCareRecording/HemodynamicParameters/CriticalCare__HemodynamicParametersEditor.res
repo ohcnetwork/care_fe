@@ -25,6 +25,7 @@ type state = {
   systolic: option<int>,
   diastolic: option<int>,
   pulse: option<int>,
+  spo2: option<int>,
   temperature: option<float>,
   resp: option<int>,
   rhythm: HemodynamicParameters.rhythm,
@@ -39,6 +40,7 @@ type action =
   | SetSystolic(int)
   | SetDiastolic(int)
   | SetPulse(int)
+  | SetSPO2(int)
   | SetTemperature(float)
   | ToggleTemperatureUnit
   | SetResp(int)
@@ -65,6 +67,7 @@ let reducer = (state, action) => {
       dirty: true,
     }
   | SetPulse(pulse) => {...state, pulse: Some(pulse), dirty: true}
+  | SetSPO2(spo2) => {...state, spo2: Some(spo2), dirty: true}
   | SetTemperature(temperature) => {
       ...state,
       temperature: Some(temperature),
@@ -101,6 +104,7 @@ let initialState = hdp => {
     systolic: Belt.Option.map(bp, HemodynamicParameters.systolic),
     diastolic: Belt.Option.map(bp, HemodynamicParameters.diastolic),
     pulse: HemodynamicParameters.pulse(hdp),
+    spo2: HemodynamicParameters.spo2(hdp),
     temperature: HemodynamicParameters.temperature(hdp),
     resp: HemodynamicParameters.resp(hdp),
     rhythm: HemodynamicParameters.rhythm(hdp),
@@ -133,6 +137,7 @@ let makePayload = state => {
   }
   DictUtils.setOptionalNumber("pain", state.pain, payload)
   DictUtils.setOptionalNumber("pulse", state.pulse, payload)
+  DictUtils.setOptionalNumber("ventilator_spo2", state.spo2, payload)
   DictUtils.setOptionalFloat(
     "temperature",
     state.tempInCelcius ? state.temperature->celciusToFahrenheit : state.temperature,
@@ -164,12 +169,10 @@ let saveData = (id, consultationId, state, send, updateCB) => {
 }
 
 let getStatus = (min, minText, max, maxText, val) => {
-  if val >= min && val <= max {
-    ("Normal", "#059669")
-  } else if val < min {
-    (minText, "#DC2626")
-  } else {
-    (maxText, "#DC2626")
+  switch (val >= min, val <= max) {
+  | (true, true) => ("Normal", "#059669")
+  | (true, false) => (maxText, "#DC2626")
+  | _ => (minText, "#DC2626")
   }
 }
 
@@ -232,6 +235,17 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
           setValue={s => send(SetDiastolic(int_of_string(s)))}
           getLabel={getStatus(50.0, "Low", 90.0, "High")}
           hasError={ValidationUtils.isInputInRangeInt(30, 180, state.diastolic)}
+        />
+        <Slider
+          title={"Spo2"}
+          start={"0"}
+          end={"100"}
+          interval={"1"}
+          step={1.0}
+          value={Belt.Option.mapWithDefault(state.spo2, "", string_of_int)}
+          setValue={s => send(SetSPO2(int_of_string(s)))}
+          getLabel={getStatus(90.0, "Low", 100.0, "High")}
+          hasError={ValidationUtils.isInputInRangeInt(0, 100, state.spo2)}
         />
       </div>
       <div className="border-b border-b-gray-500 w-full my-10" />
