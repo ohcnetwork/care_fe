@@ -53,7 +53,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       setIpAddress_error("");
       const data = {
         meta: {
-          asset_type: assetType,
+          asset_type: "CAMERA",
           middleware_hostname: middlewareHostname,
           local_ip_address: cameraAddress,
           camera_access_key: cameraAccessKey,
