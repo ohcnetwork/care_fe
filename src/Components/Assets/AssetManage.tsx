@@ -42,14 +42,12 @@ const AssetManage = (props: AssetManageProps) => {
       ]);
       if (!status.aborted) {
         setIsLoading(false);
-        if (!assetData.data)
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        else {
+        if (assetData && assetData.data) {
           setAsset(assetData.data);
           setTransactions(transactionsData.data.results);
           setTotalCount(transactionsData.data.count);
+        } else {
+          navigate("/not-found");
         }
       }
     },
@@ -176,7 +174,9 @@ const AssetManage = (props: AssetManageProps) => {
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
       <div className="bg-white rounded-lg md:p-6 p-3 shadow">
-        <div className="text-2xl font-semibold mb-4">{asset?.name}</div>
+        <div className="text-2xl font-semibold mb-4 break-words">
+          {asset?.name}
+        </div>
         <div className="md:flex justify-between">
           <div className="mb-2">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -260,14 +260,16 @@ const AssetManage = (props: AssetManageProps) => {
               <i className="fas fa-pencil-alt text-white mr-2"></i>
               Update Asset
             </button>
-            <button
-              onClick={() => navigate(`/assets/${asset?.id}/configure`)}
-              id="update-asset"
-              className="btn-primary btn"
-            >
-              <i className="fas fa-cog text-white mr-2"></i>
-              Configure Asset
-            </button>
+            {asset?.asset_class && (
+              <button
+                onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+                id="update-asset"
+                className="btn-primary btn"
+              >
+                <i className="fas fa-cog text-white mr-2"></i>
+                Configure Asset
+              </button>
+            )}
           </div>
         </div>
       </div>

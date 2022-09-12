@@ -17,15 +17,15 @@ import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import { GetApp, Visibility } from "@material-ui/icons";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
-// import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+import imageCompression from "browser-image-compression";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -50,38 +50,17 @@ export const header_content_type: URLS = {
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 
-// Object for possible extension of image files
-const ExtImage: URLS = {
-  jpeg: "1",
-  jpg: "1",
-  gif: "1",
-  png: "1",
-  svg: "1",
-};
-
-// function getModalStyle() {
-//   const top = 100;
-//   const left = 100;
-
-//   return {
-//     top: `${top}%`,
-//     left: `${left}%`,
-//     transform: `translate(-${top}%, -${left}%)`,
-//   };
-// }
-
-// const useStyles = makeStyles((theme: Theme) =>
-//   createStyles({
-//     paper: {
-//       position: "absolute",
-//       width: "60%",
-//       backgroundColor: theme.palette.background.paper,
-//       border: "2px solid #000",
-//       boxShadow: theme.shadows[5],
-//       padding: theme.spacing(2, 4, 3),
-//     },
-//   })
-// );
+// Array of image extensions
+const ExtImage: string[] = [
+  "jpeg",
+  "jpg",
+  "png",
+  "gif",
+  "svg",
+  "bmp",
+  "webp",
+  "jfif",
+];
 
 export const LinearProgressWithLabel = (props: any) => {
   return (
@@ -116,6 +95,8 @@ interface URLS {
 interface StateInterface {
   open: boolean;
   isImage: boolean;
+  name: string;
+  extension: string;
   zoom: number;
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
@@ -123,7 +104,7 @@ interface StateInterface {
 
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [file, setfile] = useState<File>();
+  const [file, setFile] = useState<File | null>();
   const {
     facilityId,
     consultationId,
@@ -141,12 +122,16 @@ export const FileUpload = (props: FileUploadProps) => {
     {},
   ]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
+  const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
   // const [uploadSuccess, setUploadSuccess] = useState(false);
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
+  const [uploadFileNameError, setUploadFileNameError] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
+  const [audioName, setAudioName] = useState<string>("");
+  const [audioNameError, setAudioNameError] = useState<string>("");
   const [contentType, setcontentType] = useState<string>("");
   // const classes = useStyles();
   // const [modalStyle] = React.useState(getModalStyle);
@@ -154,6 +139,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const initialState = {
     open: false,
     isImage: false,
+    name: "",
+    extension: "",
     zoom: 3,
     isZoomInDisabled: false,
     isZoomOutDisabled: false,
@@ -190,12 +177,12 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const zoom_values = [
-    "h-1/6 my-40",
-    "h-2/6 my-32",
-    "h-3/6 my-24",
-    "h-4/6 my-20",
-    "h-5/6 my-16",
-    "h-full my-12",
+    "h-1/6 w-1/6 my-40",
+    "h-2/6 w-2/6 my-32",
+    "h-3/6 w-3/6 my-24",
+    "h-4/6 w-4/6 my-20",
+    "h-5/6 w-5/6 my-16",
+    "h-full w-full my-12",
   ];
 
   const handleZoomIn = () => {
@@ -321,14 +308,11 @@ export const FileUpload = (props: FileUploadProps) => {
     [dispatch, fetchData, id, reload]
   );
 
-  // Function to extract the extension of the file and check if its image or not
+  // Function to extract the extension of the file
   const getExtension = (url: string) => {
     const div1 = url.split("?")[0].split(".");
     const ext: string = div1[div1.length - 1].toLowerCase();
-    if (ExtImage[ext] && ExtImage[ext] === "1") {
-      return true;
-    }
-    return false;
+    return ext;
   };
 
   const loadFile = async (id: any) => {
@@ -336,10 +320,13 @@ export const FileUpload = (props: FileUploadProps) => {
     setFileState({ ...file_state, open: true });
     const data = { file_type: type, associating_id: getAssociatedId() };
     const responseData = await dispatch(retrieveUpload(data, id));
+    const file_extension = getExtension(responseData.data.read_signed_url);
     setFileState({
       ...file_state,
       open: true,
-      isImage: getExtension(responseData.data.read_signed_url),
+      name: responseData.data.name,
+      extension: file_extension,
+      isImage: ExtImage.includes(file_extension),
     });
     downloadFileUrl(responseData.data.read_signed_url);
     setFileUrl(responseData.data.read_signed_url);
@@ -367,17 +354,40 @@ export const FileUpload = (props: FileUploadProps) => {
                 : "-"}
             </div>
           </div>
-          <div>
+          <div className="flex items-center">
             {item.file_category === "AUDIO" ? (
-              <div>
+              <div className="flex space-x-2">
                 {item.id ? (
                   Object.keys(url).length > 0 ? (
-                    <audio
-                      className="max-h-full max-w-full m-auto object-contain"
-                      src={url[item.id]}
-                      controls
-                      preload="auto"
-                    />
+                    <>
+                      <audio
+                        className="max-h-full max-w-full m-auto object-contain"
+                        src={url[item.id]}
+                        controls
+                        preload="auto"
+                        controlsList="nodownload"
+                      />
+                      <a
+                        href={url[item.id]}
+                        className="text-black p-4"
+                        download={true}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                          />
+                        </svg>
+                      </a>
+                    </>
                   ) : (
                     <CircularProgress />
                   )
@@ -392,7 +402,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
-                  startIcon={<GetAppIcon>load</GetAppIcon>}
+                  startIcon={<Visibility />}
                   onClick={() => {
                     loadFile(item.id);
                   }}
@@ -415,18 +425,33 @@ export const FileUpload = (props: FileUploadProps) => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
     }
-    setfile(e.target.files[0]);
-    const fileName = e.target.files[0].name;
+    const f = e.target.files[0];
+    const fileName = f.name;
+    setFile(e.target.files[0]);
+    setUploadFileName(
+      fileName.substring(0, fileName.lastIndexOf(".")) || fileName
+    );
     const ext: string = fileName.split(".")[1];
     setcontentType(header_content_type[ext]);
-    return e.target.files[0];
+
+    if (ExtImage.includes(ext)) {
+      const options = {
+        initialQuality: 0.6,
+        alwaysKeepResolution: true,
+      };
+      imageCompression(f, options).then((compressedFile: File) => {
+        setFile(compressedFile);
+      });
+      return;
+    }
+    setFile(f);
   };
 
   const uploadfile = (response: any) => {
     const url = response.data.signed_url;
     const internal_name = response.data.internal_name;
     const f = file;
-    if (f === undefined) return;
+    if (!f) return;
     const newFile = new File([f], `${internal_name}`);
 
     const config = {
@@ -446,23 +471,40 @@ export const FileUpload = (props: FileUploadProps) => {
       .then(() => {
         setUploadStarted(false);
         // setUploadSuccess(true);
+        setFile(null);
         setUploadFileName("");
         setReload(!reload);
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
+        setUploadFileNameError("");
       })
       .catch(() => {
         setUploadStarted(false);
       });
   };
 
-  const handleUpload = async () => {
+  const validateFileUpload = () => {
+    const filenameLength = uploadFileName.trim().length;
     const f = file;
-    if (f === undefined) return;
+    if (f === undefined) {
+      setUploadFileNameError("Please choose a file to upload");
+      return false;
+    }
+    if (filenameLength === 0) {
+      setUploadFileNameError("Please give a name !!");
+      return false;
+    }
+    return true;
+  };
+
+  const handleUpload = async (status: any) => {
+    if (!validateFileUpload()) return;
+    const f = file;
+
     const category = "UNSPECIFIED";
-    const filename = uploadFileName;
-    const name = f.name;
+    const filename = uploadFileName === ""  && f ? f.name : uploadFileName;
+    const name = f?.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
     const requestData = {
@@ -476,7 +518,12 @@ export const FileUpload = (props: FileUploadProps) => {
       .then(uploadfile)
       .catch(() => {
         setUploadStarted(false);
-      });
+      })
+      .then(fetchData(status).then(() => {}));
+
+    // setting the value of file name to empty
+    setUploadFileNameError("");
+    setUploadFileName("");
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
@@ -502,26 +549,36 @@ export const FileUpload = (props: FileUploadProps) => {
     axios
       .put(url, newFile, config)
       .then(() => {
-        setUploadStarted(false);
+        setAudioUploadStarted(false);
         // setUploadSuccess(true);
-        setUploadFileName("");
+        setAudioName("");
         setReload(!reload);
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
       })
       .catch(() => {
-        setUploadStarted(false);
+        setAudioUploadStarted(false);
       });
   };
 
-  const handleAudioUpload = async () => {
+  const validateAudioUpload = () => {
+    const filenameLength = audioName.trim().length;
     const f = audioBlob;
-    if (f === undefined) return;
+    if (f === undefined) {
+      return false;
+    }
+    return true;
+  };
+
+  const handleAudioUpload = async () => {
+    if (!validateAudioUpload()) return;
+    setAudioNameError("");
     const category = "AUDIO";
-    const filename = Date.now().toString();
     const name = "audio.mp3";
-    setUploadStarted(true);
+    const filename =
+      audioName.trim().length === 0 ? Date.now().toString() : audioName.trim();
+    setAudioUploadStarted(true);
     // setUploadSuccess(false);
     const requestData = {
       original_name: name,
@@ -533,8 +590,9 @@ export const FileUpload = (props: FileUploadProps) => {
     dispatch(createUpload(requestData))
       .then(uploadAudiofile)
       .catch(() => {
-        setUploadStarted(false);
+        setAudioUploadStarted(false);
       });
+    setAudioName("");
   };
 
   // For creating the Download File URL
@@ -556,14 +614,13 @@ export const FileUpload = (props: FileUploadProps) => {
       >
         {fileUrl && fileUrl.length > 0 ? (
           <>
-            <div className="flex absolute w-3/5 right-2">
+            <div className="flex absolute w-3/5 top-16 md:top-0 md:right-4">
               {file_state.isImage && (
-                <div className="w-2/6 flex">
-                  <div className="mr-4">
+                <div className="flex flex-col gap-2 md:flex-row">
+                  <div>
                     <Button
                       color="default"
                       variant="contained"
-                      style={{ marginLeft: "auto" }}
                       startIcon={<ZoomIn />}
                       onClick={() => {
                         handleZoomIn();
@@ -577,7 +634,6 @@ export const FileUpload = (props: FileUploadProps) => {
                     <Button
                       color="default"
                       variant="contained"
-                      style={{ marginLeft: "4px" }}
                       startIcon={<ZoomOut />}
                       onClick={() => {
                         handleZoomOut();
@@ -589,34 +645,33 @@ export const FileUpload = (props: FileUploadProps) => {
                   </div>
                 </div>
               )}
-              <div className="flex absolute right-2">
-                {downloadURL && downloadURL.length > 0 && (
-                  <div>
-                    <a
-                      href={downloadURL}
-                      download
-                      className="text-white p-4 my-2 rounded m-2 bg-primary-500"
-                    >
-                      <GetAppIcon>load</GetAppIcon>
-                      Download
-                    </a>
-                  </div>
-                )}
-
-                <div>
+            </div>
+            <div className="flex justify-center md:absolute md:right-2">
+              {downloadURL && downloadURL.length > 0 && (
+                <a
+                  href={downloadURL}
+                  download={file_state.name + "." + file_state.extension}
+                >
                   <Button
                     color="primary"
                     variant="contained"
-                    style={{ marginLeft: "auto" }}
-                    startIcon={<Close />}
-                    onClick={() => {
-                      handleClose();
-                    }}
+                    startIcon={<GetApp />}
                   >
-                    Close
+                    Download
                   </Button>
-                </div>
-              </div>
+                </a>
+              )}
+              <Button
+                color="primary"
+                variant="contained"
+                style={{ marginLeft: "10px" }}
+                startIcon={<Close />}
+                onClick={() => {
+                  handleClose();
+                }}
+              >
+                Close
+              </Button>
             </div>
             {file_state.isImage ? (
               <img
@@ -659,23 +714,44 @@ export const FileUpload = (props: FileUploadProps) => {
               <div>
                 <h4>Record and Upload Audio File</h4>
               </div>
-              <VoiceRecorder createAudioBlob={createAudioBlob} />
-              {audioBlob && (
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                  }
-
-                  onClick={() => {
-                    handleAudioUpload();
-                  }}
-                >
-                  Save Recording
-                </Button>
+              <InputLabel id="spo2-label">
+                Enter Audio File Name (optional)
+              </InputLabel>
+              <TextInputField
+                name="consultation_audio_file"
+                variant="outlined"
+                margin="dense"
+                type="text"
+                InputLabelProps={{ shrink: !!audioName }}
+                value={audioName}
+                disabled={uploadStarted}
+                onChange={(e: any) => {
+                  setAudioName(e.target.value);
+                }}
+                errors={audioNameError}
+              />
+              {audiouploadStarted ? (
+                <LinearProgressWithLabel value={uploadPercent} />
+              ) : (
+                <>
+                  <VoiceRecorder createAudioBlob={createAudioBlob} />
+                  {audioBlob && (
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      style={{ marginLeft: "auto" }}
+                      startIcon={
+                        <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
+                      }
+                      onClick={() => {
+                        handleAudioUpload();
+                      }}
+                    >
+                      Save Recording
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           ) : null}
@@ -687,7 +763,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <div>
                 <InputLabel id="spo2-label">Enter File Name</InputLabel>
                 <TextInputField
-                  name="temperature"
+                  name="consultation_file"
                   variant="outlined"
                   margin="dense"
                   type="text"
@@ -697,36 +773,47 @@ export const FileUpload = (props: FileUploadProps) => {
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
                   }}
-                  errors={`${[]}`}
+                  errors={uploadFileNameError}
                 />
               </div>
               <div className="mt-4">
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="md:flex justify-between">
-                    <input
-                      title="changeFile"
-                      onChange={onFileChange}
-                      type="file"
-                    />
-                    <div className="mt-2">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        startIcon={
-                          <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                        }
-                        onClick={() => {
-                          handleUpload();
-                        }}
-                      >
-                        Upload
-                      </Button>
-                    </div>
+                  <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
+                    <label
+                      className="flex items-center btn btn-primary"
+                    >
+                      <i className="fas fa-file-arrow-down mr-2" /> Choose file
+                      <input
+                        title="changeFile"
+                        onChange={onFileChange}
+                        type="file"
+                        hidden
+                      />
+                    </label>
+                    <button
+                      className="btn btn-primary"
+                      disabled={!file || !uploadFileName}
+                      onClick={() => {
+                        handleUpload({ status });
+                      }}
+                    >
+                      <i className="fas fa-cloud-arrow-up mr-2" /> Upload
+                    </button>
                   </div>
                 )}
+                {file && <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                  {file?.name}
+                  <button
+                    onClick={()=>{
+                      setFile(null);
+                      setUploadFileName("");
+                    }}
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>}
               </div>
             </div>
           ) : null}
@@ -738,9 +825,15 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={true}
         breadcrumbs={false}
       />
-      {uploadedFiles &&
-        uploadedFiles.length > 0 &&
-        uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))}
+      {uploadedFiles && uploadedFiles.length > 0 ? (
+        uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))
+      ) : (
+        <div className="mt-4 border bg-white shadow rounded-lg p-4">
+          <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+            {"No Data Found"}
+          </div>
+        </div>
+      )}
       {totalCount > limit && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination

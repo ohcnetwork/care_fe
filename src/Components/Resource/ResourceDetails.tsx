@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
+import clsx from "clsx";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
 import { navigate, Link } from "raviger";
@@ -39,6 +40,8 @@ export default function ResourceDetails(props: { id: string }) {
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data);
+        } else {
+          navigate("/not-found");
         }
         setIsLoading(false);
       }
@@ -56,14 +59,18 @@ export default function ResourceDetails(props: { id: string }) {
   const handleResourceDelete = async () => {
     setOpenDeleteResourceDialog(true);
 
-    let res = await dispatch(deleteResourceRecord(props.id));
-    if (res.status >= 200) {
+    const res = await dispatch(deleteResourceRecord(props.id));
+    if (res?.status === 204) {
       Notification.Success({
         msg: "Resource record has been deleted successfully.",
       });
+    } else {
+      Notification.Error({
+        msg: "Error while deleting Resource: " + (res?.data?.detail || ""),
+      });
     }
 
-    navigate(`/resource`);
+    navigate("/resource");
   };
 
   const showFacilityCard = (facilityData: any) => {
@@ -203,11 +210,11 @@ export default function ResourceDetails(props: { id: string }) {
               {data.assigned_facility_object.state_object?.name}
             </div>
           ) : null}
-          <div className="flex justify-end mt-10">
+          <div className="flex mt-10">
             <div>
               <div className="font-semibold">APPROVED BY</div>
               <div className="mt-3">
-                <div className="min-w-min lg:w-60 p-4 pr-0 pt-0 text-left">
+                <div>
                   <div>{data.approving_facility_object?.name || "--"}</div>
                   <div className="mt-2">
                     {data.approving_facility_object?.facility_type?.name ||
@@ -259,7 +266,7 @@ export default function ResourceDetails(props: { id: string }) {
         </div>
       ) : (
         <div className="mx-3 md:mx-8 mb-10">
-          <div className="my-4 flex justify-between items-center">
+          <div className="my-4 flex flex-col items-start md:flex-row md:justify-between md:items-center">
             <PageTitle
               title={"Resource details"}
               crumbsReplacements={{ [props.id]: { name: data.title } }}
@@ -289,10 +296,10 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
           )}
           <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
-            <div className="flex justify-between">
+            <div className="flex flex-col sm:flex-row sm:justify-between mb-4">
               <div className="text-xl font-semibold">{data.title || "--"}</div>
               <div>
-                <div className="mt-2">
+                <div className="mt-4 sm:mt-2">
                   <Button
                     fullWidth
                     variant="contained"
@@ -420,11 +427,11 @@ export default function ResourceDetails(props: { id: string }) {
           <h4 className="mt-8">Audit Log</h4>
 
           <div className="flex justify-between p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
-            <div className="w-1/2 border-r-2 truncate">
-              <div className="text-sm leading-5 font-medium text-gray-500">
+            <div className="w-1/2 border-r-2 px-1">
+              <div className="text-sm leading-5 font-medium text-black">
                 Created
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+              <div className="mt-1 text-sm leading-5 text-gray-900">
                 <div className="text-sm">
                   {data?.created_by_object?.first_name}{" "}
                   {data?.created_by_object?.last_name}
@@ -434,11 +441,11 @@ export default function ResourceDetails(props: { id: string }) {
                 </div>
               </div>
             </div>
-            <div className="w-1/2 truncate">
-              <div className="text-sm leading-5 font-medium text-gray-500">
+            <div className="w-1/2 px-1">
+              <div className="text-sm leading-5 font-medium text-black">
                 Last Edited
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+              <div className="mt-1 text-sm leading-5 text-gray-900">
                 <div className="text-sm">
                   {data?.last_edited_by_object?.first_name}{" "}
                   {data?.last_edited_by_object?.last_name}
@@ -450,20 +457,27 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
             </div>
           </div>
-          <div className="grid md:grid-cols-3 gap-4 pb-4">
+          <div
+            className={clsx(
+              "grid grid-cols-1 mt-8 gap-x-6 gap-y-12",
+              data.assigned_facility_object
+                ? "lg:grid-cols-3"
+                : "lg:grid-cols-2"
+            )}
+          >
             <div>
-              <h4 className="mt-8">Origin Facility</h4>
+              <h4>Origin Facility</h4>
 
               {showFacilityCard(data.orgin_facility_object)}
             </div>
             <div>
-              <h4 className="mt-8">Resource Approving facility</h4>
+              <h4>Resource Approving Facility</h4>
 
               {showFacilityCard(data.approving_facility_object)}
             </div>
             {data.assigned_facility_object && (
               <div>
-                <h4 className="mt-8">Request Fulfilling Facility</h4>
+                <h4>Request Fulfilling Facility</h4>
 
                 {showFacilityCard(data.assigned_facility_object)}
               </div>

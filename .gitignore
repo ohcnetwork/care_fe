@@ -26,7 +26,6 @@ dist
 build
 .swp
 stats.json
-package-lock.json
 public/build-meta.json
 
 
@@ -46,3 +45,12 @@ public/build-meta.json
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+
+# Using NPM
+# package-lock.json
+yarn.lock
+
+# Cypress
+cypress/downloads
+cypress/fixtures/token.json

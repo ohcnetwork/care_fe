@@ -1,25 +1,21 @@
 import React, { useCallback, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
-import { Button, CircularProgress } from "@material-ui/core";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getAnyFacility,
+  getFacilityAssetLocation,
   listFacilityBeds,
-  updateFacilityBed,
+  deleteFacilityBed,
 } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
 import { BedModel } from "./models";
 import { ReactElement } from "react";
-import {
-  MultilineInputField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
-import classNames from "classnames";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
+import BedDeleteDialog from "./BedDeleteDialog";
+
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -50,147 +46,85 @@ const BedRow = (props: BedRowProps) => {
   } = props;
 
   const dispatchAction: any = useDispatch();
-  const [isEditable, setIsEditable] = useState(false);
-  const [nameField, setNameField] = useState(name);
-  const [descField, setDescField] = useState(description);
-  const [bedTypeField, setBedTypeField] = useState(bedType);
-  const [isLoading, setIsLoading] = useState(false);
+  const [bedData, setBedData] = useState<{
+    show: boolean;
+    name: string;
+  }>({ show: false, name: "" });
 
-  const handleSave = async () => {
-    setIsLoading(true);
-    const res = await dispatchAction(
-      updateFacilityBed(
-        { name: nameField, description: descField, bed_type: bedTypeField },
-        facilityId,
-        id,
-        locationId
-      )
-    );
-    setIsLoading(false);
+  const handleDelete = (name: string, id: string) => {
+    setBedData({
+      show: true,
+      name,
+    });
+  };
 
-    if (res && res.status === 200) {
+  const handleDeleteConfirm = async () => {
+    const res = await dispatchAction(deleteFacilityBed(id));
+    if (res?.status === 204) {
       Notification.Success({
-        msg: "Location updated successfully",
+        msg: "Bed deleted successfully",
       });
     } else {
       Notification.Error({
-        msg: "Location update failed",
+        msg: "Error while deleting Bed: " + (res?.data?.detail || ""),
       });
     }
-    setIsEditable(false);
+    setBedData({ show: false, name: "" });
     triggerRerender();
-    // window.location.reload();
   };
 
-  const handleCancel = () => {
-    setNameField(name);
-    setDescField(description);
-    setBedTypeField(bedType);
-    setIsEditable(false);
+  const handleDeleteCancel = () => {
+    setBedData({ show: false, name: "" });
   };
 
   return (
-    <tr key={id}>
-      <td className="px-5 py-5 border-b border-gray-200 text-sm">
-        {isEditable ? (
-          <TextInputField
-            name="name"
-            variant="outlined"
-            margin="dense"
-            type="text"
-            value={nameField}
-            onChange={(e) => setNameField(e.target.value)}
-            errors=""
-          />
-        ) : (
-          <p className="text-gray-900">
-            {name.slice(0, 25) + (name.length > 25 ? "..." : "")}
-          </p>
-        )}
-      </td>
-      <td className="px-5 py-5 border-b border-gray-200 text-sm">
-        {isEditable ? (
-          <MultilineInputField
-            rows={2}
-            name="description"
-            variant="outlined"
-            margin="dense"
-            type="float"
-            value={descField}
-            onChange={(e) => setDescField(e.target.value)}
-            errors=""
-          />
-        ) : (
-          <p className="text-gray-900">{description}</p>
-        )}
-      </td>
-      <td className="px-5 py-5 border-b border-gray-200 text-sm">
-        {isEditable ? (
-          <SelectField
-            name="name"
-            variant="outlined"
-            margin="dense"
-            type="text"
-            value={bedTypeField}
-            onChange={(e) => setBedTypeField(e.target.value)}
-            options={LOCATION_BED_TYPES}
-            optionValue="name"
-          />
-        ) : (
-          <p className="text-gray-900">
+    <div
+      key={id}
+      className="w-full border-b lg:flex justify-between items-center py-6 space-y-5"
+    >
+      <div className="px-4 lg:w-3/4 space-y-2">
+        <div>
+          <p className="inline text-xl capitalize break-words">{name}</p> &nbsp;
+          <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
             {LOCATION_BED_TYPES.find((item) => item.id === bedType).name.slice(
               0,
               25
             ) + (bedType.length > 25 ? "..." : "")}
           </p>
-        )}
-      </td>
-      <td className="px-5 py-5 border-b border-gray-200 text-sm">
-        {isEditable ? (
-          <div className="flex space-x-2">
-            <Button
-              color={isLoading ? "default" : "primary"}
-              variant="contained"
-              type="submit"
-              size="small"
-              style={{ marginLeft: "auto" }}
-              onClick={handleSave}
-            >
-              <CircularProgress
-                size={20}
-                className={classNames("absolute z-10", { hidden: !isLoading })}
-              />
-              <p> SAVE </p>
-            </Button>
-            <Button
-              color="secondary"
-              variant="contained"
-              type="submit"
-              size="small"
-              style={{ marginLeft: "auto" }}
-              onClick={handleCancel}
-            >
-              CANCEL
-            </Button>
-          </div>
-        ) : (
-          <Button
-            color="inherit"
-            variant="contained"
-            type="submit"
-            size="small"
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "#24a0ed",
-              color: "white",
-            }}
-            onClick={() => setIsEditable(true)}
+        </div>
+        <p className="break-all">{description}</p>
+      </div>
+      <div className="sm:flex">
+        <div className="px-2 py-2 w-full">
+          <button
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/location/${locationId}/beds/${id}/update`
+              )
+            }
+            className="btn btn-default bg-white w-full border-gray-700 transition ease-in-out duration-150 hover:shadow"
           >
-            EDIT
-          </Button>
-        )}
-      </td>
-    </tr>
+            <i className="fas fa-pencil-alt mr-2"></i>
+            Edit
+          </button>
+        </div>
+        <div className="px-2 py-2 w-full">
+          <button
+            onClick={() => handleDelete(name, id)}
+            className="btn btn-default bg-white w-full border-red-500 text-red-700 active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+          >
+            <i className="fas fa-trash mr-2"></i>
+            Delete
+          </button>
+        </div>
+      </div>
+      <BedDeleteDialog
+        name={bedData.name}
+        show={bedData.show}
+        handleCancel={handleDeleteCancel}
+        handleOk={handleDeleteConfirm}
+      />
+    </div>
   );
 };
 
@@ -206,6 +140,7 @@ export const BedManagement = (props: BedManagementProps) => {
   const [totalCount, setTotalCount] = useState(0);
   const [rerender, setRerender] = useState(false);
   const [facilityName, setFacilityName] = useState("");
+  const [locationName, setLocationName] = useState("");
   const limit = 14;
 
   const triggerRerender = () => {
@@ -215,6 +150,16 @@ export const BedManagement = (props: BedManagementProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
+      const facility = await dispatchAction(getAnyFacility(facilityId));
+
+      setFacilityName(facility?.data?.name || "");
+
+      const location = await dispatchAction(
+        getFacilityAssetLocation(facilityId, locationId)
+      );
+
+      setLocationName(location?.data?.name || "");
+
       const res = await dispatchAction(
         listFacilityBeds({
           limit,
@@ -231,7 +176,7 @@ export const BedManagement = (props: BedManagementProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset, rerender]
+    [dispatchAction, offset, rerender, facilityId, locationId]
   );
 
   useAbortableEffect(
@@ -240,19 +185,6 @@ export const BedManagement = (props: BedManagementProps) => {
     },
     [fetchData]
   );
-
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -275,45 +207,16 @@ export const BedManagement = (props: BedManagementProps) => {
     ));
   } else if (beds && beds.length === 0) {
     BedList = (
-      <tr className="bg-white">
-        <td
-          colSpan={3}
-          className="px-5 py-5 border-b border-gray-200 text-center"
-        >
-          <p className="text-gray-500 whitespace-nowrap">
-            No beds available in this location
-          </p>
-        </td>
-      </tr>
+      <p className="bg-white px-5 py-5 border-b border-gray-200 text-center text-gray-500 whitespace-nowrap">
+        No beds available in this location
+      </p>
     );
   }
 
-  if (isLoading || !beds) {
-    bed = <Loading />;
-  } else if (beds) {
+  if (beds) {
     bed = (
       <>
-        <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
-          <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
-            <thead>
-              <tr>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Bed Type
-                </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Manage
-                </th>
-              </tr>
-            </thead>
-            <tbody>{BedList}</tbody>
-          </table>
-        </div>
+        <div className="grow mt-5 bg-white px-2 flex flex-wrap">{BedList}</div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
@@ -328,6 +231,10 @@ export const BedManagement = (props: BedManagementProps) => {
     );
   }
 
+  if (isLoading || !beds) {
+    return <Loading />;
+  }
+
   return (
     <div>
       <PageTitle
@@ -336,20 +243,26 @@ export const BedManagement = (props: BedManagementProps) => {
         className="mx-3 md:mx-8"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
-          [locationId]: { style: "pointer-events-none" },
+          [locationId]: {
+            name: locationName,
+            uri: `/facility/${facilityId}/location`,
+          },
         }}
       />
-      <div className="container mx-auto px-4 py-4 md:my-8 sm:px-8">
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          onClick={() =>
-            navigate(`/facility/${facilityId}/location/${locationId}/beds/add`)
-          }
-        >
-          Add Bed
-        </Button>
+      <div className="container px-4 py-2 sm:px-8">
+        <div className="flex justify-end">
+          <button
+            className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/location/${locationId}/beds/add`
+              )
+            }
+          >
+            <i className="fas fa-plus mr-2"></i>
+            Add New Bed
+          </button>
+        </div>
         {bed}
       </div>
     </div>

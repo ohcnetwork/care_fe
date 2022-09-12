@@ -94,7 +94,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                 >
                   <i className="fas fa-mobile mr-2" />
-                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                  <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
                     {shift.patient_object.phone_number || ""}
                   </dd>
                 </dt>
@@ -105,7 +105,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                 >
                   <i className="fas fa-plane-departure mr-2"></i>
-                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                  <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
                     {(shift.orgin_facility_object || {}).name}
                   </dd>
                 </dt>
@@ -116,7 +116,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                 >
                   <i className="fas fa-user-check mr-2"></i>
-                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                  <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
                     {(shift.shifting_approving_facility_object || {}).name}
                   </dd>
                 </dt>
@@ -128,7 +128,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                 >
                   <i className="fas fa-plane-arrival mr-2"></i>
 
-                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                  <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
                     {(shift.assigned_facility_object || {}).name ||
                       "Yet to be decided"}
                   </dd>
@@ -146,7 +146,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   }
                 >
                   <i className="fas fa-stopwatch mr-2"></i>
-                  <dd className="font-bold text-sm leading-5">
+                  <dd className="font-bold text-sm leading-5 break-normal">
                     {moment(shift.modified_date).format("LLL") || "--"}
                   </dd>
                 </dt>
@@ -158,7 +158,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                 >
                   <i className="fas fa-home mr-2"></i>
-                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                  <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
                     {shift.patient_object.address || "--"}
                   </dd>
                 </dt>
@@ -171,7 +171,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                   >
                     <i className="fas fa-user mr-2"></i>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                    <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
                       {shift.assigned_to_object.first_name}{" "}
                       {shift.assigned_to_object.last_name} -{" "}
                       {shift.assigned_to_object.user_type}

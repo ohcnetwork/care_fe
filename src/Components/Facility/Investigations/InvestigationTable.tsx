@@ -9,13 +9,13 @@ import {
   InputLabel,
   Box,
   Button,
-  TableRowProps,
 } from "@material-ui/core";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
 import { SelectField, TextInputField } from "../../Common/HelperInputFields";
 import _ from "lodash";
+import clsx from "clsx";
 
 const useStyle = makeStyles(() => ({
   tableCell: {
@@ -51,9 +51,10 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
         {data?.investigation_object?.name || "---"}
       </TableCell>
       <TableCell
-        className={`h-12 text-sm border-l border-r border-gray-400 ${
+        className={clsx(
+          "h-12 text-sm border-l border-r border-gray-400",
           showForm ? "p-0" : "px-2"
-        } `}
+        )}
         align="right"
         style={{
           padding: 0,
@@ -66,7 +67,6 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
             <SelectField
               name="preferred_vehicle_choice"
               variant="outlined"
-              margin="dense"
               optionArray={true}
               value={testValue}
               options={[
@@ -74,15 +74,11 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
                 ...data?.investigation_object?.choices.split(","),
               ]}
               onChange={onChange}
-              className={
-                "w-full px-4 h-full text-right text-sm border-l border-r border-gray-800 m-0"
-              }
+              className="w-full px-4 h-full text-right text-sm m-0"
             />
           ) : (
             <input
-              className={
-                "w-full px-4 h-full text-right text-sm border-l border-r border-gray-800 m-0"
-              }
+              className="w-full px-4 h-full text-right text-sm border-l border-r m-0 focus:border-primary-500 focus:ring-primary-500"
               value={testValue}
               onChange={onChange}
               type={inputType}
@@ -131,14 +127,14 @@ export const InvestigationTable = ({
 
   return (
     <Box padding="1rem" margin="1rem 0">
-      <div className="flex items-center justify-between mb">
+      <div className="flex flex-col sm:flex-row items-center justify-between mb">
         {title && <div className="font-bold text-xl">{title}</div>}
-        <div>
+        <div className="py-2 flex sm:flex-row flex-col ">
           <Button
             color="primary"
             variant="outlined"
             onClick={() => window.print()}
-            className="mr-2"
+            className="mr-2 my-2"
             disabled={showForm}
           >
             Print Report
@@ -146,6 +142,7 @@ export const InvestigationTable = ({
           <Button
             variant={showForm ? "outlined" : "contained"}
             color="primary"
+            className="mr-2 my-2"
             onClick={() => {
               showForm && handleUpdateCancel();
               setShowForm((prev) => !prev);
@@ -159,7 +156,7 @@ export const InvestigationTable = ({
               variant={"contained"}
               color="primary"
               onClick={() => handleSave()}
-              className="ml-2"
+              className="mr-2 my-2"
             >
               Save
             </Button>
@@ -176,12 +173,8 @@ export const InvestigationTable = ({
         onChange={(e) => setSearchFilter(e.target.value)}
       />
       <br />
-      <TableContainer
-        component={Paper}
-        className="overflow-hidden"
-        id="section-to-print"
-      >
-        <Table aria-label="simple table overflow-hidden" size="small">
+      <TableContainer component={Paper} id="section-to-print">
+        <Table aria-label="simple table" size="small">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>

@@ -254,7 +254,7 @@ export default function ResourceBoard({
     <div
       ref={drop}
       className={clsx(
-        "bg-gray-200 mr-2 shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md",
+        "bg-gray-200 mr-2 shrink-0 w-full sm:w-1/2 md:w-3/4 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md",
         isOver && "cursor-move"
       )}
     >

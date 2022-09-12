@@ -4,7 +4,11 @@ import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import loadable from "@loadable/component";
-import { listAssetBeds, partialUpdateAssetBed } from "../../../Redux/actions";
+import {
+  listAssetBeds,
+  partialUpdateAssetBed,
+  deleteAssetBed,
+} from "../../../Redux/actions";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { getCameraPTZ } from "../../../Common/constants";
 import {
@@ -14,8 +18,19 @@ import {
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
-import { Tooltip } from "@material-ui/core";
+import {
+  Card,
+  CardContent,
+  InputLabel,
+  Modal,
+  Tooltip,
+} from "@material-ui/core";
 import { FeedCameraPTZHelpButton } from "./Feed";
+import { AxiosError } from "axios";
+import { isNull } from "lodash";
+import { BedSelect } from "../../Common/BedSelect";
+import { BedModel } from "../models";
+import { TextInputField } from "../../Common/HelperInputFields";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -29,13 +44,17 @@ const LiveFeed = (props: any) => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
     StreamStatus.Offline
   );
+  const [bed, setBed] = useState<BedModel>({});
+  const [preset, setNewPreset] = useState<string>("");
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
   const [page, setPage] = useState({
     count: 0,
-    limit: 10,
+    limit: 8,
     offset: 0,
   });
+  const [toDelete, setToDelete] = useState<any>(null);
+  const [toUpdate, setToUpdate] = useState<any>(null);
 
   const liveFeedPlayerRef = useRef<any>(null);
 
@@ -85,6 +104,47 @@ const LiveFeed = (props: any) => {
     });
   };
 
+  const deletePreset = async (id: any) => {
+    const res = await dispatch(deleteAssetBed(id));
+    if (res?.status === 204) {
+      Notification.Success({ msg: "Preset deleted successfully" });
+      getBedPresets(cameraAsset.id);
+    } else {
+      Notification.Error({
+        msg: "Error while deleting Preset: " + (res?.data?.detail || ""),
+      });
+    }
+    setToDelete(null);
+  };
+
+  const updatePreset = async (currentPreset: any) => {
+    const data = {
+      bed_id: bed.id,
+      preset_name: preset,
+    };
+    const response = await dispatch(
+      partialUpdateAssetBed(
+        {
+          asset: currentPreset.asset_object.id,
+          bed: bed.id,
+          meta: {
+            ...currentPreset.meta,
+            ...data,
+          },
+        },
+        currentPreset?.id
+      )
+    );
+    if (response && response.status === 200) {
+      Notification.Success({ msg: "Preset Updated" });
+    } else {
+      Notification.Error({ msg: "Something Went Wrong" });
+    }
+    getBedPresets(cameraAsset?.id);
+    getPresets({});
+    setToUpdate(null);
+  };
+
   const gotoBedPreset = (preset: any) => {
     setLoading("Moving");
     absoluteMove(preset.meta.position, {
@@ -92,8 +152,20 @@ const LiveFeed = (props: any) => {
     });
   };
   useEffect(() => {
-    getPresets({ onSuccess: (resp) => setPresets(resp.data) });
+    getPresets({
+      onSuccess: (resp) => setPresets(resp.data),
+      onError: (resp) => {
+        resp instanceof AxiosError &&
+          Notification.Error({
+            msg: "Fetching presets failed",
+          });
+      },
+    });
   }, []);
+  useEffect(() => {
+    setNewPreset(toUpdate?.meta?.preset_name);
+    setBed(toUpdate?.bed_object);
+  }, [toUpdate]);
 
   useEffect(() => {
     getBedPresets(cameraAsset.id);
@@ -214,6 +286,84 @@ const LiveFeed = (props: any) => {
     <div className="mt-4 px-6 mb-2">
       <PageTitle title="Live Feed" hideBack={true} />
 
+      {toDelete && (
+        <Modal
+          className="flex h-fit justify-center items-center top-1/2"
+          open={!isNull(toDelete)}
+        >
+          <Card>
+            <CardContent>
+              <h5>
+                Confirm delete preset: {toDelete.meta.preset_name} (in bed:{" "}
+                {toDelete.bed_object.name})?
+              </h5>
+              <hr />
+              <div className="flex gap-3 justify-end mt-2">
+                <button
+                  className="bg-red-500 px-3 text-sm py-1 rounded-md text-white"
+                  onClick={() => deletePreset(toDelete.id)}
+                >
+                  Confirm
+                </button>
+                <button className="text-sm" onClick={() => setToDelete(null)}>
+                  Cancel
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </Modal>
+      )}
+      {toUpdate && (
+        <Modal
+          className="flex h-fit justify-center items-center top-1/2"
+          open={!isNull(toUpdate)}
+        >
+          <Card>
+            <CardContent>
+              <h5>Update Preset</h5>
+              <hr />
+              <div>
+                <InputLabel id="asset-type">Bed</InputLabel>
+                <BedSelect
+                  name="bed"
+                  setSelected={(selected) => setBed(selected as BedModel)}
+                  selected={bed}
+                  errors=""
+                  multiple={false}
+                  margin="dense"
+                  location={cameraAsset.location_id}
+                  facility={cameraAsset.facility_id}
+                />
+              </div>
+              <div>
+                <InputLabel id="location">Preset Name</InputLabel>
+                <TextInputField
+                  name="name"
+                  id="location"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  value={preset}
+                  onChange={(e) => setNewPreset(e.target.value)}
+                  errors=""
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end mt-2">
+                <button
+                  onClick={() => updatePreset(toUpdate)}
+                  className="bg-red-500 px-3 text-sm py-1 rounded-md text-white"
+                >
+                  Confirm
+                </button>
+                <button className="text-sm" onClick={() => setToUpdate(null)}>
+                  Cancel
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </Modal>
+      )}
       <div className="mt-4 flex flex-col">
         <div className="flex flex-col lg:flex-row gap-4 mt-4 relative">
           <div className="flex-1">
@@ -303,7 +453,7 @@ const LiveFeed = (props: any) => {
                     >
                       <span className="sr-only">{option.label}</span>
                       {option.icon ? (
-                        <i className={`${option.icon} md:p-2`}></i>
+                        <i className={`fas fa-${option.icon} md:p-2`}></i>
                       ) : (
                         <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
                           {option.value}x
@@ -373,77 +523,106 @@ const LiveFeed = (props: any) => {
                         {option.label}
                       </button>
                     ))}
-                    {/* Page Number Next and Prev buttons */}
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={presetsPage < 10}
-                      onClick={() => {
-                        setPresetsPage(presetsPage - 10);
-                      }}
-                    >
-                      <i className="fas fa-arrow-left"></i>
-                    </button>
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={presetsPage >= presets.length}
-                      onClick={() => {
-                        setPresetsPage(presetsPage + 10);
-                      }}
-                    >
-                      <i className="fas fa-arrow-right"></i>
-                    </button>
                   </>
                 ) : (
                   <>
                     {bedPresets?.map((preset: any, index: number) => (
-                      <button
-                        key={preset.id}
-                        className="flex flex-col bg-green-100 border border-white rounded-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
-                        onClick={() => {
-                          setLoading("Moving");
-                          gotoBedPreset(preset);
-                          setCurrentPreset(preset);
-                          getBedPresets(cameraAsset?.id);
-                          getPresets({});
-                        }}
-                      >
-                        <span className="justify-start text-xs font-semibold">
-                          {preset.bed_object.name}
-                        </span>
-                        <span className="mx-auto">
-                          {preset.meta.preset_name
-                            ? preset.meta.preset_name
-                            : `Unnamed Preset ${index + 1}`}
-                        </span>
-                      </button>
+                      <div className="flex flex-col">
+                        <button
+                          key={preset.id}
+                          className="flex flex-col bg-green-100 border border-white rounded-t-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
+                          onClick={() => {
+                            setLoading("Moving");
+                            gotoBedPreset(preset);
+                            setCurrentPreset(preset);
+                            getBedPresets(cameraAsset?.id);
+                            getPresets({});
+                          }}
+                        >
+                          <span className="justify-start text-xs font-semibold">
+                            {preset.bed_object.name}
+                          </span>
+                          <span className="mx-auto">
+                            {preset.meta.preset_name
+                              ? preset.meta.preset_name
+                              : `Unnamed Preset ${index + 1}`}
+                          </span>
+                        </button>
+                        <div className="flex">
+                          <button
+                            onClick={() => setToUpdate(preset)}
+                            className="text-green-800 text-sm py-1 bg-green-200 w-1/2 justify-center items-center gap-2 flex hover:bg-green-800 hover:text-green-200 "
+                          >
+                            <i className="fa-solid fa-pencil"></i>
+                          </button>
+                          <button
+                            onClick={() => setToDelete(preset)}
+                            className="text-red-800 text-sm py-1 bg-red-200 w-1/2 justify-center items-center gap-2 flex hover:bg-red-800 hover:text-red-200 "
+                          >
+                            <i className="fa-solid fa-trash-can"></i>
+                          </button>
+                        </div>
+                      </div>
                     ))}
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={page.offset === 0}
-                      onClick={() => {
-                        handlePagination(page.offset - page.limit);
-                      }}
-                    >
-                      <i className="fas fa-arrow-left"></i>
-                    </button>
-                    <button
-                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                      disabled={page.offset + page.limit >= page.count}
-                      onClick={() => {
-                        handlePagination(page.offset + page.limit);
-                      }}
-                    >
-                      <i className="fas fa-arrow-right"></i>
-                    </button>
                   </>
                 )}
               </div>
+              {/* Page Number Next and Prev buttons */}
+              {showDefaultPresets ? (
+                <div className="flex flex-row gap-1">
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={presetsPage < 10}
+                    onClick={() => {
+                      setPresetsPage(presetsPage - 10);
+                    }}
+                  >
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={presetsPage >= presets.length}
+                    onClick={() => {
+                      setPresetsPage(presetsPage + 10);
+                    }}
+                  >
+                    <i className="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-row gap-1">
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={page.offset === 0}
+                    onClick={() => {
+                      handlePagination(page.offset - page.limit);
+                    }}
+                  >
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <button
+                    className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                    disabled={page.offset + page.limit >= page.count}
+                    onClick={() => {
+                      handlePagination(page.offset + page.limit);
+                    }}
+                  >
+                    <i className="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+              )}
               {props?.showRefreshButton && (
                 <button
                   className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full"
                   onClick={() => {
                     getBedPresets(cameraAsset?.id);
-                    getPresets({});
+                    getPresets({
+                      onError: () => {
+                        Notification.Error({
+                          msg: "Fetching presets failed",
+                        });
+                      },
+                    });
                   }}
                 >
                   <RefreshIcon /> Refresh

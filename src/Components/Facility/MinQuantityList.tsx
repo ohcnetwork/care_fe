@@ -72,11 +72,9 @@ export default function MinQuantityList(props: any) {
       <tr key={inventoryItem.id} className="bg-white">
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
           <div className="flex items-center">
-            <div className="ml-3">
-              <p className="text-gray-900 whitespace-nowrap">
-                {inventoryItem.item_object?.name}
-              </p>
-            </div>
+            <p className="text-gray-900 whitespace-nowrap">
+              {inventoryItem.item_object?.name}
+            </p>
           </div>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
@@ -87,7 +85,7 @@ export default function MinQuantityList(props: any) {
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
           <RoleButton
-            className="ml-2 bg-primary-400 hover:bg-primary-600"
+            className="ml-2 bg-primary-400 hover:bg-primary-600 text-white"
             handleClickCB={() =>
               navigate(
                 `/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`

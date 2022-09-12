@@ -1,7 +1,6 @@
 import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { NURSING_CARE_FIELDS } from "../../../Common/constants";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import Pagination from "../../Common/Pagination";
@@ -45,19 +44,35 @@ export const MedicineTables = (props: any) => {
     [currentPage]
   );
 
-  const handlePagination = (page: number, limit: number) => {
+  const handlePagination = (page: number) => {
     setCurrentPage(page);
   };
 
-  //
+  const areFieldsEmpty = () => {
+    let emptyFieldCount = 0;
+    Object.keys(results).forEach((k: any) => {
+      if (Object.keys(results[k].medication_given).length === 0) {
+        emptyFieldCount++;
+      }
+    });
+    if (emptyFieldCount === Object.keys(results).length) return true;
+    else return false;
+  };
+
+  const noDataFound = Object.keys(results).length === 0 || areFieldsEmpty();
 
   return (
     <div>
       {results && (
         <div>
           <div className="mt-4 text-lg font-bold">Consultation Updates</div>
-          {Object.keys(results).map((k: any) => (
-            <div>
+          {noDataFound && (
+            <div className="text-md h-full text-center mt-5 text-gray-500 text-semibold bg-white rounded-lg shadow py-4 px-2">
+              No Consultation Updates Found
+            </div>
+          )}
+          {Object.keys(results).map((k: any, indx: number) => (
+            <div key={indx}>
               {Object.keys(results[k].medication_given).length !== 0 && (
                 <div className="grid md:grid-cols-full gap-4">
                   <div className="mt-4">
@@ -74,10 +89,19 @@ export const MedicineTables = (props: any) => {
                                   Medicine
                                 </th>
                                 <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                  Route
+                                </th>
+                                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                  Frequency
+                                </th>
+                                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                                   Dosage
                                 </th>
                                 <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                                   Days
+                                </th>
+                                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                  Notes
                                 </th>
                               </tr>
                             </thead>
@@ -89,10 +113,19 @@ export const MedicineTables = (props: any) => {
                                       {med.medicine}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
+                                      {med.route}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                       {med.dosage}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
+                                      {med.dosage_new}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                       {med.days}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
+                                      {med.notes}
                                     </td>
                                   </tr>
                                 )
