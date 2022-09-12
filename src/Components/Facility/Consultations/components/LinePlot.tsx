@@ -108,7 +108,7 @@ export const LinePlot = (props: any) => {
         {
           ...generalOptions.series[0],
           showSymbol: false,
-          lineStyle: { color: "green" },
+          lineStyle: { color: props.color },
           areaStyle: {
             ...generalOptions.series[0].areaStyle,
             color: {

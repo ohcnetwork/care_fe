@@ -16,7 +16,7 @@ export type WaveformType = {
   "wave-name": string;
 };
 
-export default function Waveform(props: { wave: WaveformType }) {
+export default function Waveform(props: { wave: WaveformType, color?: string, title: string }) {
   const wave = props.wave;
   const data = wave.data.split(" ").map(Number);
   const [queueData, setQueueData] = useState<number[]>([]);
@@ -50,14 +50,15 @@ export default function Waveform(props: { wave: WaveformType }) {
   return (
     <div className="w-full">
       <LinePlot
-        title="ECG"
-        name="ECG"
+        title={props.title}
+        name={props.title}
         xData={xData}
         yData={queueData.slice(0, viewable)}
         low={wave["data-low-limit"]}
         high={wave["data-high-limit"]}
         classes="h-full"
         type="WAVEFORM"
+        color={props.color || "green"}
       />
     </div>
   );
