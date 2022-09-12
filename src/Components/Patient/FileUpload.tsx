@@ -519,26 +519,31 @@ export const FileUpload = (props: FileUploadProps) => {
         </Modal>
         {item.file_category === "AUDIO" ? (
           <div className="flex flex-wrap justify-between space-y-2">
-            <div>
+            <div className="flex flex-wrap justify-between space-x-2">
               <div>
-                <span className="font-semibold leading-relaxed">
-                  File Name:{" "}
-                </span>{" "}
-                {item.name}
+                <i className="fa-solid fa-file-audio fa-3x m-3 text-primary-500"></i>
               </div>
               <div>
-                <span className="font-semibold leading-relaxed">
-                  Created By:
-                </span>{" "}
-                {item.uploaded_by ? item.uploaded_by.username : null}
-              </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  Created On :
-                </span>{" "}
-                {item.created_date
-                  ? moment(item.created_date).format("lll")
-                  : "-"}
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    File Name:{" "}
+                  </span>{" "}
+                  {item.name}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Created By:
+                  </span>{" "}
+                  {item.uploaded_by ? item.uploaded_by.username : null}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Created On :
+                  </span>{" "}
+                  {item.created_date
+                    ? moment(item.created_date).format("lll")
+                    : "-"}
+                </div>
               </div>
             </div>
             <div className="flex items-center">
@@ -611,26 +616,31 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         ) : (
           <div className="flex flex-wrap justify-between space-y-2">
-            <div>
+            <div className="flex flex-wrap justify-between space-x-2">
               <div>
-                <span className="font-semibold leading-relaxed">
-                  File Name:{" "}
-                </span>{" "}
-                {item.name}
+                <i className="fa-solid fa-file-medical fa-3x m-3 text-primary-500"></i>
               </div>
               <div>
-                <span className="font-semibold leading-relaxed">
-                  Created By:
-                </span>{" "}
-                {item.uploaded_by ? item.uploaded_by.username : null}
-              </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  Created On :
-                </span>{" "}
-                {item.created_date
-                  ? moment(item.created_date).format("lll")
-                  : "-"}
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    File Name:{" "}
+                  </span>{" "}
+                  {item.name}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Created By:
+                  </span>{" "}
+                  {item.uploaded_by ? item.uploaded_by.username : null}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Created On :
+                  </span>{" "}
+                  {item.created_date
+                    ? moment(item.created_date).format("lll")
+                    : "-"}
+                </div>
               </div>
             </div>
             <div className="flex flex-wrap items-center">
