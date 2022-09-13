@@ -8,9 +8,7 @@ describe("Resource Page", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
-    cy.get("a").contains("Resource").click();
-    cy.url().should("include", "/resource");
+    cy.awaitUrl("/resource");
   });
 
   it("checks if all download button works", () => {
@@ -21,7 +19,6 @@ describe("Resource Page", () => {
 
   it("switch between list view and board view", () => {
     cy.contains("List View").click();
-    cy.wait(1000);
     cy.contains("Board View").click();
   });
 

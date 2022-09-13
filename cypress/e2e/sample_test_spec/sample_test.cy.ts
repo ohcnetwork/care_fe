@@ -8,7 +8,7 @@ describe("Sample List", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
+    cy.awaitUrl("/");
     cy.get("a").contains("Sample Test").click();
   });
 
@@ -31,7 +31,6 @@ describe("Sample List", () => {
   });
 
   it("Next/Previous Page", () => {
-    cy.wait(1000);
     // only works for desktop mode
     cy.get("button")
       .should("contain", ">")

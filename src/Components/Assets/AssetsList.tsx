@@ -45,7 +45,7 @@ const AssetsList = () => {
   const [facilityName, setFacilityName] = useState<string>();
   const [asset_type, setAssetType] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
-  const limit = 14;
+  const limit = 24;
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const fetchData = useCallback(
@@ -320,58 +320,38 @@ const AssetsList = () => {
       </div>
       <div className="grow mt-10">
         <div className="py-8 md:px-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 md:-mx-8 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 md:-mx-8 gap-2">
             {assetsExist ? (
               assets.map((asset: AssetData) => (
                 <div
                   key={asset.id}
-                  className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-3 justify-center items-center"
+                  className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
                   onClick={() => navigate(`/assets/${asset.id}`)}
                 >
-                  <div className="px-4 md:w-1/2">
-                    <div className="md:flex">
-                      <p className="text-xl font-normal capitalize break-words">
-                        {asset.name}
-                      </p>
-                    </div>
-                    <p className="font-normal text-sm">
-                      {asset?.location_object?.name}
-                      <span className="text-xs ml-2">
-                        Updated at: {moment(asset.modified_date).format("lll")}
-                      </span>
+                  
+                  <div className="md:flex">
+                    <p className="text-xl font-normal capitalize break-words">
+                      {asset.name}
                     </p>
                   </div>
-                  <div className="px-4 md:flex justify-between pt-2">
-                    <div className="md:flex flex-wrap gap-4">
-                      {asset.is_working ? (
-                        <div>
-                          <Badge color="green" startIcon="cog" text="Working" />
-                        </div>
-                      ) : (
-                        <div>
-                          <Badge
-                            color="red"
-                            startIcon="cog"
-                            text="Not Working"
-                          />
-                        </div>
-                      )}
-                      <div>
-                        <Badge
-                          color="blue"
-                          startIcon="location-arrow"
-                          text={asset.status}
-                        />
-                      </div>
-                    </div>
-                    <div className="px-2">
-                      <div
-                        onClick={() => navigate(`/assets/${asset.id}`)}
-                        className="btn btn-default bg-white"
-                      >
-                        Details
-                      </div>
-                    </div>
+                  <p className="font-normal text-sm">
+                    {asset?.location_object?.name}
+                    <span className="text-xs ml-2">
+                      Updated at: {moment(asset.modified_date).format("lll")}
+                    </span>
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {asset.is_working ? (
+                      <Badge color="green" startIcon="cog" text="Working" />
+                    ) : (
+                      <Badge color="red" startIcon="cog" text="Not Working" />
+                    )}
+                    <Badge
+                      color="blue"
+                      startIcon="location-arrow"
+                      text={asset.status}
+                    />
                   </div>
                 </div>
               ))
