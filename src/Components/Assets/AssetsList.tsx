@@ -9,7 +9,6 @@ import {
   listAssets,
   getFacilityAssetLocation,
 } from "../../Redux/actions";
-import { Badge } from "../Patient/ManagePatients";
 import { AssetData } from "./AssetTypes";
 import React, { useState, useCallback, useEffect } from "react";
 import { navigate, useQueryParams } from "raviger";
@@ -21,6 +20,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
+import { Badge } from "../Common/Badge";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -45,7 +45,7 @@ const AssetsList = () => {
   const [facilityName, setFacilityName] = useState<string>();
   const [asset_type, setAssetType] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
-  const limit = 14;
+  const limit = 24;
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const fetchData = useCallback(

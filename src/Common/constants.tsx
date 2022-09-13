@@ -661,61 +661,78 @@ export type CameraPTZ = {
   value?: number;
 };
 
+export const CAMERA_STATES = {
+  IDLE: "idle",
+  MOVING: {
+    GENERIC: "Moving",
+    UP: "Moving Up",
+    DOWN: "Moving Down",
+    LEFT: "Moving Left",
+    RIGHT: "Moving Right",
+  },
+  ZOOMING: {
+    IN: "Zooming In",
+    OUT: "Zooming Out",
+  },
+  PRECISION: "Setting Precision",
+  UPDATING_PRESET: "Updating Preset",
+};
+
 export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   {
     icon: "chevron-up",
     label: "Move Up",
     action: "up",
-    loadingLabel: "Moving Up",
+    loadingLabel: CAMERA_STATES.MOVING.UP,
     shortcutKey: ["Control", "Shift", "ArrowUp"],
   },
   {
     icon: "chevron-down",
     label: "Move Down",
     action: "down",
-    loadingLabel: "Moving Down",
+    loadingLabel: CAMERA_STATES.MOVING.DOWN,
     shortcutKey: ["Control", "Shift", "ArrowDown"],
   },
   {
     icon: "chevron-left",
     label: "Move Left",
     action: "left",
-    loadingLabel: "Moving Left",
+    loadingLabel: CAMERA_STATES.MOVING.LEFT,
     shortcutKey: ["Control", "Shift", "ArrowLeft"],
   },
   {
     icon: "chevron-right",
     label: "Move Right",
     action: "right",
-    loadingLabel: "Moving Right",
+    loadingLabel: CAMERA_STATES.MOVING.RIGHT,
     shortcutKey: ["Control", "Shift", "ArrowRight"],
   },
   {
     value: precision,
     label: "Precision",
     action: "precision",
-    loadingLabel: "Setting Precision",
+    loadingLabel: CAMERA_STATES.PRECISION,
     shortcutKey: ["Shift", "P"],
   },
   {
     icon: "search-plus",
     label: "Zoom In",
     action: "zoomIn",
-    loadingLabel: "Zooming In",
+    loadingLabel: CAMERA_STATES.ZOOMING.IN,
     shortcutKey: ["Shift", "I"],
   },
   {
     icon: "search-minus",
     label: "Zoom Out",
     action: "zoomOut",
-    loadingLabel: "Zooming Out",
+    loadingLabel: CAMERA_STATES.ZOOMING.OUT,
     shortcutKey: ["Shift", "O"],
   },
   {
     icon: "save",
     label: "Update Preset",
     action: "updatePreset",
-    loadingLabel: "Updating Preset",
+    loadingLabel: CAMERA_STATES.UPDATING_PRESET,
     shortcutKey: ["Shift", "S"],
   },
   {
@@ -741,7 +758,7 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
 export const FACILITY_FEATURE_TYPES = [
   {
     id: 1,
-    name: "CT Scan Facility",
+    name: "CT Scan",
     icon: "circle-dot",
   },
   {
@@ -751,17 +768,22 @@ export const FACILITY_FEATURE_TYPES = [
   },
   {
     id: 3,
-    name: "X-Ray facility",
+    name: "X-Ray",
     icon: "x-ray",
   },
   {
     id: 4,
-    name: "Neonatal care",
+    name: "Neonatal Care",
     icon: "baby",
   },
   {
     id: 5,
-    name: "Operation theater",
+    name: "Operation Theater",
     icon: "syringe",
+  },
+  {
+    id: 6,
+    name: "Blood Bank",
+    icon: "droplet",
   },
 ];

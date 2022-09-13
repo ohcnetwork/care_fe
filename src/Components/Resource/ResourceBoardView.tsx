@@ -112,7 +112,7 @@ export default function BoardView() {
           />
         </div>
 
-        <div className="w-full flex items-start justify-center pt-2 lg:space-x-4 lg:items-center flex-col md:flex-row">
+        <div className="w-full flex justify-center pt-2 lg:space-x-4 items-center flex-col md:flex-row">
           <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex mt-1">
             <button
               className={

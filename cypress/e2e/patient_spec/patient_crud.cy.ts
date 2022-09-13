@@ -1,4 +1,4 @@
-import { cy, it, describe, beforeEach } from "local-cypress";
+import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";
@@ -7,19 +7,25 @@ const emergency_phone_number = "9430123487";
 let patient_url = "";
 
 describe("Patient Creation", () => {
+  before(() => {
+    cy.loginByApi(username, password);
+    cy.saveLocalStorage();
+  });
+
   beforeEach(() => {
-    cy.visit("http://localhost:4000/");
-    cy.get('input[name="username"]').type(username);
-    cy.get('input[name="password"]').type(password);
-    cy.get("button").contains("Login").click();
-    cy.url().should("include", "/facility");
+    cy.restoreLocalStorage();
+    cy.awaitUrl("/");
   });
 
   it("Create", () => {
-    cy.visit(
-      "http://localhost:4000/facility/2fa3fceb-d54d-455d-949c-e64dde945168"
-    );
-    cy.get("[data-testid=add-patient-button]").click();
+    cy.get("a")
+      .should("contain", "Facility")
+      .contains("Facility")
+      .click({ force: true });
+    cy.get("button").should("contain", "Add Details of a Patient");
+    cy.get("button")
+      .contains("Add Details of a Patient")
+      .click({ force: true });
     cy.get("[data-testid=phone-number] input").type(phone_number);
     cy.get("[data-testid=date-of-birth] svg").click();
     cy.get("div").contains("1999").click();
@@ -49,8 +55,9 @@ describe("Patient Creation", () => {
       cy.log(patient_url);
     });
   });
+
   it("Dashboard", () => {
-    cy.visit(patient_url);
+    cy.awaitUrl(patient_url);
     cy.url().should("include", "/patient/");
     cy.get("[data-testid=patient-dashboard]").should("contain", "22");
     cy.get("[data-testid=patient-dashboard]").should(
@@ -65,8 +72,9 @@ describe("Patient Creation", () => {
     cy.get("[data-testid=patient-dashboard]").should("contain", "1999");
     cy.get("[data-testid=patient-dashboard]").should("contain", "O+");
   });
+
   it("Edit", () => {
-    cy.visit(patient_url + "/update");
+    cy.awaitUrl(patient_url + "/update");
     cy.get("[data-testid=state] select").should("contain", "Kerala");
     cy.get("[data-testid=district] select").should("contain", "Ernakulam");
     cy.get("[data-testid=localbody] select").should("contain", "Alangad");
@@ -80,5 +88,9 @@ describe("Patient Creation", () => {
       "MANAKKAPADY"
     );
     cy.get("[data-testid=pincode] input").should("have.value", "159015");
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });
