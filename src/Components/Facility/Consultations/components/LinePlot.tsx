@@ -82,7 +82,7 @@ export const LinePlot = (props: any) => {
     generalOptions = {
       ...generalOptions,
       title: {
-        text: `${title}`,
+        text: ``,
       },
       grid: {
         left: "15px",

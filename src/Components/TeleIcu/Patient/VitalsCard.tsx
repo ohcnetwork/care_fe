@@ -35,7 +35,7 @@ export default function TeleICUPatientVitalsCard({
 }: ITeleICUPatientVitalsCardProps) {
   const wsClient = useRef<WebSocket>();
 
-  const [waveform, setWaveForm] = useState<WaveformType | null>(null);
+  const [waveforms, setWaveForms] = useState<WaveformType[] | null>(null);
 
   const dispatch: any = useDispatch();
   const [hl7Asset, setHl7Asset] = React.useState<AssetData>();
@@ -74,8 +74,8 @@ export default function TeleICUPatientVitalsCard({
     wsClient.current.addEventListener("message", (e) => {
       const newObservations = JSON.parse(e.data || "{}");
       if (newObservations.length > 0) {
-        setWaveForm(
-          newObservations.filter((o: any) => o.observation_id === "waveform")[0]
+        setWaveForms(
+          newObservations.filter((o: any) => o.observation_id === "waveform")
         );
         const newObservationsMap = newObservations.reduce(
           (acc: any, curr: { observation_id: any }) => ({
@@ -107,9 +107,17 @@ export default function TeleICUPatientVitalsCard({
     };
   }, []);
 
-  const vitals: [ReactNode, string, string | null][] = [
-    [<>Pulse Rate</>, "pulse-rate", "pulse"],
-    [<>Blood Pressure</>, "bp", "bp"],
+  type VitalType = {
+    label: ReactNode;
+    liveKey:string;
+    vitalKey:string;
+    waveformKey?:string;
+    waveformColor?:string;
+  }
+
+  /*const vitals: [ReactNode, string, string | null, string | null][] = [
+    [<>Pulse Rate</>, "pulse-rate", "pulse", "pleth"],
+    [<>Blood Pressure</>, "bp", "bp", "II"],
     [
       <>
         SpO<sub>2</sub>
@@ -117,19 +125,68 @@ export default function TeleICUPatientVitalsCard({
       "SpO2",
       "ventilator_spo2",
     ],
-    [<>R. Rate</>, "respiratory-rate", "resp"],
+    [<>R. Rate</>, "respiratory-rate", "resp", "respiration"],
     [<>Temperature (F)</>, "body-temperature1", "temperature"],
+  ];*/
+
+  const vitals: VitalType[] = [
+    {
+      label: <>Pulse Rate</>,
+      liveKey: "pulse-rate",
+      vitalKey: "pulse",
+      waveformKey: "Pleth",
+      waveformColor: "red",
+    },
+    {
+      label: <>Blood Pressure</>,
+      liveKey: "bp",
+      vitalKey: "bp",
+      waveformKey: "II",
+      waveformColor: "blue",
+    },
+    {
+      label: (
+        <>
+          SpO<sub>2</sub>
+        </>
+      ),
+      liveKey: "SpO2",
+      vitalKey: "ventilator_spo2",
+    },
+    {
+      label: <>R. Rate</>,
+      liveKey: "respiratory-rate",
+      vitalKey: "resp",
+      waveformKey: "Respiration",
+      waveformColor: "green",
+    },
+    {
+      label: <>Temperature (F)</>,
+      liveKey: "body-temperature1",
+      vitalKey: "temperature",
+    },
   ];
 
   return (
     <div className=" w-full">
       <div className="flex w-full items-stretch flex-col md:flex-row">
-        <div className="w-full flex items-stretch py-3 px-5 bg-black h-[50vw] md:h-auto text-gray-400">
-          {waveform ? (
+        <div className="w-full flex flex-col items-stretch py-2 bg-black h-auto text-gray-400">
+          {waveforms ? (
             <>
-              <Waveform wave={waveform} color = {"red"} title={"ECG"} />
-              <Waveform wave={waveform} color={"green"} title="BP"/>
-              <Waveform wave={waveform} color={"yellow"} title="Temp"/>
+              {vitals.map((v, i) => {
+                const waveform = waveforms.filter(w=>w["wave-name"] === v.waveformKey)[0];
+                return (
+                  (v.waveformKey && waveform) ?
+                    <Waveform
+                      key={i}
+                      wave={waveform}
+                      title={v.waveformKey}
+                      color={v.waveformColor}
+                    /> : (<div className="h-[90px] flex items-center justify-center text-gray-900">
+                      No data
+                    </div>)
+                )
+              })}
             </>
           ) : (
             <div className="h-full w-full flex items-center justify-center">
@@ -140,14 +197,14 @@ export default function TeleICUPatientVitalsCard({
             </div>
           )}
         </div>
-        <div className="flex flex-row md:flex-col w-full md:w-[200px] border-l border-l-gray-400 p-3 justify-between md:justify-start shrink-0">
+        <div className="flex flex-row md:flex-col flex-wrap md:flex-nowrap w-full md:w-[200px] border-l border-l-gray-400 p-3 justify-between md:justify-start shrink-0">
           {vitals.map((vital, i) => {
-            const liveReading = getVital(patientObservations, vital[1]);
+            const liveReading = getVital(patientObservations, vital.liveKey);
             return (
-              <div key={i} className="p-2">
+              <div key={i} className="p-2 h-[90px]">
                 <h2 className="font-bold text-xl md:text-3xl">
                   {liveReading ||
-                    (vital[2] === "bp"
+                    (vital.vitalKey === "bp"
                       ? `${
                           patient.last_consultation?.last_daily_round?.bp
                             .systolic || "--"
@@ -156,7 +213,7 @@ export default function TeleICUPatientVitalsCard({
                             .diastolic || "--"
                         }`
                       : patient.last_consultation?.last_daily_round?.[
-                          vital[2] || ""
+                          vital.vitalKey || ""
                         ]) ||
                     "--"}
                 </h2>
@@ -166,7 +223,7 @@ export default function TeleICUPatientVitalsCard({
                       liveReading ? "text-green-600" : "text-gray-400"
                     }`}
                   />
-                  {vital[0]}
+                  {vital.label}
                 </div>
               </div>
             );
