@@ -50,6 +50,19 @@ Starts a production http-server in local to run the project with Service worker
 The build is minified and the filenames include the hashes.<br />
 Your app is ready to be deployed!
 
+## Cypress Tests
+### `npm run cypress:run`
+Run all tests in headless mode.
+
+Failed test screenshots are saved in `cypress/screenshots`
+
+All test videos are saved in `cypress/videos`
+### `npm run cypress:run:gui`
+Run all tests visually in headed mode.
+
+### `npm run cypress:open`
+To debug and run test individually.
+
 ## Staging
 
 BE: https://careapi.coronasafe.in/swagger/
