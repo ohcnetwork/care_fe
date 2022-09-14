@@ -514,13 +514,13 @@ export const FileUpload = (props: FileUploadProps) => {
       associating_id: getAssociatedId(),
       file_category: category,
     };
-    dispatch(createUpload(requestData))
+    await dispatch(createUpload(requestData))
       .then(uploadfile)
       .catch(() => {
         setUploadStarted(false);
-      })
-      .then(fetchData(status).then(() => {}));
+      });
 
+    fetchData(status);
     // setting the value of file name to empty
     setUploadFileNameError("");
     setUploadFileName("");
