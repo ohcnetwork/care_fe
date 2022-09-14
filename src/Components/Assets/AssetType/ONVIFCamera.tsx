@@ -29,9 +29,12 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [assetType, setAssetType] = React.useState("");
   const [middlewareHostname, setMiddlewareHostname] = React.useState("");
+  const [middlewareHostname_error, setMiddlewareHostname_error] =
+    React.useState("");
   const [cameraAddress, setCameraAddress] = React.useState("");
   const [ipadrdress_error, setIpAddress_error] = React.useState("");
   const [cameraAccessKey, setCameraAccessKey] = React.useState("");
+  const [cameraAccessKey_error, setCameraAccessKey_error] = React.useState("");
   const [bed, setBed] = React.useState<BedModel>({});
   const [newPreset, setNewPreset] = React.useState("");
   const [refreshPresetsHash, setRefreshPresetsHash] = React.useState(
@@ -47,10 +50,38 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     setIsLoading(false);
   }, [asset]);
 
+  const isFormValid = () => {
+    setMiddlewareHostname_error("");
+    setIpAddress_error("");
+    setCameraAccessKey_error("");
+    if (
+      middlewareHostname.trim() !== "" &&
+      cameraAccessKey.trim() !== "" &&
+      cameraAddress.trim() !== ""
+    ) {
+      if (checkIfValidIP(cameraAddress)) {
+        return true;
+      } else {
+        setIpAddress_error("Please Enter a Valid Camera address !!");
+        return false;
+      }
+    } else {
+      if (middlewareHostname.trim() === "") {
+        setMiddlewareHostname_error("This field cannot be empty!!");
+      }
+      if (cameraAddress.trim() === "") {
+        setIpAddress_error("This field cannot be empty!!");
+      }
+      if (cameraAccessKey.trim() === "") {
+        setCameraAccessKey_error("This field cannot be empty!!");
+      }
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    if (checkIfValidIP(cameraAddress)) {
-      setIpAddress_error("");
+    if (isFormValid()) {
       const data = {
         meta: {
           asset_type: "CAMERA",
@@ -72,8 +103,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           msg: "Something went wrong..!",
         });
       }
-    } else {
-      setIpAddress_error("Please Enter a Valid Camera address !!");
     }
   };
 
@@ -134,7 +163,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                     type="text"
                     value={middlewareHostname}
                     onChange={(e) => setMiddlewareHostname(e.target.value)}
-                    errors=""
+                    errors={middlewareHostname_error}
                   />
                 </div>
                 <div>
@@ -175,7 +204,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                     type="password"
                     value={cameraAccessKey}
                     onChange={(e) => setCameraAccessKey(e.target.value)}
-                    errors=""
+                    errors={cameraAccessKey_error}
                   />
                 </div>
               </div>

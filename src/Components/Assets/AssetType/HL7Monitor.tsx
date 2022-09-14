@@ -19,6 +19,8 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   const { assetId, asset } = props;
   const [assetType, setAssetType] = React.useState("");
   const [middlewareHostname, setMiddlewareHostname] = React.useState("");
+  const [middlewareHostname_error, setMiddlewareHostname_error] =
+    React.useState("");
   const [isLoading, setIsLoading] = React.useState(true);
   const [localipAddress, setLocalIPAddress] = React.useState("");
   const [ipadrdress_error, setIpAddress_error] = React.useState("");
@@ -30,10 +32,30 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     setIsLoading(false);
   }, [asset]);
 
+  const isFormValid = () => {
+    setMiddlewareHostname_error("");
+    setIpAddress_error("");
+    if (middlewareHostname.trim() !== "" && localipAddress.trim() !== "") {
+      if (checkIfValidIP(localipAddress)) {
+        return true;
+      } else {
+        setIpAddress_error("Please Enter a Valid IP address !!");
+        return false;
+      }
+    } else {
+      if (middlewareHostname.trim() === "") {
+        setMiddlewareHostname_error("This field cannot be empty!!");
+      }
+      if (localipAddress.trim() === "") {
+        setIpAddress_error("This field cannot be empty!!");
+      }
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    if (checkIfValidIP(localipAddress)) {
-      setIpAddress_error("");
+    if (isFormValid()) {
       const data = {
         meta: {
           asset_type: assetType,
@@ -53,8 +75,6 @@ const HL7Monitor = (props: HL7MonitorProps) => {
           msg: "Something went wrong..!",
         });
       }
-    } else {
-      setIpAddress_error("Please Enter a Valid IP address !!");
     }
   };
   if (isLoading) return <Loading />;
@@ -77,7 +97,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                     type="text"
                     value={middlewareHostname}
                     onChange={(e) => setMiddlewareHostname(e.target.value)}
-                    errors=""
+                    errors={middlewareHostname_error}
                   />
                 </div>
                 <div>
