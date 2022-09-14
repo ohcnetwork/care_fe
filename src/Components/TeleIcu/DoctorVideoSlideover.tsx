@@ -19,10 +19,13 @@ export default function DoctorVideoSlideover(props: {
       if (facilityId) {
         const res = await dispatchAction(getFacilityUsers(facilityId));
         if (res && res.data) {
-          setDoctors(res.data.results.filter((user : any) => user.alt_phone_number)
-          .sort((a : any, b : any) => {
-            return Number(a.last_login) - Number(b.last_login);
-          }));
+          setDoctors(
+            res.data.results
+              .filter((user: any) => user.alt_phone_number)
+              .sort((a: any, b: any) => {
+                return Number(a.last_login) - Number(b.last_login);
+              })
+          );
         }
       } else {
         setDoctors([]);
@@ -55,46 +58,37 @@ export default function DoctorVideoSlideover(props: {
             </span>
           </button>
         </div>
-        {
-          [
-            ["Doctors", "Doctor"],
-            ["Staff", "Staff"]
-          ].map((type, i)=>(
-            <div key={i} className="mb-4">
-              <div>
-                <span className="text-lg font-semibold">
-                  {type[0]}
-                </span>
-              </div>
-
-              <ul
-                className="max-h-96 scroll-py-3 overflow-y-auto list-none"
-                id="options"
-                role="listbox"
-              >
-                {doctors
-                  .filter((doc)=>doc.user_type === type[1])
-                  .map((doctor) => {
-                    return (
-                      <UserListItem user={doctor}/>
-                    );
-                  })
-                }
-              </ul>
+        {[
+          ["Doctors", "Doctor"],
+          ["Staff", "Staff"],
+        ].map((type, i) => (
+          <div key={i} className="mb-4">
+            <div>
+              <span className="text-lg font-semibold">{type[0]}</span>
             </div>
-          ))
-        }
+
+            <ul
+              className="max-h-96 scroll-py-3 overflow-y-auto list-none"
+              id="options"
+              role="listbox"
+            >
+              {doctors
+                .filter((doc) => doc.user_type === type[1])
+                .map((doctor) => {
+                  return <UserListItem user={doctor} />;
+                })}
+            </ul>
+          </div>
+        ))}
       </div>
     </SlideOver>
   );
 }
 
-function UserListItem(props : {user : UserModel}){
+function UserListItem(props: { user: UserModel }) {
   const user = props.user;
   const icon =
-    user.user_type === "Doctor"
-      ? "fa-user-doctor "
-      : " fa-user-nurse";
+    user.user_type === "Doctor" ? "fa-user-doctor " : " fa-user-nurse";
   return (
     <li>
       <li
@@ -114,6 +108,8 @@ function UserListItem(props : {user : UserModel}){
             user.alt_phone_number
               ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
                   user.alt_phone_number
+                )}&text=${encodeURIComponent(
+                  `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
                 )}`
               : "#"
           }
@@ -125,16 +121,10 @@ function UserListItem(props : {user : UserModel}){
             {
               // Show online icon based on last_login
               user.last_login &&
-              Number(new Date()) -
-                Number(new Date(user.last_login)) <
-                60000 ? (
-                <i
-                  className={`fa-solid text-xl text-green-600 ${icon}`}
-                ></i>
+              Number(new Date()) - Number(new Date(user.last_login)) < 60000 ? (
+                <i className={`fa-solid text-xl text-green-600 ${icon}`}></i>
               ) : (
-                <i
-                  className={`fa-solid text-2xl text-gray-600 ${icon}`}
-                ></i>
+                <i className={`fa-solid text-2xl text-gray-600 ${icon}`}></i>
               )
             }
           </div>
@@ -150,5 +140,5 @@ function UserListItem(props : {user : UserModel}){
         </a>
       </li>
     </li>
-  )
+  );
 }

@@ -278,11 +278,11 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
   }, [pressureSoreParameter])
 
   <div className="my-5">
-    <div className="flex justify-between">
+    <div className="flex flex-col sm:flex-row justify-between">
       {!previewMode
         ? <>
             <h2> {str("Pressure Sore")} </h2>
-            <label className="flex items-center cursor-pointer">
+            <label className="flex items-center cursor-pointer  sm:mt-0 mt-4">
               // Toggle
 
               //Toggle Button
