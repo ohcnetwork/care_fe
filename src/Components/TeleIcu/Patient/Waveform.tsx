@@ -16,15 +16,15 @@ export type WaveformType = {
   "wave-name": string;
 };
 
-export default function Waveform(props: { wave: WaveformType, color?: string, title: string, metrics?: boolean }) {
+export default function Waveform(props: { wave: WaveformType, color?: string, title: string, metrics?: boolean, classes?: string, defaultSpace?: boolean }) {
   const wave = props.wave;
   const data = wave.data.split(" ").map(Number);
   const [queueData, setQueueData] = useState<number[]>([]);
   const [xData, setXData] = useState<number[]>([]);
   const [lastStream, setLastStream] = useState(0);
 
-  const viewable = 600;
-  const tpf = 3000 / data.length;
+  const viewable = 400;
+  const tpf = 4000 / data.length;
 
   useEffect(() => {
     setQueueData(queueData.concat(data));
@@ -56,20 +56,21 @@ export default function Waveform(props: { wave: WaveformType, color?: string, ti
         name={props.title}
         xData={xData}
         yData={queueData.slice(0, viewable)}
-        low={Math.min(...queueData)}
-        high={Math.max(...queueData)}
-        classes="h-[90px]"
+        yStart={Math.min(...queueData)}
+        yEnd={Math.max(...queueData)}
+        classes={props.classes || "h-[90px]"}
         type="WAVEFORM"
         color={props.color || "green"}
+        defaultSpace={props.defaultSpace}
       />
       <div className="absolute bottom-0 right-5 w-full md:w-[70%]">
         {props.metrics && (
           <div className="flex flex-row flex-wrap justify-end gap-2 text-[10px] text-gray-400">
             <div>
-              Lowest: {Math.min(...queueData)}
+              Lowest: {Math.min(...queueData.slice(0, viewable))}
             </div>
             <div>
-              Highest: {Math.max(...queueData)}
+              Highest: {Math.max(...queueData.slice(0, viewable))}
             </div>
             <div>
               Stream Length: {data.length}

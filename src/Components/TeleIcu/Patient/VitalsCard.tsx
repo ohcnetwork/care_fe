@@ -115,29 +115,18 @@ export default function TeleICUPatientVitalsCard({
     vitalKey:string;
     waveformKey?:string;
     waveformColor?:string;
+    waveformName?:string;
+    waveformDefaultSpace?:boolean;
   }
-
-  /*const vitals: [ReactNode, string, string | null, string | null][] = [
-    [<>Pulse Rate</>, "pulse-rate", "pulse", "pleth"],
-    [<>Blood Pressure</>, "bp", "bp", "II"],
-    [
-      <>
-        SpO<sub>2</sub>
-      </>,
-      "SpO2",
-      "ventilator_spo2",
-    ],
-    [<>R. Rate</>, "respiratory-rate", "resp", "respiration"],
-    [<>Temperature (F)</>, "body-temperature1", "temperature"],
-  ];*/
 
   const vitals: VitalType[] = [
     {
       label: <>Pulse Rate</>,
       liveKey: "pulse-rate",
       vitalKey: "pulse",
-      waveformKey: "Pleth",
-      waveformColor: "red",
+      waveformKey: "II",
+      waveformColor: "blue",
+      waveformName: "ECG"
     },
     {
       label: <>Blood Pressure</>,
@@ -152,8 +141,8 @@ export default function TeleICUPatientVitalsCard({
       ),
       liveKey: "SpO2",
       vitalKey: "ventilator_spo2",
-      waveformKey: "II",
-      waveformColor: "blue",
+      waveformKey: "Pleth",
+      waveformColor: "red",
     },
     {
       label: <>R. Rate</>,
@@ -161,6 +150,7 @@ export default function TeleICUPatientVitalsCard({
       vitalKey: "resp",
       waveformKey: "Respiration",
       waveformColor: "green",
+      waveformDefaultSpace: true
     },
     {
       label: <>Temperature (F)</>,
@@ -181,12 +171,20 @@ export default function TeleICUPatientVitalsCard({
                   (v.waveformKey && waveform) ?
                     <Waveform
                       key={i}
-                      wave={waveform}
-                      title={v.waveformKey}
+                      wave={{
+                        ...waveform, 
+                        data : waveforms
+                          .filter(w=>w["wave-name"] === v.waveformKey)
+                          .map(w=>w.data)
+                          .join(" ")
+                      }}
+                      title={v.waveformName || v.waveformKey}
                       color={v.waveformColor}
                       metrics={stats}
-                    /> : (<div className="h-[90px] flex items-center justify-center text-gray-900">
-                      No data
+                      classes={"h-[150px]"}
+                      defaultSpace={v.waveformDefaultSpace}
+                    /> : (<div className="flex items-center justify-center text-gray-900">
+                      
                     </div>)
                 )
               })}
