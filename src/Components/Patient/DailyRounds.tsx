@@ -47,7 +47,7 @@ const initForm: any = {
   other_symptoms: "",
   physical_examination_info: "",
   other_details: "",
-  patient_category: "",
+  patient_category: "Comfort Care",
   current_health: 0,
   recommend_discharge: false,
   actions: null,
@@ -532,6 +532,7 @@ export const DailyRounds = (props: any) => {
                   <SelectField
                     name="patient_category"
                     variant="standard"
+                    margin="dense"
                     value={state.form.patient_category}
                     options={PATIENT_CATEGORIES.map((c) => {
                       return { id: c, text: c };
