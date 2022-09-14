@@ -40,6 +40,8 @@ import {
 import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
 import { goBack } from "../../Utils/utils";
+import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
+
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -893,7 +895,7 @@ export const UserAdd = (props: UserProps) => {
                       value={state.form.local_body}
                       options={localBody}
                       optionValue="name"
-                      onChange={(e) => handleChange}
+                      onChange={handleChange}
                       errors={state.errors.local_body}
                     />
                   )}
