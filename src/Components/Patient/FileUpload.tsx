@@ -479,7 +479,10 @@ export const FileUpload = (props: FileUploadProps) => {
         });
         setUploadFileNameError("");
       })
-      .catch(() => {
+      .catch((e) => {
+        Notification.Error({
+          msg: "Error Uploading File: " + e.message,
+        });
         setUploadStarted(false);
       });
   };
@@ -519,11 +522,7 @@ export const FileUpload = (props: FileUploadProps) => {
       .catch(() => {
         setUploadStarted(false);
       });
-
     fetchData(status);
-    // setting the value of file name to empty
-    setUploadFileNameError("");
-    setUploadFileName("");
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
