@@ -466,25 +466,29 @@ export const FileUpload = (props: FileUploadProps) => {
         setUploadPercent(percentCompleted);
       },
     };
-    axios
-      .put(url, newFile, config)
-      .then(() => {
-        setUploadStarted(false);
-        // setUploadSuccess(true);
-        setFile(null);
-        setUploadFileName("");
-        setReload(!reload);
-        Notification.Success({
-          msg: "File Uploaded Successfully",
+    return new Promise<void>((resolve, reject) => {
+      axios
+        .put(url, newFile, config)
+        .then(() => {
+          setUploadStarted(false);
+          // setUploadSuccess(true);
+          setFile(null);
+          setUploadFileName("");
+          setReload(!reload);
+          Notification.Success({
+            msg: "File Uploaded Successfully",
+          });
+          setUploadFileNameError("");
+          resolve();
+        })
+        .catch((e) => {
+          Notification.Error({
+            msg: "Error Uploading File: " + e.message,
+          });
+          setUploadStarted(false);
+          reject();
         });
-        setUploadFileNameError("");
-      })
-      .catch((e) => {
-        Notification.Error({
-          msg: "Error Uploading File: " + e.message,
-        });
-        setUploadStarted(false);
-      });
+    });
   };
 
   const validateFileUpload = () => {
@@ -517,12 +521,14 @@ export const FileUpload = (props: FileUploadProps) => {
       associating_id: getAssociatedId(),
       file_category: category,
     };
-    await dispatch(createUpload(requestData))
+    dispatch(createUpload(requestData))
       .then(uploadfile)
       .catch(() => {
         setUploadStarted(false);
+      })
+      .then(() => {
+        fetchData(status);
       });
-    fetchData(status);
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
