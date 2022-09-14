@@ -2,6 +2,7 @@ import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listAssetBeds } from "../../../Redux/actions";
 import { AssetData } from "../../Assets/AssetTypes";
+import ToolTip from "../../Common/utils/Tooltip";
 import { PatientModel } from "../../Patient/models";
 import Waveform, { WaveformType } from "./Waveform";
 
@@ -40,6 +41,7 @@ export default function TeleICUPatientVitalsCard({
   const dispatch: any = useDispatch();
   const [hl7Asset, setHl7Asset] = React.useState<AssetData>();
   const [patientObservations, setPatientObservations] = React.useState<any>();
+  const [stats, setStats] = React.useState(false);
 
   const fetchData = async () => {
     if (patient?.last_consultation?.current_bed?.bed_object?.id) {
@@ -141,8 +143,6 @@ export default function TeleICUPatientVitalsCard({
       label: <>Blood Pressure</>,
       liveKey: "bp",
       vitalKey: "bp",
-      waveformKey: "II",
-      waveformColor: "blue",
     },
     {
       label: (
@@ -152,6 +152,8 @@ export default function TeleICUPatientVitalsCard({
       ),
       liveKey: "SpO2",
       vitalKey: "ventilator_spo2",
+      waveformKey: "II",
+      waveformColor: "blue",
     },
     {
       label: <>R. Rate</>,
@@ -170,7 +172,7 @@ export default function TeleICUPatientVitalsCard({
   return (
     <div className=" w-full">
       <div className="flex w-full items-stretch flex-col md:flex-row">
-        <div className="w-full flex flex-col items-stretch py-2 bg-black h-auto text-gray-400">
+        <div className="w-full flex flex-col items-stretch py-2 bg-black h-auto text-gray-400 relative">
           {waveforms ? (
             <>
               {vitals.map((v, i) => {
@@ -182,11 +184,25 @@ export default function TeleICUPatientVitalsCard({
                       wave={waveform}
                       title={v.waveformKey}
                       color={v.waveformColor}
+                      metrics={stats}
                     /> : (<div className="h-[90px] flex items-center justify-center text-gray-900">
                       No data
                     </div>)
                 )
               })}
+              <div className="absolute bottom-1 right-1 flex gap-2">
+                <ToolTip
+                  text="Toggle stats for nerds"
+                  position="TOP"
+                >
+                  <button
+                    onClick={() => setStats(!stats)}
+                  >
+                    <i className="fas fa-chart-simple text-gray-400" />
+                  </button>
+                </ToolTip>
+                
+              </div>
             </>
           ) : (
             <div className="h-full w-full flex items-center justify-center">
