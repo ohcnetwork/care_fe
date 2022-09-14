@@ -44,7 +44,6 @@ import clsx from "clsx";
 
 import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
 
-
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -613,20 +612,21 @@ export const UserAdd = (props: UserProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle 
+      <PageTitle
         title={headerText}
-        componentRight={<Link
-          href="https://school.coronasafe.network/targets/12953"
-          className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
-          target="_blank"
-        >
-          <i className="fas fa-info-circle" /> &nbsp;Need Help?
-        </Link>}
+        componentRight={
+          <Link
+            href="https://school.coronasafe.network/targets/12953"
+            className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
+            target="_blank"
+          >
+            <i className="fas fa-info-circle" /> &nbsp;Need Help?
+          </Link>
+        }
         justifyContents="justify-between"
       />
 
       <Card className="mt-4">
-        
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -944,7 +944,7 @@ export const UserAdd = (props: UserProps) => {
                       value={state.form.local_body}
                       options={localBody}
                       optionValue="name"
-                      onChange={(e) => handleChange}
+                      onChange={handleChange}
                       errors={state.errors.local_body}
                     />
                   )}
