@@ -256,7 +256,7 @@ export default function ResourceCreate(props: resourceProps) {
                 />
               </div>
 
-              <div>
+              <div className="md:col-span-2">
                 <InputLabel>Name of approving facility*</InputLabel>
                 <FacilitySelect
                   multiple={false}
@@ -268,21 +268,6 @@ export default function ResourceCreate(props: resourceProps) {
                   }
                   errors={state.errors.approving_facility}
                 />
-              </div>
-
-              <div className="flex items-center w-full">
-                <div className="w-full">
-                  <InputLabel>Required Quantity</InputLabel>
-                  <TextInputField
-                    name="requested_quantity"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    value={state.form.required_quantity}
-                    onChange={handleChange}
-                    errors=""
-                  />
-                </div>
               </div>
 
               <div>
@@ -314,7 +299,7 @@ export default function ResourceCreate(props: resourceProps) {
                 />
               </div>
 
-              <div className="md:col-span-2">
+              <div className="md:col-span-1">
                 <InputLabel>Request Title*</InputLabel>
                 <TextInputField
                   rows={5}
@@ -327,6 +312,21 @@ export default function ResourceCreate(props: resourceProps) {
                   onChange={handleChange}
                   errors={state.errors.title}
                 />
+              </div>
+
+              <div className="md:col-span-1">
+                <div className="w-full">
+                  <InputLabel>Required Quantity</InputLabel>
+                  <TextInputField
+                    name="requested_quantity"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.required_quantity}
+                    onChange={handleChange}
+                    errors=""
+                  />
+                </div>
               </div>
 
               <div className="md:col-span-2">
