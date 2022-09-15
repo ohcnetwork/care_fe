@@ -111,7 +111,7 @@ const DuplicatePatientDialog = (props: Props) => {
           </div>
         </div>
       </DialogContent>
-      <DialogActions className="justify-between flex flex-col md:flex-row">
+      <DialogActions className="justify-between flex flex-col md:flex-row md:px-6">
         <Button
           className="capitalize"
           color="secondary"
