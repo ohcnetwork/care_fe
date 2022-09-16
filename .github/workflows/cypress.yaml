@@ -22,8 +22,17 @@ jobs:
           repository: coronasafe/care
           path: care
       - run: cd care && make up && cd ..
-      - run: yarn install
+      - run: sleep 5s
+      - env:
+          DJANGO_SUPERUSER_PASSWORD: Coronasafe@123
+          DJANGO_SUPERUSER_USERTYPE: 10
+          DJANGO_SUPERUSER_GENDER: 3
+          DJANGO_SUPERUSER_EMAIL: devadmin@coronasafe.in
+          DJANGO_SUPERUSER_PHONENUMBER: 1234567890
+        run: docker exec care python manage.py createsuperuser --no-input --username="devdistrictadmin" --email="devdistrictadmin@coronasafe.in"
+      - run: docker exec care python manage.py collectstatic
       - run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
+      # - run: yarn install
       # - name: Cypress run
       #   uses: cypress-io/github-action@v4
       #   with:
