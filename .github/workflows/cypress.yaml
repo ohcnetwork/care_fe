@@ -15,15 +15,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Checkout care
         uses: actions/checkout@v3
         with:
           repository: coronasafe/care
           path: care
-      - run: cd care && make up
-      # - name: Checkout
-      #   uses: actions/checkout@v2
-      # - run: yarn install
+      - run: cd care && make up && cd ..
+      - run: yarn install
+      - run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
       # - name: Cypress run
       #   uses: cypress-io/github-action@v4
       #   with:
