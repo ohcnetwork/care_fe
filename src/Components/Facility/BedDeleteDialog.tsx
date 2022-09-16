@@ -48,7 +48,7 @@ const BedDeleteDialog = (
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <div className="flex flex-col md:flex row gap-2">
+        <div className="flex flex-col md:flex-row gap-2 w-full md:justify-end">
           <button
             onClick={handleCancel}
             className="btn btn-default w-full md:w-auto"
