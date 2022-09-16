@@ -12,6 +12,8 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-20.04
+    env:
+      HTTP_PROXY: "http://localhost:9000"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -22,18 +24,15 @@ jobs:
           repository: coronasafe/care
           path: care
 
-      - name: Cache docker builds
-        uses: actions/cache@v3.0.8
-        with:
-          path: /var/lib/docker/
-          key: ${{ runner.OS }}-docker
+      - name: Docker Layer Caching
+        uses: satackey/action-docker-layer-caching@v0.0.11
 
-      - name: compose up care services
+      - name: compose up care
         run: cd care && make up && cd ..
-      - run: sleep 1m
-      - run: docker exec care python manage.py migrate
+      - run: sleep 30s
       - run: docker exec care python manage.py collectstatic
-
+      - run: docker exec care python manage.py load_data kerala
+      - run: docker exec care python manage.py seed_data
       - name: Create superuser "devdistrictadmin"
         env:
           DJANGO_SUPERUSER_PASSWORD: Coronasafe@123
@@ -41,24 +40,27 @@ jobs:
           DJANGO_SUPERUSER_GENDER: 3
           DJANGO_SUPERUSER_PHONENUMBER: 1234567890
         run: docker exec care python manage.py createsuperuser --no-input --username="devdistrictadmin" --email="devdistrictadmin@coronasafe.in"
-      - run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
-      # - run: yarn install
-      # - name: Cypress run
-      #   uses: cypress-io/github-action@v4
-      #   with:
-      #     install: false
-      #     start: yarn start
-      #     wait-on: 'http://localhost:4000'
-      #     wait-on-timeout: 300
-      #     browser: electron
-      # - uses: actions/upload-artifact@v2
-      #   if: failure()
-      #   with:
-      #     name: cypress-screenshots
-      #     path: cypress/screenshots
-      # # Test run video was always captured, so this action uses "always()" condition
-      # - uses: actions/upload-artifact@v2
-      #   if: always()
-      #   with:
-      #     name: cypress-videos
-      #     path: cypress/videos
+      - name: Check if care is up
+        run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
+
+      - run: sed --in-place '/"proxy":/d' package.json
+      - run: yarn install
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        with:
+          install: false
+          start: yarn start
+          wait-on: "http://localhost:4000"
+          wait-on-timeout: 300
+          browser: electron
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      # Test run video was always captured, so this action uses "always()" condition
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
