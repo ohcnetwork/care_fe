@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useReducer } from "react";
 import {
   Card,
   CardContent,
@@ -23,18 +23,41 @@ interface ONVIFCameraProps {
   assetId: string;
   asset: any;
 }
+const initForm = {
+  middleware_hostname: {
+    value: "",
+    error: "",
+  },
+  localipAddress: {
+    value: "",
+    error: "",
+  },
+  cameraAccessKey: {
+    value: "",
+    error: "",
+  },
+};
+const initialState = {
+  form: { ...initForm },
+};
+const onvifCameraReducer = (state = initialState, action: any) => {
+  switch (action.type) {
+    case "set_form": {
+      return {
+        ...state,
+        form: action.form,
+      };
+    }
+    default:
+      return state;
+  }
+};
 
 const ONVIFCamera = (props: ONVIFCameraProps) => {
+  const [state, dispatch_form] = useReducer(onvifCameraReducer, initialState);
   const { assetId, asset } = props;
   const [isLoading, setIsLoading] = React.useState(true);
   const [assetType, setAssetType] = React.useState("");
-  const [middlewareHostname, setMiddlewareHostname] = React.useState("");
-  const [middlewareHostname_error, setMiddlewareHostname_error] =
-    React.useState("");
-  const [cameraAddress, setCameraAddress] = React.useState("");
-  const [ipadrdress_error, setIpAddress_error] = React.useState("");
-  const [cameraAccessKey, setCameraAccessKey] = React.useState("");
-  const [cameraAccessKey_error, setCameraAccessKey_error] = React.useState("");
   const [bed, setBed] = React.useState<BedModel>({});
   const [newPreset, setNewPreset] = React.useState("");
   const [refreshPresetsHash, setRefreshPresetsHash] = React.useState(
@@ -44,36 +67,62 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
 
   useEffect(() => {
     setAssetType(asset?.asset_class);
-    setMiddlewareHostname(asset?.meta?.middleware_hostname);
-    setCameraAddress(asset?.meta?.local_ip_address);
-    setCameraAccessKey(asset?.meta?.camera_access_key);
+    initializeForm(
+      asset?.meta?.middleware_hostname,
+      asset?.meta?.local_ip_address,
+      asset?.meta?.camera_access_key
+    );
     setIsLoading(false);
   }, [asset]);
 
+  const initializeForm = (
+    middleware_hostname: any,
+    local_ip_address: any,
+    camera_Access_Key: any
+  ) => {
+    let form = { ...state.form };
+    form["middleware_hostname"].value = middleware_hostname;
+    form["localipAddress"].value = local_ip_address;
+    form["cameraAccessKey"].value = camera_Access_Key;
+    dispatch_form({ type: "set_form", form });
+  };
+
+  const initializeError = () => {
+    let form = { ...state.form };
+    form["middleware_hostname"].error = "";
+    form["localipAddress"].error = "";
+    form["cameraAccessKey"].error = "";
+    dispatch_form({ type: "set_form", form });
+  };
+  const setFieldError = (field: any, error_msg: any) => {
+    let form = { ...state.form };
+    form[field].error = error_msg;
+    dispatch_form({ type: "set_form", form });
+  };
+
   const isFormValid = () => {
-    setMiddlewareHostname_error("");
-    setIpAddress_error("");
-    setCameraAccessKey_error("");
+    initializeError();
+    let form = { ...state.form };
     if (
-      middlewareHostname.trim() !== "" &&
-      cameraAccessKey.trim() !== "" &&
-      cameraAddress.trim() !== ""
+      form["middleware_hostname"].value.trim() !== "" &&
+      form["localipAddress"].value.trim() !== "" &&
+      form["cameraAccessKey"].value.trim() !== ""
     ) {
-      if (checkIfValidIP(cameraAddress)) {
+      if (checkIfValidIP(form["localipAddress"].value)) {
         return true;
       } else {
-        setIpAddress_error("Please Enter a Valid Camera address !!");
+        setFieldError("localipAddress", "Please Enter a Valid IP address !!");
         return false;
       }
     } else {
-      if (middlewareHostname.trim() === "") {
-        setMiddlewareHostname_error("This field cannot be empty!!");
+      if (form["middleware_hostname"].value.trim() === "") {
+        setFieldError("middleware_hostname", "This field cannot be empty!!");
       }
-      if (cameraAddress.trim() === "") {
-        setIpAddress_error("This field cannot be empty!!");
+      if (form["localipAddress"].value.trim() === "") {
+        setFieldError("localipAddress", "This field cannot be empty!!");
       }
-      if (cameraAccessKey.trim() === "") {
-        setCameraAccessKey_error("This field cannot be empty!!");
+      if (form["cameraAccessKey"].value.trim() === "") {
+        setFieldError("cameraAccessKey", "This field cannot be empty!!");
       }
       return false;
     }
@@ -82,12 +131,13 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (isFormValid()) {
+      let form = { ...state.form };
       const data = {
         meta: {
           asset_type: "CAMERA",
-          middleware_hostname: middlewareHostname,
-          local_ip_address: cameraAddress,
-          camera_access_key: cameraAccessKey,
+          middleware_hostname: form["middleware_hostname"].value,
+          local_ip_address: form["localipAddress"].value,
+          camera_access_key: form["cameraAccessKey"].value,
         },
       };
       const res: any = await Promise.resolve(
@@ -144,6 +194,14 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
   };
   if (isLoading) return <Loading />;
+  const handleChange = (e: any) => {
+    let form = { ...state.form };
+    form[e.target.name] = {
+      ...form[e.target.name],
+      value: e.target.value,
+    };
+    dispatch_form({ type: "set_form", form });
+  };
   return (
     <div>
       <Card>
@@ -156,27 +214,27 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                     Hospital Middleware Hostname
                   </InputLabel>
                   <TextInputField
-                    name="name"
+                    name="middleware_hostname"
                     id="middleware-hostname"
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    value={middlewareHostname}
-                    onChange={(e) => setMiddlewareHostname(e.target.value)}
-                    errors={middlewareHostname_error}
+                    value={state.form.middleware_hostname.value}
+                    onChange={handleChange}
+                    errors={state.form.middleware_hostname.error}
                   />
                 </div>
                 <div>
                   <InputLabel id="camera-addess">Local IP Address</InputLabel>
                   <TextInputField
-                    name="name"
+                    name="localipAddress"
                     id="camera-addess"
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    value={cameraAddress}
-                    onChange={(e) => setCameraAddress(e.target.value)}
-                    errors={ipadrdress_error}
+                    value={state.form.localipAddress.value}
+                    onChange={handleChange}
+                    errors={state.form.localipAddress.error}
                   />
                 </div>
                 <div>
@@ -197,14 +255,14 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                     </Tooltip>
                   </InputLabel>
                   <TextInputField
-                    name="name"
+                    name="cameraAccessKey"
                     id="camera-access-key"
                     variant="outlined"
                     margin="dense"
                     type="password"
-                    value={cameraAccessKey}
-                    onChange={(e) => setCameraAccessKey(e.target.value)}
-                    errors={cameraAccessKey_error}
+                    value={state.form.cameraAccessKey.value}
+                    onChange={handleChange}
+                    errors={state.form.cameraAccessKey.error}
                   />
                 </div>
               </div>
