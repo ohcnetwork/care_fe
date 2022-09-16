@@ -38,7 +38,7 @@ export default function InvestigationBuilder(
   const dispatch: any = useDispatch();
 
   const additionalInvestigations = [
-    ["Vitals", ["Temp", "Blood", "Pressure", "Respiratory Rate", "Pulse Rate"]],
+    ["Vitals", ["Temp", "Blood Pressure", "Respiratory Rate", "Pulse Rate"]],
     [
       "ABG",
       [
@@ -149,8 +149,8 @@ export default function InvestigationBuilder(
                   setSelectedValues={setType}
                 />
               </div>
-              <div className="flex flex-col w-full md:w-[250px] shrink-0 justify-between">
-                <div className="flex gap-2">
+              <div className="flex flex-col w-full md:w-72 shrink-0 justify-between">
+                <div className="flex gap-2 flex-col md:flex-row">
                   <div className="shrink-0">
                     Repetitive
                     <br />
