@@ -21,16 +21,26 @@ jobs:
         with:
           repository: coronasafe/care
           path: care
-      - run: cd care && make up && cd ..
-      - run: sleep 5s
-      - env:
+
+      - name: Cache docker builds
+        uses: actions/cache@v3.0.8
+        with:
+          path: /var/lib/docker/
+          key: ${{ runner.OS }}-docker
+
+      - name: compose up care services
+        run: cd care && make up && cd ..
+      - run: sleep 1m
+      - run: docker exec care python manage.py migrate
+      - run: docker exec care python manage.py collectstatic
+
+      - name: Create superuser "devdistrictadmin"
+        env:
           DJANGO_SUPERUSER_PASSWORD: Coronasafe@123
           DJANGO_SUPERUSER_USERTYPE: 10
           DJANGO_SUPERUSER_GENDER: 3
-          DJANGO_SUPERUSER_EMAIL: devadmin@coronasafe.in
           DJANGO_SUPERUSER_PHONENUMBER: 1234567890
         run: docker exec care python manage.py createsuperuser --no-input --username="devdistrictadmin" --email="devdistrictadmin@coronasafe.in"
-      - run: docker exec care python manage.py collectstatic
       - run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
       # - run: yarn install
       # - name: Cypress run
