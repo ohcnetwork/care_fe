@@ -151,17 +151,21 @@ const LiveFeed = (props: any) => {
       onSuccess: () => setLoading(undefined),
     });
   };
+
   useEffect(() => {
-    getPresets({
-      onSuccess: (resp) => setPresets(resp.data),
-      onError: (resp) => {
-        resp instanceof AxiosError &&
-          Notification.Error({
-            msg: "Fetching presets failed",
-          });
-      },
-    });
+    if (cameraAsset?.hostname) {
+      getPresets({
+        onSuccess: (resp) => setPresets(resp.data),
+        onError: (resp) => {
+          resp instanceof AxiosError &&
+            Notification.Error({
+              msg: "Fetching presets failed",
+            });
+        },
+      });
+    }
   }, []);
+
   useEffect(() => {
     setNewPreset(toUpdate?.meta?.preset_name);
     setBed(toUpdate?.bed_object);
