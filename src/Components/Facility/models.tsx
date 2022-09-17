@@ -71,12 +71,18 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
+export type PatientCategory =
+  | "Comfort Care"
+  | "Stable"
+  | "Slightly Abnormal"
+  | "Critical";
+
 export interface ConsultationModel {
   admission_date?: string;
   admitted?: boolean;
   test_id?: string;
   admitted_to?: string;
-  category?: string;
+  category?: PatientCategory;
   created_date?: string;
   discharge_date?: string;
   examination_details?: string;
