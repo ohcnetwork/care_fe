@@ -348,11 +348,16 @@ export default function SampleViewAdmin() {
     );
   } else if (sample && sample.length === 0) {
     manageSamples = (
-      <Grid item xs={12} md={12} style={{ display: "flex" }}>
-        <Grid container justify="center" alignItems="center">
-          <h5> No Sample Tests Found</h5>
-        </Grid>
-      </Grid>
+      <div className="w-full bg-white rounded-lg p-3">
+        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+          No Sample Tests Found
+        </div>
+      </div>
+      // <Grid item xs={12} md={12} style={{ display: "flex" }}>
+      //   <Grid container justify="center" alignItems="center">
+      //     <h5> No Sample Tests Found</h5>
+      //   </Grid>
+      // </Grid>
     );
   }
 
