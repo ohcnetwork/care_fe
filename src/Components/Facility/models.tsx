@@ -71,12 +71,18 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
+export type PatientCategory =
+  | "Comfort Care"
+  | "Stable"
+  | "Slightly Abnormal"
+  | "Critical";
+
 export interface ConsultationModel {
   admission_date?: string;
   admitted?: boolean;
   test_id?: string;
   admitted_to?: string;
-  category?: string;
+  category?: PatientCategory;
   created_date?: string;
   discharge_date?: string;
   examination_details?: string;
@@ -94,6 +100,7 @@ export interface ConsultationModel {
   is_kasp?: boolean;
   kasp_enabled_date?: string;
   diagnosis?: string;
+  icd11_diagnoses_object?: ICD11DiagnosisModel[];
   verified_by?: string;
   suggestion_text?: string;
   symptoms?: Array<number>;
@@ -102,7 +109,7 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   discharge_advice?: any;
-  prn_prescription? : PRNPrescriptionType[];
+  prn_prescription?: PRNPrescriptionType[];
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
@@ -187,4 +194,10 @@ export interface CurrentBed {
   start_date: string;
   end_date: string;
   meta: Record<string, any>;
+}
+
+export interface ICD11DiagnosisModel {
+  id: string;
+  label: string;
+  parentId: string | null;
 }

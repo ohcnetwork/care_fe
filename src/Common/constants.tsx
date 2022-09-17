@@ -271,19 +271,14 @@ export const PATIENT_FILTER_ADMITTED_TO = [
   { id: "2", text: "ICU" },
 ];
 
-export const PATIENT_CATEGORY = [
-  { id: "ASYMPTOMATIC", text: "ASYM (ASYMPTOMATIC) " },
-  { id: "Category-A", text: "Mild (Category A)" },
-  { id: "Category-B", text: "Moderate (Category B)" },
-  { id: "Category-C", text: "Severe (Category C)" },
+export const PATIENT_CATEGORIES = [
+  "Comfort Care",
+  "Stable",
+  "Slightly Abnormal",
+  "Critical",
 ];
 
-export const PATIENT_FILTER_CATEGORY = [
-  { id: "ASYM", text: "ASYM (ASYMPTOMATIC) " },
-  { id: "Mild", text: "Mild (Category A)" },
-  { id: "Moderate", text: "Moderate (Category B)" },
-  { id: "Severe", text: "Severe (Category C)" },
-];
+export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 
 export const CURRENT_HEALTH_CHANGE = [
   { id: 0, text: "NO DATA", desc: "" },
@@ -780,5 +775,10 @@ export const FACILITY_FEATURE_TYPES = [
     id: 5,
     name: "Operation Theater",
     icon: "syringe",
+  },
+  {
+    id: 6,
+    name: "Blood Bank",
+    icon: "droplet",
   },
 ];

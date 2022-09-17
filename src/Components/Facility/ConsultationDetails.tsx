@@ -10,7 +10,6 @@ import loadable from "@loadable/component";
 import { ConsultationModel } from "./models";
 import { PatientModel } from "../Patient/models";
 import {
-  PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   CONSULTATION_TABS,
   OptionsType,
@@ -48,6 +47,7 @@ import {
 } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
+import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -56,7 +56,6 @@ interface PreDischargeFormInterface {
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
-const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -74,6 +73,7 @@ export const ConsultationDetails = (props: any) => {
   const [open, setOpen] = useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
+  const [diagnosisShowMore, setDiagnosisShowMore] = useState(false);
 
   const initDischargeSummaryForm: { email: string } = {
     email: "",
@@ -214,9 +214,6 @@ export const ConsultationDetails = (props: any) => {
           const data: ConsultationModel = {
             ...res.data,
             symptoms_text: "",
-            category:
-              patientCategoryChoices.find((i) => i.id === res.data.category)
-                ?.text || res.data.category,
           };
           if (res.data.symptoms && res.data.symptoms.length) {
             const symptoms = res.data.symptoms
@@ -263,6 +260,8 @@ export const ConsultationDetails = (props: any) => {
     },
     [consultationId, dispatch, patientData.is_vaccinated]
   );
+
+  console.log("consultationData", consultationData);
 
   useAbortableEffect((status: statusType) => {
     fetchData(status);
@@ -487,7 +486,7 @@ export const ConsultationDetails = (props: any) => {
               )}
             </div>
 
-            <div className="flex px-4 flex-col lg:flex-row gap-2">
+            <div className="flex px-4 flex-col-reverse lg:flex-row gap-2">
               <div className="flex flex-col w-3/4 h-full">
                 {/*consultationData.other_symptoms && (
                   <div className="capitalize">
@@ -498,12 +497,43 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )*/}
 
-                {consultationData.diagnosis && (
+                {(consultationData?.icd11_diagnoses_object?.length ||
+                  consultationData.diagnosis) && (
                   <div className="text-sm w-full">
-                    <span className="font-semibold leading-relaxed">
-                      Diagnosis:{" "}
-                    </span>
-                    {consultationData.diagnosis}
+                    <p className="font-semibold leading-relaxed">Diagnosis:</p>
+
+                    {
+                      // shows the old diagnosis data
+                      consultationData.diagnosis && (
+                        <p>{consultationData.diagnosis}</p>
+                      )
+                    }
+
+                    {consultationData?.icd11_diagnoses_object
+                      ?.slice(0, !diagnosisShowMore ? 3 : undefined)
+                      .map((diagnosis) => (
+                        <p>{diagnosis.label}</p>
+                      ))}
+                    {consultationData?.icd11_diagnoses_object &&
+                      consultationData.icd11_diagnoses_object.length > 3 && (
+                        <>
+                          {!diagnosisShowMore ? (
+                            <a
+                              onClick={() => setDiagnosisShowMore(true)}
+                              className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+                            >
+                              show more
+                            </a>
+                          ) : (
+                            <a
+                              onClick={() => setDiagnosisShowMore(false)}
+                              className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+                            >
+                              show less
+                            </a>
+                          )}{" "}
+                        </>
+                      )}
                   </div>
                 )}
                 {consultationData.verified_by && (
@@ -906,14 +936,14 @@ export const ConsultationDetails = (props: any) => {
             )}
             {consultationData.discharge_advice && (
               <div className="mt-4">
-                <h3 className="flex text-lg font-semibold leading-relaxed text-gray-900">
-                  Prescription
-                  <div className="ml-3 text-xs text-gray-600 mt-2">
+                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900">
+                  <span className="mr-3">Prescription</span>
+                  <div className="text-xs text-gray-600 mt-2 ">
                     <i className="fas fa-history text-sm pr-2"></i>
                     {consultationData.modified_date &&
                       moment(consultationData.modified_date).format("lll")}
                   </div>
-                </h3>
+                </div>
                 <div className="flex flex-col">
                   <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                     <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
@@ -979,14 +1009,14 @@ export const ConsultationDetails = (props: any) => {
             )}
             {consultationData.prn_prescription && (
               <div className="mt-4">
-                <h3 className="flex text-lg font-semibold leading-relaxed text-gray-900">
-                  PRN Prescription
-                  <div className="ml-3 text-xs text-gray-600 mt-2">
+                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900">
+                  <span className="mr-3">PRN Prescription</span>
+                  <div className="text-xs text-gray-600 mt-2">
                     <i className="fas fa-history text-sm pr-2"></i>
                     {consultationData.modified_date &&
                       moment(consultationData.modified_date).format("lll")}
                   </div>
-                </h3>
+                </div>
                 <div className="flex flex-col">
                   <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                     <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
@@ -1186,6 +1216,7 @@ export const ConsultationDetails = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
             />
+            <ViewInvestigationSuggestions consultationId={consultationId} />
           </div>
         )}
       </div>

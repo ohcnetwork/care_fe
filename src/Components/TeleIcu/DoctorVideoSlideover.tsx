@@ -108,6 +108,8 @@ function UserListItem(props: { user: UserModel }) {
             user.alt_phone_number
               ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
                   user.alt_phone_number
+                )}&text=${encodeURIComponent(
+                  `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
                 )}`
               : "#"
           }
