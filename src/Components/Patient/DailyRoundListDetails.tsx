@@ -4,11 +4,7 @@ import loadable from "@loadable/component";
 import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  CURRENT_HEALTH_CHANGE,
-  PATIENT_CATEGORY,
-  SYMPTOM_CHOICES,
-} from "../../Common/constants";
+import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
@@ -16,7 +12,6 @@ const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
-const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const DailyRoundListDetails = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
@@ -47,10 +42,6 @@ export const DailyRoundListDetails = (props: any) => {
               Object.keys(res.data.medication_given).length === 0
                 ? []
                 : res.data.medication_given,
-            patient_category:
-              patientCategoryChoices.find(
-                (i) => i.id === res.data.patient_category
-              )?.text || res.data.patient_category,
             current_health: currentHealth
               ? currentHealth.desc
               : res.data.current_health,

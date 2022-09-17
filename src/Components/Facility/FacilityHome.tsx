@@ -221,8 +221,8 @@ export const FacilityHome = (props: any) => {
         open={openDeleteDialog}
         onClose={handleDeleteClose}
       >
-        <DialogTitle className="flex justify-center bg-primary-100">
-          Are you sure you want to delete {facilityData.name || "Facility"}
+        <DialogTitle className="flex justify-center bg-red-100">
+          Are you sure you want to delete {facilityData.name || "Facility"}?
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -230,16 +230,21 @@ export const FacilityHome = (props: any) => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <button onClick={handleDeleteClose} className="btn btn-primary">
-            Cancel
-          </button>
-          <button
-            onClick={handleDeleteSubmit}
-            id="facility-delete-confirm"
-            className="btn btn-danger"
-          >
-            Delete
-          </button>
+          <div className="flex flex-col md:flex-row gap-2 w-full justify-between">
+            <button
+              onClick={handleDeleteClose}
+              className="btn btn-primary w-full md:w-auto"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteSubmit}
+              id="facility-delete-confirm"
+              className="btn btn-danger w-full md:w-auto"
+            >
+              Delete
+            </button>
+          </div>
         </DialogActions>
       </Dialog>
       <div className="bg-white rounded-lg p-3 md:p-6 shadow">
@@ -303,28 +308,33 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="flex items-center gap-3 mt-4">
               <div>
-                <h1 className="text-lg font-bold">Features</h1>
+                {facilityData.features?.some((feature) =>
+                  FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
+                ) && <h1 className="text-lg font-bold">Features</h1>}
                 <div className="flex gap-2 flex-wrap mt-2">
-                  {facilityData.features?.map((feature, i) => (
-                    <div
-                      key={i}
-                      className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm"
-                    >
-                      <i
-                        className={`fas fa-${
-                          FACILITY_FEATURE_TYPES.filter(
-                            (f) => f.id === feature
-                          )[0].icon
-                        }`}
-                      />{" "}
-                      &nbsp;
-                      {
-                        FACILITY_FEATURE_TYPES.filter(
-                          (f) => f.id === feature
-                        )[0].name
-                      }
-                    </div>
-                  ))}
+                  {facilityData.features?.map(
+                    (feature, i) =>
+                      FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
+                        <div
+                          key={i}
+                          className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm"
+                        >
+                          <i
+                            className={`fas fa-${
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0]?.icon
+                            }`}
+                          />{" "}
+                          &nbsp;
+                          {
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0]?.name
+                          }
+                        </div>
+                      )
+                  )}
                 </div>
               </div>
             </div>
