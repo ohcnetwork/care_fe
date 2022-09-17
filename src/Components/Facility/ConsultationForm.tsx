@@ -21,7 +21,7 @@ import React, {
 import { useDispatch } from "react-redux";
 import {
   CONSULTATION_SUGGESTION,
-  PATIENT_CATEGORY,
+  PATIENT_CATEGORIES,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
@@ -52,10 +52,16 @@ import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder, { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
+import PRNPrescriptionBuilder, {
+  PRNPrescriptionType,
+} from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { DiagnosisSelect } from "../Common/DiagnosisSelect";
-import InvestigationBuilder, { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
+import InvestigationBuilder, {
+  InvestigationType,
+} from "../Common/prescription-builder/InvestigationBuilder";
 import { ICD11DiagnosisModel } from "./models";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -91,7 +97,7 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: PrescriptionType[];
-  prn_prescription : PRNPrescriptionType[],
+  prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
   action: string;
@@ -119,7 +125,7 @@ const initForm: FormDetails = {
   facility: "",
   admitted: "false",
   admitted_to: "",
-  category: "",
+  category: "Comfort Care",
   admission_date: new Date().toISOString(),
   discharge_date: null,
   referred_to: "",
@@ -136,7 +142,7 @@ const initForm: FormDetails = {
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
-  prn_prescription : [],
+  prn_prescription: [],
   investigation: [],
   is_telemedicine: "false",
   action: "PENDING",
@@ -186,15 +192,6 @@ const suggestionTypes = [
 
 const symptomChoices = [...SYMPTOM_CHOICES];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const categoryChoices = [
-  {
-    id: 0,
-    text: "Select suspect category",
-  },
-  ...PATIENT_CATEGORY,
-];
-
 const goBack = () => {
   window.history.go(-1);
 };
@@ -213,7 +210,9 @@ export const ConsultationForm = (props: any) => {
     []
   );
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
-  const [InvestigationAdvice, setInvestigationAdvice] = useState<InvestigationType[]>([]);
+  const [InvestigationAdvice, setInvestigationAdvice] = useState<
+    InvestigationType[]
+  >([]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -245,8 +244,14 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
       setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(!Array.isArray(res.data.prn_prescription) ? [] : res.data.prn_prescription);
-      setInvestigationAdvice(!Array.isArray(res.data.investigation) ? [] : res.data.investigation);
+      setPRNAdvice(
+        !Array.isArray(res.data.prn_prescription)
+          ? []
+          : res.data.prn_prescription
+      );
+      setInvestigationAdvice(
+        !Array.isArray(res.data.investigation) ? [] : res.data.investigation
+      );
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -262,7 +267,7 @@ export const ConsultationForm = (props: any) => {
               !!res.data.symptoms.filter((i: number) => i === 9).length,
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
-            category: res.data.category ? res.data.category : "",
+            category: res.data.category || "Comfort Care",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
@@ -304,6 +309,16 @@ export const ConsultationForm = (props: any) => {
         case "symptoms":
           if (!state.form[field] || !state.form[field].length) {
             errors[field] = "Please select the symptoms";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "category":
+          if (
+            !state.form[field] ||
+            !PATIENT_CATEGORIES.includes(state.form[field])
+          ) {
+            errors[field] = "Please select a category";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -425,12 +440,14 @@ export const ConsultationForm = (props: any) => {
           return;
         }
 
-        case "investigation":{
+        case "investigation": {
           let invalid = false;
-          for (let f of InvestigationAdvice) {
+          for (const f of InvestigationAdvice) {
             if (
               f.type?.length === 0 ||
-              (f.repetitive ? !f.frequency?.replace(/\s/g, "").length : !f.time?.replace(/\s/g, "").length)
+              (f.repetitive
+                ? !f.frequency?.replace(/\s/g, "").length
+                : !f.time?.replace(/\s/g, "").length)
             ) {
               invalid = true;
               break;
@@ -486,7 +503,7 @@ export const ConsultationForm = (props: any) => {
         icd11_provisional_diagnoses: state.form.icd11_provisional_diagnoses,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
-        prn_prescription : PRNAdvice,
+        prn_prescription: PRNAdvice,
         investigation: InvestigationAdvice,
         patient: patientId,
         facility: facilityId,
@@ -751,17 +768,24 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.prescribed_medication}
                   />
                 </div>
-                {/* <div className="flex-1" id="category-div">
-                  <InputLabel id="category-label">Category*</InputLabel>
+                <div className="flex-1" id="category-div">
+                  <InputLabel id="category-label" required>
+                    Category
+                  </InputLabel>
                   <SelectField
                     name="category"
                     variant="standard"
                     value={state.form.category}
-                    options={categoryChoices}
+                    options={PATIENT_CATEGORIES.map((c) => {
+                      return {
+                        id: c,
+                        text: c,
+                      };
+                    })}
                     onChange={handleChange}
                     errors={state.errors.category}
                   />
-                </div> */}
+                </div>
 
                 <div id="suggestion-div">
                   <InputLabel
