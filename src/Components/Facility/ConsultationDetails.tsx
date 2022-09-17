@@ -537,46 +537,6 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )*/}
 
-                {/* {(consultationData?.icd11_diagnoses_object?.length ||
-                  consultationData.diagnosis) && (
-                  <div className="text-sm w-full">
-                    <p className="font-semibold leading-relaxed">Diagnosis:</p>
-
-                    {
-                      // shows the old diagnosis data
-                      consultationData.diagnosis && (
-                        <p>{consultationData.diagnosis}</p>
-                      )
-                    }
-
-                    {consultationData?.icd11_diagnoses_object
-                      ?.slice(0, !diagnosisShowMore ? 3 : undefined)
-                      .map((diagnosis) => (
-                        <p>{diagnosis.label}</p>
-                      ))}
-                    {consultationData?.icd11_diagnoses_object &&
-                      consultationData.icd11_diagnoses_object.length > 3 && (
-                        <>
-                          {!diagnosisShowMore ? (
-                            <a
-                              onClick={() => setDiagnosisShowMore(true)}
-                              className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
-                            >
-                              show more
-                            </a>
-                          ) : (
-                            <a
-                              onClick={() => setDiagnosisShowMore(false)}
-                              className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
-                            >
-                              show less
-                            </a>
-                          )}{" "}
-                        </>
-                      )}
-                  </div>
-                )} */}
-
                 <ShowDiagnosis
                   diagnoses={
                     consultationData?.icd11_provisional_diagnoses_object
