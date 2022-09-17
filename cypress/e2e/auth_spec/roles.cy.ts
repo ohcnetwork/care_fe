@@ -5,16 +5,16 @@ describe("authentication", () => {
   users.forEach((user) => {
     it("Login as " + user.username + " - " + user.rolename, () => {
       cy.loginByApi(user.username, "passwordR0FL");
-
-      cy.visit("/user/profile").then(() => {
-        cy.get("dd").should("contain", user.username);
-        cy.get("dd").should("contain", user.rolename);
-      });
+      cy.awaitUrl("/user/profile");
+      cy.get("dd").should("contain", user.username);
+      cy.get("dd").should("contain", user.rolename);
     });
   });
   afterEach(() => {
     cy.log("Logging out");
     cy.get("p").contains("Sign Out").click();
+    cy.getLocalStorage("care_access_token").should("be.null");
+    cy.getLocalStorage("care_refresh_token").should("be.null");
     cy.url().should("include", "/");
   });
 });

@@ -8,11 +8,7 @@ describe("Resource filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.intercept(/fontawesome/).as("fontawesome");
-    cy.intercept(/currentuser/).as("currentuser");
-    cy.visit("http://localhost:4000/resource");
-    cy.wait("@fontawesome");
-    cy.wait("@currentuser");
+    cy.awaitUrl("/resource");
     cy.contains("Filters").click();
   });
 
