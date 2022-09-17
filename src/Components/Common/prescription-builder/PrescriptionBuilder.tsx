@@ -140,7 +140,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                                             
                                     </div>
                                             
-                                    <div className="w-[55px] shrink-0">
+                                    <div className="w-[70px] shrink-0">
                                         Days
                                         <input 
                                             type="number"
