@@ -15,17 +15,17 @@ interface HL7MonitorProps {
   asset: any;
 }
 const initForm = {
-  middleware_hostname: {
-    value: "",
-    error: "",
-  },
-  localipAddress: {
-    value: "",
-    error: "",
-  },
+  assetType: "",
+  middlewareHostname: "",
+  localipAddress: "",
 };
+const initError = Object.assign(
+  {},
+  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+);
 const initialState = {
   form: { ...initForm },
+  errors: { ...initError },
 };
 const hl7MonitiorFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
@@ -33,6 +33,12 @@ const hl7MonitiorFormReducer = (state = initialState, action: any) => {
       return {
         ...state,
         form: action.form,
+      };
+    }
+    case "set_error": {
+      return {
+        ...state,
+        errors: action.errors,
       };
     }
     default:
@@ -46,60 +52,57 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     initialState
   );
   const { assetId, asset } = props;
-  const [assetType, setAssetType] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-    setAssetType(asset?.asset_class);
     initializeForm(
+      asset?.asset_class,
       asset?.meta?.middleware_hostname,
       asset?.meta?.local_ip_address
     );
     setIsLoading(false);
   }, [asset]);
 
-  const initializeForm = (middleware_hostname: any, local_ip_address: any) => {
+  const initializeForm = (
+    asset_type: string,
+    middleware_hostname: string,
+    local_ip_address: string
+  ) => {
     let form = { ...state.form };
-    form["middleware_hostname"].value = middleware_hostname;
-    form["localipAddress"].value = local_ip_address;
-    dispatch_form({ type: "set_form", form });
-  };
-
-  const initializeError = () => {
-    let form = { ...state.form };
-    form["middleware_hostname"].error = "";
-    form["localipAddress"].error = "";
-    dispatch_form({ type: "set_form", form });
-  };
-
-  const setFieldError = (field: any, error_msg: any) => {
-    let form = { ...state.form };
-    form[field].error = error_msg;
+    form["assetType"] = asset_type;
+    form["middlewareHostname"] = middleware_hostname;
+    form["localipAddress"] = local_ip_address;
     dispatch_form({ type: "set_form", form });
   };
 
   const isFormValid = () => {
-    initializeError();
     let form = { ...state.form };
-    if (
-      form["middleware_hostname"].value.trim() !== "" &&
-      form["localipAddress"].value.trim() !== ""
-    ) {
-      if (checkIfValidIP(form["localipAddress"].value)) {
-        return true;
-      } else {
-        setFieldError("localipAddress", "Please Enter a Valid IP address !!");
-        return false;
+    let errors = { ...initError };
+    let invalidForm = false;
+    Object.keys(state.form).forEach((field) => {
+      switch (field) {
+        case "assetType":
+        case "middlewareHostname":
+          if (!state.form[field] || state.form[field].trim() === "") {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
+        case "localipAddress":
+          if (!state.form[field] || state.form[field].trim() === "") {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          } else {
+            if (!checkIfValidIP(form[field])) {
+              errors[field] = "Please Enter a Valid IP address !!";
+              invalidForm = true;
+            }
+          }
+          return;
       }
-    } else {
-      if (form["middleware_hostname"].value.trim() === "") {
-        setFieldError("middleware_hostname", "This field cannot be empty!!");
-      }
-      if (form["localipAddress"].value.trim() === "") {
-        setFieldError("localipAddress", "This field cannot be empty!!");
-      }
-      return false;
-    }
+    });
+    dispatch_form({ type: "set_error", errors });
+    return !invalidForm;
   };
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
@@ -108,9 +111,9 @@ const HL7Monitor = (props: HL7MonitorProps) => {
       let form = { ...state.form };
       const data = {
         meta: {
-          asset_type: assetType,
-          middleware_hostname: form["middleware_hostname"].value,
-          local_ip_address: form["localipAddress"].value,
+          asset_type: form["assetType"],
+          middleware_hostname: form["middlewareHostname"],
+          local_ip_address: form["localipAddress"],
         },
       };
       const res: any = await Promise.resolve(
@@ -129,12 +132,9 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     }
   };
   if (isLoading) return <Loading />;
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let form = { ...state.form };
-    form[e.target.name] = {
-      ...form[e.target.name],
-      value: e.target.value,
-    };
+    form[e.target.name] = e.target.value;
     dispatch_form({ type: "set_form", form });
   };
   return (
@@ -149,14 +149,14 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                     Hospital Middleware Hostname
                   </InputLabel>
                   <TextInputField
-                    name="middleware_hostname"
+                    name="middlewareHostname"
                     id="middleware-hostname"
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    value={state.form.middleware_hostname.value}
+                    value={state.form?.middlewareHostname}
                     onChange={handleChange}
-                    errors={state.form.middleware_hostname.error}
+                    errors={state.errors?.middlewareHostname}
                   />
                 </div>
                 <div>
@@ -167,9 +167,9 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    value={state.form.localipAddress.value}
+                    value={state.form?.localipAddress}
                     onChange={handleChange}
-                    errors={state.form.localipAddress.error}
+                    errors={state.errors?.localipAddress}
                   />
                 </div>
               </div>
@@ -192,7 +192,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
           </form>
         </CardContent>
       </Card>
-      {assetType === "HL7MONITOR" ? (
+      {state.form.assetType === "HL7MONITOR" ? (
         <MonitorConfigure asset={asset as AssetData} />
       ) : null}
     </div>
