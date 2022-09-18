@@ -183,13 +183,15 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 id
                 consultationId
               />
-            | IOBalanceEditor =>
-              <CriticalCare__IOBalanceEditor
-                ioBalance={CriticalCare__DailyRound.ioBalance(state.dailyRound)}
-                updateCB={updateDailyRound(send, IOBalanceEditor)}
-                id
-                consultationId
-              />
+            | IOBalanceEditor => <>
+                <CriticalCare__IOBalanceEditor
+                  ioBalance={CriticalCare__DailyRound.ioBalance(state.dailyRound)}
+                  updateCB={updateDailyRound(send, IOBalanceEditor)}
+                  id
+                  consultationId
+                />
+              </>
+
             | DialysisEditor =>
               <CriticalCare_DialysisEditor
                 dialysisParameters={CriticalCare__DailyRound.dialysis(state.dailyRound)}

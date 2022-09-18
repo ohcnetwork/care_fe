@@ -1,7 +1,11 @@
-import { medicines, routes, units } from "./PrescriptionBuilder";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { patchConsultation, updateConsultation } from "../../../Redux/actions";
+import { medicines, PrescriptionType, routes, units } from "./PrescriptionBuilder";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
 
 export type PRNPrescriptionType = {
+    id? : number,
     medicine?: string; 
     route?: string; 
     dosage?: string;
@@ -23,13 +27,60 @@ const DOSAGE_HRS = [1,2,3,6,12,24];
 
 export interface PrescriptionBuilderProps<T> {
     prescriptions :T[], 
-    setPrescriptions : React.Dispatch<React.SetStateAction<T[]>>
+    setPrescriptions : React.Dispatch<React.SetStateAction<T[]>>,
+    consultationID : number
 };
+
+/*
+    PRO TIP :
+    If you are making an array of objects in a JSON field, ALWAYS have a unique id element in each object.
+    I was not so wise, and now I am writing the following code.
+*/
+
+export const patchedPrescriptions = (prescriptions : any[]) => {
+
+    const newID : (i : number) => number = (i : number) => {
+        const check = prescriptions.find(p=>p.id === i);
+        if(check){
+            return newID(i+1);
+        }else{
+            return i;
+        }
+    }
+
+    return prescriptions.map((p, i)=>{
+        if(p.id){
+            return p;
+        }else{
+            return {
+                ...p,
+                id : newID(i+1)
+            }
+        }
+    })
+}
+
+export const patchIDs = async (prescriptions : any[], dispatch : any, setState : any, consultationID : number, key : string) => {
+
+    const patched = patchedPrescriptions(prescriptions);
+
+    if(prescriptions.filter(p => !p.id).length > 0){
+
+        console.log("Patched", patched, "original", prescriptions)
+        try {
+            const res = await dispatch(patchConsultation(consultationID, {[key] : patched}));
+        } catch(error) {
+            console.log(error);
+        }
+    }
+
+    setState(patched);
+}
 
 export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<PRNPrescriptionType>){
 
-    const {prescriptions, setPrescriptions} = props;
-    console.log("PRN prescriptions", prescriptions);
+    const {prescriptions, setPrescriptions, consultationID} = props;
+    const dispatchAction : any = useDispatch();
 
     const setItem = (object : PRNPrescriptionType, i : number) => {
         setPrescriptions(prescriptions.map((prescription, index)=>
@@ -37,7 +88,9 @@ export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<
         ))
     }
 
-    //return <>JJ</>
+    useEffect(()=>{
+        patchIDs(prescriptions, dispatchAction, setPrescriptions, consultationID, "prn_prescription");
+    }, [])
     
     return (
         <div className="mt-2">
@@ -229,7 +282,7 @@ export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<
                 onClick={()=>{
                     setPrescriptions([
                         ...prescriptions,
-                        PRNEmptyValues
+                        {...PRNEmptyValues, id : Date.now() }
                     ])
                 }}
                 className="shadow-sm mt-4 bg-gray-200 w-full font-bold block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"

@@ -3,11 +3,13 @@ type item = {
   quantity: float,
 }
 
-export type t = {
+@genType
+type t = {
   infusions: array<item>,
   ivFluid: array<item>,
   feed: array<item>,
   output: array<item>,
+  medicine_administration: array<item>,
   total_intake_calculated: option<string>,
   total_output_calculated: option<string>,
 }
@@ -19,6 +21,7 @@ let make = (
   ~output,
   ~total_intake_calculated,
   ~total_output_calculated,
+  ~medicine_administration,
 ) => {
   infusions: infusions,
   ivFluid: ivFluid,
@@ -26,6 +29,7 @@ let make = (
   output: output,
   total_intake_calculated: total_intake_calculated,
   total_output_calculated: total_output_calculated,
+  medicine_administration: medicine_administration,
 }
 
 let makeItem = (~name, ~quantity) => {
@@ -45,6 +49,7 @@ let makeFromJs = dailyRound => {
     ~output=makeItems(dailyRound["output"]),
     ~total_intake_calculated=dailyRound["total_intake_calculated"]->Js.Nullable.toOption,
     ~total_output_calculated=dailyRound["total_output_calculated"]->Js.Nullable.toOption,
+    ~medicine_administration=makeItems(dailyRound["medicine_administration"]),
   )
 }
 
@@ -56,6 +61,7 @@ let feed = t => t.feed
 let output = t => t.output
 let total_intake_calculated = t => t.total_intake_calculated
 let total_output_calculated = t => t.total_output_calculated
+let medicine_administration = t => t.medicine_administration
 
 let updateName = (name, item) => {
   ...item,

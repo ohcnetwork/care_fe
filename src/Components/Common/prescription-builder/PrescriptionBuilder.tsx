@@ -1,5 +1,8 @@
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { patchConsultation } from "../../../Redux/actions";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
-import { PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
+import { patchedPrescriptions, patchIDs, PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
 
 export const medicines = require("./assets/medicines");
 const frequency = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
@@ -7,6 +10,7 @@ export const routes = ["Oral", "IV", "IM", "S/C"]
 export const units = ["mg", "ml", "drops"]
 
 export type PrescriptionType = {
+    id? : number,
     medicine?: string; 
     route?: string; 
     dosage?: string; // is now frequency
@@ -26,13 +30,18 @@ export const emptyValues = {
 
 export default function PrescriptionBuilder(props : PrescriptionBuilderProps<PrescriptionType>){
 
-    const {prescriptions, setPrescriptions} = props;
+    const {prescriptions, setPrescriptions, consultationID} = props;
+    const dispatchAction : any = useDispatch();
 
     const setItem = (object : PrescriptionType, i : number) => {
         setPrescriptions(prescriptions.map((prescription, index)=>
             index === i ? object : prescription
         ))
     }
+
+    useEffect(()=>{
+        patchIDs(prescriptions, dispatchAction, setPrescriptions, consultationID, "discharge_advice");
+    }, [])
 
     return (
         <div className="mt-2">
@@ -197,7 +206,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                 onClick={()=>{
                     setPrescriptions([
                         ...prescriptions,
-                        emptyValues
+                        {...emptyValues, id : Date.now() }
                     ])
                 }}
                 className="shadow-sm mt-4 bg-gray-200 w-full font-bold block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"

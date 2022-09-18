@@ -12,6 +12,7 @@ type state = {
   outputs: array<IOBalance.item>,
   dirty: bool,
   saving: bool,
+  medicine_administration: array<IOBalance.item>,
 }
 
 let infusionCollection = ["Adrenalin", "Nor-adrenalin", "Vasopressin", "Dopamine", "Dobutamine"]
@@ -24,6 +25,7 @@ type action =
   | SetIVFluid(array<IOBalance.item>)
   | SetFeed(array<IOBalance.item>)
   | SetOutput(array<IOBalance.item>)
+  | SetMedicineAdministration(array<IOBalance.item>)
   | SetSaving
   | ClearSaving
 
@@ -33,6 +35,10 @@ let reducer = (state, action) => {
   | SetIVFluid(ivfluids) => {...state, ivfluids: ivfluids}
   | SetFeed(feeds) => {...state, feeds: feeds}
   | SetOutput(outputs) => {...state, outputs: outputs}
+  | SetMedicineAdministration(medicine_administration) => {
+      ...state,
+      medicine_administration: medicine_administration,
+    }
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
   }
@@ -46,6 +52,7 @@ let initialState = iob => {
     outputs: IOBalance.output(iob),
     dirty: false,
     saving: false,
+    medicine_administration: IOBalance.medicine_administration(iob),
   }
 }
 
@@ -64,6 +71,11 @@ let makePayload = state => {
   Js.Dict.set(payload, "iv_fluids", Js.Json.objectArray(makeUnitsPayload(state.ivfluids)))
   Js.Dict.set(payload, "feeds", Js.Json.objectArray(makeUnitsPayload(state.feeds)))
   Js.Dict.set(payload, "output", Js.Json.objectArray(makeUnitsPayload(state.outputs)))
+  Js.Dict.set(
+    payload,
+    "medicine_administration",
+    Js.Json.objectArray(makeUnitsPayload(state.medicine_administration)),
+  )
 
   payload
 }
@@ -100,7 +112,12 @@ let make = (~ioBalance, ~updateCB, ~id, ~consultationId) => {
   let totalInput = sumOfArray(ArrayUtils.flatten([state.infusions, state.ivfluids, state.feeds]))
 
   <div>
-    <CriticalCare__PageTitle title="Administration Record" />
+    <CriticalCare__AdministrationRecord
+      items={state.medicine_administration}
+      setItems={items => send(SetMedicineAdministration(items))}
+      consultationID={consultationId}
+    />
+    <CriticalCare__PageTitle title="I/O Balance Editor" />
     <div id="intake" className="pb-3">
       <h3> {str("Intake")} </h3>
       <IOBalance__UnitSection

@@ -492,6 +492,9 @@ export const getConsultation = (id: number) => {
 export const updateConsultation = (id: number, params: object) => {
   return fireRequest("updateConsultation", [], params, { id: id });
 };
+export const patchConsultation = (id: number, params: object) => {
+  return fireRequest("partialUpdateConsultation", [], params, { id: id });
+};
 //Inventory
 export const getItems = (params: object) => {
   return fireRequest("getItems", [], params);

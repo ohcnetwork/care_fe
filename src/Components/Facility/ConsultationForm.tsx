@@ -898,6 +898,7 @@ export const ConsultationForm = (props: any) => {
                 <PrescriptionBuilder
                   prescriptions={dischargeAdvice}
                   setPrescriptions={setDischargeAdvice}
+                  consultationID={id}
                 />
                 <br />
                 <ErrorHelperText error={state.errors.discharge_advice} />
@@ -907,6 +908,7 @@ export const ConsultationForm = (props: any) => {
                 <PRNPrescriptionBuilder
                   prescriptions={PRNAdvice}
                   setPrescriptions={setPRNAdvice}
+                  consultationID={id}
                 />
                 <br />
                 <ErrorHelperText error={state.errors.prn_prescription} />

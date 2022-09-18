@@ -1,6 +1,7 @@
-export type roundsType = NormalRound | ICURound | VentilatorRound
+@genType type roundsType = NormalRound | ICURound | VentilatorRound
 
-export type t = {
+@genType
+type t = {
   createdAt: Js.Date.t,
   admittedTo: string,
   createdByTelemedicine: bool,
