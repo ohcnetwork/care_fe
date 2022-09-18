@@ -1,4 +1,4 @@
-import { ConsultationModel } from "../Facility/models";
+import { ConsultationModel, PatientCategory } from "../Facility/models";
 
 export interface FlowModel {
   id?: number;
@@ -258,7 +258,7 @@ export interface DailyRoundsModel {
   id?: any;
   other_symptoms?: string;
   admitted_to?: string;
-  patient_category?: string;
+  patient_category?: PatientCategory;
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
