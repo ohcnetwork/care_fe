@@ -21,7 +21,7 @@ import React, {
 import { useDispatch } from "react-redux";
 import {
   CONSULTATION_SUGGESTION,
-  PATIENT_CATEGORY,
+  PATIENT_CATEGORIES,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
@@ -124,7 +124,7 @@ const initForm: FormDetails = {
   facility: "",
   admitted: "false",
   admitted_to: "",
-  category: "",
+  category: "Comfort Care",
   admission_date: new Date().toISOString(),
   discharge_date: null,
   referred_to: "",
@@ -269,7 +269,7 @@ export const ConsultationForm = (props: any) => {
               !!res.data.symptoms.filter((i: number) => i === 9).length,
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
-            category: res.data.category ? res.data.category : "",
+            category: res.data.category || "Comfort Care",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
@@ -311,6 +311,16 @@ export const ConsultationForm = (props: any) => {
         case "symptoms":
           if (!state.form[field] || !state.form[field].length) {
             errors[field] = "Please select the symptoms";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "category":
+          if (
+            !state.form[field] ||
+            !PATIENT_CATEGORIES.includes(state.form[field])
+          ) {
+            errors[field] = "Please select a category";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -434,7 +444,7 @@ export const ConsultationForm = (props: any) => {
 
         case "investigation": {
           let invalid = false;
-          for (let f of InvestigationAdvice) {
+          for (const f of InvestigationAdvice) {
             if (
               f.type?.length === 0 ||
               (f.repetitive
@@ -759,17 +769,24 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.prescribed_medication}
                   />
                 </div>
-                {/* <div className="flex-1" id="category-div">
-                  <InputLabel id="category-label">Category*</InputLabel>
+                <div className="flex-1" id="category-div">
+                  <InputLabel id="category-label" required>
+                    Category
+                  </InputLabel>
                   <SelectField
                     name="category"
                     variant="standard"
                     value={state.form.category}
-                    options={categoryChoices}
+                    options={PATIENT_CATEGORIES.map((c) => {
+                      return {
+                        id: c,
+                        text: c,
+                      };
+                    })}
                     onChange={handleChange}
                     errors={state.errors.category}
                   />
-                </div> */}
+                </div>
 
                 <div id="suggestion-div">
                   <InputLabel

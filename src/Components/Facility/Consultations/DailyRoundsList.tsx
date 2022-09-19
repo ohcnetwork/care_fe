@@ -8,12 +8,9 @@ import { getDailyReport } from "../../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
-import { PATIENT_CATEGORY } from "../../../Common/constants";
 import { smallCard } from "../../Common/components/SkeletonLoading.gen";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
-
-const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const DailyRoundsList = (props: any) => {
   const { facilityId, patientId, consultationId, consultationData } = props;
@@ -126,9 +123,7 @@ export const DailyRoundsList = (props: any) => {
                       <Typography>
                         <span className="text-gray-700">Category: </span>
                         <span className="badge badge-pill badge-warning">
-                          {patientCategoryChoices.find(
-                            (i) => i.id === itemData.patient_category
-                          )?.text || "-"}
+                          {itemData.patient_category || "-"}
                         </span>
                       </Typography>
                     </Grid>
