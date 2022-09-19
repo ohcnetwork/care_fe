@@ -189,15 +189,6 @@ const suggestionTypes = [
 
 const symptomChoices = [...SYMPTOM_CHOICES];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const categoryChoices = [
-  {
-    id: 0,
-    text: "Select suspect category",
-  },
-  ...PATIENT_CATEGORY,
-];
-
 const scrollTo = (id: any) => {
   const element = document.querySelector(`#${id}-div`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
