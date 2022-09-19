@@ -29,7 +29,7 @@ export default function ResponsiveMedicineTable(props: {
   }, []);
   return (
     <>
-      {windowSize.innerWidth > 768 ? (
+      {windowSize.innerWidth > 1024 ? (
         <table className="min-w-full">
           <thead>
             <tr>
@@ -48,7 +48,7 @@ export default function ResponsiveMedicineTable(props: {
                 {props.objectKeys.map((key, idx) => {
                   if (idx === 0)
                     return (
-                      <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
+                      <td className="px-6 py-4 w-[450px] text-sm leading-5 font-medium text-gray-900">
                         {med[key]}
                       </td>
                     );

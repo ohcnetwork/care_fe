@@ -942,7 +942,7 @@ export const ConsultationDetails = (props: any) => {
             )}
             {consultationData.discharge_advice && (
               <div className="mt-4">
-                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900">
+                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900 mb-2">
                   <span className="mr-3">Prescription</span>
                   <div className="text-xs text-gray-600 mt-2 ">
                     <i className="fas fa-history text-sm pr-2"></i>
@@ -984,7 +984,7 @@ export const ConsultationDetails = (props: any) => {
             )}
             {consultationData.prn_prescription && (
               <div className="mt-4">
-                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900">
+                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900 mb-2">
                   <span className="mr-3">PRN Prescription</span>
                   <div className="text-xs text-gray-600 mt-2">
                     <i className="fas fa-history text-sm pr-2"></i>
