@@ -466,22 +466,29 @@ export const FileUpload = (props: FileUploadProps) => {
         setUploadPercent(percentCompleted);
       },
     };
-    axios
-      .put(url, newFile, config)
-      .then(() => {
-        setUploadStarted(false);
-        // setUploadSuccess(true);
-        setFile(null);
-        setUploadFileName("");
-        setReload(!reload);
-        Notification.Success({
-          msg: "File Uploaded Successfully",
+    return new Promise<void>((resolve, reject) => {
+      axios
+        .put(url, newFile, config)
+        .then(() => {
+          setUploadStarted(false);
+          // setUploadSuccess(true);
+          setFile(null);
+          setUploadFileName("");
+          setReload(!reload);
+          Notification.Success({
+            msg: "File Uploaded Successfully",
+          });
+          setUploadFileNameError("");
+          resolve();
+        })
+        .catch((e) => {
+          Notification.Error({
+            msg: "Error Uploading File: " + e.message,
+          });
+          setUploadStarted(false);
+          reject();
         });
-        setUploadFileNameError("");
-      })
-      .catch(() => {
-        setUploadStarted(false);
-      });
+    });
   };
 
   const validateFileUpload = () => {
@@ -519,11 +526,9 @@ export const FileUpload = (props: FileUploadProps) => {
       .catch(() => {
         setUploadStarted(false);
       })
-      .then(fetchData(status).then(() => {}));
-
-    // setting the value of file name to empty
-    setUploadFileNameError("");
-    setUploadFileName("");
+      .then(() => {
+        fetchData(status);
+      });
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
