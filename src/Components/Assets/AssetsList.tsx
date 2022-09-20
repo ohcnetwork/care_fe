@@ -328,9 +328,27 @@ const AssetsList = () => {
                   className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
                   onClick={() => navigate(`/assets/${asset.id}`)}
                 >
-                  
                   <div className="md:flex">
                     <p className="text-xl font-normal capitalize break-words">
+                      <span className="mr-2">
+                        {" "}
+                        {asset.asset_class === "HL7MONITOR" ? (
+                          <i className="fa-solid fa-tv text-primary-500"></i>
+                        ) : (
+                          ""
+                        )}
+                        {asset.asset_class === "ONVIF" ? (
+                          <i className="fa-solid fa-camera text-primary-500"></i>
+                        ) : (
+                          ""
+                        )}
+                        {asset.asset_class !== "HL7MONITOR" &&
+                        asset.asset_class !== "ONVIF" ? (
+                          <i className="fa-solid fa-cart-plus text-primary-500"></i>
+                        ) : (
+                          ""
+                        )}
+                      </span>
                       {asset.name}
                     </p>
                   </div>
@@ -340,7 +358,7 @@ const AssetsList = () => {
                       Updated at: {moment(asset.modified_date).format("lll")}
                     </span>
                   </p>
-                  
+
                   <div className="flex flex-wrap gap-2 mt-2">
                     {asset.is_working ? (
                       <Badge color="green" startIcon="cog" text="Working" />

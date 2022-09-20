@@ -10,7 +10,6 @@ import loadable from "@loadable/component";
 import { ConsultationModel } from "./models";
 import { PatientModel } from "../Patient/models";
 import {
-  PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   CONSULTATION_TABS,
   OptionsType,
@@ -57,7 +56,6 @@ interface PreDischargeFormInterface {
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
-const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -216,9 +214,6 @@ export const ConsultationDetails = (props: any) => {
           const data: ConsultationModel = {
             ...res.data,
             symptoms_text: "",
-            category:
-              patientCategoryChoices.find((i) => i.id === res.data.category)
-                ?.text || res.data.category,
           };
           if (res.data.symptoms && res.data.symptoms.length) {
             const symptoms = res.data.symptoms
@@ -1221,9 +1216,7 @@ export const ConsultationDetails = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
             />
-            <ViewInvestigationSuggestions
-              consultationId={consultationId}
-            />
+            <ViewInvestigationSuggestions consultationId={consultationId} />
           </div>
         )}
       </div>
