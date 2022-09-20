@@ -25,7 +25,7 @@ import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
-import SelectMenuV2 from "../Common/components/SelectMenuV2";
+import SelectMenu from "../Common/components/SelectMenu";
 import moment from "moment";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
@@ -370,7 +370,7 @@ const AssetCreate = (props: AssetProps) => {
                   <div className="col-span-6 sm:col-span-2">
                     <label htmlFor="asset-type">Asset Type * </label>
                     <div className="mt-2">
-                      <SelectMenuV2
+                      <SelectMenu
                         options={[
                           {
                             title: "Select",
@@ -403,7 +403,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div className="">
                       <label htmlFor="asset-location">Location * </label>
                       <div className="mt-2">
-                        <SelectMenuV2
+                        <SelectMenu
                           options={[
                             {
                               title: "Select",
@@ -428,7 +428,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div>
                       <label htmlFor="asset-class">Asset Class</label>
                       <div className="mt-2">
-                        <SelectMenuV2
+                        <SelectMenu
                           options={[
                             { title: "Not Applicable", value: undefined },
                             { title: "ONVIF Camera", value: "ONVIF" },
