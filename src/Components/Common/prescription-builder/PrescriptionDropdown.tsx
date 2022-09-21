@@ -74,8 +74,13 @@ export function PrescriptionDropdown(props: {
                   }
                   placement="right-start"
                   arrow
+                  onClick={(event) => event.stopPropagation()}
+                  enterTouchDelay={0}
                 >
-                  <button className="rounded px-4">
+                  <button
+                    onClick={(event) => event.preventDefault()}
+                    className="rounded px-4"
+                  >
                     <i className="fa-solid fa-circle-info"></i>
                   </button>
                 </Tooltip>
