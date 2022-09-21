@@ -34,12 +34,7 @@ jobs:
       - run: docker exec care python manage.py seed_data
 
       - name: Create superuser "devdistrictadmin"
-        env:
-          DJANGO_SUPERUSER_PASSWORD: Coronasafe@123
-          DJANGO_SUPERUSER_USERTYPE: 10
-          DJANGO_SUPERUSER_GENDER: 3
-          DJANGO_SUPERUSER_PHONENUMBER: 1234567890
-        run: docker exec care python manage.py createsuperuser --no-input --username="devdistrictadmin" --email="devdistrictadmin@coronasafe.in"
+        run: docker exec care echo "from django.contrib.auth import get_user_model; User = get_user_model(); u = User(username='devdistrictadmin'); u.set_password('Coronasafe@123'); u.is_superuser=True; u.is_staff=True; u.gender=3; u.user_type=10; u.phone_number='1234567890'; u.age=21; u.save();" | python manage.py shell
 
       - name: Check if care is up
         run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
