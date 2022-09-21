@@ -333,6 +333,25 @@ const AssetsList = () => {
                     >
                       <div className="md:flex">
                         <p className="text-xl font-normal capitalize break-words">
+                          <span className="mr-2">
+                            {" "}
+                            {asset.asset_class === "HL7MONITOR" ? (
+                              <i className="fa-solid fa-tv text-primary-500"></i>
+                            ) : (
+                              ""
+                            )}
+                            {asset.asset_class === "ONVIF" ? (
+                              <i className="fa-solid fa-camera text-primary-500"></i>
+                            ) : (
+                              ""
+                            )}
+                            {asset.asset_class !== "HL7MONITOR" &&
+                            asset.asset_class !== "ONVIF" ? (
+                              <i className="fa-solid fa-cart-plus text-primary-500"></i>
+                            ) : (
+                              ""
+                            )}
+                          </span>
                           {asset.name}
                         </p>
                       </div>
