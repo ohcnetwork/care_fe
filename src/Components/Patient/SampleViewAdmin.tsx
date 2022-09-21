@@ -353,11 +353,6 @@ export default function SampleViewAdmin() {
           No Sample Tests Found
         </div>
       </div>
-      // <Grid item xs={12} md={12} style={{ display: "flex" }}>
-      //   <Grid container justify="center" alignItems="center">
-      //     <h5> No Sample Tests Found</h5>
-      //   </Grid>
-      // </Grid>
     );
   }
 
