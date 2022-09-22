@@ -332,10 +332,11 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
 
+  const sectionId = (title: string) => title.toLowerCase().replace(" ", "-");
   const sectionTitle = (title: string) => {
     return (
       <div
-        id={title.toLowerCase().replace(" ", "-")}
+        id={sectionId(title)}
         className="col-span-6 flex flex-row gap-6 items-center mb-6 -ml-2"
       >
         <label className="font-bold text-lg">{title}</label>
@@ -350,7 +351,7 @@ const AssetCreate = (props: AssetProps) => {
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
-    <div className="pb-2 h-screen">
+    <div className="pb-2 h-screen overflow-hidden">
       <PageTitle
         title={`${assetId ? "Update" : "Create"} Asset`}
         className="pl-6"
@@ -360,8 +361,8 @@ const AssetCreate = (props: AssetProps) => {
           [assetId || "????"]: { name },
         }}
       />
-      <div className="mt-5 md:mt-8 flex">
-        <div className="hidden xl:flex flex-col bg-gray-200 rounded-r-lg pt-10 -ml-2 w-56">
+      <div className="mt-5 md:mt-8 flex h-full sticky top-0">
+        <div className="hidden xl:flex flex-col bg-gray-200 rounded-r-lg pt-10 -ml-2 w-60">
           {[
             { title: "General Details", icon: "fa-solid fa-circle-info" },
             { title: "Warranty Details", icon: "fa-solid fa-barcode" },
@@ -370,9 +371,7 @@ const AssetCreate = (props: AssetProps) => {
             return (
               <button
                 className="flex items-center justify-start gap-3 px-5 py-3 w-full font-medium hover:bg-white hover:tracking-wider transition-all duration-100 ease-in"
-                onClick={() =>
-                  scrollTo(section.title.toLowerCase().replace(" ", "-"))
-                }
+                onClick={() => scrollTo(sectionId(section.title))}
               >
                 <i className={`${section.icon} text-sm`} />
                 <span>{section.title}</span>
@@ -380,387 +379,397 @@ const AssetCreate = (props: AssetProps) => {
             );
           })}
         </div>
-        <div className="max-w-3xl 2xl:max-w-4xl mx-auto">
-          <form
-            onSubmit={handleSubmit}
-            className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
-          >
-            <div className="grid grid-cols-1 gap-x-12 items-start">
-              <div className="grid grid-cols-6 gap-x-6">
-                {/* General Details Section */}
-                {sectionTitle("General Details")}
+        <div className="w-full h-full flex overflow-auto">
+          <div className="w-full max-w-3xl 2xl:max-w-4xl mx-auto">
+            <form
+              onSubmit={handleSubmit}
+              className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all mb-60"
+            >
+              <div className="grid grid-cols-1 gap-x-12 items-start">
+                <div className="grid grid-cols-6 gap-x-6">
+                  {/* General Details Section */}
+                  {sectionTitle("General Details")}
 
-                {/* Asset Name */}
-                <div className="col-span-6">
-                  <TextInputFieldV2
-                    id="asset-name"
-                    label="Asset Name"
-                    value={name}
-                    onValueChange={setName}
-                    error={state.errors.name}
+                  {/* Asset Name */}
+                  <div className="col-span-6">
+                    <TextInputFieldV2
+                      id="asset-name"
+                      label="Asset Name"
+                      value={name}
+                      onValueChange={setName}
+                      error={state.errors.name}
+                      required
+                    />
+                  </div>
+
+                  <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
+                    {/* Location */}
+                    <div>
+                      <label htmlFor="asset-location">Location * </label>
+                      <div className="mt-2">
+                        <SelectMenu
+                          options={[
+                            {
+                              title: "Select",
+                              description:
+                                "Select an Asset Location from the following",
+                              value: "",
+                            },
+                            ...locations.map((location: any) => ({
+                              title: location.name,
+                              description: location.facility.name,
+                              value: location.id,
+                            })),
+                          ]}
+                          selected={location}
+                          onSelect={setLocation}
+                        />
+                      </div>
+                      <ErrorHelperText error={state.errors.location} />
+                    </div>
+
+                    {/* Asset Type */}
+                    <div>
+                      <label htmlFor="asset-type">Asset Type * </label>
+                      <div className="mt-2">
+                        <SelectMenu
+                          options={[
+                            {
+                              title: "Select",
+                              description:
+                                "Select an Asset Type from the following",
+                              value: undefined,
+                            },
+                            {
+                              title: "Internal",
+                              description:
+                                "Asset is inside the facility premises.",
+                              value: "INTERNAL",
+                            },
+                            {
+                              title: "External",
+                              description:
+                                "Asset is outside the facility premises.",
+                              value: "EXTERNAL",
+                            },
+                          ]}
+                          selected={asset_type}
+                          onSelect={setAssetType}
+                        />
+                      </div>
+                      <ErrorHelperText error={state.errors.asset_type} />
+                    </div>
+
+                    {/* Asset Class */}
+                    <div>
+                      <label htmlFor="asset-class">Asset Class</label>
+                      <div className="mt-2">
+                        <SelectMenu
+                          options={[
+                            { title: "Not Applicable", value: undefined },
+                            { title: "ONVIF Camera", value: "ONVIF" },
+                            {
+                              title: "HL7 Vitals Monitor",
+                              value: "HL7MONITOR",
+                            },
+                          ]}
+                          selected={asset_class}
+                          onSelect={setAssetClass}
+                        />
+                      </div>
+                      <ErrorHelperText error={state.errors.asset_class} />
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="col-span-6">
+                    <label htmlFor="asset-description">
+                      Describe the asset
+                    </label>
+                    <textarea
+                      id="asset-description"
+                      className={
+                        "mt-2 block w-full input" +
+                        ((state.errors.description && " border-red-500") || "")
+                      }
+                      name="asset-description"
+                      placeholder="Eg. Details about the equipment"
+                      value={description}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                        setDescription(e.target.value)
+                      }
+                    />
+                    <ErrorHelperText error={state.errors.description} />
+                  </div>
+
+                  {/* Divider */}
+                  <div className="col-span-6">
+                    <hr
+                      className={
+                        "transition-all " +
+                        (is_working === "true"
+                          ? "opacity-0 my-0"
+                          : "opacity-100 my-4")
+                      }
+                    />
+                  </div>
+
+                  {/* Working Status */}
+                  <SwitchV2
+                    className="col-span-6"
                     required
+                    name="is_working"
+                    label="Working Status"
+                    options={["true", "false"]}
+                    optionLabel={(option) => {
+                      return (
+                        {
+                          true: "Working",
+                          false: "Not Working",
+                        }[option] || "undefined"
+                      );
+                    }}
+                    optionClassName={(option) =>
+                      option === "false" &&
+                      "bg-error text-white border-error focus:ring-error"
+                    }
+                    value={is_working}
+                    onChange={setIsWorking}
+                    error={state.errors.is_working}
                   />
-                </div>
 
-                <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
-                  {/* Location */}
-                  <div>
-                    <label htmlFor="asset-location">Location * </label>
-                    <div className="mt-2">
-                      <SelectMenu
-                        options={[
-                          {
-                            title: "Select",
-                            description:
-                              "Select an Asset Location from the following",
-                            value: "",
-                          },
-                          ...locations.map((location: any) => ({
-                            title: location.name,
-                            description: location.facility.name,
-                            value: location.id,
-                          })),
-                        ]}
-                        selected={location}
-                        onSelect={setLocation}
-                      />
-                    </div>
-                    <ErrorHelperText error={state.errors.location} />
+                  {/* Not Working Reason */}
+                  <div
+                    className={
+                      "col-span-6" +
+                      ((is_working !== "false" && " hidden") || "")
+                    }
+                  >
+                    <label htmlFor="not_working_reason">
+                      Why the asset is not working?
+                    </label>
+                    <textarea
+                      id="not_working_reason"
+                      className={
+                        "mt-2 block w-full input" +
+                        ((state.errors.not_working_reason &&
+                          " border-red-500") ||
+                          "")
+                      }
+                      name="not_working_reason"
+                      placeholder="Describe why the asset is not working"
+                      value={not_working_reason}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                        setNotWorkingReason(e.target.value)
+                      }
+                    />
+                    <ErrorHelperText error={state.errors.not_working_reason} />
                   </div>
 
-                  {/* Asset Type */}
-                  <div>
-                    <label htmlFor="asset-type">Asset Type * </label>
-                    <div className="mt-2">
-                      <SelectMenu
-                        options={[
-                          {
-                            title: "Select",
-                            description:
-                              "Select an Asset Type from the following",
-                            value: undefined,
-                          },
-                          {
-                            title: "Internal",
-                            description:
-                              "Asset is inside the facility premises.",
-                            value: "INTERNAL",
-                          },
-                          {
-                            title: "External",
-                            description:
-                              "Asset is outside the facility premises.",
-                            value: "EXTERNAL",
-                          },
-                        ]}
-                        selected={asset_type}
-                        onSelect={setAssetType}
-                      />
-                    </div>
-                    <ErrorHelperText error={state.errors.asset_type} />
+                  {/* Divider */}
+                  <div className="col-span-6">
+                    <hr
+                      className={
+                        "transition-all " +
+                        (is_working === "true"
+                          ? "opacity-0 my-0"
+                          : "opacity-100 mb-7")
+                      }
+                    />
                   </div>
 
-                  {/* Asset Class */}
-                  <div>
-                    <label htmlFor="asset-class">Asset Class</label>
-                    <div className="mt-2">
-                      <SelectMenu
-                        options={[
-                          { title: "Not Applicable", value: undefined },
-                          { title: "ONVIF Camera", value: "ONVIF" },
-                          {
-                            title: "HL7 Vitals Monitor",
-                            value: "HL7MONITOR",
-                          },
-                        ]}
-                        selected={asset_class}
-                        onSelect={setAssetClass}
-                      />
-                    </div>
-                    <ErrorHelperText error={state.errors.asset_class} />
+                  {/* Asset QR ID */}
+                  <div className="col-span-6">
+                    <label htmlFor="asset-qr-id">Asset QR ID</label>
+                    <ActionTextInputField
+                      id="qr_code_id"
+                      fullWidth
+                      name="qr_code_id"
+                      placeholder=""
+                      variant="outlined"
+                      margin="dense"
+                      value={qrCodeId}
+                      onChange={(e) => setQrCodeId(e.target.value)}
+                      actionIcon={<CropFreeIcon className="cursor-pointer" />}
+                      action={() => setIsScannerActive(true)}
+                      errors={state.errors.qr_code_id}
+                    />
+                    <ErrorHelperText error={state.errors.qr_id} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-6 gap-x-6">
+                  {sectionTitle("Warranty Details")}
+
+                  {/* Manufacturer */}
+                  <div className="col-span-6 sm:col-span-3">
+                    <TextInputFieldV2
+                      id="manufacturer"
+                      label="Manufacturer"
+                      value={manufacturer}
+                      placeholder="Eg. XYZ"
+                      onValueChange={setManufacturer}
+                      error={state.errors.manufacturer}
+                    />
+                  </div>
+
+                  {/* Warranty / AMC Expiry */}
+                  <div className="col-span-6 sm:col-span-3">
+                    <label htmlFor="warranty-expiry">
+                      Warranty / AMC Expiry
+                    </label>
+                    <DateInputField
+                      className="w-56"
+                      value={warranty_amc_end_of_validity}
+                      onChange={(date) =>
+                        setWarrantyAmcEndOfValidity(
+                          moment(date).format("YYYY-MM-DD")
+                        )
+                      }
+                      errors={state.errors.warranty_amc_end_of_validity}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                    <ErrorHelperText
+                      error={state.errors.warranty_amc_end_of_validity}
+                    />
+                  </div>
+
+                  {/* Customer Support Name */}
+                  <div className="col-span-6 sm:col-span-3">
+                    <TextInputFieldV2
+                      id="support-name"
+                      label="Customer Support Name"
+                      placeholder="Eg. ABC"
+                      value={support_name}
+                      onValueChange={setSupportName}
+                      error={state.errors.support_name}
+                    />
+                  </div>
+
+                  {/* Customer Support Number */}
+                  <div className="col-span-6 sm:col-span-3">
+                    <label htmlFor="support-name">
+                      Customer Support Number *{" "}
+                    </label>
+                    <PhoneNumberField
+                      value={support_phone}
+                      onChange={setSupportPhone}
+                      errors={state.errors.support_phone}
+                    />
+                  </div>
+
+                  {/* Customer Support Email */}
+                  <div className="col-span-6 sm:col-span-3">
+                    <TextInputFieldV2
+                      id="support-email"
+                      label="Customer Support Email"
+                      placeholder="Eg. mail@example.com"
+                      value={support_email}
+                      onValueChange={setSupportEmail}
+                      error={state.errors.support_email}
+                    />
+                  </div>
+
+                  <div className="sm:col-span-3" />
+
+                  {/* Vendor Name */}
+                  <div className="col-span-6 sm:col-span-3">
+                    <TextInputFieldV2
+                      label="Vendor Name"
+                      id="vendor-name"
+                      placeholder="Eg. XYZ"
+                      onValueChange={setVendorName}
+                      error={state.errors.vendor_name}
+                    />
+                  </div>
+
+                  {/* Serial Number */}
+                  <div className="col-span-6 sm:col-span-3">
+                    <TextInputFieldV2
+                      label="Serial Number"
+                      id="serial-number"
+                      value={serial_number}
+                      onValueChange={setSerialNumber}
+                      error={state.errors.serial_number}
+                    />
+                  </div>
+
+                  <div className="mt-6" />
+                  {sectionTitle("Service Details")}
+
+                  {/* Last serviced on */}
+                  <div className="col-span-6 sm:col-span-3">
+                    <label htmlFor="last-serviced-on">Last Serviced On</label>
+                    <DateInputField
+                      className="w-56"
+                      value={last_serviced_on}
+                      onChange={(date) =>
+                        setLastServicedOn(moment(date).format("YYYY-MM-DD"))
+                      }
+                      disableFuture={true}
+                      errors={state.errors.last_serviced_on}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                    <ErrorHelperText error={state.errors.last_serviced_on} />
+                  </div>
+
+                  {/* Notes */}
+                  <div className="col-span-6 mt-6">
+                    <label htmlFor="notes">Notes</label>
+                    <textarea
+                      id="notes"
+                      className={
+                        "mt-2 block w-full input" +
+                        ((state.errors.notes && " border-red-500") || "")
+                      }
+                      name="notes"
+                      placeholder="Eg. Details on functionality, service, etc."
+                      value={notes}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                        setNotes(e.target.value)
+                      }
+                    />
+                    <ErrorHelperText error={state.errors.notes} />
                   </div>
                 </div>
 
-                {/* Description */}
-                <div className="col-span-6">
-                  <label htmlFor="asset-description">Describe the asset</label>
-                  <textarea
-                    id="asset-description"
-                    className={
-                      "mt-2 block w-full input" +
-                      ((state.errors.description && " border-red-500") || "")
-                    }
-                    name="asset-description"
-                    placeholder="Eg. Details about the equipment"
-                    value={description}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setDescription(e.target.value)
-                    }
-                  />
-                  <ErrorHelperText error={state.errors.description} />
-                </div>
+                <div />
 
-                {/* Divider */}
-                <div className="col-span-6">
-                  <hr
-                    className={
-                      "transition-all " +
-                      (is_working === "true"
-                        ? "opacity-0 my-0"
-                        : "opacity-100 my-4")
-                    }
-                  />
-                </div>
-
-                {/* Working Status */}
-                <SwitchV2
-                  className="col-span-6"
-                  required
-                  name="is_working"
-                  label="Working Status"
-                  options={["true", "false"]}
-                  optionLabel={(option) => {
-                    return (
-                      {
-                        true: "Working",
-                        false: "Not Working",
-                      }[option] || "undefined"
-                    );
-                  }}
-                  optionClassName={(option) =>
-                    option === "false" &&
-                    "bg-error text-white border-error focus:ring-error"
-                  }
-                  value={is_working}
-                  onChange={setIsWorking}
-                  error={state.errors.is_working}
-                />
-
-                {/* Not Working Reason */}
-                <div
-                  className={
-                    "col-span-6" + ((is_working !== "false" && " hidden") || "")
-                  }
-                >
-                  <label htmlFor="not_working_reason">
-                    Why the asset is not working?
-                  </label>
-                  <textarea
-                    id="not_working_reason"
-                    className={
-                      "mt-2 block w-full input" +
-                      ((state.errors.not_working_reason && " border-red-500") ||
-                        "")
-                    }
-                    name="not_working_reason"
-                    placeholder="Describe why the asset is not working"
-                    value={not_working_reason}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setNotWorkingReason(e.target.value)
-                    }
-                  />
-                  <ErrorHelperText error={state.errors.not_working_reason} />
-                </div>
-
-                {/* Divider */}
-                <div className="col-span-6">
-                  <hr
-                    className={
-                      "transition-all " +
-                      (is_working === "true"
-                        ? "opacity-0 my-0"
-                        : "opacity-100 mb-7")
-                    }
-                  />
-                </div>
-
-                {/* Asset QR ID */}
-                <div className="col-span-6">
-                  <label htmlFor="asset-qr-id">Asset QR ID</label>
-                  <ActionTextInputField
-                    id="qr_code_id"
-                    fullWidth
-                    name="qr_code_id"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    value={qrCodeId}
-                    onChange={(e) => setQrCodeId(e.target.value)}
-                    actionIcon={<CropFreeIcon className="cursor-pointer" />}
-                    action={() => setIsScannerActive(true)}
-                    errors={state.errors.qr_code_id}
-                  />
-                  <ErrorHelperText error={state.errors.qr_id} />
-                </div>
-              </div>
-              <div className="grid grid-cols-6 gap-x-6">
-                {sectionTitle("Warranty Details")}
-
-                {/* Manufacturer */}
-                <div className="col-span-6 sm:col-span-3">
-                  <TextInputFieldV2
-                    id="manufacturer"
-                    label="Manufacturer"
-                    value={manufacturer}
-                    placeholder="Eg. XYZ"
-                    onValueChange={setManufacturer}
-                    error={state.errors.manufacturer}
-                  />
-                </div>
-
-                {/* Warranty / AMC Expiry */}
-                <div className="col-span-6 sm:col-span-3">
-                  <label htmlFor="warranty-expiry">Warranty / AMC Expiry</label>
-                  <DateInputField
-                    className="w-56"
-                    value={warranty_amc_end_of_validity}
-                    onChange={(date) =>
-                      setWarrantyAmcEndOfValidity(
-                        moment(date).format("YYYY-MM-DD")
+                <div className="mt-12 flex justify-end gap-x-4 gap-y-2 flex-wrap">
+                  <button
+                    className="primary-button"
+                    id="asset-create"
+                    type="submit"
+                    onClick={handleSubmit}
+                  >
+                    <div className="flex items-center justify-start gap-2">
+                      <CheckCircleOutlineIcon className="text-base">
+                        save
+                      </CheckCircleOutlineIcon>
+                      {assetId ? "Update" : "Create"}
+                    </div>
+                  </button>
+                  <button
+                    id="asset-cancel"
+                    className="secondary-button"
+                    onClick={() =>
+                      navigate(
+                        assetId
+                          ? `/assets/${assetId}`
+                          : `/facility/${facilityId}`
                       )
                     }
-                    errors={state.errors.warranty_amc_end_of_validity}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                  <ErrorHelperText
-                    error={state.errors.warranty_amc_end_of_validity}
-                  />
-                </div>
-
-                {/* Customer Support Name */}
-                <div className="col-span-6 sm:col-span-3">
-                  <TextInputFieldV2
-                    id="support-name"
-                    label="Customer Support Name"
-                    placeholder="Eg. ABC"
-                    value={support_name}
-                    onValueChange={setSupportName}
-                    error={state.errors.support_name}
-                  />
-                </div>
-
-                {/* Customer Support Number */}
-                <div className="col-span-6 sm:col-span-3">
-                  <label htmlFor="support-name">
-                    Customer Support Number *{" "}
-                  </label>
-                  <PhoneNumberField
-                    value={support_phone}
-                    onChange={setSupportPhone}
-                    errors={state.errors.support_phone}
-                  />
-                </div>
-
-                {/* Customer Support Email */}
-                <div className="col-span-6 sm:col-span-3">
-                  <TextInputFieldV2
-                    id="support-email"
-                    label="Customer Support Email"
-                    placeholder="Eg. mail@example.com"
-                    value={support_email}
-                    onValueChange={setSupportEmail}
-                    error={state.errors.support_email}
-                  />
-                </div>
-
-                <div className="sm:col-span-3" />
-
-                {/* Vendor Name */}
-                <div className="col-span-6 sm:col-span-3">
-                  <TextInputFieldV2
-                    label="Vendor Name"
-                    id="vendor-name"
-                    placeholder="Eg. XYZ"
-                    onValueChange={setVendorName}
-                    error={state.errors.vendor_name}
-                  />
-                </div>
-
-                {/* Serial Number */}
-                <div className="col-span-6 sm:col-span-3">
-                  <TextInputFieldV2
-                    label="Serial Number"
-                    id="serial-number"
-                    value={serial_number}
-                    onValueChange={setSerialNumber}
-                    error={state.errors.serial_number}
-                  />
-                </div>
-
-                <div className="mt-6" />
-                {sectionTitle("Service Details")}
-
-                {/* Last serviced on */}
-                <div className="col-span-6 sm:col-span-3">
-                  <label htmlFor="last-serviced-on">Last Serviced On</label>
-                  <DateInputField
-                    className="w-56"
-                    value={last_serviced_on}
-                    onChange={(date) =>
-                      setLastServicedOn(moment(date).format("YYYY-MM-DD"))
-                    }
-                    disableFuture={true}
-                    errors={state.errors.last_serviced_on}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                  <ErrorHelperText error={state.errors.last_serviced_on} />
-                </div>
-
-                {/* Notes */}
-                <div className="col-span-6 mt-6">
-                  <label htmlFor="notes">Notes</label>
-                  <textarea
-                    id="notes"
-                    className={
-                      "mt-2 block w-full input" +
-                      ((state.errors.notes && " border-red-500") || "")
-                    }
-                    name="notes"
-                    placeholder="Eg. Details on functionality, service, etc."
-                    value={notes}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setNotes(e.target.value)
-                    }
-                  />
-                  <ErrorHelperText error={state.errors.notes} />
+                  >
+                    <div className="flex items-center justify-start gap-2">
+                      <CancelOutlineIcon className="text-base">
+                        cancel
+                      </CancelOutlineIcon>
+                      Cancel
+                    </div>
+                  </button>
                 </div>
               </div>
-
-              <div />
-
-              <div className="mt-12 flex justify-end gap-x-4 gap-y-2 flex-wrap">
-                <button
-                  className="primary-button"
-                  id="asset-create"
-                  type="submit"
-                  onClick={handleSubmit}
-                >
-                  <div className="flex items-center justify-start gap-2">
-                    <CheckCircleOutlineIcon className="text-base">
-                      save
-                    </CheckCircleOutlineIcon>
-                    {assetId ? "Update" : "Create"}
-                  </div>
-                </button>
-                <button
-                  id="asset-cancel"
-                  className="secondary-button"
-                  onClick={() =>
-                    navigate(
-                      assetId ? `/assets/${assetId}` : `/facility/${facilityId}`
-                    )
-                  }
-                >
-                  <div className="flex items-center justify-start gap-2">
-                    <CancelOutlineIcon className="text-base">
-                      cancel
-                    </CancelOutlineIcon>
-                    Cancel
-                  </div>
-                </button>
-              </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>
