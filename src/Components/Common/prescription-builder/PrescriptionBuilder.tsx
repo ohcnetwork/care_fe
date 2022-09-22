@@ -2,7 +2,7 @@ import { PrescriptionDropdown } from "./PrescriptionDropdown";
 import { PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
 
 export const medicines = require("./assets/medicines");
-const frequency = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
+const frequency = ["Stat", "od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
 
 export const routes = ["Oral", "IV", "IM", "S/C"]
 export const units = ["mg", "ml", "drops", "ampule", "tsp"]
