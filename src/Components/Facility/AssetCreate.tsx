@@ -385,15 +385,6 @@ const AssetCreate = (props: AssetProps) => {
     );
   };
 
-  // const handleFormScroll = () =>
-  //   setCurrentSection(
-  //     (serviceDetailsVisible && "Service Details") ||
-  //       (warrantyDetailsVisible && "Warranty Details") ||
-  //       "General Details"
-  //   );
-
-  console.log(currentSection);
-
   return (
     <div className="pb-2 h-screen overflow-hidden">
       <PageTitle
@@ -425,10 +416,7 @@ const AssetCreate = (props: AssetProps) => {
             );
           })}
         </div>
-        <div
-          className="w-full h-full flex overflow-auto"
-          // onScroll={handleFormScroll}
-        >
+        <div className="w-full h-full flex overflow-auto">
           <div className="w-full max-w-3xl 2xl:max-w-4xl mx-auto">
             <form
               onSubmit={handleSubmit}
