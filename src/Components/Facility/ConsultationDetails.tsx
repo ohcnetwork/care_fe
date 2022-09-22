@@ -7,10 +7,9 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications";
 import { getConsultation, getPatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import { ConsultationModel } from "./models";
+import { ConsultationModel, ICD11DiagnosisModel } from "./models";
 import { PatientModel } from "../Patient/models";
 import {
-  PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   CONSULTATION_TABS,
   OptionsType,
@@ -57,7 +56,6 @@ interface PreDischargeFormInterface {
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
-const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -75,7 +73,6 @@ export const ConsultationDetails = (props: any) => {
   const [open, setOpen] = useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
-  const [diagnosisShowMore, setDiagnosisShowMore] = useState(false);
 
   const initDischargeSummaryForm: { email: string } = {
     email: "",
@@ -216,9 +213,6 @@ export const ConsultationDetails = (props: any) => {
           const data: ConsultationModel = {
             ...res.data,
             symptoms_text: "",
-            category:
-              patientCategoryChoices.find((i) => i.id === res.data.category)
-                ?.text || res.data.category,
           };
           if (res.data.symptoms && res.data.symptoms.length) {
             const symptoms = res.data.symptoms
@@ -266,8 +260,6 @@ export const ConsultationDetails = (props: any) => {
     [consultationId, dispatch, patientData.is_vaccinated]
   );
 
-  console.log("consultationData", consultationData);
-
   useAbortableEffect((status: statusType) => {
     fetchData(status);
   }, []);
@@ -280,6 +272,49 @@ export const ConsultationDetails = (props: any) => {
     `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
+
+  const ShowDiagnosis = ({
+    diagnoses = [],
+    label = "Diagnosis",
+    nshow = 2,
+  }: {
+    diagnoses: ICD11DiagnosisModel[] | undefined;
+    label: string;
+    nshow?: number;
+  }) => {
+    const [showMore, setShowMore] = useState(false);
+
+    return diagnoses.length ? (
+      <div className="text-sm w-full">
+        <p className="font-semibold leading-relaxed">{label}</p>
+
+        {diagnoses
+          .slice(0, !showMore ? nshow : undefined)
+          .map((diagnosis: any) => (
+            <p>{diagnosis.label}</p>
+          ))}
+        {diagnoses.length > nshow && (
+          <>
+            {!showMore ? (
+              <a
+                onClick={() => setShowMore(true)}
+                className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+              >
+                show more
+              </a>
+            ) : (
+              <a
+                onClick={() => setShowMore(false)}
+                className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+              >
+                show less
+              </a>
+            )}
+          </>
+        )}
+      </div>
+    ) : null;
+  };
 
   return (
     <div>
@@ -502,45 +537,29 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )*/}
 
-                {(consultationData?.icd11_diagnoses_object?.length ||
-                  consultationData.diagnosis) && (
-                  <div className="text-sm w-full">
-                    <p className="font-semibold leading-relaxed">Diagnosis:</p>
+                <ShowDiagnosis
+                  diagnoses={
+                    consultationData?.icd11_provisional_diagnoses_object
+                  }
+                  label="Provisional Diagnosis"
+                />
 
-                    {
-                      // shows the old diagnosis data
-                      consultationData.diagnosis && (
-                        <p>{consultationData.diagnosis}</p>
-                      )
-                    }
+                <ShowDiagnosis
+                  diagnoses={[
+                    ...(consultationData?.diagnosis
+                      ? [
+                          {
+                            id: "0",
+                            label: consultationData?.diagnosis,
+                            parentId: null,
+                          },
+                        ]
+                      : []),
+                    ...(consultationData?.icd11_diagnoses_object || []),
+                  ]}
+                  label="Diagnosis"
+                />
 
-                    {consultationData?.icd11_diagnoses_object
-                      ?.slice(0, !diagnosisShowMore ? 3 : undefined)
-                      .map((diagnosis) => (
-                        <p>{diagnosis.label}</p>
-                      ))}
-                    {consultationData?.icd11_diagnoses_object &&
-                      consultationData.icd11_diagnoses_object.length > 3 && (
-                        <>
-                          {!diagnosisShowMore ? (
-                            <a
-                              onClick={() => setDiagnosisShowMore(true)}
-                              className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
-                            >
-                              show more
-                            </a>
-                          ) : (
-                            <a
-                              onClick={() => setDiagnosisShowMore(false)}
-                              className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
-                            >
-                              show less
-                            </a>
-                          )}{" "}
-                        </>
-                      )}
-                  </div>
-                )}
                 {consultationData.verified_by && (
                   <div className="text-sm mt-2">
                     <span className="font-semibold leading-relaxed">
@@ -1221,9 +1240,7 @@ export const ConsultationDetails = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
             />
-            <ViewInvestigationSuggestions
-              consultationId={consultationId}
-            />
+            <ViewInvestigationSuggestions consultationId={consultationId} />
           </div>
         )}
       </div>

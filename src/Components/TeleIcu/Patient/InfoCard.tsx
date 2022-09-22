@@ -23,10 +23,6 @@ export default function TeleICUPatientInfoCard(props: {
         onClose={() => setOpen(false)}
       >
         <div className="bg-white h-screen w-screen md:h-auto md:w-[800px] md:max-h-[90vh] overflow-auto p-4 mx-auto md:rounded-xl">
-          <CloseRoundedIcon
-            onClick={() => setOpen(false)}
-            className="absolute z-20 top-3 right-3 cursor-pointer"
-          />
           {patient?.facility &&
           patient?.id &&
           patient?.last_consultation?.id ? (

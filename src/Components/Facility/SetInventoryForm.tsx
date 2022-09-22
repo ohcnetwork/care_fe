@@ -193,12 +193,13 @@ export const SetInventoryForm = (props: any) => {
                   />
                 </div>
               </div>
-              <div className="flex justify-between mt-4">
+              <div className="sm:flex sm:justify-between mt-4">
                 <Button
                   color="default"
                   variant="contained"
                   type="button"
                   onClick={goBack}
+                  className="w-full sm:w-fit"
                 >
                   Cancel
                 </Button>
@@ -209,6 +210,7 @@ export const SetInventoryForm = (props: any) => {
                   style={{ marginLeft: "auto" }}
                   startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
                   onClick={(e) => handleSubmit(e)}
+                  className="w-full sm:w-fit mt-2"
                 >
                   SET{" "}
                 </Button>
