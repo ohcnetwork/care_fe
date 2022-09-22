@@ -8,7 +8,7 @@ export const LinePlot = (props: any) => {
     yData,
     low = null,
     high = null,
-    defaultSpace,
+    defaultSpace = true,
   } = props;
   let generalOptions: any = {
     title: {
