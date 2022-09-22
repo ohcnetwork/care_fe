@@ -1,4 +1,9 @@
-import React, { useReducer, useState, useEffect } from "react";
+import React, {
+  useReducer,
+  useState,
+  useEffect,
+  MutableRefObject,
+} from "react";
 import {
   createAsset,
   getAsset,
@@ -30,6 +35,7 @@ import moment from "moment";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
 import { scrollTo } from "../../Utils/utils";
+import useVisibility from "../../Utils/useVisibility";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError = {
@@ -117,7 +123,20 @@ const AssetCreate = (props: AssetProps) => {
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
   const [currentSection, setCurrentSection] =
     useState<AssetFormSection>("General Details");
-  const [offset, setOffset] = useState(0);
+
+  const [generalDetailsVisible, generalDetailsRef] = useVisibility();
+  const [warrantyDetailsVisible, warrantyDetailsRef] = useVisibility(-300);
+  const [serviceDetailsVisible, serviceDetailsRef] = useVisibility(-300);
+
+  useEffect(() => {
+    setCurrentSection((currentSection) => {
+      let sectionNow = currentSection;
+      if (serviceDetailsVisible) sectionNow = "Service Details";
+      if (warrantyDetailsVisible) sectionNow = "Warranty Details";
+      if (generalDetailsVisible) sectionNow = "General Details";
+      return sectionNow;
+    });
+  }, [generalDetailsVisible, warrantyDetailsVisible, serviceDetailsVisible]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -349,17 +368,31 @@ const AssetCreate = (props: AssetProps) => {
 
   const sectionId = (section: AssetFormSection) =>
     section.toLowerCase().replace(" ", "-");
-  const sectionTitle = (section: AssetFormSection) => {
+
+  const sectionTitle = (
+    section: AssetFormSection,
+    ref: MutableRefObject<any>
+  ) => {
     return (
       <div
         id={sectionId(section)}
         className="col-span-6 flex flex-row gap-6 items-center mb-6 -ml-2"
+        ref={ref}
       >
-        <label className="font-bold text-lg">{section}</label>
+        <label className="font-bold text-lg text-gray-900">{section}</label>
         <hr className="flex-1" />
       </div>
     );
   };
+
+  // const handleFormScroll = () =>
+  //   setCurrentSection(
+  //     (serviceDetailsVisible && "Service Details") ||
+  //       (warrantyDetailsVisible && "Warranty Details") ||
+  //       "General Details"
+  //   );
+
+  console.log(currentSection);
 
   return (
     <div className="pb-2 h-screen overflow-hidden">
@@ -394,9 +427,7 @@ const AssetCreate = (props: AssetProps) => {
         </div>
         <div
           className="w-full h-full flex overflow-auto"
-          onScroll={(event) => {
-            console.table(event);
-          }}
+          // onScroll={handleFormScroll}
         >
           <div className="w-full max-w-3xl 2xl:max-w-4xl mx-auto">
             <form
@@ -406,7 +437,7 @@ const AssetCreate = (props: AssetProps) => {
               <div className="grid grid-cols-1 gap-x-12 items-start">
                 <div className="grid grid-cols-6 gap-x-6">
                   {/* General Details Section */}
-                  {sectionTitle("General Details")}
+                  {sectionTitle("General Details", generalDetailsRef)}
 
                   {/* Asset Name */}
                   <div className="col-span-6">
@@ -616,7 +647,7 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
                 </div>
                 <div className="grid grid-cols-6 gap-x-6">
-                  {sectionTitle("Warranty Details")}
+                  {sectionTitle("Warranty Details", warrantyDetailsRef)}
 
                   {/* Manufacturer */}
                   <div className="col-span-6 sm:col-span-3">
@@ -712,7 +743,7 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   <div className="mt-6" />
-                  {sectionTitle("Service Details")}
+                  {sectionTitle("Service Details", serviceDetailsRef)}
 
                   {/* Last serviced on */}
                   <div className="col-span-6 sm:col-span-3">
