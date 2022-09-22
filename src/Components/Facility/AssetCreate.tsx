@@ -345,6 +345,7 @@ const AssetCreate = (props: AssetProps) => {
     );
   };
 
+  // TODO: @rithviknishad use utility scrollTo instead when PR of #3594 is merged.
   const scrollTo = (id: string) =>
     document
       .querySelector(`#${id}`)

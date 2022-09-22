@@ -268,7 +268,7 @@ const AssetManage = (props: AssetManageProps) => {
             id="update-asset"
             className="primary-button"
           >
-            <i className="fas fa-pencil-alt text-white mr-4"></i>
+            <i className="fas fa-pencil-alt text-white mr-4" />
             Update
           </button>
           {asset?.asset_class && (
