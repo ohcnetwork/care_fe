@@ -389,7 +389,7 @@ export default function ManageUsers() {
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="flex lg:flex-row gap-3 flex-col justify-between">
+                <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
                   {user.username && (
                     <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit">
                       {user.username}
