@@ -2,9 +2,22 @@ import { useRef, useEffect, useState, MutableRefObject } from "react";
 
 /**
  * Check if an element is in viewport
-
  * @param {number} offset - Number of pixels up to the observable element from the top
- * @param {number} throttleMilliseconds - Throttle observable listener, in ms
+ *
+ * **Usage Example:**
+ * ```tsx
+ * const [isVisible, elementRef] = useVisibility(-200);
+ *
+ * useEffect(() => {
+ *     // do something.
+ * }, [isVisible]);
+ *
+ * return (
+ *     ...
+ *     <Element ref={elementRef} />
+ *     ...
+ * );
+ * ```
  */
 export default function useVisibility<Element extends HTMLElement>(
   offset = 0
