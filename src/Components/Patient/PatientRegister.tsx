@@ -58,7 +58,6 @@ import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
 import { InfoOutlined } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { scrollTo } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -185,6 +184,11 @@ const patientFormReducer = (state = initialState, action: any) => {
 
 const goBack = () => {
   window.history.go(-1);
+};
+
+const scrollTo = (id: any) => {
+  const element = document.querySelector(`#${id}-div`);
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
@@ -659,7 +663,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     e.preventDefault();
     const [validForm, error_div] = validateForm();
     if (!validForm) {
-      scrollTo(`${error_div}-div`);
+      scrollTo(error_div);
     } else {
       setIsLoading(true);
       const medical_history: Array<medicalHistoryModel> = [];

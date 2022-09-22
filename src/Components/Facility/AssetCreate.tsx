@@ -1,9 +1,4 @@
-import React, {
-  useReducer,
-  useState,
-  useEffect,
-  MutableRefObject,
-} from "react";
+import React, { useReducer, useState, useEffect, LegacyRef } from "react";
 import {
   createAsset,
   getAsset,
@@ -34,7 +29,6 @@ import SelectMenu from "../Common/components/SelectMenu";
 import moment from "moment";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
-import { scrollTo } from "../../Utils/utils";
 import useVisibility from "../../Utils/useVisibility";
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -87,12 +81,6 @@ type AssetFormSection =
   | "Warranty Details"
   | "Service Details";
 
-const sections: { title: AssetFormSection; iconClass: string }[] = [
-  { title: "General Details", iconClass: "fa-solid fa-circle-info" },
-  { title: "Warranty Details", iconClass: "fa-solid fa-barcode" },
-  { title: "Service Details", iconClass: "fas fa-tools" },
-];
-
 const AssetCreate = (props: AssetProps) => {
   const { facilityId, assetId } = props;
 
@@ -121,12 +109,31 @@ const AssetCreate = (props: AssetProps) => {
   const [notes, setNotes] = useState("");
   const dispatchAction: any = useDispatch();
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
+
   const [currentSection, setCurrentSection] =
     useState<AssetFormSection>("General Details");
 
   const [generalDetailsVisible, generalDetailsRef] = useVisibility();
   const [warrantyDetailsVisible, warrantyDetailsRef] = useVisibility(-300);
   const [serviceDetailsVisible, serviceDetailsRef] = useVisibility(-300);
+
+  const sections = {
+    "General Details": {
+      iconClass: "fa-solid fa-circle-info",
+      isVisible: generalDetailsVisible,
+      ref: generalDetailsRef,
+    },
+    "Warranty Details": {
+      iconClass: "fa-solid fa-barcode",
+      isVisible: warrantyDetailsVisible,
+      ref: warrantyDetailsRef,
+    },
+    "Service Details": {
+      iconClass: "fas fa-tools",
+      isVisible: serviceDetailsVisible,
+      ref: serviceDetailsRef,
+    },
+  };
 
   useEffect(() => {
     setCurrentSection((currentSection) => {
@@ -369,15 +376,12 @@ const AssetCreate = (props: AssetProps) => {
   const sectionId = (section: AssetFormSection) =>
     section.toLowerCase().replace(" ", "-");
 
-  const sectionTitle = (
-    section: AssetFormSection,
-    ref: MutableRefObject<any>
-  ) => {
+  const sectionTitle = (section: AssetFormSection) => {
     return (
       <div
         id={sectionId(section)}
         className="col-span-6 flex flex-row gap-6 items-center mb-6 -ml-2"
-        ref={ref}
+        ref={sections[section].ref as LegacyRef<HTMLDivElement>}
       >
         <label className="font-bold text-lg text-gray-900">{section}</label>
         <hr className="flex-1" />
@@ -398,20 +402,24 @@ const AssetCreate = (props: AssetProps) => {
       />
       <div className="mt-5 md:mt-8 flex h-full sticky top-0">
         <div className="hidden xl:flex flex-col bg-gray-300 rounded-r-lg pt-10 w-72">
-          {sections.map((section) => {
-            const isCurrent = currentSection === section.title;
+          {Object.keys(sections).map((sectionTitle) => {
+            const isCurrent = currentSection === sectionTitle;
+            const section = sections[sectionTitle as AssetFormSection];
             return (
               <button
                 className={`flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
                   isCurrent ? "bg-white" : "bg-transparent"
                 } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
                 onClick={() => {
-                  scrollTo(sectionId(section.title));
-                  setCurrentSection(section.title);
+                  section.ref.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                  setCurrentSection(sectionTitle as AssetFormSection);
                 }}
               >
                 <i className={`${section.iconClass} text-sm`} />
-                <span>{section.title}</span>
+                <span>{sectionTitle}</span>
               </button>
             );
           })}
@@ -425,7 +433,7 @@ const AssetCreate = (props: AssetProps) => {
               <div className="grid grid-cols-1 gap-x-12 items-start">
                 <div className="grid grid-cols-6 gap-x-6">
                   {/* General Details Section */}
-                  {sectionTitle("General Details", generalDetailsRef)}
+                  {sectionTitle("General Details")}
 
                   {/* Asset Name */}
                   <div className="col-span-6">
@@ -635,7 +643,7 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
                 </div>
                 <div className="grid grid-cols-6 gap-x-6">
-                  {sectionTitle("Warranty Details", warrantyDetailsRef)}
+                  {sectionTitle("Warranty Details")}
 
                   {/* Manufacturer */}
                   <div className="col-span-6 sm:col-span-3">
@@ -731,7 +739,7 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   <div className="mt-6" />
-                  {sectionTitle("Service Details", serviceDetailsRef)}
+                  {sectionTitle("Service Details")}
 
                   {/* Last serviced on */}
                   <div className="col-span-6 sm:col-span-3">

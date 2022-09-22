@@ -62,8 +62,3 @@ export const calculateApache2Score = (apacheParams: ApacheParams): number => {
 
   return totalScore;
 };
-
-export const scrollTo = (elementId: string) => {
-  const element = document.querySelector(`#${elementId}`);
-  element?.scrollIntoView({ behavior: "smooth", block: "center" });
-};

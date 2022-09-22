@@ -63,7 +63,6 @@ import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
 import { ICD11DiagnosisModel } from "./models";
-import { scrollTo } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -195,6 +194,11 @@ const symptomChoices = [...SYMPTOM_CHOICES];
 
 const goBack = () => {
   window.history.go(-1);
+};
+
+const scrollTo = (id: any) => {
+  const element = document.querySelector(`#${id}-div`);
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
 export const ConsultationForm = (props: any) => {
@@ -469,7 +473,7 @@ export const ConsultationForm = (props: any) => {
     const [validForm, error_div] = validateForm();
 
     if (!validForm) {
-      scrollTo(`${error_div}-div`);
+      scrollTo(error_div);
     } else {
       setIsLoading(true);
       const data = {
