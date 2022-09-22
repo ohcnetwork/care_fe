@@ -76,6 +76,17 @@ const goBack = () => {
   window.history.go(-1);
 };
 
+type AssetFormSection =
+  | "General Details"
+  | "Warranty Details"
+  | "Service Details";
+
+const sections: { title: AssetFormSection; iconClass: string }[] = [
+  { title: "General Details", iconClass: "fa-solid fa-circle-info" },
+  { title: "Warranty Details", iconClass: "fa-solid fa-barcode" },
+  { title: "Service Details", iconClass: "fas fa-tools" },
+];
+
 const AssetCreate = (props: AssetProps) => {
   const { facilityId, assetId } = props;
 
@@ -104,6 +115,9 @@ const AssetCreate = (props: AssetProps) => {
   const [notes, setNotes] = useState("");
   const dispatchAction: any = useDispatch();
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
+  const [currentSection, setCurrentSection] =
+    useState<AssetFormSection>("General Details");
+  const [offset, setOffset] = useState(0);
 
   useEffect(() => {
     setIsLoading(true);
@@ -333,14 +347,15 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
 
-  const sectionId = (title: string) => title.toLowerCase().replace(" ", "-");
-  const sectionTitle = (title: string) => {
+  const sectionId = (section: AssetFormSection) =>
+    section.toLowerCase().replace(" ", "-");
+  const sectionTitle = (section: AssetFormSection) => {
     return (
       <div
-        id={sectionId(title)}
+        id={sectionId(section)}
         className="col-span-6 flex flex-row gap-6 items-center mb-6 -ml-2"
       >
-        <label className="font-bold text-lg">{title}</label>
+        <label className="font-bold text-lg">{section}</label>
         <hr className="flex-1" />
       </div>
     );
@@ -358,24 +373,31 @@ const AssetCreate = (props: AssetProps) => {
         }}
       />
       <div className="mt-5 md:mt-8 flex h-full sticky top-0">
-        <div className="hidden xl:flex flex-col bg-gray-200 rounded-r-lg pt-10 -ml-2 w-60">
-          {[
-            { title: "General Details", icon: "fa-solid fa-circle-info" },
-            { title: "Warranty Details", icon: "fa-solid fa-barcode" },
-            { title: "Service Details", icon: "fas fa-tools" },
-          ].map((section) => {
+        <div className="hidden xl:flex flex-col bg-gray-300 rounded-r-lg pt-10 w-72">
+          {sections.map((section) => {
+            const isCurrent = currentSection === section.title;
             return (
               <button
-                className="flex items-center justify-start gap-3 px-5 py-3 w-full font-medium hover:bg-white hover:tracking-wider transition-all duration-100 ease-in"
-                onClick={() => scrollTo(sectionId(section.title))}
+                className={`flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
+                  isCurrent ? "bg-white" : "bg-transparent"
+                } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
+                onClick={() => {
+                  scrollTo(sectionId(section.title));
+                  setCurrentSection(section.title);
+                }}
               >
-                <i className={`${section.icon} text-sm`} />
+                <i className={`${section.iconClass} text-sm`} />
                 <span>{section.title}</span>
               </button>
             );
           })}
         </div>
-        <div className="w-full h-full flex overflow-auto">
+        <div
+          className="w-full h-full flex overflow-auto"
+          onScroll={(event) => {
+            console.table(event);
+          }}
+        >
           <div className="w-full max-w-3xl 2xl:max-w-4xl mx-auto">
             <form
               onSubmit={handleSubmit}
