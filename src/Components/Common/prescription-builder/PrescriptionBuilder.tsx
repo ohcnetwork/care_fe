@@ -3,8 +3,9 @@ import { PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
 
 export const medicines = require("./assets/medicines");
 const frequency = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"]
+
 export const routes = ["Oral", "IV", "IM", "S/C"]
-export const units = ["mg", "ml", "drops"]
+export const units = ["mg", "ml", "drops", "ampule", "tsp"]
 
 export type PrescriptionType = {
     medicine?: string; 
@@ -73,7 +74,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                                 <div
                                     className="w-full"    
                                 >
-                                    Medicine :
+                                    Medicine
                                     <PrescriptionDropdown
                                         placeholder="Medicine"
                                         options={medicines}
@@ -83,7 +84,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                                 </div>
                                 <div className="flex gap-2">
                                     <div>
-                                        Route :
+                                        Route
                                         <PrescriptionDropdown
                                             placeholder="Route"
                                             options={routes}
@@ -92,7 +93,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                                         />
                                     </div>
                                     <div>
-                                        Frequency :
+                                        Frequency
                                         <PrescriptionDropdown
                                             placeholder="Frequency"
                                             options={frequency}
@@ -105,7 +106,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                             <div className="flex gap-2 mt-2 flex-col md:flex-row">
                                 <div className="w-full md:w-[260px] flex gap-2 shrink-0">
                                     <div>
-                                        Dosage :
+                                        Dosage
                                         <div className="flex gap-1">
                                             <input 
                                                 type="number"
@@ -126,7 +127,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                                                 required
                                             />
                                             <div
-                                                className="w-[70px] shrink-0"    
+                                                className="w-[80px] shrink-0"    
                                             >
                                                 <PrescriptionDropdown
                                                     placeholder="Unit"
@@ -139,7 +140,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                                             
                                     </div>
                                             
-                                    <div className="w-[65px] shrink-0">
+                                    <div className="w-[70px] shrink-0">
                                         Days
                                         <input 
                                             type="number"
@@ -163,7 +164,7 @@ export default function PrescriptionBuilder(props : PrescriptionBuilderProps<Pre
                                 </div>
                                 
                                 <div className="w-full">
-                                    Notes : 
+                                    Notes
                                     <input 
                                         type="text"
                                         className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
