@@ -26,8 +26,8 @@ jobs:
         uses: satackey/action-docker-layer-caching@v0.0.11
 
       - name: Compose Up Care
-        run: cd care && make up && cd ..
-      - run: sleep 30s
+        run: cd care && make build && make up && cd .. && sleep 30s
+        # Voluntarily kept 30 seconds delay to wait for migrations to complete.
 
       - run: docker exec care python manage.py collectstatic
       - run: docker exec care python manage.py load_data kerala
