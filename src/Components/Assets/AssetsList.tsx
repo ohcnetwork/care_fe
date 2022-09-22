@@ -228,7 +228,6 @@ const AssetsList = () => {
     }
   };
 
-  if (isLoading) return <Loading />;
   if (isScannerActive)
     return (
       <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
@@ -311,84 +310,95 @@ const AssetsList = () => {
           </div>
         </SlideOver>
       </div>
-      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3">
-        {badge("Facility", facilityName, ["facility", "location"])}
-        {badge("Asset Name", qParams.search, ["search"])}
-        {badge("Location", locationName, ["location"])}
-        {badge("Asset Type", asset_type, ["asset_type"])}
-        {badge("Status", qParams.status, ["status"])}
-      </div>
-      <div className="grow mt-10">
-        <div className="py-8 md:px-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 md:-mx-8 gap-2">
-            {assetsExist ? (
-              assets.map((asset: AssetData) => (
-                <div
-                  key={asset.id}
-                  className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
-                  onClick={() => navigate(`/assets/${asset.id}`)}
-                >
-                  <div className="md:flex">
-                    <p className="text-xl font-normal capitalize break-words">
-                      <span className="mr-2">
-                        {" "}
-                        {asset.asset_class === "HL7MONITOR" ? (
-                          <i className="fa-solid fa-tv text-primary-500"></i>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3">
+            {badge("Facility", facilityName, ["facility", "location"])}
+            {badge("Asset Name", qParams.search, ["search"])}
+            {badge("Location", locationName, ["location"])}
+            {badge("Asset Type", asset_type, ["asset_type"])}
+            {badge("Status", qParams.status, ["status"])}
+          </div>
+          <div className="grow mt-10">
+            <div className="py-8 md:px-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 md:-mx-8 gap-2">
+                {assetsExist ? (
+                  assets.map((asset: AssetData) => (
+                    <div
+                      key={asset.id}
+                      className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
+                      onClick={() => navigate(`/assets/${asset.id}`)}
+                    >
+                      <div className="md:flex">
+                        <p className="text-xl font-normal capitalize break-words">
+                          <span className="mr-2">
+                            {" "}
+                            {asset.asset_class === "HL7MONITOR" ? (
+                              <i className="fa-solid fa-tv text-primary-500"></i>
+                            ) : (
+                              ""
+                            )}
+                            {asset.asset_class === "ONVIF" ? (
+                              <i className="fa-solid fa-camera text-primary-500"></i>
+                            ) : (
+                              ""
+                            )}
+                            {asset.asset_class !== "HL7MONITOR" &&
+                            asset.asset_class !== "ONVIF" ? (
+                              <i className="fa-solid fa-cart-plus text-primary-500"></i>
+                            ) : (
+                              ""
+                            )}
+                          </span>
+                          {asset.name}
+                        </p>
+                      </div>
+                      <p className="font-normal text-sm">
+                        {asset?.location_object?.name}
+                      </p>
+
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {asset.is_working ? (
+                          <Badge color="green" startIcon="cog" text="Working" />
                         ) : (
-                          ""
+                          <Badge
+                            color="red"
+                            startIcon="cog"
+                            text="Not Working"
+                          />
                         )}
-                        {asset.asset_class === "ONVIF" ? (
-                          <i className="fa-solid fa-camera text-primary-500"></i>
-                        ) : (
-                          ""
-                        )}
-                        {asset.asset_class !== "HL7MONITOR" &&
-                        asset.asset_class !== "ONVIF" ? (
-                          <i className="fa-solid fa-cart-plus text-primary-500"></i>
-                        ) : (
-                          ""
-                        )}
-                      </span>
-                      {asset.name}
+                        <Badge
+                          color="blue"
+                          startIcon="location-arrow"
+                          text={asset.status}
+                        />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="w-full pb-2 cursor-pointer mb-3">
+                    <p className="text-xl font-bold capitalize text-center">
+                      No Assets Found
                     </p>
                   </div>
-                  <p className="font-normal text-sm">
-                    {asset?.location_object?.name}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {asset.is_working ? (
-                      <Badge color="green" startIcon="cog" text="Working" />
-                    ) : (
-                      <Badge color="red" startIcon="cog" text="Not Working" />
-                    )}
-                    <Badge
-                      color="blue"
-                      startIcon="location-arrow"
-                      text={asset.status}
-                    />
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="w-full pb-2 cursor-pointer mb-3">
-                <p className="text-xl font-bold capitalize text-center">
-                  No Assets Found
-                </p>
+                )}
               </div>
-            )}
-          </div>
-          {totalCount > limit && (
-            <div className="mt-4 flex w-full justify-center">
-              <Pagination
-                cPage={currentPage}
-                defaultPerPage={limit}
-                data={{ totalCount }}
-                onChange={handlePagination}
-              />
+              {totalCount > limit && (
+                <div className="mt-4 flex w-full justify-center">
+                  <Pagination
+                    cPage={currentPage}
+                    defaultPerPage={limit}
+                    data={{ totalCount }}
+                    onChange={handlePagination}
+                  />
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
