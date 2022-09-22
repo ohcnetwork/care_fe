@@ -354,11 +354,7 @@ const AssetsList = () => {
                   </div>
                   <p className="font-normal text-sm">
                     {asset?.location_object?.name}
-                    <span className="text-xs ml-2">
-                      Updated at: {moment(asset.modified_date).format("lll")}
-                    </span>
                   </p>
-
                   <div className="flex flex-wrap gap-2 mt-2">
                     {asset.is_working ? (
                       <Badge color="green" startIcon="cog" text="Working" />
