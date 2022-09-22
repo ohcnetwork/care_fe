@@ -376,21 +376,25 @@ const AssetCreate = (props: AssetProps) => {
   const sectionId = (section: AssetFormSection) =>
     section.toLowerCase().replace(" ", "-");
 
-  const sectionTitle = (section: AssetFormSection) => {
+  const sectionTitle = (sectionTitle: AssetFormSection) => {
+    const section = sections[sectionTitle];
     return (
       <div
-        id={sectionId(section)}
-        className="col-span-6 flex flex-row gap-6 items-center mb-6 -ml-2"
-        ref={sections[section].ref as LegacyRef<HTMLDivElement>}
+        id={sectionId(sectionTitle)}
+        className="col-span-6 flex flex-row items-center mb-6 -ml-2"
+        ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <label className="font-bold text-lg text-gray-900">{section}</label>
-        <hr className="flex-1" />
+        <i className={`${section.iconClass} text-lg mr-3`} />
+        <label className="font-bold text-lg text-gray-900">
+          {sectionTitle}
+        </label>
+        <hr className="ml-6 flex-1 border-gray-400 border" />
       </div>
     );
   };
 
   return (
-    <div className="pb-2 h-screen overflow-hidden">
+    <div className="pb-2 h-screen flex flex-col">
       <PageTitle
         title={`${assetId ? "Update" : "Create"} Asset`}
         className="pl-6"
@@ -400,15 +404,15 @@ const AssetCreate = (props: AssetProps) => {
           [assetId || "????"]: { name },
         }}
       />
-      <div className="mt-5 md:mt-8 flex h-full sticky top-0">
-        <div className="hidden xl:flex flex-col bg-gray-300 rounded-r-lg pt-10 w-72">
+      <div className="mt-5 flex h-full sticky top-0 sm:mx-auto">
+        <div className="hidden xl:flex flex-col bg-gray-200 rounded-l-lg pt-10 w-72">
           {Object.keys(sections).map((sectionTitle) => {
             const isCurrent = currentSection === sectionTitle;
             const section = sections[sectionTitle as AssetFormSection];
             return (
               <button
                 className={`flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
-                  isCurrent ? "bg-white" : "bg-transparent"
+                  isCurrent ? "bg-white text-primary-500" : "bg-transparent"
                 } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
                 onClick={() => {
                   section.ref.current?.scrollIntoView({
@@ -425,10 +429,10 @@ const AssetCreate = (props: AssetProps) => {
           })}
         </div>
         <div className="w-full h-full flex overflow-auto">
-          <div className="w-full max-w-3xl 2xl:max-w-4xl mx-auto">
+          <div className="w-full max-w-3xl 2xl:max-w-4xl">
             <form
               onSubmit={handleSubmit}
-              className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all mb-60"
+              className="rounded sm:rounded-xl xl:rounded-none xl:rounded-r-xl bg-white p-6 sm:p-12 transition-all mb-40"
             >
               <div className="grid grid-cols-1 gap-x-12 items-start">
                 <div className="grid grid-cols-6 gap-x-6">
