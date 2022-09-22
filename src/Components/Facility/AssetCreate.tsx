@@ -29,6 +29,7 @@ import SelectMenu from "../Common/components/SelectMenu";
 import moment from "moment";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
+import { scrollTo } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError = {
@@ -344,12 +345,6 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
   };
-
-  // TODO: @rithviknishad use utility scrollTo instead when PR of #3594 is merged.
-  const scrollTo = (id: string) =>
-    document
-      .querySelector(`#${id}`)
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
     <div className="pb-2 h-screen overflow-hidden">
