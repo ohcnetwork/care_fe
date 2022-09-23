@@ -92,7 +92,7 @@ const AssetManage = (props: AssetManageProps) => {
   const badge = (label: string, className: string) => {
     return (
       <span
-        className={`font-medium tracking-wider py-1 px-3 uppercase rounded-full shadow text-sm ${className}`}
+        className={`font-medium tracking-wider py-1 px-3 uppercase rounded-full text-sm ${className}`}
       >
         {label}
       </span>
@@ -165,7 +165,7 @@ const AssetManage = (props: AssetManageProps) => {
         title="Asset Details"
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
-      <div className="bg-white rounded-lg md:rounded-xl md:p-8 p-6 shadow">
+      <div className="bg-white rounded-lg md:rounded-xl md:p-8 p-6">
         <div className="mb-4 flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-2xl md:text-3xl font-semibold break-words">
@@ -178,87 +178,82 @@ const AssetManage = (props: AssetManageProps) => {
           <span className="text-gray-700">{asset?.description}</span>
         </div>
 
-        <div className="2xl:flex justify-between">
-          <div className="m-2 sm:m-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Location Detail */}
-              <div className="flex flex-row items-center gap-4">
-                <i className="fas fa-map-marker-alt text-xl text-gray-600" />
-                <div className="flex flex-col">
-                  <span className="text-gray-700">
-                    {asset?.location_object.facility.name}
-                  </span>
-                  <span className="font-medium text-lg text-gray-900">
-                    {asset?.location_object.name}
-                  </span>
-                </div>
-              </div>
-
-              {/* Asset Type */}
-              <div className="flex flex-row items-center gap-4">
-                <i className="fas fa-cubes text-xl text-gray-600" />
-                <div className="flex flex-col">
-                  <span className="text-gray-700">Asset Type</span>
-                  <span className="font-medium text-lg text-gray-900">
-                    {asset?.asset_type === "INTERNAL"
-                      ? "Internal Asset"
-                      : "External Asset"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Not working reason */}
-              {asset?.is_working === false && (
-                <div className="flex flex-row items-center gap-4">
-                  {/* description icon */}
-                  <i className="fas fa-exclamation-circle text-xl text-gray-600" />
-                  <div className="flex flex-col">
-                    <span className="text-gray-700">Not working reason</span>
-                    <span className="text-gray-900">
-                      {asset?.not_working_reason || "--"}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <div className="md:col-span-2 lg:col-span-3 grid grid-cols-3">
-                <span className="text-gray-700 md:col-span-2 lg:col-span-3 mb-2">
-                  Service Details
+        <div className="flex flex-col 2xl:flex-row justify-between">
+          <div className="m-2 sm:m-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 md:gap-x-16 w-full mb-12">
+            {/* Location Detail */}
+            <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
+              <i className="fas fa-map-marker-alt text-xl text-gray-600" />
+              <div className="flex flex-col">
+                <span className="text-gray-700">
+                  {asset?.location_object.facility.name}
                 </span>
-                {/* Last Serviced On */}
-                <div className="flex flex-row items-center gap-4">
-                  <i className="fas fa-tools text-xl text-gray-600" />
-                  <div className="flex flex-col">
-                    <span className="text-gray-700">Last serviced on</span>
-                    <span className="font-medium text-lg text-gray-900">
-                      {asset?.last_serviced_on
-                        ? moment(asset?.last_serviced_on).format("MMM DD, YYYY")
-                        : "--"}
-                    </span>
-                  </div>
-                </div>
+                <span className="font-medium text-lg text-gray-900">
+                  {asset?.location_object.name}
+                </span>
+              </div>
+            </div>
 
-                {/* Notes */}
-                <div className="flex flex-row items-center gap-4 lg:col-span-2">
-                  <i className="fas fa-sticky-note text-xl text-gray-600" />
-                  <div className="flex flex-col">
-                    <span className="text-gray-700">Notes</span>
-                    <span className="text-gray-900">
-                      {asset?.notes || "--"}
-                    </span>
-                  </div>
+            {/* Asset Type */}
+            <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
+              <i className="fas fa-cubes text-xl text-gray-600" />
+              <div className="flex flex-col">
+                <span className="text-gray-700">Asset Type</span>
+                <span className="font-medium text-lg text-gray-900">
+                  {asset?.asset_type === "INTERNAL"
+                    ? "Internal Asset"
+                    : "External Asset"}
+                </span>
+              </div>
+            </div>
+
+            {/* Not working reason */}
+            {asset?.is_working === false && (
+              <div className="flex flex-row items-center gap-4 col-span-1 md:col-span-2 xl:col-span-1 2xl:col-span-2 mb-6 md:mb-12">
+                {/* description icon */}
+                <i className="fas fa-exclamation-circle text-xl text-gray-600" />
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Not working reason</span>
+                  <span className="text-gray-900">
+                    {asset?.not_working_reason || "--"}
+                  </span>
                 </div>
+              </div>
+            )}
+
+            <span className="font-medium text-gray-800 mb-4 col-span-1 md:col-span-2 xl:col-span-3 2xl:col-span-2">
+              Service Details
+            </span>
+
+            {/* Last Serviced On */}
+            <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
+              <i className="fas fa-tools text-xl text-gray-600" />
+              <div className="flex flex-col">
+                <span className="text-gray-700">Last serviced on</span>
+                <span className="font-medium text-lg text-gray-900">
+                  {asset?.last_serviced_on
+                    ? moment(asset?.last_serviced_on).format("MMM DD, YYYY")
+                    : "--"}
+                </span>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
+              <i className="fas fa-sticky-note text-xl text-gray-600" />
+              <div className="flex flex-col">
+                <span className="text-gray-700">Notes</span>
+                <span className="text-gray-900">{asset?.notes || "--"}</span>
               </div>
             </div>
           </div>
           {asset && (
-            <div className="flex flex-wrap gap-8 my-8 justify-center 2xl:justify-end">
+            <div className="flex gap-8 lg:gap-4 xl:gap-8 2xl:gap-4 3xl:gap-8 items-center justify-center flex-col lg:flex-row transition-all duration-200 ease-in">
               <AssetWarrantyCard asset={asset} view="front" />
               <AssetWarrantyCard asset={asset} view="back" />
             </div>
           )}
         </div>
-        <div className="flex mt-2 gap-1">
+        <div className="flex mt-8 gap-1">
           <button
             onClick={() =>
               navigate(
@@ -283,7 +278,7 @@ const AssetManage = (props: AssetManageProps) => {
           )}
         </div>
       </div>
-      <div className="bg-white rounded-lg md:p-6 p-3 shadow mt-2">
+      <div className="bg-white rounded-lg md:p-6 p-3 mt-2">
         <div className="text-xl font-semibold">Transaction History</div>
         <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">
