@@ -86,6 +86,8 @@ type FormDetails = {
   referred_to: string;
   icd11_diagnoses: string[];
   icd11_diagnoses_object: ICD11DiagnosisModel[];
+  icd11_provisional_diagnoses: string[];
+  icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
   verified_by: string;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
@@ -129,6 +131,8 @@ const initForm: FormDetails = {
   referred_to: "",
   icd11_diagnoses: [],
   icd11_diagnoses_object: [],
+  icd11_provisional_diagnoses: [],
+  icd11_provisional_diagnoses_object: [],
   verified_by: "",
   is_kasp: "false",
   kasp_enabled_date: null,
@@ -496,6 +500,7 @@ export const ConsultationForm = (props: any) => {
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
         icd11_diagnoses: state.form.icd11_diagnoses,
+        icd11_provisional_diagnoses: state.form.icd11_provisional_diagnoses,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
         prn_prescription: PRNAdvice,
@@ -942,6 +947,26 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.verified_by}
                 />
               </div>
+              <div id="provisional-diagnosis-div" className="mt-4">
+                <InputLabel id="diagnosis-label">Provisional Diagnosis</InputLabel>
+                <DiagnosisSelect
+                  name="icd11_provisional_diagnoses"
+                  selected={state.form.icd11_provisional_diagnoses_object}
+                  setSelected={(selected: ICD11DiagnosisModel[] | null) => {
+                    dispatch({
+                      type: "set_form",
+                      form: {
+                        ...state.form,
+                        icd11_provisional_diagnoses:
+                          selected?.map(
+                            (diagnosis: ICD11DiagnosisModel) => diagnosis.id
+                          ) || [],
+                      },
+                    });
+                  }}
+                />
+              </div>
+
               <div id="diagnosis-div" className="mt-4">
                 <InputLabel id="diagnosis-label">Diagnosis</InputLabel>
                 <DiagnosisSelect

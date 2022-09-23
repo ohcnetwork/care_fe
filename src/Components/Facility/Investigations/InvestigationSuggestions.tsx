@@ -34,7 +34,7 @@ export default function ViewInvestigationSuggestions(props: {
                             Investigations
                         </th>
                         <th className="p-4">
-                            To be conducted...
+                            To be conducted
                         </th>
                         <th className="p-4">
                             Notes
