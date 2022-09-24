@@ -185,7 +185,7 @@ export default function FacilityUsers(props: any) {
     }
 
     setUserData({ show: false, username: "", name: "" });
-    window.location.reload();
+    fetchData({ aborted: false });
   };
 
   const handleDelete = (user: any) => {

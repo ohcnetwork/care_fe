@@ -88,7 +88,7 @@ const Beds = (props: BedsProps) => {
       Notification.Success({
         msg: "Bed allocated successfully",
       });
-      window.location.reload();
+      fetchData({ aborted: false });
     }
   };
 
