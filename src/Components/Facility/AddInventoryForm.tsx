@@ -289,9 +289,11 @@ export const AddInventoryForm = (props: any) => {
                   />
                 </div>
               </div>
-              <div className="flex justify-between mt-4">
+              <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
                 <Button
                   color="default"
+                  fullWidth
+                  className="w-full md:w-auto"
                   variant="contained"
                   type="button"
                   onClick={goBack}
@@ -300,6 +302,8 @@ export const AddInventoryForm = (props: any) => {
                 </Button>
                 <Button
                   color="primary"
+                  fullWidth
+                  className="w-full md:w-auto"
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
