@@ -181,7 +181,7 @@ export const SetInventoryForm = (props: any) => {
                   />
                 </div>
 
-                <div>
+                <div className="w-full">
                   <InputLabel id="quantity">Item Min Quantity</InputLabel>
                   <TextInputField
                     fullWidth
