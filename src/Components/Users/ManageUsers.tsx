@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -33,7 +33,23 @@ import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
+const getScreenSize = () => {
+  const { innerWidth, innerHeight } = window;
+  return { innerWidth, innerHeight };
+};
+
 export default function ManageUsers() {
+  const [screenSize, setScreenSize] = useState(getScreenSize());
+  useEffect(() => {
+    const handleWindowResize = () => {
+      setScreenSize(getScreenSize());
+    };
+    window.addEventListener("resize", handleWindowResize);
+    return () => {
+      window.removeEventListener("resize", handleWindowResize);
+    };
+  }, []);
+
   const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
@@ -73,7 +89,10 @@ export default function ManageUsers() {
     facility?: FacilityModel;
   }>({ show: false, userName: "", facility: undefined });
 
-  const limit = RESULTS_PER_PAGE_LIMIT;
+  const limit =
+    screenSize.innerWidth >= 1280
+      ? RESULTS_PER_PAGE_LIMIT + 1
+      : RESULTS_PER_PAGE_LIMIT;
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };

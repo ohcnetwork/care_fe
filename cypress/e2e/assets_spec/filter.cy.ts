@@ -10,10 +10,8 @@ describe("Assets Filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
-    cy.get("a").contains("Assets").click();
+    cy.awaitUrl("/assets");
     cy.contains("Advanced Filters").click();
-    cy.wait(2000);
   });
 
   it("Filter by Facility", () => {

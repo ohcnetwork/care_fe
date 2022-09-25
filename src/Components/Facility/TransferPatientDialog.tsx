@@ -7,7 +7,6 @@ import {
   InputLabel,
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { WithStyles, withStyles } from "@material-ui/styles";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useReducer, useState } from "react";
@@ -24,13 +23,6 @@ interface Props {
   handleCancel: () => void;
   facilityId: number;
 }
-
-const styles = {
-  paper: {
-    "max-width": "650px",
-    "min-width": "400px",
-  },
-};
 
 const initForm: any = {
   patient: "",
@@ -66,8 +58,8 @@ const patientFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
-  const { patientList, handleOk, handleCancel, facilityId, classes } = props;
+const TransferPatientDialog = (props: Props) => {
+  const { patientList, handleOk, handleCancel, facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -150,12 +142,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   };
 
   return (
-    <Dialog
-      open={true}
-      classes={{
-        paper: classes.paper,
-      }}
-    >
+    <Dialog open={true} maxWidth={"sm"}>
       <DialogTitle id="test-sample-title">Patient Transfer Form</DialogTitle>
       <DialogContent>
         <div className="grid gap-4 grid-cols-1">
@@ -195,7 +182,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
           </div>
         </div>
       </DialogContent>
-      <DialogActions style={{ justifyContent: "space-between" }}>
+      <DialogActions className="justify-between flex flex-col md:flex-row">
         <Button
           disabled={isLoading}
           color="secondary"
@@ -217,4 +204,4 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   );
 };
 
-export default withStyles(styles)(TransferPatientDialog);
+export default TransferPatientDialog;

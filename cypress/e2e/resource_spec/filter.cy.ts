@@ -8,9 +8,7 @@ describe("Resource filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
-    cy.get("a").contains("Resource").click();
-    cy.url().should("include", "/resource");
+    cy.awaitUrl("/resource");
     cy.contains("Filters").click();
   });
 
