@@ -14,7 +14,7 @@ export const LinePlot = (props: any) => {
     title: {
       text: `${title} [ {0|${yData[yData.length - 1]?.toFixed(2) || "NA"}} ]`,
       textStyle: {
-        fontSize: 20,
+        fontSize: 14,
         rich: {
           0: {
             fontSize: 14,
@@ -35,6 +35,8 @@ export const LinePlot = (props: any) => {
     },
     toolbox: {
       show: true,
+      orient: "vertical",
+      top: "9%",
       feature: {
         dataZoom: {
           yAxisIndex: "none",
