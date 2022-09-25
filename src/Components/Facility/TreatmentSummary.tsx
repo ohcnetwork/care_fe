@@ -3,11 +3,12 @@ import { useDispatch } from "react-redux";
 import { getPatient, getInvestigation } from "../../Redux/actions";
 import { ConsultationModel } from "./models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { PatientModel, DailyRoundsModel } from "../Patient/models";
+import { PatientModel } from "../Patient/models";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { getConsultation } from "../../Redux/actions";
 import { GENDER_TYPES } from "../../Common/constants";
+import clsx from "clsx";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
@@ -21,6 +22,7 @@ const TreatmentSummary = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [investigations, setInvestigations] = useState<Array<any>>([]);
   const [dailyRounds, setDailyRounds] = useState<any>({});
+  const [printView, setPrintView] = useState(false);
 
   const fetchPatientData = useCallback(
     async (status: statusType) => {
@@ -87,17 +89,21 @@ const TreatmentSummary = (props: any) => {
     fetchConsultation(status);
   }, []);
 
+  const print = () => {
+    Promise.resolve(setPrintView(true)).then(() => {
+      window.print();
+      setPrintView(false);
+    });
+  };
+
   return (
     <div>
       {isLoading ? (
         <Loading />
       ) : (
         <div className="my-4">
-          <div className="my-4 flex justify-end ">
-            <button
-              onClick={(_) => window.print()}
-              className="btn btn-primary mr-2"
-            >
+          <div className="my-4 flex sm:justify-end flex-wrap justify-center gap-2">
+            <button onClick={(_) => print()} className="btn btn-primary mr-2">
               <i className="fas fa-print mr-2"></i> Print Treatment Summary
             </button>
             <button
@@ -120,8 +126,18 @@ const TreatmentSummary = (props: any) => {
             </div>
 
             <div className="mt-2 mb-5 border border-gray-800">
-              <div className="border-b-2 border-gray-800 grid grid-cols-3">
-                <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
+              <div
+                className={clsx("border-b-2 border-gray-800", {
+                  "grid grid-cols-3": printView,
+                  "grid sm:grid-cols-3": !printView,
+                })}
+              >
+                <div
+                  className={clsx("col-span-1 py-2 px-3 border-gray-800", {
+                    "border-r-2": printView,
+                    "sm:border-r-2 border-b-2 sm:border-b-0": !printView,
+                  })}
+                >
                   <b>Name :</b> {patientData.name}
                 </div>
                 <div className="col-span-1 py-2 px-3">
@@ -129,11 +145,26 @@ const TreatmentSummary = (props: any) => {
                 </div>
               </div>
 
-              <div className="border-b-2 border-gray-800 grid grid-cols-3">
-                <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
+              <div
+                className={clsx("border-b-2 border-gray-800", {
+                  "grid grid-cols-3": printView,
+                  "grid sm:grid-cols-2 md:grid-cols-3": !printView,
+                })}
+              >
+                <div
+                  className={clsx("col-span-1 py-2 px-3 border-gray-800", {
+                    "border-r-2": printView,
+                    "sm:border-r-2 border-b-2 md:border-b-0": !printView,
+                  })}
+                >
                   <b>Age :</b> {patientData.age}
                 </div>
-                <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
+                <div
+                  className={clsx("col-span-1 py-2 px-3 border-gray-800", {
+                    "border-r-2": printView,
+                    "md:border-r-2 border-b-2 md:border-b-0": !printView,
+                  })}
+                >
                   <b>Date of admission :</b>
                   <span>
                     {consultationData.admitted
@@ -151,13 +182,28 @@ const TreatmentSummary = (props: any) => {
                 </div>
               </div>
 
-              <div className="border-b-2 border-gray-800 grid grid-cols-3">
-                <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
+              <div
+                className={clsx("border-b-2 border-gray-800", {
+                  "grid grid-cols-3": printView,
+                  "grid sm:grid-cols-2 md:grid-cols-3": !printView,
+                })}
+              >
+                <div
+                  className={clsx("col-span-1 py-2 px-3 border-gray-800", {
+                    "border-r-2": printView,
+                    "sm:border-r-2 border-b-2 md:border-b-0": !printView,
+                  })}
+                >
                   <b>Gender :</b>
                   {GENDER_TYPES.find((i) => i.id === patientData.gender)?.text}
                 </div>
 
-                <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
+                <div
+                  className={clsx("col-span-1 py-2 px-3 border-gray-800", {
+                    "border-r-2": printView,
+                    "md:border-r-2 border-b-2 md:border-b-0": !printView,
+                  })}
+                >
                   <b>Contact person :</b>
                   <span>
                     {" "}
@@ -178,8 +224,13 @@ const TreatmentSummary = (props: any) => {
               </div>
 
               <div className="border-b-2 border-gray-800 px-5 py-2">
-                <b>Comorbidities :</b>
-                <div className="mx-5">
+                <b>Comorbidities:</b>
+                <div
+                  className={clsx({
+                    "mx-5": printView,
+                    "mx-0 sm:mx-5": !printView,
+                  })}
+                >
                   <table className="border-collapse border border-gray-800 w-full">
                     <thead>
                       <tr>
@@ -267,7 +318,12 @@ const TreatmentSummary = (props: any) => {
               <div className="border-b-2 border-gray-800 px-5 py-2">
                 <b>Relevant investigations :</b>
 
-                <div className="mx-5">
+                <div
+                  className={clsx({
+                    "mx-5": printView,
+                    "mx-0 sm:mx-5 overflow-x-auto": !printView,
+                  })}
+                >
                   <table className="border-collapse border border-gray-800 w-full">
                     <thead>
                       <tr>
@@ -365,7 +421,12 @@ const TreatmentSummary = (props: any) => {
                 )}
                 <b className="mb-2">Treatment summary/Treament Plan :</b>
 
-                <div className="mx-5">
+                <div
+                  className={clsx({
+                    "mx-5": printView,
+                    "mx-0 sm:mx-5 overflow-x-auto": !printView,
+                  })}
+                >
                   <table className="border-collapse border border-gray-800 w-full">
                     <thead>
                       <tr>
