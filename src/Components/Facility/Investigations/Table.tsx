@@ -40,7 +40,7 @@ const StyledTableRow = withStyles((theme: Theme) =>
 
 const TestRow = ({ data, value, onChange }: any) => {
   const className = useStyle();
-  const inputType = data.investigation_type === "Float" ? "number" : "string";
+  const inputType = data.investigation_type === "Float" ? "number" : "text";
   return (
     <StyledTableRow>
       <TableCell className={className.tableCell}>{data.name}</TableCell>
@@ -57,7 +57,7 @@ const TestRow = ({ data, value, onChange }: any) => {
           />
         ) : (
           <input
-            className="h-12 text-right text-sm border-l border-r focus:ring-primary-500 focus:border-primary-500"
+            className="lg:w-full h-12 text-right text-sm border-l border-r focus:ring-primary-500 focus:border-primary-500 bg-[#fbfafc]"
             value={value}
             onChange={onChange}
             type={inputType}
