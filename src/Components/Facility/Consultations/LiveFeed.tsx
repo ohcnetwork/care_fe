@@ -24,6 +24,8 @@ import {
   InputLabel,
   Modal,
   Tooltip,
+  useMediaQuery,
+  useTheme,
 } from "@material-ui/core";
 import { FeedCameraPTZHelpButton } from "./Feed";
 import { AxiosError } from "axios";
@@ -55,7 +57,8 @@ const LiveFeed = (props: any) => {
   });
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
-
+  const theme = useTheme();
+  const isExtremeSmallScreen = useMediaQuery(theme.breakpoints.down(320));
   const liveFeedPlayerRef = useRef<any>(null);
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
@@ -424,7 +427,11 @@ const LiveFeed = (props: any) => {
                 )}
               </div>
             </div>
-            <div className="md:flex max-w-lg mt-4">
+            <div
+              className={`${
+                isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
+              } max-w-lg mt-4`}
+            >
               {cameraPTZ.map((option) => {
                 const shortcutKeyDescription =
                   option.shortcutKey &&
@@ -500,7 +507,11 @@ const LiveFeed = (props: any) => {
               </button>
             </nav>
             <div className="w-full space-y-4 my-2">
-              <div className="grid grid-cols-2 my-auto gap-2">
+              <div
+                className={`grid ${
+                  isExtremeSmallScreen ? " sm:grid-cols-2 " : " grid-cols-2 "
+                } my-auto gap-2`}
+              >
                 {showDefaultPresets ? (
                   <>
                     {viewOptions(presetsPage)?.map((option: any, i) => (
