@@ -480,7 +480,7 @@ const LiveFeed = (props: any) => {
           </div>
 
           <div className="flex flex-col mx-4 max-w-sm">
-            <nav className="flex w-full">
+            <nav className="flex flex-wrap">
               <button
                 className={`flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
                   showDefaultPresets
