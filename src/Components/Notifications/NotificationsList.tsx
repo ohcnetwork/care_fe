@@ -194,9 +194,19 @@ export default function NotificationsList({
     if (status === "NotSubscribed") {
       return "Subscribe";
     } else if (status === "SubscribedOnAnotherDevice") {
-      return "Subscribe On This Device";
+      return (
+        <>
+          {" "}
+          <i className="fa-solid fa-bell mr-2"></i>Subscribe On This Device
+        </>
+      );
     } else {
-      return "Unsubscribe";
+      return (
+        <>
+          {" "}
+          <i className="fa-solid fa-bell-slash mr-2"></i>Unsubscribe
+        </>
+      );
     }
   };
 
