@@ -19,7 +19,8 @@ jobs:
       - name: Checkout care
         uses: actions/checkout@v3
         with:
-          repository: coronasafe/care
+          repository: rithviknishad/care
+          ref: cypress/dummy-data
           path: care
 
       - name: Docker Layer Caching
