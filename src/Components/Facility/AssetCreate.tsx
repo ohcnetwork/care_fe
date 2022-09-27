@@ -347,113 +347,6 @@ const AssetCreate = (props: AssetProps) => {
                   errors={state.errors.name}
                 />
               </div>
-              <div className="flex flex-wrap justify-between">
-                <div>
-                  <InputLabel htmlFor="asset-type" id="name=label" required>
-                    Asset Type
-                  </InputLabel>
-                  <div className="my-2">
-                    <SelectMenu
-                      options={[
-                        {
-                          title: "Select",
-                          description:
-                            "Select an Asset Type from the following",
-                          value: undefined,
-                        },
-                        {
-                          title: "Internal",
-                          description: "Asset is inside the facility premises.",
-                          value: "INTERNAL",
-                        },
-                        {
-                          title: "External",
-                          description:
-                            "Asset is outside the facility premises.",
-                          value: "EXTERNAL",
-                        },
-                      ]}
-                      selected={asset_type}
-                      onSelect={setAssetType}
-                    />
-                  </div>
-                  <ErrorHelperText error={state.errors.asset_type} />
-                </div>
-                <div>
-                  <InputLabel htmlFor="asset-class" id="name=label">
-                    Asset Class
-                  </InputLabel>
-                  <div className="my-2">
-                    <SelectMenu
-                      options={[
-                        { title: "Select", value: undefined },
-                        { title: "ONVIF Camera", value: "ONVIF" },
-                        { title: "HL7 Vitals Monitor", value: "HL7MONITOR" },
-                      ]}
-                      selected={asset_class}
-                      onSelect={setAssetClass}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <InputLabel htmlFor="is_working" id="name=label" required>
-                    Working Status
-                  </InputLabel>
-                  <div className="my-2">
-                    <SelectMenu
-                      options={[
-                        { title: "Select", value: undefined },
-                        { title: "Working", value: "true" },
-                        { title: "Not Working", value: "false" },
-                      ]}
-                      selected={is_working}
-                      onSelect={setIsWorking}
-                      position="right"
-                    />
-                  </div>
-                  <ErrorHelperText error={state.errors.is_working} />
-                </div>
-              </div>
-              {is_working === "false" && (
-                <div>
-                  <InputLabel htmlFor="description" id="name=label">
-                    Reason
-                  </InputLabel>
-                  <MultilineInputField
-                    id="not_working_reason"
-                    rows={3}
-                    fullWidth
-                    name="description"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    value={not_working_reason}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setNotWorkingReason(e.target.value)
-                    }
-                    errors={state.errors.not_working_reason}
-                  />
-                </div>
-              )}
-              <div>
-                <InputLabel htmlFor="description" id="name=label">
-                  Description
-                </InputLabel>
-                <MultilineInputField
-                  id="description"
-                  rows={3}
-                  fullWidth
-                  name="description"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={description}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setDescription(e.target.value)
-                  }
-                  errors={state.errors.description}
-                />
-              </div>
               <div>
                 <InputLabel htmlFor="serial_number" id="name=label">
                   Serial Number
@@ -472,6 +365,30 @@ const AssetCreate = (props: AssetProps) => {
                   errors={state.errors.serial_number}
                 />
               </div>
+            </div>
+            {is_working === "false" && (
+              <div>
+                <InputLabel htmlFor="description" id="name=label">
+                  Reason
+                </InputLabel>
+                <MultilineInputField
+                  id="not_working_reason"
+                  rows={3}
+                  fullWidth
+                  name="description"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={not_working_reason}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNotWorkingReason(e.target.value)
+                  }
+                  errors={state.errors.not_working_reason}
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <InputLabel htmlFor="warranty_details" id="name=label">
                   Warranty Details
@@ -508,6 +425,8 @@ const AssetCreate = (props: AssetProps) => {
                   errors={state.errors.vendor_name}
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <InputLabel htmlFor="support_name" id="name=label">
                   Customer Support Name
@@ -534,6 +453,8 @@ const AssetCreate = (props: AssetProps) => {
                   errors={state.errors.support_phone}
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <InputLabel htmlFor="support_email" id="name=label">
                   Contact Email
@@ -573,6 +494,27 @@ const AssetCreate = (props: AssetProps) => {
                   errors={state.errors.location}
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <InputLabel htmlFor="description" id="name=label">
+                  Description
+                </InputLabel>
+                <MultilineInputField
+                  id="description"
+                  rows={3}
+                  fullWidth
+                  name="description"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={description}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setDescription(e.target.value)
+                  }
+                  errors={state.errors.description}
+                />
+              </div>
               <div>
                 <InputLabel htmlFor="qr_code_id" id="name=label">
                   Asset QR Code ID
@@ -594,20 +536,73 @@ const AssetCreate = (props: AssetProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-center sm:justify-start gap-x-4 gap-y-2 flex-wrap">
-              <Button
-                id="asset-create"
-                color="primary"
-                variant="contained"
-                type="submit"
-                onClick={(e) => handleSubmit(e)}
-                startIcon={
-                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                }
-                className="w-full sm:w-auto"
-              >
-                {assetId ? "Update" : "Create"}
-              </Button>
+
+            <div className="flex flex-wrap gap-2">
+              <div>
+                <InputLabel htmlFor="is_working" id="name=label" required>
+                  Working Status
+                </InputLabel>
+                <div className="my-2">
+                  <SelectMenu
+                    options={[
+                      { title: "Select", value: undefined },
+                      { title: "Working", value: "true" },
+                      { title: "Not Working", value: "false" },
+                    ]}
+                    selected={is_working}
+                    onSelect={setIsWorking}
+                    position="right"
+                  />
+                </div>
+                <ErrorHelperText error={state.errors.is_working} />
+              </div>
+              <div>
+                <InputLabel htmlFor="asset-type" id="name=label" required>
+                  Asset Type
+                </InputLabel>
+                <div className="my-2">
+                  <SelectMenu
+                    options={[
+                      {
+                        title: "Select",
+                        description: "Select an Asset Type from the following",
+                        value: undefined,
+                      },
+                      {
+                        title: "Internal",
+                        description: "Asset is inside the facility premises.",
+                        value: "INTERNAL",
+                      },
+                      {
+                        title: "External",
+                        description: "Asset is outside the facility premises.",
+                        value: "EXTERNAL",
+                      },
+                    ]}
+                    selected={asset_type}
+                    onSelect={setAssetType}
+                  />
+                </div>
+                <ErrorHelperText error={state.errors.asset_type} />
+              </div>
+              <div>
+                <InputLabel htmlFor="asset-class" id="name=label">
+                  Asset Class
+                </InputLabel>
+                <div className="my-2">
+                  <SelectMenu
+                    options={[
+                      { title: "Select", value: undefined },
+                      { title: "ONVIF Camera", value: "ONVIF" },
+                      { title: "HL7 Vitals Monitor", value: "HL7MONITOR" },
+                    ]}
+                    selected={asset_class}
+                    onSelect={setAssetClass}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-center sm:justify-end gap-x-4 gap-y-2 flex-wrap mt-4">
               <Button
                 id="asset-cancel"
                 color="primary"
@@ -622,6 +617,19 @@ const AssetCreate = (props: AssetProps) => {
                 className="w-full sm:w-auto"
               >
                 Cancel
+              </Button>
+              <Button
+                id="asset-create"
+                color="primary"
+                variant="contained"
+                type="submit"
+                onClick={(e) => handleSubmit(e)}
+                startIcon={
+                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                }
+                className="w-full sm:w-auto"
+              >
+                {assetId ? "Update" : "Create"}
               </Button>
             </div>
           </form>
