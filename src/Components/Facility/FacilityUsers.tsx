@@ -39,7 +39,10 @@ export default function FacilityUsers(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState(0);
-  const [facilityName, setFacilityName] = useState<string>("");
+  const [facilityData, setFacilityData] = useState({
+    name: "",
+    district_object_id: 0,
+  });
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -72,10 +75,15 @@ export default function FacilityUsers(props: any) {
     async function fetchFacilityName() {
       if (facilityId) {
         const res = await dispatch(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
+        setFacilityData({
+          name: res?.data?.name || "",
+          district_object_id: res?.data?.district_object?.id || 0,
+        });
       } else {
-        setFacilityName("");
+        setFacilityData({
+          name: "",
+          district_object_id: 0,
+        });
       }
     }
     fetchFacilityName();
@@ -288,7 +296,7 @@ export default function FacilityUsers(props: any) {
       currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
       currentUserLevel > level
     )
-      return user?.district_object?.id === currentUser?.data?.district;
+      return facilityData?.district_object_id === currentUser?.data?.district;
     return false;
   };
 
@@ -460,7 +468,7 @@ export default function FacilityUsers(props: any) {
         />
       )}
       <PageTitle
-        title={`Users - ${facilityName}`}
+        title={`Users - ${facilityData?.name}`}
         hideBack={true}
         className="mx-3 md:mx-8"
         breadcrumbs={false}
