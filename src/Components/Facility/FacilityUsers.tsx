@@ -273,19 +273,21 @@ export default function FacilityUsers(props: any) {
   };
 
   const showDelete = (user: any) => {
-    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateLabAdmin");
+    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateAdmin");
     const STATE_READ_ONLY_ADMIN_LEVEL =
       USER_TYPES.indexOf("StateReadOnlyAdmin");
     const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
     const level = USER_TYPES.indexOf(user.user_type);
     const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
     if (user.is_superuser) return true;
-    if (
-      currentUserLevel >= STATE_ADMIN_LEVEL &&
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
-    )
+
+    if (currentUserLevel >= STATE_ADMIN_LEVEL)
       return user.state_object?.id === currentUser?.data?.state;
-    if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel > level)
+    if (
+      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
+      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
+      currentUserLevel > level
+    )
       return user?.district_object?.id === currentUser?.data?.district;
     return false;
   };
