@@ -290,7 +290,7 @@ export const AddInventoryForm = (props: any) => {
                 <button
                   color="default"
                   type="button"
-                  onClick={goBack}
+                  onClick={() => goBack()}
                   className="w-full sm:w-fit bg-gray-400 hover:bg-gray-500 rounded-md p-2 px-6"
                 >
                   Cancel
