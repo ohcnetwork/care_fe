@@ -2,7 +2,7 @@ import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import React, { useReducer, useCallback, useState, useEffect } from "react";
+import { useReducer, useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
 import {
@@ -21,6 +21,7 @@ import {
 import { SampleTestModel, FacilityNameModel } from "./models";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -258,10 +259,6 @@ export const SampleTest = (props: any) => {
     const { checked, name } = e.target;
     form[name] = checked;
     dispatch({ type: "set_form", form });
-  };
-
-  const goBack = () => {
-    window.history.go(-1);
   };
 
   if (isLoading) {
@@ -516,7 +513,7 @@ export const SampleTest = (props: any) => {
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={goBack}
+                  onClick={() => goBack()}
                 >
                   {" "}
                   Cancel{" "}

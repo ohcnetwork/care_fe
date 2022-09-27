@@ -30,6 +30,7 @@ import moment from "moment";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError = {
@@ -70,10 +71,6 @@ const asset_create_reducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 type AssetFormSection =
