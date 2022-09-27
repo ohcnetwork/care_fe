@@ -192,21 +192,12 @@ let getPainStatus = val => {
   }
 }
 
-let isInvalidInputInt = (min, max, val) => {
-  let value = Js.Option.getWithDefault(min, val)
-  if value < min || value > max {
-    Some("Input outside range")
-  } else {
-    None
-  }
-}
-
 @react.component
 let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(hemodynamicParameter))
 
   <div>
-    <h2> {str("Hemodynamic Parameters")} </h2>
+    <h2> {str("Vitals")} </h2>
     <div className="flex items-center flex-col">
       <div className="w-full">
         <div className="mx-2 mt-5 md:flex justify-between">
@@ -229,6 +220,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
           value={Belt.Option.mapWithDefault(state.systolic, "", string_of_int)}
           setValue={s => send(SetSystolic(int_of_string(s)))}
           getLabel={getStatus(100.0, "Low", 140.0, "High")}
+          hasError={ValidationUtils.isInputInRangeInt(0, 250, state.systolic)}
         />
         <Slider
           title={"Diastolic"}
@@ -239,6 +231,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
           value={Belt.Option.mapWithDefault(state.diastolic, "", string_of_int)}
           setValue={s => send(SetDiastolic(int_of_string(s)))}
           getLabel={getStatus(50.0, "Low", 90.0, "High")}
+          hasError={ValidationUtils.isInputInRangeInt(30, 180, state.diastolic)}
         />
       </div>
       <Slider
@@ -250,6 +243,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         value={Belt.Option.mapWithDefault(state.pulse, "", string_of_int)}
         setValue={s => send(SetPulse(int_of_string(s)))}
         getLabel={getStatus(40.0, "Bradycardia", 100.0, "Tachycardia")}
+        hasError={ValidationUtils.isInputInRangeInt(0, 200, state.pulse)}
       />
       <Slider
         title={"Temperature"}
@@ -267,6 +261,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         getLabel={state.tempInCelcius
           ? getStatus(36.4, "Low", 37.5, "High")
           : getStatus(97.6, "Low", 99.6, "High")}
+        hasError={state.tempInCelcius ? ValidationUtils.isInputInRangeFloat("35", "41", state.temperature) : ValidationUtils.isInputInRangeFloat("95", "106", state.temperature)}
       />
       <Slider
         title={"Respiratory Rate (bpm)"}
@@ -277,6 +272,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         value={Belt.Option.mapWithDefault(state.resp, "", string_of_int)}
         setValue={s => send(SetResp(int_of_string(s)))}
         getLabel={getStatus(12.0, "Low", 16.0, "High")}
+        hasError={ValidationUtils.isInputInRangeInt(10, 70, state.resp)}
       />
       <Slider
         title={"Pain Scale"}
@@ -287,7 +283,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         value={Belt.Option.mapWithDefault(state.pain, "", string_of_int)}
         setValue={s => send(SetPain(int_of_string(s)))}
         getLabel={val => getPainStatus(val)}
-        hasError={isInvalidInputInt(0, 10, state.pain)}
+        hasError={ValidationUtils.isInputInRangeInt(0, 10, state.pain)}
       />
       <div className="w-full mb-10 px-3">
         <label className="block mb-2 font-bold"> {str("Rhythm")} </label>

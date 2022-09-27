@@ -50,6 +50,10 @@ export const deleteFacility = (id: number) => {
 export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
+
+export const partialUpdateUser = (username: string, data: any) => {
+  return fireRequest("partialUpdateUser", [], data, { username });
+};
 export const getUserListFacility = (pathParam: object) => {
   return fireRequest("userListFacility", [], {}, pathParam);
 };
@@ -79,8 +83,13 @@ export const getAnyFacility = (id: number | string, key?: string) => {
   return fireRequest("getAnyFacility", [], {}, { id: id }, key);
 };
 
-export const getFacilityUsers = (id: string) => {
-  return fireRequest("getFacilityUsers", [], {}, { facility_id: id });
+export const getFacilityUsers = (id: string, params?: object) => {
+  return fireRequest(
+    "getFacilityUsers",
+    [],
+    { ...params },
+    { facility_id: id }
+  );
 };
 export const getOnlineDoctors = () => {
   return fireRequest("getOnlineDoctors", [], {}, {});
@@ -337,6 +346,9 @@ export const getCapacityBed = (pathParam: object) => {
 
 export const getDoctor = (pathParam: object) => {
   return fireRequest("getDoctor", [], {}, pathParam);
+};
+export const deleteCapacity = (pathParam: object) => {
+  return fireRequest("deleteCapacityBed", [], {}, pathParam);
 };
 
 //Patient
@@ -705,6 +717,11 @@ export const editInvestigation = (
     consultation_external_id: consultation_external_id,
   });
 };
+
+// ICD11
+export const listICD11Diagnosis = (params: object, key: string) => {
+  return fireRequest("listICD11Diagnosis", [], params, null, key);
+}
 
 // Resource
 export const createResource = (params: object) => {

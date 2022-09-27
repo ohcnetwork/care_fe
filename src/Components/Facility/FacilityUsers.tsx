@@ -22,6 +22,7 @@ import UserDeleteDialog from "../Users/UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
 import UserDetails from "../Common/UserDetails";
+import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -59,6 +60,12 @@ export default function FacilityUsers(props: any) {
     name: string;
   }>({ show: false, username: "", name: "" });
 
+  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
+    show: boolean;
+    userName: string;
+    facility?: FacilityModel;
+  }>({ show: false, userName: "", facility: undefined });
+
   const limit = RESULTS_PER_PAGE_LIMIT;
 
   useEffect(() => {
@@ -77,7 +84,10 @@ export default function FacilityUsers(props: any) {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getFacilityUsers(facilityId));
+      const res = await dispatch(
+        getFacilityUsers(facilityId, { offset, limit })
+      );
+
       if (!status.aborted) {
         if (res && res.data) {
           setUsers(res.data.results);
@@ -86,7 +96,7 @@ export default function FacilityUsers(props: any) {
         setIsLoading(false);
       }
     },
-    [dispatch, facilityId]
+    [dispatch, facilityId, offset, limit]
   );
 
   useAbortableEffect(
@@ -122,17 +132,18 @@ export default function FacilityUsers(props: any) {
     setIsFacilityLoading(false);
   };
 
-  const removeFacility = async (username: string, facility: any) => {
-    setIsFacilityLoading(true);
-    await dispatch(deleteUserFacility(username, String(facility.id)));
-    setIsFacilityLoading(false);
-    loadFacilities(username);
-  };
-
   const showLinkFacilityModal = (username: string) => {
     setLinkFacility({
       show: true,
       username,
+    });
+  };
+
+  const hideUnlinkFacilityModal = () => {
+    setUnlinkFacilityData({
+      show: false,
+      facility: undefined,
+      userName: "",
     });
   };
 
@@ -141,6 +152,19 @@ export default function FacilityUsers(props: any) {
       show: false,
       username: "",
     });
+  };
+
+  const handleUnlinkFacilitySubmit = async () => {
+    setIsFacilityLoading(true);
+    await dispatch(
+      deleteUserFacility(
+        unlinkFacilityData.userName,
+        String(unlinkFacilityData?.facility?.id)
+      )
+    );
+    setIsFacilityLoading(false);
+    loadFacilities(unlinkFacilityData.userName);
+    hideUnlinkFacilityModal();
   };
 
   const handleCancel = () => {
@@ -213,7 +237,13 @@ export default function FacilityUsers(props: any) {
                   size="small"
                   color="secondary"
                   disabled={isFacilityLoading}
-                  onClick={() => removeFacility(username, facility)}
+                  onClick={() =>
+                    setUnlinkFacilityData({
+                      show: true,
+                      facility: facility,
+                      userName: username,
+                    })
+                  }
                 >
                   <CloseIcon />
                 </IconButton>
@@ -222,6 +252,14 @@ export default function FacilityUsers(props: any) {
           ))}
         </div>
         {showLinkFacility(username)}
+        {unlinkFacilityData.show && (
+          <UnlinkFacilityDialog
+            facilityName={unlinkFacilityData.facility?.name || ""}
+            userName={unlinkFacilityData.userName}
+            handleCancel={hideUnlinkFacilityModal}
+            handleOk={handleUnlinkFacilitySubmit}
+          />
+        )}
       </div>
     );
   };

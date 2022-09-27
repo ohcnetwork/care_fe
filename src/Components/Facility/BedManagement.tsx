@@ -94,7 +94,7 @@ const BedRow = (props: BedRowProps) => {
         </div>
         <p className="break-all">{description}</p>
       </div>
-      <div className="flex">
+      <div className="sm:flex">
         <div className="px-2 py-2 w-full">
           <button
             onClick={() =>
@@ -207,7 +207,7 @@ export const BedManagement = (props: BedManagementProps) => {
     ));
   } else if (beds && beds.length === 0) {
     BedList = (
-      <p className="bg-white px-5 py-5 border-b border-gray-200 text-center text-gray-500 whitespace-nowrap">
+      <p className="bg-white text-2xl w-full flex justify-center font-bold px-5 py-5 border-b border-gray-200 text-center text-gray-500">
         No beds available in this location
       </p>
     );
