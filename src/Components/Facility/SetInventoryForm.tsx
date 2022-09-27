@@ -209,13 +209,9 @@ export const SetInventoryForm = (props: any) => {
                 <div>
                   <button
                     color="primary"
-                    // variant="contained"
                     type="submit"
                     style={{ marginLeft: "auto" }}
                     className="bg-green-500 hover:bg-green-700 w-full text-white sm:w-fit mt-2 rounded-md px-6 font-bold p-2"
-                    // startIcon={
-                    //   <CheckCircleOutlineIcon></CheckCircleOutlineIcon>
-                    // }
                     onClick={(e) => handleSubmit(e)}
                   >
                     <CheckCircleOutlineIcon></CheckCircleOutlineIcon> SET
