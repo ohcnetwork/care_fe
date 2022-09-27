@@ -256,7 +256,7 @@ export default function ResourceCreate(props: resourceProps) {
                 />
               </div>
 
-              <div>
+              <div className="md:col-span-2">
                 <InputLabel>Name of approving facility*</InputLabel>
                 <FacilitySelect
                   multiple={false}
@@ -267,6 +267,80 @@ export default function ResourceCreate(props: resourceProps) {
                     handleValueChange(value, "approving_facility")
                   }
                   errors={state.errors.approving_facility}
+                />
+              </div>
+
+              <div>
+                <InputLabel>Category</InputLabel>
+                <SelectField
+                  name="category"
+                  variant="outlined"
+                  fullWidth
+                  margin="dense"
+                  optionArray={true}
+                  value={state.form.category}
+                  options={RESOURCE_CATEGORY_CHOICES}
+                  onChange={handleChange}
+                  className="bg-white h-14 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
+
+              <div>
+                <InputLabel>Subcategory</InputLabel>
+                <SelectField
+                  name="sub_category"
+                  variant="outlined"
+                  margin="dense"
+                  fullWidth
+                  value={state.form.sub_category}
+                  options={RESOURCE_SUBCATEGORIES}
+                  onChange={handleChange}
+                  className="bg-white h-14 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
+
+              <div className="md:col-span-1">
+                <InputLabel>Request Title*</InputLabel>
+                <TextInputField
+                  rows={5}
+                  name="title"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Type your title here"
+                  value={state.form.title}
+                  onChange={handleChange}
+                  errors={state.errors.title}
+                />
+              </div>
+
+              <div className="md:col-span-1">
+                <div className="w-full">
+                  <InputLabel>Required Quantity</InputLabel>
+                  <TextInputField
+                    name="requested_quantity"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.required_quantity}
+                    onChange={handleChange}
+                    errors=""
+                  />
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <InputLabel>Description of request*</InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  name="reason"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Type your description here"
+                  value={state.form.reason}
+                  onChange={handleChange}
+                  errors={state.errors.reason}
                 />
               </div>
 
@@ -295,84 +369,22 @@ export default function ResourceCreate(props: resourceProps) {
                 <ErrorHelperText error={state.errors.emergency} />
               </div>
 
-              <div>
-                <InputLabel>Category</InputLabel>
-                <SelectField
-                  name="category"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.category}
-                  options={RESOURCE_CATEGORY_CHOICES}
-                  onChange={handleChange}
-                  className="bg-white h-14 lg:w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-
-              <div>
-                <InputLabel>Subcategory</InputLabel>
-                <SelectField
-                  name="sub_category"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.sub_category}
-                  options={RESOURCE_SUBCATEGORIES}
-                  onChange={handleChange}
-                  className="bg-white h-14 lg:w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-
-              <div>
-                <InputLabel>Required Quantity</InputLabel>
-                <TextInputField
-                  name="requested_quantity"
-                  variant="outlined"
-                  margin="dense"
-                  type="number"
-                  value={state.form.required_quantity}
-                  onChange={handleChange}
-                  errors=""
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Request Title*</InputLabel>
-                <TextInputField
-                  rows={5}
-                  name="title"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Type your title here"
-                  value={state.form.title}
-                  onChange={handleChange}
-                  errors={state.errors.title}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Description of request*</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="reason"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Type your description here"
-                  value={state.form.reason}
-                  onChange={handleChange}
-                  errors={state.errors.reason}
-                />
-              </div>
-
-              <div className="md:col-span-2 flex justify-between mt-4">
-                <Button color="default" variant="contained" onClick={goBack}>
+              <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
+                <Button
+                  color="default"
+                  variant="contained"
+                  className="w-full md:w-auto"
+                  fullWidth
+                  onClick={goBack}
+                >
                   Cancel
                 </Button>
                 <Button
                   color="primary"
                   variant="contained"
                   type="submit"
+                  fullWidth
+                  className="w-full md:w-auto"
                   style={{ marginLeft: "auto" }}
                   onClick={(e) => handleSubmit(e)}
                   startIcon={
