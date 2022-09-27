@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import { navigate } from "raviger";
 import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import clsx from "clsx";
+import { goBack } from "../../Utils/utils";
 
 interface PageTitleProps {
   title: string;
@@ -45,16 +45,8 @@ export default function PageTitle(props: PageTitleProps) {
     }
   }, [divRef, focusOnLoad]);
 
-  const onBackButtonClick = () => {
-    if (backButtonCB) {
-      const goBack = backButtonCB();
-      if (goBack) {
-        window.history.go(goBack);
-      }
-    } else {
-      backUrl ? navigate(backUrl) : window.history.go(-1);
-    }
-  };
+  const onBackButtonClick = () =>
+    goBack((backButtonCB && backButtonCB()) || backUrl);
 
   return (
     <div ref={divRef} className={`pt-4 mb-4 ${className}`}>
