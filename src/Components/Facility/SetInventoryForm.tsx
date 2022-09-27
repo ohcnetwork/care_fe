@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -197,30 +197,29 @@ export const SetInventoryForm = (props: any) => {
               </div>
               <div className="sm:flex sm:justify-between mt-4">
                 <div>
-                  <Button
+                  <button
                     color="default"
-                    variant="contained"
                     type="button"
                     onClick={goBack}
-                    className="w-full sm:w-fit"
+                    className="w-full sm:w-fit bg-gray-400 hover:bg-gray-500 rounded-md p-2 px-6"
                   >
                     Cancel
-                  </Button>
+                  </button>
                 </div>
                 <div>
-                  <Button
+                  <button
                     color="primary"
-                    variant="contained"
+                    // variant="contained"
                     type="submit"
                     style={{ marginLeft: "auto" }}
-                    startIcon={
-                      <CheckCircleOutlineIcon></CheckCircleOutlineIcon>
-                    }
+                    className="bg-green-500 hover:bg-green-700 w-full text-white sm:w-fit mt-2 rounded-md px-6 font-bold p-2"
+                    // startIcon={
+                    //   <CheckCircleOutlineIcon></CheckCircleOutlineIcon>
+                    // }
                     onClick={(e) => handleSubmit(e)}
-                    className="w-full sm:w-fit mt-2"
                   >
-                    SET
-                  </Button>
+                    <CheckCircleOutlineIcon></CheckCircleOutlineIcon> SET
+                  </button>
                 </div>
               </div>
             </CardContent>
