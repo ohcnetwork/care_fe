@@ -171,11 +171,12 @@ export const UpdateMinQuantity = (props: any) => {
                   />
                 </div>
               </div>
-              <div className="flex justify-between mt-4">
+              <div className="sm:flex sm:justify-between mt-4">
                 <Button
                   color="default"
                   variant="contained"
                   type="button"
+                  className="w-full sm:w-fit"
                   onClick={goBack}
                 >
                   Cancel
@@ -183,6 +184,7 @@ export const UpdateMinQuantity = (props: any) => {
                 <Button
                   color="primary"
                   variant="contained"
+                  className="w-full sm:w-fit mt-2"
                   type="submit"
                   style={{ marginLeft: "auto" }}
                   startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}

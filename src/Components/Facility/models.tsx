@@ -71,12 +71,18 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
+export type PatientCategory =
+  | "Comfort Care"
+  | "Stable"
+  | "Slightly Abnormal"
+  | "Critical";
+
 export interface ConsultationModel {
   admission_date?: string;
   admitted?: boolean;
   test_id?: string;
   admitted_to?: string;
-  category?: string;
+  category?: PatientCategory;
   created_date?: string;
   discharge_date?: string;
   examination_details?: string;
@@ -95,6 +101,7 @@ export interface ConsultationModel {
   kasp_enabled_date?: string;
   diagnosis?: string;
   icd11_diagnoses_object?: ICD11DiagnosisModel[];
+  icd11_provisional_diagnoses_object?: ICD11DiagnosisModel[];
   verified_by?: string;
   suggestion_text?: string;
   symptoms?: Array<number>;
