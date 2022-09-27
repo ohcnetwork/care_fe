@@ -11,6 +11,7 @@ import {
   retrieveUpload,
   createUpload,
   getPatient,
+  editUpload,
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
 import { TextInputField } from "../Common/HelperInputFields";
@@ -250,7 +251,11 @@ export const FileUpload = (props: FileUploadProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           audio_urls(res.data.results);
-          setuploadedFiles(res.data.results);
+          setuploadedFiles(
+            res.data.results.filter(
+              (file: FileUploadModel) => file.upload_completed
+            )
+          );
           setTotalCount(res.data.count);
         }
         setIsLoading(false);
@@ -459,7 +464,7 @@ export const FileUpload = (props: FileUploadProps) => {
             msg: "File Uploaded Successfully",
           });
           setUploadFileNameError("");
-          resolve();
+          resolve(response);
         })
         .catch((e) => {
           Notification.Error({
@@ -484,6 +489,16 @@ export const FileUpload = (props: FileUploadProps) => {
     }
     return true;
   };
+  const markUploadComplete = async (response: any) => {
+    return dispatch(
+      editUpload(
+        { upload_completed: true },
+        response.data.id,
+        type,
+        getAssociatedId()
+      )
+    );
+  };
 
   const handleUpload = async (status: any) => {
     if (!validateFileUpload()) return;
@@ -503,6 +518,7 @@ export const FileUpload = (props: FileUploadProps) => {
     };
     dispatch(createUpload(requestData))
       .then(uploadfile)
+      .then(markUploadComplete)
       .catch(() => {
         setUploadStarted(false);
       })
