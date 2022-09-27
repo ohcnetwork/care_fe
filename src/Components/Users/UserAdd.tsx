@@ -35,13 +35,11 @@ import {
   PhoneNumberField,
   SelectField,
   TextInputField,
-  MultiSelectField,
   CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
-import HelpToolTip from "../Common/utils/HelpToolTip";
 import clsx from "clsx";
-
+import { goBack } from "../../Utils/utils";
 import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
 
 
@@ -113,10 +111,6 @@ const user_create_reducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 export const UserAdd = (props: UserProps) => {
@@ -264,40 +258,6 @@ export const UserAdd = (props: UserProps) => {
     [dispatchAction]
   );
 
-  // const fetchData = useCallback(
-  //   async (status: statusType) => {
-  //     if (userId) {
-  //       setIsLoading(true);
-  //       const res = await dispatchAction(getFacility(userId));
-  //       if (!status.aborted && res.data) {
-  //         const formData = {
-  //           facility_type: res.data.facility_type,
-  //           name: res.data.name,
-  //           state: res.data.state ? res.data.state : "",
-  //           district: res.data.district ? res.data.district : "",
-  //           local_body: res.data.local_body ? res.data.local_body : "",
-  //           address: res.data.address,
-  //           phone_number: res.data.phone_number,
-  //           latitude: res.data.location ? res.data.location.latitude : "",
-  //           longitude: res.data.location ? res.data.location.longitude : "",
-  //           oxygen_capacity: res.data.oxygen_capacity
-  //             ? res.data.oxygen_capacity
-  //             : ""
-  //         };
-  //         dispatch({ type: "set_form", form: formData });
-  //         Promise.all([
-  //           fetchDistricts(res.data.state),
-  //           fetchLocalBody(res.data.district)
-  //         ]);
-  //       } else {
-  //         navigate(`/facility/${userId}`);
-  //       }
-  //       setIsLoading(false);
-  //     }
-  //   },
-  //   [dispatchAction, fetchDistricts, fetchLocalBody, userId]
-  // );
-
   const fetchStates = useCallback(
     async (status: statusType) => {
       setIsStateLoading(true);
@@ -334,9 +294,6 @@ export const UserAdd = (props: UserProps) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      // if (userId) {
-      //   fetchData(status);
-      // }
       fetchStates(status);
       if (userType === "Staff" || userType === "StaffReadOnly") {
         fetchFacilities(status);
@@ -391,13 +348,6 @@ export const UserAdd = (props: UserProps) => {
     form.facilities = selected
       ? (selected as FacilityModel[]).map((i) => i.id)
       : [];
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleMultiSelect = (event: any) => {
-    const { name, value } = event.target;
-    const form = { ...state.form };
-    form[name] = value;
     dispatch({ type: "set_form", form });
   };
 
@@ -613,20 +563,21 @@ export const UserAdd = (props: UserProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle 
+      <PageTitle
         title={headerText}
-        componentRight={<Link
-          href="https://school.coronasafe.network/targets/12953"
-          className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
-          target="_blank"
-        >
-          <i className="fas fa-info-circle" /> &nbsp;Need Help?
-        </Link>}
+        componentRight={
+          <Link
+            href="https://school.coronasafe.network/targets/12953"
+            className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
+            target="_blank"
+          >
+            <i className="fas fa-info-circle" /> &nbsp;Need Help?
+          </Link>
+        }
         justifyContents="justify-between"
       />
 
       <Card className="mt-4">
-        
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -944,7 +895,7 @@ export const UserAdd = (props: UserProps) => {
                       value={state.form.local_body}
                       options={localBody}
                       optionValue="name"
-                      onChange={(e) => handleChange}
+                      onChange={handleChange}
                       errors={state.errors.local_body}
                     />
                   )}
@@ -952,7 +903,11 @@ export const UserAdd = (props: UserProps) => {
               )}
             </div>
             <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-              <Button color="default" variant="contained" onClick={goBack}>
+              <Button
+                color="default"
+                variant="contained"
+                onClick={() => goBack()}
+              >
                 Cancel
               </Button>
               <Button

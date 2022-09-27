@@ -5,10 +5,7 @@ describe("authentication", () => {
   users.forEach((user) => {
     it("Login as " + user.username + " - " + user.rolename, () => {
       cy.loginByApi(user.username, "passwordR0FL");
-
-      // Assert user
-      cy.get("a[href='/user/profile'] i").click();
-      cy.url().should("include", "/user/profile");
+      cy.awaitUrl("/user/profile");
       cy.get("dd").should("contain", user.username);
       cy.get("dd").should("contain", user.rolename);
     });
@@ -16,6 +13,8 @@ describe("authentication", () => {
   afterEach(() => {
     cy.log("Logging out");
     cy.get("p").contains("Sign Out").click();
+    cy.getLocalStorage("care_access_token").should("be.null");
+    cy.getLocalStorage("care_refresh_token").should("be.null");
     cy.url().should("include", "/");
   });
 });

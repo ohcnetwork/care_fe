@@ -19,6 +19,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../../Components/Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -77,14 +78,6 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   const buttonText = !id
     ? `Save ${!isLastOptionType ? "& Add More" : "Doctor Capacity"}`
     : "Update Doctor Capacity";
-
-  const goBack = () => {
-    if (!id) {
-      navigate(`/facility/${facilityId}`);
-    } else {
-      window.history.go(-1);
-    }
-  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -290,7 +283,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     className="w-full sm:w-auto"
                     color="default"
                     variant="contained"
-                    onClick={goBack}
+                    onClick={() => goBack(!id && `/facility/${facilityId}`)}
                   >
                     Cancel
                   </Button>

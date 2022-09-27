@@ -8,12 +8,17 @@ import { getDailyReport } from "../../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
-import { PATIENT_CATEGORY } from "../../../Common/constants";
 import { smallCard } from "../../Common/components/SkeletonLoading.gen";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
-const patientCategoryChoices = [...PATIENT_CATEGORY];
+const getName = (item: any) => {
+  const fallback = "Virtual Nursing Assistant";
+  if (item?.first_name === "" && item?.last_name === "") {
+    return fallback;
+  }
+  return `${item?.first_name} ${item?.last_name} - ${item?.user_type}`;
+};
 
 export const DailyRoundsList = (props: any) => {
   const { facilityId, patientId, consultationId, consultationData } = props;
@@ -87,9 +92,7 @@ export const DailyRoundsList = (props: any) => {
                         <span className="text-gray-700">Updated by:</span>{" "}
                         {telemedicine_doctor_update &&
                         consultationData.assigned_to_object
-                          ? consultationData.assigned_to_object.first_name +
-                            " " +
-                            consultationData.assigned_to_object.last_name
+                          ? getName(consultationData.assigned_to_object)
                           : "-"}
                       </Typography>
                     </Grid>
@@ -99,11 +102,7 @@ export const DailyRoundsList = (props: any) => {
                     <Grid item xs={12}>
                       <Typography>
                         <span className="text-gray-700">Updated by:</span>{" "}
-                        {itemData.last_edited_by.first_name +
-                          " " +
-                          itemData.last_edited_by.last_name +
-                          " - " +
-                          itemData.last_edited_by.user_type}
+                        {getName(itemData.last_edited_by)}
                       </Typography>
                     </Grid>
                   ) : null}
@@ -112,11 +111,7 @@ export const DailyRoundsList = (props: any) => {
                     <Grid item xs={12}>
                       <Typography>
                         <span className="text-gray-700">Created by:</span>{" "}
-                        {itemData.created_by.first_name +
-                          " " +
-                          itemData.created_by.last_name +
-                          " - " +
-                          itemData.created_by.user_type}
+                        {getName(itemData.created_by)}
                       </Typography>
                     </Grid>
                   ) : null}
@@ -126,9 +121,7 @@ export const DailyRoundsList = (props: any) => {
                       <Typography>
                         <span className="text-gray-700">Category: </span>
                         <span className="badge badge-pill badge-warning">
-                          {patientCategoryChoices.find(
-                            (i) => i.id === itemData.patient_category
-                          )?.text || "-"}
+                          {itemData.patient_category || "-"}
                         </span>
                       </Typography>
                     </Grid>

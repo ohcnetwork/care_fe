@@ -7,10 +7,9 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications";
 import { getConsultation, getPatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import { ConsultationModel } from "./models";
+import { ConsultationModel, ICD11DiagnosisModel } from "./models";
 import { PatientModel } from "../Patient/models";
 import {
-  PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   CONSULTATION_TABS,
   OptionsType,
@@ -48,6 +47,7 @@ import {
 } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
+import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -56,7 +56,6 @@ interface PreDischargeFormInterface {
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
-const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -214,9 +213,6 @@ export const ConsultationDetails = (props: any) => {
           const data: ConsultationModel = {
             ...res.data,
             symptoms_text: "",
-            category:
-              patientCategoryChoices.find((i) => i.id === res.data.category)
-                ?.text || res.data.category,
           };
           if (res.data.symptoms && res.data.symptoms.length) {
             const symptoms = res.data.symptoms
@@ -276,6 +272,49 @@ export const ConsultationDetails = (props: any) => {
     `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
+
+  const ShowDiagnosis = ({
+    diagnoses = [],
+    label = "Diagnosis",
+    nshow = 2,
+  }: {
+    diagnoses: ICD11DiagnosisModel[] | undefined;
+    label: string;
+    nshow?: number;
+  }) => {
+    const [showMore, setShowMore] = useState(false);
+
+    return diagnoses.length ? (
+      <div className="text-sm w-full">
+        <p className="font-semibold leading-relaxed">{label}</p>
+
+        {diagnoses
+          .slice(0, !showMore ? nshow : undefined)
+          .map((diagnosis: any) => (
+            <p>{diagnosis.label}</p>
+          ))}
+        {diagnoses.length > nshow && (
+          <>
+            {!showMore ? (
+              <a
+                onClick={() => setShowMore(true)}
+                className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+              >
+                show more
+              </a>
+            ) : (
+              <a
+                onClick={() => setShowMore(false)}
+                className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+              >
+                show less
+              </a>
+            )}
+          </>
+        )}
+      </div>
+    ) : null;
+  };
 
   return (
     <div>
@@ -487,7 +526,7 @@ export const ConsultationDetails = (props: any) => {
               )}
             </div>
 
-            <div className="flex px-4 flex-col lg:flex-row gap-2">
+            <div className="flex px-4 flex-col-reverse lg:flex-row gap-2">
               <div className="flex flex-col w-3/4 h-full">
                 {/*consultationData.other_symptoms && (
                   <div className="capitalize">
@@ -498,14 +537,29 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )*/}
 
-                {consultationData.diagnosis && (
-                  <div className="text-sm w-full">
-                    <span className="font-semibold leading-relaxed">
-                      Diagnosis:{" "}
-                    </span>
-                    {consultationData.diagnosis}
-                  </div>
-                )}
+                <ShowDiagnosis
+                  diagnoses={
+                    consultationData?.icd11_provisional_diagnoses_object
+                  }
+                  label="Provisional Diagnosis"
+                />
+
+                <ShowDiagnosis
+                  diagnoses={[
+                    ...(consultationData?.diagnosis
+                      ? [
+                          {
+                            id: "0",
+                            label: consultationData?.diagnosis,
+                            parentId: null,
+                          },
+                        ]
+                      : []),
+                    ...(consultationData?.icd11_diagnoses_object || []),
+                  ]}
+                  label="Diagnosis"
+                />
+
                 {consultationData.verified_by && (
                   <div className="text-sm mt-2">
                     <span className="font-semibold leading-relaxed">
@@ -906,14 +960,14 @@ export const ConsultationDetails = (props: any) => {
             )}
             {consultationData.discharge_advice && (
               <div className="mt-4">
-                <h3 className="flex text-lg font-semibold leading-relaxed text-gray-900">
-                  Prescription
-                  <div className="ml-3 text-xs text-gray-600 mt-2">
+                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900">
+                  <span className="mr-3">Prescription</span>
+                  <div className="text-xs text-gray-600 mt-2 ">
                     <i className="fas fa-history text-sm pr-2"></i>
                     {consultationData.modified_date &&
                       moment(consultationData.modified_date).format("lll")}
                   </div>
-                </h3>
+                </div>
                 <div className="flex flex-col">
                   <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                     <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
@@ -979,14 +1033,14 @@ export const ConsultationDetails = (props: any) => {
             )}
             {consultationData.prn_prescription && (
               <div className="mt-4">
-                <h3 className="flex text-lg font-semibold leading-relaxed text-gray-900">
-                  PRN Prescription
-                  <div className="ml-3 text-xs text-gray-600 mt-2">
+                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900">
+                  <span className="mr-3">PRN Prescription</span>
+                  <div className="text-xs text-gray-600 mt-2">
                     <i className="fas fa-history text-sm pr-2"></i>
                     {consultationData.modified_date &&
                       moment(consultationData.modified_date).format("lll")}
                   </div>
-                </h3>
+                </div>
                 <div className="flex flex-col">
                   <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                     <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
@@ -1186,6 +1240,7 @@ export const ConsultationDetails = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
             />
+            <ViewInvestigationSuggestions consultationId={consultationId} />
           </div>
         )}
       </div>

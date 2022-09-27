@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import React, { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -8,6 +8,7 @@ import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -36,10 +37,6 @@ const inventoryFormReducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 export const SetInventoryForm = (props: any) => {
@@ -193,12 +190,13 @@ export const SetInventoryForm = (props: any) => {
                   />
                 </div>
               </div>
-              <div className="flex justify-between mt-4">
+              <div className="sm:flex sm:justify-between mt-4">
                 <Button
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={goBack}
+                  onClick={() => goBack()}
+                  className="w-full sm:w-fit"
                 >
                   Cancel
                 </Button>
@@ -209,6 +207,7 @@ export const SetInventoryForm = (props: any) => {
                   style={{ marginLeft: "auto" }}
                   startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
                   onClick={(e) => handleSubmit(e)}
+                  className="w-full sm:w-fit mt-2"
                 >
                   SET{" "}
                 </Button>
