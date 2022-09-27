@@ -18,7 +18,7 @@ import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { InputSearchBox } from "../Common/SearchBox";
 import { FacilityModel } from "../Facility/models";
 
-import { IconButton, CircularProgress } from "@material-ui/core";
+import { IconButton, CircularProgress, Modal } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
@@ -57,6 +57,8 @@ export default function ManageUsers() {
   const [users, setUsers] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [isFacilityLoading, setIsFacilityLoading] = useState(false);
+  const [modalFacility, setModalFacility] = useState(false);
+  const [modalFacilityContent, setModalFacilityContent] = useState(<></>);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
@@ -192,7 +194,10 @@ export default function ManageUsers() {
             }
           : user;
       });
+      showFacilities(username, res.data);
+
       setUsers(updated);
+      setModalFacility(true);
     }
     setIsFacilityLoading(false);
   };
@@ -311,14 +316,15 @@ export default function ManageUsers() {
 
   const showFacilities = (username: string, facilities: FacilityModel[]) => {
     if (!facilities || !facilities.length) {
-      return (
+      setModalFacilityContent(
         <>
           <div className="font-semibold">No Facilities!</div>
           {showLinkFacility(username)}
         </>
       );
+      return <></>;
     }
-    return (
+    setModalFacilityContent(
       <div className="sm:col-start-2 col-span-full sm:col-span-3">
         <div className="mb-2">
           {facilities.map((facility, i) => (
@@ -353,6 +359,7 @@ export default function ManageUsers() {
         {showLinkFacility(username)}
       </div>
     );
+    return <></>;
   };
 
   const addFacility = async (username: string, facility: any) => {
@@ -521,16 +528,12 @@ export default function ManageUsers() {
                       </UserDetails>
                     </div>
                   )}
-                  {user.username && user.facilities && (
-                    <div className="col-span-4">
-                      <UserDetails title="Linked Facilities">
-                        {showFacilities(user.username, user.facilities)}
-                      </UserDetails>
-                    </div>
-                  )}
+
                   {user.username && !user.facilities && (
                     <a
-                      onClick={() => loadFacilities(user.username)}
+                      onClick={() => {
+                        loadFacilities(user.username);
+                      }}
                       className={`col-span-4 mt-2 ${facilityClassname}`}
                       href="#"
                     >
@@ -584,6 +587,35 @@ export default function ManageUsers() {
           handleCancel={hideLinkFacilityModal}
         />
       )}
+      <Modal
+        className=""
+        open={modalFacility}
+        onClose={(_) => {
+          setModalFacility(false);
+          setModalFacilityContent(<></>);
+          window.location.reload();
+        }}
+      >
+        <div className="h-full w-full absolute flex items-center justify-center bg-modal">
+          <div className="bg-white rounded relative shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content overflow-auto">
+            <div
+              onClick={(_) => {
+                setModalFacility(false);
+                setModalFacilityContent(<></>);
+                window.location.reload();
+              }}
+              className="top-0 right-0 absolute h-16 w-16 text-red-500 text-3xl cursor-pointer"
+            >
+              X
+            </div>
+            <div className="text-xl text-black font-bold mb-2">
+              Linked Facilities:
+            </div>
+
+            {modalFacilityContent}
+          </div>
+        </div>
+      </Modal>
       <PageTitle
         title="User Management"
         hideBack={true}
