@@ -171,7 +171,7 @@ export default function TeleICUPatientInfoCard(props: {
               <Link
                 key={i}
                 href={`${action[0]}`}
-                className="btn btn-primary hover:text-white flex justify-center"
+                className="btn btn-primary hover:text-white flex justify-start"
               >
                 <i className={`fas fa-${action[2]} w-4 mr-3`}></i>
                 <p className="font-semibold">{action[1]}</p>

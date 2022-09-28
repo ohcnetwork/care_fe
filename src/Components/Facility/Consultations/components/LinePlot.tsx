@@ -1,12 +1,20 @@
 import ReactECharts from "echarts-for-react";
 
 export const LinePlot = (props: any) => {
-  const { title, name, xData, yData, low = null, high = null, defaultSpace } = props;
+  const {
+    title,
+    name,
+    xData,
+    yData,
+    low = null,
+    high = null,
+    defaultSpace = true,
+  } = props;
   let generalOptions: any = {
     title: {
       text: `${title} [ {0|${yData[yData.length - 1]?.toFixed(2) || "NA"}} ]`,
       textStyle: {
-        fontSize: 20,
+        fontSize: 14,
         rich: {
           0: {
             fontSize: 14,
@@ -27,6 +35,8 @@ export const LinePlot = (props: any) => {
     },
     toolbox: {
       show: true,
+      orient: "vertical",
+      top: "9%",
       feature: {
         dataZoom: {
           yAxisIndex: "none",
@@ -82,7 +92,7 @@ export const LinePlot = (props: any) => {
     generalOptions = {
       ...generalOptions,
       title: {
-        text: ``,
+        text: "",
       },
       grid: {
         left: "15px",
@@ -132,15 +142,15 @@ export const LinePlot = (props: any) => {
     };
   }
 
-  if(!defaultSpace){
+  if (!defaultSpace) {
     generalOptions = {
       ...generalOptions,
       grid: {
         ...generalOptions.grid,
         top: "20px",
         bottom: "20px",
-      }
-    }
+      },
+    };
   }
 
   const visualMap: any = {
