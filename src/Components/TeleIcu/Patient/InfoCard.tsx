@@ -9,6 +9,7 @@ import { useState } from "react";
 export default function TeleICUPatientInfoCard(props: {
   patient: PatientModel;
   ip_no?: string | undefined;
+  fetchPatientData?: (state: { aborted: boolean }) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -33,6 +34,7 @@ export default function TeleICUPatientInfoCard(props: {
               consultationId={patient?.last_consultation?.id}
               smallLoader={true}
               setState={setOpen}
+              fetchPatientData={props.fetchPatientData}
             />
           ) : (
             <div>Invalid Patient Data</div>

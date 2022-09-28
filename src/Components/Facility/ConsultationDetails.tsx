@@ -490,6 +490,7 @@ export const ConsultationDetails = (props: any) => {
             <TeleICUPatientInfoCard
               patient={patientData}
               ip_no={consultationData.ip_no}
+              fetchPatientData={fetchData}
             />
 
             <div className="flex md:flex-row flex-col justify-between border-t px-4 pt-5">
