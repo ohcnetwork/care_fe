@@ -629,6 +629,10 @@ const routes: Routes = {
     path: "/api/v1/files/{fileId}/",
     method: "GET",
   },
+  editUpload: {
+    path: "/api/v1/files/{fileId}/?file_type={fileType}&associating_id={associatingId}",
+    method: "PATCH",
+  },
 
   // Investigation
   listInvestigations: {
