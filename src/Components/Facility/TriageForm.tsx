@@ -2,7 +2,7 @@ import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
-import React, { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -13,6 +13,7 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, TextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -52,10 +53,6 @@ const triageFormReducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 export const TriageForm = (props: triageFormProps) => {
@@ -313,7 +310,7 @@ export const TriageForm = (props: triageFormProps) => {
                   fullWidth
                   className="w-full md:w-auto"
                   type="button"
-                  onClick={goBack}
+                  onClick={() => goBack()}
                 >
                   Cancel
                 </Button>

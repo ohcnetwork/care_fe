@@ -643,8 +643,8 @@ export const PatientManager = (props: any) => {
     );
   } else if (data && data.length === 0) {
     managePatients = (
-      <div className="w-full text-center col-span-3 py-8">
-        <p className="text-lg font-semibold ">No Patients Found</p>
+      <div className="w-full bg-white rounded-lg p-2 text-center col-span-3 py-8 pt-4">
+        <p className="text-2xl font-bold text-gray-600">No Patients Found</p>
       </div>
     );
   }
