@@ -27,7 +27,7 @@ export const StackedLinePlot = (props: any) => {
           .join(" | ") +
         " ] ",
       textStyle: {
-        fontSize: 20,
+        fontSize: 14,
         rich: Object.assign(
           {},
           COLORS.map((x: any) => ({
@@ -50,6 +50,8 @@ export const StackedLinePlot = (props: any) => {
     },
     toolbox: {
       show: true,
+      orient: "vertical",
+      top: "9%",
       feature: {
         dataZoom: {
           yAxisIndex: "none",

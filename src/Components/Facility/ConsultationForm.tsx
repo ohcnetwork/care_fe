@@ -21,7 +21,7 @@ import React, {
 import { useDispatch } from "react-redux";
 import {
   CONSULTATION_SUGGESTION,
-  PATIENT_CATEGORY,
+  PATIENT_CATEGORIES,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
@@ -52,9 +52,16 @@ import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder, { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
+import PRNPrescriptionBuilder, {
+  PRNPrescriptionType,
+} from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { DiagnosisSelect } from "../Common/DiagnosisSelect";
+import InvestigationBuilder, {
+  InvestigationType,
+} from "../Common/prescription-builder/InvestigationBuilder";
 import { ICD11DiagnosisModel } from "./models";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -79,6 +86,8 @@ type FormDetails = {
   referred_to: string;
   icd11_diagnoses: string[];
   icd11_diagnoses_object: ICD11DiagnosisModel[];
+  icd11_provisional_diagnoses: string[];
+  icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
   verified_by: string;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
@@ -89,6 +98,7 @@ type FormDetails = {
   ip_no: string;
   discharge_advice: PrescriptionType[];
   prn_prescription: PRNPrescriptionType[];
+  investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
@@ -115,12 +125,14 @@ const initForm: FormDetails = {
   facility: "",
   admitted: "false",
   admitted_to: "",
-  category: "",
+  category: "Comfort Care",
   admission_date: new Date().toISOString(),
   discharge_date: null,
   referred_to: "",
   icd11_diagnoses: [],
   icd11_diagnoses_object: [],
+  icd11_provisional_diagnoses: [],
+  icd11_provisional_diagnoses_object: [],
   verified_by: "",
   is_kasp: "false",
   kasp_enabled_date: null,
@@ -131,6 +143,7 @@ const initForm: FormDetails = {
   ip_no: "",
   discharge_advice: [],
   prn_prescription: [],
+  investigation: [],
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
@@ -179,15 +192,6 @@ const suggestionTypes = [
 
 const symptomChoices = [...SYMPTOM_CHOICES];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const categoryChoices = [
-  {
-    id: 0,
-    text: "Select suspect category",
-  },
-  ...PATIENT_CATEGORY,
-];
-
 const goBack = () => {
   window.history.go(-1);
 };
@@ -206,6 +210,9 @@ export const ConsultationForm = (props: any) => {
     []
   );
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
+  const [InvestigationAdvice, setInvestigationAdvice] = useState<
+    InvestigationType[]
+  >([]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -242,6 +249,9 @@ export const ConsultationForm = (props: any) => {
           ? []
           : res.data.prn_prescription
       );
+      setInvestigationAdvice(
+        !Array.isArray(res.data.investigation) ? [] : res.data.investigation
+      );
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -257,7 +267,7 @@ export const ConsultationForm = (props: any) => {
               !!res.data.symptoms.filter((i: number) => i === 9).length,
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
-            category: res.data.category ? res.data.category : "",
+            category: res.data.category || "Comfort Care",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
@@ -299,6 +309,16 @@ export const ConsultationForm = (props: any) => {
         case "symptoms":
           if (!state.form[field] || !state.form[field].length) {
             errors[field] = "Please select the symptoms";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "category":
+          if (
+            !state.form[field] ||
+            !PATIENT_CATEGORIES.includes(state.form[field])
+          ) {
+            errors[field] = "Please select a category";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -419,6 +439,27 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
+
+        case "investigation": {
+          let invalid = false;
+          for (const f of InvestigationAdvice) {
+            if (
+              f.type?.length === 0 ||
+              (f.repetitive
+                ? !f.frequency?.replace(/\s/g, "").length
+                : !f.time?.replace(/\s/g, "").length)
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Investigation Suggestion field can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        }
         default:
           return;
       }
@@ -459,9 +500,11 @@ export const ConsultationForm = (props: any) => {
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
         icd11_diagnoses: state.form.icd11_diagnoses,
+        icd11_provisional_diagnoses: state.form.icd11_provisional_diagnoses,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
         prn_prescription: PRNAdvice,
+        investigation: InvestigationAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -571,8 +614,7 @@ export const ConsultationForm = (props: any) => {
   };
 
   const handleDoctorSelect = (doctor: UserModel | null) => {
-    doctor &&
-      doctor.id &&
+    if (doctor?.id) {
       dispatch({
         type: "set_form",
         form: {
@@ -581,6 +623,16 @@ export const ConsultationForm = (props: any) => {
           assigned_to_object: doctor,
         },
       });
+    } else {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          assigned_to: "",
+          assigned_to_object: null,
+        },
+      });
+    }
   };
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
@@ -716,17 +768,24 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.prescribed_medication}
                   />
                 </div>
-                {/* <div className="flex-1" id="category-div">
-                  <InputLabel id="category-label">Category*</InputLabel>
+                <div className="flex-1" id="category-div">
+                  <InputLabel id="category-label" required>
+                    Category
+                  </InputLabel>
                   <SelectField
                     name="category"
                     variant="standard"
                     value={state.form.category}
-                    options={categoryChoices}
+                    options={PATIENT_CATEGORIES.map((c) => {
+                      return {
+                        id: c,
+                        text: c,
+                      };
+                    })}
                     onChange={handleChange}
                     errors={state.errors.category}
                   />
-                </div> */}
+                </div>
 
                 <div id="suggestion-div">
                   <InputLabel
@@ -826,6 +885,15 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.consultation_notes}
                 />
               </div>
+              <div id="investigation-div" className="mt-4">
+                <InputLabel>Investigation Suggestions</InputLabel>
+                <InvestigationBuilder
+                  investigations={InvestigationAdvice}
+                  setInvestigations={setInvestigationAdvice}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.investigation} />
+              </div>
               <div id="discharge_advice-div" className="mt-4">
                 <InputLabel>Prescription Medication</InputLabel>
                 {/*<PrescriptionBuilderOld
@@ -879,6 +947,26 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.verified_by}
                 />
               </div>
+              <div id="provisional-diagnosis-div" className="mt-4">
+                <InputLabel id="diagnosis-label">Provisional Diagnosis</InputLabel>
+                <DiagnosisSelect
+                  name="icd11_provisional_diagnoses"
+                  selected={state.form.icd11_provisional_diagnoses_object}
+                  setSelected={(selected: ICD11DiagnosisModel[] | null) => {
+                    dispatch({
+                      type: "set_form",
+                      form: {
+                        ...state.form,
+                        icd11_provisional_diagnoses:
+                          selected?.map(
+                            (diagnosis: ICD11DiagnosisModel) => diagnosis.id
+                          ) || [],
+                      },
+                    });
+                  }}
+                />
+              </div>
+
               <div id="diagnosis-div" className="mt-4">
                 <InputLabel id="diagnosis-label">Diagnosis</InputLabel>
                 <DiagnosisSelect

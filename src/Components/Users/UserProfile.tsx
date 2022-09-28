@@ -572,6 +572,7 @@ export default function UserProfile() {
                         <div className="col-span-6 sm:col-span-3">
                           <PhoneNumberField
                             label="Phone Number*"
+                            placeholder="Phone Number"
                             value={states.form.phoneNumber}
                             onChange={(value: string) =>
                               handleValueChange(value, "phoneNumber")
@@ -584,6 +585,7 @@ export default function UserProfile() {
                           <PhoneNumberField
                             name="altPhoneNumber"
                             label="Whatsapp Number"
+                            placeholder="WhatsApp Number"
                             value={states.form.altPhoneNumber}
                             onChange={(value: string) =>
                               handleWhatsappNumChange(value, "altPhoneNumber")
