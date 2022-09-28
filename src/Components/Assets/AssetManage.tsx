@@ -89,7 +89,7 @@ const AssetManage = (props: AssetManageProps) => {
           size={200}
           value={
             asset?.id
-              ? `https://dashboard.coronasafe.network/asset/${asset?.id}`
+              ? `https://care-dashboard.vercel.app/assets/${asset?.id}`
               : ""
           }
         />
@@ -248,7 +248,7 @@ const AssetManage = (props: AssetManageProps) => {
                 size={128}
                 value={
                   asset?.id
-                    ? `https://dashboard.coronasafe.network/asset/${asset?.id}`
+                    ? `https://care-dashboard.vercel.app/assets/${asset?.id}`
                     : ""
                 }
               />
