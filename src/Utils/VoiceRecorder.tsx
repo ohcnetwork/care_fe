@@ -53,18 +53,15 @@ export const VoiceRecorder = (props: any) => {
             </div>
           </>
         ) : (
-          <Button
-            color="primary"
-            variant="contained"
+          <button
             style={{ marginLeft: "auto" }}
-            startIcon={<MicIcon />}
             onClick={startRecording}
-            fullWidth
-            className="w-full md:w-auto"
+            className="w-full md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2"
             disabled={isRecording}
           >
-            {audioURL ? "Re-Record" : "Record"}
-          </Button>
+            <MicIcon />
+            &nbsp;{audioURL ? "Re-Record" : "Record"}
+          </button>
         )}
       </div>
       {audioURL && (

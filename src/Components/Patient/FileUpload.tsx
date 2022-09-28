@@ -4,7 +4,7 @@ import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import loadable from "@loadable/component";
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -154,8 +154,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const limit = RESULTS_PER_PAGE_LIMIT;
-
-  const filePicker = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -400,20 +398,17 @@ export const FileUpload = (props: FileUploadProps) => {
               </div>
             ) : (
               <div className="w-full">
-                <Button
-                  color="primary"
-                  variant="contained"
+                <button
                   type="submit"
                   style={{ marginLeft: "auto" }}
-                  fullWidth
-                  className="w-full md:w-auto"
-                  startIcon={<Visibility />}
+                  className="w-full md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2"
                   onClick={() => {
                     loadFile(item.id);
                   }}
                 >
-                  Preview File
-                </Button>
+                  <Visibility />
+                  &nbsp; Preview File
+                </button>
               </div>
             )}
           </div>
@@ -609,11 +604,6 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
-  // upload file on click of custom button
-  const uploadFileFromCustomButton = () => {
-    filePicker?.current?.click();
-  };
-
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
       <Modal
@@ -628,30 +618,28 @@ export const FileUpload = (props: FileUploadProps) => {
               {file_state.isImage && (
                 <div className="flex flex-col gap-2 md:flex-row">
                   <div>
-                    <Button
-                      color="default"
-                      variant="contained"
-                      startIcon={<ZoomIn />}
+                    <button
                       onClick={() => {
                         handleZoomIn();
                       }}
+                      className="bg-gray-100 hover:bg-gray-300 p-2 rounded-md"
                       disabled={file_state.isZoomInDisabled}
                     >
-                      Zoom in
-                    </Button>
+                      <ZoomIn />
+                      &nbsp; Zoom in
+                    </button>
                   </div>
                   <div>
-                    <Button
-                      color="default"
-                      variant="contained"
-                      startIcon={<ZoomOut />}
+                    <button
+                      className="bg-gray-100 hover:bg-gray-300 p-2 rounded-md"
                       onClick={() => {
                         handleZoomOut();
                       }}
                       disabled={file_state.isZoomOutDisabled}
                     >
-                      Zoom Out
-                    </Button>
+                      <ZoomOut />
+                      &nbsp; Zoom Out
+                    </button>
                   </div>
                 </div>
               )}
@@ -671,17 +659,17 @@ export const FileUpload = (props: FileUploadProps) => {
                   </Button>
                 </a>
               )}
-              <Button
+              <button
                 color="primary"
-                variant="contained"
+                className="bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2"
                 style={{ marginLeft: "10px" }}
-                startIcon={<Close />}
                 onClick={() => {
                   handleClose();
                 }}
               >
-                Close
-              </Button>
+                <Close />
+                &nbsp; Close
+              </button>
             </div>
             {file_state.isImage ? (
               <img
@@ -746,22 +734,17 @@ export const FileUpload = (props: FileUploadProps) => {
                 <>
                   <VoiceRecorder createAudioBlob={createAudioBlob} />
                   {audioBlob && (
-                    <Button
-                      color="primary"
-                      variant="contained"
+                    <button
                       type="submit"
                       style={{ marginLeft: "auto" }}
-                      fullWidth
-                      className="w-full md:w-auto"
-                      startIcon={
-                        <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                      }
+                      className="w-full md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2"
                       onClick={() => {
                         handleAudioUpload();
                       }}
                     >
-                      Save Recording
-                    </Button>
+                      <CloudUploadOutlineIcon />
+                      &nbsp; Save Recording
+                    </button>
                   )}
                 </>
               )}
@@ -793,42 +776,28 @@ export const FileUpload = (props: FileUploadProps) => {
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
                   <div className="flex flex-col md:flex-row justify-between gap-2">
-                    <div>
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        onClick={uploadFileFromCustomButton}
-                        startIcon={<InsertDriveFileIcon />}
-                        type="submit"
-                        fullWidth
-                        className="w-full md:w-auto"
-                      >
-                        Browse
-                      </Button>
+                    <div className="flex items-center">
+                      <label className="w-full md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2">
+                        <InsertDriveFileIcon /> Browse
+                        <input
+                          title="changeFile"
+                          onChange={onFileChange}
+                          type="file"
+                          hidden
+                        />
+                      </label>
                     </div>
-                    <input
-                      title="Choose File"
-                      ref={filePicker}
-                      onChange={onFileChange}
-                      type="file"
-                      className="hidden w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-primary-100 file:text-primary-700 hover:file:bg-primary-300"
-                    />
                     <div>
-                      <Button
-                        color="primary"
-                        variant="contained"
+                      <button
                         type="submit"
-                        fullWidth
-                        className="w-full md:w-auto"
-                        startIcon={
-                          <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                        }
+                        className="w-full md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2"
                         onClick={() => {
                           handleUpload({ status });
                         }}
                       >
-                        Upload
-                      </Button>
+                        <CloudUploadOutlineIcon />
+                        &nbsp; Upload
+                      </button>
                     </div>
                   </div>
                 )}
