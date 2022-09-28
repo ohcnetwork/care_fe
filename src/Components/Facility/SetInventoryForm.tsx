@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -167,18 +167,6 @@ export const SetInventoryForm = (props: any) => {
                 </div>
 
                 <div>
-                  <InputLabel id="quantity">Item Min Quantity</InputLabel>
-                  <TextInputField
-                    name="quantity"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    value={state.form.quantity}
-                    onChange={handleChange}
-                    errors=""
-                  />
-                </div>
-                <div>
                   <InputLabel id="inventory_name_label">Unit</InputLabel>
                   <TextInputField
                     name="id"
@@ -189,28 +177,43 @@ export const SetInventoryForm = (props: any) => {
                     errors=""
                   />
                 </div>
+
+                <div className="md:col-span-2">
+                  <InputLabel id="quantity">Item Min Quantity</InputLabel>
+                  <TextInputField
+                    fullWidth
+                    name="quantity"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.quantity}
+                    onChange={handleChange}
+                    errors=""
+                  />
+                </div>
               </div>
               <div className="sm:flex sm:justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={() => goBack()}
-                  className="w-full sm:w-fit"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-                  onClick={(e) => handleSubmit(e)}
-                  className="w-full sm:w-fit mt-2"
-                >
-                  SET{" "}
-                </Button>
+                <div>
+                  <button
+                    color="default"
+                    type="button"
+                    onClick={() => goBack()}
+                    className="w-full sm:w-fit bg-gray-400 hover:bg-gray-500 rounded-md p-2 px-6"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <div>
+                  <button
+                    color="primary"
+                    type="submit"
+                    style={{ marginLeft: "auto" }}
+                    className="bg-green-500 hover:bg-green-700 w-full text-white sm:w-fit mt-2 rounded-md px-6 font-bold p-2"
+                    onClick={(e) => handleSubmit(e)}
+                  >
+                    <CheckCircleOutlineIcon></CheckCircleOutlineIcon> SET
+                  </button>
+                </div>
               </div>
             </CardContent>
           </form>
