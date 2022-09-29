@@ -51,7 +51,7 @@ const initForm: any = {
   current_health: 0,
   recommend_discharge: false,
   actions: null,
-  review_time: 0,
+  review_interval: null,
   admitted_to: "",
   taken_at: null,
   rounds_type: "NORMAL",
@@ -106,7 +106,7 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [prevReviewTime, setPreviousReviewTime] = useState("");
+  const [prevReviewInterval, setPreviousReviewInterval] = useState("");
   const [hasPreviousLog, setHasPreviousLog] = useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
@@ -150,7 +150,8 @@ export const DailyRounds = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
-          setPreviousReviewTime(res.data.review_time);
+          setPreviousReviewInterval(res.data.last_consultation.review_interval);
+          getExpectedReviewTime();
         }
       } else {
         setPatientName("");
@@ -264,7 +265,7 @@ export const DailyRounds = (props: any) => {
           consultation: consultationId,
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: state.form.action,
-          review_time: state.form.review_time,
+          review_interval: state.form.review_interval,
           // bed: isTeleicu === "true" ? state.form.bed : undefined,
         };
         if (state.form.rounds_type === "NORMAL") {
@@ -449,14 +450,11 @@ export const DailyRounds = (props: any) => {
   };
 
   const getExpectedReviewTime = () => {
-    if (Number(state.form.review_time))
+    const nextReviewTime = state.form.review_interval || prevReviewInterval;
+    if (Number(nextReviewTime))
       return `Next Review at ${moment()
-        .add(state.form.review_time, "minutes")
+        .add(nextReviewTime, "minutes")
         .format("DD/MM/YYYY hh:mm A")}`;
-    if (prevReviewTime && moment().isBefore(prevReviewTime))
-      return `Next Review at ${moment(prevReviewTime).format(
-        "DD/MM/YYYY hh:mm A"
-      )}`;
     return "No Reviews Planned!";
   };
 
@@ -660,19 +658,19 @@ export const DailyRounds = (props: any) => {
                     </div>
 
                     <div className="flex-1">
-                      <InputLabel id="review_time-label">
+                      <InputLabel id="review_interval-label">
                         Review After{" "}
                       </InputLabel>
                       <SelectField
-                        name="review_time"
+                        name="review_interval"
                         variant="standard"
-                        value={state.form.review_time}
+                        value={state.form.review_interval || prevReviewInterval}
                         options={[
                           { id: 0, text: "select" },
                           ...REVIEW_AT_CHOICES,
                         ]}
                         onChange={handleChange}
-                        errors={state.errors.review_time}
+                        errors={state.errors.review_interval}
                       />
                       <div className="text-gray-500 text-sm">
                         {getExpectedReviewTime()}

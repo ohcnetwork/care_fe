@@ -536,6 +536,13 @@ export const PatientManager = (props: any) => {
                 )}
                 <div className="flex w-full">
                   <div className="flex flex-wrap gap-2 flex-row justify-start">
+                    {moment().isAfter(patient.review_time) && (
+                      <Badge
+                        color="red"
+                        startIcon="clock"
+                        text="Review Missed"
+                      />
+                    )}
                     {patient.allow_transfer ? (
                       <Badge
                         color="yellow"
@@ -594,19 +601,6 @@ export const PatientManager = (props: any) => {
                         </span>
                       </span>
                     )}
-                    {showReviewAlert(patient) &&
-                      moment().isBefore(patient.review_time) && (
-                        <span
-                          className={
-                            "m-1 inline-block items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
-                            (moment().isBefore(patient.review_time)
-                              ? " bg-gray-100"
-                              : "rounded p-1 bg-red-400 text-white")
-                          }
-                        >
-                          Review Missed
-                        </span>
-                      )}
                   </div>
                 </div>
               </div>
