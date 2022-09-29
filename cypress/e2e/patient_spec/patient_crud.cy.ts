@@ -34,12 +34,16 @@ describe("Patient Creation", () => {
     cy.get("[data-testid=Gender] select").select("Male");
     cy.get("[data-testid=state] select").select("Kerala");
     cy.get("[data-testid=district] select").select("Ernakulam");
-    cy.get("[data-testid=localbody] select").select("844");
+    cy.get("[data-testid=localbody] select").select(
+      "Alangad  Block Panchayat, Ernakulam District"
+    );
     cy.get("[data-testid=current-address] textarea").type(
       "Test Patient Address"
     );
     cy.get("[data-testid=permanent-address] input").check();
-    cy.get("[data-testid=ward-respective-lsgi] select").select("15015");
+    cy.get("[data-testid=ward-respective-lsgi] select").select(
+      "1: MANAKKAPADY"
+    );
     cy.get("[data-testid=pincode] input").type("159015");
     cy.get("[data-testid=blood-group] select").select("O+");
     cy.get("[data-testid=emergency-phone-number] input").type(

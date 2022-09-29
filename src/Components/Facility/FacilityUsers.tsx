@@ -39,7 +39,10 @@ export default function FacilityUsers(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState(0);
-  const [facilityName, setFacilityName] = useState<string>("");
+  const [facilityData, setFacilityData] = useState({
+    name: "",
+    district_object_id: 0,
+  });
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -72,10 +75,15 @@ export default function FacilityUsers(props: any) {
     async function fetchFacilityName() {
       if (facilityId) {
         const res = await dispatch(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
+        setFacilityData({
+          name: res?.data?.name || "",
+          district_object_id: res?.data?.district_object?.id || 0,
+        });
       } else {
-        setFacilityName("");
+        setFacilityData({
+          name: "",
+          district_object_id: 0,
+        });
       }
     }
     fetchFacilityName();
@@ -185,7 +193,7 @@ export default function FacilityUsers(props: any) {
     }
 
     setUserData({ show: false, username: "", name: "" });
-    window.location.reload();
+    fetchData({ aborted: false });
   };
 
   const handleDelete = (user: any) => {
@@ -273,7 +281,7 @@ export default function FacilityUsers(props: any) {
   };
 
   const showDelete = (user: any) => {
-    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateLabAdmin");
+    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateAdmin");
     const STATE_READ_ONLY_ADMIN_LEVEL =
       USER_TYPES.indexOf("StateReadOnlyAdmin");
     const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
@@ -281,8 +289,9 @@ export default function FacilityUsers(props: any) {
     const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
     if (user?.is_superuser) return true;
     if (
-      currentUserLevel >= STATE_ADMIN_LEVEL &&
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
+      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
+      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
+      currentUserLevel > level
     )
       return user?.state_object?.id === currentUser?.data?.state;
     if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel > level)
@@ -339,6 +348,15 @@ export default function FacilityUsers(props: any) {
                       aria-label="Online"
                     ></i>
                   ) : null}
+                  {showDelete(user) && (
+                    <button
+                      type="button"
+                      className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      onClick={() => handleDelete(user)}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex justify-between">
@@ -403,16 +421,6 @@ export default function FacilityUsers(props: any) {
                   </UserDetails>
                 )}
               </div>
-
-              {showDelete(user) && (
-                <button
-                  type="button"
-                  className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                  onClick={() => handleDelete(user)}
-                >
-                  Delete
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -458,7 +466,7 @@ export default function FacilityUsers(props: any) {
         />
       )}
       <PageTitle
-        title={`Users - ${facilityName}`}
+        title={`Users - ${facilityData?.name}`}
         hideBack={true}
         className="mx-3 md:mx-8"
         breadcrumbs={false}
