@@ -58,6 +58,7 @@ import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
 import { InfoOutlined } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { goBack } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -180,10 +181,6 @@ const patientFormReducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 const scrollTo = (id: any) => {
@@ -527,21 +524,30 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "local_body":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select local body";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "ward":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select ward";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "district":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select district";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -824,6 +830,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   const handleChange = (e: any) => {
     const form = { ...state.form };
+    switch (e.target.name) {
+      case "state":
+        form["district"] = "0";
+        form["local_body"] = "0";
+        form["ward"] = "0";
+        break;
+
+      case "district":
+        form["local_body"] = "0";
+        form["ward"] = "0";
+        break;
+
+      case "local_body":
+        form["ward"] = "0";
+        break;
+    }
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -973,7 +995,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         <>
           {showAlertMessage.show && (
             <AlertDialog
-              handleClose={() => goBack()}
+              handleClose={goBack}
               message={showAlertMessage.message}
               title={showAlertMessage.title}
             />
@@ -1546,7 +1568,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             in={String(state.form.is_vaccinated) === "true"}
                             timeout="auto"
                             unmountOnExit
-                            className="col-span-2"
                           >
                             {
                               <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
@@ -1714,7 +1735,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             }
                             timeout="auto"
                             unmountOnExit
-                            className="col-span-2"
                           >
                             <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                               <div id="estimated_contact_date-div">
@@ -1728,7 +1748,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <DateInputField
                                   fullWidth={true}
                                   id="estimated_contact_date"
-                                  label="Estimate date of contact"
                                   value={state.form.estimated_contact_date}
                                   onChange={(date) =>
                                     handleDateChange(
@@ -2025,7 +2044,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <button
                       className="btn btn-default bg-gray-300 hover:bg-gray-400 btn-large   mr-4"
                       type="button"
-                      onClick={goBack}
+                      onClick={() => goBack()}
                     >
                       {" "}
                       Cancel{" "}

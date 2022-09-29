@@ -49,6 +49,8 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import GLocationPicker from "../Common/GLocationPicker";
+import { goBack } from "../../Utils/utils";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -145,8 +147,6 @@ const facilityCreateReducer = (
       return { ...state, errors: action.errors };
   }
 };
-
-const goBack = () => window.history.go(-1);
 
 export const FacilityCreate = (props: FacilityProps) => {
   const dispatchAction: any = useDispatch();
@@ -478,9 +478,10 @@ export const FacilityCreate = (props: FacilityProps) => {
           navigate(`/facility/${facilityId}`);
         }
       } else {
-        Notification.Error({
-          msg: "Something went wrong: " + (res.data.detail || ""),
-        });
+        if (res?.data)
+          Notification.Error({
+            msg: "Something went wrong: " + (res.data.detail || ""),
+          });
       }
       setIsLoading(false);
     }
@@ -882,8 +883,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <InputLabel id="location-label">Location</InputLabel>
                 <TextInputField
                   name="latitude"
-                  label="Latitude"
-                  placeholder=""
+                  placeholder="Latitude"
                   variant="outlined"
                   margin="dense"
                   value={state.form.latitude}
@@ -923,8 +923,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <InputLabel>&nbsp;</InputLabel>
                 <TextInputField
                   name="longitude"
-                  label="Longitude"
-                  placeholder=""
+                  placeholder="Longitude"
                   variant="outlined"
                   margin="dense"
                   value={state.form.longitude}
@@ -933,8 +932,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-6">
-              <Button color="default" variant="contained" onClick={goBack}>
+            <div className="flex justify-between mt-6 gap-2">
+              <Button
+                color="default"
+                variant="contained"
+                onClick={() => goBack()}
+              >
                 Cancel
               </Button>
               <Button

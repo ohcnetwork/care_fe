@@ -32,6 +32,7 @@ interface BedsProps {
   smallLoader?: boolean;
   discharged?: boolean;
   setState?: Dispatch<SetStateAction<boolean>>;
+  fetchPatientData?: (state: { aborted: boolean }) => void;
 }
 
 const Beds = (props: BedsProps) => {
@@ -88,7 +89,8 @@ const Beds = (props: BedsProps) => {
       Notification.Success({
         msg: "Bed allocated successfully",
       });
-      window.location.reload();
+      if (props.fetchPatientData) props.fetchPatientData({ aborted: false });
+      if (props.setState) props.setState(false);
     }
   };
 

@@ -1,13 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { postLogin } from "../../Redux/actions";
 import { navigate } from "raviger";
-import {
-  CardActions,
-  CardContent,
-  Grid,
-  CircularProgress,
-} from "@material-ui/core";
+import { CardContent, Grid, CircularProgress } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
 import { useTranslation } from "react-i18next";
@@ -18,7 +13,7 @@ import LanguageSelector from "../Common/LanguageSelector";
 import { RECAPTCHA_SITE_KEY } from "../../Common/env";
 import get from "lodash.get";
 
-export const Login = (props: any) => {
+export const Login = () => {
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
@@ -126,11 +121,11 @@ export const Login = (props: any) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen relative">
-      <div className="absolute top-2 right-2">
+    <div className="flex flex-col md:flex-row md:h-screen relative">
+      <div className="md:absolute top-2 right-2 p-2 md:p-0 bg-primary-500 md:bg-white">
         <LanguageSelector className="md:bg-primary-500 md:text-white bg-white" />
       </div>
-      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-primary-500">
+      <div className="flex flex-col justify-center md:w-1/2 md:h-full bg-primary-500 border-primary-500">
         <div className="pl-1/5">
           <a href={"/"}>
             <img
@@ -145,13 +140,13 @@ export const Login = (props: any) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-center w-full mt-4 md:mt-0 md:w-1/2 md:h-full">
-        <div className="bg-white mt-4 md:mt-20 rounded-lg px-4 py-4">
+      <div className="flex items-center justify-center w-full my-4 md:mt-0 md:w-1/2 md:h-full">
+        <div className="bg-white mt-4 md:mt-20 px-4 py-4">
           <div className="text-2xl font-bold text-center pt-4 text-primary-600">
             {t("auth_login_title")}
           </div>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
+          <form onSubmit={handleSubmit}>
+            <div>
               <TextInputField
                 name="username"
                 label={t("username")}
@@ -189,8 +184,6 @@ export const Login = (props: any) => {
                   />
                 )}
               </div>
-            </CardContent>
-            <CardActions className="padding16">
               <Grid container justify="center">
                 {isCaptchaEnabled && (
                   <Grid item className="px-8 py-4">
@@ -202,7 +195,7 @@ export const Login = (props: any) => {
                   </Grid>
                 )}
 
-                <div className="w-full flex justify-between items-center px-4 pb-4">
+                <div className="w-full flex justify-between items-center pb-4">
                   <a
                     href="/forgot-password"
                     className="text-sm text-primary-400 hover:text-primary-500"
@@ -218,13 +211,13 @@ export const Login = (props: any) => {
                 ) : (
                   <button
                     type="submit"
-                    className="w-full bg-primary-500 btn text-white"
+                    className="w-full bg-primary-500 inline-flex items-center justify-center text-sm font-semibold py-2 px-4 rounded cursor-pointer text-white"
                   >
                     {t("login")}
                   </button>
                 )}
               </Grid>
-            </CardActions>
+            </div>
           </form>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useCallback, useEffect } from "react";
+import { useReducer, useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -10,7 +10,7 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, updateShift, getUserList } from "../../Redux/actions";
 import { SelectField } from "../Common/HelperInputFields";
@@ -34,6 +34,7 @@ import {
   FormControlLabel,
   Button,
 } from "@material-ui/core";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -83,12 +84,9 @@ const initialState = {
   errors: { ...initError },
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
-
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const dispatchAction: any = useDispatch();
+  const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState(null);
   const [assignedUserLoading, setAssignedUserLoading] = useState(false);
@@ -166,7 +164,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async () => {
     const validForm = validateForm();
 
     if (validForm) {
@@ -218,12 +216,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         if (res && res.data) {
           const d = res.data;
           d["initial_status"] = res.data.status;
+          d["status"] = qParams.status || res.data.status;
           dispatch({ type: "set_form", form: d });
         }
         setIsLoading(false);
       }
     },
-    [props.id, dispatchAction]
+    [props.id, dispatchAction, qParams.status]
   );
 
   useAbortableEffect(
@@ -257,12 +256,12 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.status}
                   options={shiftStatusOptions}
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-14 w-full mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
               <div className="flex-none">
                 <InputLabel>Assigned To</InputLabel>
-                <div className="">
+                <div>
                   {assignedUserLoading ? (
                     <CircularProgress size={20} />
                   ) : (
@@ -391,7 +390,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.preferred_vehicle_choice}
                   options={["", ...vehicleOptions]}
                   onChange={handleChange}
-                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
+                  className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5"
                   errors={state.errors.preferred_vehicle_choice}
                 />
               </div>
@@ -405,7 +404,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.assigned_facility_type}
                   options={["", ...facilityOptions]}
                   onChange={handleChange}
-                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
+                  className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5"
                   errors={state.errors.assigned_facility_type}
                 />
               </div>
@@ -419,10 +418,10 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.breathlessness_level}
                   options={BREATHLESSNESS_LEVEL}
                   onChange={handleChange}
-                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
+                  className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5"
                 />
               </div>
-              <div className="md:col-span-2">
+              <div className="">
                 <InputLabel>Reason for shift*</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -437,7 +436,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 />
               </div>
 
-              <div className="md:col-span-2">
+              <div className="">
                 <InputLabel>Any other comments</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -452,16 +451,22 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 />
               </div>
 
-              <div className="md:col-span-2 flex justify-between mt-4">
-                <Button color="default" variant="contained" onClick={goBack}>
+              <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
+                <Button
+                  color="default"
+                  variant="contained"
+                  className="w-full md:w-auto"
+                  onClick={() => goBack()}
+                >
                   Cancel
                 </Button>
                 <Button
                   color="primary"
                   variant="contained"
                   type="submit"
+                  className="w-full md:w-auto"
                   style={{ marginLeft: "auto" }}
-                  onClick={(e) => handleSubmit(e)}
+                  onClick={handleSubmit}
                   startIcon={
                     <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                   }
