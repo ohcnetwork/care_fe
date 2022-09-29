@@ -680,7 +680,7 @@ export const PatientHome = (props: any) => {
                   >
                     <i className="mr-2 text-md fas fa-clock"></i>
                     {(moment().isBefore(patientData.review_time)
-                      ? "Review at: "
+                      ? "Review before: "
                       : "Review Missed: ") +
                       moment(patientData.review_time).format("lll")}
                   </div>

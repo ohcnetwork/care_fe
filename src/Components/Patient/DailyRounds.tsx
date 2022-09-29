@@ -452,7 +452,7 @@ export const DailyRounds = (props: any) => {
   const getExpectedReviewTime = () => {
     const nextReviewTime = state.form.review_interval || prevReviewInterval;
     if (Number(nextReviewTime))
-      return `Next Review at ${moment()
+      return `Review before ${moment()
         .add(nextReviewTime, "minutes")
         .format("DD/MM/YYYY hh:mm A")}`;
     return "No Reviews Planned!";

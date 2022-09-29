@@ -95,7 +95,7 @@ export default function TeleICUPatientInfoCard(props: {
               >
                 <i className="mr-2 text-md fas fa-clock"></i>
                 {(moment().isBefore(patient.review_time)
-                  ? "Review at: "
+                  ? "Review before: "
                   : "Review Missed: ") +
                   moment(patient.review_time).format("lll")}
               </div>
