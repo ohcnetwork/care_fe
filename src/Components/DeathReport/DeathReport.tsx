@@ -88,9 +88,6 @@ export default function PrintDeathReport(props: { id: string }) {
             is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
           };
           setPatientData(data);
-          console.log(patientData);
-          console.log(data.facility);
-          console.log(data);
         }
         setIsLoading(false);
       }
