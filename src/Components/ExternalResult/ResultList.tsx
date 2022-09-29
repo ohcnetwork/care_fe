@@ -78,8 +78,8 @@ export default function ResultList() {
         if (res && res.data) {
           setData(res.data.results);
           setTotalCount(res.data.count);
+          setIsLoading(false);
         }
-        setIsLoading(false);
       })
       .catch(() => {
         setIsLoading(false);
