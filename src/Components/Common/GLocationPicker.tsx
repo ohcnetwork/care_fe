@@ -41,18 +41,18 @@ const GLocationPicker = ({
   };
 
   const onIdle = (m: google.maps.Map) => {
-    console.log("onIdle");
     setZoom(m.getZoom()!);
     setCenter(m.getCenter()!.toJSON());
   };
 
   return (
     <div className="flex w-96 h-96">
-      <Wrapper apiKey={GMAPS_API_KEY} render={render}>
+      <Wrapper libraries={["places"]} apiKey={GMAPS_API_KEY} render={render}>
         <Map
           center={center}
           onClick={onClick}
           onIdle={onIdle}
+          handleOnChange={handleOnChange}
           zoom={zoom}
           style={{ flexGrow: "1", height: "100%" }}
         >
@@ -66,24 +66,51 @@ interface MapProps extends google.maps.MapOptions {
   style: { [key: string]: string };
   onClick?: (e: google.maps.MapMouseEvent) => void;
   onIdle?: (map: google.maps.Map) => void;
+  handleOnChange?: (location: google.maps.LatLng) => void;
   children?: React.ReactNode;
 }
 
 const Map: React.FC<MapProps> = ({
   onClick,
   onIdle,
+  handleOnChange,
   children,
   style,
   ...options
 }) => {
   const ref = React.useRef<HTMLDivElement>(null);
+  const searchRef = React.useRef<HTMLInputElement>(null);
   const [map, setMap] = React.useState<google.maps.Map>();
+  const [searchBox, setSearchBox] =
+    React.useState<google.maps.places.SearchBox>();
 
   React.useEffect(() => {
     if (ref.current && !map) {
-      setMap(new window.google.maps.Map(ref.current, {}));
+      setMap(
+        new window.google.maps.Map(ref.current, { mapTypeControl: false })
+      );
     }
   }, [ref, map]);
+
+  React.useEffect(() => {
+    if (searchRef.current && !searchBox) {
+      setSearchBox(new window.google.maps.places.SearchBox(searchRef.current));
+    }
+
+    if (searchBox) {
+      map?.addListener("bounds_changed", () => {
+        searchBox.setBounds(map?.getBounds() as google.maps.LatLngBounds);
+      });
+
+      searchBox.addListener("places_changed", () => {
+        const places = searchBox.getPlaces();
+
+        if (handleOnChange) {
+          handleOnChange(places[0]?.geometry?.location as google.maps.LatLng);
+        }
+      });
+    }
+  }, [searchRef, map, searchBox, handleOnChange]);
 
   useDeepCompareEffectForMaps(() => {
     if (map) {
@@ -110,6 +137,13 @@ const Map: React.FC<MapProps> = ({
   return (
     <>
       <div ref={ref} style={style} />
+      <input
+        id="pac-input"
+        ref={searchRef}
+        type="text"
+        className="absolute top-2 left-2 p-2 rounded"
+        placeholder="Start typing to search"
+      />
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
           return React.cloneElement(child, { map });

@@ -832,3 +832,8 @@ button:disabled,
   margin-top: -8px;
   border-radius: 50%;
 }
+
+/* for gmaps search dropdown */
+.pac-container {
+  z-index: 100000 !important;
+}
