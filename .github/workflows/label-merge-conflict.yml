@@ -1,4 +1,9 @@
 name: Auto Label Conflicts
+
+permissions:
+  issues: write
+  pull-requests: write
+
 on:
   push:
     branches: [develop]
@@ -12,7 +17,7 @@ jobs:
       - uses: prince-chrismc/label-merge-conflicts-action@v2
         with:
           conflict_label_name: "merge conflict"
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           max_retries: 5
           wait_ms: 15000
           detect_merge_changes: false
