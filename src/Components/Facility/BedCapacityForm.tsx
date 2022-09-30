@@ -275,44 +275,46 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
               />
               <ErrorHelperText error={state.errors.bedType} />
             </CardContent>
-            <CardContent>
-              <InputLabel
-                htmlFor="total-capacity"
-                id="demo-simple-select-outlined-label"
-              >
-                Total Capacity*
-              </InputLabel>
-              <TextInputField
-                id="total-capacity"
-                name="totalCapacity"
-                variant="outlined"
-                margin="dense"
-                type="number"
-                InputLabelProps={{ shrink: !!state.form.totalCapacity }}
-                value={state.form.totalCapacity}
-                onChange={handleChange}
-                errors={state.errors.totalCapacity}
-              />
-            </CardContent>
-            <CardContent>
-              <InputLabel
-                htmlFor="currently-occupied"
-                id="demo-simple-select-outlined-label"
-              >
-                Currently Occupied*
-              </InputLabel>
-              <TextInputField
-                id="currently-occupied"
-                name="currentOccupancy"
-                variant="outlined"
-                margin="dense"
-                type="number"
-                InputLabelProps={{ shrink: !!state.form.currentOccupancy }}
-                value={state.form.currentOccupancy}
-                onChange={handleChange}
-                errors={state.errors.currentOccupancy}
-              />
-            </CardContent>
+            <div className="flex flex-col md:flex-row gap-2">
+              <CardContent className="w-full">
+                <InputLabel
+                  htmlFor="total-capacity"
+                  id="demo-simple-select-outlined-label"
+                >
+                  Total Capacity*
+                </InputLabel>
+                <TextInputField
+                  id="total-capacity"
+                  name="totalCapacity"
+                  variant="outlined"
+                  margin="dense"
+                  type="number"
+                  InputLabelProps={{ shrink: !!state.form.totalCapacity }}
+                  value={state.form.totalCapacity}
+                  onChange={handleChange}
+                  errors={state.errors.totalCapacity}
+                />
+              </CardContent>
+              <CardContent className="w-full">
+                <InputLabel
+                  htmlFor="currently-occupied"
+                  id="demo-simple-select-outlined-label"
+                >
+                  Currently Occupied*
+                </InputLabel>
+                <TextInputField
+                  id="currently-occupied"
+                  name="currentOccupancy"
+                  variant="outlined"
+                  margin="dense"
+                  type="number"
+                  InputLabelProps={{ shrink: !!state.form.currentOccupancy }}
+                  value={state.form.currentOccupancy}
+                  onChange={handleChange}
+                  errors={state.errors.currentOccupancy}
+                />
+              </CardContent>
+            </div>
             <CardContent>
               <CardActions
                 className="padding16 flex flex-col md:flex-row gap-4"

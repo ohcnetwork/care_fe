@@ -232,7 +232,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         }}
       />
       <div>
-        <Card style={{ marginTop: "20px" }}>
+        <Card style={{ marginTop: "10px" }}>
           <form
             onSubmit={(e) => {
               handleSubmit(e);
@@ -276,7 +276,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
               />
             </CardContent>
             <CardContent>
-              <Grid container justify="space-between" spacing={5}>
+              <Grid container spacing={2} className="flex justify-between">
                 <Grid item className="flex flex-row w-full sm:w-auto gap-4">
                   <Button
                     id="doctor-cancel"
