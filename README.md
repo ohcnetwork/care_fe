@@ -1,4 +1,5 @@
-<p align="center"><img src="https://cdn.coronasafe.network/light-logo.svg" alt="CARE Logo" /></p>
+
+<p align="center"><img style="height:150px;" src="https://cdn.coronasafe.network/care_logo.svg" alt="CARE Logo" /></p>
 <h3 align="center"><a href="https://care.coronasafe.in/" target="_blank">🚀 Staging Deploy</a></h3>
 <p align="center"><img src="https://api.netlify.com/api/v1/badges/fd123f42-ef65-448c-9b03-39959d60e60b/deploy-status"></p>
 <h2></h2>
@@ -41,6 +42,18 @@ Once the development server has started, open [http://localhost:4000](http://loc
 The page will be automatically reloaded when you make edits and save<br />
 You will also see any lint errors in the console.<br />
 
+#### Run cypress tests
+Ensure that the development server is running and then run the cypress tests in either of the ways described below.
+
+```sh
+$ npm run cypress:run        # To run all tests in headless mode.
+$ npm run cypress:run:gui    # To run all tests in headed mode.
+$ npm run cypress:open       # To debug and run tests individually.
+```
+
+- Failed test screenshots are saved in `cypress/screenshots`
+- All test videos are saved in `cypress/videos`
+
 ### `npm run build`
 
 Builds the app for production to the `build` folder.<br />
@@ -52,19 +65,6 @@ Starts a production http-server in local to run the project with Service worker
 
 The build is minified and the filenames include the hashes.<br />
 Your app is ready to be deployed!
-
-## Cypress Tests
-### `npm run cypress:run`
-Run all tests in headless mode.
-
-Failed test screenshots are saved in `cypress/screenshots`
-
-All test videos are saved in `cypress/videos`
-### `npm run cypress:run:gui`
-Run all tests visually in headed mode.
-
-### `npm run cypress:open`
-To debug and run test individually.
 
 ## Staging
 
