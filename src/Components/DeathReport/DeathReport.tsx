@@ -38,6 +38,7 @@ export default function PrintDeathReport(props: { id: string }) {
     kottayam_confirmation_sent: "",
     kottayam_sample_date: "",
     cause_of_death: "",
+    facility: "",
   };
 
   const [patientData, setPatientData] = useState(initialState);
@@ -290,6 +291,7 @@ export default function PrintDeathReport(props: { id: string }) {
               [props.id]: { name: patientName },
               death_report: { style: "pointer-events-none" },
             }}
+            backUrl={`/facility/${patientData.facility}/patient/${id}`}
           />
           <div className="grid grid-rows-11">
             <div className="grid grid-cols-1 mt-4 gap-10">
