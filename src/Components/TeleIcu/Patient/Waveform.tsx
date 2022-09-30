@@ -77,18 +77,21 @@ export default function Waveform(props: {
               <div>Lowest: {Math.min(...queueData.slice(0, viewable))}</div>
               <div>Highest: {Math.max(...queueData.slice(0, viewable))}</div>
               <div>Stream Length: {data.length}</div>
+              <div>
+                Lag:{" "}
+                {Number((tpf * (queueData.length - viewable)) / 1000).toFixed(
+                  2
+                )}{" "}
+                sec
+              </div>
             </div>
             <div>
               <div>Buffer Length: {queueData.length}</div>
               <div>Flow Rate: {Number(tpf).toFixed(2)} ms</div>
               <div>Sampling Rate: {wave["sampling rate"]}</div>
+              <div>Last response: {lastStream} sec ago</div>
             </div>
-            <div>
-              Lag:{" "}
-              {Number((tpf * (queueData.length - viewable)) / 1000).toFixed(2)}{" "}
-              sec
-            </div>
-            <div>Last response: {lastStream} sec ago</div>
+
             {queueData.length > viewable && (
               <button
                 className="text-blue-400"
