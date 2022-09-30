@@ -1,4 +1,8 @@
-# Coronasafe Care Frontend .
+<p align="center"><img src="https://cdn.coronasafe.network/light-logo.svg" alt="CARE Logo" /></p>
+<h3 align="center"><a href="https://care.coronasafe.in/" target="_blank">🚀 Staging Deploy</a></h3>
+<p align="center"><img src="https://api.netlify.com/api/v1/badges/fd123f42-ef65-448c-9b03-39959d60e60b/deploy-status"></p>
+<h2></h2>
+
 
 [![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/0)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/0)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/1)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/1)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/2)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/2)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/3)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/3)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/4)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/4)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/5)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/5)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/6)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/6)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/7)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/7)
 
@@ -13,30 +17,29 @@
 [![CircleCI](https://circleci.com/gh/coronasafe/care_fe.svg?style=svg)](https://circleci.com/gh/coronasafe/care_fe)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f1438f693aa459805301/maintainability)](https://codeclimate.com/github/coronasafe/care_fe/maintainability)
 
-Auto Deployed to https://care.coronasafe.in for Develop Branch.
-All pull request has a preview build powered by @Netlify
+Auto deployed to https://care.coronasafe.in for `develop` branch.
+All pull requests has preview builds powered by [Netlify](https://netlify.com).
 
-### Report bugs at [JIRA SERVICE DESK](https://bugs.coronasafe.in)
+## Let's contribute?
 
-### Issue tracker : [JIRA SOFTWARE](https://rakshalife.atlassian.net/browse/CARE)
+- Comment on the issue if you are willing to take it up, and link the pull request with the issue.
+- Tag `@coronasafe/code-reviewers` for faster resolution.
+- Attach screenshots in the pull requests shwoing the changes made in the UI.
 
-Auto Deployed to https://care.coronasafe.network for Master Branch
+### Getting started
 
-Please comment on the issue if you are taking it up and tag pull requests with issues.
-tag @coronasafe/code-reviewers for faster resolution.
-attach. a screenshot for all Prs
+#### Install the required dependencies
+```sh
+npm install --legacy-peer-deps
+```
 
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.<br />
-Open [http://localhost:4000](http://localhost:4000) to view it in the browser.
-
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+#### Run the app in development mode
+```sh
+npm run start
+```
+Once the development server has started, open [http://localhost:4000](http://localhost:4000) in your browser.<br />
+The page will be automatically reloaded when you make edits and save<br />
+You will also see any lint errors in the console.<br />
 
 ### `npm run build`
 
