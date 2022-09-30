@@ -42,6 +42,20 @@ Once the development server has started, open [http://localhost:4000](http://loc
 The page will be automatically reloaded when you make edits and save<br />
 You will also see any lint errors in the console.<br />
 
+#### Staging API Credentials
+
+Authenticate to staging API with any of the following credentials
+
+```yaml
+- username:  devdistrictadmin
+  password:  Coronasafe@123
+  role:      District Admin
+  
+- username:  devstaff
+  password:  Coronasafe@123
+  role:      Staff
+```
+
 #### Run cypress tests
 Ensure that the development server is running and then run the cypress tests in either of the ways described below.
 
@@ -53,6 +67,10 @@ $ npm run cypress:open       # To debug and run tests individually.
 
 - Failed test screenshots are saved in `cypress/screenshots`
 - All test videos are saved in `cypress/videos`
+
+#### Staging API Documentation
+
+https://careapi.coronasafe.in/swagger/
 
 ### `npm run build`
 
@@ -66,21 +84,3 @@ Starts a production http-server in local to run the project with Service worker
 The build is minified and the filenames include the hashes.<br />
 Your app is ready to be deployed!
 
-## Staging
-
-BE: https://careapi.coronasafe.in/swagger/
-FE: https://care.coronasafe.in/
-
-## Staging Api Credentails for testing
-
-```
-user_id: devdistrictadmin
-pass: Coronasafe@123
-role: District Admin
-```
-
-```
-user_id: devstaff
-pass: Coronasafe@123
-role: Staff
-```
