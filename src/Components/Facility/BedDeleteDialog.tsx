@@ -48,16 +48,21 @@ const BedDeleteDialog = (
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <button onClick={handleCancel} className="btn btn-default">
-          Cancel
-        </button>
-        <button
-          onClick={handleSubmit}
-          className="font-medium btn btn-danger"
-          disabled={disable}
-        >
-          Delete
-        </button>
+        <div className="flex flex-col md:flex-row gap-2 w-full md:justify-end">
+          <button
+            onClick={handleCancel}
+            className="btn btn-default w-full md:w-auto"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="font-medium btn btn-danger w-full md:w-auto"
+            disabled={disable}
+          >
+            Delete
+          </button>
+        </div>
       </DialogActions>
     </Dialog>
   );

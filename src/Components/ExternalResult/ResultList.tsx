@@ -317,13 +317,15 @@ export default function ResultList() {
     manageResults = <>{resultList}</>;
   } else if (data && data.length === 0) {
     manageResults = (
-      <Grid item xs={12} md={12}>
-        <Grid container justify="center" alignItems="center">
-          <h5 className="flex justify-center items-center text-gray-600">
-            No Results Found
-          </h5>
-        </Grid>
-      </Grid>
+      <tr className="bg-white">
+        <td colSpan={5}>
+          <div className="w-full bg-white rounded-lg p-3">
+            <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+              No Results Found
+            </div>
+          </div>
+        </td>
+      </tr>
     );
   }
 
@@ -454,7 +456,7 @@ export default function ResultList() {
           "sample_collection_date_after"
         )}
         {badge("SRF ID", qParams.srf_id, "srf_id")}
-      </div>   
+      </div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-t-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>

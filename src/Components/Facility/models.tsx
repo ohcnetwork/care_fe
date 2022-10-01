@@ -101,6 +101,7 @@ export interface ConsultationModel {
   kasp_enabled_date?: string;
   diagnosis?: string;
   icd11_diagnoses_object?: ICD11DiagnosisModel[];
+  icd11_provisional_diagnoses_object?: ICD11DiagnosisModel[];
   verified_by?: string;
   suggestion_text?: string;
   symptoms?: Array<number>;
