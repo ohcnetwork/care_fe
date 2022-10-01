@@ -59,9 +59,9 @@ Authenticate to staging API with any of the following credentials
 
 #### 🏷️ Make use labels to update the PR/issue status
 
-- Mark your PRs as `work-in-progress` if it's still being worked on. ![image](https://user-images.githubusercontent.com/25143503/193393362-d9c6f7d6-a486-40ee-be01-479d7b9c360c.png)
-- Once you have solved the related issue, mark your PR with `need testing` and `need review` labels. ![image](https://user-images.githubusercontent.com/25143503/193393411-61098446-4ef8-4d9a-8646-b185cbb20b0c.png)
-- When you’re making a PR with lots of code changes that affects multiple functionalities, or is likely to break, make sure you tag it with `Major Code Change` label. ![image](https://user-images.githubusercontent.com/25143503/193393572-f8942d69-c750-4eae-adab-6bcbcd3451c2.png)
+- Mark your PRs as `work-in-progress` if it's still being worked on.
+- Once you have solved the related issue, mark your PR with `need testing` and `need review` labels.
+- When you’re making a PR with lots of code changes that affects multiple functionalities, or is likely to break, make sure you tag it with `Major Code Change` label.
 
 
 #### 🧪 Run cypress tests
