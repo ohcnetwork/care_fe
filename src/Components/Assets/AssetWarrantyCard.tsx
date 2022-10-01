@@ -14,7 +14,7 @@ export default function AssetWarrantyCard(props: AssetWarrantyCardProps) {
 
 function CardFrontView(asset: AssetData) {
   return (
-    <div className="rounded-2xl shadow-xl hover:shadow-2xl bg-gray-700 hover:scale-[1.01] hover:bg-gray-600 text-white p-6 w-96 h-56 transition-all">
+    <div className="rounded-2xl shadow hover:shadow-lg bg-gray-700 hover:scale-[1.01] hover:bg-gray-600 text-white p-6 w-96 h-56 transition-all">
       <div className="flex justify-end px-2">
         {asset.manufacturer ? (
           <i className="font-bold text-2xl">{asset.manufacturer}</i>
@@ -62,7 +62,7 @@ function CardFrontView(asset: AssetData) {
 
 function CardBackView(asset: AssetData) {
   return (
-    <div className="rounded-2xl shadow-xl hover:shadow-2xl bg-gray-700 hover:scale-[1.01] hover:bg-gray-600 text-white p-6 w-96 h-56 transition-all">
+    <div className="rounded-2xl shadow hover:shadow-lg bg-gray-700 hover:scale-[1.01] hover:bg-gray-600 text-white p-6 w-96 h-56 transition-all">
       <div className="flex flex-col px-2 items-center">
         <span className="tracking-wide text-sm mb-6 justify-center">
           CUSTOMER SUPPORT DETAILS
