@@ -62,6 +62,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [bed, setBed] = React.useState<BedModel>({});
   const [newPreset, setNewPreset] = React.useState("");
+  const [bedError, setBedError] = React.useState("");
+  const [presetNameError, setpresetNameError] = React.useState("");
   const [refreshPresetsHash, setRefreshPresetsHash] = React.useState(
     Number(new Date())
   );
@@ -155,42 +157,59 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       }
     }
   };
-
+  const isCameraConfigureFormValid = (bed: BedModel, preset_name: string) => {
+    let result = true;
+    if (bed) {
+      setBedError("");
+    } else {
+      setBedError("Please choose a bed !");
+      result = false;
+    }
+    if (preset_name.trim()) {
+      setpresetNameError("");
+    } else {
+      setpresetNameError("Please enter a valid preset name !");
+      result = false;
+    }
+    return result;
+  };
   const addPreset = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    const config = getCameraConfig(asset as AssetData);
-    const data = {
-      bed_id: bed.id,
-      preset_name: newPreset,
-    };
-    try {
-      const presetData = await axios.get(
-        `https://${asset?.meta?.middleware_hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
-      );
-      const res: any = await Promise.resolve(
-        dispatch(
-          createAssetBed(
-            { meta: { ...data, ...presetData.data } },
-            assetId,
-            bed?.id as string
+    if (isCameraConfigureFormValid(bed, newPreset)) {
+      const config = getCameraConfig(asset as AssetData);
+      const data = {
+        bed_id: bed.id,
+        preset_name: newPreset,
+      };
+      try {
+        const presetData = await axios.get(
+          `https://${asset?.meta?.middleware_hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
+        );
+        const res: any = await Promise.resolve(
+          dispatch(
+            createAssetBed(
+              { meta: { ...data, ...presetData.data } },
+              assetId,
+              bed?.id as string
+            )
           )
-        )
-      );
-      if (res?.status === 201) {
-        Notification.Success({
-          msg: "Preset Added Successfully",
-        });
-        setNewPreset("");
-        setRefreshPresetsHash(Number(new Date()));
-      } else {
+        );
+        if (res?.status === 201) {
+          Notification.Success({
+            msg: "Preset Added Successfully",
+          });
+          setNewPreset("");
+          setRefreshPresetsHash(Number(new Date()));
+        } else {
+          Notification.Error({
+            msg: "Something went wrong..!",
+          });
+        }
+      } catch (e) {
         Notification.Error({
           msg: "Something went wrong..!",
         });
       }
-    } catch (e) {
-      Notification.Error({
-        msg: "Something went wrong..!",
-      });
     }
   };
   if (isLoading) return <Loading />;
@@ -292,6 +311,10 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           setNewPreset={setNewPreset}
           addPreset={addPreset}
           refreshPresetsHash={refreshPresetsHash}
+          bedError={bedError}
+          presetNameError={presetNameError}
+          setBedError={setBedError}
+          setpresetNameError={setpresetNameError}
         />
       ) : null}
     </div>

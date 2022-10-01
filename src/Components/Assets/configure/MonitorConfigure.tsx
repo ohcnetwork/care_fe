@@ -37,6 +37,7 @@ const update_Link = (
 
 export default function MonitorConfigure({ asset }: { asset: AssetData }) {
   const [bed, setBed] = React.useState<BedModel>({});
+  const [bedError, setBedError] = React.useState("");
   const [updateLink, setUpdateLink] = React.useState<boolean>(false);
   const [assetBed, setAssetBed] = React.useState<any>();
   const dispatch: any = useDispatch();
@@ -64,16 +65,21 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (updateLink) {
-            update_Link(
-              assetBed?.id as string,
-              asset.id as string,
-              bed as BedModel,
-              assetBed,
-              dispatch
-            );
+          if (bed) {
+            setBedError("");
+            if (updateLink) {
+              update_Link(
+                assetBed?.id as string,
+                asset.id as string,
+                bed as BedModel,
+                assetBed,
+                dispatch
+              );
+            } else {
+              saveLink(asset.id as string, bed?.id as string, dispatch);
+            }
           } else {
-            saveLink(asset.id as string, bed?.id as string, dispatch);
+            setBedError("Please select a bed !");
           }
         }}
       >
@@ -85,7 +91,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
                 name="bed"
                 setSelected={(selected) => setBed(selected as BedModel)}
                 selected={bed}
-                errors=""
+                errors={bedError}
                 multiple={false}
                 margin="dense"
                 location={asset?.location_object?.id}

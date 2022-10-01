@@ -17,6 +17,10 @@ interface CameraConfigureProps {
   newPreset: string;
   setNewPreset(preset: string): void;
   refreshPresetsHash: number;
+  bedError: string;
+  presetNameError: string;
+  setBedError(error: string): void;
+  setpresetNameError(error: string): void;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
   const {
@@ -27,6 +31,10 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     newPreset,
     setNewPreset,
     refreshPresetsHash,
+    bedError,
+    presetNameError,
+    setBedError,
+    setpresetNameError,
   } = props;
 
   return (
@@ -41,7 +49,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                   name="bed"
                   setSelected={(selected) => setBed(selected as BedModel)}
                   selected={bed}
-                  errors=""
+                  errors={bedError}
                   multiple={false}
                   margin="dense"
                   location={asset?.location_object?.id}
@@ -58,7 +66,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                   type="text"
                   value={newPreset}
                   onChange={(e) => setNewPreset(e.target.value)}
-                  errors=""
+                  errors={presetNameError}
                 />
               </div>
             </div>
