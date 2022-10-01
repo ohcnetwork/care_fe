@@ -277,6 +277,20 @@ const AssetManage = (props: AssetManageProps) => {
             </button>
           )}
         </div>
+        <div className="flex md:flex-row flex-col gap-2 justify-between pt-4 -mb-4">
+          <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
+            <div>
+              <span className="text-gray-900">Created: </span>
+              {moment(asset?.created_date).format("lll")}
+            </div>
+          </div>
+          <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
+            <div>
+              <span className="text-gray-900">Last Modified: </span>
+              {moment(asset?.modified_date).format("lll")}
+            </div>
+          </div>
+        </div>
       </div>
       <div className="bg-white rounded-lg md:p-6 p-3 mt-2">
         <div className="text-xl font-semibold">Transaction History</div>
