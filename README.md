@@ -1,4 +1,12 @@
-<p align="center"><img align="center" src="https://user-images.githubusercontent.com/25143503/193395577-e42df745-1414-484f-bc8a-5b290018c8fb.svg" alt="CARE Logo" /></p>
+
+<a href="https://coronasafe.network/">
+  <p align="center">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://cdn.coronasafe.network/light-logo.svg">
+      <img alt="CARE Logo" src="https://user-images.githubusercontent.com/25143503/193396107-27e0d587-b195-4e95-a795-5d0663d5cd81.svg">
+    </picture>
+  </p>
+</a>
 <p align="center"><b>Our goal is to continuously improve the quality and accessibility of public healthcare services using digital tools.</b></p>
 <h2></h2>
 <h3 align="center"><a href="https://care.coronasafe.in/" target="_blank">🚀 Staging Deploy</a></h3>
