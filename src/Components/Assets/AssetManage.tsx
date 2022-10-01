@@ -309,7 +309,7 @@ const AssetManage = (props: AssetManageProps) => {
           </div>
         </div>
       </div>
-      <div className="bg-white rounded-lg md:p-6 p-3 mt-2">
+      <div className="bg-white rounded-lg md:p-6 p-3 mt-2 max-w-6xl mx-auto">
         <div className="text-xl font-semibold">Transaction History</div>
         <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">
