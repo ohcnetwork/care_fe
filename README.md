@@ -1,14 +1,14 @@
-
-<p align="center"><img style="height:150px;" src="https://cdn.coronasafe.network/care_logo.svg" alt="CARE Logo" /></p>
+<p align="center"><img align="center" src="https://user-images.githubusercontent.com/25143503/193395577-e42df745-1414-484f-bc8a-5b290018c8fb.svg" alt="CARE Logo" /></p>
+<p align="center"><b>Our goal is to continuously improve the quality and accessibility of public healthcare services using digital tools.</b></p>
+<h2></h2>
 <h3 align="center"><a href="https://care.coronasafe.in/" target="_blank">🚀 Staging Deploy</a></h3>
 <p align="center"><img src="https://api.netlify.com/api/v1/badges/fd123f42-ef65-448c-9b03-39959d60e60b/deploy-status"></p>
-<h2></h2>
+<p align="center">Auto deployed to <a href="https://care.coronasafe.in">care.coronasafe.in</a> for <code>develop</code> branch. All pull requests have preview builds powered by <a href="https://netlify.com">Netlify</a>.</p>
 
 
 [![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/0)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/0)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/1)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/1)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/2)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/2)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/3)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/3)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/4)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/4)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/5)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/5)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/6)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/6)[![](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/images/7)](https://sourcerer.io/fame/tomahawk-pilot/coronasafe/care_fe/links/7)
 
-[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=coronasafe_care_fe)
-
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=coronasafe_care_fe&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=coronasafe_care_fe)
 ![Code scanning - action](https://github.com/coronasafe/care_fe/workflows/Code%20scanning%20-%20action/badge.svg)
 ![OSSAR](https://github.com/coronasafe/care_fe/workflows/OSSAR/badge.svg)
 [![Cypress Tests](https://github.com/coronasafe/care_fe/actions/workflows/cypress.yaml/badge.svg)](https://github.com/coronasafe/care_fe/actions/workflows/cypress.yaml)
@@ -18,31 +18,24 @@
 [![CircleCI](https://circleci.com/gh/coronasafe/care_fe.svg?style=svg)](https://circleci.com/gh/coronasafe/care_fe)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f1438f693aa459805301/maintainability)](https://codeclimate.com/github/coronasafe/care_fe/maintainability)
 
-Auto deployed to https://care.coronasafe.in for `develop` branch.
-All pull requests has preview builds powered by [Netlify](https://netlify.com).
+## Getting started
 
-## Let's contribute?
-
-- Comment on the issue if you are willing to take it up, and link the pull request with the issue.
-- Tag `@coronasafe/code-reviewers` for faster resolution.
-- Attach screenshots in the pull requests shwoing the changes made in the UI.
-
-### Getting started
+- 💬 Comment on the issue if you are willing to take it up, and link the pull request with the issue.
+- 🏷️ Tag `@coronasafe/code-reviewers` for faster resolution.
+- 📸 Attach screenshots in the pull requests shwoing the changes made in the UI.
 
 #### Install the required dependencies
 ```sh
 npm install --legacy-peer-deps
 ```
 
-#### Run the app in development mode
+#### 🏃 Run the app in development mode
 ```sh
 npm run start
 ```
-Once the development server has started, open [http://localhost:4000](http://localhost:4000) in your browser.<br />
-The page will be automatically reloaded when you make edits and save<br />
-You will also see any lint errors in the console.<br />
+Once the development server has started, open [localhost:4000](http://localhost:4000) in your browser. The page will be automatically reloaded when you make edits and save. You will also see any lint errors in the console.
 
-#### Staging API Credentials
+#### 🔑 Staging API Credentials
 
 Authenticate to staging API with any of the following credentials
 
@@ -56,7 +49,14 @@ Authenticate to staging API with any of the following credentials
   role:      Staff
 ```
 
-#### Run cypress tests
+#### 🏷️ Make use labels to update the PR/issue status
+
+- Mark your PRs as `work-in-progress` if it's still being worked on. ![image](https://user-images.githubusercontent.com/25143503/193393362-d9c6f7d6-a486-40ee-be01-479d7b9c360c.png)
+- Once you have solved the related issue, mark your PR with `need testing` and `need review` labels. ![image](https://user-images.githubusercontent.com/25143503/193393411-61098446-4ef8-4d9a-8646-b185cbb20b0c.png)
+- When you’re making a PR with lots of code changes that affects multiple functionalities, or is likely to break, make sure you tag it with `Major Code Change` label. ![image](https://user-images.githubusercontent.com/25143503/193393572-f8942d69-c750-4eae-adab-6bcbcd3451c2.png)
+
+
+#### 🧪 Run cypress tests
 Ensure that the development server is running and then run the cypress tests in either of the ways described below.
 
 ```sh
@@ -68,19 +68,28 @@ $ npm run cypress:open       # To debug and run tests individually.
 - Failed test screenshots are saved in `cypress/screenshots`
 - All test videos are saved in `cypress/videos`
 
-#### Staging API Documentation
+## 📖 Documentations
 
-https://careapi.coronasafe.in/swagger/
+- [CARE Documentation](https://docs.coronasafe.network/coronasafe-care-documentation/)
+- [Swagger API Documentation](https://careapi.coronasafe.in/swagger/)
 
-### `npm run build`
+## 🚀 Production
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### Build the app for production
 
-### `npm run start:Dev`
+```sh
+npm run build
+```
 
-Starts a production http-server in local to run the project with Service worker
+Builds the app for production to the `build` folder. It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+#### Start a production `http-server`
+
+```sh
+npm run start:Dev
+```
+Starts a production http-server in local to run the project with Service worker.
+The build is minified and the filenames include the hashes.
+
+**🚀 Your app is ready to be deployed!**
 
