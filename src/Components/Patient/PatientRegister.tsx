@@ -90,9 +90,7 @@ const genderTypes = [
   ...GENDER_TYPES,
 ];
 const diseaseStatus = [...DISEASE_STATUS];
-const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
-const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
   name: "",
@@ -140,9 +138,6 @@ const initForm: any = {
   cluster_name: "",
   covin_id: "",
   is_vaccinated: "false",
-  number_of_doses: "1",
-  vaccine_name: null,
-  last_vaccinated_date: null,
   ...medicalHistoryChoices,
 };
 
@@ -1592,85 +1587,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     errors={state.errors.covin_id}
                                   />
                                 </div>
-                                <div id="number_of_doses-div">
-                                  <InputLabel
-                                    id="doses-label"
-                                    htmlFor="number_of_doses"
-                                  >
-                                    Number of doses
-                                  </InputLabel>
-                                  <RadioGroup
-                                    aria-label="number_of_doses"
-                                    id="number_of_doses"
-                                    name="number_of_doses"
-                                    value={state.form.number_of_doses}
-                                    onChange={handleChange}
-                                    style={{ padding: "0px 5px" }}
-                                  >
-                                    <Box display="flex" flexDirection="row">
-                                      <FormControlLabel
-                                        value="1"
-                                        control={<Radio />}
-                                        label="1"
-                                      />
-                                      <FormControlLabel
-                                        value="2"
-                                        control={<Radio />}
-                                        label="2"
-                                      />
-                                      <FormControlLabel
-                                        value="3"
-                                        control={<Radio />}
-                                        label="3 (Booster/Precautionary Dose)"
-                                      />
-                                    </Box>
-                                  </RadioGroup>
-                                </div>
-                                <div id="vaccine_name-div">
-                                  <InputLabel
-                                    id="vaccine-name-label"
-                                    htmlFor="vaccine_name"
-                                    required
-                                  >
-                                    Vaccine Name
-                                  </InputLabel>
-                                  <SelectField
-                                    labelId="vaccine_name"
-                                    name="vaccine_name"
-                                    variant="outlined"
-                                    margin="dense"
-                                    optionArray={true}
-                                    value={state.form.vaccine_name}
-                                    options={vaccines}
-                                    onChange={handleChange}
-                                    errors={state.errors.vaccine_name}
-                                  />
-                                </div>
-                                <div id="last_vaccinated_date-div">
-                                  <InputLabel
-                                    id="last_vaccinated_date-label"
-                                    htmlFor="last_vaccinated_date"
-                                    required
-                                  >
-                                    Last Date of Vaccination
-                                  </InputLabel>
-                                  <DateInputField
-                                    id="last_vaccinated_date"
-                                    fullWidth={true}
-                                    value={state.form.last_vaccinated_date}
-                                    onChange={(date) =>
-                                      handleDateChange(
-                                        date,
-                                        "last_vaccinated_date"
-                                      )
-                                    }
-                                    errors={state.errors.last_vaccinated_date}
-                                    inputVariant="outlined"
-                                    margin="dense"
-                                    openTo="year"
-                                    disableFuture={true}
-                                  />
-                                </div>
                               </div>
                             }
                           </Collapse>
@@ -1991,46 +1907,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               return renderMedicalHistory(i.id, i.text);
                             })}
                           </div>
-                        </div>
-
-                        <div id="allergies-div">
-                          <InputLabel htmlFor="allergies" id="allergies_label">
-                            Allergies
-                          </InputLabel>
-                          <MultilineInputField
-                            rows={1}
-                            id="allergies"
-                            name="allergies"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            placeholder="Optional Information"
-                            value={state.form.allergies}
-                            onChange={handleChange}
-                            errors={state.errors.allergies}
-                          />
-                        </div>
-
-                        <div data-testid="blood-group" id="blood_group-div">
-                          <InputLabel
-                            id="blood_group-label"
-                            htmlFor="blood_group"
-                            required
-                          >
-                            Blood Group
-                          </InputLabel>
-                          <SelectField
-                            labelId="blood_group"
-                            name="blood_group"
-                            variant="outlined"
-                            margin="dense"
-                            showEmpty={true}
-                            optionArray={true}
-                            value={state.form.blood_group}
-                            options={bloodGroups}
-                            onChange={handleChange}
-                            errors={state.errors.blood_group}
-                          />
                         </div>
                       </div>
                     </CardContent>

@@ -1,7 +1,11 @@
 import loadable from "@loadable/component";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
+  Card,
   CardContent,
   FormControlLabel,
   InputLabel,
@@ -27,6 +31,8 @@ import {
   REVIEW_AT_CHOICES,
   KASP_STRING,
   KASP_ENABLED,
+  BLOOD_GROUPS,
+  VACCINES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -63,11 +69,22 @@ import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
 import { ICD11DiagnosisModel } from "./models";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
+const vaccines = ["Select", ...VACCINES];
+const bloodGroups = [...BLOOD_GROUPS];
+
 type BooleanStrings = "true" | "false";
+
+type Vaccine = {
+  health_details: string;
+  vaccine: any;
+  doses: number;
+  last_vaccinated_date: any;
+};
 
 type FormDetails = {
   hasSymptom: boolean;
@@ -105,9 +122,16 @@ type FormDetails = {
   assigned_to_object: UserModel | null;
   special_instruction: string;
   review_time: number;
-  weight: string;
-  height: string;
   bed: string | null;
+  // Health Details
+  family_details: string;
+  has_allergy: BooleanStrings;
+  allergies: string;
+  blood_group: string;
+  height: number;
+  weight: number;
+  vaccination_history: Vaccine[];
+  modified_date: string;
 };
 
 type Action =
@@ -150,8 +174,14 @@ const initForm: FormDetails = {
   assigned_to_object: null,
   special_instruction: "",
   review_time: 0,
-  weight: "",
-  height: "",
+  family_details: "",
+  has_allergy: "false",
+  allergies: "",
+  blood_group: "",
+  height: 0.0,
+  weight: 0.0,
+  vaccination_history: [],
+  modified_date: "",
   bed: null,
 };
 
@@ -276,8 +306,15 @@ export const ConsultationForm = (props: any) => {
             assigned_to: res.data.assigned_to || "",
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
-            weight: res.data.weight ? res.data.weight : "",
-            height: res.data.height ? res.data.height : "",
+            family_details: res.data.last_health_details?.family_details || "",
+            has_allergy:
+              `${res.data.last_health_details?.has_allergy}` || "false",
+            allergies: res.data.last_health_details?.allergies || "",
+            blood_group: res.data.last_health_details?.blood_group || "",
+            height: res.data.last_health_details?.height || 0.0,
+            weight: res.data.last_health_details?.weight || 0.0,
+            vaccination_history:
+              res.data.last_health_details?.vaccination_history || [],
             bed: res.data?.current_bed?.bed_object?.id || null,
           };
           dispatch({ type: "set_form", form: formData });
@@ -460,6 +497,24 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
+
+        case "blood_group":
+          if (!state.form[field]) {
+            errors[field] = "Please select a blood group";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+
+        case "has_allergy":
+          if (state.form.has_allergy === "true") {
+            if (state.form.allergies === "") {
+              errors["allergies"] = "Please enter Patient's allergies";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+            }
+          }
+          return;
         default:
           return;
       }
@@ -516,8 +571,16 @@ export const ConsultationForm = (props: any) => {
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
         special_instruction: state.form.special_instruction,
-        weight: Number(state.form.weight),
-        height: Number(state.form.height),
+        new_health_details: {
+          family_details: state.form.family_details,
+          has_allergy: state.form.has_allergy,
+          allergies:
+            state.form.has_allergy === "true" ? state.form.allergies : "",
+          blood_group: state.form.blood_group,
+          height: state.form.height,
+          weight: state.form.weight,
+          vaccination_history: state.form.vaccination_history,
+        },
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
       };
       const res = await dispatchAction(
@@ -948,7 +1011,9 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="provisional-diagnosis-div" className="mt-4">
-                <InputLabel id="diagnosis-label">Provisional Diagnosis</InputLabel>
+                <InputLabel id="diagnosis-label">
+                  Provisional Diagnosis
+                </InputLabel>
                 <DiagnosisSelect
                   name="icd11_provisional_diagnoses"
                   selected={state.form.icd11_provisional_diagnoses_object}
@@ -1110,42 +1175,152 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row justify-between md:gap-5 mt-4">
-                <div id="weight-div" className="flex-1">
-                  <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
-                  <TextInputField
-                    name="weight"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    InputLabelProps={{ shrink: !!state.form.weight }}
-                    value={state.form.weight}
-                    onChange={handleChange}
-                    errors={state.errors.weight}
-                  />
-                </div>
-                <div id="height-div" className="flex-1">
-                  <InputLabel id="refered-label">Height (in cm)</InputLabel>
-                  <TextInputField
-                    name="height"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    InputLabelProps={{ shrink: !!state.form.height }}
-                    value={state.form.height}
-                    onChange={handleChange}
-                    errors={state.errors.height}
-                  />
-                </div>
-              </div>
-              <div id="body_surface-div" className="flex-1">
-                Body Surface area :{" "}
-                {Math.sqrt(
-                  (Number(state.form.weight) * Number(state.form.height)) / 3600
-                ).toFixed(2)}{" "}
-                m<sup>2</sup>
-              </div>
               {/* End of Telemedicine fields */}
+            </CardContent>
+
+            <Card elevation={0} className="mb-8 rounded">
+              <Accordion className="mt-2 lg:mt-0 md:mt-0">
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="panel1a-content"
+                  id="panel1a-header"
+                >
+                  <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                    Health Details
+                  </h1>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <div className="w-full grid gap-4 grid-cols-1">
+                    <div id="family_details-div">
+                      <InputLabel
+                        htmlFor="family_details"
+                        id="family_details_label"
+                      >
+                        Family Details
+                      </InputLabel>
+                      <MultilineInputField
+                        rows={1}
+                        id="family_details"
+                        name="family_details"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        placeholder="Family Details"
+                        value={state.form.family_details}
+                        onChange={handleChange}
+                        errors={state.errors.family_details}
+                      />
+                    </div>
+                    <div id="has_allergy-div">
+                      <InputLabel id="has_allergy-label">Allergy</InputLabel>
+                      <RadioGroup
+                        aria-label="covid"
+                        name="has_allergy"
+                        value={state.form.has_allergy}
+                        onChange={handleChange}
+                        style={{ padding: "0px 5px" }}
+                      >
+                        <Box display="flex" flexDirection="row">
+                          <FormControlLabel
+                            value="true"
+                            control={<Radio />}
+                            label="Yes"
+                          />
+                          <FormControlLabel
+                            value="false"
+                            control={<Radio />}
+                            label="No"
+                          />
+                        </Box>
+                      </RadioGroup>
+                      <ErrorHelperText error={state.errors.has_allergy} />
+                    </div>
+
+                    {JSON.parse(state.form.has_allergy) && (
+                      <div id="allergies-div">
+                        <InputLabel htmlFor="allergies" id="allergies_label">
+                          Allergies
+                        </InputLabel>
+                        <MultilineInputField
+                          rows={1}
+                          id="allergies"
+                          name="allergies"
+                          variant="outlined"
+                          margin="dense"
+                          type="text"
+                          placeholder="Optional Information"
+                          value={state.form.allergies}
+                          onChange={handleChange}
+                          errors={state.errors.allergies}
+                        />
+                      </div>
+                    )}
+
+                    <div data-testid="blood-group" id="blood_group-div">
+                      <InputLabel
+                        id="blood_group-label"
+                        htmlFor="blood_group"
+                        required
+                      >
+                        Blood Group
+                      </InputLabel>
+                      <SelectField
+                        labelId="blood_group"
+                        name="blood_group"
+                        variant="outlined"
+                        margin="dense"
+                        showEmpty={true}
+                        optionArray={true}
+                        value={state.form.blood_group}
+                        options={bloodGroups}
+                        onChange={handleChange}
+                        errors={state.errors.blood_group}
+                      />
+                    </div>
+                    <div className="flex flex-col md:flex-row justify-between md:gap-5 mt-4">
+                      <div id="weight-div" className="flex-1">
+                        <InputLabel id="refered-label">
+                          Weight (in Kg)
+                        </InputLabel>
+                        <TextInputField
+                          name="weight"
+                          variant="outlined"
+                          margin="dense"
+                          type="number"
+                          InputLabelProps={{ shrink: !!state.form.weight }}
+                          value={state.form.weight}
+                          onChange={handleChange}
+                          errors={state.errors.weight}
+                        />
+                      </div>
+                      <div id="height-div" className="flex-1">
+                        <InputLabel id="refered-label">
+                          Height (in cm)
+                        </InputLabel>
+                        <TextInputField
+                          name="height"
+                          variant="outlined"
+                          margin="dense"
+                          type="number"
+                          InputLabelProps={{ shrink: !!state.form.height }}
+                          value={state.form.height}
+                          onChange={handleChange}
+                          errors={state.errors.height}
+                        />
+                      </div>
+                    </div>
+                    <div id="body_surface-div" className="flex-1">
+                      Body Surface area :{" "}
+                      {Math.sqrt(
+                        (state.form.weight * state.form.height) / 3600
+                      ).toFixed(2)}{" "}
+                      m<sup>2</sup>
+                    </div>
+                  </div>
+                </AccordionDetails>
+              </Accordion>
+            </Card>
+            <CardContent>
               <div className="mt-4 flex justify-between">
                 <Button
                   color="default"
