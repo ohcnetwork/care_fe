@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -332,7 +331,7 @@ const AssetsList = () => {
                       onClick={() => navigate(`/assets/${asset.id}`)}
                     >
                       <div className="md:flex">
-                        <p className="text-xl font-normal capitalize break-words">
+                        <p className="text-xl font-medium capitalize break-words">
                           <span className="mr-2">
                             {" "}
                             {asset.asset_class === "HL7MONITOR" ? (

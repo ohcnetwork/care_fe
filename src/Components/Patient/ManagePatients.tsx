@@ -501,8 +501,9 @@ export const PatientManager = (props: any) => {
             <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
               <div>
                 <div className="md:flex justify-between w-full">
-                  <div className="text-xl font-bold capitalize">
-                    {patient.name} - {patient.age}
+                  <div className="text-xl font-semibold capitalize">
+                    <span>{patient.name}</span>
+                    <span className="text-gray-800">{" - " + patient.age}</span>
                     {patient.action && patient.action != 10 && (
                       <span className="font-semibold ml-2 text-gray-700">
                         -{" "}
