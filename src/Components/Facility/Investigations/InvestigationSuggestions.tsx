@@ -60,7 +60,7 @@ export default function ViewInvestigationSuggestions(props: {
                                     </div>
                                 ) : (
                                     <div>
-                                        at {formatDate(investigation.time)}
+                                        at {investigation.time ? formatDate(investigation.time) : "--:--"}
                                     </div>
                                 )}
                             </td>
@@ -96,7 +96,7 @@ export default function ViewInvestigationSuggestions(props: {
                             </>
                         ) : (
                             <>
-                                at {formatDate(investigation.time)}
+                                at {investigation.time ? formatDate(investigation.time) : "--:--"}
                             </>
                         )}
                         </b>
