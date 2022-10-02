@@ -401,15 +401,14 @@ const AssetCreate = (props: AssetProps) => {
           [assetId || "????"]: { name },
         }}
       />
-      
       <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
-        <div className="hidden xl:flex flex-col rounded-l-lg w-72 fixed h-full">
+        <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
           {Object.keys(sections).map((sectionTitle) => {
             const isCurrent = currentSection === sectionTitle;
             const section = sections[sectionTitle as AssetFormSection];
             return (
               <button
-                className={`flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
+                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
                   isCurrent ? "bg-white text-primary-500" : "bg-transparent"
                 } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
                 onClick={() => {
@@ -430,7 +429,7 @@ const AssetCreate = (props: AssetProps) => {
           <div className="w-full max-w-3xl 2xl:max-w-4xl">
             <form
               onSubmit={handleSubmit}
-              className="rounded sm:rounded-xl xl:rounded-none xl:rounded-r-xl bg-white p-6 sm:p-12 transition-all mb-40"
+              className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
             >
               <div className="grid grid-cols-1 gap-x-12 items-start">
                 <div className="grid grid-cols-6 gap-x-6">
