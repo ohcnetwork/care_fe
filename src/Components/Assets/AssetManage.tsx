@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, ReactElement } from "react";
 
 import loadable from "@loadable/component";
-import moment from "moment";
 import { AssetData, AssetTransaction } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch } from "react-redux";
@@ -10,6 +9,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
+import { formatDate } from "../../Utils/utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -132,7 +132,7 @@ const AssetManage = (props: AssetManageProps) => {
             </td>
             <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
               <span className="text-gray-900 font-medium">
-                {moment(transaction.modified_date).format("lll")}
+                {formatDate(transaction.modified_date)}
               </span>
             </td>
           </tr>
@@ -231,7 +231,7 @@ const AssetManage = (props: AssetManageProps) => {
                 <span className="text-gray-700">Last serviced on</span>
                 <span className="font-medium text-lg text-gray-900">
                   {asset?.last_serviced_on
-                    ? moment(asset?.last_serviced_on).format("MMM DD, YYYY")
+                    ? formatDate(asset?.last_serviced_on)
                     : "--"}
                 </span>
               </div>

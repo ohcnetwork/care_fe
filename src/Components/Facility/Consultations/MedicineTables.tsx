@@ -1,10 +1,10 @@
-import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
+import { formatDate } from "../../../Utils/utils";
 
 export const MedicineTables = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -77,7 +77,7 @@ export const MedicineTables = (props: any) => {
                 <div className="flex flex-col space-y-4">
                   <div className="mt-4">
                     <div className="text-md font-semibold leading-relaxed text-gray-900">
-                      {moment(k).format("LLL")}
+                      {formatDate(k)}
                     </div>
                     <div className="flex flex-col">
                       <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">

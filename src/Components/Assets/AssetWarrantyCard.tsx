@@ -1,4 +1,4 @@
-import moment from "moment";
+import { formatDate } from "../../Utils/utils";
 import { AssetData } from "./AssetTypes";
 
 interface AssetWarrantyCardProps {
@@ -40,7 +40,7 @@ function CardFrontView(asset: AssetData) {
             }`}
           >
             {(asset.warranty_amc_end_of_validity &&
-              moment(asset.warranty_amc_end_of_validity).format("DD/MM/YY")) ||
+              formatDate(asset.warranty_amc_end_of_validity)) ||
               "--"}
           </span>
           <span className="tracking-wide text-sm">EXPIRY</span>

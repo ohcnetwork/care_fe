@@ -18,9 +18,9 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
-import ReactDOM from "react-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import CommentSection from "./CommentsSection";
+import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -837,8 +837,7 @@ export default function ShiftDetails(props: { id: string }) {
                       {data?.created_by_object?.last_name}
                     </div>
                     <div className="text-xs">
-                      {data.created_date &&
-                        moment(data.created_date).format("lll")}
+                      {data.created_date && formatDate(data.created_date)}
                     </div>
                   </div>
                 </div>

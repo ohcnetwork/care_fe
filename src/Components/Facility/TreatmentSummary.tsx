@@ -3,11 +3,12 @@ import { useDispatch } from "react-redux";
 import { getPatient, getInvestigation } from "../../Redux/actions";
 import { ConsultationModel } from "./models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { PatientModel, DailyRoundsModel } from "../Patient/models";
+import { PatientModel } from "../Patient/models";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { getConsultation } from "../../Redux/actions";
 import { GENDER_TYPES } from "../../Common/constants";
+import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
@@ -379,9 +380,7 @@ const TreatmentSummary = (props: any) => {
                       {dailyRounds ? (
                         <tr>
                           <td className="border border-gray-800 text-center">
-                            {moment(dailyRounds.modified_date).format(
-                              "DD/MM/YYYY (h:mm A)"
-                            )}
+                            {formatDate(dailyRounds.modified_date)}
                           </td>
                           <td className="border border-gray-800 text-center">
                             {dailyRounds.ventilator_spo2 || "-"}
