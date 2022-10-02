@@ -403,7 +403,7 @@ const AssetCreate = (props: AssetProps) => {
       />
       
       <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
-        <div className="hidden xl:flex flex-col bg-gray-200 rounded-l-lg pt-10 w-72 fixed h-full">
+        <div className="hidden xl:flex flex-col rounded-l-lg w-72 fixed h-full">
           {Object.keys(sections).map((sectionTitle) => {
             const isCurrent = currentSection === sectionTitle;
             const section = sections[sectionTitle as AssetFormSection];
