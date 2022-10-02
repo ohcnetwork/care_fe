@@ -391,18 +391,19 @@ const AssetCreate = (props: AssetProps) => {
   };
 
   return (
-    <div className="pb-2 h-screen flex flex-col">
+    <div className="pb-2 relative flex flex-col">
       <PageTitle
         title={`${assetId ? "Update" : "Create"} Asset`}
-        className="pl-6"
+        className="pl-6 flex-grow-0"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
       />
-      <div className="mt-5 flex h-full sticky top-0 sm:mx-auto">
-        <div className="hidden xl:flex flex-col bg-gray-200 rounded-l-lg pt-10 w-72">
+      
+      <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
+        <div className="hidden xl:flex flex-col bg-gray-200 rounded-l-lg pt-10 w-72 fixed h-full">
           {Object.keys(sections).map((sectionTitle) => {
             const isCurrent = currentSection === sectionTitle;
             const section = sections[sectionTitle as AssetFormSection];
@@ -425,7 +426,7 @@ const AssetCreate = (props: AssetProps) => {
             );
           })}
         </div>
-        <div className="w-full h-full flex overflow-auto">
+        <div className="w-full h-full flex overflow-auto xl:ml-72">
           <div className="w-full max-w-3xl 2xl:max-w-4xl">
             <form
               onSubmit={handleSubmit}
