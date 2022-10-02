@@ -5,6 +5,9 @@ module.exports = {
   important: true,
   theme: {
     extend: {
+      fontFamily: {
+        sans: "Inter",
+      },
       colors: {
         error: colors.red["500"],
         green: colors.emerald,
