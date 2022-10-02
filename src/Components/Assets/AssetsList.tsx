@@ -321,7 +321,7 @@ const AssetsList = () => {
             {badge("Asset Type", asset_type, ["asset_type"])}
             {badge("Status", qParams.status, ["status"])}
           </div>
-          <div className="grow mt-10">
+          <div className="grow">
             <div className="py-8 md:px-5">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 md:-mx-8 gap-2">
                 {assetsExist ? (
