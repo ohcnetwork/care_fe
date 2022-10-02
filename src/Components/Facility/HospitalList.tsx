@@ -42,6 +42,7 @@ import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import ToolTip from "../Common/utils/Tooltip";
+import SelectMenu from "../Common/components/SelectMenu";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -573,18 +574,17 @@ export const HospitalList = (props: any) => {
                   <InputLabel className="text-sm">
                     {t("download_type")}
                   </InputLabel>
-                  <div className="flex flex-row">
-                    <SelectField
-                      name="select_download"
-                      className="text-sm"
-                      variant="outlined"
-                      margin="dense"
-                      optionArray={true}
-                      value={downloadSelect}
-                      options={downloadTypes}
-                      onChange={(e) => {
-                        setdownloadSelect(e.target.value);
-                      }}
+                  <div className="flex flex-row gap-6">
+                    <SelectMenu
+                      options={[
+                        ...downloadTypes.map((download) => ({
+                          title: download,
+                          value: download,
+                        })),
+                      ]}
+                      selected={downloadSelect}
+                      onSelect={setdownloadSelect}
+                      position="right"
                     />
 
                     {downloadLoading ? (
