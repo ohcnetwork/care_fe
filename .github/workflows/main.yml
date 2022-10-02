@@ -15,14 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Sync Repo on input 
-        if: ${{ inputs.branch }}
-        run: gh repo sync ${{ github.repository }} -b ${{ inputs.branch }}
-        env:
-          GH_TOKEN: ${{ secrets.GUTHUB_TOKEN }}
-
       - name: Sync Repo
-        if: !${{ inputs.branch }}
         run: gh repo sync ${{ github.repository }} -b develop
         env:
           GH_TOKEN: ${{ secrets.GUTHUB_TOKEN }}
