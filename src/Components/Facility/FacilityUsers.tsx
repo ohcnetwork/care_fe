@@ -339,7 +339,7 @@ export default function FacilityUsers(props: any) {
                     </span>
                   </div>
                 </div>
-                <div className="font-black text-2xl capitalize mt-2">
+                <div className="font-bold text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login &&
