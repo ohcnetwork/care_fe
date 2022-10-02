@@ -260,7 +260,7 @@ export default function ManageUsers() {
     }
 
     setUserData({ show: false, username: "", name: "" });
-    window.location.reload();
+    fetchData({ aborted: false });
   };
 
   const handleUnlinkFacilitySubmit = async () => {

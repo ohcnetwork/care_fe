@@ -254,7 +254,8 @@ export const FileUpload = (props: FileUploadProps) => {
           audio_urls(res.data.results);
           setuploadedFiles(
             res.data.results.filter(
-              (file: FileUploadModel) => file.upload_completed
+              (file: FileUploadModel) =>
+                file.upload_completed || file.file_category === "AUDIO"
             )
           );
           setTotalCount(res.data.count);
@@ -617,39 +618,45 @@ export const FileUpload = (props: FileUploadProps) => {
           <>
             <div className="flex absolute h-full sm:h-auto sm:inset-x-4 sm:top-4 p-4 sm:p-0 justify-between flex-col sm:flex-row">
               <div className="flex gap-3">
-              {file_state.isImage && (
-                <>
-                  {
-                    [
-                      ["Zoom In", "magnifying-glass-plus", handleZoomIn, file_state.zoom === zoom_values.length],
-                      ["Zoom Out", "magnifying-glass-minus", handleZoomOut, file_state.zoom === 1],
-                    ].map((button, index) => 
-                      <button 
+                {file_state.isImage && (
+                  <>
+                    {[
+                      [
+                        "Zoom In",
+                        "magnifying-glass-plus",
+                        handleZoomIn,
+                        file_state.zoom === zoom_values.length,
+                      ],
+                      [
+                        "Zoom Out",
+                        "magnifying-glass-minus",
+                        handleZoomOut,
+                        file_state.zoom === 1,
+                      ],
+                    ].map((button, index) => (
+                      <button
                         key={index}
                         onClick={button[2] as () => void}
                         className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
                         disabled={button[3] as boolean}
                       >
-                        <i 
-                          className={`fas fa-${button[1]} mr-2`}
-                        />
+                        <i className={`fas fa-${button[1]} mr-2`} />
                         {button[0] as String}
                       </button>
-                    )
-                  }
-                </>
-              )}
+                    ))}
+                  </>
+                )}
               </div>
               <div className="flex gap-3">
                 {downloadURL && downloadURL.length > 0 && (
-                    <a
-                      href={downloadURL}
-                      download
-                      className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
-                    >
-                      <i className="fas fa-download mr-2" />
-                      Download
-                    </a>
+                  <a
+                    href={downloadURL}
+                    download
+                    className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                  >
+                    <i className="fas fa-download mr-2" />
+                    Download
+                  </a>
                 )}
                 <button
                   onClick={handleClose}
@@ -657,7 +664,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 >
                   <i className="fas fa-times mr-2" />
                   Close
-                </button>                  
+                </button>
               </div>
             </div>
             {file_state.isImage ? (
@@ -803,6 +810,19 @@ export const FileUpload = (props: FileUploadProps) => {
                     </button>
                   </div>
                 )}
+                {file && (
+                  <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                    {file?.name}
+                    <button
+                      onClick={() => {
+                        setFile(null);
+                        setUploadFileName("");
+                      }}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ) : null}
@@ -835,4 +855,4 @@ export const FileUpload = (props: FileUploadProps) => {
       )}
     </div>
   );
-};
+};;
