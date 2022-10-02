@@ -36,6 +36,7 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import GetAppIcon from "@material-ui/icons/GetApp";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
@@ -586,36 +587,17 @@ export const HospitalList = (props: any) => {
                       onSelect={setdownloadSelect}
                       position="right"
                     />
-
                     {downloadLoading ? (
                       <div className="px-2 ml-2 my-2 pt-1 rounded">
                         <CircularProgress className="text-primary-600 w-6 h-6" />
                       </div>
                     ) : (
                       <button
-                        className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
+                        className="bg-primary-600 hover:shadow-md px-2 rounded-full"
                         onClick={handleDownloader}
                         disabled={downloadLoading}
                       >
-                        <svg
-                          className="h-6 w-6"
-                          viewBox="0 0 16 16"
-                          fill="white"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
-                          />
-                        </svg>
+                        <GetAppIcon style={{ color: "white" }} />
                       </button>
                     )}
                   </div>
