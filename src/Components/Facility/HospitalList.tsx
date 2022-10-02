@@ -22,7 +22,6 @@ import {
   sendNotificationMessages,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
@@ -42,7 +41,6 @@ import FacillityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
-import ToolTip from "../Common/utils/Tooltip";
 import SelectMenu from "../Common/components/SelectMenu";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
