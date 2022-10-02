@@ -6,6 +6,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        error: colors.red["500"],
         green: colors.emerald,
         yellow: colors.amber,
         purple: colors.violet,
