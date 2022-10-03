@@ -463,7 +463,10 @@ export default function PatientFilterV2(props: any) {
           onChange={(v) => setFilterState({ ...filterState, ordering: v })}
         />
       </div>
-      <div className="font-light text-md mt-2">Filter By:</div>
+      <div className="text-md mt-4 flex items-center text-gray-700 gap-2">
+        <i className="fa-solid fa-filter" />
+        <p>Filter by</p>
+      </div>
       <div className="flex flex-wrap gap-2">
         <div className="w-full flex-none">
           <span className="text-sm">LSG body</span>
