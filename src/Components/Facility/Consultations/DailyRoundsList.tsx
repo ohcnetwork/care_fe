@@ -48,7 +48,6 @@ export const DailyRoundsList = (props: any) => {
         }
         setIsDailyRoundLoading(false);
       }
-      console.log(res);
     },
     [consultationId, dispatch, offset]
   );
