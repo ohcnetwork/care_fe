@@ -145,7 +145,7 @@ export const UserAdd = (props: UserProps) => {
 
   const [usernameExists, setUsernameExists] = useState<number>(0);
 
-  const checkUsername = async (username: string) => {
+  const check_username = async (username: string) => {
     setUsernameExists(userExistsEnums.checking);
     const usernameCheck = await dispatchAction(checkUsername(username), true);
     setUsernameExists(
@@ -163,7 +163,7 @@ export const UserAdd = (props: UserProps) => {
       /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
     ) {
       let timeout = setTimeout(() => {
-        checkUsername(usernameInput);
+        check_username(usernameInput);
       }, 500);
       return () => clearTimeout(timeout);
     }
