@@ -14,6 +14,7 @@ type Props<T> = {
   position?: string;
 };
 
+/** Deprecated. Use SelectMenuV2. */
 export default function SelectMenu<T>(props: Props<T>) {
   const options = props.options.map((option) => {
     return {
