@@ -564,22 +564,18 @@ export default function PatientFilterV2(props: any) {
             }
           />
         </div>
-
-        {KASP_ENABLED && (
+        {!KASP_ENABLED && (
           <div className="w-full flex-none">
             <span className="text-sm">{KASP_STRING}</span>
-            <SelectField
-              name="is_kasp"
-              variant="outlined"
-              margin="dense"
+            <SelectMenuV2
+              className="pt-2"
+              placeholder="Show all"
+              options={[true, false]}
+              optionLabel={(o) =>
+                o ? `Show ${KASP_STRING}` : `Show Non ${KASP_STRING}`
+              }
               value={filterState.is_kasp}
-              options={[
-                { id: "", text: "Show All" },
-                { id: "true", text: `Show ${KASP_STRING}` },
-                { id: "false", text: `Show Non ${KASP_STRING}` },
-              ]}
-              onChange={handleChange}
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+              onChange={(v) => setFilterState({ ...filterState, is_kasp: v })}
             />
           </div>
         )}
