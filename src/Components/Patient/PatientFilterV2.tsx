@@ -594,6 +594,16 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Disease Status</span>
+          <SelectMenuV2
+            className="pt-2"
+            placeholder="Show all"
+            options={DISEASE_STATUS}
+            optionLabel={(o) => o}
+            value={filterState.disease_status}
+            onChange={(v) =>
+              setFilterState({ ...filterState, disease_status: v })
+            }
+          />
           <SelectField
             name="disease_status"
             variant="outlined"
