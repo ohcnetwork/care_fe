@@ -310,7 +310,11 @@ export const ConsultationForm = (props: any) => {
             has_allergy:
               `${res.data.last_health_details?.has_allergy}` || "false",
             allergies: res.data.last_health_details?.allergies || "",
-            blood_group: res.data.last_health_details?.blood_group || "",
+            blood_group: res.data.last_health_details?.blood_group
+              ? res.data.last_health_details?.blood_group === "UNKNOWN"
+                ? "UNK"
+                : res.data.last_health_details?.blood_group
+              : "",
             height: res.data.last_health_details?.height || 0.0,
             weight: res.data.last_health_details?.weight || 0.0,
             vaccination_history:
@@ -515,6 +519,15 @@ export const ConsultationForm = (props: any) => {
             }
           }
           return;
+
+        case "weight":
+        case "height":
+          if (!state.form[field]) {
+            errors[field] = "Please enter a value";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -576,7 +589,9 @@ export const ConsultationForm = (props: any) => {
           has_allergy: state.form.has_allergy,
           allergies:
             state.form.has_allergy === "true" ? state.form.allergies : "",
-          blood_group: state.form.blood_group,
+          blood_group: state.form.blood_group
+            ? state.form.blood_group
+            : undefined,
           height: state.form.height,
           weight: state.form.weight,
           vaccination_history: state.form.vaccination_history,
