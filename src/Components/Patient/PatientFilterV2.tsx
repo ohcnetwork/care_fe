@@ -549,31 +549,19 @@ export default function PatientFilterV2(props: any) {
             value={filterState.gender}
             onChange={(v) => setFilterState({ ...filterState, gender: v })}
           />
-          <SelectField
-            name="gender"
-            variant="outlined"
-            margin="dense"
-            value={filterState.gender}
-            options={[{ id: "", text: "Show All" }, ...GENDER_TYPES]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
         </div>
 
         <div className="w-full flex-none">
           <span className="text-sm">Is Antenatal</span>
-          <SelectField
-            name="is_antenatal"
-            variant="outlined"
-            margin="dense"
+          <SelectMenuV2
+            className="pt-2"
+            placeholder="Show all"
+            options={[true, false]}
+            optionLabel={(o) => (o ? "Antenatal" : "Non-antenatal")}
             value={filterState.is_antenatal}
-            options={[
-              { id: "", text: "Show All" },
-              { id: "true", text: "antenatal" },
-              { id: "false", text: "non antenatal" },
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            onChange={(v) =>
+              setFilterState({ ...filterState, is_antenatal: v })
+            }
           />
         </div>
 
