@@ -195,7 +195,6 @@ export default function PatientFilterV2(props: any) {
   ];
 
   const DECLARED_FILTER = [
-    { id: "", text: "Show All" },
     { id: "false", text: "Not Declared" },
     { id: "true", text: "Declared" },
   ];
@@ -620,14 +619,16 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Declared</span>
-          <SelectField
-            name="is_declared_positive"
-            variant="outlined"
-            margin="dense"
-            value={filterState.is_declared_positive}
+          <SelectMenuV2
+            className="pt-2"
+            placeholder="Show all"
             options={DECLARED_FILTER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
+            value={filterState.is_declared_positive}
+            onChange={(v) =>
+              setFilterState({ ...filterState, is_declared_positive: v })
+            }
           />
         </div>
         <div className="w-full flex-none">
