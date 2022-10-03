@@ -412,27 +412,30 @@ export default function PatientFilterV2(props: any) {
 
   return (
     <div>
-      <div className="flex flex-wrap justify-between">
-        <button className="btn btn-default mt-1" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />
-          Cancel
+      <div className="flex mb-4">
+        <button
+          className="inline-flex items-center justify-center whitespace-nowrap py-2 px-4 rounded cursor-pointer hover:bg-gray-100 mt-1"
+          onClick={closeFilter}
+        >
+          <i className="fa-solid fa-xmark mr-2" />
+          <span className="text-sm">Cancel</span>
         </button>
         <button
-          className="btn btn-default mt-1"
+          className="inline-flex items-center justify-center whitespace-nowrap py-2 px-4 rounded cursor-pointer hover:bg-gray-100 mt-1 text-red-600"
           onClick={(_) => {
             navigate("/patients");
             setFilterState(clearFilterState);
           }}
         >
-          <i className="fas fa-times mr-2" />
-          Clear Filter
+          <i className="fa-solid fa-xmark mr-2" />
+          <span className="text-sm">Clear Filter</span>
         </button>
+        <div className="flex-1" />
         <button
-          className="btn btn-primary w-full sm:w-fit mt-2 sm:mt-0"
+          className="inline-flex items-center justify-center whitespace-nowrap py-2 px-4 rounded cursor-pointer bg-primary-500 hover:bg-primary-400 mt-1 text-white"
           onClick={applyFilter}
         >
-          <i className="fas fa-check mr-2" />
-          Apply
+          <span className="text-sm">Apply</span>
         </button>
       </div>
       <div className="w-full flex-none mt-2">
