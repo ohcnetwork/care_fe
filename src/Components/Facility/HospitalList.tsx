@@ -362,31 +362,36 @@ export const HospitalList = (props: any) => {
                       <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
-                      {facility.features?.map((feature: number, i: number) => (
-                        <div
-                          key={i}
-                          className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
-                          title={
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0].name
-                          }
-                        >
-                          <i
-                            className={`fas fa-${
-                              FACILITY_FEATURE_TYPES.filter(
-                                (f) => f.id === feature
-                              )[0].icon
-                            }`}
-                          />{" "}
-                          &nbsp;
-                          {
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0].name
-                          }
-                        </div>
-                      ))}
+                      {facility.features?.map(
+                        (feature: number, i: number) =>
+                          FACILITY_FEATURE_TYPES.some(
+                            (f) => f.id === feature
+                          ) && (
+                            <div
+                              key={i}
+                              className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                              title={
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            >
+                              <i
+                                className={`fas fa-${
+                                  FACILITY_FEATURE_TYPES.filter(
+                                    (f) => f.id === feature
+                                  )[0]?.icon
+                                }`}
+                              />{" "}
+                              &nbsp;
+                              {
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            </div>
+                          )
+                      )}
                     </div>
 
                     <div className="mt-2 flex justify-between">
@@ -409,7 +414,7 @@ export const HospitalList = (props: any) => {
                         <div>
                           {userType !== "Staff" ? (
                             <button
-                              className="mx-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                              className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                               onClick={(_) => setModalFor(facility.id)}
                             >
                               <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
@@ -521,8 +526,10 @@ export const HospitalList = (props: any) => {
     );
   } else if (data && data.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
-      <div className="w-full">
-        <div className="text-3xl mt-4">{t("no_facilities")}</div>
+      <div className="w-full bg-white rounded-lg p-3">
+        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+          {t("no_facilities")}
+        </div>
       </div>
     ) : (
       <div>

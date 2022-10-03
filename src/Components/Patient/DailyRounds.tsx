@@ -1,5 +1,4 @@
 import {
-  Button,
   CardContent,
   InputLabel,
   RadioGroup,
@@ -7,7 +6,6 @@ import {
   FormControlLabel,
   Radio,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
@@ -18,6 +16,7 @@ import {
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
+  PATIENT_CATEGORIES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -48,7 +47,7 @@ const initForm: any = {
   other_symptoms: "",
   physical_examination_info: "",
   other_details: "",
-  category: "",
+  patient_category: "Comfort Care",
   current_health: 0,
   recommend_discharge: false,
   actions: null,
@@ -241,6 +240,7 @@ export const DailyRounds = (props: any) => {
       const baseData = {
         clone_last: state.form.clone_last === "true" ? true : false,
         rounds_type: state.form.rounds_type,
+        patient_category: state.form.patient_category,
         taken_at: state.form.taken_at
           ? state.form.taken_at
           : new Date().toISOString(),
@@ -262,7 +262,6 @@ export const DailyRounds = (props: any) => {
           physical_examination_info: state.form.physical_examination_info,
           other_details: state.form.other_details,
           consultation: consultationId,
-          patient_category: state.form.category,
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: state.form.action,
           review_time: state.form.review_time,
@@ -490,22 +489,23 @@ export const DailyRounds = (props: any) => {
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div>
-                <div>
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="w-full md:w-1/3">
                   <DateTimeFiled
                     label="Measured At"
                     margin="dense"
                     value={state.form.taken_at}
+                    fullWidth
                     disableFuture={true}
                     showTodayButton={true}
                     onChange={(date) => handleDateChange(date, "taken_at")}
                     errors={state.errors.taken_at}
                   />
                 </div>
-                <div className="mt-4">
+                <div className="w-full md:w-1/3">
                   <InputLabel id="rounds_type">Round Type</InputLabel>
                   <SelectField
-                    className="md:w-1/2"
+                    className=""
                     name="rounds_type"
                     variant="standard"
                     margin="dense"
@@ -523,6 +523,22 @@ export const DailyRounds = (props: any) => {
                     value={state.form.rounds_type}
                     onChange={handleChange}
                     errors={state.errors.rounds_type}
+                  />
+                </div>
+                <div className="w-full md:w-1/3">
+                  <InputLabel id="category-label" required>
+                    Category
+                  </InputLabel>
+                  <SelectField
+                    name="patient_category"
+                    variant="standard"
+                    margin="dense"
+                    value={state.form.patient_category}
+                    options={PATIENT_CATEGORIES.map((c) => {
+                      return { id: c, text: c };
+                    })}
+                    onChange={handleChange}
+                    errors={state.errors.patient_category}
                   />
                 </div>
               </div>
@@ -628,6 +644,7 @@ export const DailyRounds = (props: any) => {
                         />
                       </div>
                     )}
+
                     <div className="flex-1">
                       <InputLabel id="action-label">Action </InputLabel>
                       <NativeSelectField
@@ -929,7 +946,7 @@ export const DailyRounds = (props: any) => {
                 </div>
               )}
 
-              <div className="mt-4 flex justify-between">
+              <div className="mt-4 flex flex-col md:flex-row gap-2 justify-between">
                 <Link
                   className="btn btn-default bg-white mt-2"
                   href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
@@ -938,7 +955,7 @@ export const DailyRounds = (props: any) => {
                 </Link>
                 <button
                   type="submit"
-                  className="btn btn-primary ml-auto text-base"
+                  className="btn btn-primary ml-auto text-base w-full md:w-auto"
                   onClick={(e) => handleSubmit(e)}
                 >
                   <i className="fa-regular fa-circle-check mr-2"></i>{" "}

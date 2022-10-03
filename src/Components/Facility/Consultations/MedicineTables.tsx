@@ -67,14 +67,14 @@ export const MedicineTables = (props: any) => {
         <div>
           <div className="mt-4 text-lg font-bold">Consultation Updates</div>
           {noDataFound && (
-            <div className="text-md h-full text-center mt-5 text-gray-500 text-semibold bg-white rounded-lg shadow py-4">
+            <div className="text-md h-full text-center mt-5 text-gray-500 text-semibold bg-white rounded-lg shadow py-4 px-2">
               No Consultation Updates Found
             </div>
           )}
           {Object.keys(results).map((k: any, indx: number) => (
             <div key={indx}>
               {Object.keys(results[k].medication_given).length !== 0 && (
-                <div className="grid md:grid-cols-full gap-4">
+                <div className="flex flex-col space-y-4">
                   <div className="mt-4">
                     <div className="text-md font-semibold leading-relaxed text-gray-900">
                       {moment(k).format("LLL")}

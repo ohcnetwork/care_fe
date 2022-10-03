@@ -44,7 +44,6 @@ export default function ResultList() {
   });
 
   let manageResults: any = null;
-  let pagination: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
     localStorage.getItem("lsg-ward-data") ||
@@ -123,10 +122,6 @@ export default function ResultList() {
   const searchByPhone = (value: string) => {
     updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
-
-  // const handleFilter = (value: string) => {
-  //   updateQuery({ disease_status: value, page: 1 });
-  // };
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
@@ -319,19 +314,17 @@ export default function ResultList() {
     );
   } else if (data && data.length) {
     manageResults = <>{resultList}</>;
-    pagination = (
-      <>
-        {totalCount > RESULT_LIMIT && (
-          <div className="mt-4 w-full flex justify-center items-center">
-            <Pagination
-              cPage={qParams.page}
-              defaultPerPage={RESULT_LIMIT}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
+  } else if (data && data.length === 0) {
+    manageResults = (
+      <tr className="bg-white">
+        <td colSpan={5}>
+          <div className="w-full bg-white rounded-lg p-3">
+            <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+              No Results Found
+            </div>
           </div>
-        )}
-      </>
+        </td>
+      </tr>
     );
   }
 
@@ -378,6 +371,7 @@ export default function ResultList() {
             <PhoneNumberField
               value={qParams.mobile_number || "+91"}
               onChange={(value: string) => searchByPhone(value)}
+              placeholder="Search by Phone Number"
               turnOffAutoFormat={false}
               errors=""
             />
@@ -462,7 +456,7 @@ export default function ResultList() {
         )}
         {badge("SRF ID", qParams.srf_id, "srf_id")}
       </div>
-      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
+      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-t-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
@@ -487,8 +481,17 @@ export default function ResultList() {
             {manageResults}
           </tbody>
         </table>
-        <div className="bg-white divide-y divide-gray-200">{pagination}</div>
       </div>
+      {totalCount > RESULT_LIMIT && (
+        <div className="flex w-full pt-5 pb-1 items-center justify-center shadow sm:rounded-b-lg min-w-full bg-gray-50 border-t border-gray-200">
+          <Pagination
+            cPage={qParams.page}
+            defaultPerPage={RESULT_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
       <CSVLink
         data={downloadFile}
         filename={`external-result--${now}.csv`}

@@ -660,6 +660,19 @@ export const retrieveUploadFilesURL = (params: object, fileId: string) => {
   return fireRequestForFiles("retrieveUpload", [], params, { fileId: fileId });
 };
 
+export const editUpload = (
+  params: object,
+  fileId: string,
+  fileType: string,
+  associatingId: string
+) => {
+  return fireRequest("editUpload", [], params, {
+    fileId,
+    fileType,
+    associatingId,
+  });
+};
+
 // Investigation
 
 export const listInvestigations = (
@@ -716,6 +729,11 @@ export const editInvestigation = (
   return fireRequest("editInvestigation", [], params, {
     consultation_external_id: consultation_external_id,
   });
+};
+
+// ICD11
+export const listICD11Diagnosis = (params: object, key: string) => {
+  return fireRequest("listICD11Diagnosis", [], params, null, key);
 };
 
 // Resource

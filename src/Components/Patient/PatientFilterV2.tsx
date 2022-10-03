@@ -11,7 +11,7 @@ import {
   GENDER_TYPES,
   FACILITY_TYPES,
   DISEASE_STATUS,
-  PATIENT_FILTER_CATEGORY,
+  PATIENT_FILTER_CATEGORIES,
   PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
   KASP_ENABLED,
@@ -414,13 +414,13 @@ export default function PatientFilterV2(props: any) {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
+      <div className="flex flex-wrap justify-between">
+        <button className="btn btn-default mt-1" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
         <button
-          className="btn btn-default"
+          className="btn btn-default mt-1"
           onClick={(_) => {
             navigate("/patients");
             setFilterState(clearFilterState);
@@ -429,7 +429,10 @@ export default function PatientFilterV2(props: any) {
           <i className="fas fa-times mr-2" />
           Clear Filter
         </button>
-        <button className="btn btn-primary" onClick={applyFilter}>
+        <button
+          className="btn btn-primary w-full sm:w-fit mt-2 sm:mt-0"
+          onClick={applyFilter}
+        >
           <i className="fas fa-check mr-2" />
           Apply
         </button>
@@ -581,7 +584,12 @@ export default function PatientFilterV2(props: any) {
             variant="outlined"
             margin="dense"
             value={filterState.category}
-            options={[{ id: "", text: "Show All" }, ...PATIENT_FILTER_CATEGORY]}
+            options={[
+              { id: "", text: "Show All" },
+              ...PATIENT_FILTER_CATEGORIES.map((o) => {
+                return { id: o, text: o };
+              }),
+            ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />

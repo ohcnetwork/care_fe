@@ -75,7 +75,7 @@ export default function InventoryLog(props: any) {
       Notification.Success({
         msg: "Updated Successfully",
       });
-      window.location.reload();
+      fetchData({ aborted: false });
     }
     setSaving(false);
   };
@@ -93,7 +93,7 @@ export default function InventoryLog(props: any) {
       Notification.Success({
         msg: "Last entry deleted Successfully",
       });
-      window.location.reload();
+      fetchData({ aborted: false });
     } else {
       Notification.Error({
         msg: "Error while deleting last entry: " + (res?.data?.detail || ""),

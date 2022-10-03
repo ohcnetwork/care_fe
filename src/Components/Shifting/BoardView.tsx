@@ -13,12 +13,12 @@ import { useDispatch } from "react-redux";
 import moment from "moment";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import GetAppIcon from "@material-ui/icons/GetApp";
-
+import withScrolling from "react-dnd-scrolling";
 import { formatFilter } from "./Commons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
+const ScrollingComponent = withScrolling("div");
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
 const COMPLETED = ["COMPLETED", "REJECTED", "DESTINATION REJECTED"];
@@ -166,20 +166,22 @@ export default function BoardView() {
         local={local}
         updateFilter={updateFilter}
       />
-      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
-        {isLoading ? (
-          <Loading />
-        ) : (
-          boardFilter.map((board) => (
-            <ShiftingBoard
-              key={board}
-              filterProp={qParams}
-              board={board}
-              formatFilter={formatFilter}
-            />
-          ))
-        )}
-      </div>
+      <ScrollingComponent className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
+        <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-2">
+          {isLoading ? (
+            <Loading />
+          ) : (
+            boardFilter.map((board) => (
+              <ShiftingBoard
+                key={board}
+                filterProp={qParams}
+                board={board}
+                formatFilter={formatFilter}
+              />
+            ))
+          )}
+        </div>
+      </ScrollingComponent>
       <CSVLink
         data={downloadFile}
         filename={`shift-requests--${now}.csv`}

@@ -232,12 +232,18 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
           )}
         >
           <div className="shrink-0 flex items-center justify-center w-10">
-            <Link href="/user/profile" className="flex items-center justify-center bg-white rounded-full w-8 h-8">
+            <Link
+              href="/user/profile"
+              className="flex items-center justify-center bg-white rounded-full w-8 h-8"
+            >
               <i className="block fas fa-user text-base text-primary-800"></i>
             </Link>
           </div>
           <div className="ml-3 overflow-hidden whitespace-nowrap">
-            <Link href="/user/profile" className="text-base leading-5 font-medium text-white mb-1">
+            <Link
+              href="/user/profile"
+              className="text-base leading-5 font-medium text-white mb-1"
+            >
               {loginUser}
             </Link>
             <p
