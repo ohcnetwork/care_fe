@@ -412,7 +412,7 @@ export default function PatientFilterV2(props: any) {
 
   return (
     <div>
-      <div className="flex mb-4">
+      <div className="flex mb-4 max-w-sm w-full fixed -ml-4 pl-4 pr-8 z-10 -mt-8 pt-8 pb-4 bg-gray-50">
         <button
           className="inline-flex items-center justify-center whitespace-nowrap py-2 px-4 rounded cursor-pointer hover:bg-gray-100 mt-1"
           onClick={closeFilter}
@@ -438,7 +438,7 @@ export default function PatientFilterV2(props: any) {
           <span className="text-sm">Apply</span>
         </button>
       </div>
-      <div className="w-full flex-none mt-2">
+      <div className="w-full flex-none pt-16">
         <span className="text-sm">Ordering</span>
         <SelectMenuV2
           className="pt-2"
