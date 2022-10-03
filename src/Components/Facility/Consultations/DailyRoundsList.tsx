@@ -36,7 +36,10 @@ export const DailyRoundsList = (props: any) => {
     async (status: statusType) => {
       setIsDailyRoundLoading(true);
       const res = await dispatch(
-        getDailyReport({ limit, offset }, { consultationId })
+        getDailyReport(
+          { limit, offset, rounds_type: "NORMAL,VENTILATOR,ICU" },
+          { consultationId }
+        )
       );
       if (!status.aborted) {
         if (res && res.data) {
@@ -45,6 +48,7 @@ export const DailyRoundsList = (props: any) => {
         }
         setIsDailyRoundLoading(false);
       }
+      console.log(res);
     },
     [consultationId, dispatch, offset]
   );
