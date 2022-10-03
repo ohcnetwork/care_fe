@@ -526,10 +526,12 @@ export default function PatientFilterV2(props: any) {
           <SelectMenuV2
             className="pt-2"
             placeholder="Show all"
-            options={FACILITY_TYPES.map((type) => type.text)}
+            options={FACILITY_TYPES}
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.text}
             value={filterState.facility_type}
-            onChange={(value) =>
-              setFilterState({ ...filterState, facility_type: value })
+            onChange={(v) =>
+              setFilterState({ ...filterState, facility_type: v })
             }
             optionIcon={() => <i className="fa-solid fa-hospital" />}
           />
@@ -537,6 +539,22 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Gender</span>
+          <SelectMenuV2
+            className="pt-2"
+            placeholder="Show all"
+            options={GENDER_TYPES}
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
+            value={filterState.gender}
+            onChange={(v) => setFilterState({ ...filterState, gender: v })}
+            optionIcon={(option) => {
+              return {
+                1: <i className="text-base fa-solid fa-person" />,
+                2: <i className="text-base fa-solid fa-person-dress" />,
+                3: <i className="text-base fa-solid fa-genderless" />,
+              }[option.id as number];
+            }}
+          />
           <SelectField
             name="gender"
             variant="outlined"
