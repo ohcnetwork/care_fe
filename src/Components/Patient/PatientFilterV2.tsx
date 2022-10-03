@@ -564,7 +564,7 @@ export default function PatientFilterV2(props: any) {
             }
           />
         </div>
-        {!KASP_ENABLED && (
+        {KASP_ENABLED && (
           <div className="w-full flex-none">
             <span className="text-sm">{KASP_STRING}</span>
             <SelectMenuV2
@@ -582,19 +582,13 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Category</span>
-          <SelectField
-            name="category"
-            variant="outlined"
-            margin="dense"
+          <SelectMenuV2
+            className="pt-2"
+            placeholder="Show all"
+            options={PATIENT_FILTER_CATEGORIES}
+            optionLabel={(o) => o}
             value={filterState.category}
-            options={[
-              { id: "", text: "Show All" },
-              ...PATIENT_FILTER_CATEGORIES.map((o) => {
-                return { id: o, text: o };
-              }),
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            onChange={(v) => setFilterState({ ...filterState, category: v })}
           />
         </div>
 
