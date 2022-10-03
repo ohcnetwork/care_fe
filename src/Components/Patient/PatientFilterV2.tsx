@@ -189,7 +189,6 @@ export default function PatientFilterV2(props: any) {
   }, [dispatch]);
 
   const VACCINATED_FILTER = [
-    { id: "", text: "Show All" },
     { id: 0, text: "Unvaccinated" },
     { id: 1, text: "1st dose only" },
     { id: 2, text: "Both doses" },
@@ -604,27 +603,19 @@ export default function PatientFilterV2(props: any) {
               setFilterState({ ...filterState, disease_status: v })
             }
           />
-          <SelectField
-            name="disease_status"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.disease_status}
-            options={["Show All", ...DISEASE_STATUS]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Vaccinated</span>
-          <SelectField
-            name="number_of_doses"
-            variant="outlined"
-            margin="dense"
-            value={filterState.number_of_doses}
+          <SelectMenuV2
+            className="pt-2"
+            placeholder="Show all"
             options={VACCINATED_FILTER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
+            value={filterState.number_of_doses}
+            onChange={(v) =>
+              setFilterState({ ...filterState, number_of_doses: v })
+            }
           />
         </div>
         <div className="w-full flex-none">
