@@ -492,6 +492,29 @@ export const FacilityCreate = (props: FacilityProps) => {
     setMapLoadLocation([parseFloat(location.lat), parseFloat(location.lon)]);
   };
 
+  const resetWard = () => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, ward: "0" },
+    });
+  };
+
+  const resetLocalBody = () => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, local_body: "0" },
+    });
+    resetWard();
+  };
+
+  const resetDistrict = () => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, district: "0" },
+    });
+    resetLocalBody();
+  };
+
   if (isLoading) {
     return <Loading />;
   }
@@ -569,6 +592,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     optionValue="name"
                     onChange={(e) => [
                       handleChange(e),
+                      resetDistrict(),
                       fetchDistricts(String(e.target.value)),
                     ]}
                     errors={state.errors.state}
@@ -591,6 +615,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     optionValue="name"
                     onChange={(e) => [
                       handleChange(e),
+                      resetLocalBody(),
                       fetchLocalBody(String(e.target.value)),
                     ]}
                     errors={state.errors.district}
@@ -613,6 +638,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     optionValue="name"
                     onChange={(e) => [
                       handleChange(e),
+                      resetWard(),
                       fetchWards(String(e.target.value)),
                     ]}
                     errors={state.errors.local_body}
