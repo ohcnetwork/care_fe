@@ -28,6 +28,7 @@ import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 import { debounce } from "lodash";
+import SelectMenuV2 from "../Common/components/SelectMenuV2";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -438,23 +439,34 @@ export default function PatientFilterV2(props: any) {
         </button>
       </div>
       <div className="w-full flex-none mt-2">
-        <span className="text-sm font-semibold">Ordering</span>
-        <SelectField
-          name="ordering"
-          variant="outlined"
-          margin="dense"
-          optionKey="text"
-          optionValue="desc"
-          value={filterState.ordering}
-          options={[{ desc: "Select", text: "" }, ...PATIENT_FILTER_ORDER]}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        <span className="text-sm">Ordering</span>
+        <SelectMenuV2
+          className="pt-2"
+          id="order"
+          options={Object.keys(PATIENT_FILTER_ORDER)}
+          optionLabel={(o) => PATIENT_FILTER_ORDER[o].label}
+          optionSelectedLabel={(option) => {
+            const item = PATIENT_FILTER_ORDER[option];
+            return `${item.label} (${item.mode})`;
+          }}
+          optionDescription={(o) => PATIENT_FILTER_ORDER[o].mode}
+          optionIcon={(option) => (
+            <i
+              className={`fa-solid ${
+                option.mode === "Ascending"
+                  ? "fa-arrow-up-short-wide"
+                  : "fa-arrow-up-wide-short"
+              }`}
+            />
+          )}
+          value={filterState.ordering || undefined}
+          onChange={(v) => setFilterState({ ...filterState, ordering: v })}
         />
       </div>
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">LSG body</span>
+          <span className="text-sm">LSG body</span>
           <div className="">
             <AutoCompleteAsyncField
               name="lsgBody"
@@ -483,7 +495,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">District</span>
+          <span className="text-sm">District</span>
           <DistrictSelect
             multiple={false}
             name="district"
@@ -495,7 +507,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Facility</span>
+          <span className="text-sm">Facility</span>
           <FacilitySelect
             multiple={false}
             name="facility"
@@ -508,7 +520,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Facility type</span>
+          <span className="text-sm">Facility type</span>
           <SelectField
             name="facility_type"
             variant="outlined"
@@ -529,7 +541,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Gender</span>
+          <span className="text-sm">Gender</span>
           <SelectField
             name="gender"
             variant="outlined"
@@ -542,7 +554,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Is Antenatal</span>
+          <span className="text-sm">Is Antenatal</span>
           <SelectField
             name="is_antenatal"
             variant="outlined"
@@ -560,7 +572,7 @@ export default function PatientFilterV2(props: any) {
 
         {KASP_ENABLED && (
           <div className="w-full flex-none">
-            <span className="text-sm font-semibold">{KASP_STRING}</span>
+            <span className="text-sm">{KASP_STRING}</span>
             <SelectField
               name="is_kasp"
               variant="outlined"
@@ -578,7 +590,7 @@ export default function PatientFilterV2(props: any) {
         )}
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Category</span>
+          <span className="text-sm">Category</span>
           <SelectField
             name="category"
             variant="outlined"
@@ -596,7 +608,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Disease Status</span>
+          <span className="text-sm">Disease Status</span>
           <SelectField
             name="disease_status"
             variant="outlined"
@@ -609,7 +621,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Vaccinated</span>
+          <span className="text-sm">Vaccinated</span>
           <SelectField
             name="number_of_doses"
             variant="outlined"
@@ -621,7 +633,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Declared</span>
+          <span className="text-sm">Declared</span>
           <SelectField
             name="is_declared_positive"
             variant="outlined"
@@ -633,7 +645,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Telemedicine</span>
+          <span className="text-sm">Telemedicine</span>
           <SelectField
             name="last_consultation_is_telemedicine"
             variant="outlined"
@@ -645,7 +657,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">SRF ID</span>
+          <span className="text-sm">SRF ID</span>
           <div className="flex justify-between">
             <div className="w-full">
               <TextInputField
@@ -663,7 +675,7 @@ export default function PatientFilterV2(props: any) {
           </div>
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">COWIN ID</span>
+          <span className="text-sm">COWIN ID</span>
           <div className="flex justify-between">
             <div className="w-full">
               <TextInputField
@@ -681,9 +693,7 @@ export default function PatientFilterV2(props: any) {
           </div>
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">
-            Last Admitted to (Bed Type)
-          </span>
+          <span className="text-sm">Last Admitted to (Bed Type)</span>
           <MultiSelectField
             name="last_consultation_admitted_to_list"
             variant="outlined"
@@ -829,7 +839,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Age</span>
+          <span className="text-sm">Age</span>
           <div className="flex justify-between">
             <TextInputField
               id="age_min"
