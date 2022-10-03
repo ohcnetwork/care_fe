@@ -25,8 +25,8 @@ import {
   getDistrictByState,
   getLocalbodyByDistrict,
   getStates,
-  getUserDetails,
   getUserListFacility,
+  checkUsername
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -35,14 +35,10 @@ import {
   PhoneNumberField,
   SelectField,
   TextInputField,
-  MultiSelectField,
   CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
-import HelpToolTip from "../Common/utils/HelpToolTip";
 import clsx from "clsx";
-
-import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -151,9 +147,9 @@ export const UserAdd = (props: UserProps) => {
 
   const checkUsername = async (username: string) => {
     setUsernameExists(userExistsEnums.checking);
-    const userDetails = await dispatchAction(getUserDetails(username), true);
+    const usernameCheck = await dispatchAction(checkUsername(username), true);
     setUsernameExists(
-      userDetails.status === 404
+      usernameCheck.status === 200
         ? userExistsEnums.avaliable
         : userExistsEnums.exists
     );
@@ -390,13 +386,6 @@ export const UserAdd = (props: UserProps) => {
     form.facilities = selected
       ? (selected as FacilityModel[]).map((i) => i.id)
       : [];
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleMultiSelect = (event: any) => {
-    const { name, value } = event.target;
-    const form = { ...state.form };
-    form[name] = value;
     dispatch({ type: "set_form", form });
   };
 

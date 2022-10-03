@@ -552,6 +552,12 @@ const routes: Routes = {
     method: "POST",
   },
   //Profile
+
+  checkUsername: {
+    path: "/api/v1/checkusername/",
+    method: "GET",
+  },
+
   getUserDetails: {
     path: "/api/v1/users/{username}/",
     method: "GET",
