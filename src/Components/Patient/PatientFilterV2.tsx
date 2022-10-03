@@ -200,7 +200,6 @@ export default function PatientFilterV2(props: any) {
   ];
 
   const TELEMEDICINE_FILTER = [
-    { id: "", text: "Show All" },
     { id: "true", text: "Yes" },
     { id: "false", text: "No" },
   ];
@@ -633,14 +632,19 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Telemedicine</span>
-          <SelectField
-            name="last_consultation_is_telemedicine"
-            variant="outlined"
-            margin="dense"
-            value={filterState.last_consultation_is_telemedicine}
+          <SelectMenuV2
+            className="pt-2"
+            placeholder="Show all"
             options={TELEMEDICINE_FILTER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
+            value={filterState.last_consultation_is_telemedicine}
+            onChange={(v) =>
+              setFilterState({
+                ...filterState,
+                last_consultation_is_telemedicine: v,
+              })
+            }
           />
         </div>
         <div className="w-full flex-none">
