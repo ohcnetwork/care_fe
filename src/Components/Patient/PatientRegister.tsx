@@ -98,7 +98,6 @@ const initForm: any = {
   gender: "",
   phone_number: "",
   emergency_phone_number: "",
-  blood_group: "",
   disease_status: diseaseStatus[2],
   is_declared_positive: "false",
   date_declared_positive: new Date(),
@@ -113,15 +112,12 @@ const initForm: any = {
   address: "",
   permanent_address: "",
   village: "",
-  allergies: "",
   pincode: "",
   present_health: "",
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
-
   estimated_contact_date: null,
   date_of_return: null,
-
   number_of_primary_contacts: "",
   number_of_secondary_contacts: "",
   is_antenatal: "false",
@@ -302,7 +298,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ? parseGenderFromExt(res.data.gender, state.form.gender)
         : state.form.gender;
       form["srf_id"] = res.data.srf_id ? res.data.srf_id : state.form.srf_id;
-
       form["state"] = res.data.district_object
         ? res.data.district_object.state
         : state.form.state;
@@ -360,17 +355,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
-            blood_group: res.data.blood_group
-              ? res.data.blood_group === "UNKNOWN"
-                ? "UNK"
-                : res.data.blood_group
-              : "",
             local_body: res.data.local_body ? res.data.local_body : "",
             ward: res.data.ward_object ? res.data.ward_object.id : initialWard,
             village: res.data.village ? res.data.village : "",
             medical_history: [],
             is_antenatal: String(!!res.data.is_antenatal),
-            allergies: res.data.allergies ? res.data.allergies : "",
             pincode: res.data.pincode ? res.data.pincode : "",
             ongoing_medication: res.data.ongoing_medication
               ? res.data.ongoing_medication
@@ -413,14 +402,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             )
               ? Number(res.data.number_of_chronic_diseased_dependents)
               : "",
-            is_vaccinated: String(res.data.is_vaccinated),
-            number_of_doses: res.data.number_of_doses
-              ? String(res.data.number_of_doses)
-              : "1",
-            vaccine_name: res.data.vaccine_name ? res.data.vaccine_name : null,
-            last_vaccinated_date: res.data.last_vaccinated_date
-              ? res.data.last_vaccinated_date
-              : null,
           };
           if (res.data.address !== res.data.permanent_address) {
             setSameAddress(false);
@@ -618,33 +599,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-        case "blood_group":
-          if (!state.form[field]) {
-            errors[field] = "Please select a blood group";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
 
-        case "is_vaccinated":
-          if (state.form.is_vaccinated === "true") {
-            if (
-              state.form.vaccine_name === null ||
-              state.form.vaccine_name === "Select"
-            ) {
-              errors["vaccine_name"] = "Please select vaccine name";
-              if (!error_div) error_div = field;
-              invalidForm = true;
-            }
-
-            if (!state.form.last_vaccinated_date) {
-              errors["last_vaccinated_date"] =
-                "Please enter last vaccinated date";
-              if (!error_div) error_div = field;
-              invalidForm = true;
-            }
-          }
-          return;
         default:
           return;
       }
@@ -699,30 +654,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         srf_id: state.form.srf_id,
         covin_id:
           state.form.is_vaccinated === "true" ? state.form.covin_id : undefined,
-        is_vaccinated: state.form.is_vaccinated,
-        number_of_doses:
-          state.form.is_vaccinated === "true"
-            ? Number(state.form.number_of_doses)
-            : Number("0"),
-        vaccine_name:
-          state.form.vaccine_name &&
-          state.form.vaccine_name !== "Select" &&
-          state.form.is_vaccinated === "true"
-            ? state.form.vaccine_name
-            : null,
-        last_vaccinated_date:
-          state.form.is_vaccinated === "true"
-            ? state.form.last_vaccinated_date
-              ? state.form.last_vaccinated_date
-              : null
-            : null,
         test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
         is_antenatal: state.form.is_antenatal,
-
         passport_no:
           state.form.nationality !== "India"
             ? state.form.passport_no
@@ -764,8 +701,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.cluster_name
             ? state.form.cluster_name
             : null,
-
-        allergies: state.form.allergies,
         number_of_primary_contacts: Number(
           state.form.number_of_primary_contacts
         )
@@ -777,16 +712,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? Number(state.form.number_of_secondary_contacts)
           : undefined,
         ongoing_medication: state.form.ongoing_medication,
-
         is_declared_positive: JSON.parse(state.form.is_declared_positive),
         designation_of_health_care_worker:
           state.form.designation_of_health_care_worker,
         instituion_of_health_care_worker:
           state.form.instituion_of_health_care_worker,
-
-        blood_group: state.form.blood_group
-          ? state.form.blood_group
-          : undefined,
         number_of_aged_dependents: Number(state.form.number_of_aged_dependents)
           ? Number(state.form.number_of_aged_dependents)
           : undefined,
