@@ -46,7 +46,7 @@
     "@types/echarts": "^4.9.9",
     "@types/loadable__component": "^5.13.3",
     "@types/lodash": "^4.14.170",
-    "@types/node": "^15.6.1",
+    "@types/node": "^18.8.0",
     "@types/prop-types": "*",
     "@types/qrcode.react": "^1.0.1",
     "@types/react": "18.0.9",
