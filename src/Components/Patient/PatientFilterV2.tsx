@@ -442,7 +442,6 @@ export default function PatientFilterV2(props: any) {
         <span className="text-sm">Ordering</span>
         <SelectMenuV2
           className="pt-2"
-          id="order"
           options={Object.keys(PATIENT_FILTER_ORDER)}
           optionLabel={(o) => PATIENT_FILTER_ORDER[o].label}
           optionSelectedLabel={(option) => {
@@ -463,7 +462,7 @@ export default function PatientFilterV2(props: any) {
           onChange={(v) => setFilterState({ ...filterState, ordering: v })}
         />
       </div>
-      <div className="text-md mt-4 flex items-center text-gray-700 gap-2">
+      <div className="text-md my-6 flex items-center text-gray-700 gap-2">
         <i className="fa-solid fa-filter" />
         <p>Filter by</p>
       </div>
@@ -524,22 +523,15 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Facility type</span>
-          <SelectField
-            name="facility_type"
-            variant="outlined"
-            margin="dense"
+          <SelectMenuV2
+            className="pt-2"
+            placeholder="Show all"
+            options={FACILITY_TYPES.map((type) => type.text)}
             value={filterState.facility_type}
-            options={[
-              { id: "", text: "Show All" },
-              ...FACILITY_TYPES.map(({ id, text }) => {
-                return {
-                  id: text,
-                  text,
-                };
-              }),
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            onChange={(value) =>
+              setFilterState({ ...filterState, facility_type: value })
+            }
+            optionIcon={() => <i className="fa-solid fa-hospital" />}
           />
         </div>
 

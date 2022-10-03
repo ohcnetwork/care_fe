@@ -6,9 +6,9 @@ type OptionCallback<T, R> = (option: T) => R;
 type SelectMenuProps<T> = {
   id?: string;
   options: T[];
-  value?: T;
+  value: T | undefined;
   placeholder?: React.ReactNode;
-  optionLabel: OptionCallback<T, React.ReactNode>;
+  optionLabel?: OptionCallback<T, React.ReactNode>;
   optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
@@ -26,11 +26,14 @@ type SelectMenuProps<T> = {
 
 const SelectMenuV2 = <T,>(props: SelectMenuProps<T>) => {
   const valueOptions = props.options.map((option) => {
+    const label = props.optionLabel
+      ? props.optionLabel(option)
+      : (option as string);
     return {
-      label: props.optionLabel(option),
+      label,
       selectedLabel: props.optionSelectedLabel
         ? props.optionSelectedLabel(option)
-        : props.optionLabel(option),
+        : label,
       description: props.optionDescription && props.optionDescription(option),
       icon: props.optionIcon && props.optionIcon(option),
       value: option,
