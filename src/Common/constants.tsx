@@ -242,10 +242,10 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 7, text: "Other" },
 ];
 
-export const GENDER_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Male" },
-  { id: 2, text: "Female" },
-  { id: 3, text: "Non-binary" },
+export const GENDER_TYPES = [
+  { id: 1, text: "Male", icon: <i className="fa-solid fa-person" /> },
+  { id: 2, text: "Female", icon: <i className="fa-solid fa-person-dress" /> },
+  { id: 3, text: "Non-binary", icon: <i className="fa-solid fa-genderless" /> },
 ];
 
 export const SAMPLE_TEST_RESULT = [

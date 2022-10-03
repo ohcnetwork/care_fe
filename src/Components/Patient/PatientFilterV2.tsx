@@ -544,16 +544,10 @@ export default function PatientFilterV2(props: any) {
             placeholder="Show all"
             options={GENDER_TYPES}
             optionLabel={(o) => o.text}
+            optionIcon={(o) => <i className="text-base">{o.icon}</i>}
             optionValue={(o) => o.id}
             value={filterState.gender}
             onChange={(v) => setFilterState({ ...filterState, gender: v })}
-            optionIcon={(option) => {
-              return {
-                1: <i className="text-base fa-solid fa-person" />,
-                2: <i className="text-base fa-solid fa-person-dress" />,
-                3: <i className="text-base fa-solid fa-genderless" />,
-              }[option.id as number];
-            }}
           />
           <SelectField
             name="gender"
