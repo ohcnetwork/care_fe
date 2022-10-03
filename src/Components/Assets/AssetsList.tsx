@@ -372,8 +372,7 @@ const AssetsList = () => {
                         <Badge
                           color="blue"
                           startIcon="location-arrow"
-                          text={`${asset.status}`}
-                          title={`Transfer Status: ${asset.status}`}
+                          text={`TRANSFER ${asset.status}`}
                         />
                       </div>
                     </div>
