@@ -47,6 +47,7 @@ export const StackedLinePlot = (props: any) => {
     },
     tooltip: {
       trigger: "axis",
+      confine: true,
     },
     toolbox: {
       show: true,
@@ -65,8 +66,9 @@ export const StackedLinePlot = (props: any) => {
       boundaryGap: false,
       data: xData,
       axisLabel: {
-        width: 100,
-        overflow: "break",
+        width: 125,
+        overflow: "breakAll",
+        align: "left",
       },
     },
     yAxis: {
