@@ -1077,7 +1077,7 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="w-full">
+          <div className="w-full flex flex-col">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Medical
@@ -1125,6 +1125,23 @@ export const PatientHome = (props: any) => {
                   </div>
                 )}
                 {patientMedHis}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
+                Family Details
+              </div>
+              {!consultationListData.at(-1)?.health_details_object
+                ?.family_details?.length && (
+                <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
+                  No Family Details Available
+                </div>
+              )}
+              <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
+                {
+                  consultationListData.at(-1)?.health_details_object
+                    ?.family_details
+                }
               </div>
             </div>
           </div>
