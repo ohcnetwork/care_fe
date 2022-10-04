@@ -545,7 +545,21 @@ export const PatientHome = (props: any) => {
                     Blood Group
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData.blood_group || "-"}
+                    {consultationListData.at(-1)?.health_details_object
+                      ?.blood_group || "-"}
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Vaccines
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {consultationListData
+                      .at(-1)
+                      ?.health_details_object?.vaccination_history?.map(
+                        (vaccines) => vaccines.vaccine
+                      )
+                      .join(", ") || "-"}
                   </div>
                 </div>
                 {patientData.date_of_return && (
