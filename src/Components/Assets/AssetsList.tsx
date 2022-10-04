@@ -352,7 +352,7 @@ const AssetsList = () => {
                               ""
                             )}
                           </span>
-                          <p className="truncate w-1/2">{asset.name}</p>
+                          <p className="truncate w-48">{asset.name}</p>
                         </p>
                       </div>
                       <p className="font-normal text-sm">
