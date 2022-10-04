@@ -1114,16 +1114,6 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
-                {patientData.allergies && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-medium text-gray-500">
-                      Allergies
-                    </div>
-                    <div className="my-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
-                      {patientData.allergies}
-                    </div>
-                  </div>
-                )}
                 {patientData.gender === 2 && patientData.is_antenatal && (
                   <div className="sm:col-span-1">
                     <div className="text-sm leading-5 font-medium text-gray-500">
