@@ -316,10 +316,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
               </CardContent>
             </div>
             <CardContent>
-              <CardActions
-                className="padding16 flex flex-col md:flex-row gap-4"
-                style={{ justifyContent: "space-between" }}
-              >
+              <CardActions className="flex flex-col md:flex-row gap-4 justify-between items-end">
                 <div className="w-full md:w-auto">
                   <Button
                     id="bed-capacity-cancel"
@@ -340,6 +337,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                       id="bed-capacity-save-and-exit"
                       color="primary"
                       variant="contained"
+                      fullWidth
                       type="submit"
                       onClick={(e) => handleSubmit(e, "Save and Exit")}
                       startIcon={
@@ -353,6 +351,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                     id="bed-capacity-save"
                     color="primary"
                     variant="contained"
+                    fullWidth
                     type="submit"
                     onClick={(e) => handleSubmit(e)}
                     startIcon={
