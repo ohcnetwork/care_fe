@@ -127,7 +127,7 @@ export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<
                                                         required
                                                     />
                                                     <div
-                                                        className="w-[70px] shrink-0"    
+                                                        className="w-[80px] shrink-0"    
                                                     >
                                                         <PrescriptionDropdown
                                                             placeholder="Unit"
@@ -181,7 +181,7 @@ export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<
                                                 required
                                             />
                                             <div
-                                                className="w-[70px] shrink-0"    
+                                                className="w-[80px] shrink-0"    
                                             >
                                                 <PrescriptionDropdown
                                                     placeholder="Unit"
