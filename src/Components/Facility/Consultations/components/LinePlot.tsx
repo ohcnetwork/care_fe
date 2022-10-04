@@ -11,6 +11,11 @@ export const LinePlot = (props: any) => {
     defaultSpace = true,
   } = props;
   let generalOptions: any = {
+    grid: {
+      left: "15px",
+      right: "15px",
+      containLabel: true,
+    },
     title: {
       text: `${title} [ {0|${yData[yData.length - 1]?.toFixed(2) || "NA"}} ]`,
       textStyle: {
@@ -51,8 +56,8 @@ export const LinePlot = (props: any) => {
       boundaryGap: false,
       data: xData,
       axisLabel: {
-        width: 125,
-        overflow: "breakAll",
+        width: 85,
+        overflow: "break",
         align: "left",
       },
     },
@@ -99,6 +104,7 @@ export const LinePlot = (props: any) => {
       grid: {
         left: "15px",
         right: "15px",
+        containLabel: true,
       },
       animation: false,
       xAxis: {

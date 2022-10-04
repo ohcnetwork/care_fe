@@ -14,6 +14,11 @@ export const StackedLinePlot = (props: any) => {
   }));
 
   const generalOptions = {
+    grid: {
+      left: "15px",
+      right: "15px",
+      containLabel: true,
+    },
     color: COLORS,
     title: {
       text:
@@ -66,8 +71,8 @@ export const StackedLinePlot = (props: any) => {
       boundaryGap: false,
       data: xData,
       axisLabel: {
-        width: 125,
-        overflow: "breakAll",
+        width: 85,
+        overflow: "break",
         align: "left",
       },
     },
