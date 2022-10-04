@@ -782,7 +782,7 @@ const AssetCreate = (props: AssetProps) => {
 
                 <div className="mt-12 flex justify-end gap-x-4 gap-y-2 flex-wrap">
                   <button
-                    className="primary-button"
+                    className="primary-button w-full md:w-auto flex justify-center"
                     id="asset-create"
                     type="submit"
                     onClick={handleSubmit}
@@ -796,7 +796,7 @@ const AssetCreate = (props: AssetProps) => {
                   </button>
                   <button
                     id="asset-cancel"
-                    className="secondary-button"
+                    className="secondary-button w-full md:w-auto flex justify-center"
                     onClick={() =>
                       navigate(
                         assetId
