@@ -14,6 +14,7 @@ export default function ResponsiveMedicineTable(props: {
   theads: Array<string>;
   list: Array<any>;
   objectKeys: Array<string>;
+  fieldsToDisplay: Array<number>;
 }) {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   useEffect(() => {
@@ -88,11 +89,22 @@ export default function ResponsiveMedicineTable(props: {
                 aria-controls={`panel${index + 1}a-content`}
                 id={`panel${index + 1}a-header`}
               >
-                <div className="flex flex-col">
-                  <h4 className="font-semibold text-base">{props.theads[0]}</h4>{" "}
-                  <h3 className="text-sm font-normal overflow-hidden text-ellipsis w-full">
-                    {med[props.objectKeys[0]]}
-                  </h3>
+                <div className="grid">
+                  <div className="flex flex-col">
+                    <h3 className="text-sm font-medium overflow-hidden text-ellipsis w-full">
+                      {med[props.objectKeys[0]]}
+                    </h3>
+                  </div>
+                  <div className="flex gap-[160px] w-full mt-2">
+                    {props.fieldsToDisplay?.map((i) => (
+                      <div>
+                        <h4 className="text-base font-semibold">
+                          {props.theads[i]}
+                        </h4>
+                        {med[props.objectKeys[i]]}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </AccordionSummary>
               <AccordionDetails className="border-t border-t-gray-400">

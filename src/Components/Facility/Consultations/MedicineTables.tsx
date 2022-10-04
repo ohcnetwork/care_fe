@@ -101,6 +101,7 @@ export const MedicineTables = (props: any) => {
                               "days",
                               "notes",
                             ]}
+                            fieldsToDisplay={[2, 3]}
                           />
                         </div>
                       </div>

@@ -647,13 +647,14 @@ export const ConsultationDetails = (props: any) => {
           <div className="flex md:flex-row flex-col">
             <div className="md:w-2/3">
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
-              {(!consultationData.discharge_date) && (
-              <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                <TeleICUPatientVitalsCard patient={patientData} />
-                {/*<TeleICUPatientVitalsGraphCard
+              {!consultationData.discharge_date && (
+                <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
+                  <TeleICUPatientVitalsCard patient={patientData} />
+                  {/*<TeleICUPatientVitalsGraphCard
                   consultationId={patientData.last_consultation?.id}
                 />*/}
-              </section>)}
+                </section>
+              )}
               <div className="grid lg:grid-cols-2 gap-4 mt-4">
                 {consultationData.symptoms_text && (
                   <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -992,6 +993,7 @@ export const ConsultationDetails = (props: any) => {
                           "days",
                           "notes",
                         ]}
+                        fieldsToDisplay={[2, 3]}
                       />
                       {consultationData.discharge_advice.length === 0 && (
                         <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
@@ -1034,6 +1036,7 @@ export const ConsultationDetails = (props: any) => {
                           "max_dosage",
                           "min_time",
                         ]}
+                        fieldsToDisplay={[2, 4]}
                       />
                       {consultationData.prn_prescription.length === 0 && (
                         <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
