@@ -159,7 +159,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [isWardLoading, setIsWardLoading] = useState(false);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
-  const [localBody, setLocalBody] = useState(selectDistrict);
+  const [localBody, setLocalBodies] = useState(selectDistrict);
   const [ward, setWard] = useState(selectLocalBody);
 
   const [anchorEl, setAnchorEl] = React.useState<
@@ -195,10 +195,10 @@ export const FacilityCreate = (props: FacilityProps) => {
         );
         setIsLocalbodyLoading(false);
         if (localBodyList) {
-          setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+          setLocalBodies([...initialLocalbodies, ...localBodyList.data]);
         }
       } else {
-        setLocalBody(selectDistrict);
+        setLocalBodies(selectDistrict);
       }
     },
     [dispatchAction]
@@ -492,27 +492,41 @@ export const FacilityCreate = (props: FacilityProps) => {
     setMapLoadLocation([parseFloat(location.lat), parseFloat(location.lon)]);
   };
 
-  const resetWard = () => {
+  const setLocalBody = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({
       type: "set_form",
-      form: { ...state.form, ward: "0" },
+      form: {
+        ...state.form,
+        local_body: e.target.value,
+
+        ward: "0",
+      },
     });
   };
 
-  const resetLocalBody = () => {
+  const setDistrict = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({
       type: "set_form",
-      form: { ...state.form, local_body: "0" },
-    });
-    resetWard();
-  };
+      form: {
+        ...state.form,
+        district: e.target.value,
 
-  const resetDistrict = () => {
+        local_body: "0",
+        ward: "0",
+      },
+    });
+  };
+  const setState = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({
       type: "set_form",
-      form: { ...state.form, district: "0" },
+      form: {
+        ...state.form,
+        state: e.target.value,
+        district: "0",
+        local_body: "0",
+        ward: "0",
+      },
     });
-    resetLocalBody();
   };
 
   if (isLoading) {
@@ -591,8 +605,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     options={states}
                     optionValue="name"
                     onChange={(e) => [
-                      handleChange(e),
-                      resetDistrict(),
+                      setState(e),
                       fetchDistricts(String(e.target.value)),
                     ]}
                     errors={state.errors.state}
@@ -614,8 +627,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     options={districts}
                     optionValue="name"
                     onChange={(e) => [
-                      handleChange(e),
-                      resetLocalBody(),
+                      setDistrict(e),
                       fetchLocalBody(String(e.target.value)),
                     ]}
                     errors={state.errors.district}
@@ -637,8 +649,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     options={localBody}
                     optionValue="name"
                     onChange={(e) => [
-                      handleChange(e),
-                      resetWard(),
+                      setLocalBody(e),
                       fetchWards(String(e.target.value)),
                     ]}
                     errors={state.errors.local_body}
