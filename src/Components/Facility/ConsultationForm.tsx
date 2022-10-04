@@ -306,19 +306,20 @@ export const ConsultationForm = (props: any) => {
             assigned_to: res.data.assigned_to || "",
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
-            family_details: res.data.last_health_details?.family_details || "",
+            family_details:
+              res.data.health_details_object?.family_details || "",
             has_allergy:
-              `${res.data.last_health_details?.has_allergy}` || "false",
-            allergies: res.data.last_health_details?.allergies || "",
-            blood_group: res.data.last_health_details?.blood_group
-              ? res.data.last_health_details?.blood_group === "UNKNOWN"
+              `${res.data.health_details_object?.has_allergy}` || "false",
+            allergies: res.data.health_details_object?.allergies || "",
+            blood_group: res.data.health_details_object?.blood_group
+              ? res.data.health_details_object?.blood_group === "UNKNOWN"
                 ? "UNK"
-                : res.data.last_health_details?.blood_group
+                : res.data.health_details_object?.blood_group
               : "",
-            height: res.data.last_health_details?.height || 0.0,
-            weight: res.data.last_health_details?.weight || 0.0,
+            height: res.data.health_details_object?.height || 0.0,
+            weight: res.data.health_details_object?.weight || 0.0,
             vaccination_history:
-              res.data.last_health_details?.vaccination_history || [],
+              res.data.health_details_object?.vaccination_history || [],
             bed: res.data?.current_bed?.bed_object?.id || null,
           };
           dispatch({ type: "set_form", form: formData });
@@ -1193,7 +1194,7 @@ export const ConsultationForm = (props: any) => {
               {/* End of Telemedicine fields */}
             </CardContent>
 
-            <Card elevation={0} className="mb-8 rounded">
+            <Card elevation={0} className="mb-4 rounded">
               <Accordion className="mt-2 lg:mt-0 md:mt-0">
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
@@ -1336,7 +1337,7 @@ export const ConsultationForm = (props: any) => {
               </Accordion>
             </Card>
             <CardContent>
-              <div className="mt-4 flex justify-between">
+              <div className="flex justify-between">
                 <Button
                   color="default"
                   variant="contained"
