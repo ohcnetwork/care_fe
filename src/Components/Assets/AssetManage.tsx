@@ -167,13 +167,14 @@ const AssetManage = (props: AssetManageProps) => {
       />
       <div className="bg-white rounded-lg md:rounded-xl md:p-8 p-6">
         <div className="mb-4 flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 justify-between w-full">
             <span className="text-2xl md:text-3xl font-semibold break-words">
               {asset?.name}
             </span>
-            <div className="flex-1" />
-            {status(asset?.status)}
-            {workingStatus(asset?.is_working)}
+            <div className=" flex flex-wrap gap-2">
+              {status(asset?.status)}
+              {workingStatus(asset?.is_working)}
+            </div>
           </div>
           <span className="text-gray-700">{asset?.description}</span>
         </div>
