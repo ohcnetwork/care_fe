@@ -528,22 +528,20 @@ export const ConsultationDetails = (props: any) => {
 
             <div className="flex px-4 flex-col-reverse lg:flex-row gap-2">
               <div className="flex flex-col w-3/4 h-full">
-                {/*consultationData.other_symptoms && (
-                  <div className="capitalize">
-                    <span className="font-semibold leading-relaxed">
-                      Other Symptoms:{" "}
-                    </span>
-                    {consultationData.other_symptoms}
-                  </div>
-                )*/}
-
+                {/* consultationData.other_symptoms && (
+                <div className="capitalize">
+                  <span className="font-semibold leading-relaxed">
+                    Other Symptoms:{" "}
+                  </span>
+                  {consultationData.other_symptoms}
+                </div>
+                ) */}
                 <ShowDiagnosis
                   diagnoses={
                     consultationData?.icd11_provisional_diagnoses_object
                   }
                   label="Provisional Diagnosis"
                 />
-
                 <ShowDiagnosis
                   diagnoses={[
                     ...(consultationData?.diagnosis
@@ -559,7 +557,14 @@ export const ConsultationDetails = (props: any) => {
                   ]}
                   label="Diagnosis"
                 />
-
+                {consultationData?.health_details_object?.allergies && (
+                  <div className="capitalize">
+                    <span className="font-semibold leading-relaxed">
+                      Allergies:{" "}
+                    </span>
+                    {consultationData?.health_details_object?.allergies}
+                  </div>
+                )}
                 {consultationData.verified_by && (
                   <div className="text-sm mt-2">
                     <span className="font-semibold leading-relaxed">

@@ -660,6 +660,14 @@ export const PatientHome = (props: any) => {
                 {patientData.last_consultation?.is_telemedicine && (
                   <Badge color="purple" startIcon="phone" text="Telemedicine" />
                 )}
+                {consultationListData.at(-1)?.health_details_object
+                  ?.allergies && (
+                  <Badge
+                    color="red"
+                    startIcon="exclamation-triangle"
+                    text="Allergies"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -1132,7 +1140,7 @@ export const PatientHome = (props: any) => {
                 Family Details
               </div>
               {!consultationListData.at(-1)?.health_details_object
-                ?.family_details?.length && (
+                ?.family_details && (
                 <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
                   No Family Details Available
                 </div>
