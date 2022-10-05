@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: "Inter", sans-serif,
+        sans: ['Inter', 'sans-serif'],
       },
       colors: {
         error: colors.red["500"],
