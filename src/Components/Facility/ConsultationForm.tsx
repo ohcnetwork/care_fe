@@ -32,7 +32,6 @@ import {
   KASP_STRING,
   KASP_ENABLED,
   BLOOD_GROUPS,
-  VACCINES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -70,21 +69,16 @@ import InvestigationBuilder, {
 } from "../Common/prescription-builder/InvestigationBuilder";
 import { ICD11DiagnosisModel } from "./models";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import VaccinationBuilder, {
+  VaccinationDetails,
+} from "../Common/prescription-builder/VaccinationBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const vaccines = ["Select", ...VACCINES];
 const bloodGroups = [...BLOOD_GROUPS];
 
 type BooleanStrings = "true" | "false";
-
-type Vaccine = {
-  health_details: string;
-  vaccine: any;
-  doses: number;
-  last_vaccinated_date: any;
-};
 
 type FormDetails = {
   hasSymptom: boolean;
@@ -130,7 +124,11 @@ type FormDetails = {
   blood_group: string;
   height: number;
   weight: number;
-  vaccination_history: Vaccine[];
+  vaccination_history: {
+    vaccine: string;
+    doses: number;
+    last_vaccinated_date: string;
+  }[];
   modified_date: string;
 };
 
@@ -240,6 +238,7 @@ export const ConsultationForm = (props: any) => {
     []
   );
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
+  const [vaccination, setVaccination] = useState<VaccinationDetails[]>([]);
   const [InvestigationAdvice, setInvestigationAdvice] = useState<
     InvestigationType[]
   >([]);
@@ -281,6 +280,11 @@ export const ConsultationForm = (props: any) => {
       );
       setInvestigationAdvice(
         !Array.isArray(res.data.investigation) ? [] : res.data.investigation
+      );
+      setVaccination(
+        !Array.isArray(res.data.health_details_object?.vaccination_history)
+          ? []
+          : res.data.health_details_object?.vaccination_history
       );
 
       if (!status.aborted) {
@@ -521,6 +525,26 @@ export const ConsultationForm = (props: any) => {
           }
           return;
 
+        case "vaccination_history": {
+          console.log("yes");
+          let invalid = false;
+          for (const f of vaccination) {
+            if (
+              !f.vaccine?.replace(/\s/g, "").length ||
+              !f.last_vaccinated_date?.replace(/\s/g, "").length
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Vaccination field can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        }
+
         case "weight":
         case "height":
           if (!state.form[field]) {
@@ -595,7 +619,7 @@ export const ConsultationForm = (props: any) => {
             : undefined,
           height: state.form.height,
           weight: state.form.weight,
-          vaccination_history: state.form.vaccination_history,
+          vaccination_history: vaccination,
         },
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
       };
@@ -1291,6 +1315,17 @@ export const ConsultationForm = (props: any) => {
                         options={bloodGroups}
                         onChange={handleChange}
                         errors={state.errors.blood_group}
+                      />
+                    </div>
+                    <div id="vaccination_history-div" className="mt-4">
+                      <InputLabel>Vaccination History</InputLabel>
+                      <VaccinationBuilder
+                        vaccinations={vaccination}
+                        setVaccinations={setVaccination}
+                      />
+                      <br />
+                      <ErrorHelperText
+                        error={state.errors.vaccination_history}
                       />
                     </div>
                     <div className="flex flex-col md:flex-row justify-between md:gap-5 mt-4">

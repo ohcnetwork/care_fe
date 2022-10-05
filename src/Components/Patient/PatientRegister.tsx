@@ -20,12 +20,10 @@ import loadable from "@loadable/component";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
-  BLOOD_GROUPS,
   DISEASE_STATUS,
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
-  VACCINES,
 } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";

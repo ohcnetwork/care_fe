@@ -15,7 +15,7 @@ export type VaccinationDetails = {
 };
 
 export const emptyValues = {
-  vaccines: "",
+  vaccine: "",
   doses: 0,
   last_vaccinated_date: "",
 };
@@ -69,7 +69,6 @@ export default function VaccinationBuilder(
                   value={vaccination.doses}
                   placeholder="Doses"
                   min={0}
-                  defaultValue={0}
                   onChange={(e) => {
                     let value = parseInt(e.target.value);
                     if (value < 0) {
