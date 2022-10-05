@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { getPatient, getInvestigation } from "../../Redux/actions";
 import { ConsultationModel } from "./models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { PatientModel, DailyRoundsModel } from "../Patient/models";
+import { PatientModel } from "../Patient/models";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { getConsultation } from "../../Redux/actions";
