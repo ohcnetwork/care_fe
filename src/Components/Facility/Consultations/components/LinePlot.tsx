@@ -13,7 +13,7 @@ export const LinePlot = (props: any) => {
   let generalOptions: any = {
     grid: {
       left: "15px",
-      right: "15px",
+      right: "30px",
       containLabel: true,
     },
     title: {
@@ -103,7 +103,7 @@ export const LinePlot = (props: any) => {
       },
       grid: {
         left: "15px",
-        right: "15px",
+        right: "30px",
         containLabel: true,
       },
       animation: false,

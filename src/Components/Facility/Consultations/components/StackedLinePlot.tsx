@@ -16,7 +16,7 @@ export const StackedLinePlot = (props: any) => {
   const generalOptions = {
     grid: {
       left: "15px",
-      right: "15px",
+      right: "30px",
       containLabel: true,
     },
     color: COLORS,
