@@ -356,16 +356,6 @@ export const TEST_TYPE = [
   "POCPCR",
 ];
 
-export const VACCINES = [
-  "CoviShield",
-  "Covaxin",
-  "Sputnik",
-  "Moderna",
-  "Pfizer",
-  "Janssen",
-  "Sinovac",
-];
-
 export const BLOOD_GROUPS = [
   "UNK",
   "A+",
