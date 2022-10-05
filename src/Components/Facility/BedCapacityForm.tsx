@@ -325,9 +325,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                     variant="contained"
                     type="button"
                     fullWidth
-                    onClick={() =>
-                      goBack(!id && `/facility/${facilityId}/doctor`)
-                    }
+                    onClick={() => goBack(!id && `/facility/${facilityId}`)}
                   >
                     Cancel
                   </Button>
