@@ -10,7 +10,6 @@ html {
 }
 
 body {
-  font-family: 'Inter', 'Open Sans', sans-serif;
   color: #453c52;
   @apply font-sans text-gray-900 w-full h-full antialiased;
 }
