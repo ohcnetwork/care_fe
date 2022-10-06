@@ -78,7 +78,7 @@ let make = (~id, ~value, ~updateCB, ~placeholder, ~selectables) => {
       autoComplete="off"
       onClick={_ => setShowDropdown(_ => !showDropdown)}
       onChange={e => updateCB(ReactEvent.Form.target(e)["value"])}
-      className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
+      className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:ring-primary-500"
       placeholder
       required=true
     />
