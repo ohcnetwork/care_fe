@@ -4,8 +4,13 @@ import { createCustomEqual } from "fast-equals";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
 
 import { GMAPS_API_KEY } from "../../Common/env";
+import Spinner from "./Spinner";
 
 const render = (status: Status) => {
+  if (status === "LOADING") {
+    return <Spinner />;
+  }
+
   return <h1>{status}</h1>;
 };
 
@@ -30,14 +35,16 @@ const GLocationPicker = ({
   });
 
   React.useEffect(() => {
-    (async function () {
+    const setLatLng = async () => {
       const latLng = await new google.maps.LatLng(lat, lng);
       setLocation(latLng);
-    })();
+    };
+
+    if (lat && lng) setLatLng();
   }, [lat, lng]);
 
   const onClick = (e: google.maps.MapMouseEvent) => {
-    handleOnChange(e.latLng);
+    if (e.latLng) handleOnChange(e.latLng);
   };
 
   const onIdle = (m: google.maps.Map) => {
@@ -105,8 +112,13 @@ const Map: React.FC<MapProps> = ({
       searchBox.addListener("places_changed", () => {
         const places = searchBox.getPlaces();
 
-        if (handleOnChange) {
-          handleOnChange(places[0]?.geometry?.location as google.maps.LatLng);
+        if (
+          handleOnChange &&
+          places &&
+          places.length > 0 &&
+          places[0].geometry?.location
+        ) {
+          handleOnChange(places[0].geometry.location);
         }
       });
     }

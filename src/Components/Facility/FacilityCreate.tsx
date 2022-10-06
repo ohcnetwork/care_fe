@@ -106,8 +106,8 @@ const initForm: FacilityForm = {
   features: [],
   address: "",
   phone_number: "",
-  latitude: DEFAULT_MAP_LOCATION[0].toString(),
-  longitude: DEFAULT_MAP_LOCATION[1].toString(),
+  latitude: "",
+  longitude: "",
   pincode: "",
   oxygen_capacity: "",
   type_b_cylinders: "",
@@ -169,6 +169,8 @@ export const FacilityCreate = (props: FacilityProps) => {
 
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
+
+  console.log(state.form.latitude, state.form.longitude);
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -300,15 +302,17 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
   };
 
-  const handleLocationChange = (location: any) => {
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        latitude: location.lat(),
-        longitude: location.lng(),
-      },
-    });
+  const handleLocationChange = (location: google.maps.LatLng | undefined) => {
+    if (location) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          latitude: location.lat().toString(),
+          longitude: location.lng().toString(),
+        },
+      });
+    }
   };
 
   const handleValueChange = (value: any, field: string) => {
@@ -319,7 +323,13 @@ export const FacilityCreate = (props: FacilityProps) => {
   };
 
   const handleClickLocationPicker = (event: React.MouseEvent) => {
-    if (navigator.geolocation) {
+    event.preventDefault();
+
+    if (
+      navigator.geolocation &&
+      !state.form.latitude &&
+      !state.form.longitude
+    ) {
       navigator.geolocation.getCurrentPosition((position) => {
         dispatch({
           type: "set_form",
@@ -913,8 +923,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                   }}
                 >
                   <GLocationPicker
-                    lat={Number(state.form.latitude)}
-                    lng={Number(state.form.longitude)}
+                    lat={Number(state.form.latitude || DEFAULT_MAP_LOCATION[0])}
+                    lng={Number(
+                      state.form.longitude || DEFAULT_MAP_LOCATION[1]
+                    )}
                     handleOnChange={handleLocationChange}
                   />
                 </Popover>
