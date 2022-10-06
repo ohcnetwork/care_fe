@@ -28,7 +28,10 @@ import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 import { debounce } from "lodash";
-import SelectMenuV2 from "../Common/components/SelectMenuV2";
+import Select from "../Form/Select";
+import RangeSlider from "../Form/Range";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -410,6 +413,9 @@ export default function PatientFilterV2(props: any) {
     setFilterState(filterData);
   };
 
+  const handleFormFieldChange: FieldChangeEventHandler<string> = (event) =>
+    setFilterState({ ...filterState, [event.name]: event.value });
+
   return (
     <div>
       <div className="flex mb-4 max-w-sm w-full fixed -ml-4 pl-4 pr-8 z-10 -mt-8 pt-8 pb-4 bg-gray-50">
@@ -440,7 +446,7 @@ export default function PatientFilterV2(props: any) {
       </div>
       <div className="w-full flex-none pt-16">
         <span className="text-sm">Ordering</span>
-        <SelectMenuV2
+        <Select
           className="pt-2"
           options={Object.keys(PATIENT_FILTER_ORDER)}
           optionLabel={(o) => PATIENT_FILTER_ORDER[o].label}
@@ -468,7 +474,7 @@ export default function PatientFilterV2(props: any) {
       </div>
       <div className="flex flex-wrap gap-2">
         <div className="w-full flex-none">
-          <span className="text-sm">LSG body</span>
+          <span className="text-sm">LSG Body</span>
           <div className="">
             <AutoCompleteAsyncField
               name="lsgBody"
@@ -491,7 +497,8 @@ export default function PatientFilterV2(props: any) {
                 option.id === value.id
               }
               getOptionLabel={(option: any) => option.name}
-              className="shifting-page-filter-dropdown"
+              // className="shifting-page-filter-dropdown"
+              className="bg-red-100"
             />
           </div>
         </div>
@@ -523,7 +530,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Facility type</span>
-          <SelectMenuV2
+          <Select
             className="pt-2"
             placeholder="Show all"
             options={FACILITY_TYPES}
@@ -539,7 +546,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Gender</span>
-          <SelectMenuV2
+          <Select
             className="pt-2"
             placeholder="Show all"
             options={GENDER_TYPES}
@@ -553,7 +560,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Is Antenatal</span>
-          <SelectMenuV2
+          <Select
             className="pt-2"
             placeholder="Show all"
             options={[true, false]}
@@ -567,7 +574,7 @@ export default function PatientFilterV2(props: any) {
         {KASP_ENABLED && (
           <div className="w-full flex-none">
             <span className="text-sm">{KASP_STRING}</span>
-            <SelectMenuV2
+            <Select
               className="pt-2"
               placeholder="Show all"
               options={[true, false]}
@@ -582,7 +589,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Category</span>
-          <SelectMenuV2
+          <Select
             className="pt-2"
             placeholder="Show all"
             options={PATIENT_FILTER_CATEGORIES}
@@ -594,7 +601,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Disease Status</span>
-          <SelectMenuV2
+          <Select
             className="pt-2"
             placeholder="Show all"
             options={DISEASE_STATUS}
@@ -607,7 +614,7 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Vaccinated</span>
-          <SelectMenuV2
+          <Select
             className="pt-2"
             placeholder="Show all"
             options={VACCINATED_FILTER}
@@ -621,7 +628,7 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Declared</span>
-          <SelectMenuV2
+          <Select
             className="pt-2"
             placeholder="Show all"
             options={DECLARED_FILTER}
@@ -635,7 +642,7 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Telemedicine</span>
-          <SelectMenuV2
+          <Select
             className="pt-2"
             placeholder="Show all"
             options={TELEMEDICINE_FILTER}
@@ -651,40 +658,26 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm">SRF ID</span>
-          <div className="flex justify-between">
-            <div className="w-full">
-              <TextInputField
-                id="srf_id"
-                name="srf_id"
-                variant="outlined"
-                margin="dense"
-                errors=""
-                value={filterState.srf_id}
-                onChange={handleChange}
-                label="Srf id"
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-              />
-            </div>
-          </div>
+          <TextFormField
+            id="srf_id"
+            name="srf_id"
+            placeholder="Filter by SRF ID"
+            label="SRF ID"
+            labelClass="!text-sm"
+            value={filterState.srf_id}
+            onChange={handleFormFieldChange}
+          />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm">COWIN ID</span>
-          <div className="flex justify-between">
-            <div className="w-full">
-              <TextInputField
-                id="covin_id"
-                name="covin_id"
-                variant="outlined"
-                margin="dense"
-                errors=""
-                value={filterState.covin_id}
-                onChange={handleChange}
-                label="COWIN ID"
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-              />
-            </div>
-          </div>
+          <TextFormField
+            id="covin_id"
+            name="covin_id"
+            placeholder="Filter by COWIN ID"
+            label="COWIN ID"
+            labelClass="!text-sm"
+            value={filterState.covin_id}
+            onChange={handleFormFieldChange}
+          />
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Last Admitted to (Bed Type)</span>
@@ -834,6 +827,20 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Age</span>
+          <div className="flex justify-between">
+            <RangeSlider
+              range={[0, 120]}
+              value={[
+                +(filterState.age_min ?? 0),
+                +(filterState.age_max ?? 120),
+              ]}
+              onChange={(value) => {
+                const [age_min, age_max] = value;
+                setFilterState({ ...filterState, age_min, age_max });
+              }}
+              step={1}
+            />
+          </div>
           <div className="flex justify-between">
             <TextInputField
               id="age_min"
