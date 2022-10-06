@@ -332,7 +332,7 @@ const AssetsList = () => {
                       onClick={() => navigate(`/assets/${asset.id}`)}
                     >
                       <div className="md:flex">
-                        <p className="text-xl font-normal capitalize break-words">
+                        <p className="text-xl flex font-normal capitalize break-words">
                           <span className="mr-2">
                             {" "}
                             {asset.asset_class === "HL7MONITOR" ? (
