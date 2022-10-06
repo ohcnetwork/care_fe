@@ -338,6 +338,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                       color="primary"
                       variant="contained"
                       fullWidth
+                      className="w-full md:w-auto"
                       type="submit"
                       onClick={(e) => handleSubmit(e, "Save and Exit")}
                       startIcon={
@@ -352,6 +353,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                     color="primary"
                     variant="contained"
                     fullWidth
+                    className="w-full md:w-auto"
                     type="submit"
                     onClick={(e) => handleSubmit(e)}
                     startIcon={
