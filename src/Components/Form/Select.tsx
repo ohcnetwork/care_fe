@@ -3,7 +3,7 @@ import { Listbox, Transition } from "@headlessui/react";
 
 type OptionCallback<T, R> = (option: T) => R;
 
-type SelectMenuProps<T, V = T> = {
+type SelectProps<T, V = T> = {
   id?: string;
   options: T[];
   value: T | undefined;
@@ -25,7 +25,7 @@ type SelectMenuProps<T, V = T> = {
     }
 );
 
-const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
+const Select = <T, V>(props: SelectProps<T, V>) => {
   const valueOptions = props.options.map((option) => {
     const label = props.optionLabel(option);
 
@@ -143,4 +143,4 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   );
 };
 
-export default SelectMenuV2;
+export default Select;
