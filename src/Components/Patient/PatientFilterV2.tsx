@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
-  SelectField,
   MultiSelectField,
-  TextInputField,
   AutoCompleteAsyncField,
 } from "../Common/HelperInputFields";
 import {
@@ -29,9 +27,9 @@ import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 import { debounce } from "lodash";
 import SelectMenu from "../Form/SelectMenu";
-import RangeSlider from "../Form/Range";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
+import { FieldLabel } from "../Form/FormFields/FormField";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -824,51 +822,24 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm">Age</span>
-          <div className="flex justify-between">
+          <FieldLabel>
+            <span className="text-sm">Age</span>
+          </FieldLabel>
+          <div className="flex justify-between gap-4">
             <TextFormField
-              className="flex-3"
-              id="age_min"
               name="age_min"
               placeholder="Min. age"
-              label={<span className="text-sm">Age</span>}
+              label={null}
               value={filterState.age_min}
               onChange={handleFormFieldChange}
             />
-            <div className="flex-1" />
             <TextFormField
-              className="flex-3"
-              id="age_max"
               name="age_max"
               placeholder="Max. age"
               label={null}
               value={filterState.age_max}
               onChange={handleFormFieldChange}
             />
-            {/* <TextInputField
-              id="age_min"
-              name="age_min"
-              type="number"
-              variant="outlined"
-              margin="dense"
-              errors=""
-              value={filterState.age_min}
-              onChange={handleChange}
-              label="Min Age"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-            />
-            <TextInputField
-              id="age_max"
-              name="age_max"
-              type="number"
-              variant="outlined"
-              margin="dense"
-              errors=""
-              value={filterState.age_max}
-              onChange={handleChange}
-              label="Max Age"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-            /> */}
           </div>
         </div>
       </div>
