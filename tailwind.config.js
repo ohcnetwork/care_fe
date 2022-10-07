@@ -1,14 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const colors = require("tailwindcss/colors");
-const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
   important: true,
   theme: {
-    screens: {
-      vs: "348px",
-      ...defaultTheme.screens,
-    },
     extend: {
       colors: {
         error: colors.red["500"],
@@ -23,17 +18,17 @@ module.exports = {
           500: "#0e9f6e",
           600: "#057a55",
           700: "#046c4e",
-          800: "#03543f",
+          800: "#025340",
           900: "#014737",
         },
         gray: {
-          100: "#FBFAFC",
-          200: "#F7F5FA",
+          100: "#FBF9FB",
+          200: "#F6F6F6",
           300: "#F1EDF7",
           400: "#DFDAE8",
           500: "#BFB8CC",
-          600: "#9187A1",
-          700: "#7D728F",
+          600: "#9C9C9C",
+          700: "#808080",
           800: "#6A5F7A",
           900: "#453C52",
         },
