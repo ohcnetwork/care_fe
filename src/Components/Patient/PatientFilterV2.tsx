@@ -28,7 +28,7 @@ import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 import { debounce } from "lodash";
-import Select from "../Form/Select";
+import SelectMenu from "../Form/SelectMenu";
 import RangeSlider from "../Form/Range";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
@@ -446,7 +446,7 @@ export default function PatientFilterV2(props: any) {
       </div>
       <div className="w-full flex-none pt-16">
         <span className="text-sm">Ordering</span>
-        <Select
+        <SelectMenu
           className="pt-2"
           options={Object.keys(PATIENT_FILTER_ORDER)}
           optionLabel={(o) => PATIENT_FILTER_ORDER[o].label}
@@ -530,7 +530,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Facility type</span>
-          <Select
+          <SelectMenu
             className="pt-2"
             placeholder="Show all"
             options={FACILITY_TYPES}
@@ -546,7 +546,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Gender</span>
-          <Select
+          <SelectMenu
             className="pt-2"
             placeholder="Show all"
             options={GENDER_TYPES}
@@ -560,7 +560,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Is Antenatal</span>
-          <Select
+          <SelectMenu
             className="pt-2"
             placeholder="Show all"
             options={[true, false]}
@@ -574,7 +574,7 @@ export default function PatientFilterV2(props: any) {
         {KASP_ENABLED && (
           <div className="w-full flex-none">
             <span className="text-sm">{KASP_STRING}</span>
-            <Select
+            <SelectMenu
               className="pt-2"
               placeholder="Show all"
               options={[true, false]}
@@ -589,7 +589,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Category</span>
-          <Select
+          <SelectMenu
             className="pt-2"
             placeholder="Show all"
             options={PATIENT_FILTER_CATEGORIES}
@@ -601,7 +601,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Disease Status</span>
-          <Select
+          <SelectMenu
             className="pt-2"
             placeholder="Show all"
             options={DISEASE_STATUS}
@@ -614,7 +614,7 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Vaccinated</span>
-          <Select
+          <SelectMenu
             className="pt-2"
             placeholder="Show all"
             options={VACCINATED_FILTER}
@@ -628,7 +628,7 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Declared</span>
-          <Select
+          <SelectMenu
             className="pt-2"
             placeholder="Show all"
             options={DECLARED_FILTER}
@@ -642,7 +642,7 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Telemedicine</span>
-          <Select
+          <SelectMenu
             className="pt-2"
             placeholder="Show all"
             options={TELEMEDICINE_FILTER}
@@ -662,8 +662,7 @@ export default function PatientFilterV2(props: any) {
             id="srf_id"
             name="srf_id"
             placeholder="Filter by SRF ID"
-            label="SRF ID"
-            labelClass="!text-sm"
+            label={<span className="text-sm">SRF ID</span>}
             value={filterState.srf_id}
             onChange={handleFormFieldChange}
           />
@@ -673,8 +672,7 @@ export default function PatientFilterV2(props: any) {
             id="covin_id"
             name="covin_id"
             placeholder="Filter by COWIN ID"
-            label="COWIN ID"
-            labelClass="!text-sm"
+            label={<span className="text-sm">CoWIN ID</span>}
             value={filterState.covin_id}
             onChange={handleFormFieldChange}
           />
@@ -828,21 +826,26 @@ export default function PatientFilterV2(props: any) {
         <div className="w-full flex-none">
           <span className="text-sm">Age</span>
           <div className="flex justify-between">
-            <RangeSlider
-              range={[0, 120]}
-              value={[
-                +(filterState.age_min ?? 0),
-                +(filterState.age_max ?? 120),
-              ]}
-              onChange={(value) => {
-                const [age_min, age_max] = value;
-                setFilterState({ ...filterState, age_min, age_max });
-              }}
-              step={1}
+            <TextFormField
+              className="flex-3"
+              id="age_min"
+              name="age_min"
+              placeholder="Min. age"
+              label={<span className="text-sm">Age</span>}
+              value={filterState.age_min}
+              onChange={handleFormFieldChange}
             />
-          </div>
-          <div className="flex justify-between">
-            <TextInputField
+            <div className="flex-1" />
+            <TextFormField
+              className="flex-3"
+              id="age_max"
+              name="age_max"
+              placeholder="Max. age"
+              label={null}
+              value={filterState.age_max}
+              onChange={handleFormFieldChange}
+            />
+            {/* <TextInputField
               id="age_min"
               name="age_min"
               type="number"
@@ -865,7 +868,7 @@ export default function PatientFilterV2(props: any) {
               onChange={handleChange}
               label="Max Age"
               className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-            />
+            /> */}
           </div>
         </div>
       </div>

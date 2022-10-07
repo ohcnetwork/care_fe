@@ -1,4 +1,4 @@
-import { Dispatch } from "react";
+import React, { Dispatch } from "react";
 import { FieldError, FormAction, FormDetails, FormState } from "../Utils";
 
 type FieldChangeEvent<T> = { name: string; value: T };
@@ -9,12 +9,10 @@ export type FieldValidator<T> = (value: T) => FieldError;
 export type FormFieldBaseProps<T> = {
   id?: string;
   name: string;
-  label: string;
+  label: React.ReactNode;
   disabled?: boolean;
   className?: string;
   required?: boolean;
-  errorClass?: string;
-  labelClass?: string;
 } & (
   | {
       error?: undefined;

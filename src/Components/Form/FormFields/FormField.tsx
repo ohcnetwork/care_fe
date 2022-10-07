@@ -1,18 +1,16 @@
-import { ReactNode } from "react";
 import { FieldError } from "../Utils";
 import { FormFieldBaseProps, resolveFormFieldError } from "./Utils";
 
 type LabelProps = {
   required?: boolean;
   htmlFor?: string;
-  children: string;
-  className?: string;
+  children: React.ReactNode;
 };
 
 export const FieldLabel = (props: LabelProps) => {
   return (
     <label
-      className={`mb-2 block text-gray-900 text-base font-normal ${props.className}`}
+      className="mb-2 block text-gray-900 text-base font-normal"
       htmlFor={props.htmlFor}
     >
       {props.children}
@@ -21,17 +19,12 @@ export const FieldLabel = (props: LabelProps) => {
   );
 };
 
-type ErrorTextProps = {
-  error: FieldError;
-  className?: string;
-};
-
-export const FieldErrorText = (props: ErrorTextProps) => {
+export const FieldErrorText = (props: { error: FieldError }) => {
   return (
     <span
       className={`font-medium tracking-wide text-red-500 text-xs mt-2 ml-1 ${
         props.error ? "opacity-100" : "opacity-0"
-      } transition-opacity duration-300 ${props.className}`}
+      } transition-opacity duration-300`}
     >
       {props.error}
     </span>
@@ -40,21 +33,17 @@ export const FieldErrorText = (props: ErrorTextProps) => {
 
 const FormField = (props: {
   props: FormFieldBaseProps<any>;
-  children: ReactNode;
+  children: React.ReactNode;
 }) => {
-  const { id, className, required, label, labelClass, errorClass } =
-    props.props;
+  const { id, className, required, label } = props.props;
 
   return (
     <div className={className}>
-      <FieldLabel htmlFor={id} required={required} className={labelClass}>
+      <FieldLabel htmlFor={id} required={required}>
         {label}
       </FieldLabel>
       {props.children}
-      <FieldErrorText
-        className={errorClass}
-        error={resolveFormFieldError(props.props)}
-      />
+      <FieldErrorText error={resolveFormFieldError(props.props)} />
     </div>
   );
 };
