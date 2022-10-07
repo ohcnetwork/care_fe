@@ -369,217 +369,158 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const renderFileUpload = (item: FileUploadModel) => {
     return (
-      <div className="mt-4 border bg-white shadow rounded-lg p-4" key={item.id}>
-        <Modal open={modalOpenForEdit}>
-          <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-            <form
-              onSubmit={(event: any) => {
-                event.preventDefault();
-                setbtnloader(true);
-                partialupdateFileName(modalDetails?.id, editFileName);
-              }}
-              className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content"
-            >
-              <div>
-                <InputLabel className="text-xl" id="editfilenamelabel">
-                  Please enter the file name
-                </InputLabel>
-                <TextInputField
-                  name="editFileName"
-                  variant="outlined"
-                  margin="dense"
-                  value={editFileName}
-                  onChange={(e) => setEditFileName(e.target.value)}
-                  errors={editFileNameError}
-                />
-              </div>
-              <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-                <button
-                  type="submit"
-                  className="btn-primary btn mr-2 w-full md:w-auto"
-                >
-                  <svg
-                    className={clsx(
-                      "animate-spin -ml-1 mr-3 h-5 w-5 text-white",
-                      !btnloader ? " hidden" : ""
-                    )}
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Proceed
-                </button>
-                <button
-                  type="button"
-                  className="btn-danger btn mr-2 w-full md:w-auto"
-                  onClick={(_) => setModalOpenForEdit(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </Modal>
-        {item.file_category === "AUDIO" ? (
-          <div className="flex flex-wrap justify-between space-y-2">
-            <div className="flex flex-wrap justify-between space-x-2">
-              <div>
-                <i className="fa-solid fa-file-audio fa-3x m-3 text-primary-500"></i>
-              </div>
-              <div>
+      <>
+        <div
+          className="mt-4 border bg-white shadow rounded-lg p-4"
+          key={item.id}
+        >
+          {item.file_category === "AUDIO" ? (
+            <div className="flex flex-wrap justify-between space-y-2">
+              <div className="flex flex-wrap justify-between space-x-2">
                 <div>
-                  <span className="font-semibold leading-relaxed">
-                    File Name:{" "}
-                  </span>{" "}
-                  {item.name}
+                  <i className="fa-solid fa-file-audio fa-3x m-3 text-primary-500"></i>
                 </div>
                 <div>
-                  <span className="font-semibold leading-relaxed">
-                    Created By:
-                  </span>{" "}
-                  {item.uploaded_by ? item.uploaded_by.username : null}
-                </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Created On :
-                  </span>{" "}
-                  {item.created_date
-                    ? moment(item.created_date).format("lll")
-                    : "-"}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center">
-              {item.id ? (
-                Object.keys(url).length > 0 ? (
-                  <div className="flex flex-wrap">
-                    <audio
-                      className="max-h-full max-w-full m-auto object-contain"
-                      src={url[item.id]}
-                      controls
-                      preload="auto"
-                      controlsList="nodownload"
-                    />
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      File Name:{" "}
+                    </span>{" "}
+                    {item.name}
                   </div>
-                ) : (
-                  <CircularProgress />
-                )
-              ) : (
-                <div>File Not found</div>
-              )}
-            </div>
-            <div className="flex flex-wrap items-center">
-              {item.id ? (
-                Object.keys(url).length > 0 ? (
-                  <div className="flex flex-wrap">
-                    <a
-                      href={url[item.id]}
-                      download={true}
-                      className="btn btn-primary m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
-                    >
-                      <i className="fa-solid fa-circle-arrow-down mr-2"></i>{" "}
-                      DOWNLOAD
-                    </a>
-                    {item?.uploaded_by?.username === currentuser_username ? (
-                      <>
-                        <label
-                          onClick={() => {
-                            setModalDetails({ name: item.name, id: item.id });
-                            setEditFileName(item?.name);
-                            setModalOpenForEdit(true);
-                          }}
-                          className="btn btn-primary m-1 sm:w-auto w-full"
-                        >
-                          <i className="fa-solid fa-pencil mr-2"></i>EDIT FILE
-                          NAME
-                        </label>
-                      </>
-                    ) : (
-                      <></>
-                    )}
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      Created By:
+                    </span>{" "}
+                    {item.uploaded_by ? item.uploaded_by.username : null}
                   </div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      Created On :
+                    </span>{" "}
+                    {item.created_date
+                      ? moment(item.created_date).format("lll")
+                      : "-"}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center">
+                {item.id ? (
+                  Object.keys(url).length > 0 ? (
+                    <div className="flex flex-wrap">
+                      <audio
+                        className="max-h-full max-w-full m-auto object-contain"
+                        src={url[item.id]}
+                        controls
+                        preload="auto"
+                        controlsList="nodownload"
+                      />
+                    </div>
+                  ) : (
+                    <CircularProgress />
+                  )
                 ) : (
-                  <CircularProgress />
-                )
-              ) : (
-                <div>File Not found</div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-wrap justify-between space-y-2">
-            <div className="flex flex-wrap justify-between space-x-2">
-              <div>
-                <i className="fa-solid fa-file-medical fa-3x m-3 text-primary-500"></i>
+                  <div>File Not found</div>
+                )}
               </div>
-              <div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    File Name:{" "}
-                  </span>{" "}
-                  {item.name}
-                </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Created By:
-                  </span>{" "}
-                  {item.uploaded_by ? item.uploaded_by.username : null}
-                </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Created On :
-                  </span>{" "}
-                  {item.created_date
-                    ? moment(item.created_date).format("lll")
-                    : "-"}
-                </div>
+              <div className="flex flex-wrap items-center">
+                {item.id ? (
+                  Object.keys(url).length > 0 ? (
+                    <div className="flex flex-wrap">
+                      <a
+                        href={url[item.id]}
+                        download={true}
+                        className="btn btn-primary m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
+                      >
+                        <i className="fa-solid fa-circle-arrow-down mr-2"></i>{" "}
+                        DOWNLOAD
+                      </a>
+                      {item?.uploaded_by?.username === currentuser_username ? (
+                        <>
+                          <label
+                            onClick={() => {
+                              setModalDetails({ name: item.name, id: item.id });
+                              setEditFileName(item?.name);
+                              setModalOpenForEdit(true);
+                            }}
+                            className="btn btn-primary m-1 sm:w-auto w-full"
+                          >
+                            <i className="fa-solid fa-pencil mr-2"></i>EDIT FILE
+                            NAME
+                          </label>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  ) : (
+                    <CircularProgress />
+                  )
+                ) : (
+                  <div>File Not found</div>
+                )}
               </div>
             </div>
-            <div className="flex flex-wrap items-center">
-              <label
-                onClick={() => {
-                  loadFile(item.id);
-                }}
-                className="btn btn-primary m-1 sm:w-auto w-full"
-              >
-                {" "}
-                <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
-              </label>
-              {item?.uploaded_by?.username === currentuser_username ? (
-                <>
+          ) : (
+            <div className="flex flex-wrap justify-between space-y-2">
+              <div className="flex flex-wrap justify-between space-x-2">
+                <div>
+                  <i className="fa-solid fa-file-medical fa-3x m-3 text-primary-500"></i>
+                </div>
+                <div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      File Name:{" "}
+                    </span>{" "}
+                    {item.name}
+                  </div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      Created By:
+                    </span>{" "}
+                    {item.uploaded_by ? item.uploaded_by.username : null}
+                  </div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      Created On :
+                    </span>{" "}
+                    {item.created_date
+                      ? moment(item.created_date).format("lll")
+                      : "-"}
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center">
+                <label
+                  onClick={() => {
+                    loadFile(item.id);
+                  }}
+                  className="btn btn-primary m-1 sm:w-auto w-full"
+                >
                   {" "}
-                  <label
-                    onClick={() => {
-                      setModalDetails({ name: item.name, id: item.id });
-                      setEditFileName(item?.name);
-                      setModalOpenForEdit(true);
-                    }}
-                    className="btn btn-primary m-1 sm:w-auto w-full"
-                  >
-                    <i className="fa-solid fa-pencil mr-2"></i> EDIT FILE NAME
-                  </label>
-                </>
-              ) : (
-                <></>
-              )}
+                  <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
+                </label>
+                {item?.uploaded_by?.username === currentuser_username ? (
+                  <>
+                    {" "}
+                    <label
+                      onClick={() => {
+                        setModalDetails({ name: item.name, id: item.id });
+                        setEditFileName(item?.name);
+                        setModalOpenForEdit(true);
+                      }}
+                      className="btn btn-primary m-1 sm:w-auto w-full"
+                    >
+                      <i className="fa-solid fa-pencil mr-2"></i> EDIT FILE NAME
+                    </label>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </>
     );
   };
 
@@ -871,7 +812,70 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         )}
       </Modal>
-
+      <Modal open={modalOpenForEdit}>
+        <div className="h-screen w-full absolute flex items-center justify-center ">
+          <form
+            onSubmit={(event: any) => {
+              event.preventDefault();
+              setbtnloader(true);
+              partialupdateFileName(modalDetails?.id, editFileName);
+            }}
+            className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content"
+          >
+            <div>
+              <InputLabel className="text-xl" id="editfilenamelabel">
+                Please enter the file name
+              </InputLabel>
+              <TextInputField
+                name="editFileName"
+                variant="outlined"
+                margin="dense"
+                value={editFileName}
+                onChange={(e) => setEditFileName(e.target.value)}
+                errors={editFileNameError}
+              />
+            </div>
+            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+              <button
+                type="submit"
+                className="btn-primary btn mr-2 w-full md:w-auto"
+              >
+                <svg
+                  className={clsx(
+                    "animate-spin -ml-1 mr-3 h-5 w-5 text-white",
+                    !btnloader ? " hidden" : ""
+                  )}
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Proceed
+              </button>
+              <button
+                type="button"
+                className="btn-danger btn mr-2 w-full md:w-auto"
+                onClick={(_) => setModalOpenForEdit(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
       <PageTitle
         title={`${UPLOAD_HEADING[type]}`}
         hideBack={hideBack}
