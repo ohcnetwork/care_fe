@@ -1,11 +1,10 @@
 {
-  "Facilities": "Facilities",
-  "Patients": "Patients",
-  "Sample Test": "Sample Test",
-  "Shifting": "Shifting",
-  "Resource": "Resource",
-  "External Results": "External Results",
-  "Users": "Users",
-  "Profile": "Profile",
-  "Dashboard": "Dashboard"
+  "facility_search_placeholder": "Search by Facility / District Name",
+  "advanced_filters": "Advanced Filters",
+  "Facility Type": "Facility Type",
+  "KASP Empanelled": "KASP Empanelled",
+  "View Facility": "View Facility",
+  "no_duplicate_facility": "You should not create duplicate facilities",
+  "no_facilities": "No Facilities found",
+  "create_facility": "Create a new facility"
 }
