@@ -278,6 +278,12 @@ export const PATIENT_CATEGORIES = [
   "Critical",
 ];
 
+export type PatientCategory =
+  | "Comfort Care"
+  | "Stable"
+  | "Slightly Abnormal"
+  | "Critical";
+
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 
 export const CURRENT_HEALTH_CHANGE = [
