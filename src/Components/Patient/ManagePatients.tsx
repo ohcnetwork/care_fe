@@ -67,31 +67,25 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 const RESULT_LIMIT = 12;
 
-const PatientCategoryClasses: Record<PatientCategory | "Unknown", string> = {
-  "Comfort Care": "bg-slate-200 text-slate-700",
-  Stable: "bg-[#59D4FF] text-blue-900",
-  "Slightly Abnormal": "bg-[#F6CB23] text-yellow-900",
-  Critical: "bg-red-500 text-red-100",
-  Unknown: "group-hover:bg-gray-400 bg-white text-gray-800",
-};
-
-const PatientCategoryRingClasses: Record<PatientCategory | "Unknown", string> =
-  {
-    "Comfort Care": "ring-slate-200",
-    Stable: "ring-[#59D4FF]",
-    "Slightly Abnormal": "ring-[#F6CB23]",
-    Critical: "ring-red-500",
-    Unknown: "ring-gray-400",
-  };
-
-const PatientCategoryDisplayText: Record<PatientCategory | "Unknown", string> =
+const PatientCategoryDisplayText: Record<PatientCategory | "unknown", string> =
   {
     "Comfort Care": "COMFORT CARE",
     Stable: "STABLE",
     "Slightly Abnormal": "ABNORMAL",
     Critical: "CRITICAL",
-    Unknown: "UNKNOWN",
+    unknown: "UNKNOWN",
   };
+
+const PatientCategoryTailwindClass: Record<
+  PatientCategory | "unknown",
+  string
+> = {
+  "Comfort Care": "patient-comfort",
+  Stable: "patient-stable",
+  "Slightly Abnormal": "patient-abnormal",
+  Critical: "patient-critical",
+  unknown: "patient-unknown",
+};
 
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
@@ -485,17 +479,21 @@ export const PatientManager = (props: any) => {
         patientUrl = `/patient/${patient.id}`;
       }
 
-      const category: PatientCategory | "Unknown" =
-        patient?.last_consultation?.category || "Unknown";
+      const category: PatientCategory | "unknown" =
+        patient?.last_consultation?.category || "unknown";
+
+      const categoryClass = PatientCategoryTailwindClass[category];
 
       return (
         <Link
           key={`usr_${patient.id}`}
           href={patientUrl}
-          className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-9 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${PatientCategoryRingClasses[category]}`}
+          className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-9 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ring-${categoryClass}`}
         >
           <div
-            className={`rounded-l-lg absolute top-0 bottom-0 left-0 h-full w-1 group-hover:w-5 transition-all duration-200 ease-in-out flex items-center ${PatientCategoryClasses[category]}`}
+            className={`rounded-l-lg absolute top-0 bottom-0 left-0 h-full w-1 group-hover:w-5 transition-all duration-200 ease-in-out flex items-center ${
+              category === "unknown" ? "group-hover:" : ""
+            }bg-${categoryClass} text-${categoryClass}-fore`}
           >
             <span className="absolute -left-32 -right-32 top-0 bottom-0 flex justify-center items-center text-center transform -rotate-90 text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out">
               {PatientCategoryDisplayText[category]}
