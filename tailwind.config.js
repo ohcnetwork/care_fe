@@ -44,7 +44,7 @@ module.exports = {
           },
           stable: {
             DEFAULT: "#59D4FF",
-            fore: colors.blue[900],
+            fore: colors.white,
           },
           abnormal: {
             DEFAULT: "#F6CB23",

@@ -929,3 +929,19 @@ background-color: #84e1bc;
 .patient-unknown-ring {
   @apply ring-patient-unknown
 }
+
+.patient-comfort-profile { 
+  @apply border-2 border-patient-comfort rounded-t
+}
+.patient-stable-profile { 
+  @apply border-2 border-patient-stable rounded-t
+}
+.patient-abnormal-profile { 
+  @apply border-2 border-patient-abnormal rounded-t
+}
+.patient-critical-profile { 
+  @apply border-2 border-patient-critical rounded-t
+}
+.patient-unknown-profile {
+  @apply border border-patient-unknown rounded
+}
