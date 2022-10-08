@@ -1,3 +1,5 @@
+import { PatientCategory } from "../Components/Facility/models";
+
 export const KeralaLogo = "images/kerala-logo.png";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
@@ -278,11 +280,13 @@ export const PATIENT_CATEGORIES = [
   "Critical",
 ];
 
-export type PatientCategory =
-  | "Comfort Care"
-  | "Stable"
-  | "Slightly Abnormal"
-  | "Critical";
+export const PatientCategoryTailwindClass: Record<PatientCategory, string> = {
+  "Comfort Care": "patient-comfort",
+  Stable: "patient-stable",
+  "Slightly Abnormal": "patient-abnormal",
+  Critical: "patient-critical",
+  unknown: "patient-unknown",
+};
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 

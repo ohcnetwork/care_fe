@@ -26,6 +26,7 @@ import {
   TELEMEDICINE_ACTIONS,
   PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
+  PatientCategoryTailwindClass,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
@@ -67,24 +68,12 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 const RESULT_LIMIT = 12;
 
-const PatientCategoryDisplayText: Record<PatientCategory | "unknown", string> =
-  {
-    "Comfort Care": "COMFORT CARE",
-    Stable: "STABLE",
-    "Slightly Abnormal": "ABNORMAL",
-    Critical: "CRITICAL",
-    unknown: "UNKNOWN",
-  };
-
-const PatientCategoryTailwindClass: Record<
-  PatientCategory | "unknown",
-  string
-> = {
-  "Comfort Care": "patient-comfort",
-  Stable: "patient-stable",
-  "Slightly Abnormal": "patient-abnormal",
-  Critical: "patient-critical",
-  unknown: "patient-unknown",
+const PatientCategoryDisplayText: Record<PatientCategory, string> = {
+  "Comfort Care": "COMFORT CARE",
+  Stable: "STABLE",
+  "Slightly Abnormal": "ABNORMAL",
+  Critical: "CRITICAL",
+  unknown: "UNKNOWN",
 };
 
 export const PatientManager = (props: any) => {
@@ -479,9 +468,8 @@ export const PatientManager = (props: any) => {
         patientUrl = `/patient/${patient.id}`;
       }
 
-      const category: PatientCategory | "unknown" =
+      const category: PatientCategory =
         patient?.last_consultation?.category || "unknown";
-
       const categoryClass = PatientCategoryTailwindClass[category];
 
       return (

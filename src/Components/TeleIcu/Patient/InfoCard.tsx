@@ -3,8 +3,25 @@ import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { Modal } from "@material-ui/core";
 import Beds from "../../Facility/Consultations/Beds";
-import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
 import { useState } from "react";
+import { PatientCategoryTailwindClass } from "../../../Common/constants";
+import { PatientCategory } from "../../Facility/models";
+
+const PatientCategoryDisplayText: Record<PatientCategory, string> = {
+  "Comfort Care": "COMFORT CARE",
+  Stable: "STABLE",
+  "Slightly Abnormal": "SLIGHTLY ABNORMAL",
+  Critical: "CRITICAL",
+  unknown: "UNKNOWN",
+};
+
+const PatientCategoryClasses: Record<PatientCategory, string> = {
+  "Comfort Care": "h-10",
+  Stable: "h-6",
+  "Slightly Abnormal": "h-10",
+  Critical: "h-6",
+  unknown: "h-6",
+};
 
 export default function TeleICUPatientInfoCard(props: {
   patient: PatientModel;
@@ -16,8 +33,17 @@ export default function TeleICUPatientInfoCard(props: {
   const patient = props.patient;
   const ip_no = props.ip_no;
 
+  const category: PatientCategory =
+    patient?.last_consultation?.category || "unknown";
+  const categoryClass = PatientCategoryTailwindClass[category];
+
   return (
-    <section className="flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
+    <section className="relative flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between overflow-clip">
+      <div
+        className={`absolute -left-8 top-3 transform -rotate-45 bg-${categoryClass} bg-opacity-80 hover:bg-opacity-100 text-${categoryClass}-fore w-32 flex justify-center items-center text-center uppercase font-bold tracking-widest text-xs px-4 transition-all duration-200 ease-in-out ${PatientCategoryClasses[category]}`}
+      >
+        <span className="">{PatientCategoryDisplayText[category]}</span>
+      </div>
       <Modal
         className="top-0 left-0 flex items-center justify-center"
         open={open}
