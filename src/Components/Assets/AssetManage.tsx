@@ -264,7 +264,7 @@ const AssetManage = (props: AssetManageProps) => {
             </div>
           </div>
           {asset && (
-            <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col lg:flex-row transition-all duration-200 ease-in">
+            <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col lg:flex-row transition-all duration-200 ease-in-out">
               <AssetWarrantyCard asset={asset} view="front" />
               <AssetWarrantyCard asset={asset} view="back" />
             </div>

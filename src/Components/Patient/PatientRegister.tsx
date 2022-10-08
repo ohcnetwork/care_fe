@@ -56,9 +56,8 @@ import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
-import { InfoOutlined } from "@material-ui/icons";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { goBack } from "../../Utils/utils";
+import Button from "../Common/components/Buttons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -983,8 +982,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <div className="mt-4">
         <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
           <div className="text-lg font-bold flex items-center mb-1">
-            <InfoOutlined className="mr-2" /> Please enter the correct date of
-            birth for the patient
+            <i className="mr-2 fa-solid fa-circle-info" /> Please enter the
+            correct date of birth for the patient
           </div>
           <p className="text-sm text-black font-normal">
             Each patient in the system is uniquely identifiable by the number
@@ -1049,6 +1048,105 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     {" "}
                     Import From External Results
                   </button>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex gap-2">
+                      <Button size="small">small button</Button>
+                      <Button size="default">default button</Button>
+                      <Button size="large">large button</Button>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button style="secondary">secondary button</Button>
+                      <Button style="success">success button</Button>
+                      <Button style="alert">alert button</Button>
+                      <Button style="danger">danger button</Button>
+                      <Button style="warning">warning button</Button>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button shadow style="secondary">
+                        Shadow
+                      </Button>
+                      <Button shadow style="success">
+                        Shadow
+                      </Button>
+                      <Button shadow style="alert">
+                        Shadow
+                      </Button>
+                      <Button shadow style="danger">
+                        Shadow
+                      </Button>
+                      <Button shadow style="warning">
+                        Shadow
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button ghost style="secondary">
+                        Ghost
+                      </Button>
+                      <Button ghost style="success">
+                        Ghost
+                      </Button>
+                      <Button ghost style="alert">
+                        Ghost
+                      </Button>
+                      <Button ghost style="danger">
+                        Ghost
+                      </Button>
+                      <Button ghost style="warning">
+                        Ghost
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button style="secondary" disabled>
+                        Button
+                      </Button>
+                      <Button style="success" disabled>
+                        Button
+                      </Button>
+                      <Button style="alert" disabled>
+                        Button
+                      </Button>
+                      <Button style="danger" disabled>
+                        Button
+                      </Button>
+                      <Button style="warning" disabled>
+                        Button
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button shadow style="secondary" disabled>
+                        Button
+                      </Button>
+                      <Button shadow style="success" disabled>
+                        Button
+                      </Button>
+                      <Button shadow style="alert" disabled>
+                        Button
+                      </Button>
+                      <Button shadow style="danger" disabled>
+                        Button
+                      </Button>
+                      <Button shadow style="warning" disabled>
+                        Button
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button ghost style="secondary" disabled>
+                        Button
+                      </Button>
+                      <Button ghost style="success" disabled>
+                        Button
+                      </Button>
+                      <Button ghost style="alert" disabled>
+                        Button
+                      </Button>
+                      <Button ghost style="danger" disabled>
+                        Button
+                      </Button>
+                      <Button ghost style="warning" disabled>
+                        Button
+                      </Button>
+                    </div>
+                  </div>
                   <Card elevation={0} className="mb-8 rounded">
                     <CardContent>
                       <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
@@ -1431,7 +1529,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <Card elevation={0} className="mb-8 rounded">
                     <Accordion className="mt-2 lg:mt-0 md:mt-0">
                       <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
+                        expandIcon={<i className="fa-solid fa-chevron-down" />}
                         aria-controls="panel1a-content"
                         id="panel1a-header"
                       >
