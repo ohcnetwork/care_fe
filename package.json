@@ -73,6 +73,7 @@
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
     "moment": "^2.29.1",
+    "postcss-loader": "^7.0.1",
     "qrcode.react": "^1.0.1",
     "querystring": "^0.2.1",
     "raviger": "^4.1.0",
