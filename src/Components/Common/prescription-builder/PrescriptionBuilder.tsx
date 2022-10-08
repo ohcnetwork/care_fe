@@ -3,8 +3,9 @@ import { PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
 
 export const medicines = require("./assets/medicines");
 
-const frequency = ["od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"];
+const frequency = ["Stat", "od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"];
 const frequencyTips = {
+  Stat: "Immediately",
   od: "once daily",
   hs: "Night only",
   bd: "Twice daily",

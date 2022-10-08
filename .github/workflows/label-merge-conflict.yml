@@ -1,0 +1,26 @@
+name: Auto Label Conflicts
+
+permissions:
+  issues: write
+  pull-requests: write
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: prince-chrismc/label-merge-conflicts-action@v2
+        with:
+          conflict_label_name: "merge conflict"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          max_retries: 5
+          wait_ms: 15000
+          detect_merge_changes: false
+          conflict_comment: |
+            :wave: Hi, @${author},
+            Conflicts have been detected against the base branch. Please rebase your branch against the base branch.

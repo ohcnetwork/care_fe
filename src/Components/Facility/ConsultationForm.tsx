@@ -59,6 +59,7 @@ import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { DiagnosisSelect } from "../Common/DiagnosisSelect";
+import { goBack } from "../../Utils/utils";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
@@ -191,10 +192,6 @@ const suggestionTypes = [
 ];
 
 const symptomChoices = [...SYMPTOM_CHOICES];
-
-const goBack = () => {
-  window.history.go(-1);
-};
 
 const scrollTo = (id: any) => {
   const element = document.querySelector(`#${id}-div`);
@@ -948,7 +945,9 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="provisional-diagnosis-div" className="mt-4">
-                <InputLabel id="diagnosis-label">Provisional Diagnosis</InputLabel>
+                <InputLabel id="diagnosis-label">
+                  Provisional Diagnosis
+                </InputLabel>
                 <DiagnosisSelect
                   name="icd11_provisional_diagnoses"
                   selected={state.form.icd11_provisional_diagnoses_object}

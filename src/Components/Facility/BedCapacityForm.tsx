@@ -14,7 +14,6 @@ import { BED_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createCapacity,
-  getCapacity,
   listCapacity,
   getCapacityBed,
   getAnyFacility,
@@ -26,6 +25,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { CapacityModal, OptionsType } from "./models";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../../Components/Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -84,14 +84,6 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
   const buttonText = !id
     ? `Save ${!isLastOptionType ? "& Add More" : "Bed Capacity"}`
     : "Update Bed Capacity";
-
-  const goBack = () => {
-    if (!id) {
-      navigate(`/facility/${facilityId}/doctor`);
-    } else {
-      window.history.go(-1);
-    }
-  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -333,7 +325,9 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                     variant="contained"
                     type="button"
                     fullWidth
-                    onClick={goBack}
+                    onClick={() =>
+                      goBack(!id && `/facility/${facilityId}/doctor`)
+                    }
                   >
                     Cancel
                   </Button>
