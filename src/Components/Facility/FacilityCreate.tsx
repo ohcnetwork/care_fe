@@ -50,6 +50,7 @@ import {
 } from "../Common/HelperInputFields";
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
 import { goBack } from "../../Utils/utils";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -161,6 +162,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
   const [ward, setWard] = useState(selectLocalBody);
+  const { width } = useWindowDimensions();
 
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
@@ -495,6 +497,10 @@ export const FacilityCreate = (props: FacilityProps) => {
   if (isLoading) {
     return <Loading />;
   }
+
+  const extremeSmallScreenBreakpoint: number = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
   const open = Boolean(anchorEl);
   const id = open ? "map-popover" : undefined;
   return (
@@ -686,7 +692,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
 
               <div className="md:col-span-2 grid grid-cols-1 xl:grid-cols-2 gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
                     <InputLabel
                       htmlFor="facility-oxygen-capacity"
@@ -727,7 +733,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
                     <InputLabel
                       htmlFor="facility-type-b-cylinders"
@@ -767,7 +773,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
                     <InputLabel
                       htmlFor="facility-type-c-cylinders"
@@ -807,7 +813,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
                     <InputLabel
                       htmlFor="facility-type-d-cylinders"
@@ -883,7 +889,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                 </div>
               )}
             </div>
-            <div className="flex items-center mt-4 -mx-2">
+            <div
+              className={`${
+                isExtremeSmallScreen
+                  ? " grid grid-cols-1 "
+                  : " flex items-center "
+              } mt-4 -mx-2`}
+            >
               <div className="flex-1 px-2">
                 <InputLabel id="location-label">Location</InputLabel>
                 <TextInputField
@@ -937,27 +949,27 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-6 gap-2">
-              <Button
-                color="default"
-                variant="contained"
+            <div
+              className={`${
+                isExtremeSmallScreen
+                  ? " grid grid-cols-1 "
+                  : " flex justify-between "
+              } mt-6 gap-2 `}
+            >
+              <button
+                className="btn btn-default border-2 border-grey-300"
                 onClick={() => goBack()}
               >
                 Cancel
-              </Button>
-              <Button
+              </button>
+              <button
+                className="btn btn-primary"
                 id="facility-save"
-                color="primary"
-                variant="contained"
                 type="submit"
-                style={{ marginLeft: "auto" }}
                 onClick={(e) => handleSubmit(e)}
-                startIcon={
-                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                }
               >
-                {buttonText}
-              </Button>
+                <i className="mr-2 fa-regular fa-circle-check"></i> {buttonText}
+              </button>
             </div>
           </form>
         </CardContent>
