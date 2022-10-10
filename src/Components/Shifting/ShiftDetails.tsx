@@ -826,8 +826,8 @@ export default function ShiftDetails(props: { id: string }) {
             <div className="col-span-2">
               <h4 className="mt-8">Audit Log</h4>
 
-              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2 flex flex-col md:flex-row gap-4 justify-center">
-                <div className="border-r-2">
+              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2 grid lg:grid-cols-2">
+                <div className="lg:border-r-2 border-b-2 lg:border-b-0 pb-2 lg:pb-0">
                   <div className="text-sm leading-5 font-medium text-gray-500">
                     Created
                   </div>
@@ -841,7 +841,7 @@ export default function ShiftDetails(props: { id: string }) {
                     </div>
                   </div>
                 </div>
-                <div className="">
+                <div className="mt-2 lg:mt-0">
                   <div className="text-sm leading-5 font-medium text-gray-500">
                     Last Edited
                   </div>
