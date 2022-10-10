@@ -449,7 +449,6 @@ export default function FacilityUsers(props: any) {
   } else if (users && users.length === 0) {
     manageUsers = (
       <div>
-        {userTypes.length}
         <div>
           <h5> No Users Found</h5>
         </div>
