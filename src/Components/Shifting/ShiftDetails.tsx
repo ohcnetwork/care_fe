@@ -851,8 +851,7 @@ export default function ShiftDetails(props: { id: string }) {
                       {data?.last_edited_by_object?.last_name}
                     </div>
                     <div className="text-xs">
-                      {data.modified_date &&
-                        moment(data.modified_date).format("lll")}
+                      {data.modified_date && formatDate(data.modified_date)}
                     </div>
                   </div>
                 </div>

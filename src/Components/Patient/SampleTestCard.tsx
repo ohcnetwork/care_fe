@@ -10,6 +10,7 @@ import { RoleButton } from "../Common/RoleButton";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import _ from "lodash";
+import { formatDate } from "../../Utils/utils";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -109,14 +110,14 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <div className="text-gray-600 text-sm font-bold">
               <span className="text-gray-800">Date of Sample:</span>{" "}
               {itemData.date_of_sample
-                ? moment(itemData.date_of_sample).format("lll")
+                ? formatDate(itemData.date_of_sample)
                 : "Not Available"}
             </div>
 
             <div className="text-gray-600 text-sm font-bold">
               <span className="text-gray-800">Date of Result:</span>{" "}
               {itemData.date_of_result
-                ? moment(itemData.date_of_result).format("lll")
+                ? formatDate(itemData.date_of_result)
                 : "Not Available"}
             </div>
           </div>
