@@ -12,7 +12,6 @@ import {
   TEST_TYPE_CHOICES,
   KeralaLogo,
 } from "../../Common/constants";
-import moment from "moment";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -123,7 +122,7 @@ export default function ResourceDetails(props: { id: string }) {
               {" "}
               Date and Time:{" "}
             </span>
-            {moment(data.created_date).format("LLL" || "--")}
+            {formatDate(data.created_date)}
           </div>
           <div className="text-right mt-2">
             <span className="font-semibold leading-relaxed"> Unique Id: </span>

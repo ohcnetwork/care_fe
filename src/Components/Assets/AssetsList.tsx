@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";

@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, ReactElement } from "react";
 
 import loadable from "@loadable/component";
-import moment from "moment";
 import { assetClassProps, AssetData, AssetTransaction } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch } from "react-redux";
@@ -299,13 +298,13 @@ const AssetManage = (props: AssetManageProps) => {
           <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
             <div>
               <span className="text-gray-900">Created: </span>
-              {moment(asset?.created_date).format("lll")}
+              {asset?.created_date && formatDate(asset?.created_date)}
             </div>
           </div>
           <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
             <div>
               <span className="text-gray-900">Last Modified: </span>
-              {moment(asset?.modified_date).format("lll")}
+              {asset?.modified_date && formatDate(asset?.modified_date)}
             </div>
           </div>
         </div>
