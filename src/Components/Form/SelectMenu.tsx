@@ -53,13 +53,15 @@ const SelectMenu = <T, V>(props: SelectMenuProps<T, V>) => {
     ? valueOptions
     : [defaultOption, ...valueOptions];
 
+  const value = options.find((o) => props.value == o.value) || defaultOption;
+
   return (
     <div className={props.className}>
       <Listbox
-        value={options.find((o) => props.value == o.value) || defaultOption}
+        value={value}
         onChange={(selection: any) => props.onChange(selection.value)}
       >
-        {({ open, value }) => (
+        {({ open }) => (
           <>
             <Listbox.Label className="sr-only">
               {props.placeholder}
