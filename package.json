@@ -248,7 +248,7 @@
     "**/*": [
       "prettier --write --ignore-unknown",
       "eslint --fix",
-      "git add"
+      "git add -A ."
     ]
   },
   "eslintConfig": {
