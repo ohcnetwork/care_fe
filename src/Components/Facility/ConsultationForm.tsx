@@ -313,7 +313,9 @@ export const ConsultationForm = (props: any) => {
         case "category":
           if (
             !state.form[field] ||
-            !PATIENT_CATEGORIES.includes(state.form[field])
+            !PATIENT_CATEGORIES.map((category) => category.id).includes(
+              state.form[field]
+            )
           ) {
             errors[field] = "Please select a category";
             if (!error_div) error_div = field;
@@ -773,12 +775,7 @@ export const ConsultationForm = (props: any) => {
                     name="category"
                     variant="standard"
                     value={state.form.category}
-                    options={PATIENT_CATEGORIES.map((c) => {
-                      return {
-                        id: c,
-                        text: c,
-                      };
-                    })}
+                    options={PATIENT_CATEGORIES}
                     onChange={handleChange}
                     errors={state.errors.category}
                   />
