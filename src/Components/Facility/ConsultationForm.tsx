@@ -126,7 +126,7 @@ const initForm: FormDetails = {
   facility: "",
   admitted: "false",
   admitted_to: "",
-  category: "Comfort Care",
+  category: "Comfort",
   admission_date: new Date().toISOString(),
   discharge_date: null,
   referred_to: "",
@@ -264,7 +264,9 @@ export const ConsultationForm = (props: any) => {
               !!res.data.symptoms.filter((i: number) => i === 9).length,
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
-            category: res.data.category || "Comfort Care",
+            category: res.data.category
+              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)?.id
+              : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
