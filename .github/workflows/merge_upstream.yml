@@ -13,4 +13,4 @@ jobs:
       - name: Sync Repo
         run: gh repo sync ${{ github.repository }} -b develop
         env:
-          GH_TOKEN: ${{ secrets.GUTHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
