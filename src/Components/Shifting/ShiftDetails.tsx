@@ -784,19 +784,25 @@ export default function ShiftDetails(props: { id: string }) {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={() => setOpenDeleteShiftDialog(false)}
-                      color="primary"
-                    >
-                      No
-                    </Button>
-                    <Button
-                      color="primary"
-                      onClick={handleShiftDelete}
-                      autoFocus
-                    >
-                      Yes
-                    </Button>
+                    <div className="flex flex-col md:flex-row w-full gap-2 justify-end">
+                      <div>
+                        <button
+                          onClick={() => setOpenDeleteShiftDialog(false)}
+                          className="btn btn-primary w-full md:w-auto"
+                        >
+                          No
+                        </button>
+                      </div>
+                      <div>
+                        <button
+                          onClick={handleShiftDelete}
+                          id="facility-delete-confirm"
+                          className="btn btn-danger w-full md:w-auto"
+                        >
+                          Yes
+                        </button>
+                      </div>
+                    </div>
                   </DialogActions>
                 </Dialog>
               </div>
@@ -820,8 +826,8 @@ export default function ShiftDetails(props: { id: string }) {
             <div className="col-span-2">
               <h4 className="mt-8">Audit Log</h4>
 
-              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2 flex flex-col md:flex-row gap-4 justify-center">
-                <div className="border-r-2">
+              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2 grid lg:grid-cols-2">
+                <div className="lg:border-r-2 border-b-2 lg:border-b-0 pb-2 lg:pb-0">
                   <div className="text-sm leading-5 font-medium text-gray-500">
                     Created
                   </div>
@@ -836,7 +842,7 @@ export default function ShiftDetails(props: { id: string }) {
                     </div>
                   </div>
                 </div>
-                <div className="">
+                <div className="mt-2 lg:mt-0">
                   <div className="text-sm leading-5 font-medium text-gray-500">
                     Last Edited
                   </div>

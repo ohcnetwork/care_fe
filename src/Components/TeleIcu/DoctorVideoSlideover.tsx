@@ -108,6 +108,8 @@ function UserListItem(props: { user: UserModel }) {
             user.alt_phone_number
               ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
                   user.alt_phone_number
+                )}&text=${encodeURIComponent(
+                  `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
                 )}`
               : "#"
           }
@@ -132,7 +134,9 @@ function UserListItem(props: { user: UserModel }) {
             </p>
             <p className="text-sm text-gray-500 flex gap-2 divide-gray-800">
               <span>{user.alt_phone_number}</span>
-              <span>{moment(user.last_login).fromNow()}</span>
+              {user.last_login && (
+                <span>{moment(user.last_login).fromNow()}</span>
+              )}
             </p>
           </div>
         </a>

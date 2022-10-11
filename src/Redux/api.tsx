@@ -629,6 +629,10 @@ const routes: Routes = {
     path: "/api/v1/files/{fileId}/",
     method: "GET",
   },
+  editUpload: {
+    path: "/api/v1/files/{fileId}/?file_type={fileType}&associating_id={associatingId}",
+    method: "PATCH",
+  },
 
   // Investigation
   listInvestigations: {
@@ -658,6 +662,11 @@ const routes: Routes = {
   editInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/batchUpdate/",
     method: "PUT",
+  },
+
+  // ICD11
+  listICD11Diagnosis: {
+    path: "/api/v1/icd/",
   },
 
   // Resource

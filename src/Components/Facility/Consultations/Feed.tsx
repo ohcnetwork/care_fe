@@ -2,7 +2,11 @@ import clsx from "clsx";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
-import { CameraPTZ, getCameraPTZ } from "../../../Common/constants";
+import {
+  CameraPTZ,
+  CAMERA_STATES,
+  getCameraPTZ,
+} from "../../../Common/constants";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import {
   ICameraAssetState,
@@ -141,7 +145,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const [currentPreset, setCurrentPreset] = useState<any>();
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
 
-  const [loading, setLoading] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState<string>(CAMERA_STATES.IDLE);
   const [camTimeout, setCamTimeout] = useState<number>(0);
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -237,7 +241,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   useEffect(() => {
     if (streamStatus === StreamStatus.Playing) {
-      setLoading("Moving");
+      setLoading(CAMERA_STATES.MOVING.GENERIC);
       const preset =
         bedPresets?.find(
           (preset: any) =>
@@ -248,11 +252,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       if (preset) {
         absoluteMove(preset?.meta?.position, {
           onSuccess: () => {
-            setLoading(undefined);
+            setLoading(CAMERA_STATES.IDLE);
             setCurrentPreset(preset);
           },
           onError: (err: AxiosError<any>) => {
-            setLoading(undefined);
+            setLoading(CAMERA_STATES.IDLE);
             const responseData = err.response?.data;
             if (responseData.status) {
               switch (responseData.status) {
@@ -277,7 +281,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           },
         });
       } else {
-        setLoading(undefined);
+        setLoading(CAMERA_STATES.IDLE);
       }
     }
   }, [bedPresets, streamStatus]);
@@ -335,7 +339,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               getBedPresets(cameraAsset?.id);
               getPresets({});
             }
-            setLoading(undefined);
+            setLoading(CAMERA_STATES.IDLE);
           }
         },
       });
@@ -343,7 +347,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     other: (option, value) => {
       setLoading(option.loadingLabel);
       relativeMove(getPTZPayload(option.action, precision, value), {
-        onSuccess: () => setLoading(undefined),
+        onSuccess: () => setLoading(CAMERA_STATES.IDLE),
       });
     },
   };
@@ -376,18 +380,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               <button
                 key={preset.id}
                 onClick={() => {
-                  setLoading("Moving");
+                  setLoading(CAMERA_STATES.MOVING.GENERIC);
                   // gotoBedPreset(preset);
                   absoluteMove(preset.meta.position, {
                     onSuccess: () => {
-                      setLoading(undefined);
+                      setLoading(CAMERA_STATES.IDLE);
                       setCurrentPreset(preset);
                       console.log(
                         "onSuccess: Set Preset to " + preset?.meta?.preset_name
                       );
                     },
                     onError: () => {
-                      setLoading(undefined);
+                      setLoading(CAMERA_STATES.IDLE);
                       setCurrentPreset(preset);
                       console.log(
                         "onError: Set Preset to " + preset?.meta?.preset_name
@@ -447,7 +451,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           />
         )}
 
-        {loading && (
+        {loading !== CAMERA_STATES.IDLE && (
           <div className="absolute inset-x-0 top-2 text-center flex items-center justify-center">
             <div className="inline-flex items-center rounded p-4 gap-2 bg-white/70">
               <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
