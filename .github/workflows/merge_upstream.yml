@@ -3,11 +3,6 @@ on:
   schedule:
     - cron: '* 00 * * *'
   workflow_dispatch:
-    inputs:
-      branch:
-          description: 'Enter branch name to sync from upstream'
-          required: true
-          default: 'develop'
 
 jobs:
   sync-upstream:
