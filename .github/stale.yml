@@ -27,3 +27,8 @@ issue:
   daysUntilStale: 14
   # No auto closing the issues
   daysUntilClose: false
+  # Comment to post when marking an issue as stale.
+  markComment: >
+    Hi, @gigincg, @nihal467, @khavinshankar, @mathew-alex 
+    This issue has been automatically marked as stale because it has not had any recent activity.
+

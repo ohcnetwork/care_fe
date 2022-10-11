@@ -672,6 +672,7 @@ export const DailyRounds = (props: any) => {
                         ]}
                         onChange={handleChange}
                         errors={state.errors.review_time}
+                        className="mt-1"
                       />
                       <div className="text-gray-500 text-sm">
                         {getExpectedReviewTime()}
@@ -920,7 +921,7 @@ export const DailyRounds = (props: any) => {
                             options={RHYTHM_CHOICES}
                             onChange={handleChange}
                             errors={state.errors.rhythm}
-                            className="mb-2 mt-1"
+                            className="mb-8"
                           />
                         </div>
                         <div className="md:col-span-2 mt-2">
