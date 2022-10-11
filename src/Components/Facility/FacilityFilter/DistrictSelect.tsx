@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { getDistrictByName, getStates } from "../../../Redux/actions";
 import { AutoCompleteAsyncField } from "../../Common/HelperInputFields";
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
 
 interface DistrictSelectProps {
   name: string;
