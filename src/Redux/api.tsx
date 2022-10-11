@@ -139,12 +139,7 @@ const routes: Routes = {
     method: "PATCH",
   },
 
-  facilityCoverImageCreate: {
-    path: "/api/v1/facility/{id}/cover_image/",
-    method: "POST",
-  },
-
-  facilityCoverImageDelete: {
+  deleteFacilityCoverImage: {
     path: "/api/v1/facility/{id}/cover_image/",
     method: "DELETE",
   },

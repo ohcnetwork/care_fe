@@ -1,18 +1,16 @@
 import { Modal } from "@material-ui/core";
 import axios from "axios";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { FacilityModel } from "./models";
 
-interface CoverImageUploadModalProps {
+interface Props {
   open: boolean;
-  onCloseCB: () => void | undefined;
+  onClose: () => void | undefined;
   facility: FacilityModel;
 }
 
-export function CoverImageUploadModal(props: CoverImageUploadModalProps) {
-  const { open, onCloseCB, facility } = props;
-  const dispatch = useDispatch();
+const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
+  const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState<File | null>();
 
   const handleFileChange = (e: any) => {
@@ -25,29 +23,22 @@ export function CoverImageUploadModal(props: CoverImageUploadModalProps) {
       return;
     }
     const formData = new FormData();
-    formData.append("file", file);
-    const response = await axios.post(
-      `/api/v1/facility/${facility.id}/cover_image/`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    dispatch({ type: "UPDATE_FACILITY", payload: response.data });
-    onCloseCB();
+    formData.append("cover_image", file);
+    setIsUploading(true);
+    await axios.post(`/api/v1/facility/${facility.id}/cover_image/`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: "Bearer " + localStorage.getItem("care_access_token"),
+      },
+    });
+    setIsUploading(false);
+    onClose();
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={onCloseCB}
-      aria-labelledby="Notify This Facility"
-      aria-describedby="Type a message and notify this facility"
-    >
+    <Modal open={open} onClose={onClose}>
       <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-        <form className="m-4 bg-white rounded-xl w-11/12 max-w-3xl h-96 max-h-full flex flex-col shadow overflow-clip">
+        <form className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-full flex flex-col shadow overflow-clip">
           <div className="px-6 py-6 flex flex-col bg-gray-300">
             <span className="text-xl font-medium">Edit Cover Photo</span>
             <span className="mt-1 text-gray-700">{facility.name}</span>
@@ -83,13 +74,13 @@ export function CoverImageUploadModal(props: CoverImageUploadModalProps) {
               className="rounded-lg bg-gray-100 hover:bg-gray-300 py-2 px-4 text-slate-600 hover:text-slate-800 font-medium text-sm flex gap-1 items-center transition-all"
               onClick={(e) => {
                 e.stopPropagation();
-                onCloseCB();
+                onClose();
               }}
             >
               Cancel
             </button>
             <button
-              type="submit"
+              type="button"
               className="rounded-lg bg-primary-500 py-2 px-4 text-white font-medium hover:bg-primary-400 text-sm flex gap-3 items-center transition-all"
               onClick={handleUpload}
             >
@@ -101,4 +92,6 @@ export function CoverImageUploadModal(props: CoverImageUploadModalProps) {
       </div>
     </Modal>
   );
-}
+};
+
+export default CoverImageEditModal;

@@ -44,9 +44,6 @@ export const createFacility = (params: object) => {
 export const updateFacility = (id: number, params: object) => {
   return fireRequest("updateFacility", [id], params);
 };
-export const createFacilityCoverImage = (id: number, params: object) => {
-  return fireRequest("facilityCoverImageCreate", [id], params);
-};
 export const deleteFacility = (id: number) => {
   return fireRequest("deleteFacility", [id], {});
 };

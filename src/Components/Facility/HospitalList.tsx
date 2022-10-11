@@ -42,7 +42,7 @@ import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
-import { CoverImageUploadModal } from "./CoverImageEditModal";
+import CoverImageEditModal from "./CoverImageEditModal";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -348,13 +348,13 @@ export const HospitalList = (props: any) => {
                 ) : (
                   <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                 )}
-                <div className="opacity-0 group-hover:opacity-70 transition-all bg-gray-900 h-8 left-0 right-0 -bottom-8 group-hover:bottom-0 absolute flex justify-start items-center z-10 gap-2 px-2 text-gray-300">
+                <div className="transition-all bg-black bg-opacity-60 h-8 left-0 right-0 -bottom-8 group-hover:bottom-0 absolute flex justify-start items-center z-10 gap-2 px-2 text-gray-300">
                   <i className="fa-solid fa-pen"></i>
                   <span>Edit Cover</span>
                 </div>
-                <CoverImageUploadModal
+                <CoverImageEditModal
                   open={coverImageModalFor === facility.id}
-                  onCloseCB={() => setCoverImageModalFor(undefined)}
+                  onClose={() => setCoverImageModalFor(undefined)}
                   facility={facility}
                 />
               </div>
