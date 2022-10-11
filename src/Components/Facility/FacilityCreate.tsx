@@ -159,7 +159,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [isWardLoading, setIsWardLoading] = useState(false);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
-  const [localBody, setLocalBodies] = useState(selectDistrict);
+  const [localBodies, setLocalBodies] = useState(selectDistrict);
   const [ward, setWard] = useState(selectLocalBody);
 
   const [anchorEl, setAnchorEl] = React.useState<
@@ -646,7 +646,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     variant="outlined"
                     margin="dense"
                     value={state.form.local_body}
-                    options={localBody}
+                    options={localBodies}
                     optionValue="name"
                     onChange={(e) => [
                       setLocalBody(e),
