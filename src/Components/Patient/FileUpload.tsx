@@ -11,6 +11,7 @@ import {
   retrieveUpload,
   createUpload,
   getPatient,
+  editUpload,
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
 import { TextInputField } from "../Common/HelperInputFields";
@@ -250,7 +251,12 @@ export const FileUpload = (props: FileUploadProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           audio_urls(res.data.results);
-          setuploadedFiles(res.data.results);
+          setuploadedFiles(
+            res.data.results.filter(
+              (file: FileUploadModel) =>
+                file.upload_completed || file.file_category === "AUDIO"
+            )
+          );
           setTotalCount(res.data.count);
         }
         setIsLoading(false);
@@ -459,7 +465,7 @@ export const FileUpload = (props: FileUploadProps) => {
             msg: "File Uploaded Successfully",
           });
           setUploadFileNameError("");
-          resolve();
+          resolve(response);
         })
         .catch((e) => {
           Notification.Error({
@@ -484,13 +490,23 @@ export const FileUpload = (props: FileUploadProps) => {
     }
     return true;
   };
+  const markUploadComplete = async (response: any) => {
+    return dispatch(
+      editUpload(
+        { upload_completed: true },
+        response.data.id,
+        type,
+        getAssociatedId()
+      )
+    );
+  };
 
   const handleUpload = async (status: any) => {
     if (!validateFileUpload()) return;
     const f = file;
 
     const category = "UNSPECIFIED";
-    const filename = uploadFileName === ""  && f ? f.name : uploadFileName;
+    const filename = uploadFileName === "" && f ? f.name : uploadFileName;
     const name = f?.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
@@ -503,6 +519,7 @@ export const FileUpload = (props: FileUploadProps) => {
     };
     dispatch(createUpload(requestData))
       .then(uploadfile)
+      .then(markUploadComplete)
       .catch(() => {
         setUploadStarted(false);
       })
@@ -601,39 +618,45 @@ export const FileUpload = (props: FileUploadProps) => {
           <>
             <div className="flex absolute h-full sm:h-auto sm:inset-x-4 sm:top-4 p-4 sm:p-0 justify-between flex-col sm:flex-row">
               <div className="flex gap-3">
-              {file_state.isImage && (
-                <>
-                  {
-                    [
-                      ["Zoom In", "magnifying-glass-plus", handleZoomIn, file_state.zoom === zoom_values.length],
-                      ["Zoom Out", "magnifying-glass-minus", handleZoomOut, file_state.zoom === 1],
-                    ].map((button, index) => 
-                      <button 
+                {file_state.isImage && (
+                  <>
+                    {[
+                      [
+                        "Zoom In",
+                        "magnifying-glass-plus",
+                        handleZoomIn,
+                        file_state.zoom === zoom_values.length,
+                      ],
+                      [
+                        "Zoom Out",
+                        "magnifying-glass-minus",
+                        handleZoomOut,
+                        file_state.zoom === 1,
+                      ],
+                    ].map((button, index) => (
+                      <button
                         key={index}
                         onClick={button[2] as () => void}
                         className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
                         disabled={button[3] as boolean}
                       >
-                        <i 
-                          className={`fas fa-${button[1]} mr-2`}
-                        />
+                        <i className={`fas fa-${button[1]} mr-2`} />
                         {button[0] as String}
                       </button>
-                    )
-                  }
-                </>
-              )}
+                    ))}
+                  </>
+                )}
               </div>
               <div className="flex gap-3">
                 {downloadURL && downloadURL.length > 0 && (
-                    <a
-                      href={downloadURL}
-                      download
-                      className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
-                    >
-                      <i className="fas fa-download mr-2" />
-                      Download
-                    </a>
+                  <a
+                    href={downloadURL}
+                    download
+                    className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                  >
+                    <i className="fas fa-download mr-2" />
+                    Download
+                  </a>
                 )}
                 <button
                   onClick={handleClose}
@@ -641,7 +664,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 >
                   <i className="fas fa-times mr-2" />
                   Close
-                </button>                  
+                </button>
               </div>
             </div>
             {file_state.isImage ? (
@@ -752,9 +775,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
                   <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
-                    <label
-                      className="flex items-center btn btn-primary"
-                    >
+                    <label className="flex items-center btn btn-primary">
                       <i className="fas fa-file-arrow-down mr-2" /> Choose file
                       <input
                         title="changeFile"
@@ -774,17 +795,19 @@ export const FileUpload = (props: FileUploadProps) => {
                     </button>
                   </div>
                 )}
-                {file && <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
-                  {file?.name}
-                  <button
-                    onClick={()=>{
-                      setFile(null);
-                      setUploadFileName("");
-                    }}
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
-                </div>}
+                {file && (
+                  <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                    {file?.name}
+                    <button
+                      onClick={() => {
+                        setFile(null);
+                        setUploadFileName("");
+                      }}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ) : null}
@@ -817,4 +840,4 @@ export const FileUpload = (props: FileUploadProps) => {
       )}
     </div>
   );
-};
+};;

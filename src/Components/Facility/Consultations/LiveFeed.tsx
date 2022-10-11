@@ -31,6 +31,7 @@ import { isNull } from "lodash";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../models";
 import { TextInputField } from "../../Common/HelperInputFields";
+import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -55,7 +56,10 @@ const LiveFeed = (props: any) => {
   });
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
-
+  const { width } = useWindowDimensions();
+  const extremeSmallScreenBreakpoint: number = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
   const liveFeedPlayerRef = useRef<any>(null);
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
@@ -424,7 +428,11 @@ const LiveFeed = (props: any) => {
                 )}
               </div>
             </div>
-            <div className="md:flex max-w-lg mt-4">
+            <div
+              className={`${
+                isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
+              } max-w-lg mt-4`}
+            >
               {cameraPTZ.map((option) => {
                 const shortcutKeyDescription =
                   option.shortcutKey &&
@@ -473,7 +481,7 @@ const LiveFeed = (props: any) => {
           </div>
 
           <div className="flex flex-col mx-4 max-w-sm">
-            <nav className="flex w-full">
+            <nav className="flex flex-wrap">
               <button
                 className={`flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
                   showDefaultPresets
@@ -500,7 +508,11 @@ const LiveFeed = (props: any) => {
               </button>
             </nav>
             <div className="w-full space-y-4 my-2">
-              <div className="grid grid-cols-2 my-auto gap-2">
+              <div
+                className={`grid ${
+                  isExtremeSmallScreen ? " sm:grid-cols-2 " : " grid-cols-2 "
+                } my-auto gap-2`}
+              >
                 {showDefaultPresets ? (
                   <>
                     {viewOptions(presetsPage)?.map((option: any, i) => (

@@ -13,6 +13,23 @@ export interface AssetLocationObject {
 export type AssetType = "INTERNAL" | "EXTERNAL";
 export type AssetClass = "ONVIF" | "HL7MONITOR";
 
+export const assetClassProps = {
+  ONVIF: {
+    name: "ONVIF Camera",
+    description: "",
+    icon: <i className="fa-solid fa-camera" />,
+  },
+  HL7MONITOR: {
+    name: "HL7 Vitals Monitor",
+    description: "",
+    icon: <i className="fa-solid fa-tv" />,
+  },
+  None: {
+    name: "N/A",
+    icon: <i className="fa-solid fa-cart-plus" />,
+  },
+};
+
 export interface AssetData {
   id: string;
   name: string;
@@ -23,7 +40,6 @@ export interface AssetData {
   created_date: string;
   modified_date: string;
   serial_number: string;
-  warranty_details: string;
   asset_type: AssetType;
   asset_class?: AssetClass;
   location_object: AssetLocationObject;
@@ -33,6 +49,10 @@ export interface AssetData {
   support_email: string;
   support_phone: string;
   qr_code_id: string;
+  manufacturer: string;
+  warranty_amc_end_of_validity: string;
+  last_serviced_on: string;
+  notes: string;
   meta?: {
     [key: string]: any;
   };

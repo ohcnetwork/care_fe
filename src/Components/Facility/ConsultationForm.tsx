@@ -945,7 +945,9 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="provisional-diagnosis-div" className="mt-4">
-                <InputLabel id="diagnosis-label">Provisional Diagnosis</InputLabel>
+                <InputLabel id="diagnosis-label">
+                  Provisional Diagnosis
+                </InputLabel>
                 <DiagnosisSelect
                   name="icd11_provisional_diagnoses"
                   selected={state.form.icd11_provisional_diagnoses_object}
