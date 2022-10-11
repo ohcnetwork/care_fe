@@ -8,7 +8,6 @@ import { getDailyReport } from "../../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
-import { smallCard } from "../../Common/components/SkeletonLoading.gen";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
@@ -68,7 +67,21 @@ export const DailyRoundsList = (props: any) => {
   let roundsList: any;
 
   if (isDailyRoundLoading) {
-    roundsList = smallCard();
+    roundsList = (
+      <div className="m-1">
+        <div className="border border-gray-300 bg-white shadow rounded-md p-4 max-w-sm w-full mx-auto">
+          <div className="animate-pulse flex space-x-4 ">
+            <div className="flex-1 space-y-4 py-1">
+              <div className="h-4 bg-gray-400 rounded w-3/4"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-400 rounded"></div>
+                <div className="h-4 bg-gray-400 rounded w-5/6"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   } else if (dailyRoundsListData.length === 0) {
     roundsList = (
       <Typography>No Consultation Update data is available.</Typography>
@@ -217,7 +230,7 @@ export const DailyRoundsList = (props: any) => {
             breadcrumbs={false}
           />
         </div>
-        <div className="flex flex-wrap">
+        <div className={!isDailyRoundLoading ? "flex flex-wrap" : ""}>
           <div className="overflow-y-auto h-screen space-y-4">{roundsList}</div>
           {!isDailyRoundLoading && totalCount > limit && (
             <div className="mt-4 flex justify-center">
