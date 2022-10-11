@@ -13,6 +13,23 @@ export interface AssetLocationObject {
 export type AssetType = "INTERNAL" | "EXTERNAL";
 export type AssetClass = "ONVIF" | "HL7MONITOR";
 
+export const assetClassProps = {
+  ONVIF: {
+    name: "ONVIF Camera",
+    description: "",
+    icon: <i className="fa-solid fa-camera" />,
+  },
+  HL7MONITOR: {
+    name: "HL7 Vitals Monitor",
+    description: "",
+    icon: <i className="fa-solid fa-tv" />,
+  },
+  None: {
+    name: "N/A",
+    icon: <i className="fa-solid fa-cart-plus" />,
+  },
+};
+
 export interface AssetData {
   id: string;
   name: string;
