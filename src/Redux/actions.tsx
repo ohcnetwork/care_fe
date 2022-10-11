@@ -47,6 +47,9 @@ export const updateFacility = (id: number, params: object) => {
 export const deleteFacility = (id: number) => {
   return fireRequest("deleteFacility", [id], {});
 };
+export const deleteFacilityCover = (id: string) => {
+  return fireRequest("deleteFacilityCoverImage", [], {}, { id });
+};
 export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
