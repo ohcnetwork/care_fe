@@ -1,8 +1,8 @@
-import React from "react";
-import { navigate } from "raviger";
+import React, { useEffect, useRef } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import clsx from "clsx";
+import { goBack } from "../../Utils/utils";
 
 interface PageTitleProps {
   title: string;
@@ -10,12 +10,17 @@ interface PageTitleProps {
   backUrl?: string;
   backButtonCB?: () => number | void;
   className?: string;
-  componentRight?: React.ReactChild;
-  justifyContents? : "justify-center" | "justify-start" | "justify-end" | "justify-between";
+  componentRight?: React.ReactNode;
+  justifyContents?:
+    | "justify-center"
+    | "justify-start"
+    | "justify-end"
+    | "justify-between";
   breadcrumbs?: boolean;
   crumbsReplacements?: {
     [key: string]: { name?: string; uri?: string; style?: string };
   };
+  focusOnLoad?: boolean;
 }
 
 export default function PageTitle(props: PageTitleProps) {
@@ -29,26 +34,29 @@ export default function PageTitle(props: PageTitleProps) {
     breadcrumbs = true,
     crumbsReplacements = {},
     justifyContents = "justify-start",
+    focusOnLoad = false,
   } = props;
 
-  const onBackButtonClick = () => {
-    if (backButtonCB) {
-      const goBack = backButtonCB();
-      if (goBack) {
-        window.history.go(goBack);
-      }
-    } else {
-      backUrl ? navigate(backUrl) : window.history.go(-1);
+  const divRef = useRef<any>();
+
+  useEffect(() => {
+    if (divRef.current && focusOnLoad) {
+      divRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  };
+  }, [divRef, focusOnLoad]);
+
+  const onBackButtonClick = () =>
+    goBack((backButtonCB && backButtonCB()) || backUrl);
 
   return (
-    <div className={`pt-4 mb-4 ${className}`}>
+    <div ref={divRef} className={`pt-4 mb-4 ${className}`}>
       <PageHeadTitle title={title} />
-      <div className={clsx({
-          "flex items-center" : true,
-          [justifyContents] : true
-        })}>
+      <div
+        className={clsx({
+          "flex items-center": true,
+          [justifyContents]: true,
+        })}
+      >
         <div className="flex items-center">
           {!hideBack && (
             <button onClick={onBackButtonClick}>

@@ -14,7 +14,6 @@ import { BED_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createCapacity,
-  getCapacity,
   listCapacity,
   getCapacityBed,
   getAnyFacility,
@@ -26,6 +25,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { CapacityModal, OptionsType } from "./models";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../../Components/Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -84,14 +84,6 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
   const buttonText = !id
     ? `Save ${!isLastOptionType ? "& Add More" : "Bed Capacity"}`
     : "Update Bed Capacity";
-
-  const goBack = () => {
-    if (!id) {
-      navigate(`/facility/${facilityId}/doctor`);
-    } else {
-      window.history.go(-1);
-    }
-  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -283,49 +275,48 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
               />
               <ErrorHelperText error={state.errors.bedType} />
             </CardContent>
+            <div className="flex flex-col md:flex-row gap-2">
+              <CardContent className="w-full">
+                <InputLabel
+                  htmlFor="total-capacity"
+                  id="demo-simple-select-outlined-label"
+                >
+                  Total Capacity*
+                </InputLabel>
+                <TextInputField
+                  id="total-capacity"
+                  name="totalCapacity"
+                  variant="outlined"
+                  margin="dense"
+                  type="number"
+                  InputLabelProps={{ shrink: !!state.form.totalCapacity }}
+                  value={state.form.totalCapacity}
+                  onChange={handleChange}
+                  errors={state.errors.totalCapacity}
+                />
+              </CardContent>
+              <CardContent className="w-full">
+                <InputLabel
+                  htmlFor="currently-occupied"
+                  id="demo-simple-select-outlined-label"
+                >
+                  Currently Occupied*
+                </InputLabel>
+                <TextInputField
+                  id="currently-occupied"
+                  name="currentOccupancy"
+                  variant="outlined"
+                  margin="dense"
+                  type="number"
+                  InputLabelProps={{ shrink: !!state.form.currentOccupancy }}
+                  value={state.form.currentOccupancy}
+                  onChange={handleChange}
+                  errors={state.errors.currentOccupancy}
+                />
+              </CardContent>
+            </div>
             <CardContent>
-              <InputLabel
-                htmlFor="total-capacity"
-                id="demo-simple-select-outlined-label"
-              >
-                Total Capacity*
-              </InputLabel>
-              <TextInputField
-                id="total-capacity"
-                name="totalCapacity"
-                variant="outlined"
-                margin="dense"
-                type="number"
-                InputLabelProps={{ shrink: !!state.form.totalCapacity }}
-                value={state.form.totalCapacity}
-                onChange={handleChange}
-                errors={state.errors.totalCapacity}
-              />
-            </CardContent>
-            <CardContent>
-              <InputLabel
-                htmlFor="currently-occupied"
-                id="demo-simple-select-outlined-label"
-              >
-                Currently Occupied*
-              </InputLabel>
-              <TextInputField
-                id="currently-occupied"
-                name="currentOccupancy"
-                variant="outlined"
-                margin="dense"
-                type="number"
-                InputLabelProps={{ shrink: !!state.form.currentOccupancy }}
-                value={state.form.currentOccupancy}
-                onChange={handleChange}
-                errors={state.errors.currentOccupancy}
-              />
-            </CardContent>
-            <CardContent>
-              <CardActions
-                className="padding16 flex flex-col md:flex-row gap-4"
-                style={{ justifyContent: "space-between" }}
-              >
+              <CardActions className="flex flex-col md:flex-row gap-4 justify-between items-end">
                 <div className="w-full md:w-auto">
                   <Button
                     id="bed-capacity-cancel"
@@ -333,7 +324,9 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                     variant="contained"
                     type="button"
                     fullWidth
-                    onClick={goBack}
+                    onClick={() =>
+                      goBack(!id && `/facility/${facilityId}/doctor`)
+                    }
                   >
                     Cancel
                   </Button>
@@ -344,6 +337,8 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                       id="bed-capacity-save-and-exit"
                       color="primary"
                       variant="contained"
+                      fullWidth
+                      className="w-full md:w-auto"
                       type="submit"
                       onClick={(e) => handleSubmit(e, "Save and Exit")}
                       startIcon={
@@ -357,6 +352,8 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                     id="bed-capacity-save"
                     color="primary"
                     variant="contained"
+                    fullWidth
+                    className="w-full md:w-auto"
                     type="submit"
                     onClick={(e) => handleSubmit(e)}
                     startIcon={

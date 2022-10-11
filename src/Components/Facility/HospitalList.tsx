@@ -22,7 +22,6 @@ import {
   sendNotificationMessages,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
@@ -36,12 +35,13 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import GetAppIcon from "@material-ui/icons/GetApp";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
-import ToolTip from "../Common/utils/Tooltip";
+import SelectMenu from "../Common/components/SelectMenu";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -362,31 +362,36 @@ export const HospitalList = (props: any) => {
                       <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
-                      {facility.features?.map((feature: number, i: number) => (
-                        <div
-                          key={i}
-                          className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
-                          title={
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0].name
-                          }
-                        >
-                          <i
-                            className={`fas fa-${
-                              FACILITY_FEATURE_TYPES.filter(
-                                (f) => f.id === feature
-                              )[0].icon
-                            }`}
-                          />{" "}
-                          &nbsp;
-                          {
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0].name
-                          }
-                        </div>
-                      ))}
+                      {facility.features?.map(
+                        (feature: number, i: number) =>
+                          FACILITY_FEATURE_TYPES.some(
+                            (f) => f.id === feature
+                          ) && (
+                            <div
+                              key={i}
+                              className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                              title={
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            >
+                              <i
+                                className={`fas fa-${
+                                  FACILITY_FEATURE_TYPES.filter(
+                                    (f) => f.id === feature
+                                  )[0]?.icon
+                                }`}
+                              />{" "}
+                              &nbsp;
+                              {
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            </div>
+                          )
+                      )}
                     </div>
 
                     <div className="mt-2 flex justify-between">
@@ -521,8 +526,10 @@ export const HospitalList = (props: any) => {
     );
   } else if (data && data.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
-      <div className="w-full">
-        <div className="text-3xl mt-4">{t("no_facilities")}</div>
+      <div className="w-full bg-white rounded-lg p-3">
+        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+          {t("no_facilities")}
+        </div>
       </div>
     ) : (
       <div>
@@ -566,49 +573,29 @@ export const HospitalList = (props: any) => {
                   <InputLabel className="text-sm">
                     {t("download_type")}
                   </InputLabel>
-                  <div className="flex flex-row">
-                    <SelectField
-                      name="select_download"
-                      className="text-sm"
-                      variant="outlined"
-                      margin="dense"
-                      optionArray={true}
-                      value={downloadSelect}
-                      options={downloadTypes}
-                      onChange={(e) => {
-                        setdownloadSelect(e.target.value);
-                      }}
+                  <div className="flex flex-row gap-6">
+                    <SelectMenu
+                      options={[
+                        ...downloadTypes.map((download) => ({
+                          title: download,
+                          value: download,
+                        })),
+                      ]}
+                      selected={downloadSelect}
+                      onSelect={setdownloadSelect}
+                      position="right"
                     />
-
                     {downloadLoading ? (
                       <div className="px-2 ml-2 my-2 pt-1 rounded">
                         <CircularProgress className="text-primary-600 w-6 h-6" />
                       </div>
                     ) : (
                       <button
-                        className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
+                        className="bg-primary-600 hover:shadow-md px-2 rounded-full"
                         onClick={handleDownloader}
                         disabled={downloadLoading}
                       >
-                        <svg
-                          className="h-6 w-6"
-                          viewBox="0 0 16 16"
-                          fill="white"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
-                          />
-                        </svg>
+                        <GetAppIcon style={{ color: "white" }} />
                       </button>
                     )}
                   </div>

@@ -1,4 +1,4 @@
-import { Button, CardContent } from "@material-ui/core";
+import { CardContent } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useState } from "react";
@@ -6,6 +6,7 @@ import { SampleTestModel } from "./models";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { patchSample } from "../../Redux/actions";
+import { RoleButton } from "../Common/RoleButton";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import _ from "lodash";
@@ -143,7 +144,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             )}
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap w-full gap-4">
+        <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between w-full">
           {itemData.status === "APPROVED" && (
             <button
               onClick={(e) => {
@@ -155,15 +156,17 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               Send to Collection Centre
             </button>
           )}
-          <button
-            onClick={(e) => showUpdateStatus(itemData)}
-            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
+          <RoleButton
+            handleClickCB={() => showUpdateStatus(itemData)}
+            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+            disableFor="readOnly"
+            buttonType="html"
           >
-            Update Sample Test Status
-          </button>
+            UPDATE SAMPLE TEST STATUS
+          </RoleButton>
           <button
             onClick={(e) => navigate(`/sample/${itemData.id}`)}
-            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
           >
             Sample Report
           </button>
