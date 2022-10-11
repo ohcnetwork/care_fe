@@ -91,6 +91,7 @@ let make = (
               step={step}
               max={end}
               min={start}
+              className="focus:outline-none focus:bg-white focus:ring-primary-500"
               value={displayValue}
               onChange={event =>
                 setValue(
@@ -110,7 +111,7 @@ let make = (
         style={ReactDOM.Style.unsafeAddStyle(
           ReactDOM.Style.make(),
           {
-            "--min": start,
+            "--min": {value !== "" ? start : "0"},
             "--max": end,
             "--fill-color": "#0e9f6e",
             "--primary-color": "#0e9f6e",
