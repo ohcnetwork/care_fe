@@ -772,8 +772,8 @@ export const FileUpload = (props: FileUploadProps) => {
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
                   <div className="flex flex-col md:flex-row justify-between gap-2">
-                    <div className="flex items-center">
-                      <label className="w-full md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2">
+                    <div>
+                      <label className="w-full flex justify-center gap-2 items-center md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2">
                         <InsertDriveFileIcon /> Browse
                         <input
                           title="changeFile"
@@ -855,4 +855,4 @@ export const FileUpload = (props: FileUploadProps) => {
       )}
     </div>
   );
-};;
+};
