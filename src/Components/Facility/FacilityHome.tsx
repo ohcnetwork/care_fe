@@ -210,6 +210,8 @@ export const FacilityHome = (props: any) => {
     );
   });
 
+  const hasCoverImage = !!facilityData.read_cover_image_url;
+
   return (
     <div className="px-2 pb-2">
       <PageTitle
@@ -247,7 +249,18 @@ export const FacilityHome = (props: any) => {
           </div>
         </DialogActions>
       </Dialog>
-      <div className="bg-white rounded-lg p-3 md:p-6 shadow">
+      {hasCoverImage && (
+        <img
+          src={facilityData.read_cover_image_url}
+          alt="Facility"
+          className="w-full object-cover rounded-t-lg bg-gray-200 h-48 lg:h-0 opacity-100 lg:opacity-0 transition-all duration-200 ease-in-out"
+        />
+      )}
+      <div
+        className={`bg-white ${
+          hasCoverImage ? "rounded-b-lg lg:rounded-t-lg" : "rounded-lg"
+        } p-3 md:p-6 shadow transition-all duration-200 ease-in-out`}
+      >
         <div className="lg:flex justify-between gap-2">
           <div className="md:flex flex-col justify-between">
             <div className="flex flex-col flex-1 gap-3">
@@ -361,80 +374,97 @@ export const FacilityHome = (props: any) => {
               </button>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 mt-2 md:mt-4">
-            <RoleButton
-              id="update-facility"
-              className="btn-primary btn"
-              handleClickCB={() => navigate(`/facility/${facilityId}/update`)}
-              disableFor="readOnly"
-              buttonType="html"
-            >
-              <i className="fas fa-pencil-alt text-white mr-2"></i>
-              Update Facility
-            </RoleButton>
-            <button
-              className="btn-primary btn"
-              onClick={() => navigate(`/facility/${facilityId}/inventory`)}
-            >
-              <i className="fas fa-dolly-flatbed text-white mr-2"></i>
-              Manage Inventory
-            </button>
-            <RoleButton
-              className="btn-primary btn"
-              handleClickCB={() => navigate(`/facility/${facilityId}/location`)}
-              disableFor="readOnly"
-              buttonType="html"
-            >
-              <i className="fas fa-map-marker-alt text-white mr-2"></i>
-              Manage Locations
-            </RoleButton>
-            <RoleButton
-              className="btn-primary btn"
-              handleClickCB={() =>
-                navigate(`/facility/${facilityId}/resource/new`)
-              }
-              disableFor="readOnly"
-              buttonType="html"
-            >
-              <i className="fas fa-dolly-flatbed text-white mr-2"></i>
-              Request Resource
-            </RoleButton>
-            <RoleButton
-              className="btn-primary btn"
-              handleClickCB={() =>
-                navigate(`/facility/${facilityId}/assets/new`)
-              }
-              disableFor="readOnly"
-              buttonType="html"
-            >
-              <i className="fas fa-plus-circle text-white mr-2"></i>
-              Create Asset
-            </RoleButton>
-            <button
-              className="btn-primary btn"
-              onClick={() => navigate(`/assets?facility=${facilityId}`)}
-            >
-              <i className="fas fa-boxes text-white mr-2"></i>
-              View Assets
-            </button>
-            <button
-              className="btn-primary btn"
-              onClick={() => navigate(`/facility/${facilityId}/users`)}
-            >
-              <i className="fas fa-users text-white mr-2"></i>
-              View Users
-            </button>
-            {(currentUser.data.user_type === "DistrictAdmin" ||
-              currentUser.data.user_type === "StateAdmin") && (
-              <button
-                id="facility-delete"
-                className="btn-danger btn"
-                onClick={() => setOpenDeleteDialog(true)}
-              >
-                <i className="fas fa-trash text-white mr-2"></i>
-                Delete Facility
-              </button>
+          <div className="flex flex-col justify-center">
+            {hasCoverImage && (
+              <img
+                src={facilityData.read_cover_image_url}
+                alt="Facility"
+                className="w-full object-cover rounded-lg h-0 lg:h-48 bg-gray-200 opacity-0 lg:opacity-100 transition-all duration-200 ease-in-out"
+              />
             )}
+            <div
+              className={`${
+                hasCoverImage
+                  ? "grid grid-cols-1 xl:grid-cols-2"
+                  : "flex flex-col"
+              } gap-2 mt-2 md:mt-4 transition-all duration-200 ease-in-out`}
+            >
+              <RoleButton
+                id="update-facility"
+                className="btn-primary btn"
+                handleClickCB={() => navigate(`/facility/${facilityId}/update`)}
+                disableFor="readOnly"
+                buttonType="html"
+              >
+                <i className="fas fa-pencil-alt text-white mr-2"></i>
+                Update Facility
+              </RoleButton>
+              <button
+                className="btn-primary btn"
+                onClick={() => navigate(`/facility/${facilityId}/inventory`)}
+              >
+                <i className="fas fa-dolly-flatbed text-white mr-2"></i>
+                Manage Inventory
+              </button>
+              <RoleButton
+                className="btn-primary btn"
+                handleClickCB={() =>
+                  navigate(`/facility/${facilityId}/location`)
+                }
+                disableFor="readOnly"
+                buttonType="html"
+              >
+                <i className="fas fa-map-marker-alt text-white mr-2"></i>
+                Manage Locations
+              </RoleButton>
+              <RoleButton
+                className="btn-primary btn"
+                handleClickCB={() =>
+                  navigate(`/facility/${facilityId}/resource/new`)
+                }
+                disableFor="readOnly"
+                buttonType="html"
+              >
+                <i className="fas fa-dolly-flatbed text-white mr-2"></i>
+                Request Resource
+              </RoleButton>
+              <RoleButton
+                className="btn-primary btn"
+                handleClickCB={() =>
+                  navigate(`/facility/${facilityId}/assets/new`)
+                }
+                disableFor="readOnly"
+                buttonType="html"
+              >
+                <i className="fas fa-plus-circle text-white mr-2"></i>
+                Create Asset
+              </RoleButton>
+              <button
+                className="btn-primary btn"
+                onClick={() => navigate(`/assets?facility=${facilityId}`)}
+              >
+                <i className="fas fa-boxes text-white mr-2"></i>
+                View Assets
+              </button>
+              <button
+                className="btn-primary btn"
+                onClick={() => navigate(`/facility/${facilityId}/users`)}
+              >
+                <i className="fas fa-users text-white mr-2"></i>
+                View Users
+              </button>
+              {(currentUser.data.user_type === "DistrictAdmin" ||
+                currentUser.data.user_type === "StateAdmin") && (
+                <button
+                  id="facility-delete"
+                  className="btn-danger btn"
+                  onClick={() => setOpenDeleteDialog(true)}
+                >
+                  <i className="fas fa-trash text-white mr-2"></i>
+                  Delete Facility
+                </button>
+              )}
+            </div>
           </div>
         </div>
         <div className="mt-6">
