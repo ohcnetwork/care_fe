@@ -222,8 +222,8 @@ export const FacilityHome = (props: any) => {
       StaffUserTypeIndex;
 
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
-    <div className="transition-all bg-black bg-opacity-60 h-8 left-0 right-0 -bottom-8 group-hover:bottom-0 absolute flex justify-start items-center z-10 gap-3 px-4 text-gray-300">
-      <i className="fa-solid fa-pen"></i>
+    <div className="transition-all bg-black bg-opacity-60 h-8 left-0 right-0 -bottom-8 group-hover:bottom-0 absolute flex justify-start items-center z-10 gap-3 px-4 text-gray-300 text-sm">
+      <i className="fa-solid fa-pen" />
       <span>{`${hasCoverImage ? "Edit" : "Upload a "} cover image`}</span>
     </div>
   );
@@ -392,7 +392,7 @@ export const FacilityHome = (props: any) => {
                 disableFor="readOnly"
                 buttonType="html"
               >
-                <i className="fas fa-plus text-white mr-2"></i>
+                <i className="fas fa-plus text-white mr-2" />
                 Add Details of a Patient
               </RoleButton>
 
@@ -400,7 +400,7 @@ export const FacilityHome = (props: any) => {
                 className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
-                <i className="fas fa-user-injured text-white mr-2"></i>
+                <i className="fas fa-user-injured text-white mr-2" />
                 View Patients
               </button>
             </div>
@@ -435,14 +435,23 @@ export const FacilityHome = (props: any) => {
                 disableFor="readOnly"
                 buttonType="html"
               >
-                <i className="fas fa-pencil-alt text-white mr-2"></i>
+                <i className="fas fa-pencil-alt text-white mr-2" />
                 Update Facility
               </RoleButton>
+              {!hasCoverImage && (
+                <button
+                  className="lg:hidden btn-primary btn"
+                  onClick={() => setEditCoverImage(true)}
+                >
+                  <i className="fas fa-pencil-alt text-white mr-2" />
+                  Add Cover Image
+                </button>
+              )}
               <button
                 className="btn-primary btn"
                 onClick={() => navigate(`/facility/${facilityId}/inventory`)}
               >
-                <i className="fas fa-dolly-flatbed text-white mr-2"></i>
+                <i className="fas fa-dolly-flatbed text-white mr-2" />
                 Manage Inventory
               </button>
               <RoleButton
@@ -453,7 +462,7 @@ export const FacilityHome = (props: any) => {
                 disableFor="readOnly"
                 buttonType="html"
               >
-                <i className="fas fa-map-marker-alt text-white mr-2"></i>
+                <i className="fas fa-map-marker-alt text-white mr-2" />
                 Manage Locations
               </RoleButton>
               <RoleButton
@@ -464,7 +473,7 @@ export const FacilityHome = (props: any) => {
                 disableFor="readOnly"
                 buttonType="html"
               >
-                <i className="fas fa-dolly-flatbed text-white mr-2"></i>
+                <i className="fas fa-dolly-flatbed text-white mr-2" />
                 Request Resource
               </RoleButton>
               <RoleButton
@@ -475,21 +484,21 @@ export const FacilityHome = (props: any) => {
                 disableFor="readOnly"
                 buttonType="html"
               >
-                <i className="fas fa-plus-circle text-white mr-2"></i>
+                <i className="fas fa-plus-circle text-white mr-2" />
                 Create Asset
               </RoleButton>
               <button
                 className="btn-primary btn"
                 onClick={() => navigate(`/assets?facility=${facilityId}`)}
               >
-                <i className="fas fa-boxes text-white mr-2"></i>
+                <i className="fas fa-boxes text-white mr-2" />
                 View Assets
               </button>
               <button
                 className="btn-primary btn"
                 onClick={() => navigate(`/facility/${facilityId}/users`)}
               >
-                <i className="fas fa-users text-white mr-2"></i>
+                <i className="fas fa-users text-white mr-2" />
                 View Users
               </button>
               {(currentUser.data.user_type === "DistrictAdmin" ||
@@ -499,7 +508,7 @@ export const FacilityHome = (props: any) => {
                   className="btn-danger btn"
                   onClick={() => setOpenDeleteDialog(true)}
                 >
-                  <i className="fas fa-trash text-white mr-2"></i>
+                  <i className="fas fa-trash text-white mr-2" />
                   Delete Facility
                 </button>
               )}
@@ -574,7 +583,7 @@ export const FacilityHome = (props: any) => {
               disableFor="readOnly"
               buttonType="html"
             >
-              <i className="fas fa-bed text-white mr-2"></i>
+              <i className="fas fa-bed text-white mr-2" />
               Add More Bed Types
             </RoleButton>
           </div>
@@ -590,7 +599,7 @@ export const FacilityHome = (props: any) => {
               disableFor="readOnly"
               buttonType="html"
             >
-              <i className="fas fa-user-md text-white mr-2"></i>
+              <i className="fas fa-user-md text-white mr-2" />
               Add Doctor Types
             </RoleButton>
           </div>
@@ -605,7 +614,7 @@ export const FacilityHome = (props: any) => {
               disableFor="readOnly"
               buttonType="html"
             >
-              <i className="fas fa-notes-medical text-white mr-2"></i>
+              <i className="fas fa-notes-medical text-white mr-2" />
               Add Triage
             </RoleButton>
           </div>
