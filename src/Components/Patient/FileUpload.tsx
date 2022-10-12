@@ -773,7 +773,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 ) : (
                   <div className="flex flex-col md:flex-row justify-between gap-2">
                     <div>
-                      <label className="w-full flex justify-center gap-2 items-center md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2">
+                      <label className="px-4 w-full flex justify-center gap-2 items-center md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2">
                         <InsertDriveFileIcon /> Browse
                         <input
                           title="changeFile"
@@ -786,7 +786,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <div>
                       <button
                         type="submit"
-                        className="w-full md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2"
+                        className="px-4 w-full md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2"
                         onClick={() => {
                           handleUpload({ status });
                         }}
