@@ -49,6 +49,8 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
+import { goBack } from "../../Utils/utils";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -75,7 +77,7 @@ type FacilityForm = {
   state: string;
   district: string;
   local_body: string;
-  features : string[];
+  features: string[];
   ward: string;
   kasp_empanelled: string;
   address: string;
@@ -101,7 +103,7 @@ const initForm: FacilityForm = {
   local_body: "",
   ward: "",
   kasp_empanelled: "false",
-  features : [],
+  features: [],
   address: "",
   phone_number: "",
   latitude: "",
@@ -146,8 +148,6 @@ const facilityCreateReducer = (
   }
 };
 
-const goBack = () => window.history.go(-1);
-
 export const FacilityCreate = (props: FacilityProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
@@ -162,6 +162,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
   const [ward, setWard] = useState(selectLocalBody);
+  const { width } = useWindowDimensions();
 
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
@@ -233,7 +234,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
             local_body: res.data.local_body ? res.data.local_body : "",
-            features : res.data.features || [],
+            features: res.data.features || [],
             ward: res.data.ward_object ? res.data.ward_object.id : initialWards,
             kasp_empanelled: res.data.kasp_empanelled
               ? String(res.data.kasp_empanelled)
@@ -413,7 +414,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         address: state.form.address,
         pincode: state.form.pincode,
         local_body: state.form.local_body,
-        features : state.form.features,
+        features: state.form.features,
         ward: state.form.ward,
         kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
         location:
@@ -456,7 +457,8 @@ export const FacilityCreate = (props: FacilityProps) => {
       const res = await dispatchAction(
         facilityId ? updateFacility(facilityId, data) : createFacility(data)
       );
-      if (res && res.data) {
+
+      if (res && (res.status === 200 || res.status === 201) && res.data) {
         const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!facilityId) {
@@ -470,6 +472,11 @@ export const FacilityCreate = (props: FacilityProps) => {
           });
           navigate(`/facility/${facilityId}`);
         }
+      } else {
+        if (res?.data)
+          Notification.Error({
+            msg: "Something went wrong: " + (res.data.detail || ""),
+          });
       }
       setIsLoading(false);
     }
@@ -490,6 +497,10 @@ export const FacilityCreate = (props: FacilityProps) => {
   if (isLoading) {
     return <Loading />;
   }
+
+  const extremeSmallScreenBreakpoint: number = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
   const open = Boolean(anchorEl);
   const id = open ? "map-popover" : undefined;
   return (
@@ -538,16 +549,16 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div className="">
                 <InputLabel id="features-label">Features</InputLabel>
                 <MultiSelectField
-                    data-test="facility-features"
-                    name="features"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.features}
-                    options={FACILITY_FEATURE_TYPES}
-                    onChange={(e)=>handleChange(e)}
-                    optionValue="name"
-                    errors={state.errors.features}
-                  />
+                  data-test="facility-features"
+                  name="features"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.features}
+                  options={FACILITY_FEATURE_TYPES}
+                  onChange={(e) => handleChange(e)}
+                  optionValue="name"
+                  errors={state.errors.features}
+                />
               </div>
               <div>
                 <InputLabel id="gender-label">State*</InputLabel>
@@ -681,7 +692,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
 
               <div className="md:col-span-2 grid grid-cols-1 xl:grid-cols-2 gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
                     <InputLabel
                       htmlFor="facility-oxygen-capacity"
@@ -722,7 +733,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
                     <InputLabel
                       htmlFor="facility-type-b-cylinders"
@@ -762,7 +773,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
                     <InputLabel
                       htmlFor="facility-type-c-cylinders"
@@ -802,7 +813,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
                     <InputLabel
                       htmlFor="facility-type-d-cylinders"
@@ -878,13 +889,18 @@ export const FacilityCreate = (props: FacilityProps) => {
                 </div>
               )}
             </div>
-            <div className="flex items-center mt-4 -mx-2">
+            <div
+              className={`${
+                isExtremeSmallScreen
+                  ? " grid grid-cols-1 "
+                  : " flex items-center "
+              } mt-4 -mx-2`}
+            >
               <div className="flex-1 px-2">
                 <InputLabel id="location-label">Location</InputLabel>
                 <TextInputField
                   name="latitude"
-                  label="Latitude"
-                  placeholder=""
+                  placeholder="Latitude"
                   variant="outlined"
                   margin="dense"
                   value={state.form.latitude}
@@ -924,8 +940,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <InputLabel>&nbsp;</InputLabel>
                 <TextInputField
                   name="longitude"
-                  label="Longitude"
-                  placeholder=""
+                  placeholder="Longitude"
                   variant="outlined"
                   margin="dense"
                   value={state.form.longitude}
@@ -934,23 +949,27 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-6">
-              <Button color="default" variant="contained" onClick={goBack}>
-                Cancel
-              </Button>
-              <Button
-                id="facility-save"
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                onClick={(e) => handleSubmit(e)}
-                startIcon={
-                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                }
+            <div
+              className={`${
+                isExtremeSmallScreen
+                  ? " grid grid-cols-1 "
+                  : " flex justify-between "
+              } mt-6 gap-2 `}
+            >
+              <button
+                className="btn btn-default border-2 border-grey-300"
+                onClick={() => goBack()}
               >
-                {buttonText}
-              </Button>
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                id="facility-save"
+                type="submit"
+                onClick={(e) => handleSubmit(e)}
+              >
+                <i className="mr-2 fa-regular fa-circle-check"></i> {buttonText}
+              </button>
             </div>
           </form>
         </CardContent>

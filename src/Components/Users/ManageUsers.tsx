@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -9,6 +9,8 @@ import {
   getUserList,
   getUserListFacility,
   deleteUser,
+  getDistrict,
+  partialUpdateUser,
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate, useQueryParams } from "raviger";
@@ -25,11 +27,16 @@ import classNames from "classnames";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
+import clsx from "clsx";
+import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ManageUsers() {
+  const { width } = useWindowDimensions();
+
   const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
@@ -41,7 +48,9 @@ export default function ManageUsers() {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-
+  const [districtName, setDistrictName] = useState<string | undefined>(
+    undefined
+  );
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const isSuperuser = currentUser.data.is_superuser;
@@ -61,7 +70,17 @@ export default function ManageUsers() {
     name: string;
   }>({ show: false, username: "", name: "" });
 
-  const limit = RESULTS_PER_PAGE_LIMIT;
+  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
+    show: boolean;
+    userName: string;
+    facility?: FacilityModel;
+  }>({ show: false, userName: "", facility: undefined });
+
+  const limit =
+    width >= 1280 ? RESULTS_PER_PAGE_LIMIT + 1 : RESULTS_PER_PAGE_LIMIT;
+  const extremeSmallScreenBreakpoint: number = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
@@ -86,7 +105,16 @@ export default function ManageUsers() {
         phone_number: qParams.phone_number,
         alt_phone_number: qParams.alt_phone_number,
         user_type: qParams.user_type,
+        district_id: qParams.district_id,
       };
+      if (qParams.district_id) {
+        const dis = await dispatch(getDistrict(qParams.district_id));
+        if (!status.aborted) {
+          if (dis && dis.data) {
+            setDistrictName(dis.data.name);
+          }
+        }
+      }
       const res = await dispatch(getUserList(params));
       if (!status.aborted) {
         if (res && res.data) {
@@ -106,6 +134,7 @@ export default function ManageUsers() {
       qParams.last_name,
       qParams.phone_number,
       qParams.alt_phone_number,
+      qParams.district_id,
     ]
   );
 
@@ -128,7 +157,7 @@ export default function ManageUsers() {
 
   const addUser = (
     <button
-      className="px-4 py-1 rounded-md bg-primary-500 mt-4 text-white text-lg font-semibold shadow"
+      className="px-4 py-1 w-full md:w-auto rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
       onClick={() => navigate("/user/add")}
     >
       <i className="fas fa-plus mr-2"></i>
@@ -154,13 +183,6 @@ export default function ManageUsers() {
       setUsers(updated);
     }
     setIsFacilityLoading(false);
-  };
-
-  const removeFacility = async (username: string, facility: any) => {
-    setIsFacilityLoading(true);
-    await dispatch(deleteUserFacility(username, String(facility.id)));
-    setIsFacilityLoading(false);
-    loadFacilities(username);
   };
 
   const showLinkFacilityModal = (username: string) => {
@@ -193,6 +215,14 @@ export default function ManageUsers() {
     );
   };
 
+  const hideUnlinkFacilityModal = () => {
+    setUnlinkFacilityData({
+      show: false,
+      facility: undefined,
+      userName: "",
+    });
+  };
+
   const hideLinkFacilityModal = () => {
     setLinkFacility({
       show: false,
@@ -207,14 +237,31 @@ export default function ManageUsers() {
   const handleSubmit = async () => {
     const username = userData.username;
     const res = await dispatch(deleteUser(username));
-    if (res.status >= 200) {
+    if (res?.status === 204) {
       Notification.Success({
         msg: "User deleted successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while deleting User: " + (res?.data?.detail || ""),
       });
     }
 
     setUserData({ show: false, username: "", name: "" });
-    window.location.reload();
+    fetchData({ aborted: false });
+  };
+
+  const handleUnlinkFacilitySubmit = async () => {
+    setIsFacilityLoading(true);
+    await dispatch(
+      deleteUserFacility(
+        unlinkFacilityData.userName,
+        String(unlinkFacilityData?.facility?.id)
+      )
+    );
+    setIsFacilityLoading(false);
+    loadFacilities(unlinkFacilityData.userName);
+    hideUnlinkFacilityModal();
   };
 
   const handleDelete = (user: any) => {
@@ -243,6 +290,13 @@ export default function ManageUsers() {
     );
   };
 
+  const updateHomeFacility = async (username: string, facility: any) => {
+    setIsFacilityLoading(true);
+    await dispatch(partialUpdateUser(username, { home_facility: facility.id }));
+    setIsFacilityLoading(false);
+    fetchData({ aborted: false });
+  };
+
   const showFacilities = (username: string, facilities: FacilityModel[]) => {
     if (!facilities || !facilities.length) {
       return (
@@ -262,11 +316,21 @@ export default function ManageUsers() {
             >
               <div className="flex items-center  space-x-1">
                 <div className="font-semibold">{facility.name}</div>
+                <i
+                  className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
+                  onClick={() => updateHomeFacility(username, facility)}
+                ></i>
                 <IconButton
                   size="small"
                   color="secondary"
                   disabled={isFacilityLoading}
-                  onClick={() => removeFacility(username, facility)}
+                  onClick={() =>
+                    setUnlinkFacilityData({
+                      show: true,
+                      facility: facility,
+                      userName: username,
+                    })
+                  }
                 >
                   <CloseIcon />
                 </IconButton>
@@ -282,25 +346,36 @@ export default function ManageUsers() {
   const addFacility = async (username: string, facility: any) => {
     hideLinkFacilityModal();
     setIsFacilityLoading(true);
-    await dispatch(addUserFacility(username, String(facility.id)));
+    const res = await dispatch(addUserFacility(username, String(facility.id)));
+    if (res?.status === 201) {
+      Notification.Success({
+        msg: "Facility linked successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while linking facility",
+      });
+    }
     setIsFacilityLoading(false);
     loadFacilities(username);
   };
 
   const showDelete = (user: any) => {
-    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateLabAdmin");
+    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateAdmin");
     const STATE_READ_ONLY_ADMIN_LEVEL =
       USER_TYPES.indexOf("StateReadOnlyAdmin");
     const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
     const level = USER_TYPES.indexOf(user.user_type);
     const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
     if (user.is_superuser) return true;
-    if (
-      currentUserLevel >= STATE_ADMIN_LEVEL &&
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
-    )
+
+    if (currentUserLevel >= STATE_ADMIN_LEVEL)
       return user.state_object?.id === currentUser?.data?.state;
-    if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel > level)
+    if (
+      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
+      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
+      currentUserLevel > level
+    )
       return user?.district_object?.id === currentUser?.data?.district;
     return false;
   };
@@ -310,6 +385,9 @@ export default function ManageUsers() {
   users &&
     users.length &&
     (userList = users.map((user: any) => {
+      const cur_online = moment()
+        .subtract(5, "minutes")
+        .isBefore(user.last_login);
       return (
         <div
           key={`usr_${user.id}`}
@@ -318,56 +396,81 @@ export default function ManageUsers() {
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="flex lg:flex-row gap-3 flex-col justify-between">
+                <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
                   {user.username && (
                     <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit">
                       {user.username}
                     </div>
                   )}
                   <div className="flex-shrink-0 text-sm text-gray-600 min-width-50">
-                    Last Online:{" "}
-                    <span
-                      aria-label="Online"
-                      className={
-                        "shrink-0 inline-block h-2 w-2 rounded-full " +
-                        (moment()
-                          .subtract(5, "minutes")
-                          .isBefore(user.last_login)
-                          ? "bg-primary-400"
-                          : "bg-gray-300")
-                      }
-                    ></span>
-                    <span className="pl-2">
-                      {user.last_login
-                        ? moment(user.last_login).fromNow()
-                        : "Never"}
-                    </span>
+                    {user.last_login && cur_online ? (
+                      <span>
+                        {" "}
+                        <i className="fa-solid fa-clock"></i> Currently Online
+                      </span>
+                    ) : (
+                      <>
+                        <span>
+                          <i className="fa-solid fa-clock"></i> Last Online:{" "}
+                        </span>
+                        <span
+                          aria-label="Online"
+                          className={clsx(
+                            "shrink-0 inline-block h-2 w-2 rounded-full",
+                            cur_online ? "bg-primary-400" : "bg-gray-300"
+                          )}
+                        ></span>
+                        <span className="pl-2">
+                          {user.last_login
+                            ? moment(user.last_login).fromNow()
+                            : "Never"}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
 
-                  {user.last_login &&
-                  moment().subtract(5, "minutes").isBefore(user.last_login) ? (
+                  {user.last_login && cur_online ? (
                     <i
                       className="animate-pulse text-primary-500 fas fa-circle ml-1 opacity-75"
                       aria-label="Online"
                     ></i>
                   ) : null}
+                  {showDelete(user) && (
+                    <button
+                      type="button"
+                      className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-white hover:bg-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      onClick={() => handleDelete(user)}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
 
-                <div className="flex justify-between">
+                <div
+                  className={`flex ${
+                    isExtremeSmallScreen
+                      ? " flex-wrap "
+                      : " flex-row justify-between "
+                  } md:grid md:grid-cols-4 gap-2`}
+                >
                   {user.user_type && (
-                    <UserDetails title="Role">
-                      <div className="font-semibold">{user.user_type}</div>
-                    </UserDetails>
+                    <div className="col-span-2">
+                      <UserDetails title="Role">
+                        <div className="font-semibold">{user.user_type}</div>
+                      </UserDetails>
+                    </div>
                   )}
                   {user.district_object && (
-                    <UserDetails title="District">
-                      <div className="font-semibold">
-                        {user.district_object.name}
-                      </div>
-                    </UserDetails>
+                    <div className="col-span-2">
+                      <UserDetails title="District">
+                        <div className="font-semibold">
+                          {user.district_object.name}
+                        </div>
+                      </UserDetails>
+                    </div>
                   )}
                 </div>
                 {user.local_body_object && (
@@ -377,14 +480,22 @@ export default function ManageUsers() {
                     </div>
                   </UserDetails>
                 )}
-                <div className="flex justify-between">
+                <div
+                  className={`${
+                    isExtremeSmallScreen
+                      ? "flex flex-wrap "
+                      : "grid grid-cols-4 "
+                  }`}
+                >
                   {user.created_by && (
-                    <UserDetails title="Created by">
-                      <div className="font-semibold">{user.created_by}</div>
-                    </UserDetails>
+                    <div className="col-span-2">
+                      <UserDetails title="Created by">
+                        <div className="font-semibold">{user.created_by}</div>
+                      </UserDetails>
+                    </div>
                   )}
                   {user.phone_number && (
-                    <div className="mt-2 bg-gray-50 border-t px-6 py-2">
+                    <div className="mt-2 bg-gray-50 border-t px-6 py-2 col-span-2">
                       <div className="flex py-4 justify-between">
                         <div>
                           <div className="text-gray-500 leading-relaxed">
@@ -400,34 +511,34 @@ export default function ManageUsers() {
                       </div>
                     </div>
                   )}
+                  {user.username && (
+                    <div className="col-span-2">
+                      <UserDetails title="Home Facility">
+                        <span className="font-semibold block">
+                          {user.home_facility_object?.name ||
+                            "No Home Facility"}
+                        </span>
+                      </UserDetails>
+                    </div>
+                  )}
+                  {user.username && user.facilities && (
+                    <div className="col-span-4">
+                      <UserDetails title="Linked Facilities">
+                        {showFacilities(user.username, user.facilities)}
+                      </UserDetails>
+                    </div>
+                  )}
+                  {user.username && !user.facilities && (
+                    <a
+                      onClick={() => loadFacilities(user.username)}
+                      className={`col-span-4 mt-2 ${facilityClassname}`}
+                      href="#"
+                    >
+                      Click here to show linked facilities
+                    </a>
+                  )}
                 </div>
-
-                {user.username && (
-                  <UserDetails title="Facilities">
-                    {user.facilities &&
-                      showFacilities(user.username, user.facilities)}
-                    {!user.facilities && (
-                      <a
-                        onClick={() => loadFacilities(user.username)}
-                        className={`inline-block ${facilityClassname}`}
-                        href="#"
-                      >
-                        Click here to show
-                      </a>
-                    )}
-                  </UserDetails>
-                )}
               </div>
-
-              {showDelete(user) && (
-                <button
-                  type="button"
-                  className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                  onClick={() => handleDelete(user)}
-                >
-                  Delete
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -513,7 +624,7 @@ export default function ManageUsers() {
           <div>
             <div className="flex items-start mb-2">
               <button
-                className="btn btn-primary-ghost"
+                className="btn btn-primary-ghost w-full"
                 onClick={() => setShowFilters((show) => !show)}
               >
                 <svg
@@ -562,7 +673,7 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <div className="flex mt-2 mx-6 flex-wrap gap-2 items-center">
+      <div className="flex my-2 mx-6 flex-wrap gap-2 items-center">
         {badge("Username", qParams.username, "username")}
         {badge("First Name", qParams.first_name, "first_name")}
         {badge("Last Name", qParams.last_name, "last_name")}
@@ -571,13 +682,16 @@ export default function ManageUsers() {
           : null}
         {qParams.alt_phone_number?.trim()
           ? badge(
-              "Alternate Phone Number",
+              "WhatsApp Phone Number",
               qParams.alt_phone_number,
               "alt_phone_number"
             )
           : null}
         {qParams.user_type
           ? badge("Role", qParams.user_type, "user_type")
+          : null}
+        {qParams.district_id
+          ? badge("District", districtName, "district_id")
           : null}
       </div>
 
@@ -589,6 +703,14 @@ export default function ManageUsers() {
           name={userData.name}
           handleCancel={handleCancel}
           handleOk={handleSubmit}
+        />
+      )}
+      {unlinkFacilityData.show && (
+        <UnlinkFacilityDialog
+          facilityName={unlinkFacilityData.facility?.name || ""}
+          userName={unlinkFacilityData.userName}
+          handleCancel={hideUnlinkFacilityModal}
+          handleOk={handleUnlinkFacilitySubmit}
         />
       )}
     </div>

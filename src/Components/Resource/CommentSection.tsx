@@ -4,8 +4,8 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceComments, addResourceComments } from "../../Redux/actions";
 import { Button, CircularProgress } from "@material-ui/core";
 import * as Notification from "../../Utils/Notifications.js";
-import moment from "moment";
 import Pagination from "../Common/Pagination";
+import { formatDate } from "../../Utils/utils";
 
 interface CommentSectionProps {
   id: string;
@@ -74,7 +74,7 @@ const CommentSection = (props: CommentSectionProps) => {
       <textarea
         rows={3}
         placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4"
+        className="mt-4 border border-gray-500 rounded-lg p-4 focus:border-primary-600 focus:ring-primary-600"
         value={commentBox}
         onChange={(e) => setCommentBox(e.target.value)}
       />
@@ -100,7 +100,7 @@ const CommentSection = (props: CommentSectionProps) => {
               </div>
               <div className="mt-3">
                 <span className="text-xs text-gray-500">
-                  {moment(comment.modified_date).format("LLL") || "-"}
+                  {formatDate(comment.modified_date) || "-"}
                 </span>
               </div>
               <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">

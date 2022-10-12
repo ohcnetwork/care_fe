@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import get from "lodash.get";
 import { useSelector } from "react-redux";
 import { Link, navigate, usePath } from "raviger";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
-import { IconButton, useTheme } from "@material-ui/core";
+import { IconButton } from "@material-ui/core";
 import Drawer from "@material-ui/core/Drawer";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import NotificationsList from "../Notifications/NotificationsList";
 import { Close } from "@material-ui/icons";
 import { PREFERENCE_SIDEBAR_KEY, SIDEBAR } from "../../Common/constants";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 const LOGO = process.env.REACT_APP_LIGHT_LOGO;
 const LOGO_COLLAPSE =
@@ -57,11 +57,6 @@ const menus = [
     icon: "fas fa-users",
   },
   {
-    title: "Profile",
-    link: "/user/profile",
-    icon: "fas fa-user-circle",
-  },
-  {
     title: "Notice Board",
     link: "/notice_board/",
     icon: "fas fa-comment-alt",
@@ -89,8 +84,9 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     return url?.includes(tag) ? tag : acc;
   }, "");
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down(768));
+  const { width } = useWindowDimensions();
+  const mobileBreakpoint: number = 768;
+  const isMobile = width <= mobileBreakpoint ? true : false;
   const [enableCollapse, setEnableCollapse] = useState(
     localStorage.getItem(PREFERENCE_SIDEBAR_KEY) === SIDEBAR.COLLAPSED
   );
@@ -237,14 +233,20 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
           )}
         >
           <div className="shrink-0 flex items-center justify-center w-10">
-            <div className="flex items-center justify-center bg-white rounded-full w-8 h-8">
+            <Link
+              href="/user/profile"
+              className="flex items-center justify-center bg-white rounded-full w-8 h-8"
+            >
               <i className="block fas fa-user text-base text-primary-800"></i>
-            </div>
+            </Link>
           </div>
           <div className="ml-3 overflow-hidden whitespace-nowrap">
-            <p className="text-base leading-5 font-medium text-white mb-1">
+            <Link
+              href="/user/profile"
+              className="text-base leading-5 font-medium text-white mb-1"
+            >
               {loginUser}
-            </p>
+            </Link>
             <p
               onClick={handleSignOut}
               className="cursor-pointer text-sm leading-4 font-medium text-primary-200 group-hover:text-primary-100 transition ease-in-out duration-150"

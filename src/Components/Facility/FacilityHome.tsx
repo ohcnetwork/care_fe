@@ -1,4 +1,4 @@
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
@@ -7,7 +7,11 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
-import { BED_TYPES, DOCTOR_SPECIALIZATION, FACILITY_FEATURE_TYPES } from "../../Common/constants";
+import {
+  BED_TYPES,
+  DOCTOR_SPECIALIZATION,
+  FACILITY_FEATURE_TYPES,
+} from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getPermittedFacility,
@@ -38,7 +42,6 @@ export const FacilityHome = (props: any) => {
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
-  const [facilityNotFound, setFacilityNotFound] = useState(false);
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
@@ -78,7 +81,7 @@ export const FacilityHome = (props: any) => {
           }
         }
       } else {
-        setFacilityNotFound(true);
+        navigate("/not-found");
         setIsLoading(false);
       }
     },
@@ -98,9 +101,13 @@ export const FacilityHome = (props: any) => {
 
   const handleDeleteSubmit = async () => {
     const res = await dispatch(deleteFacility(facilityId));
-    if (res && res.status == 204) {
+    if (res?.status === 204) {
       Notification.Success({
         msg: "Facility deleted successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while deleting Facility: " + (res?.data?.detail || ""),
       });
     }
     navigate("/facility");
@@ -112,36 +119,6 @@ export const FacilityHome = (props: any) => {
   if (isLoading) {
     return <Loading />;
   }
-
-  if (facilityNotFound) {
-    return (
-      <div className="flex justify-center text-center items-center h-screen">
-        <div className="text-center error-page-wrap">
-          <div>
-            <div className="w-28  -rotate-45 mx-auto relative top-14">
-              <div className="bg-gray-900 h-1 w-full"></div>
-              <div className="bg-gray-100 h-1 w-full"></div>
-            </div>
-            <i className="fas fa-hospital text-6xl my-4"></i>
-          </div>
-
-          <h1>Facility Not Found</h1>
-          <p>
-            A facility with ID: {facilityId}, does not exist!
-            <br />
-            <br />
-            <Link
-              href="/"
-              className="rounded-lg px-4 py-2 inline-block bg-primary-600 text-white hover:text-white hover:bg-primary-700"
-            >
-              Return to CARE
-            </Link>
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   let capacityList: any = null;
   if (!capacityData || !capacityData.length) {
     capacityList = (
@@ -155,8 +132,16 @@ export const FacilityHome = (props: any) => {
         return data.room_type === x.id;
       });
       if (res) {
+        const removeCurrentBedType = (bedTypeId: number | undefined) => {
+          setCapacityData((state) => state.filter((i) => i.id !== bedTypeId));
+        };
         return (
-          <BedTypeCard facilityId={facilityId} key={`bed_${res.id}`} {...res} />
+          <BedTypeCard
+            facilityId={facilityId}
+            key={`bed_${res.id}`}
+            {...res}
+            removeBedType={removeCurrentBedType}
+          />
         );
       }
     });
@@ -236,8 +221,8 @@ export const FacilityHome = (props: any) => {
         open={openDeleteDialog}
         onClose={handleDeleteClose}
       >
-        <DialogTitle className="flex justify-center bg-primary-100">
-          Are you sure you want to delete {facilityData.name || "Facility"}
+        <DialogTitle className="flex justify-center bg-red-100">
+          Are you sure you want to delete {facilityData.name || "Facility"}?
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -245,20 +230,25 @@ export const FacilityHome = (props: any) => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <button onClick={handleDeleteClose} className="btn btn-primary">
-            Cancel
-          </button>
-          <button
-            onClick={handleDeleteSubmit}
-            id="facility-delete-confirm"
-            className="btn btn-danger"
-          >
-            Delete
-          </button>
+          <div className="flex flex-col md:flex-row gap-2 w-full justify-between">
+            <button
+              onClick={handleDeleteClose}
+              className="btn btn-primary w-full md:w-auto"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteSubmit}
+              id="facility-delete-confirm"
+              className="btn btn-danger w-full md:w-auto"
+            >
+              Delete
+            </button>
+          </div>
         </DialogActions>
       </Dialog>
       <div className="bg-white rounded-lg p-3 md:p-6 shadow">
-        <div className="md:flex justify-between gap-2">
+        <div className="lg:flex justify-between gap-2">
           <div className="md:flex flex-col justify-between">
             <div className="flex flex-col flex-1 gap-3">
               <div>
@@ -288,16 +278,15 @@ export const FacilityHome = (props: any) => {
                         </a>
                       </div>
                     </div>
-                    
                   </div>
                   <div className="lg:flex-1 min-w-[300px] md:flex flex-col">
                     <div className="mb-4">
                       <h1 className="text-lg font-bold">Local Body</h1>
-                      <p className="text-lg">
+                      <p className="text-lg w-2/3 md:w-full">
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex flex-col md:flex-row gap-4">
                       <div>
                         <h1 className="text-lg font-bold">Ward</h1>
                         <p className="text-lg">
@@ -319,13 +308,33 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="flex items-center gap-3 mt-4">
               <div>
-                <h1 className="text-lg font-bold">Features</h1>
+                {facilityData.features?.some((feature) =>
+                  FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
+                ) && <h1 className="text-lg font-bold">Features</h1>}
                 <div className="flex gap-2 flex-wrap mt-2">
-                  {facilityData.features?.map((feature, i)=>(
-                    <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm">
-                      {FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
-                    </div>
-                  ))}
+                  {facilityData.features?.map(
+                    (feature, i) =>
+                      FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
+                        <div
+                          key={i}
+                          className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm"
+                        >
+                          <i
+                            className={`fas fa-${
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0]?.icon
+                            }`}
+                          />{" "}
+                          &nbsp;
+                          {
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0]?.name
+                          }
+                        </div>
+                      )
+                  )}
                 </div>
               </div>
             </div>

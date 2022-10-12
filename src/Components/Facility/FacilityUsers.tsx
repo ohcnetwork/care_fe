@@ -22,6 +22,7 @@ import UserDeleteDialog from "../Users/UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
 import UserDetails from "../Common/UserDetails";
+import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -38,7 +39,10 @@ export default function FacilityUsers(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState(0);
-  const [facilityName, setFacilityName] = useState<string>("");
+  const [facilityData, setFacilityData] = useState({
+    name: "",
+    district_object_id: 0,
+  });
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -59,16 +63,27 @@ export default function FacilityUsers(props: any) {
     name: string;
   }>({ show: false, username: "", name: "" });
 
+  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
+    show: boolean;
+    userName: string;
+    facility?: FacilityModel;
+  }>({ show: false, userName: "", facility: undefined });
+
   const limit = RESULTS_PER_PAGE_LIMIT;
 
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
         const res = await dispatch(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
+        setFacilityData({
+          name: res?.data?.name || "",
+          district_object_id: res?.data?.district_object?.id || 0,
+        });
       } else {
-        setFacilityName("");
+        setFacilityData({
+          name: "",
+          district_object_id: 0,
+        });
       }
     }
     fetchFacilityName();
@@ -77,7 +92,10 @@ export default function FacilityUsers(props: any) {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getFacilityUsers(facilityId));
+      const res = await dispatch(
+        getFacilityUsers(facilityId, { offset, limit })
+      );
+
       if (!status.aborted) {
         if (res && res.data) {
           setUsers(res.data.results);
@@ -86,7 +104,7 @@ export default function FacilityUsers(props: any) {
         setIsLoading(false);
       }
     },
-    [dispatch, facilityId]
+    [dispatch, facilityId, offset, limit]
   );
 
   useAbortableEffect(
@@ -122,17 +140,18 @@ export default function FacilityUsers(props: any) {
     setIsFacilityLoading(false);
   };
 
-  const removeFacility = async (username: string, facility: any) => {
-    setIsFacilityLoading(true);
-    await dispatch(deleteUserFacility(username, String(facility.id)));
-    setIsFacilityLoading(false);
-    loadFacilities(username);
-  };
-
   const showLinkFacilityModal = (username: string) => {
     setLinkFacility({
       show: true,
       username,
+    });
+  };
+
+  const hideUnlinkFacilityModal = () => {
+    setUnlinkFacilityData({
+      show: false,
+      facility: undefined,
+      userName: "",
     });
   };
 
@@ -143,6 +162,19 @@ export default function FacilityUsers(props: any) {
     });
   };
 
+  const handleUnlinkFacilitySubmit = async () => {
+    setIsFacilityLoading(true);
+    await dispatch(
+      deleteUserFacility(
+        unlinkFacilityData.userName,
+        String(unlinkFacilityData?.facility?.id)
+      )
+    );
+    setIsFacilityLoading(false);
+    loadFacilities(unlinkFacilityData.userName);
+    hideUnlinkFacilityModal();
+  };
+
   const handleCancel = () => {
     setUserData({ show: false, username: "", name: "" });
   };
@@ -150,14 +182,18 @@ export default function FacilityUsers(props: any) {
   const handleSubmit = async () => {
     const username = userData.username;
     const res = await dispatch(deleteUser(username));
-    if (res.status >= 200) {
+    if (res?.status === 204) {
       Notification.Success({
         msg: "User deleted successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while deleting User: " + (res?.data?.detail || ""),
       });
     }
 
     setUserData({ show: false, username: "", name: "" });
-    window.location.reload();
+    fetchData({ aborted: false });
   };
 
   const handleDelete = (user: any) => {
@@ -209,7 +245,13 @@ export default function FacilityUsers(props: any) {
                   size="small"
                   color="secondary"
                   disabled={isFacilityLoading}
-                  onClick={() => removeFacility(username, facility)}
+                  onClick={() =>
+                    setUnlinkFacilityData({
+                      show: true,
+                      facility: facility,
+                      userName: username,
+                    })
+                  }
                 >
                   <CloseIcon />
                 </IconButton>
@@ -218,6 +260,14 @@ export default function FacilityUsers(props: any) {
           ))}
         </div>
         {showLinkFacility(username)}
+        {unlinkFacilityData.show && (
+          <UnlinkFacilityDialog
+            facilityName={unlinkFacilityData.facility?.name || ""}
+            userName={unlinkFacilityData.userName}
+            handleCancel={hideUnlinkFacilityModal}
+            handleOk={handleUnlinkFacilitySubmit}
+          />
+        )}
       </div>
     );
   };
@@ -231,20 +281,22 @@ export default function FacilityUsers(props: any) {
   };
 
   const showDelete = (user: any) => {
-    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateLabAdmin");
+    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateAdmin");
     const STATE_READ_ONLY_ADMIN_LEVEL =
       USER_TYPES.indexOf("StateReadOnlyAdmin");
     const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
     const level = USER_TYPES.indexOf(user.user_type);
     const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
     if (user.is_superuser) return true;
-    if (
-      currentUserLevel >= STATE_ADMIN_LEVEL &&
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
-    )
+
+    if (currentUserLevel >= STATE_ADMIN_LEVEL)
       return user.state_object?.id === currentUser?.data?.state;
-    if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel > level)
-      return user?.district_object?.id === currentUser?.data?.district;
+    if (
+      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
+      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
+      currentUserLevel > level
+    )
+      return facilityData?.district_object_id === currentUser?.data?.district;
     return false;
   };
 
@@ -297,6 +349,15 @@ export default function FacilityUsers(props: any) {
                       aria-label="Online"
                     ></i>
                   ) : null}
+                  {showDelete(user) && (
+                    <button
+                      type="button"
+                      className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      onClick={() => handleDelete(user)}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex justify-between">
@@ -361,16 +422,6 @@ export default function FacilityUsers(props: any) {
                   </UserDetails>
                 )}
               </div>
-
-              {showDelete(user) && (
-                <button
-                  type="button"
-                  className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                  onClick={() => handleDelete(user)}
-                >
-                  Delete
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -398,7 +449,6 @@ export default function FacilityUsers(props: any) {
   } else if (users && users.length === 0) {
     manageUsers = (
       <div>
-        {userTypes.length}
         <div>
           <h5> No Users Found</h5>
         </div>
@@ -416,7 +466,7 @@ export default function FacilityUsers(props: any) {
         />
       )}
       <PageTitle
-        title={`Users - ${facilityName}`}
+        title={`Users - ${facilityData?.name}`}
         hideBack={true}
         className="mx-3 md:mx-8"
         breadcrumbs={false}

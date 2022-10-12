@@ -7,10 +7,10 @@ import {
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
-import { useCallback, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -25,6 +25,7 @@ import {
   getDistrictByState,
   getLocalbodyByDistrict,
   getStates,
+  getUserDetails,
   getUserListFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
@@ -34,12 +35,13 @@ import {
   PhoneNumberField,
   SelectField,
   TextInputField,
-  MultiSelectField,
   CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
-import HelpToolTip from "../Common/utils/HelpToolTip";
-import { Cancel, CheckCircle } from "@material-ui/icons";
+import clsx from "clsx";
+import { goBack } from "../../Utils/utils";
+import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
+
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -68,6 +70,7 @@ const initForm: any = {
   password: "",
   c_password: "",
   facilities: [],
+  home_facility: null,
   username: "",
   first_name: "",
   last_name: "",
@@ -110,10 +113,6 @@ const user_create_reducer = (state = initialState, action: any) => {
   }
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
-
 export const UserAdd = (props: UserProps) => {
   const dispatchAction: any = useDispatch();
   const { userId } = props;
@@ -134,6 +133,40 @@ export const UserAdd = (props: UserProps) => {
   >([]);
   const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
+  const [usernameInput, setUsernameInput] = useState("");
+
+  const userExistsEnums = {
+    idle: 0,
+    checking: 1,
+    exists: 2,
+    avaliable: 3,
+  };
+
+  const [usernameExists, setUsernameExists] = useState<number>(0);
+
+  const checkUsername = async (username: string) => {
+    setUsernameExists(userExistsEnums.checking);
+    const userDetails = await dispatchAction(getUserDetails(username), true);
+    setUsernameExists(
+      userDetails.status === 404
+        ? userExistsEnums.avaliable
+        : userExistsEnums.exists
+    );
+  };
+
+  useEffect(() => {
+    setUsernameExists(userExistsEnums.idle);
+    if (
+      usernameInput.length > 1 &&
+      !(state.form.username?.length < 2) &&
+      /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
+    ) {
+      let timeout = setTimeout(() => {
+        checkUsername(usernameInput);
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [usernameInput]);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -146,7 +179,6 @@ export const UserAdd = (props: UserProps) => {
   const userIndex = USER_TYPES.indexOf(userType);
 
   const defaultAllowedUserTypes = USER_TYPES.slice(0, userIndex + 1);
-
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : userType === "StaffReadOnly"
@@ -178,7 +210,17 @@ export const UserAdd = (props: UserProps) => {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
         if (districtList) {
-          setDistricts([...initialDistricts, ...districtList.data]);
+          if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
+            setDistricts([
+              ...initialDistricts,
+              {
+                id: currentUser.data.district,
+                name: currentUser.data.district_object.name,
+              },
+            ]);
+          } else {
+            setDistricts([...initialDistricts, ...districtList.data]);
+          }
         }
         setIsDistrictLoading(false);
       } else {
@@ -197,7 +239,17 @@ export const UserAdd = (props: UserProps) => {
         );
         setIsLocalbodyLoading(false);
         if (localBodyList) {
-          setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+          if (userIndex <= USER_TYPES.indexOf("LocalBodyAdmin")) {
+            setLocalBody([
+              ...initialLocalbodies,
+              {
+                id: currentUser.data.local_body,
+                name: currentUser.data.local_body_object.name,
+              },
+            ]);
+          } else {
+            setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+          }
         }
       } else {
         setLocalBody(selectDistrict);
@@ -206,46 +258,22 @@ export const UserAdd = (props: UserProps) => {
     [dispatchAction]
   );
 
-  // const fetchData = useCallback(
-  //   async (status: statusType) => {
-  //     if (userId) {
-  //       setIsLoading(true);
-  //       const res = await dispatchAction(getFacility(userId));
-  //       if (!status.aborted && res.data) {
-  //         const formData = {
-  //           facility_type: res.data.facility_type,
-  //           name: res.data.name,
-  //           state: res.data.state ? res.data.state : "",
-  //           district: res.data.district ? res.data.district : "",
-  //           local_body: res.data.local_body ? res.data.local_body : "",
-  //           address: res.data.address,
-  //           phone_number: res.data.phone_number,
-  //           latitude: res.data.location ? res.data.location.latitude : "",
-  //           longitude: res.data.location ? res.data.location.longitude : "",
-  //           oxygen_capacity: res.data.oxygen_capacity
-  //             ? res.data.oxygen_capacity
-  //             : ""
-  //         };
-  //         dispatch({ type: "set_form", form: formData });
-  //         Promise.all([
-  //           fetchDistricts(res.data.state),
-  //           fetchLocalBody(res.data.district)
-  //         ]);
-  //       } else {
-  //         navigate(`/facility/${userId}`);
-  //       }
-  //       setIsLoading(false);
-  //     }
-  //   },
-  //   [dispatchAction, fetchDistricts, fetchLocalBody, userId]
-  // );
-
   const fetchStates = useCallback(
     async (status: statusType) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        setStates([...initialStates, ...statesRes.data.results]);
+        if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
+          setStates([
+            ...initialStates,
+            {
+              id: currentUser.data.state,
+              name: currentUser.data.state_object.name,
+            },
+          ]);
+        } else {
+          setStates([...initialStates, ...statesRes.data.results]);
+        }
       }
       setIsStateLoading(false);
     },
@@ -266,9 +294,6 @@ export const UserAdd = (props: UserProps) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      // if (userId) {
-      //   fetchData(status);
-      // }
       fetchStates(status);
       if (userType === "Staff" || userType === "StaffReadOnly") {
         fetchFacilities(status);
@@ -287,6 +312,14 @@ export const UserAdd = (props: UserProps) => {
     if (name === "state") {
       form["district"] = "";
     }
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleChangeHomeFacility = (e: any) => {
+    const { value, name } = e.target;
+    const newValue = value === "" ? null : value;
+    const form = { ...state.form };
+    form[name] = newValue;
     dispatch({ type: "set_form", form });
   };
 
@@ -315,13 +348,6 @@ export const UserAdd = (props: UserProps) => {
     form.facilities = selected
       ? (selected as FacilityModel[]).map((i) => i.id)
       : [];
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleMultiSelect = (event: any) => {
-    const { name, value } = event.target;
-    const form = { ...state.form };
-    form[name] = value;
     dispatch({ type: "set_form", form });
   };
 
@@ -374,6 +400,9 @@ export const UserAdd = (props: UserProps) => {
           } else if (!validateUsername(state.form[field])) {
             errors[field] =
               "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
+            invalidForm = true;
+          } else if (usernameExists !== userExistsEnums.avaliable) {
+            errors[field] = "This username already exists";
             invalidForm = true;
           }
           return;
@@ -484,6 +513,7 @@ export const UserAdd = (props: UserProps) => {
         gender: state.form.gender,
         password: state.form.password,
         facilities: state.form.facilities ? state.form.facilities : undefined,
+        home_facility: state.form.home_facility ?? undefined,
         username: state.form.username,
         first_name: state.form.first_name ? state.form.first_name : undefined,
         last_name: state.form.last_name ? state.form.last_name : undefined,
@@ -501,9 +531,15 @@ export const UserAdd = (props: UserProps) => {
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
       };
+
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
-      if (res && (res.data || res.data === "") && res.status >= 200 && res.status < 300) {
+      if (
+        res &&
+        (res.data || res.data === "") &&
+        res.status >= 200 &&
+        res.status < 300
+      ) {
         // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
@@ -527,16 +563,37 @@ export const UserAdd = (props: UserProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={headerText} />
+      <PageTitle
+        title={headerText}
+        componentRight={
+          <Link
+            href="https://school.coronasafe.network/targets/12953"
+            className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
+            target="_blank"
+          >
+            <i className="fas fa-info-circle" /> &nbsp;Need Help?
+          </Link>
+        }
+        justifyContents="justify-between"
+      />
 
       <Card className="mt-4">
-        <HelpToolTip
-          text="Need help? Go to the docs "
-          link="https://school.coronasafe.network/targets/12953"
-        />
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <InputLabel>Facilities</InputLabel>
+                <FacilitySelect
+                  multiple={true}
+                  name="facilities"
+                  selected={selectedFacility}
+                  setSelected={setFacility}
+                  district={currentUser.data.district}
+                  errors={state.errors.facilities}
+                  showAll={false}
+                />
+              </div>
+
               <div>
                 <InputLabel>User Type*</InputLabel>
                 <SelectField
@@ -551,9 +608,26 @@ export const UserAdd = (props: UserProps) => {
                   errors={state.errors.user_type}
                 />
               </div>
+              <div>
+                <InputLabel>Home Facility</InputLabel>
+                <SelectField
+                  name="home_facility"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.home_facility}
+                  options={[
+                    { id: "", name: "Select" },
+                    ...(selectedFacility ?? []),
+                  ]}
+                  optionValue="name"
+                  onChange={handleChangeHomeFacility}
+                  errors={state.errors.home_facility}
+                />
+              </div>
 
               <div>
                 <PhoneNumberField
+                  placeholder="Phone Number"
                   label="Phone Number*"
                   value={state.form.phone_number}
                   onChange={(value: any) =>
@@ -575,6 +649,7 @@ export const UserAdd = (props: UserProps) => {
 
               <div>
                 <PhoneNumberField
+                  placeholder="WhatsApp Phone Number"
                   label="Whatsapp Number"
                   value={state.form.alt_phone_number}
                   onChange={(value: any) =>
@@ -586,29 +661,6 @@ export const UserAdd = (props: UserProps) => {
                 />
               </div>
 
-              <div className="md:col-span-2">
-                <InputLabel>Facilities</InputLabel>
-                {userType === "Staff" || userType === "StaffReadOnly" ? (
-                  <MultiSelectField
-                    name="facilities"
-                    variant="outlined"
-                    value={state.form.facilities}
-                    options={current_user_facilities}
-                    onChange={handleMultiSelect}
-                    optionValue="name"
-                    errors={state.errors.facilities}
-                  />
-                ) : (
-                  <FacilitySelect
-                    multiple={true}
-                    name="facilities"
-                    selected={selectedFacility}
-                    setSelected={setFacility}
-                    errors={state.errors.facilities}
-                  />
-                )}
-              </div>
-
               <div>
                 <InputLabel>Username*</InputLabel>
                 <TextInputField
@@ -617,31 +669,75 @@ export const UserAdd = (props: UserProps) => {
                   autoComplete="new-username"
                   variant="outlined"
                   margin="dense"
-                  onChange={handleChange}
+                  value={usernameInput}
+                  onChange={(e) => {
+                    handleChange(e);
+                    setUsernameInput(e.target.value);
+                  }}
                   errors={state.errors.username}
                   onFocus={() => setUsernameInputInFocus(true)}
                   onBlur={() => setUsernameInputInFocus(false)}
                 />
-
                 {usernameInputInFocus && (
                   <div className="pl-2 text-small text-gray-500">
                     <div>
+                      {usernameExists !== userExistsEnums.idle && (
+                        <>
+                          {usernameExists === userExistsEnums.checking ? (
+                            <span>
+                              <i className="fas fa-circle-dot" /> checking...
+                            </span>
+                          ) : usernameExists === userExistsEnums.exists ? (
+                            <span className="text-red-500">
+                              <i className="fas fa-circle-xmark text-red-500" />{" "}
+                              User already exists
+                            </span>
+                          ) : (
+                            usernameExists === userExistsEnums.avaliable && (
+                              <span className="text-primary-500">
+                                <i className="fas fa-circle-check text-green-500" />{" "}
+                                Available!
+                              </span>
+                            )
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <div>
                       {state.form.username?.length < 2 ? (
-                        <Cancel fontSize="inherit" color="error" />
+                        <i className="fas fa-circle-xmark text-red-500" />
                       ) : (
-                        <CheckCircle fontSize="inherit" color="primary" />
+                        <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
-                      username should be atleast 2 characters long
+                      <span
+                        className={clsx(
+                          state.form.username?.length < 2
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Username should be atleast 2 characters long
+                      </span>
                     </div>
                     <div>
                       {!/[^.@+_-]/.test(
                         state.form.username[state.form.username?.length - 1]
                       ) ? (
-                        <Cancel fontSize="inherit" color="error" />
+                        <i className="fas fa-circle-xmark text-red-500" />
                       ) : (
-                        <CheckCircle fontSize="inherit" color="primary" />
+                        <i className="fas fa-circle-check text-green-500" />
                       )}{" "}
-                      {"username can't end with ^ . @ + _ -"}
+                      <span
+                        className={clsx(
+                          !/[^.@+_-]/.test(
+                            state.form.username[state.form.username?.length - 1]
+                          )
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Username can't end with ^ . @ + _ -
+                      </span>
                     </div>
                   </div>
                 )}
@@ -650,6 +746,7 @@ export const UserAdd = (props: UserProps) => {
               <div>
                 <InputLabel>Date of birth*</InputLabel>
                 <DateInputField
+                  name="dob"
                   fullWidth={true}
                   value={state.form.date_of_birth}
                   onChange={(date) => handleDateChange(date, "date_of_birth")}
@@ -805,12 +902,18 @@ export const UserAdd = (props: UserProps) => {
                 </div>
               )}
             </div>
-            <div className="flex justify-between mt-4">
-              <Button color="default" variant="contained" onClick={goBack}>
+            <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
+              <Button
+                color="default"
+                variant="contained"
+                onClick={() => goBack()}
+              >
                 Cancel
               </Button>
               <Button
                 color="primary"
+                fullWidth
+                className="w-full md:w-auto"
                 variant="contained"
                 type="submit"
                 style={{ marginLeft: "auto" }}

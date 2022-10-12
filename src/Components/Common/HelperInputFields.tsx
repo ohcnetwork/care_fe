@@ -77,17 +77,7 @@ type ActionTextFieldProps = TextFieldPropsExtended & {
   actionIcon?: React.ReactElement;
   action?: () => void;
 };
-// type Option = { text: string; score: number };
-// interface InputProps {
-//   options: Array<Option>;
-//   onChange: (
-//     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-//     index: number
-//   ) => void;
-//   handleDeleteOption: (index: number) => void;
-//   errors: Array<Option>;
-//   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-// }
+
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
   onChange: (
@@ -101,13 +91,6 @@ interface DateInputFieldProps extends DatePickerProps {
   disabled?: boolean;
   margin?: "none" | "dense" | "normal";
 }
-// interface TimeInputFieldProps {
-//   value: string;
-//   onChange: (
-//     date: MaterialUiPickersDate,
-//     value?: string | null | undefined
-//   ) => void;
-// }
 
 interface CheckboxProps extends Omit<FormControlLabelProps, "control"> {
   label: string;
@@ -280,9 +263,17 @@ export const TimeInputField = (props: any) => {
   );
 };
 
-export const ErrorHelperText = (props: { error: string | number }) => {
+export const ErrorHelperText = (props: { error?: string }) => {
   const { error } = props;
-  return <div className="error-text">{error}</div>;
+  return (
+    <span
+      className={`error-text mt-2 ml-1 transition-all duration-300 ${
+        error ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      {error}
+    </span>
+  );
 };
 
 export const ShowRadioOptions = (props: OptionsProps) => {
@@ -496,9 +487,28 @@ export const CheckboxField = (props: CheckboxProps) => {
   );
 };
 
-export const AutoCompleteMultiField = (props: any) => {
-  const { id, options, label, variant, placeholder, errors, onChange, value } =
-    props;
+interface AutoCompleteMultiFieldProps {
+  id: string;
+  options: Array<any>;
+  label: string;
+  variant: string;
+  placeholder: string;
+  errors?: string;
+  value: any;
+  onChange: (e: any, selected: any) => void;
+}
+
+export const AutoCompleteMultiField = (props: AutoCompleteMultiFieldProps) => {
+  const {
+    id,
+    options,
+    label,
+    variant,
+    placeholder,
+    errors = "",
+    onChange,
+    value,
+  } = props;
   return (
     <>
       <Autocomplete
@@ -523,8 +533,36 @@ export const AutoCompleteMultiField = (props: any) => {
   );
 };
 
-export const AutoCompleteAsyncField = (props: any) => {
+interface AutoCompleteAsyncFieldProps {
+  multiple?: boolean;
+  className?: string;
+  autoSelect?: boolean;
+  margin?: string;
+  variant: string;
+  label?: string;
+  onSearch?: (e: any) => void;
+  onChange: (e: any, selected: any) => void;
+  options: Array<any>;
+  getOptionSelected: (option: any, value: any) => boolean;
+  getOptionLabel: (option: any) => string;
+  renderOption: (option: any) => JSX.Element;
+  placeholder: string;
+  noOptionsText?: string;
+  value?: any;
+  defaultValue?: any;
+  loading?: boolean;
+  errors?: string;
+  onBlur?: (e: any) => void;
+  onOpen?: (e: any) => void;
+  filterOptions?: (options: any) => any;
+  name?: string;
+  freeSolo?: boolean;
+  disabled?: boolean;
+}
+
+export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
   const {
+    name,
     margin,
     options,
     label,
@@ -533,29 +571,36 @@ export const AutoCompleteAsyncField = (props: any) => {
     renderOption,
     variant,
     placeholder,
-    errors,
+    errors = "",
     onChange,
     onSearch,
     value,
+    defaultValue,
     loading,
+    onBlur,
     onOpen,
     noOptionsText,
     filterOptions,
     multiple = false,
+    autoSelect = true,
     className = "",
+    disabled = false,
   } = props;
   return (
     <>
       <Autocomplete
         openOnFocus
-        autoSelect
         autoComplete
         autoHighlight
+        autoSelect={autoSelect}
         multiple={multiple}
         onOpen={onOpen}
+        onBlur={onBlur}
         options={options}
+        disabled={disabled}
         onChange={onChange}
         value={value}
+        defaultValue={defaultValue}
         loading={loading}
         noOptionsText={noOptionsText}
         getOptionSelected={getOptionSelected}
@@ -566,6 +611,7 @@ export const AutoCompleteAsyncField = (props: any) => {
         renderInput={(params: any) => (
           <TextField
             {...params}
+            name={name}
             variant={variant}
             margin={margin || "normal"}
             label={label}

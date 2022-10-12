@@ -7,7 +7,6 @@ import {
   InputLabel,
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { WithStyles, withStyles } from "@material-ui/styles";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useReducer, useState } from "react";
@@ -24,13 +23,6 @@ interface Props {
   handleCancel: () => void;
   facilityId: number;
 }
-
-const styles = {
-  paper: {
-    "max-width": "650px",
-    "min-width": "400px",
-  },
-};
 
 const initForm: any = {
   patient: "",
@@ -66,15 +58,15 @@ const patientFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
-  const { patientList, handleOk, handleCancel, facilityId, classes } = props;
+const TransferPatientDialog = (props: Props) => {
+  const { patientList, handleOk, handleCancel, facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
     return {
       id: patient.patient_id,
-      text: `#${patient.patient_id} - ${patient.name} (${patient.gender})`,
+      text: `${patient.name} (${patient.gender})`,
     };
   });
 
@@ -93,9 +85,9 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   };
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "patient":
           if (!state.form[field]) {
@@ -139,7 +131,9 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
         const newFacilityId =
           res.data && res.data.facility_object && res.data.facility_object.id;
         if (newFacilityId) {
-          navigate(`/facility/${newFacilityId}/patient/${res.data.patient}`);
+          navigate(
+            `/facility/${newFacilityId}/patient/${res.data.patient}/consultation`
+          );
         } else {
           navigate("/facility");
         }
@@ -148,12 +142,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   };
 
   return (
-    <Dialog
-      open={true}
-      classes={{
-        paper: classes.paper,
-      }}
-    >
+    <Dialog open={true} maxWidth={"sm"}>
       <DialogTitle id="test-sample-title">Patient Transfer Form</DialogTitle>
       <DialogContent>
         <div className="grid gap-4 grid-cols-1">
@@ -193,7 +182,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
           </div>
         </div>
       </DialogContent>
-      <DialogActions style={{ justifyContent: "space-between" }}>
+      <DialogActions className="justify-between flex flex-col md:flex-row">
         <Button
           disabled={isLoading}
           color="secondary"
@@ -215,4 +204,4 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   );
 };
 
-export default withStyles(styles)(TransferPatientDialog);
+export default TransferPatientDialog;

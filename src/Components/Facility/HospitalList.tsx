@@ -22,7 +22,6 @@ import {
   sendNotificationMessages,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
@@ -36,11 +35,13 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import GetAppIcon from "@material-ui/icons/GetApp";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
+import SelectMenu from "../Common/components/SelectMenu";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -90,26 +91,16 @@ export const HospitalList = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const params = qParams.search
-        ? {
-            limit,
-            offset,
-            search_text: qParams.search,
-            state: qParams.state,
-            district: qParams.district,
-            local_body: qParams.local_body,
-            facility_type: qParams.facility_type,
-            kasp_empanelled: qParams.kasp_empanelled,
-          }
-        : {
-            limit,
-            offset,
-            state: qParams.state,
-            district: qParams.district,
-            local_body: qParams.local_body,
-            facility_type: qParams.facility_type,
-            kasp_empanelled: qParams.kasp_empanelled,
-          };
+      const params = {
+        limit,
+        offset,
+        search_text: qParams.search || undefined,
+        state: qParams.state,
+        district: qParams.district,
+        local_body: qParams.local_body,
+        facility_type: qParams.facility_type,
+        kasp_empanelled: qParams.kasp_empanelled,
+      };
 
       const res = await dispatchAction(getPermittedFacilities(params));
       if (!status.aborted) {
@@ -201,9 +192,8 @@ export const HospitalList = (props: any) => {
     return facility_type?.text;
   };
 
-  const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ search }, { replace: true });
-    else setQueryParams({ search: "" }, { replace: true });
+  const onSearchSuspects = (value: string) => {
+    updateQuery({ search: value });
   };
 
   const handleDownload = async () => {
@@ -336,18 +326,12 @@ export const HospitalList = (props: any) => {
     }
   };
 
-  const kaspOptionValues = [
-    { id: "", text: "Not Selected" },
-    { id: "true", text: "Yes" },
-    { id: "false", text: "No" },
-  ];
-
   let facilityList: any[] = [];
   if (data && data.length) {
-    facilityList = data.map((facility: any, idx: number) => {
+    facilityList = data.map((facility: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
-          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
+          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
               <div className="md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center">
                 {facility.cover_image_url ? (
@@ -360,7 +344,7 @@ export const HospitalList = (props: any) => {
                   <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                 )}
               </div>
-              <div className="h-full w-full grow overflow-clip">
+              <div className="h-full w-full grow">
                 <div className="h-full flex flex-col justify-between w-full">
                   <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
                     <div className="flow-root">
@@ -374,25 +358,42 @@ export const HospitalList = (props: any) => {
                       </div>
                     </div>
 
-                    <div className="block">
-                      <div className="inline-flex items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                    <div className="flex gap-1 flex-wrap mt-2">
+                      <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
+                      {facility.features?.map(
+                        (feature: number, i: number) =>
+                          FACILITY_FEATURE_TYPES.some(
+                            (f) => f.id === feature
+                          ) && (
+                            <div
+                              key={i}
+                              className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                              title={
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            >
+                              <i
+                                className={`fas fa-${
+                                  FACILITY_FEATURE_TYPES.filter(
+                                    (f) => f.id === feature
+                                  )[0]?.icon
+                                }`}
+                              />{" "}
+                              &nbsp;
+                              {
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            </div>
+                          )
+                      )}
                     </div>
-                    <div className="flex gap-1 flex-wrap mt-2">
-                      {facility.features?.map((feature: number, i: number) => (
-                        <div
-                          key={i}
-                          className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs"
-                        >
-                          {
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0].name
-                          }
-                        </div>
-                      ))}
-                    </div>
+
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
                         <div className="font-semibold">
@@ -413,7 +414,7 @@ export const HospitalList = (props: any) => {
                         <div>
                           {userType !== "Staff" ? (
                             <button
-                              className="mx-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                              className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                               onClick={(_) => setModalFor(facility.id)}
                             >
                               <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
@@ -456,17 +457,17 @@ export const HospitalList = (props: any) => {
                                     variant="outlined"
                                   />
                                 </div>
-                                <div className="flex flex-row justify-end">
+                                <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
                                   <button
                                     type="button"
-                                    className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
+                                    className="btn-danger btn mr-2 w-full md:w-auto"
                                     onClick={(_) => setModalFor(undefined)}
                                   >
                                     Cancel
                                   </button>
                                   <button
                                     type="submit"
-                                    className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
+                                    className="btn-primary btn mr-2 w-full md:w-auto"
                                   >
                                     Send Notification
                                   </button>
@@ -525,8 +526,10 @@ export const HospitalList = (props: any) => {
     );
   } else if (data && data.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
-      <div className="w-full">
-        <div className="text-3xl mt-4">{t("no_facilities")}</div>
+      <div className="w-full bg-white rounded-lg p-3">
+        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+          {t("no_facilities")}
+        </div>
       </div>
     ) : (
       <div>
@@ -554,7 +557,7 @@ export const HospitalList = (props: any) => {
         />
 
         <div className="flex md:justify-end w-full md:mt-4">
-          <div>
+          <div className="w-full md:w-auto">
             <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
@@ -570,49 +573,29 @@ export const HospitalList = (props: any) => {
                   <InputLabel className="text-sm">
                     {t("download_type")}
                   </InputLabel>
-                  <div className="flex flex-row">
-                    <SelectField
-                      name="select_download"
-                      className="text-sm"
-                      variant="outlined"
-                      margin="dense"
-                      optionArray={true}
-                      value={downloadSelect}
-                      options={downloadTypes}
-                      onChange={(e) => {
-                        setdownloadSelect(e.target.value);
-                      }}
+                  <div className="flex flex-row gap-6">
+                    <SelectMenu
+                      options={[
+                        ...downloadTypes.map((download) => ({
+                          title: download,
+                          value: download,
+                        })),
+                      ]}
+                      selected={downloadSelect}
+                      onSelect={setdownloadSelect}
+                      position="right"
                     />
-
                     {downloadLoading ? (
                       <div className="px-2 ml-2 my-2 pt-1 rounded">
                         <CircularProgress className="text-primary-600 w-6 h-6" />
                       </div>
                     ) : (
                       <button
-                        className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
+                        className="bg-primary-600 hover:shadow-md px-2 rounded-full"
                         onClick={handleDownloader}
                         disabled={downloadLoading}
                       >
-                        <svg
-                          className="h-6 w-6"
-                          viewBox="0 0 16 16"
-                          fill="white"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
-                          />
-                        </svg>
+                        <GetAppIcon style={{ color: "white" }} />
                       </button>
                     )}
                   </div>
@@ -672,8 +655,8 @@ export const HospitalList = (props: any) => {
             </dl>
           </div>
         </div>
-        <div className="flex my-4 gap-2 flex-wrap justify-between flex-grow">
-          <div className="w-72">
+        <div className="flex my-4 gap-2 flex-col md:flex-row justify-between flex-grow">
+          <div className="w-full md:w-72">
             <InputSearchBox
               value={qParams.search}
               search={onSearchSuspects}
@@ -682,46 +665,42 @@ export const HospitalList = (props: any) => {
             />
           </div>
 
-          <div className="flex">
-            <div>
-              <div className="flex items-start mb-2">
-                <button
-                  className="btn btn-primary-ghost"
-                  onClick={() => setShowFilters(true)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="fill-current w-4 h-4 mr-2"
-                  >
-                    <line x1="8" y1="6" x2="21" y2="6"></line>
-                    <line x1="8" y1="12" x2="21" y2="12">
-                      {" "}
-                    </line>
-                    <line x1="8" y1="18" x2="21" y2="18">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="6" x2="3.01" y2="6">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="12" x2="3.01" y2="12">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="18" x2="3.01" y2="18">
-                      {" "}
-                    </line>
-                  </svg>
-                  <span>{t("advanced_filters")}</span>
-                </button>
-              </div>
-            </div>
+          <div className="flex items-start mb-2 w-full md:w-auto">
+            <button
+              className="btn btn-primary-ghost w-full md:w-auto"
+              onClick={() => setShowFilters(true)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="fill-current w-4 h-4 mr-2"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12">
+                  {" "}
+                </line>
+                <line x1="8" y1="18" x2="21" y2="18">
+                  {" "}
+                </line>
+                <line x1="3" y1="6" x2="3.01" y2="6">
+                  {" "}
+                </line>
+                <line x1="3" y1="12" x2="3.01" y2="12">
+                  {" "}
+                </line>
+                <line x1="3" y1="18" x2="3.01" y2="18">
+                  {" "}
+                </line>
+              </svg>
+              <span>{t("advanced_filters")}</span>
+            </button>
           </div>
         </div>
       </div>

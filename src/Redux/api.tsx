@@ -35,6 +35,11 @@ const routes: Routes = {
     path: "/api/v1/password_reset/",
     method: "POST",
   },
+
+  updatePassword: {
+    path: "/api/v1/password_change/",
+    method: "PUT",
+  },
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
@@ -70,7 +75,7 @@ const routes: Routes = {
   },
 
   partialUpdateUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/{username}/",
     method: "PATCH",
   },
 
@@ -179,6 +184,10 @@ const routes: Routes = {
   partialUpdateAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PATCH",
+  },
+  deleteAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "DELETE",
   },
 
   // Facility Beds
@@ -313,6 +322,11 @@ const routes: Routes = {
 
   getCapacityBed: {
     path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
+  },
+
+  deleteCapacityBed: {
+    path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
+    method: "DELETE",
   },
 
   listDoctor: {
@@ -615,6 +629,10 @@ const routes: Routes = {
     path: "/api/v1/files/{fileId}/",
     method: "GET",
   },
+  editUpload: {
+    path: "/api/v1/files/{fileId}/?file_type={fileType}&associating_id={associatingId}",
+    method: "PATCH",
+  },
 
   // Investigation
   listInvestigations: {
@@ -644,6 +662,11 @@ const routes: Routes = {
   editInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/batchUpdate/",
     method: "PUT",
+  },
+
+  // ICD11
+  listICD11Diagnosis: {
+    path: "/api/v1/icd/",
   },
 
   // Resource

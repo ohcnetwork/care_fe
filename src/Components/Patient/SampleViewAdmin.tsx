@@ -27,6 +27,7 @@ import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
+import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
@@ -207,13 +208,13 @@ export default function SampleViewAdmin() {
           >
             <div className="px-6 py-4 h-full flex flex-col justify-between">
               <div>
-                <div className="flex justify-between">
+                <div className="flex flex-col md:flex-row md:justify-between">
                   <div className="font-bold text-xl capitalize mb-2">
                     {item.patient_name}
                   </div>
                   <div>
                     {item.sample_type && (
-                      <span className="bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
+                      <span className="truncate bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
                         Type: {item.sample_type}
                       </span>
                     )}
@@ -290,14 +291,14 @@ export default function SampleViewAdmin() {
                 <div className="text-gray-600 text-sm font-bold">
                   <span className="text-gray-800">Date of Sample:</span>{" "}
                   {item.date_of_sample
-                    ? moment(item.date_of_sample).format("lll")
+                    ? formatDate(item.date_of_sample)
                     : "Not Available"}
                 </div>
 
                 <div className="text-gray-600 text-sm font-bold">
                   <span className="text-gray-800">Date of Result:</span>{" "}
                   {item.date_of_result
-                    ? moment(item.date_of_result).format("lll")
+                    ? formatDate(item.date_of_result)
                     : "Not Available"}
                 </div>
               </div>
@@ -348,11 +349,11 @@ export default function SampleViewAdmin() {
     );
   } else if (sample && sample.length === 0) {
     manageSamples = (
-      <Grid item xs={12} md={12} style={{ display: "flex" }}>
-        <Grid container justify="center" alignItems="center">
-          <h5> No Sample Tests Found</h5>
-        </Grid>
-      </Grid>
+      <div className="w-full bg-white rounded-lg p-3">
+        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+          No Sample Tests Found
+        </div>
+      </div>
     );
   }
 
@@ -405,8 +406,8 @@ export default function SampleViewAdmin() {
         }
       />
       <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
+        <div className="flex flex-col lg:flex-row gap-6 justify-between">
+          <div className="bg-white overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6 w-full">
             <dl>
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Samples Taken
@@ -423,78 +424,78 @@ export default function SampleViewAdmin() {
               )}
             </dl>
           </div>
-        </div>
 
-        <div>
-          <div className="mt-2">
-            <div className="text-sm font-semibold mb-2">
-              Search by District Name
-            </div>
-            <InputSearchBox
-              value={qParams.district_name}
-              search={searchByDistrict}
-              placeholder="District Name"
-              errors=""
-            />
-          </div>
-          <div className="mt-2">
-            <div className="text-sm font-semibold mb-2">Search by Name</div>
-            <InputSearchBox
-              value={qParams.patient_name}
-              search={searchByName}
-              placeholder="Search by Patient Name"
-              errors=""
-            />
-          </div>
-        </div>
-
-        <div>
-          <div className="flex items-start mt-2 mb-2">
-            <button
-              className="btn btn-primary-ghost md:mt-7 "
-              onClick={() => setShowFilters((show) => !show)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="fill-current w-4 h-4 mr-2"
-              >
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12">
-                  {" "}
-                </line>
-                <line x1="8" y1="18" x2="21" y2="18">
-                  {" "}
-                </line>
-                <line x1="3" y1="6" x2="3.01" y2="6">
-                  {" "}
-                </line>
-                <line x1="3" y1="12" x2="3.01" y2="12">
-                  {" "}
-                </line>
-                <line x1="3" y1="18" x2="3.01" y2="18">
-                  {" "}
-                </line>
-              </svg>
-              <span>Advanced Filters</span>
-            </button>
-          </div>
-          <SlideOver show={showFilters} setShow={setShowFilters}>
-            <div className="bg-white min-h-screen p-4">
-              <SampleFilter
-                filter={qParams}
-                onChange={applyFilter}
-                closeFilter={() => setShowFilters(false)}
+          <div className="w-full">
+            <div className="mt-2">
+              <div className="text-sm font-semibold mb-2">
+                Search by District Name
+              </div>
+              <InputSearchBox
+                value={qParams.district_name}
+                search={searchByDistrict}
+                placeholder="District Name"
+                errors=""
               />
             </div>
-          </SlideOver>
+            <div className="mt-2">
+              <div className="text-sm font-semibold mb-2">Search by Name</div>
+              <InputSearchBox
+                value={qParams.patient_name}
+                search={searchByName}
+                placeholder="Search by Patient Name"
+                errors=""
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-start mt-2 mb-2 ">
+              <button
+                className="btn btn-primary-ghost md:mt-7 w-full"
+                onClick={() => setShowFilters((show) => !show)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="fill-current w-4 h-4 mr-2"
+                >
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12">
+                    {" "}
+                  </line>
+                  <line x1="8" y1="18" x2="21" y2="18">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="6" x2="3.01" y2="6">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="12" x2="3.01" y2="12">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="18" x2="3.01" y2="18">
+                    {" "}
+                  </line>
+                </svg>
+                <span>Advanced Filters</span>
+              </button>
+            </div>
+            <SlideOver show={showFilters} setShow={setShowFilters}>
+              <div className="bg-white min-h-screen p-4">
+                <SampleFilter
+                  filter={qParams}
+                  onChange={applyFilter}
+                  closeFilter={() => setShowFilters(false)}
+                />
+              </div>
+            </SlideOver>
+          </div>
         </div>
         <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
           {badge("Patient Name", qParams.patient_name, "patient_name")}
