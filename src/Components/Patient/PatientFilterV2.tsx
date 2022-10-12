@@ -211,22 +211,6 @@ export default function PatientFilterV2(props: any) {
     setFilterState(filterData);
   };
 
-  const handleChange = (event: any) => {
-    const { name, value } = event.target;
-
-    const filterData: any = { ...filterState };
-    filterData[name] = value;
-
-    setFilterState(filterData);
-  };
-
-  const handleMultiSelectChange = (event: any) => {
-    const { name, value } = event.target;
-    const filterData: any = { ...filterState };
-    filterData[name] = [...value];
-    setFilterState(filterData);
-  };
-
   const handleLsgSearch = (e: any) => {
     setHasLsgSearchText(!!e.target.value);
     setLsgLoading(true);
