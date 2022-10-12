@@ -16,8 +16,17 @@ export type WaveformType = {
   "wave-name": string;
 };
 
-export default function Waveform(props: { wave: WaveformType, color?: string, title: string, metrics?: boolean, classes?: string, defaultSpace?: boolean }) {
-  const wave = props.wave;
+export default function Waveform(props: { 
+  wave: WaveformType,
+  color?: string, 
+  title: string, 
+  metrics?: boolean, 
+  classes?: string, 
+  defaultSpace?: boolean 
+  wavetype?: "STREAM" | "REFRESH"
+}) {
+
+  const { wave, color, title, metrics, classes, defaultSpace, wavetype } = props;
   const data = wave.data.split(" ").map(Number);
   const [queueData, setQueueData] = useState<number[]>([]);
   const [xData, setXData] = useState<number[]>([]);
@@ -37,6 +46,7 @@ export default function Waveform(props: { wave: WaveformType, color?: string, ti
       seconds++;
     }, 1000);
     return () => clearInterval(timer);
+    
   }, [props]);
 
   useEffect(() => {
@@ -49,22 +59,22 @@ export default function Waveform(props: { wave: WaveformType, color?: string, ti
   return (
     <div className="w-full relative">
       <div className="text-gray-400 absolute top-0 left-5 text-xs">
-        {props.title}
+        {title}
       </div>
       <LinePlot
-        title={props.title}
-        name={props.title}
+        title={title}
+        name={title}
         xData={xData}
         yData={queueData.slice(0, viewable)}
         yStart={Math.min(...queueData)}
         yEnd={Math.max(...queueData)}
-        classes={props.classes || "h-[90px]"}
+        classes={classes || "h-[90px]"}
         type="WAVEFORM"
-        color={props.color || "green"}
-        defaultSpace={props.defaultSpace}
+        color={color || "green"}
+        defaultSpace={defaultSpace}
       />
       <div className="absolute bottom-0 right-5 w-full md:w-[70%]">
-        {props.metrics && (
+        {metrics && (
           <div className="flex flex-row flex-wrap justify-end gap-2 text-[10px] text-gray-400">
             <div>
               Lowest: {Math.min(...queueData.slice(0, viewable))}
