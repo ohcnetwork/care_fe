@@ -54,6 +54,7 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
     });
     setIsUploading(false);
     closeModal();
+    window.location.reload();
   };
 
   return (
