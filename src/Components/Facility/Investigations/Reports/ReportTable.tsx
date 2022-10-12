@@ -16,7 +16,7 @@ import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { getColorIndex, rowColor, transformData } from "./utils";
 import { InvestigationResponse } from "./types";
-import moment from "moment";
+import { formatDate } from "../../../../Utils/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyle = makeStyles((theme: Theme) => ({
@@ -207,9 +207,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
                     }}
                     className={className.tableCell}
                   >
-                    {moment(session.session_created_date).format(
-                      "D MMM YYYY h:mm a"
-                    )}
+                    {formatDate(session.session_created_date)}
                   </TableCell>
                 ))}
                 <TableCell align="center" className={className.tableCell}>

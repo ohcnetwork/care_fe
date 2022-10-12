@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -9,6 +8,7 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { StackedLinePlot } from "./components/StackedLinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
+import { formatDate } from "../../../Utils/utils";
 
 export const NutritionPlots = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -63,7 +63,7 @@ export const NutritionPlots = (props: any) => {
   };
 
   const dates = Object.keys(results)
-    .map((p: string) => moment(p).format("LLL"))
+    .map((p: string) => formatDate(p))
     .reverse();
 
   const yAxisData = (name: string) => {
@@ -254,9 +254,7 @@ export const NutritionPlots = (props: any) => {
                 if (obj[1].infusions && obj[1].infusions.length > 0) {
                   return (
                     <div>
-                      <h4 className="text-sm">
-                        - {moment(obj[0]).format("LLL")}
-                      </h4>
+                      <h4 className="text-sm">- {formatDate(obj[0])}</h4>
                       <div className="px-5 text-sm">
                         {obj[1].infusions.map((o: any) => (
                           <div>
@@ -284,9 +282,7 @@ export const NutritionPlots = (props: any) => {
                 if (obj[1].iv_fluids && obj[1].iv_fluids.length > 0) {
                   return (
                     <div>
-                      <h4 className="text-sm">
-                        - {moment(obj[0]).format("LLL")}
-                      </h4>
+                      <h4 className="text-sm">- {formatDate(obj[0])}</h4>
                       <div className="px-5 text-sm">
                         {obj[1].iv_fluids.map((o: any) => (
                           <div>
@@ -314,9 +310,7 @@ export const NutritionPlots = (props: any) => {
                 if (obj[1].feeds && obj[1].feeds.length > 0) {
                   return (
                     <div>
-                      <h4 className="text-sm">
-                        - {moment(obj[0]).format("LLL")}
-                      </h4>
+                      <h4 className="text-sm">- {formatDate(obj[0])}</h4>
                       <div className="px-5 text-sm">
                         {obj[1].feeds.map((o: any) => (
                           <div>
@@ -367,9 +361,7 @@ export const NutritionPlots = (props: any) => {
                 if (obj[1].output && obj[1].output.length > 0) {
                   return (
                     <div>
-                      <h4 className="text-sm">
-                        - {moment(obj[0]).format("LLL")}
-                      </h4>
+                      <h4 className="text-sm">- {formatDate(obj[0])}</h4>
                       <div className="px-5 text-sm">
                         {obj[1].output.map((o: any) => (
                           <div>

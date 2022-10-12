@@ -1,10 +1,10 @@
 import { CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
-import moment from "moment";
 import React from "react";
 import { ConsultationModel } from "./models";
 import { KASP_STRING } from "../../Common/constants";
 import { RoleButton } from "../Common/RoleButton";
+import { formatDate } from "../../Utils/utils";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -52,7 +52,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                     {KASP_STRING} Enabled date:{" "}
                   </span>
                   {itemData.kasp_enabled_date
-                    ? moment(itemData.kasp_enabled_date).format("lll")
+                    ? formatDate(itemData.kasp_enabled_date)
                     : "-"}
                 </Typography>
               </Grid>
@@ -61,7 +61,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               <Grid item xs={5}>
                 <Typography>
                   <span className="text-gray-700">Admitted on: </span>
-                  {moment(itemData.admission_date).format("lll")}
+                  {formatDate(itemData.admission_date)}
                 </Typography>
               </Grid>
             )}
@@ -69,7 +69,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               <Grid item xs={5}>
                 <Typography>
                   <span className="text-gray-700">Discharged on: </span>
-                  {moment(itemData.discharge_date).format("lll")}
+                  {formatDate(itemData.discharge_date)}
                 </Typography>
               </Grid>
             )}
@@ -78,7 +78,10 @@ export const ConsultationCard = (props: ConsultationProps) => {
           <div className="flex flex-col mt-6">
             {
               <div className="text-sm text-gray-700">
-                Created on {moment(itemData.created_date).format("lll")}
+                Created on{" "}
+                {itemData.created_date
+                  ? formatDate(itemData.created_date)
+                  : "--:--"}
                 {itemData.created_by && (
                   <span>
                     by{" "}
@@ -88,7 +91,10 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </div>
             }
             <div className="text-sm text-gray-700">
-              Last Modified on {moment(itemData.modified_date).format("lll")}{" "}
+              Last Modified on
+              {itemData.modified_date
+                ? formatDate(itemData.modified_date)
+                : "--:--"}{" "}
               {itemData.last_edited_by && (
                 <span>
                   by{" "}
