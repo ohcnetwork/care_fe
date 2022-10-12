@@ -9,7 +9,7 @@ import {
   listAssets,
   getFacilityAssetLocation,
 } from "../../Redux/actions";
-import { AssetData } from "./AssetTypes";
+import { assetClassProps, AssetData } from "./AssetTypes";
 import { getAsset } from "../../Redux/actions";
 import React, { useState, useCallback, useEffect } from "react";
 import { navigate, useQueryParams } from "raviger";
@@ -332,27 +332,18 @@ const AssetsList = () => {
                       onClick={() => navigate(`/assets/${asset.id}`)}
                     >
                       <div className="md:flex">
-                        <p className="text-xl font-normal capitalize break-words">
-                          <span className="mr-2">
+                        <p className="text-xl flex font-normal capitalize break-words">
+                          <span className="mr-2 text-primary-500">
                             {" "}
-                            {asset.asset_class === "HL7MONITOR" ? (
-                              <i className="fa-solid fa-tv text-primary-500"></i>
-                            ) : (
-                              ""
-                            )}
-                            {asset.asset_class === "ONVIF" ? (
-                              <i className="fa-solid fa-camera text-primary-500"></i>
-                            ) : (
-                              ""
-                            )}
-                            {asset.asset_class !== "HL7MONITOR" &&
-                            asset.asset_class !== "ONVIF" ? (
-                              <i className="fa-solid fa-cart-plus text-primary-500"></i>
-                            ) : (
-                              ""
-                            )}
+                            {
+                              (
+                                (asset.asset_class &&
+                                  assetClassProps[asset.asset_class]) ||
+                                assetClassProps.None
+                              ).icon
+                            }
                           </span>
-                          {asset.name}
+                          <p className="truncate w-48">{asset.name}</p>
                         </p>
                       </div>
                       <p className="font-normal text-sm">

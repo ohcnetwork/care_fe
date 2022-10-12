@@ -6,7 +6,6 @@ import {
   DialogTitle,
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { WithStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
@@ -18,16 +17,8 @@ interface Props {
   setSelected: (e: any) => void;
 }
 
-const styles = {
-  paper: {
-    "max-width": "650px",
-    "min-width": "400px",
-  },
-};
-
-const FacilitiesSelectDialog = (props: Props & WithStyles<typeof styles>) => {
-  const { handleOk, handleCancel, classes, selectedFacility, setSelected } =
-    props;
+const FacilitiesSelectDialog = (props: Props) => {
+  const { handleOk, handleCancel, selectedFacility, setSelected } = props;
 
   const handleEscKeyPress = (event: any) => {
     if (event.key === "Escape") {
@@ -36,15 +27,9 @@ const FacilitiesSelectDialog = (props: Props & WithStyles<typeof styles>) => {
   };
 
   return (
-    <Dialog
-      open={true}
-      classes={{
-        paper: classes.paper,
-      }}
-      onKeyDown={(e) => handleEscKeyPress(e)}
-    >
+    <Dialog open={true} onKeyDown={(e) => handleEscKeyPress(e)}>
       <DialogTitle
-        className=" font-semibold text-3xl"
+        className="font-semibold text-3xl max-w-md md:min-w-[400px]"
         id="font-semibold text-3xl"
       >
         Search for a facility
@@ -81,4 +66,4 @@ const FacilitiesSelectDialog = (props: Props & WithStyles<typeof styles>) => {
   );
 };
 
-export default withStyles(styles)(FacilitiesSelectDialog);
+export default FacilitiesSelectDialog;
