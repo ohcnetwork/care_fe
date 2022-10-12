@@ -292,4 +292,7 @@ export interface FileUploadModel {
   upload_completed?: boolean;
   uploaded_by?: { username?: string };
   file_category?: string;
+  is_archived?:boolean;
+  archive_reason?:string;
+  extension?:string
 }

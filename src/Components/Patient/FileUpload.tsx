@@ -18,11 +18,9 @@ import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import { GetApp, Visibility } from "@material-ui/icons";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Modal from "@material-ui/core/Modal";
-import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
@@ -97,6 +95,7 @@ interface URLS {
 interface ModalDetails {
   name?: string;
   id?: string;
+  reason?: string;
 }
 
 interface StateInterface {
@@ -160,6 +159,11 @@ export const FileUpload = (props: FileUploadProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [modalOpenForEdit, setModalOpenForEdit] = useState(false);
+  const [modalOpenForArchive, setModalOpenForArchive] = useState(false);
+  const [modalOpenForMoreDetails, setModalOpenForMoreDetails] = useState(false);
+  const [modalOpenForUnarchive, setModalOpenForUnarchive] = useState(false);
+  const [archiveReason, setArchiveReason] = useState("");
+  const [archiveReasonError, setArchiveReasonError] = useState("");
   const [modalDetails, setModalDetails] = useState<ModalDetails>();
   const [editFileName, setEditFileName] = useState<any>("");
   const [editFileNameError, setEditFileNameError] = useState("");
@@ -315,6 +319,73 @@ export const FileUpload = (props: FileUploadProps) => {
     return ext;
   };
 
+  const getIconClassName = (extensionName: string | undefined) => {
+    // check for image files
+    if (
+      extensionName === ".png" ||
+      extensionName === ".jpg" ||
+      extensionName === ".jpeg" ||
+      extensionName === ".tif" ||
+      extensionName === ".tiff" ||
+      extensionName === ".bmp" ||
+      extensionName === ".eps" ||
+      extensionName === ".apng" ||
+      extensionName === ".avif" ||
+      extensionName === ".jfif" ||
+      extensionName === ".pjpeg" ||
+      extensionName === ".pjp" ||
+      extensionName === ".svg" ||
+      extensionName === ".webp"
+    ) {
+      return "fa-solid fa-file-image";
+    }
+    // check for video files
+    if (
+      extensionName === ".webm" ||
+      extensionName === ".mpg" ||
+      extensionName === ".mp2" ||
+      extensionName === ".mpeg" ||
+      extensionName === ".mpe" ||
+      extensionName === ".mpv" ||
+      extensionName === ".ogg" ||
+      extensionName === ".mp4" ||
+      extensionName === ".m4p" ||
+      extensionName === ".m4v" ||
+      extensionName === ".avi" ||
+      extensionName === ".wmv" ||
+      extensionName === ".mov" ||
+      extensionName === ".qt" ||
+      extensionName === ".flv" ||
+      extensionName === ".swf"
+    ) {
+      return "fa-solid fa-file-video";
+    }
+    // check for compressed files
+    if (extensionName === ".zip" || extensionName === ".rar") {
+      return "fa-solid fa-file-zipper";
+    }
+    // check for misclaneous files whose icons are available freely in fontawesome
+    if (extensionName === ".pdf") {
+      return "fa-solid fa-file-pdf";
+    }
+    if (extensionName === ".docx") {
+      return "fa-solid fa-file-word";
+    }
+    if (extensionName === ".csv") {
+      return "fa-solid fa-file-csv";
+    }
+    if (extensionName === ".xlsx") {
+      return "fa-solid fa-file-excel";
+    }
+    if (extensionName === ".txt") {
+      return "fa-solid fa-file-lines";
+    }
+    if (extensionName === ".pptx") {
+      return "fa-solid fa-file-powerpoint";
+    }
+    return "fa-solid fa-file-medical";
+  };
+
   const loadFile = async (id: any) => {
     setFileUrl("");
     setFileState({ ...file_state, open: true });
@@ -338,6 +409,16 @@ export const FileUpload = (props: FileUploadProps) => {
       return false;
     } else {
       setEditFileNameError("");
+      return true;
+    }
+  };
+
+  const validateArchiveReason = (name: any) => {
+    if (name.trim() === "") {
+      setArchiveReasonError("Please enter a valid reason!");
+      return false;
+    } else {
+      setArchiveReasonError("");
       return true;
     }
   };
@@ -367,157 +448,315 @@ export const FileUpload = (props: FileUploadProps) => {
     }
   };
 
+  const archiveFile = async (id: any, archiveReason: string) => {
+    const data = {
+      file_type: type,
+      is_archived: true,
+      archive_reason: archiveReason,
+      associating_id: getAssociatedId(),
+    };
+    if (validateArchiveReason(archiveReason)) {
+      const res = await dispatch(
+        editUpload(
+          {
+            is_archived: data.is_archived,
+            archive_reason: data.archive_reason,
+          },
+          id,
+          data.file_type,
+          data.associating_id
+        )
+      );
+      if (res && res.status === 200) {
+        fetchData(res.status);
+        Notification.Success({
+          msg: "File archived successfully",
+        });
+        setbtnloader(false);
+        setModalOpenForArchive(false);
+      } else {
+        setbtnloader(false);
+      }
+    } else {
+      setbtnloader(false);
+    }
+  };
+
+  const unarchiveFile = async (id: any) => {
+    const data = {
+      file_type: type,
+      is_archived: false,
+      associating_id: getAssociatedId(),
+    };
+    const res = await dispatch(
+      editUpload(
+        {
+          is_archived: data.is_archived,
+        },
+        id,
+        data.file_type,
+        data.associating_id
+      )
+    );
+    if (res && res.status === 200) {
+      fetchData(res.status);
+      Notification.Success({
+        msg: "File archived successfully",
+      });
+      setbtnloader(false);
+      setModalOpenForArchive(false);
+    } else {
+      setbtnloader(false);
+    }
+  };
+
   const renderFileUpload = (item: FileUploadModel) => {
+    console.log(item);
     return (
       <>
         <div
           className="mt-4 border bg-white shadow rounded-lg p-4"
           key={item.id}
         >
-          {item.file_category === "AUDIO" ? (
-            <div className="flex flex-wrap justify-between space-y-2">
-              <div className="flex flex-wrap justify-between space-x-2">
-                <div>
-                  <i className="fa-solid fa-file-audio fa-3x m-3 text-primary-500"></i>
-                </div>
-                <div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      File Name:{" "}
-                    </span>{" "}
-                    {item.name}
-                  </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      Created By:
-                    </span>{" "}
-                    {item.uploaded_by ? item.uploaded_by.username : null}
-                  </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      Created On :
-                    </span>{" "}
-                    {item.created_date
-                      ? moment(item.created_date).format("lll")
-                      : "-"}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center">
-                {item.id ? (
-                  Object.keys(url).length > 0 ? (
-                    <div className="flex flex-wrap">
-                      <audio
-                        className="max-h-full max-w-full m-auto object-contain"
-                        src={url[item.id]}
-                        controls
-                        preload="auto"
-                        controlsList="nodownload"
-                      />
+          {!item.is_archived ? (
+            <>
+              {item.file_category === "AUDIO" ? (
+                <div className="flex flex-wrap justify-between space-y-2">
+                  <div className="flex flex-wrap justify-between space-x-2">
+                    <div>
+                      <i className="fa-solid fa-file-audio fa-3x m-3 text-primary-500"></i>
                     </div>
-                  ) : (
-                    <CircularProgress />
-                  )
-                ) : (
-                  <div>File Not found</div>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center">
-                {item.id ? (
-                  Object.keys(url).length > 0 ? (
-                    <div className="flex flex-wrap">
-                      <a
-                        href={url[item.id]}
-                        download={true}
-                        className="btn btn-primary m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
-                      >
-                        <i className="fa-solid fa-circle-arrow-down mr-2"></i>{" "}
-                        DOWNLOAD
-                      </a>
-                      {item?.uploaded_by?.username === currentuser_username ? (
-                        <>
+                    <div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          File Name:{" "}
+                        </span>{" "}
+                        {item.name}
+                      </div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          Created By:
+                        </span>{" "}
+                        {item.uploaded_by ? item.uploaded_by.username : null}
+                      </div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          Created On :
+                        </span>{" "}
+                        {item.created_date
+                          ? moment(item.created_date).format("lll")
+                          : "-"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    {item.id ? (
+                      Object.keys(url).length > 0 ? (
+                        <div className="flex flex-wrap">
+                          <audio
+                            className="max-h-full max-w-full m-auto object-contain"
+                            src={url[item.id]}
+                            controls
+                            preload="auto"
+                            controlsList="nodownload"
+                          />
+                        </div>
+                      ) : (
+                        <CircularProgress />
+                      )
+                    ) : (
+                      <div>File Not found</div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center">
+                    {item.id ? (
+                      Object.keys(url).length > 0 ? (
+                        <div className="flex flex-wrap">
+                          <a
+                            href={url[item.id]}
+                            download={true}
+                            className="btn btn-primary m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
+                          >
+                            <i className="fa-solid fa-circle-arrow-down mr-2"></i>{" "}
+                            DOWNLOAD
+                          </a>
+                          {item?.uploaded_by?.username ===
+                          currentuser_username ? (
+                            <>
+                              <label
+                                onClick={() => {
+                                  setModalDetails({
+                                    name: item.name,
+                                    id: item.id,
+                                  });
+                                  setEditFileName(item?.name);
+                                  setModalOpenForEdit(true);
+                                }}
+                                className="btn btn-primary m-1 sm:w-auto w-full"
+                              >
+                                <i className="fa-solid fa-pencil mr-2"></i>EDIT
+                                FILE NAME
+                              </label>
+                            </>
+                          ) : (
+                            <></>
+                          )}
                           <label
                             onClick={() => {
                               setModalDetails({ name: item.name, id: item.id });
-                              setEditFileName(item?.name);
-                              setModalOpenForEdit(true);
+                              setModalOpenForArchive(true);
                             }}
                             className="btn btn-primary m-1 sm:w-auto w-full"
                           >
-                            <i className="fa-solid fa-pencil mr-2"></i>EDIT FILE
-                            NAME
+                            <i className="fa-solid fa-box-archive mr-2 "></i>
+                            ARCHIVE
                           </label>
-                        </>
+                        </div>
                       ) : (
-                        <></>
-                      )}
+                        <CircularProgress />
+                      )
+                    ) : (
+                      <div>File Not found</div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap justify-between space-y-2">
+                  <div className="flex flex-wrap justify-between space-x-2">
+                    <div>
+                      <i
+                        className={`${getIconClassName(
+                          item?.extension
+                        )} fa-3x m-3 text-primary-500`}
+                      ></i>
                     </div>
-                  ) : (
-                    <CircularProgress />
-                  )
-                ) : (
-                  <div>File Not found</div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-wrap justify-between space-y-2">
-              <div className="flex flex-wrap justify-between space-x-2">
-                <div>
-                  <i className="fa-solid fa-file-medical fa-3x m-3 text-primary-500"></i>
-                </div>
-                <div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      File Name:{" "}
-                    </span>{" "}
-                    {item.name}
+                    <div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          File Name:{" "}
+                        </span>{" "}
+                        {item.name}
+                      </div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          Created By:
+                        </span>{" "}
+                        {item.uploaded_by ? item.uploaded_by.username : null}
+                      </div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          Created On :
+                        </span>{" "}
+                        {item.created_date
+                          ? moment(item.created_date).format("lll")
+                          : "-"}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      Created By:
-                    </span>{" "}
-                    {item.uploaded_by ? item.uploaded_by.username : null}
-                  </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      Created On :
-                    </span>{" "}
-                    {item.created_date
-                      ? moment(item.created_date).format("lll")
-                      : "-"}
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center">
-                <label
-                  onClick={() => {
-                    loadFile(item.id);
-                  }}
-                  className="btn btn-primary m-1 sm:w-auto w-full"
-                >
-                  {" "}
-                  <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
-                </label>
-                {item?.uploaded_by?.username === currentuser_username ? (
-                  <>
-                    {" "}
+                  <div className="flex flex-wrap items-center">
                     <label
                       onClick={() => {
-                        setModalDetails({ name: item.name, id: item.id });
-                        setEditFileName(item?.name);
-                        setModalOpenForEdit(true);
+                        loadFile(item.id);
                       }}
                       className="btn btn-primary m-1 sm:w-auto w-full"
                     >
-                      <i className="fa-solid fa-pencil mr-2"></i> EDIT FILE NAME
+                      {" "}
+                      <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
                     </label>
-                  </>
-                ) : (
-                  <></>
-                )}
+                    {item?.uploaded_by?.username === currentuser_username ? (
+                      <>
+                        {" "}
+                        <label
+                          onClick={() => {
+                            setModalDetails({ name: item.name, id: item.id });
+                            setEditFileName(item?.name);
+                            setModalOpenForEdit(true);
+                          }}
+                          className="btn btn-primary m-1 sm:w-auto w-full"
+                        >
+                          <i className="fa-solid fa-pencil mr-2"></i> EDIT FILE
+                          NAME
+                        </label>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                    <label
+                      onClick={() => {
+                        setModalDetails({ name: item.name, id: item.id });
+                        setModalOpenForArchive(true);
+                      }}
+                      className="btn btn-primary m-1 sm:w-auto w-full"
+                    >
+                      <i className="fa-solid fa-box-archive mr-2 "></i>ARCHIVE
+                    </label>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="flex flex-wrap justify-between space-y-2">
+                <div className="flex flex-wrap justify-between space-x-2">
+                  <div>
+                    <i className="fa-solid fa-file-circle-xmark fa-3x m-3 text-primary-500"></i>
+                  </div>
+                  <div>
+                    <div>
+                      <span className="font-semibold leading-relaxed">
+                        File Name:{" "}
+                      </span>{" "}
+                      {item.name}
+                    </div>
+                    <div>
+                      <span className="font-semibold leading-relaxed">
+                        Created By:
+                      </span>{" "}
+                      {item.uploaded_by ? item.uploaded_by.username : null}
+                    </div>
+                    <div>
+                      <span className="font-semibold leading-relaxed">
+                        Created On :
+                      </span>{" "}
+                      {item.created_date
+                        ? moment(item.created_date).format("lll")
+                        : "-"}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center">
+                  <label className="btn btn-primary disabled m-1 sm:w-auto w-full">
+                    {" "}
+                    <i className="fa-solid fa-eye-slash mr-2"></i> FILE ARCHIVED
+                  </label>
+                  <label
+                    onClick={() => {
+                      setModalDetails({
+                        name: item.name,
+                        reason: item.archive_reason,
+                      });
+                      setModalOpenForMoreDetails(true);
+                    }}
+                    className="btn btn-primary m-1 sm:w-auto w-full"
+                  >
+                    <i className="fa-solid fa-circle-question mr-2 "></i>MORE
+                    DETAILS
+                  </label>
+                  <label
+                    onClick={() => {
+                      setModalDetails({
+                        name: item.name,
+                        id: item.id,
+                      });
+                      setModalOpenForUnarchive(true);
+                    }}
+                    className="btn btn-primary m-1 sm:w-auto w-full"
+                  >
+                    <i className="fa-solid fa-box-archive mr-2 "></i>UNARCHIVE
+                  </label>
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </>
@@ -874,6 +1113,151 @@ export const FileUpload = (props: FileUploadProps) => {
               </button>
             </div>
           </form>
+        </div>
+      </Modal>
+      <Modal open={modalOpenForArchive}>
+        <div className="h-screen w-full absolute flex items-center justify-center ">
+          <form
+            onSubmit={(event: any) => {
+              event.preventDefault();
+              setbtnloader(true);
+              archiveFile(modalDetails?.id, archiveReason);
+            }}
+            className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content"
+          >
+            <div>
+              <InputLabel className="text-xl" id="archivereasonlabel">
+                Please state the reason for archiving{" "}
+                <b>{modalDetails?.name}</b> file?
+              </InputLabel>
+              <TextInputField
+                name="editFileName"
+                variant="outlined"
+                margin="dense"
+                value={archiveReason}
+                onChange={(e) => setArchiveReason(e.target.value)}
+                errors={archiveReasonError}
+              />
+            </div>
+            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+              <button
+                type="submit"
+                className="btn-primary btn mr-2 w-full md:w-auto"
+              >
+                <svg
+                  className={clsx(
+                    "animate-spin -ml-1 mr-3 h-5 w-5 text-white",
+                    !btnloader ? " hidden" : ""
+                  )}
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Proceed
+              </button>
+              <button
+                type="button"
+                className="btn-danger btn mr-2 w-full md:w-auto"
+                onClick={(_) => setModalOpenForArchive(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
+      <Modal open={modalOpenForMoreDetails}>
+        <div className="h-screen w-full absolute flex items-center justify-center ">
+          <div className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content">
+            <div>
+              <div className="text-center">
+                <i className="fa-solid fa-file-circle-xmark my-2 fa-4x text-primary-500"></i>
+              </div>
+              <div className="text-md text-center">
+                <b>{modalDetails?.name}</b> file is arcived.
+              </div>
+              <div className="text-md text-center">
+                <b>Reason:</b> {modalDetails?.reason}
+              </div>
+            </div>
+            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+              <button
+                type="button"
+                className="btn-danger btn mr-2 w-full md:w-auto"
+                onClick={(_) => setModalOpenForMoreDetails(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
+      <Modal open={modalOpenForUnarchive}>
+        <div className="h-screen w-full absolute flex items-center justify-center ">
+          <div className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content">
+            <div>
+              <div className="text-xl" id="archivereasonlabel">
+                Are you sure you want to unarchive
+                <b>{modalDetails?.name}</b> file?
+              </div>
+            </div>
+            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+              <button
+                onClick={(event: any) => {
+                  event.preventDefault();
+                  setbtnloader(true);
+                  unarchiveFile(modalDetails?.id);
+                }}
+                className="btn-primary btn mr-2 w-full md:w-auto"
+              >
+                <svg
+                  className={clsx(
+                    "animate-spin -ml-1 mr-3 h-5 w-5 text-white",
+                    !btnloader ? " hidden" : ""
+                  )}
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Proceed
+              </button>
+              <button
+                type="button"
+                className="btn-danger btn mr-2 w-full md:w-auto"
+                onClick={(_) => setModalOpenForUnarchive(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       </Modal>
       <PageTitle
