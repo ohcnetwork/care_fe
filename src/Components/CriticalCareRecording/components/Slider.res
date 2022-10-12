@@ -91,6 +91,7 @@ let make = (
               step={step}
               max={end}
               min={start}
+              className="focus:outline-none focus:bg-white focus:ring-primary-500"
               value={displayValue}
               onChange={event =>
                 setValue(

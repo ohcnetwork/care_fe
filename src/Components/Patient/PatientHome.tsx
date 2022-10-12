@@ -33,6 +33,7 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { RoleButton } from "../Common/RoleButton";
 import clsx from "clsx";
 import { Badge } from "../Common/Badge";
+import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -568,7 +569,7 @@ export const PatientHome = (props: any) => {
                       Date of Return
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900">
-                      {moment(patientData.date_of_return).format("LL")}
+                      {formatDate(patientData.date_of_return)}
                     </div>
                   </div>
                 )}
@@ -598,7 +599,7 @@ export const PatientHome = (props: any) => {
                       Last Vaccinated on
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900">
-                      {moment(patientData.last_vaccinated_date).format("LL")}
+                      {formatDate(patientData.last_vaccinated_date)}
                     </div>
                   </div>
                 )}
@@ -704,7 +705,7 @@ export const PatientHome = (props: any) => {
                     {(moment().isBefore(patientData.review_time)
                       ? "Review at: "
                       : "Review Missed: ") +
-                      moment(patientData.review_time).format("lll")}
+                      formatDate(patientData.review_time)}
                   </div>
                 )}
                 <div className="p-2 bg-white rounded-lg shadow text-center">
@@ -740,14 +741,7 @@ export const PatientHome = (props: any) => {
                       <div className="text-xs flex justify-center">
                         {patientData.created_date && (
                           <div className="flex flex-col md:flex-row gap-1">
-                            <div>
-                              {moment(patientData.created_date).format("ll")}
-                            </div>
-                            <div>
-                              {moment(patientData.created_date).format(
-                                "hh:mm A"
-                              )}
-                            </div>
+                            <div>{formatDate(patientData.created_date)}</div>
                           </div>
                         )}
                       </div>
@@ -765,14 +759,7 @@ export const PatientHome = (props: any) => {
                       <div className="text-xs flex justify-center">
                         {patientData.modified_date && (
                           <div className="flex flex-col md:flex-row gap-1">
-                            <div>
-                              {moment(patientData.modified_date).format("ll")}
-                            </div>
-                            <div>
-                              {moment(patientData.modified_date).format(
-                                "hh:mm A"
-                              )}
-                            </div>
+                            <div>{formatDate(patientData.modified_date)}</div>
                           </div>
                         )}
                       </div>
@@ -942,8 +929,7 @@ export const PatientHome = (props: any) => {
                             >
                               <i className="fas fa-stopwatch mr-2"></i>
                               <dd className="font-bold text-sm leading-5">
-                                {moment(shift.modified_date).format("LLL") ||
-                                  "--"}
+                                {formatDate(shift.modified_date) || "--"}
                               </dd>
                             </dt>
                           </div>

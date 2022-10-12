@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const colors = require("tailwindcss/colors");
+const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
   important: true,
   theme: {
+    screens: {
+      vs: "348px",
+      ...defaultTheme.screens,
+    },
     extend: {
       colors: {
+        error: colors.red["500"],
         green: colors.emerald,
         yellow: colors.amber,
         purple: colors.violet,

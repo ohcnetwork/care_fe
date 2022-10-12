@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -6,6 +5,7 @@ import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { make as CriticalCare__PressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.gen";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
+import { formatDate } from "../../../Utils/utils";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -98,7 +98,7 @@ export const PressureSoreDiagrams = (props: any) => {
           {dates.map((key) => {
             return (
               <option key={key} value={key}>
-                {moment(key).format("LLL")}
+                {formatDate(key)}
               </option>
             );
           })}

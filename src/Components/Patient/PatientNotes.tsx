@@ -7,13 +7,13 @@ import {
   getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import moment from "moment";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import Loading from "../Common/Loading";
 import { RoleButton } from "../Common/RoleButton";
+import { formatDate } from "../../Utils/utils";
 
 interface PatientNotesProps {
   patientId: any;
@@ -143,7 +143,7 @@ const PatientNotes = (props: PatientNotesProps) => {
                 </div>
                 <div className="mt-3">
                   <span className="text-xs text-gray-500">
-                    {moment(note.created_date).format("LLL") || "-"}
+                    {formatDate(note.created_date) || "-"}
                   </span>
                 </div>
 

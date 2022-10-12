@@ -38,6 +38,7 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { make as Link } from "../Common/components/Link.gen";
+import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -454,9 +455,7 @@ export const DailyRounds = (props: any) => {
         .add(state.form.review_time, "minutes")
         .format("DD/MM/YYYY hh:mm A")}`;
     if (prevReviewTime && moment().isBefore(prevReviewTime))
-      return `Next Review at ${moment(prevReviewTime).format(
-        "DD/MM/YYYY hh:mm A"
-      )}`;
+      return `Next Review at ${formatDate(prevReviewTime)}`;
     return "No Reviews Planned!";
   };
 
@@ -673,6 +672,7 @@ export const DailyRounds = (props: any) => {
                         ]}
                         onChange={handleChange}
                         errors={state.errors.review_time}
+                        className="mt-1"
                       />
                       <div className="text-gray-500 text-sm">
                         {getExpectedReviewTime()}
@@ -921,7 +921,7 @@ export const DailyRounds = (props: any) => {
                             options={RHYTHM_CHOICES}
                             onChange={handleChange}
                             errors={state.errors.rhythm}
-                            className="mb-2 mt-1"
+                            className="mb-8"
                           />
                         </div>
                         <div className="md:col-span-2 mt-2">
