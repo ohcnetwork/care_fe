@@ -108,7 +108,7 @@ type FormDetails = {
   review_time: number;
   weight: string;
   height: string;
-  bed: string | null;
+  bed: BedModel | null;
 };
 
 type Action =
@@ -275,9 +275,10 @@ export const ConsultationForm = (props: any) => {
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
-            bed: res.data?.current_bed?.bed_object?.id || null,
+            bed: res.data?.current_bed?.bed_object || null,
           };
           dispatch({ type: "set_form", form: formData });
+          setBed(formData.bed);
         } else {
           goBack();
         }
@@ -856,6 +857,7 @@ export const ConsultationForm = (props: any) => {
                         errors=""
                         multiple={false}
                         margin="dense"
+                        disabled={true}
                         // location={state.form.}
                         facility={facilityId}
                       />
