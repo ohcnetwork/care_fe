@@ -7,7 +7,6 @@ import { getDailyReport } from "../../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
-import { smallCard } from "../../Common/components/SkeletonLoading.gen";
 import { formatDate } from "../../../Utils/utils";
 
 
