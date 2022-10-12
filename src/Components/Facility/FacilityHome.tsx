@@ -407,7 +407,7 @@ export const FacilityHome = (props: any) => {
           </div>
           <div className="flex flex-col justify-center">
             <div
-              className={`group relative h-0 lg:h-48 w-full opacity-0 lg:opacity-100 transition-all duration-200 ease-in-out rounded-lg overflow-clip ${
+              className={`group relative h-0 lg:h-48 w-full max-w-[24rem] opacity-0 lg:opacity-100 transition-all duration-200 ease-in-out rounded-lg overflow-clip ${
                 hasPermissionToEditCoverImage && "cursor-pointer"
               }`}
               onClick={() =>
