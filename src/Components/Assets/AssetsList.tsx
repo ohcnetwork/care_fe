@@ -332,7 +332,7 @@ const AssetsList = () => {
                       onClick={() => navigate(`/assets/${asset.id}`)}
                     >
                       <div className="md:flex">
-                        <p className="text-xl font-normal capitalize break-words">
+                        <p className="text-xl flex font-normal capitalize break-words">
                           <span className="mr-2 text-primary-500">
                             {" "}
                             {
@@ -343,7 +343,7 @@ const AssetsList = () => {
                               ).icon
                             }
                           </span>
-                          {asset.name}
+                          <p className="truncate w-48">{asset.name}</p>
                         </p>
                       </div>
                       <p className="font-normal text-sm">
