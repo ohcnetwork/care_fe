@@ -361,7 +361,7 @@ export const FacilityHome = (props: any) => {
               </button>
             </div>
           </div>
-          <div className="flex flex-col mt-2 md:mt-4">
+          <div className="grid grid-cols-2 gap-2 mt-2 md:mt-4">
             <RoleButton
               id="update-facility"
               className="btn-primary btn"
@@ -373,23 +373,23 @@ export const FacilityHome = (props: any) => {
               Update Facility
             </RoleButton>
             <button
-              className="btn-primary btn mt-2"
+              className="btn-primary btn"
               onClick={() => navigate(`/facility/${facilityId}/inventory`)}
             >
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
-              Inventory Management
+              Manage Inventory
             </button>
             <RoleButton
-              className="btn-primary btn mt-2"
+              className="btn-primary btn"
               handleClickCB={() => navigate(`/facility/${facilityId}/location`)}
               disableFor="readOnly"
               buttonType="html"
             >
               <i className="fas fa-map-marker-alt text-white mr-2"></i>
-              Location Management
+              Manage Locations
             </RoleButton>
             <RoleButton
-              className="btn-primary btn mt-2"
+              className="btn-primary btn"
               handleClickCB={() =>
                 navigate(`/facility/${facilityId}/resource/new`)
               }
@@ -397,10 +397,10 @@ export const FacilityHome = (props: any) => {
               buttonType="html"
             >
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
-              Resource Request
+              Request Resource
             </RoleButton>
             <RoleButton
-              className="btn-primary btn mt-2"
+              className="btn-primary btn"
               handleClickCB={() =>
                 navigate(`/facility/${facilityId}/assets/new`)
               }
@@ -411,14 +411,14 @@ export const FacilityHome = (props: any) => {
               Create Asset
             </RoleButton>
             <button
-              className="btn-primary btn mt-2"
+              className="btn-primary btn"
               onClick={() => navigate(`/assets?facility=${facilityId}`)}
             >
               <i className="fas fa-boxes text-white mr-2"></i>
               View Assets
             </button>
             <button
-              className="btn-primary btn mt-2"
+              className="btn-primary btn"
               onClick={() => navigate(`/facility/${facilityId}/users`)}
             >
               <i className="fas fa-users text-white mr-2"></i>
@@ -428,7 +428,7 @@ export const FacilityHome = (props: any) => {
               currentUser.data.user_type === "StateAdmin") && (
               <button
                 id="facility-delete"
-                className="btn-danger btn mt-2"
+                className="btn-danger btn"
                 onClick={() => setOpenDeleteDialog(true)}
               >
                 <i className="fas fa-trash text-white mr-2"></i>
