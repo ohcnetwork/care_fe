@@ -59,6 +59,7 @@ import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { DiagnosisSelect } from "../Common/DiagnosisSelect";
+import { goBack } from "../../Utils/utils";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
@@ -86,6 +87,8 @@ type FormDetails = {
   referred_to: string;
   icd11_diagnoses: string[];
   icd11_diagnoses_object: ICD11DiagnosisModel[];
+  icd11_provisional_diagnoses: string[];
+  icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
   verified_by: string;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
@@ -105,7 +108,7 @@ type FormDetails = {
   review_time: number;
   weight: string;
   height: string;
-  bed: string | null;
+  bed: BedModel | null;
 };
 
 type Action =
@@ -129,6 +132,8 @@ const initForm: FormDetails = {
   referred_to: "",
   icd11_diagnoses: [],
   icd11_diagnoses_object: [],
+  icd11_provisional_diagnoses: [],
+  icd11_provisional_diagnoses_object: [],
   verified_by: "",
   is_kasp: "false",
   kasp_enabled_date: null,
@@ -187,10 +192,6 @@ const suggestionTypes = [
 ];
 
 const symptomChoices = [...SYMPTOM_CHOICES];
-
-const goBack = () => {
-  window.history.go(-1);
-};
 
 const scrollTo = (id: any) => {
   const element = document.querySelector(`#${id}-div`);
@@ -274,9 +275,10 @@ export const ConsultationForm = (props: any) => {
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
-            bed: res.data?.current_bed?.bed_object?.id || null,
+            bed: res.data?.current_bed?.bed_object || null,
           };
           dispatch({ type: "set_form", form: formData });
+          setBed(formData.bed);
         } else {
           goBack();
         }
@@ -496,6 +498,7 @@ export const ConsultationForm = (props: any) => {
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
         icd11_diagnoses: state.form.icd11_diagnoses,
+        icd11_provisional_diagnoses: state.form.icd11_provisional_diagnoses,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
         prn_prescription: PRNAdvice,
@@ -854,6 +857,7 @@ export const ConsultationForm = (props: any) => {
                         errors=""
                         multiple={false}
                         margin="dense"
+                        disabled={true}
                         // location={state.form.}
                         facility={facilityId}
                       />
@@ -942,6 +946,28 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.verified_by}
                 />
               </div>
+              <div id="provisional-diagnosis-div" className="mt-4">
+                <InputLabel id="diagnosis-label">
+                  Provisional Diagnosis
+                </InputLabel>
+                <DiagnosisSelect
+                  name="icd11_provisional_diagnoses"
+                  selected={state.form.icd11_provisional_diagnoses_object}
+                  setSelected={(selected: ICD11DiagnosisModel[] | null) => {
+                    dispatch({
+                      type: "set_form",
+                      form: {
+                        ...state.form,
+                        icd11_provisional_diagnoses:
+                          selected?.map(
+                            (diagnosis: ICD11DiagnosisModel) => diagnosis.id
+                          ) || [],
+                      },
+                    });
+                  }}
+                />
+              </div>
+
               <div id="diagnosis-div" className="mt-4">
                 <InputLabel id="diagnosis-label">Diagnosis</InputLabel>
                 <DiagnosisSelect

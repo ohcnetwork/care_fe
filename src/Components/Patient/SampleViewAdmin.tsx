@@ -27,6 +27,7 @@ import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
+import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
@@ -290,14 +291,14 @@ export default function SampleViewAdmin() {
                 <div className="text-gray-600 text-sm font-bold">
                   <span className="text-gray-800">Date of Sample:</span>{" "}
                   {item.date_of_sample
-                    ? moment(item.date_of_sample).format("lll")
+                    ? formatDate(item.date_of_sample)
                     : "Not Available"}
                 </div>
 
                 <div className="text-gray-600 text-sm font-bold">
                   <span className="text-gray-800">Date of Result:</span>{" "}
                   {item.date_of_result
-                    ? moment(item.date_of_result).format("lll")
+                    ? formatDate(item.date_of_result)
                     : "Not Available"}
                 </div>
               </div>
@@ -348,11 +349,11 @@ export default function SampleViewAdmin() {
     );
   } else if (sample && sample.length === 0) {
     manageSamples = (
-      <Grid item xs={12} md={12} style={{ display: "flex" }}>
-        <Grid container justify="center" alignItems="center">
-          <h5> No Sample Tests Found</h5>
-        </Grid>
-      </Grid>
+      <div className="w-full bg-white rounded-lg p-3">
+        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+          No Sample Tests Found
+        </div>
+      </div>
     );
   }
 

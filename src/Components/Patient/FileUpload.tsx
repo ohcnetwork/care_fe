@@ -1,6 +1,5 @@
 import axios from "axios";
 import { Button, CircularProgress, InputLabel } from "@material-ui/core";
-import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect } from "react";
@@ -11,6 +10,7 @@ import {
   retrieveUpload,
   createUpload,
   getPatient,
+  editUpload,
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
 import { TextInputField } from "../Common/HelperInputFields";
@@ -26,6 +26,7 @@ import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
+import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -186,39 +187,19 @@ export const FileUpload = (props: FileUploadProps) => {
   ];
 
   const handleZoomIn = () => {
-    const len = zoom_values.length - 1;
-    if (file_state.zoom + 1 === len) {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom + 1,
-        isZoomOutDisabled: false,
-        isZoomInDisabled: true,
-      });
-      // setZoomInDisabled(true);
-    } else {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom + 1,
-        isZoomOutDisabled: false,
-      });
-    }
+    const checkFull = file_state.zoom === zoom_values.length;
+    setFileState({
+      ...file_state,
+      zoom: !checkFull ? file_state.zoom + 1 : file_state.zoom,
+    });
   };
 
   const handleZoomOut = () => {
-    if (file_state.zoom - 1 === 0) {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom - 1,
-        isZoomOutDisabled: true,
-        isZoomInDisabled: false,
-      });
-    } else {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom - 1,
-        isZoomInDisabled: false,
-      });
-    }
+    const checkFull = file_state.zoom === 1;
+    setFileState({
+      ...file_state,
+      zoom: !checkFull ? file_state.zoom - 1 : file_state.zoom,
+    });
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
@@ -270,7 +251,12 @@ export const FileUpload = (props: FileUploadProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           audio_urls(res.data.results);
-          setuploadedFiles(res.data.results);
+          setuploadedFiles(
+            res.data.results.filter(
+              (file: FileUploadModel) =>
+                file.upload_completed || file.file_category === "AUDIO"
+            )
+          );
           setTotalCount(res.data.count);
         }
         setIsLoading(false);
@@ -349,9 +335,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <span className="font-semibold leading-relaxed">
                 Created On :
               </span>{" "}
-              {item.created_date
-                ? moment(item.created_date).format("lll")
-                : "-"}
+              {item.created_date ? formatDate(item.created_date) : "-"}
             </div>
           </div>
           <div className="flex items-center">
@@ -479,7 +463,7 @@ export const FileUpload = (props: FileUploadProps) => {
             msg: "File Uploaded Successfully",
           });
           setUploadFileNameError("");
-          resolve();
+          resolve(response);
         })
         .catch((e) => {
           Notification.Error({
@@ -504,13 +488,23 @@ export const FileUpload = (props: FileUploadProps) => {
     }
     return true;
   };
+  const markUploadComplete = async (response: any) => {
+    return dispatch(
+      editUpload(
+        { upload_completed: true },
+        response.data.id,
+        type,
+        getAssociatedId()
+      )
+    );
+  };
 
   const handleUpload = async (status: any) => {
     if (!validateFileUpload()) return;
     const f = file;
 
     const category = "UNSPECIFIED";
-    const filename = uploadFileName === ""  && f ? f.name : uploadFileName;
+    const filename = uploadFileName === "" && f ? f.name : uploadFileName;
     const name = f?.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
@@ -523,6 +517,7 @@ export const FileUpload = (props: FileUploadProps) => {
     };
     dispatch(createUpload(requestData))
       .then(uploadfile)
+      .then(markUploadComplete)
       .catch(() => {
         setUploadStarted(false);
       })
@@ -619,64 +614,56 @@ export const FileUpload = (props: FileUploadProps) => {
       >
         {fileUrl && fileUrl.length > 0 ? (
           <>
-            <div className="flex absolute w-3/5 top-16 md:top-0 md:right-4">
-              {file_state.isImage && (
-                <div className="flex flex-col gap-2 md:flex-row">
-                  <div>
-                    <Button
-                      color="default"
-                      variant="contained"
-                      startIcon={<ZoomIn />}
-                      onClick={() => {
-                        handleZoomIn();
-                      }}
-                      disabled={file_state.isZoomInDisabled}
-                    >
-                      Zoom in
-                    </Button>
-                  </div>
-                  <div>
-                    <Button
-                      color="default"
-                      variant="contained"
-                      startIcon={<ZoomOut />}
-                      onClick={() => {
-                        handleZoomOut();
-                      }}
-                      disabled={file_state.isZoomOutDisabled}
-                    >
-                      Zoom Out
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="flex justify-center md:absolute md:right-2">
-              {downloadURL && downloadURL.length > 0 && (
-                <a
-                  href={downloadURL}
-                  download={file_state.name + "." + file_state.extension}
-                >
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    startIcon={<GetApp />}
+            <div className="flex absolute h-full sm:h-auto sm:inset-x-4 sm:top-4 p-4 sm:p-0 justify-between flex-col sm:flex-row">
+              <div className="flex gap-3">
+                {file_state.isImage && (
+                  <>
+                    {[
+                      [
+                        "Zoom In",
+                        "magnifying-glass-plus",
+                        handleZoomIn,
+                        file_state.zoom === zoom_values.length,
+                      ],
+                      [
+                        "Zoom Out",
+                        "magnifying-glass-minus",
+                        handleZoomOut,
+                        file_state.zoom === 1,
+                      ],
+                    ].map((button, index) => (
+                      <button
+                        key={index}
+                        onClick={button[2] as () => void}
+                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                        disabled={button[3] as boolean}
+                      >
+                        <i className={`fas fa-${button[1]} mr-2`} />
+                        {button[0] as string}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
+              <div className="flex gap-3">
+                {downloadURL && downloadURL.length > 0 && (
+                  <a
+                    href={downloadURL}
+                    download
+                    className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
                   >
+                    <i className="fas fa-download mr-2" />
                     Download
-                  </Button>
-                </a>
-              )}
-              <Button
-                color="primary"
-                variant="contained"
-                style={{ marginLeft: "10px" }}
-                startIcon={<Close />}
-                onClick={() => {
-                  handleClose();
-                }}
-              >
-                Close
-              </Button>
+                  </a>
+                )}
+                <button
+                  onClick={handleClose}
+                  className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                >
+                  <i className="fas fa-times mr-2" />
+                  Close
+                </button>
+              </div>
             </div>
             {file_state.isImage ? (
               <img
@@ -786,9 +773,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
                   <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
-                    <label
-                      className="flex items-center btn btn-primary"
-                    >
+                    <label className="flex items-center btn btn-primary">
                       <i className="fas fa-file-arrow-down mr-2" /> Choose file
                       <input
                         title="changeFile"
@@ -808,17 +793,19 @@ export const FileUpload = (props: FileUploadProps) => {
                     </button>
                   </div>
                 )}
-                {file && <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
-                  {file?.name}
-                  <button
-                    onClick={()=>{
-                      setFile(null);
-                      setUploadFileName("");
-                    }}
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
-                </div>}
+                {file && (
+                  <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                    {file?.name}
+                    <button
+                      onClick={() => {
+                        setFile(null);
+                        setUploadFileName("");
+                      }}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ) : null}

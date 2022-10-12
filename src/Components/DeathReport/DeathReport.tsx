@@ -11,6 +11,7 @@ import {
 } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
 import moment from "moment";
+import { formatDate } from "../../Utils/utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function PrintDeathReport(props: { id: string }) {
@@ -38,6 +39,7 @@ export default function PrintDeathReport(props: { id: string }) {
     kottayam_confirmation_sent: "",
     kottayam_sample_date: "",
     cause_of_death: "",
+    facility: "",
   };
 
   const [patientData, setPatientData] = useState(initialState);
@@ -157,7 +159,7 @@ export default function PrintDeathReport(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of declaring positive:{" "}
               </span>
-              {moment(patientData.date_declared_positive).format("LLL") || ""}
+              {formatDate(patientData.date_declared_positive) || ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -169,13 +171,13 @@ export default function PrintDeathReport(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of sample collection for Covid testing:{" "}
               </span>
-              {moment(patientData.date_of_test).format("LLL") || ""}
+              {formatDate(patientData.date_of_test) || ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Date of confirmation as Covid with SRF ID:{" "}
               </span>
-              {moment(patientData.date_of_result).format("LLL") || ""} (SRF ID:{" "}
+              {formatDate(patientData.date_of_result) || ""} (SRF ID:{" "}
               {patientData.srf_id || "-"})
             </div>
             <div>
@@ -195,13 +197,13 @@ export default function PrintDeathReport(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of admission:{" "}
               </span>
-              {moment(patientData.date_of_admission).format("LLL") || ""}
+              {formatDate(patientData.date_of_admission) || ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Date of death:{" "}
               </span>
-              {moment(patientData.date_of_death).format("LLL") || ""}
+              {formatDate(patientData.date_of_death) || ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -244,7 +246,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of sending the sample for confirmation to NIV/IUCBR
                 Kottayam:{" "}
               </span>
-              {moment(patientData.kottayam_sample_date).format("LLL") || ""}
+              {formatDate(patientData.kottayam_sample_date) || ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -290,6 +292,7 @@ export default function PrintDeathReport(props: { id: string }) {
               [props.id]: { name: patientName },
               death_report: { style: "pointer-events-none" },
             }}
+            backUrl={`/facility/${patientData.facility}/patient/${id}`}
           />
           <div className="grid grid-rows-11">
             <div className="grid grid-cols-1 mt-4 gap-10">

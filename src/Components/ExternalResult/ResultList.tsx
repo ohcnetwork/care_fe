@@ -78,8 +78,8 @@ export default function ResultList() {
         if (res && res.data) {
           setData(res.data.results);
           setTotalCount(res.data.count);
+          setIsLoading(false);
         }
-        setIsLoading(false);
       })
       .catch(() => {
         setIsLoading(false);
@@ -317,13 +317,15 @@ export default function ResultList() {
     manageResults = <>{resultList}</>;
   } else if (data && data.length === 0) {
     manageResults = (
-      <Grid item xs={12} md={12}>
-        <Grid container justify="center" alignItems="center">
-          <h5 className="flex justify-center items-center text-gray-600">
-            No Results Found
-          </h5>
-        </Grid>
-      </Grid>
+      <tr className="bg-white">
+        <td colSpan={5}>
+          <div className="w-full bg-white rounded-lg p-3">
+            <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+              No Results Found
+            </div>
+          </div>
+        </td>
+      </tr>
     );
   }
 
@@ -349,9 +351,15 @@ export default function ResultList() {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Results
               </dt>
-              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                {totalCount}
-              </dd>
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
             </dl>
           </div>
         </div>
@@ -454,7 +462,7 @@ export default function ResultList() {
           "sample_collection_date_after"
         )}
         {badge("SRF ID", qParams.srf_id, "srf_id")}
-      </div>   
+      </div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-t-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
