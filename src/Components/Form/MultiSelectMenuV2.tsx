@@ -7,7 +7,7 @@ type Props<T, V = T> = {
   id?: string;
   placeholder?: React.ReactNode;
   options: T[];
-  value: V[];
+  value: V[] | undefined;
   onChange: OptionCallback<V[]>;
   optionLabel: OptionCallback<T, React.ReactNode>;
   optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
@@ -18,36 +18,41 @@ type Props<T, V = T> = {
   className?: string;
 };
 
-const MultiSelectMenuV2 = <T,>(props: Props<T>) => {
+const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
   const options = props.options.map((option) => {
     const label = props.optionLabel(option);
     const selectedLabel = props.optionSelectedLabel
       ? props.optionSelectedLabel(option)
       : label;
 
+    const value = props.optionValue ? props.optionValue(option) : option;
+
     return {
       label,
       selectedLabel,
       description: props.optionDescription && props.optionDescription(option),
       icon: props.optionIcon && props.optionIcon(option),
-      value: props.optionValue ? props.optionValue(option) : option,
-      isSelected: props.value.includes(option),
+      value,
+      isSelected: props.value?.includes(value as any) ?? false,
       node: props.renderOption ? (
         props.renderOption(option)
       ) : (
-        <div className="">{selectedLabel}</div>
+        <div className="px-2 bg-gray-100 rounded-full text-xs text-gray-900 border border-gray-400">
+          {selectedLabel}
+        </div>
       ),
     };
   });
 
-  //   const placeholder = props.placeholder ?? "Select";
+  const placeholder = props.placeholder ?? "Select";
+  const selectedOptions = options.filter((o) => o.isSelected);
 
   return (
     <div className={props.className}>
       <Listbox
-        value={options.filter((o) => o.isSelected)}
+        value={selectedOptions}
         onChange={(opts: typeof options) =>
-          props.onChange(opts.map((o) => o.value))
+          props.onChange(opts.map((o) => o.value) as any)
         }
         multiple
       >
@@ -60,11 +65,14 @@ const MultiSelectMenuV2 = <T,>(props: Props<T>) => {
               <Listbox.Button className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
                 <div className="relative z-0 flex items-center w-full">
                   <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
-                    <div className="ml-2 text-sm text-gray-700">
-                      {/* {value.icon} */}
-                    </div>
-                    <p className="ml-2.5 text-sm font-medium">
-                      {/* {value.selectedLabel} */}
+                    <p className="ml-2.5 text-sm font-normal text-gray-600">
+                      {selectedOptions.length ? (
+                        <div className="flex flex-wrap gap-1">
+                          {selectedOptions.map((o) => o.node)}
+                        </div>
+                      ) : (
+                        placeholder
+                      )}
                     </p>
                   </div>
                   <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
@@ -102,13 +110,17 @@ const MultiSelectMenuV2 = <T,>(props: Props<T>) => {
                             >
                               {option.label}
                             </p>
-                            {option.icon && (
+                            {(option.icon || option.isSelected) && (
                               <span
                                 className={`transition-all duration-100 ease-in-out ${
                                   active ? "text-white" : "text-primary-500"
                                 }`}
                               >
-                                {option.icon}
+                                {option.isSelected ? (
+                                  <i className="fa-solid fa-check" />
+                                ) : (
+                                  option.icon
+                                )}
                               </span>
                             )}
                           </div>

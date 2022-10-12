@@ -1,9 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  MultiSelectField,
-  AutoCompleteAsyncField,
-} from "../Common/HelperInputFields";
+import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import {
   PATIENT_FILTER_ORDER,
   GENDER_TYPES,
@@ -225,11 +222,8 @@ export default function PatientFilterV2(props: any) {
 
   const handleMultiSelectChange = (event: any) => {
     const { name, value } = event.target;
-
     const filterData: any = { ...filterState };
     filterData[name] = [...value];
-    console.log(value);
-
     setFilterState(filterData);
   };
 
@@ -679,17 +673,20 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Last Admitted to (Bed Type)</span>
-          {/* <MultiSelectMenuV2
+          <MultiSelectMenuV2
+            className="pt-2"
             id="last_consultation_admitted_to_list"
             placeholder="Select bed types"
-            options={}
-          /> */}
-          <MultiSelectField
-            name="last_consultation_admitted_to_list"
-            variant="outlined"
+            options={PATIENT_FILTER_ADMITTED_TO}
             value={filterState.last_consultation_admitted_to_list}
-            options={[...PATIENT_FILTER_ADMITTED_TO]}
-            onChange={handleMultiSelectChange}
+            optionValue={(o) => o.id}
+            optionLabel={(o) => o.text}
+            onChange={(o) =>
+              setFilterState({
+                ...filterState,
+                last_consultation_admitted_to_list: o,
+              })
+            }
           />
         </div>
         <div className="w-full flex-none">
