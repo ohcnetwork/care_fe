@@ -267,7 +267,10 @@ export const FacilityHome = (props: any) => {
       </Dialog>
       <CoverImageEditModal
         open={editCoverImage}
-        onClose={() => setEditCoverImage(false)}
+        onClose={() => {
+          setEditCoverImage(false);
+          window.location.reload();
+        }}
         facility={facilityData}
       />
       {hasCoverImage && (
