@@ -30,6 +30,7 @@ import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -227,6 +228,7 @@ export default function PatientFilterV2(props: any) {
 
     const filterData: any = { ...filterState };
     filterData[name] = [...value];
+    console.log(value);
 
     setFilterState(filterData);
   };
@@ -677,6 +679,11 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Last Admitted to (Bed Type)</span>
+          {/* <MultiSelectMenuV2
+            id="last_consultation_admitted_to_list"
+            placeholder="Select bed types"
+            options={}
+          /> */}
           <MultiSelectField
             name="last_consultation_admitted_to_list"
             variant="outlined"
