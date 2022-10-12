@@ -120,12 +120,14 @@ export const PressureSoreDiagrams = (props: any) => {
   return (
     <div>
       {dates && dropdown(dates)}
-      {!isLoading && selectedData.data && (
+      {!isLoading && selectedData.data ? (
         <CriticalCare__PressureScoreViewer
           pressureSoreParameter={selectedData.data}
           id={selectedData.id}
           consultationId={consultationId}
         />
+      ) : (
+        <div className="h-screen" />
       )}
       {totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
