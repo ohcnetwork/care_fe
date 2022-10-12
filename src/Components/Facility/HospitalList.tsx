@@ -42,7 +42,6 @@ import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
-import CoverImageEditModal from "./CoverImageEditModal";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -84,7 +83,6 @@ export const HospitalList = (props: any) => {
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
-  const [coverImageModalFor, setCoverImageModalFor] = useState(undefined);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
@@ -335,10 +333,7 @@ export const HospitalList = (props: any) => {
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg overflow-clip bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
-              <div
-                className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0 cursor-pointer"
-                onClick={() => setCoverImageModalFor(facility.id)}
-              >
+              <div className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
                 {facility.read_cover_image_url ? (
                   <img
                     src={facility.read_cover_image_url}
@@ -348,15 +343,6 @@ export const HospitalList = (props: any) => {
                 ) : (
                   <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                 )}
-                <div className="transition-all bg-black bg-opacity-60 h-8 left-0 right-0 -bottom-8 group-hover:bottom-0 absolute flex justify-start items-center z-10 gap-2 px-2 text-gray-300">
-                  <i className="fa-solid fa-pen"></i>
-                  <span>Edit Cover</span>
-                </div>
-                <CoverImageEditModal
-                  open={coverImageModalFor === facility.id}
-                  onClose={() => setCoverImageModalFor(undefined)}
-                  facility={facility}
-                />
               </div>
               <div className="h-full w-full grow">
                 <div className="h-full flex flex-col justify-between w-full">

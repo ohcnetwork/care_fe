@@ -11,6 +11,7 @@ import {
   BED_TYPES,
   DOCTOR_SPECIALIZATION,
   FACILITY_FEATURE_TYPES,
+  USER_TYPES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -31,6 +32,7 @@ import {
 } from "./models";
 import moment from "moment";
 import { RoleButton } from "../Common/RoleButton";
+import CoverImageEditModal from "./CoverImageEditModal";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -42,6 +44,7 @@ export const FacilityHome = (props: any) => {
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+  const [editCoverImage, setEditCoverImage] = React.useState(false);
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
@@ -212,6 +215,19 @@ export const FacilityHome = (props: any) => {
 
   const hasCoverImage = !!facilityData.read_cover_image_url;
 
+  const StaffUserTypeIndex = USER_TYPES.findIndex((type) => type === "Staff");
+  const hasPermissionToEditCoverImage =
+    !(currentUser.data.user_type as string).includes("ReadOnly") &&
+    USER_TYPES.findIndex((type) => type == currentUser.data.user_type) >=
+      StaffUserTypeIndex;
+
+  const editCoverImageTooltip = hasPermissionToEditCoverImage && (
+    <div className="transition-all bg-black bg-opacity-60 h-8 left-0 right-0 -bottom-8 group-hover:bottom-0 absolute flex justify-start items-center z-10 gap-3 px-4 text-gray-300">
+      <i className="fa-solid fa-pen"></i>
+      <span>{`${hasCoverImage ? "Edit" : "Upload a "} cover image`}</span>
+    </div>
+  );
+
   return (
     <div className="px-2 pb-2">
       <PageTitle
@@ -249,12 +265,27 @@ export const FacilityHome = (props: any) => {
           </div>
         </DialogActions>
       </Dialog>
+      <CoverImageEditModal
+        open={editCoverImage}
+        onClose={() => setEditCoverImage(false)}
+        facility={facilityData}
+      />
       {hasCoverImage && (
-        <img
-          src={facilityData.read_cover_image_url}
-          alt="Facility"
-          className="w-full object-cover rounded-t-lg bg-gray-200 h-48 lg:h-0 opacity-100 lg:opacity-0 transition-all duration-200 ease-in-out"
-        />
+        <div
+          className={`group relative overflow-clip w-full rounded-t-lg bg-gray-200 h-48 lg:h-0 opacity-100 lg:opacity-0 transition-all duration-200 ease-in-out ${
+            hasPermissionToEditCoverImage && "cursor-pointer"
+          }`}
+          onClick={() =>
+            hasPermissionToEditCoverImage && setEditCoverImage(true)
+          }
+        >
+          <img
+            src={facilityData.read_cover_image_url}
+            alt="Facility"
+            className="w-full object-cover h-full"
+          />
+          {editCoverImageTooltip}
+        </div>
       )}
       <div
         className={`bg-white ${
@@ -375,20 +406,28 @@ export const FacilityHome = (props: any) => {
             </div>
           </div>
           <div className="flex flex-col justify-center">
-            {hasCoverImage && (
-              <img
-                src={facilityData.read_cover_image_url}
-                alt="Facility"
-                className="w-full object-cover rounded-lg h-0 lg:h-48 bg-gray-200 opacity-0 lg:opacity-100 transition-all duration-200 ease-in-out"
-              />
-            )}
             <div
-              className={`${
-                hasCoverImage
-                  ? "grid grid-cols-1 xl:grid-cols-2"
-                  : "flex flex-col"
-              } gap-2 mt-2 md:mt-4 transition-all duration-200 ease-in-out`}
+              className={`group relative h-0 lg:h-48 w-full opacity-0 lg:opacity-100 transition-all duration-200 ease-in-out rounded-lg overflow-clip ${
+                hasPermissionToEditCoverImage && "cursor-pointer"
+              }`}
+              onClick={() =>
+                hasPermissionToEditCoverImage && setEditCoverImage(true)
+              }
             >
+              {hasCoverImage ? (
+                <img
+                  src={facilityData.read_cover_image_url}
+                  alt="Facility"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="lg:h-48 bg-gray-200 text-gray-700 flex items-center justify-center font-medium">
+                  No cover image
+                </div>
+              )}
+              {editCoverImageTooltip}
+            </div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-2 mt-2 md:mt-4 transition-all duration-200 ease-in-out">
               <RoleButton
                 id="update-facility"
                 className="btn-primary btn"
