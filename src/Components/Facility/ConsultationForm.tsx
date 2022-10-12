@@ -108,7 +108,7 @@ type FormDetails = {
   review_time: number;
   weight: string;
   height: string;
-  bed: string | null;
+  bed: BedModel | null;
 };
 
 type Action =
