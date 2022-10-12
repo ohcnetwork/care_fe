@@ -25,7 +25,7 @@ type SelectMenuProps<T, V = T> = {
     }
 );
 
-const SelectMenu = <T, V>(props: SelectMenuProps<T, V>) => {
+const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const valueOptions = props.options.map((option) => {
     const label = props.optionLabel(option);
 
@@ -145,4 +145,4 @@ const SelectMenu = <T, V>(props: SelectMenuProps<T, V>) => {
   );
 };
 
-export default SelectMenu;
+export default SelectMenuV2;

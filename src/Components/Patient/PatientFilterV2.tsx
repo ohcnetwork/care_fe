@@ -26,7 +26,7 @@ import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 import { debounce } from "lodash";
-import SelectMenu from "../Form/SelectMenu";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -444,7 +444,7 @@ export default function PatientFilterV2(props: any) {
       </div>
       <div className="w-full flex-none pt-16">
         <span className="text-sm">Ordering</span>
-        <SelectMenu
+        <SelectMenuV2
           className="pt-2"
           options={Object.keys(PATIENT_FILTER_ORDER)}
           optionLabel={(o) => PATIENT_FILTER_ORDER[o].label}
@@ -528,7 +528,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Facility type</span>
-          <SelectMenu
+          <SelectMenuV2
             className="pt-2"
             placeholder="Show all"
             options={FACILITY_TYPES}
@@ -544,7 +544,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Gender</span>
-          <SelectMenu
+          <SelectMenuV2
             className="pt-2"
             placeholder="Show all"
             options={GENDER_TYPES}
@@ -558,7 +558,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Is Antenatal</span>
-          <SelectMenu
+          <SelectMenuV2
             className="pt-2"
             placeholder="Show all"
             options={[true, false]}
@@ -572,7 +572,7 @@ export default function PatientFilterV2(props: any) {
         {KASP_ENABLED && (
           <div className="w-full flex-none">
             <span className="text-sm">{KASP_STRING}</span>
-            <SelectMenu
+            <SelectMenuV2
               className="pt-2"
               placeholder="Show all"
               options={[true, false]}
@@ -587,7 +587,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Category</span>
-          <SelectMenu
+          <SelectMenuV2
             className="pt-2"
             placeholder="Show all"
             options={PATIENT_FILTER_CATEGORIES}
@@ -599,7 +599,7 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm">Disease Status</span>
-          <SelectMenu
+          <SelectMenuV2
             className="pt-2"
             placeholder="Show all"
             options={DISEASE_STATUS}
@@ -612,7 +612,7 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Vaccinated</span>
-          <SelectMenu
+          <SelectMenuV2
             className="pt-2"
             placeholder="Show all"
             options={VACCINATED_FILTER}
@@ -626,7 +626,7 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Declared</span>
-          <SelectMenu
+          <SelectMenuV2
             className="pt-2"
             placeholder="Show all"
             options={DECLARED_FILTER}
@@ -640,7 +640,7 @@ export default function PatientFilterV2(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm">Telemedicine</span>
-          <SelectMenu
+          <SelectMenuV2
             className="pt-2"
             placeholder="Show all"
             options={TELEMEDICINE_FILTER}
