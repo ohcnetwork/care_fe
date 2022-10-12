@@ -13,7 +13,7 @@ let isInputInRangeInt = (min, max, val) => {
   switch val {
   | Some(value) =>
     switch (value < min, value > max) {
-    | (true, _) => Some("Input less than " ++ string_of_int(1))
+    | (true, _) => Some("Input less than " ++ string_of_int(min))
     | (_, true) => Some("Input greater than maximum")
     | _ => None
     }
