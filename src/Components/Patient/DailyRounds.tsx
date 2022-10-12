@@ -38,6 +38,7 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { make as Link } from "../Common/components/Link.gen";
+import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -452,9 +453,9 @@ export const DailyRounds = (props: any) => {
   const getExpectedReviewTime = () => {
     const nextReviewTime = state.form.review_interval || prevReviewInterval;
     if (Number(nextReviewTime))
-      return `Review before ${moment()
-        .add(nextReviewTime, "minutes")
-        .format("DD/MM/YYYY hh:mm A")}`;
+      return `Review before ${formatDate(
+        moment().add(nextReviewTime, "minutes").toDate()
+      )}`;
     return "No Reviews Planned!";
   };
 

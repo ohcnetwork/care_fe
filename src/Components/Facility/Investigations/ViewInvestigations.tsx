@@ -5,11 +5,11 @@ import {
   getInvestigationSessions,
   getInvestigation,
 } from "../../../Redux/actions";
-import moment from "moment";
 import { navigate } from "raviger";
 import ReportTable from "./Reports/ReportTable";
 import { InvestigationResponse } from "./Reports/types";
 import loadable from "@loadable/component";
+import { formatDate } from "../../../Utils/utils";
 const Loading = loadable(() => import("../../Common/Loading"));
 
 interface InvestigationSessionType {
@@ -99,9 +99,7 @@ export default function ViewInvestigations(props: any) {
                 className="flex justify-between items-center bg-white hover:bg-gray-200 cursor-pointer p-4 border rounded-lg shadow"
               >
                 <div>
-                  {moment(investigationSession.session_created_date).format(
-                    "lll"
-                  )}
+                  {formatDate(investigationSession.session_created_date)}
                 </div>
                 <button
                   onClick={() =>

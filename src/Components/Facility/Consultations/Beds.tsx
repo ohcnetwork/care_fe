@@ -12,7 +12,7 @@ import { BedSelect } from "../../Common/BedSelect";
 import { Button, InputLabel } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { TextInputField } from "../../Common/HelperInputFields";
-import moment from "moment";
+import { formatDate } from "../../../Utils/utils";
 
 const formatDateTime: () => string = () => {
   const current = new Date();
@@ -195,11 +195,11 @@ const Beds = (props: BedsProps) => {
                   {bed?.bed_object?.location_object?.name}
                 </div>
                 <div className="text-center bg-primary-100 p-2 break-words">
-                  {moment(bed?.start_date).format("MMMM Do YYYY, h:mm:ss a")}
+                  {formatDate(bed?.start_date)}
                 </div>
                 {bed?.end_date ? (
                   <div className="text-center bg-primary-100 p-2 break-words">
-                    {moment(bed?.end_date).format("MMMM Do YYYY, h:mm:ss a")}
+                    {formatDate(bed?.end_date)}
                   </div>
                 ) : (
                   <div className="text-center bg-primary-100 p-2">
