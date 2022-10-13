@@ -14,6 +14,11 @@ export const StackedLinePlot = (props: any) => {
   }));
 
   const generalOptions = {
+    grid: {
+      left: "15px",
+      right: "30px",
+      containLabel: true,
+    },
     color: COLORS,
     title: {
       text:
@@ -47,6 +52,7 @@ export const StackedLinePlot = (props: any) => {
     },
     tooltip: {
       trigger: "axis",
+      confine: true,
     },
     toolbox: {
       show: true,
@@ -65,8 +71,9 @@ export const StackedLinePlot = (props: any) => {
       boundaryGap: false,
       data: xData,
       axisLabel: {
-        width: 100,
+        width: 85,
         overflow: "break",
+        align: "left",
       },
     },
     yAxis: {
