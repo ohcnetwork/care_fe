@@ -70,16 +70,27 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
               {props.placeholder}
             </Listbox.Label>
             <div className="relative">
-              <Listbox.Button className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
-                <div className="relative z-0 flex items-center w-full">
-                  <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
-                    <p className="ml-2.5 text-sm font-normal text-gray-500">
-                      <Placeholder />
-                    </p>
+              <div className="">
+                <Listbox.Button className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
+                  <div className="relative z-0 flex items-center w-full">
+                    <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
+                      <p className="ml-2.5 text-sm font-normal text-gray-500">
+                        <Placeholder />
+                      </p>
+                    </div>
+                    <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
                   </div>
-                  <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
-                </div>
-              </Listbox.Button>
+                </Listbox.Button>
+                {selectedOptions.length !== 0 && (
+                  <div className="p-2 flex flex-wrap gap-2">
+                    {selectedOptions.map((option) => (
+                      <span className="bg-gray-200 border border-gray-400 text-gray-800 rounded-full text-xs px-2 py-1">
+                        {option.selectedLabel}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
               <Transition
                 show={open}
                 as={Fragment}
@@ -90,7 +101,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Listbox.Options className="origin-top-right absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
+                <Listbox.Options className="top-12 absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
                   {options.map((option, index) => (
                     <Listbox.Option
                       id={`${props.id}-option-${index}`}
