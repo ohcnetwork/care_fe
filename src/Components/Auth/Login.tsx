@@ -99,11 +99,10 @@ export const Login = () => {
             window.location.pathname === "/" ||
             window.location.pathname === "/login"
           ) {
-            navigate("/facility");
+            window.location.href = "/facility";
           } else {
-            navigate(window.location.pathname.toString());
+            window.location.href = window.location.pathname.toString();
           }
-          window.location.reload();
         } else {
           // error from server set back to login button
           setLoading(false);
