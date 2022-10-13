@@ -603,6 +603,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           )}
                           <label
                             onClick={() => {
+                              setArchiveReason("");
                               setModalDetails({ name: item.name, id: item.id });
                               setModalOpenForArchive(true);
                             }}
@@ -683,6 +684,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     )}
                     <label
                       onClick={() => {
+                        setArchiveReason("");
                         setModalDetails({ name: item.name, id: item.id });
                         setModalOpenForArchive(true);
                       }}
@@ -699,7 +701,48 @@ export const FileUpload = (props: FileUploadProps) => {
               <div className="flex flex-wrap justify-between space-y-2">
                 <div className="flex flex-wrap justify-between space-x-2">
                   <div>
-                    <i className="fa-solid fa-file-circle-xmark fa-3x m-3 text-primary-500"></i>
+                    {item.file_category === "AUDIO" ? (
+                      <div className="relative">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="absolute w-12 h-12 bottom-1 right-2 text-white"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+
+                        <i className="fa-solid fa-file-audio fa-3x m-3 text-gray-500"></i>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="absolute w-12 h-12 bottom-1 right-2 text-white"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                        <i
+                          className={`${getIconClassName(
+                            item?.extension
+                          )} fa-3x m-3 text-gray-500`}
+                        ></i>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div>
@@ -742,7 +785,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <i className="fa-solid fa-circle-question mr-2 "></i>MORE
                     DETAILS
                   </label>
-                  <label
+                  {/* <label
                     onClick={() => {
                       setModalDetails({
                         name: item.name,
@@ -753,7 +796,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     className="btn btn-primary m-1 sm:w-auto w-full"
                   >
                     <i className="fa-solid fa-box-archive mr-2 "></i>UNARCHIVE
-                  </label>
+                  </label> */}
                 </div>
               </div>
             </>
@@ -1125,14 +1168,29 @@ export const FileUpload = (props: FileUploadProps) => {
             }}
             className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content"
           >
+            <div className="text-center m-2">
+              <i className="fa-solid fa-5x fa-triangle-exclamation text-red-500"></i>
+            </div>
+            <div className="text-xl text-center text-black m-2">
+              This action is irreversible. Once a file is archived it cannot be
+              unarchived.
+            </div>
             <div>
-              <InputLabel className="text-xl" id="archivereasonlabel">
+              <InputLabel
+                className="text-md text-black text-center"
+                id="archivereasonlabel"
+              >
                 Please state the reason for archiving{" "}
                 <b>{modalDetails?.name}</b> file?
               </InputLabel>
               <TextInputField
                 name="editFileName"
                 variant="outlined"
+                rows={6}
+                multiline
+                required
+                className="w-full border p-2 max-h-64"
+                placeholder="Type the reason..."
                 margin="dense"
                 value={archiveReason}
                 onChange={(e) => setArchiveReason(e.target.value)}
@@ -1181,14 +1239,14 @@ export const FileUpload = (props: FileUploadProps) => {
         </div>
       </Modal>
       <Modal open={modalOpenForMoreDetails}>
-        <div className="h-screen w-full absolute flex items-center justify-center ">
+        <div className="h-screen w-full absolute flex items-center justify-center">
           <div className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content">
             <div>
               <div className="text-center">
                 <i className="fa-solid fa-file-circle-xmark my-2 fa-4x text-primary-500"></i>
               </div>
               <div className="text-md text-center">
-                <b>{modalDetails?.name}</b> file is arcived.
+                <b>{modalDetails?.name}</b> file is archived.
               </div>
               <div className="text-md text-center">
                 <b>Reason:</b> {modalDetails?.reason}
@@ -1388,7 +1446,10 @@ export const FileUpload = (props: FileUploadProps) => {
         breadcrumbs={false}
       />
       {uploadedFiles && uploadedFiles.length > 0 ? (
-        uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))
+        [
+          ...uploadedFiles.filter((item: FileUploadModel) => !item.is_archived),
+          ...uploadedFiles.filter((item: FileUploadModel) => item.is_archived),
+        ].map((item: FileUploadModel) => renderFileUpload(item))
       ) : (
         <div className="mt-4 border bg-white shadow rounded-lg p-4">
           <div className="font-bold text-gray-500 text-md flex justify-center items-center">
