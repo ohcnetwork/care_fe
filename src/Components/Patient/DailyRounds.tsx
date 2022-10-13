@@ -179,7 +179,7 @@ export const DailyRounds = (props: any) => {
             patient_category: res.data.patient_category
               ? PATIENT_CATEGORIES.find(
                   (i) => i.text === res.data.patient_category
-                )?.id
+                )?.id || "Comfort"
               : "Comfort",
             clone_last: res.data.count > 0 ? "true" : "false",
           },
