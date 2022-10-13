@@ -728,16 +728,11 @@ button:disabled,
 }
 
 .form-input {
-  padding-top: 6px;
-  padding-bottom: 6px;
-  width: 100%;
-  border-radius: 4px;
-  height: 38px;
+  @apply text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out !important
 }
 
-.form-input:focus {
-  border-color: #28a745 !important;
-  box-shadow: 0 0 0 1px #28a745 !important;
+.form-textarea {
+  @apply form-input resize-none !important
 }
 
 .shifting-page-filter-dropdown .MuiFormControl-root {
