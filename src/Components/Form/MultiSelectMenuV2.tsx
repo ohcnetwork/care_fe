@@ -50,7 +50,9 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
     if (selectedOptions.length === 0) return placeholder;
     if (props.renderSelectedOptions)
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
-    return `${selectedOptions.length} items selected`;
+    return (
+      <span className="text-gray-700">{`${selectedOptions.length} items selected`}</span>
+    );
   };
 
   return (
@@ -71,7 +73,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
               <Listbox.Button className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
                 <div className="relative z-0 flex items-center w-full">
                   <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
-                    <p className="ml-2.5 text-sm font-normal text-gray-600">
+                    <p className="ml-2.5 text-sm font-normal text-gray-500">
                       <Placeholder />
                     </p>
                   </div>

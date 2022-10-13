@@ -25,7 +25,7 @@ const TextFormField = (props: TextFormFieldProps) => {
     <FormField props={props}>
       <input
         id={props.id}
-        className={`text-sm w-full px-4 py-3 rounded ${bgColor} focus:bg-white ${borderColor} focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in`}
+        className={`text-sm w-full px-4 py-3 rounded placeholder:text-gray-500 ${bgColor} focus:bg-white ${borderColor} focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in`}
         disabled={props.disabled}
         type={props.type || "text"}
         placeholder={props.placeholder}

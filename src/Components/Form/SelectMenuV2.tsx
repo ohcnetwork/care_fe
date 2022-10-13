@@ -43,7 +43,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const placeholder = props.placeholder ?? "Select";
   const defaultOption = {
     label: placeholder,
-    selectedLabel: <p className="font-normal text-gray-600">{placeholder}</p>,
+    selectedLabel: <p className="font-normal text-gray-500">{placeholder}</p>,
     description: undefined,
     icon: undefined,
     value: undefined,
