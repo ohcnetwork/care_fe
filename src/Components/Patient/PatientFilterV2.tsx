@@ -28,6 +28,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
+import DateInputFormField from "../Form/FormFields/DateInputFormField";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -688,6 +689,18 @@ export default function PatientFilterV2(props: any) {
             label={"Date of result"}
             size="small"
           />
+          <div className="flex gap-2">
+            <DateInputFormField
+              label="dtae input"
+              name=""
+              onChange={() => {}}
+            />
+            <DateInputFormField
+              label="dtae input"
+              name=""
+              onChange={() => {}}
+            />
+          </div>
           <DateRangePicker
             startDate={getDate(filterState.date_declared_positive_after)}
             endDate={getDate(filterState.date_declared_positive_before)}
