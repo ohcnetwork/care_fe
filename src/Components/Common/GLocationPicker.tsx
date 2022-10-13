@@ -1,6 +1,6 @@
 import React from "react";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
-import { createCustomEqual } from "fast-equals";
+import { deepEqual } from "../../Common/utils";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
 
 import { GMAPS_API_KEY } from "../../Common/env";
@@ -189,22 +189,18 @@ const Marker: React.FC<google.maps.MarkerOptions> = (options) => {
   return null;
 };
 
-const deepCompareEqualsForMaps = createCustomEqual(
-  // @ts-ignore
-  (deepEqual) => (a: any, b: any) => {
-    if (
-      isLatLngLiteral(a) ||
-      a instanceof google.maps.LatLng ||
-      isLatLngLiteral(b) ||
-      b instanceof google.maps.LatLng
-    ) {
-      return new google.maps.LatLng(a).equals(new google.maps.LatLng(b));
-    }
-
-    // @ts-ignore
-    return deepEqual(a, b);
+const deepCompareEqualsForMaps = (a: any, b: any) => {
+  if (
+    isLatLngLiteral(a) ||
+    a instanceof google.maps.LatLng ||
+    isLatLngLiteral(b) ||
+    b instanceof google.maps.LatLng
+  ) {
+    return new google.maps.LatLng(a).equals(new google.maps.LatLng(b));
   }
-);
+
+  return deepEqual(a, b);
+};
 
 function useDeepCompareMemoize(value: any) {
   const ref = React.useRef();
