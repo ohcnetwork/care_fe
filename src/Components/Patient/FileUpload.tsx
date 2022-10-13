@@ -1,6 +1,5 @@
 import axios from "axios";
 import { Button, CircularProgress, InputLabel } from "@material-ui/core";
-import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect } from "react";
@@ -26,6 +25,7 @@ import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
 import clsx from "clsx";
+import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -1044,7 +1044,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         disabled={button[3] as boolean}
                       >
                         <i className={`fas fa-${button[1]} mr-2`} />
-                        {button[0] as String}
+                        {button[0] as string}
                       </button>
                     ))}
                   </>

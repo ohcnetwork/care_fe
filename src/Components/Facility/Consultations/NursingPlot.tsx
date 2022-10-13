@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { NURSING_CARE_FIELDS } from "../../../Common/constants";
@@ -6,6 +5,7 @@ import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
+import { formatDate } from "../../../Utils/utils";
 
 export const NursingPlot = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -51,7 +51,7 @@ export const NursingPlot = (props: any) => {
 
   const data = Object.entries(results).map((key: any) => {
     return {
-      date: moment(key[0]).format("lll"),
+      date: formatDate(key[0]),
       nursing: key[1]["nursing"],
     };
   });
