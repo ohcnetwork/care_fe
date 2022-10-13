@@ -6,7 +6,7 @@ type OptionCallback<T, R> = (option: T) => R;
 type SelectMenuProps<T, V = T> = {
   id?: string;
   options: T[];
-  value: T | undefined;
+  value: V | undefined;
   placeholder?: React.ReactNode;
   optionLabel: OptionCallback<T, React.ReactNode>;
   optionSelectedLabel?: OptionCallback<T, React.ReactNode>;

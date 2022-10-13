@@ -426,23 +426,21 @@ export default function PatientFilterV2(props: any) {
         <span className="text-sm">Ordering</span>
         <SelectMenuV2
           className="pt-2"
-          options={Object.keys(PATIENT_FILTER_ORDER)}
-          optionLabel={(o) => PATIENT_FILTER_ORDER[o].label}
-          optionSelectedLabel={(option) => {
-            const item = PATIENT_FILTER_ORDER[option];
-            return `${item.label} (${item.mode})`;
-          }}
-          optionDescription={(o) => PATIENT_FILTER_ORDER[o].mode}
+          options={PATIENT_FILTER_ORDER}
+          optionLabel={(o) => o.desc}
+          optionSelectedLabel={(option) => `${option.desc} (${option.order})`}
+          optionDescription={(o) => o.order}
           optionIcon={(option) => (
             <i
               className={`fa-solid ${
-                option.mode === "Ascending"
+                option.order === "Ascending"
                   ? "fa-arrow-up-short-wide"
                   : "fa-arrow-up-wide-short"
               }`}
             />
           )}
           value={filterState.ordering || undefined}
+          optionValue={(o) => o.text}
           onChange={(v) => setFilterState({ ...filterState, ordering: v })}
         />
       </div>

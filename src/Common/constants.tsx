@@ -123,9 +123,6 @@ export const SHIFTING_VEHICLE_CHOICES: Array<OptionsType> = [
   { id: 50, text: "Auto-rickshaw" },
 ];
 
-type Ordering = "Ascending" | "Descending";
-type OrderingProps = Record<string, { label: string; mode: Ordering }>;
-
 export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 1, text: "created_date", desc: "ASC Created Date" },
   { id: 2, text: "-created_date", desc: "DESC Created Date" },
@@ -133,22 +130,14 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
-// TODO: use this when instead of above one, when migrating to new select menu in shifting page filters.
-// export const SHIFTING_FILTER_ORDER: OrderingProps = {
-//   created_date: { label: "Created Date", mode: "Ascending" },
-//   "-created_date": { label: "Created Date", mode: "Descending" },
-//   modified_date: { label: "Modified Date", mode: "Ascending" },
-//   "-modified_date": { label: "Modified Date", mode: "Descending" },
-// };
-
-export const PATIENT_FILTER_ORDER: OrderingProps = {
-  created_date: { label: "Created Date", mode: "Ascending" },
-  "-created_date": { label: "Created Date", mode: "Descending" },
-  modified_date: { label: "Modified Date", mode: "Ascending" },
-  "-modified_date": { label: "Modified Date", mode: "Descending" },
-  review_time: { label: "Review Time", mode: "Ascending" },
-  "-review_time": { label: "Review Time", mode: "Descending" },
-};
+export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
+  { id: 1, text: "created_date", desc: "Created Date", order: "Ascending" },
+  { id: 2, text: "-created_date", desc: "Created Date", order: "Descending" },
+  { id: 3, text: "modified_date", desc: "Modified Date", order: "Ascending" },
+  { id: 4, text: "-modified_date", desc: "Modified Date", order: "Descending" },
+  { id: 5, text: "review_time", desc: "Review Time", order: "Ascending" },
+  { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
+];
 
 const KASP_BED_TYPES = KASP_ENABLED
   ? [

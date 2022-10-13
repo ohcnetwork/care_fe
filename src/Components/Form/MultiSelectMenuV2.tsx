@@ -5,17 +5,17 @@ type OptionCallback<T, R = void> = (option: T) => R;
 
 type Props<T, V = T> = {
   id?: string;
-  placeholder?: React.ReactNode;
   options: T[];
   value: V[] | undefined;
-  onChange: OptionCallback<V[]>;
+  placeholder?: React.ReactNode;
   optionLabel: OptionCallback<T, React.ReactNode>;
   optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
-  renderOption?: OptionCallback<T, React.ReactNode>;
   className?: string;
+  renderSelectedOptions?: OptionCallback<T[], React.ReactNode>;
+  onChange: OptionCallback<V[]>;
 };
 
 const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
@@ -28,15 +28,14 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
     const value = props.optionValue ? props.optionValue(option) : option;
 
     return {
+      option,
       label,
       selectedLabel,
       description: props.optionDescription && props.optionDescription(option),
       icon: props.optionIcon && props.optionIcon(option),
       value,
       isSelected: props.value?.includes(value as any) ?? false,
-      node: props.renderOption ? (
-        props.renderOption(option)
-      ) : (
+      displayChip: (
         <div className="px-2 bg-gray-100 rounded-full text-xs text-gray-900 border border-gray-400">
           {selectedLabel}
         </div>
@@ -46,6 +45,13 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
 
   const placeholder = props.placeholder ?? "Select";
   const selectedOptions = options.filter((o) => o.isSelected);
+
+  const Placeholder: () => any = () => {
+    if (selectedOptions.length === 0) return placeholder;
+    if (props.renderSelectedOptions)
+      return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
+    return `${selectedOptions.length} items selected`;
+  };
 
   return (
     <div className={props.className}>
@@ -66,13 +72,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                 <div className="relative z-0 flex items-center w-full">
                   <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
                     <p className="ml-2.5 text-sm font-normal text-gray-600">
-                      {selectedOptions.length ? (
-                        <div className="flex flex-wrap gap-1">
-                          {selectedOptions.map((o) => o.node)}
-                        </div>
-                      ) : (
-                        placeholder
-                      )}
+                      <Placeholder />
                     </p>
                   </div>
                   <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
