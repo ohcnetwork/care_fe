@@ -544,7 +544,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           Created On :
                         </span>{" "}
                         {item.created_date
-                          ? moment(item.created_date).format("lll")
+                          ? formatDate(item.created_date)
                           : "-"}
                       </div>
                     </div>
@@ -649,7 +649,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           Created On :
                         </span>{" "}
                         {item.created_date
-                          ? moment(item.created_date).format("lll")
+                          ? formatDate(item.created_date)
                           : "-"}
                       </div>
                     </div>
@@ -761,9 +761,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       <span className="font-semibold leading-relaxed">
                         Created On :
                       </span>{" "}
-                      {item.created_date
-                        ? moment(item.created_date).format("lll")
-                        : "-"}
+                      {item.created_date ? formatDate(item.created_date) : "-"}
                     </div>
                   </div>
                 </div>
