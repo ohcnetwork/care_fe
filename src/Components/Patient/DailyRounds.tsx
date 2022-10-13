@@ -125,7 +125,7 @@ export const DailyRounds = (props: any) => {
             patient_category: res.data.patient_category
               ? PATIENT_CATEGORIES.find(
                   (i) => i.text === res.data.patient_category
-                )?.id
+                )?.id || "Comfort"
               : "Comfort",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
