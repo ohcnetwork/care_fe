@@ -15,6 +15,7 @@ interface BedSelectProps {
   facility?: string;
   location?: string;
   showAll?: boolean;
+  disabled?: boolean;
   selected: BedModel | BedModel[] | null;
   setSelected: (selected: BedModel | BedModel[] | null) => void;
 }
@@ -31,6 +32,7 @@ export const BedSelect = (props: BedSelectProps) => {
     className = "",
     facility,
     location,
+    disabled = false,
   } = props;
   const dispatchAction: any = useDispatch();
   const [bedLoading, isBedLoading] = useState(false);
@@ -83,6 +85,7 @@ export const BedSelect = (props: BedSelectProps) => {
       value={selected}
       options={bedList}
       onSearch={handelSearch}
+      disabled={disabled}
       onChange={(e: any, selected: any) => handleValueChange(selected)}
       loading={bedLoading}
       placeholder="Search by beds name"

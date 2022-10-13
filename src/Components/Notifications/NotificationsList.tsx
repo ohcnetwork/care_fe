@@ -10,7 +10,6 @@ import {
 } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { SelectField } from "../Common/HelperInputFields";
-import moment from "moment";
 import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
 import Spinner from "../Common/Spinner";
@@ -20,6 +19,7 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
 import * as Sentry from "@sentry/browser";
+import { formatDate } from "../../Utils/utils";
 
 const RESULT_LIMIT = 14;
 
@@ -95,7 +95,7 @@ const NotificationTile = ({
         </div>
         <div>
           <div className="text-xs text-right py-1">
-            {moment(result.created_date).format("lll")}
+            {formatDate(result.created_date)}
           </div>
           <div className="mt-2 text-right">
             <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
@@ -192,10 +192,12 @@ export default function NotificationsList({
   const getButtonText = () => {
     const status = isSubscribed;
     if (status === "NotSubscribed") {
-      return <>
+      return (
+        <>
           {" "}
           <i className="fa-solid fa-bell mr-2"></i>Subscribe
-        </>;
+        </>
+      );
     } else if (status === "SubscribedOnAnotherDevice") {
       return (
         <>

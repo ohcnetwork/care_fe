@@ -11,16 +11,15 @@ import {
   KASP_FULL_STRING,
   TEST_TYPE_CHOICES,
 } from "../../Common/constants";
-import moment from "moment";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
-import ReactDOM from "react-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import CommentSection from "./CommentsSection";
+import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -172,7 +171,7 @@ export default function ShiftDetails(props: { id: string }) {
               Date of Test:{" "}
             </span>
             {(patientData?.date_of_test &&
-              moment(patientData?.date_of_test).format("LL")) ||
+              formatDate(patientData?.date_of_test)) ||
               "-"}
           </div>
 
@@ -276,7 +275,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Estimated contact date:{" "}
               </span>
-              {moment(patientData?.estimated_contact_date).format("LL")}
+              {formatDate(patientData?.estimated_contact_date)}
             </div>
           )}
           <div className="md:col-span-2">
@@ -411,7 +410,7 @@ export default function ShiftDetails(props: { id: string }) {
               {" "}
               Date and Time:{" "}
             </span>
-            {moment(data.created_date).format("LLL") || "--"}
+            {formatDate(data.created_date) || "--"}
           </div>
           <div className="text-left mt-2">
             <span className="font-semibold leading-relaxed"> Unique Id: </span>
@@ -461,9 +460,9 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of Admission:{" "}
               </span>
-              {moment(
+              {formatDate(
                 consultation.admission_date || consultation.created_date
-              ).format("LL") || "-"}
+              ) || "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">OP/IP No: </span>
@@ -476,7 +475,7 @@ export default function ShiftDetails(props: { id: string }) {
                 Date of Positive Covid 19 Swab:{" "}
               </span>
               {(patientData?.date_of_test &&
-                moment(patientData?.date_of_test).format("LL")) ||
+                formatDate(patientData?.date_of_test)) ||
                 "-"}
             </div>
             <div>
@@ -747,7 +746,7 @@ export default function ShiftDetails(props: { id: string }) {
                   {" "}
                   Record Created at :{" "}
                 </span>
-                {moment(data.created_date).format("LLL") || "--"}
+                {formatDate(data.created_date) || "--"}
               </div>
 
               <div>
@@ -755,7 +754,7 @@ export default function ShiftDetails(props: { id: string }) {
                   {" "}
                   Last Updated on :{" "}
                 </span>
-                {moment(data.modified_date).format("LLL") || "--"}
+                {formatDate(data.modified_date) || "--"}
               </div>
             </div>
 
@@ -837,8 +836,7 @@ export default function ShiftDetails(props: { id: string }) {
                       {data?.created_by_object?.last_name}
                     </div>
                     <div className="text-xs">
-                      {data.created_date &&
-                        moment(data.created_date).format("lll")}
+                      {data.created_date && formatDate(data.created_date)}
                     </div>
                   </div>
                 </div>
@@ -852,8 +850,7 @@ export default function ShiftDetails(props: { id: string }) {
                       {data?.last_edited_by_object?.last_name}
                     </div>
                     <div className="text-xs">
-                      {data.modified_date &&
-                        moment(data.modified_date).format("lll")}
+                      {data.modified_date && formatDate(data.modified_date)}
                     </div>
                   </div>
                 </div>

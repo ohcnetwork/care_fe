@@ -38,6 +38,7 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { make as Link } from "../Common/components/Link.gen";
+import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -47,7 +48,7 @@ const initForm: any = {
   other_symptoms: "",
   physical_examination_info: "",
   other_details: "",
-  patient_category: "Comfort Care",
+  patient_category: "Comfort",
   current_health: 0,
   recommend_discharge: false,
   actions: null,
@@ -122,6 +123,11 @@ export const DailyRounds = (props: any) => {
         if (res && res.data) {
           const data = {
             ...res.data,
+            patient_category: res.data.patient_category
+              ? PATIENT_CATEGORIES.find(
+                  (i) => i.text === res.data.patient_category
+                )?.id || "Comfort"
+              : "Comfort",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
           dispatch({ type: "set_form", form: data });
@@ -171,6 +177,11 @@ export const DailyRounds = (props: any) => {
           type: "set_form",
           form: {
             ...state.form,
+            patient_category: res.data.patient_category
+              ? PATIENT_CATEGORIES.find(
+                  (i) => i.text === res.data.patient_category
+                )?.id || "Comfort"
+              : "Comfort",
             clone_last: res.data.count > 0 ? "true" : "false",
           },
         });
@@ -454,9 +465,7 @@ export const DailyRounds = (props: any) => {
         .add(state.form.review_time, "minutes")
         .format("DD/MM/YYYY hh:mm A")}`;
     if (prevReviewTime && moment().isBefore(prevReviewTime))
-      return `Next Review at ${moment(prevReviewTime).format(
-        "DD/MM/YYYY hh:mm A"
-      )}`;
+      return `Next Review at ${formatDate(prevReviewTime)}`;
     return "No Reviews Planned!";
   };
 
@@ -534,9 +543,7 @@ export const DailyRounds = (props: any) => {
                     variant="standard"
                     margin="dense"
                     value={state.form.patient_category}
-                    options={PATIENT_CATEGORIES.map((c) => {
-                      return { id: c, text: c };
-                    })}
+                    options={PATIENT_CATEGORIES}
                     onChange={handleChange}
                     errors={state.errors.patient_category}
                   />

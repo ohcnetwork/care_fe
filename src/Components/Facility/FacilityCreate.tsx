@@ -160,7 +160,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [isWardLoading, setIsWardLoading] = useState(false);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
-  const [localBody, setLocalBody] = useState(selectDistrict);
+  const [localBodies, setLocalBodies] = useState(selectDistrict);
   const [ward, setWard] = useState(selectLocalBody);
   const { width } = useWindowDimensions();
 
@@ -196,10 +196,10 @@ export const FacilityCreate = (props: FacilityProps) => {
         );
         setIsLocalbodyLoading(false);
         if (localBodyList) {
-          setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+          setLocalBodies([...initialLocalbodies, ...localBodyList.data]);
         }
       } else {
-        setLocalBody(selectDistrict);
+        setLocalBodies(selectDistrict);
       }
     },
     [dispatchAction]
@@ -496,6 +496,43 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
+  const setLocalBody = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        local_body: e.target.value,
+
+        ward: "0",
+      },
+    });
+  };
+
+  const setDistrict = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        district: e.target.value,
+
+        local_body: "0",
+        ward: "0",
+      },
+    });
+  };
+  const setState = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        state: e.target.value,
+        district: "0",
+        local_body: "0",
+        ward: "0",
+      },
+    });
+  };
+
   if (isLoading) {
     return <Loading />;
   }
@@ -576,7 +613,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     options={states}
                     optionValue="name"
                     onChange={(e) => [
-                      handleChange(e),
+                      setState(e),
                       fetchDistricts(String(e.target.value)),
                     ]}
                     errors={state.errors.state}
@@ -598,7 +635,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     options={districts}
                     optionValue="name"
                     onChange={(e) => [
-                      handleChange(e),
+                      setDistrict(e),
                       fetchLocalBody(String(e.target.value)),
                     ]}
                     errors={state.errors.district}
@@ -617,10 +654,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                     variant="outlined"
                     margin="dense"
                     value={state.form.local_body}
-                    options={localBody}
+                    options={localBodies}
                     optionValue="name"
                     onChange={(e) => [
-                      handleChange(e),
+                      setLocalBody(e),
                       fetchWards(String(e.target.value)),
                     ]}
                     errors={state.errors.local_body}
