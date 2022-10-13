@@ -1,5 +1,4 @@
 import {
-  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -11,7 +10,6 @@ import {
   Radio,
 } from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
@@ -537,7 +535,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     return <Loading />;
   }
 
-  const extremeSmallScreenBreakpoint: number = 320;
+  const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
   const open = Boolean(anchorEl);
