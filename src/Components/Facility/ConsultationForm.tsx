@@ -265,7 +265,7 @@ export const ConsultationForm = (props: any) => {
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)?.id
+              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)?.id || "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
