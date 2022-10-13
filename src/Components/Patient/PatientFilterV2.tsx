@@ -571,7 +571,8 @@ export default function PatientFilterV2(props: any) {
             className="pt-2"
             placeholder="Show all"
             options={PATIENT_FILTER_CATEGORIES}
-            optionLabel={(o) => o}
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
             value={filterState.category}
             onChange={(v) => setFilterState({ ...filterState, category: v })}
           />

@@ -7,6 +7,7 @@ import { LinePlot } from "./components/LinePlot";
 import { StackedLinePlot } from "./components/StackedLinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
+import { formatDate } from "../../../Utils/utils";
 
 interface PrimaryParametersPlotProps {
   facilityId: string;
@@ -68,7 +69,7 @@ export const PrimaryParametersPlot = ({
   };
 
   const dates = Object.keys(results)
-    .map((p: string) => moment(p).format("LLL"))
+    .map((p: string) => formatDate(p))
     .reverse();
 
   const yAxisData = (name: string) => {

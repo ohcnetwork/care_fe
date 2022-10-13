@@ -283,10 +283,10 @@ export const PATIENT_FILTER_ADMITTED_TO = [
 ];
 
 export const PATIENT_CATEGORIES = [
-  "Comfort Care",
-  "Stable",
-  "Slightly Abnormal",
-  "Critical",
+  { id: "Comfort", text: "Comfort Care" },
+  { id: "Stable", text: "Stable" },
+  { id: "Moderate", text: "Slightly Abnormal" },
+  { id: "Critical", text: "Critical" },
 ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;

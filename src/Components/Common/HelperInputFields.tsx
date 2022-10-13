@@ -557,6 +557,7 @@ interface AutoCompleteAsyncFieldProps {
   filterOptions?: (options: any) => any;
   name?: string;
   freeSolo?: boolean;
+  disabled?: boolean;
 }
 
 export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
@@ -583,6 +584,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
     multiple = false,
     autoSelect = true,
     className = "",
+    disabled = false,
   } = props;
   return (
     <>
@@ -595,6 +597,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         onOpen={onOpen}
         onBlur={onBlur}
         options={options}
+        disabled={disabled}
         onChange={onChange}
         value={value}
         defaultValue={defaultValue}
