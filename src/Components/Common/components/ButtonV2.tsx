@@ -54,7 +54,7 @@ export type ButtonProps = RawButtonProps & {
 const shadowClasses =
   "shadow enabled:hover:shadow-lg enabled:hover:-translate-y-1";
 
-const Button = ({
+const ButtonV2 = ({
   size = "default",
   shape = "square",
   style = "success",
@@ -84,7 +84,7 @@ const Button = ({
   );
 };
 
-export default Button;
+export default ButtonV2;
 
 // export const RawButton = (props: RawButtonProps) => {
 //   const { className, children, ...btnProps } = props;

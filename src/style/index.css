@@ -84,10 +84,6 @@ a:hover {
 
 /* Button */
 
-button:focus {
-  outline: none;
-}
-
 .btn {
   @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
 }
@@ -891,17 +887,17 @@ background-color: #84e1bc;
   @apply text-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none;
 }
 
-.Button { @apply h-min flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 }
+.Button { @apply font-medium h-min flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 }
 .button-success-default { @apply accent-primary-500 bg-primary-500 hover:bg-primary-400 text-white }
-.button-success-ghost { @apply accent-primary-500 hover:bg-primary-200 text-primary-500 border-0 }
-.button-secondary-default { @apply accent-gray-200 bg-gray-200 hover:bg-gray-100 text-primary-500 }
-.button-secondary-ghost { @apply accent-gray-200 hover:bg-gray-200 border-0 }
+.button-success-ghost { @apply accent-primary-500 hover:bg-primary-100 text-primary-500 border-0 }
+.button-secondary-default { @apply accent-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700 }
+.button-secondary-ghost { @apply accent-gray-200 hover:bg-gray-200 text-gray-700 border-0 }
 .button-danger-default { @apply accent-red-500 bg-red-500 hover:bg-red-400 text-white }
-.button-danger-ghost { @apply accent-red-500 hover:bg-red-200 text-red-500 border-0 }
+.button-danger-ghost { @apply accent-red-500 hover:bg-red-100 text-red-500 border-0 }
 .button-warning-default { @apply accent-yellow-500 bg-yellow-500 hover:bg-yellow-400 text-white }
-.button-warning-ghost { @apply accent-yellow-500 hover:bg-yellow-200 text-yellow-500 border-0 }
+.button-warning-ghost { @apply accent-yellow-500 hover:bg-yellow-100 text-yellow-500 border-0 }
 .button-alert-default { @apply accent-violet-600 bg-violet-600 hover:bg-violet-500 text-white }
-.button-alert-ghost { @apply accent-violet-600 hover:bg-violet-200 text-violet-600 border-0 }
+.button-alert-ghost { @apply accent-violet-600 hover:bg-violet-100 text-violet-600 border-0 }
 
 .button-shape-square { @apply rounded }
 .button-shape-circle { @apply rounded-full }
