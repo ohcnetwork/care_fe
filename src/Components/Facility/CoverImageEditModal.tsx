@@ -3,6 +3,7 @@ import axios from "axios";
 import { ChangeEventHandler, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { deleteFacilityCover } from "../../Redux/actions";
+import ImageWithFallback from "../Common/ImageWithFallback";
 import { FacilityModel } from "./models";
 
 interface Props {
@@ -67,10 +68,18 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
           </div>
           <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
             {preview || facility.read_cover_image_url ? (
-              <img
+              <ImageWithFallback
                 src={preview || facility.read_cover_image_url}
                 alt="Facility"
                 className="w-full h-full object-cover"
+                fallback={
+                  <div className="flex flex-col gap-2 items-center justify-center text-center bg-red-50 w-full h-full">
+                    <i className="fas fa-hospital text-4xl block text-red-300" />
+                    <span className="text-xs text-red-400">
+                      {"Could not fetch cover image 🙁"}
+                    </span>
+                  </div>
+                }
               />
             ) : (
               <span className="mt-10 w-max text-xl text-gray-700 font-medium">

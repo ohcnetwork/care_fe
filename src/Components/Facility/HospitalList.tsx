@@ -42,6 +42,7 @@ import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
+import ImageWithFallback from "../Common/ImageWithFallback";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -334,14 +335,22 @@ export const HospitalList = (props: any) => {
           <div className="block rounded-lg overflow-clip bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
               <div className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
-                {facility.read_cover_image_url ? (
-                  <img
+                {(facility.read_cover_image_url && (
+                  <ImageWithFallback
                     src={facility.read_cover_image_url}
                     alt="Facility"
                     className="w-full h-full object-cover"
+                    fallback={
+                      <div className="flex flex-col gap-2 items-center justify-center text-center bg-red-50 w-full h-full">
+                        <i className="fas fa-hospital text-4xl block text-red-300" />
+                        <span className="text-xs text-red-400">
+                          {"Could not fetch cover image 🙁"}
+                        </span>
+                      </div>
+                    }
                   />
-                ) : (
-                  <i className="fas fa-hospital text-4xl block text-gray-600"></i>
+                )) || (
+                  <i className="fas fa-hospital text-4xl block text-gray-500" />
                 )}
               </div>
               <div className="h-full w-full grow">

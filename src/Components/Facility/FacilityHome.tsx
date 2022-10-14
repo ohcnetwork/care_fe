@@ -33,6 +33,7 @@ import {
 import moment from "moment";
 import { RoleButton } from "../Common/RoleButton";
 import CoverImageEditModal from "./CoverImageEditModal";
+import ImageWithFallback from "../Common/ImageWithFallback";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -228,6 +229,22 @@ export const FacilityHome = (props: any) => {
     </div>
   );
 
+  const CoverImage = () => (
+    <ImageWithFallback
+      src={facilityData.read_cover_image_url}
+      alt="Facility"
+      className="w-full h-full object-cover"
+      fallback={
+        <div className="flex flex-col gap-2 items-center justify-center text-center bg-red-50 w-full h-full">
+          <i className="fas fa-hospital text-4xl block text-red-300" />
+          <span className="text-xs text-red-400">
+            {"Could not fetch cover image 🙁"}
+          </span>
+        </div>
+      }
+    />
+  );
+
   return (
     <div className="px-2 pb-2">
       <PageTitle
@@ -279,11 +296,7 @@ export const FacilityHome = (props: any) => {
             hasPermissionToEditCoverImage && setEditCoverImage(true)
           }
         >
-          <img
-            src={facilityData.read_cover_image_url}
-            alt="Facility"
-            className="w-full object-cover h-full"
-          />
+          <CoverImage />
           {editCoverImageTooltip}
         </div>
       )}
@@ -415,11 +428,7 @@ export const FacilityHome = (props: any) => {
               }
             >
               {hasCoverImage ? (
-                <img
-                  src={facilityData.read_cover_image_url}
-                  alt="Facility"
-                  className="w-full h-full object-cover"
-                />
+                <CoverImage />
               ) : (
                 <div className="lg:h-48 bg-gray-200 text-gray-700 flex items-center justify-center font-medium">
                   No cover image
