@@ -27,7 +27,7 @@ export type ButtonProps = RawButtonProps & {
    * - `"circle"` gives a button with fully rounded corners. Ideal when only
    * icons are present.
    */
-  shape?: ButtonShape;
+  circle?: boolean | undefined;
   /**
    * - `"success"` is ideal for form submissions, etc.
    * - `"secondary"` is ideal for things that have secondary importance.
@@ -56,8 +56,8 @@ const shadowClasses =
 
 const ButtonV2 = ({
   size = "default",
-  shape = "square",
   style = "success",
+  circle,
   shadow,
   ghost,
   className,
@@ -72,7 +72,7 @@ const ButtonV2 = ({
       className={[
         "Button outline-offset-1",
         `button-size-${size}`,
-        `button-shape-${shape}`,
+        `button-shape-${circle ? "circle" : "square"}`,
         `button-${style}-${ghost ? "ghost" : "default"}`,
         shadow && shadowClasses,
         className,
