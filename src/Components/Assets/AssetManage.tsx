@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, ReactElement } from "react";
 
 import loadable from "@loadable/component";
-import moment from "moment";
 import { assetClassProps, AssetData, AssetTransaction } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch } from "react-redux";
@@ -10,6 +9,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
+import { formatDate } from "../../Utils/utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -132,7 +132,7 @@ const AssetManage = (props: AssetManageProps) => {
             </td>
             <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
               <span className="text-gray-900 font-medium">
-                {moment(transaction.modified_date).format("lll")}
+                {formatDate(transaction.modified_date)}
               </span>
             </td>
           </tr>
@@ -171,13 +171,14 @@ const AssetManage = (props: AssetManageProps) => {
       />
       <div className="my-8 bg-white rounded-lg md:rounded-xl md:p-8 p-6 max-w-6xl mx-auto">
         <div className="mb-4 flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 justify-between w-full">
             <span className="text-2xl md:text-3xl font-semibold break-words">
               {asset?.name}
             </span>
-            <div className="flex-1" />
-            {status(asset?.status)}
-            {workingStatus(asset?.is_working)}
+            <div className=" flex flex-wrap gap-2">
+              {status(asset?.status)}
+              {workingStatus(asset?.is_working)}
+            </div>
           </div>
           <span className="text-gray-700">{asset?.description}</span>
         </div>
@@ -248,7 +249,7 @@ const AssetManage = (props: AssetManageProps) => {
                 <span className="text-gray-700">Last serviced on</span>
                 <span className="font-medium text-lg text-gray-900">
                   {asset?.last_serviced_on
-                    ? moment(asset?.last_serviced_on).format("MMM DD, YYYY")
+                    ? formatDate(asset?.last_serviced_on)
                     : "--"}
                 </span>
               </div>
@@ -298,13 +299,13 @@ const AssetManage = (props: AssetManageProps) => {
           <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
             <div>
               <span className="text-gray-900">Created: </span>
-              {moment(asset?.created_date).format("lll")}
+              {asset?.created_date && formatDate(asset?.created_date)}
             </div>
           </div>
           <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
             <div>
               <span className="text-gray-900">Last Modified: </span>
-              {moment(asset?.modified_date).format("lll")}
+              {asset?.modified_date && formatDate(asset?.modified_date)}
             </div>
           </div>
         </div>

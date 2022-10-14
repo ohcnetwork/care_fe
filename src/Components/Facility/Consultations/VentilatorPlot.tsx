@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -6,6 +5,7 @@ import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
+import { formatDate } from "../../../Utils/utils";
 
 interface ModalityType {
   id: number;
@@ -80,7 +80,7 @@ export const VentilatorPlot = (props: any) => {
   };
 
   const dates = Object.keys(results)
-    .map((p: string) => moment(p).format("LLL"))
+    .map((p: string) => formatDate(p))
     .reverse();
 
   const yAxisData = (name: string) => {

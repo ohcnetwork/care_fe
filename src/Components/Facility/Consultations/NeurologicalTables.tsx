@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -10,6 +9,7 @@ import {
   VERBAL_RESPONSE_SCALE,
   MOTOR_RESPONSE_SCALE,
 } from "../../../Common/constants";
+import { formatDate } from "../../../Utils/utils";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
@@ -187,7 +187,7 @@ export const NeurologicalTable = (props: any) => {
     const value: any = x[1];
     if (x[1].consciousness_level) {
       locData.push({
-        date: moment(x[0]).format("LLL"),
+        date: formatDate(x[0]),
         loc:
           LOC_OPTIONS.find((item) => item.id === x[1].consciousness_level)
             ?.value || "--",
@@ -200,7 +200,7 @@ export const NeurologicalTable = (props: any) => {
       value.glasgow_motor_response
     ) {
       glasgowData.push({
-        date: moment(x[0]).format("LLL"),
+        date: formatDate(x[0]),
         eye: value.glasgow_eye_open || "-",
         verbal: value.glasgow_verbal_response || "-",
         motor: value.glasgow_motor_response || "-",
@@ -210,14 +210,14 @@ export const NeurologicalTable = (props: any) => {
 
     if (x[1].consciousness_level_detail) {
       locDescription.push({
-        date: moment(x[0]).format("LLL"),
+        date: formatDate(x[0]),
         loc: x[1].consciousness_level_detail,
       });
     }
 
     if (x[1].left_pupil_size || x[1].right_pupil_size) {
       sizeData.push({
-        date: moment(x[0]).format("LLL"),
+        date: formatDate(x[0]),
         left: x[1].left_pupil_size || "-",
         right: x[1].right_pupil_size || "-",
       });
@@ -225,7 +225,7 @@ export const NeurologicalTable = (props: any) => {
 
     if (x[1].left_pupil_size_detail || x[1].right_pupil_size_detail) {
       sizeDescription.push({
-        date: moment(x[0]).format("LLL"),
+        date: formatDate(x[0]),
         left: x[1].left_pupil_size_detail || "-",
         right: x[1].right_pupil_size_detail || "-",
       });
@@ -233,7 +233,7 @@ export const NeurologicalTable = (props: any) => {
 
     if (x[1].left_pupil_light_reaction || x[1].right_pupil_light_reaction) {
       reactionData.push({
-        date: moment(x[0]).format("LLL"),
+        date: formatDate(x[0]),
         left:
           REACTION_OPTIONS.find(
             (item) => item.id === x[1].left_pupil_light_reaction
@@ -250,7 +250,7 @@ export const NeurologicalTable = (props: any) => {
       x[1].right_pupil_light_reaction_detail
     ) {
       reactionDescription.push({
-        date: moment(x[0]).format("LLL"),
+        date: formatDate(x[0]),
         left: x[1].left_pupil_light_reaction_detail || "-",
         right: x[1].right_pupil_light_reaction_detail || "-",
       });
@@ -260,7 +260,7 @@ export const NeurologicalTable = (props: any) => {
       x[1].limb_response_upper_extremity_right
     ) {
       upperLimbData.push({
-        date: moment(x[0]).format("LLL"),
+        date: formatDate(x[0]),
         left:
           LIMP_OPTIONS.find(
             (item) => item.id === x[1].limb_response_upper_extremity_left
@@ -277,7 +277,7 @@ export const NeurologicalTable = (props: any) => {
       x[1].limb_response_lower_extremity_right
     ) {
       lowerLimbData.push({
-        date: moment(x[0]).format("LLL"),
+        date: formatDate(x[0]),
         left:
           LIMP_OPTIONS.find(
             (item) => item.id === x[1].limb_response_lower_extremity_left
