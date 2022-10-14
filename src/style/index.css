@@ -904,5 +904,5 @@ background-color: #84e1bc;
 .button-shape-circle { @apply rounded-full }
 
 .button-size-small { @apply px-2 py-1 text-xs }
-.button-size-default { @apply p-2 text-sm }
-.button-size-large { @apply p-3 text-base }
+.button-size-default { @apply py-2 px-4 text-sm }
+.button-size-large { @apply py-3 px-5 text-base }
