@@ -56,10 +56,12 @@ export const VoiceRecorder = (props: any) => {
           <button
             // style={{ marginLeft: "auto" }}
             onClick={startRecording}
-            className="flex w-full md:w-auto bg-green-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2"
+            className="flex w-full gap-1 md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md px-4 font-bold p-2"
             disabled={isRecording}
           >
-            <MicIcon />
+            <p className="text-sm">
+              <MicIcon />
+            </p>
             &nbsp;{audioURL ? "Re-Record" : "Record"}
           </button>
         )}
