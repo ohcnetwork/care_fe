@@ -270,9 +270,10 @@ export const FacilityHome = (props: any) => {
                     <div className="flex items-center gap-3">
                       <div>
                         <h1 className="text-lg font-bold">Phone Number</h1>
+                        <i className="fa-solid fa-phone inline-block"></i>
                         <a
                           href={`tel:${facilityData.phone_number}`}
-                          className="block text-lg font-normal"
+                          className="inline-block ml-2 text-green-500 visited:text-green-500 text-lg font-normal"
                         >
                           {facilityData.phone_number}
                         </a>
