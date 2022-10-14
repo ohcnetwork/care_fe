@@ -852,8 +852,7 @@ button:disabled,
   border-radius: 50%;
 }
 
-@media (min-width:471px)
-  {
+@media (min-width:471px) {
     .csv-input {
       display: block; 
       font-size: 0.875rem;
@@ -861,9 +860,9 @@ button:disabled,
       margin: auto;
       width: 50%;
     }
-  }
-  @media (max-width:470px)
-  {
+}
+
+@media (max-width:470px) {
     .csv-input {
       display: block; 
       font-size: 0.875rem;
@@ -871,28 +870,26 @@ button:disabled,
       margin: auto;
       width: 100%;
     }
-  }
-  
+}
+
 .csv-input::file-selector-button{
-padding-top: 0.5rem;
-padding-bottom: 0.5rem; 
-padding-left: 1rem;
-padding-right: 1rem; 
-font-size: 0.875rem;
-line-height: 1.25rem; 
-font-weight: 600; 
-border-width: 0; 
-background-color: #def7ec;
-color:#046c4e;
-
-}
- 
-
-.csv-input::file-selector-button:hover{
-background-color: #84e1bc;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem; 
+  padding-left: 1rem;
+  padding-right: 1rem; 
+  font-size: 0.875rem;
+  line-height: 1.25rem; 
+  font-weight: 600; 
+  border-width: 0; 
+  background-color: #def7ec;
+  color:#046c4e;
 }
 
-[type="checkbox"]{
+.csv-input::file-selector-button:hover {
+  background-color: #84e1bc;
+}
+
+[type="checkbox"] {
   @apply text-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none;
 }
 
@@ -944,4 +941,9 @@ background-color: #84e1bc;
 }
 .patient-unknown-profile {
   @apply border border-patient-unknown rounded
+}
+
+/* for gmaps search dropdown */
+.pac-container {
+  z-index: 100000 !important;
 }

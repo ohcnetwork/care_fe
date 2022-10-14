@@ -18,6 +18,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { limit, formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
+import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -225,7 +226,7 @@ export default function ListView() {
                   >
                     <i className="fas fa-stopwatch mr-2"></i>
                     <dd className="font-bold text-sm leading-5">
-                      {moment(resource.modified_date).format("LLL") || "--"}
+                      {formatDate(resource.modified_date) || "--"}
                     </dd>
                   </dt>
                 </div>
