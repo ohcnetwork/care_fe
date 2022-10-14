@@ -245,7 +245,11 @@
     ]
   },
   "lint-staged": {
-    "**/*": []
+    "**/*": [
+      "prettier --write --ignore-unknown",
+      "eslint --fix",
+      "git update-index --again"
+    ]
   },
   "eslintConfig": {
     "extends": [
