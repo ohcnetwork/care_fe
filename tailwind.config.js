@@ -46,15 +46,11 @@ module.exports = {
   corePlugins: {
     aspectRatio: false,
   },
-  content: [
-    "./src/**/*.{html,md,js,jsx,ts,tsx,res}",
-    "./node_modules/tw-elements/dist/js/**/*.js",
-  ],
+  content: ["./src/**/*.{html,md,js,jsx,ts,tsx,res}"],
   safelist: [{ pattern: /^(bg|text|border)-/, variants: ["hover"] }],
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
     require("@tailwindcss/aspect-ratio"),
-    require("tw-elements/dist/plugin"),
   ],
 };
