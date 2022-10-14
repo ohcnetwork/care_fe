@@ -2,7 +2,7 @@ import { Modal } from "@material-ui/core";
 import axios from "axios";
 import { ChangeEventHandler, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { deleteFacilityCover } from "../../Redux/actions";
+import { deleteFacilityCoverImage } from "../../Redux/actions";
 import ImageWithFallback from "../Common/ImageWithFallback";
 import { FacilityModel } from "./models";
 
@@ -72,14 +72,6 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
                 src={preview || facility.read_cover_image_url}
                 alt="Facility"
                 className="w-full h-full object-cover"
-                fallback={
-                  <div className="flex flex-col gap-2 items-center justify-center text-center bg-red-50 w-full h-full">
-                    <i className="fas fa-hospital text-4xl block text-red-300" />
-                    <span className="text-xs text-red-400">
-                      {"Could not fetch cover image 🙁"}
-                    </span>
-                  </div>
-                }
               />
             ) : (
               <span className="mt-10 w-max text-xl text-gray-700 font-medium">
@@ -117,7 +109,7 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
                 className="rounded-lg bg-error py-2 px-4 text-white font-medium text-sm flex gap-1 items-center transition-all"
                 onClick={(e) => {
                   e.stopPropagation();
-                  dispatch(deleteFacilityCover(facility.id as any));
+                  dispatch(deleteFacilityCoverImage(facility.id as any));
                   closeModal();
                 }}
                 disabled={isUploading}

@@ -340,14 +340,6 @@ export const HospitalList = (props: any) => {
                     src={facility.read_cover_image_url}
                     alt="Facility"
                     className="w-full h-full object-cover"
-                    fallback={
-                      <div className="flex flex-col gap-2 items-center justify-center text-center bg-red-50 w-full h-full">
-                        <i className="fas fa-hospital text-4xl block text-red-300" />
-                        <span className="text-xs text-red-400">
-                          {"Could not fetch cover image 🙁"}
-                        </span>
-                      </div>
-                    }
                   />
                 )) || (
                   <i className="fas fa-hospital text-4xl block text-gray-500" />
