@@ -78,83 +78,9 @@ const ButtonV2 = ({
         className,
       ].join(" ")}
     >
-      {/* TODO: add loading animation if props.loading */}
       {props.children}
     </button>
   );
 };
 
 export default ButtonV2;
-
-// export const RawButton = (props: RawButtonProps) => {
-//   const { className, children, ...btnProps } = props;
-//   return (
-//     <button
-//       className={`cursor-pointer flex rounded items-center justify-center font-medium text-sm transition-all duration-200 ease-in ${className}`}
-//       {...btnProps}
-//     >
-//       {children}
-//     </button>
-//   );
-// };
-
-// export const PrimaryButton = (props: ButtonProps) => {
-//   const padding = props.label ? "p-2" : "py-2 px-4";
-//   return (
-//     <RawButton
-//       className={`${props.className} bg-primary-500 text-white ${padding}`}
-//       {...props}
-//     >
-//       {props.icon}
-//       {props.label}
-//     </RawButton>
-//   );
-// };
-
-// export const SecondaryButton = (props: ButtonProps) => {
-//   const padding = props.label ? "p-2" : "py-2 px-4";
-//   return (
-//     <RawButton
-//       className={`${props.className} bg-primary-500 text-white ${padding}`}
-//       {...props}
-//     >
-//       {props.icon}
-//       {props.label}
-//     </RawButton>
-//   );
-// };
-
-// export const TextButton = (props: ButtonProps) => {
-//   const padding = props.label ? "p-2" : "py-2 px-4";
-//   return (
-//     <RawButton
-//       className={`${props.className} text-primary-500 ${padding}`}
-//       {...props}
-//     >
-//       {props.icon}
-//       {props.label}
-//     </RawButton>
-//   );
-// };
-
-// export const OutlinedButton = (props: ButtonProps) => {
-//   return (
-//     <TextButton
-//       className="outline outline-primary-500 hover:bg-gray-100"
-//       {...props}
-//     />
-//   );
-// };
-
-// export const DangerButton = (props: ButtonProps) => {
-//   const padding = props.label ? "p-2" : "py-2 px-4";
-//   return (
-//     <RawButton
-//       className={`${props.className} bg-red-500 text-white ${padding}`}
-//       {...props}
-//     >
-//       {props.icon}
-//       {props.label}
-//     </RawButton>
-//   );
-// };
