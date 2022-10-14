@@ -901,7 +901,7 @@ background-color: #84e1bc;
 .button-alert-ghost { @apply accent-violet-600 hover:bg-violet-100 text-violet-600 border-0 }
 
 .button-shape-square { @apply rounded }
-.button-shape-circle { @apply rounded-full }
+.button-shape-circle { @apply rounded-full p-2 !important }
 
 .button-size-small { @apply px-2 py-1 text-xs }
 .button-size-default { @apply py-2 px-4 text-sm }
