@@ -417,9 +417,19 @@ export default function AppRouter() {
   const path = usePath();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const WHITELIST: RegExp[] = [
+    /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/updates+/i,
+  ];
   useEffect(() => {
-    const pageContainer = window.document.getElementById("pages");
-    pageContainer?.scroll(0, 0);
+    let flag: boolean = false;
+    if (path)
+      WHITELIST.forEach((regex: RegExp) => {
+        flag = flag || regex.test(path);
+      });
+    if (path && flag) {
+      const pageContainer = window.document.getElementById("pages");
+      pageContainer?.scroll(0, 0);
+    }
   }, [path]);
 
   return (

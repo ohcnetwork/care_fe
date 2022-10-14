@@ -29,26 +29,13 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
 import clsx from "clsx";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const getScreenSize = () => {
-  const { innerWidth, innerHeight } = window;
-  return { innerWidth, innerHeight };
-};
-
 export default function ManageUsers() {
-  const [screenSize, setScreenSize] = useState(getScreenSize());
-  useEffect(() => {
-    const handleWindowResize = () => {
-      setScreenSize(getScreenSize());
-    };
-    window.addEventListener("resize", handleWindowResize);
-    return () => {
-      window.removeEventListener("resize", handleWindowResize);
-    };
-  }, []);
+  const { width } = useWindowDimensions();
 
   const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
@@ -90,9 +77,10 @@ export default function ManageUsers() {
   }>({ show: false, userName: "", facility: undefined });
 
   const limit =
-    screenSize.innerWidth >= 1280
-      ? RESULTS_PER_PAGE_LIMIT + 1
-      : RESULTS_PER_PAGE_LIMIT;
+    width >= 1280 ? RESULTS_PER_PAGE_LIMIT + 1 : RESULTS_PER_PAGE_LIMIT;
+  const extremeSmallScreenBreakpoint: number = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
@@ -260,7 +248,7 @@ export default function ManageUsers() {
     }
 
     setUserData({ show: false, username: "", name: "" });
-    window.location.reload();
+    fetchData({ aborted: false });
   };
 
   const handleUnlinkFacilitySubmit = async () => {
@@ -408,7 +396,7 @@ export default function ManageUsers() {
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="flex lg:flex-row gap-3 flex-col justify-between">
+                <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
                   {user.username && (
                     <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit">
                       {user.username}
@@ -461,7 +449,13 @@ export default function ManageUsers() {
                   )}
                 </div>
 
-                <div className="flex flex-row md:grid md:grid-cols-4 gap-2 justify-between">
+                <div
+                  className={`flex ${
+                    isExtremeSmallScreen
+                      ? " flex-wrap "
+                      : " flex-row justify-between "
+                  } md:grid md:grid-cols-4 gap-2`}
+                >
                   {user.user_type && (
                     <div className="col-span-2">
                       <UserDetails title="Role">
@@ -486,7 +480,13 @@ export default function ManageUsers() {
                     </div>
                   </UserDetails>
                 )}
-                <div className="grid grid-cols-4">
+                <div
+                  className={`${
+                    isExtremeSmallScreen
+                      ? "flex flex-wrap "
+                      : "grid grid-cols-4 "
+                  }`}
+                >
                   {user.created_by && (
                     <div className="col-span-2">
                       <UserDetails title="Created by">

@@ -77,17 +77,7 @@ type ActionTextFieldProps = TextFieldPropsExtended & {
   actionIcon?: React.ReactElement;
   action?: () => void;
 };
-// type Option = { text: string; score: number };
-// interface InputProps {
-//   options: Array<Option>;
-//   onChange: (
-//     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-//     index: number
-//   ) => void;
-//   handleDeleteOption: (index: number) => void;
-//   errors: Array<Option>;
-//   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-// }
+
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
   onChange: (
@@ -101,13 +91,6 @@ interface DateInputFieldProps extends DatePickerProps {
   disabled?: boolean;
   margin?: "none" | "dense" | "normal";
 }
-// interface TimeInputFieldProps {
-//   value: string;
-//   onChange: (
-//     date: MaterialUiPickersDate,
-//     value?: string | null | undefined
-//   ) => void;
-// }
 
 interface CheckboxProps extends Omit<FormControlLabelProps, "control"> {
   label: string;
@@ -280,9 +263,17 @@ export const TimeInputField = (props: any) => {
   );
 };
 
-export const ErrorHelperText = (props: { error: string }) => {
+export const ErrorHelperText = (props: { error?: string }) => {
   const { error } = props;
-  return <div className="error-text">{error}</div>;
+  return (
+    <span
+      className={`error-text mt-2 ml-1 transition-all duration-300 ${
+        error ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      {error}
+    </span>
+  );
 };
 
 export const ShowRadioOptions = (props: OptionsProps) => {
@@ -566,6 +557,7 @@ interface AutoCompleteAsyncFieldProps {
   filterOptions?: (options: any) => any;
   name?: string;
   freeSolo?: boolean;
+  disabled?: boolean;
 }
 
 export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
@@ -592,6 +584,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
     multiple = false,
     autoSelect = true,
     className = "",
+    disabled = false,
   } = props;
   return (
     <>
@@ -604,6 +597,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         onOpen={onOpen}
         onBlur={onBlur}
         options={options}
+        disabled={disabled}
         onChange={onChange}
         value={value}
         defaultValue={defaultValue}

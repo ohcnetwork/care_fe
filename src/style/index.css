@@ -193,6 +193,14 @@ button:focus {
   background-image: none;
 }
 
+.primary-button {
+  @apply focus:outline-none text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-6 py-2.5 mr-2 mb-2 transition-all ease-in-out duration-200 !important;
+}
+
+.secondary-button {
+  @apply text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-6 py-2.5 mr-2 mb-2 transition-all ease-in-out duration-200 !important;
+}
+
 button:disabled,
 .disabled {
   @apply cursor-not-allowed bg-gray-300 text-gray-500 shadow-none border-transparent;
@@ -352,9 +360,21 @@ button:disabled:focus,
   }
 }
 
+label {
+  @apply block text-gray-700 text-sm font-medium;
+}
+
+input {
+  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300 !important;
+}
+
 input:disabled,
 .disabled {
-  @apply cursor-not-allowed bg-gray-200 text-gray-700;
+  @apply cursor-not-allowed bg-gray-200 border-gray-400 text-gray-700;
+}
+
+textarea {
+  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300;
 }
 
 button:disabled,
@@ -582,8 +602,7 @@ button:disabled,
 }
 
 .error-text {
-  font-size: 14px;
-  color: red;
+  @apply font-medium tracking-wide text-error text-xs
 }
 
 .textMarginCenter {
@@ -833,8 +852,7 @@ button:disabled,
   border-radius: 50%;
 }
 
-@media (min-width:471px)
-  {
+@media (min-width:471px) {
     .csv-input {
       display: block; 
       font-size: 0.875rem;
@@ -842,9 +860,9 @@ button:disabled,
       margin: auto;
       width: 50%;
     }
-  }
-  @media (max-width:470px)
-  {
+}
+
+@media (max-width:470px) {
     .csv-input {
       display: block; 
       font-size: 0.875rem;
@@ -852,27 +870,31 @@ button:disabled,
       margin: auto;
       width: 100%;
     }
-  }
-  
+}
+
 .csv-input::file-selector-button{
-padding-top: 0.5rem;
-padding-bottom: 0.5rem; 
-padding-left: 1rem;
-padding-right: 1rem; 
-font-size: 0.875rem;
-line-height: 1.25rem; 
-font-weight: 600; 
-border-width: 0; 
-background-color: #def7ec;
-color:#046c4e;
-
-}
- 
-
-.csv-input::file-selector-button:hover{
-background-color: #84e1bc;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem; 
+  padding-left: 1rem;
+  padding-right: 1rem; 
+  font-size: 0.875rem;
+  line-height: 1.25rem; 
+  font-weight: 600; 
+  border-width: 0; 
+  background-color: #def7ec;
+  color:#046c4e;
 }
 
-[type="checkbox"]{
+.csv-input::file-selector-button:hover {
+  background-color: #84e1bc;
+}
+
+[type="checkbox"] {
   @apply text-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none;
+}
+
+
+/* for gmaps search dropdown */
+.pac-container {
+  z-index: 100000 !important;
 }
