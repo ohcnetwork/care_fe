@@ -84,10 +84,6 @@ a:hover {
 
 /* Button */
 
-button:focus {
-  outline: none;
-}
-
 .btn {
   @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
 }
@@ -847,8 +843,7 @@ button:disabled,
   border-radius: 50%;
 }
 
-@media (min-width:471px)
-  {
+@media (min-width:471px) {
     .csv-input {
       display: block; 
       font-size: 0.875rem;
@@ -856,9 +851,9 @@ button:disabled,
       margin: auto;
       width: 50%;
     }
-  }
-  @media (max-width:470px)
-  {
+}
+
+@media (max-width:470px) {
     .csv-input {
       display: block; 
       font-size: 0.875rem;
@@ -866,27 +861,50 @@ button:disabled,
       margin: auto;
       width: 100%;
     }
-  }
-  
+}
+
 .csv-input::file-selector-button{
-padding-top: 0.5rem;
-padding-bottom: 0.5rem; 
-padding-left: 1rem;
-padding-right: 1rem; 
-font-size: 0.875rem;
-line-height: 1.25rem; 
-font-weight: 600; 
-border-width: 0; 
-background-color: #def7ec;
-color:#046c4e;
-
-}
- 
-
-.csv-input::file-selector-button:hover{
-background-color: #84e1bc;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem; 
+  padding-left: 1rem;
+  padding-right: 1rem; 
+  font-size: 0.875rem;
+  line-height: 1.25rem; 
+  font-weight: 600; 
+  border-width: 0; 
+  background-color: #def7ec;
+  color:#046c4e;
 }
 
-[type="checkbox"]{
+.csv-input::file-selector-button:hover {
+  background-color: #84e1bc;
+}
+
+[type="checkbox"] {
   @apply text-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none;
 }
+
+/* for gmaps search dropdown */
+.pac-container {
+  z-index: 100000 !important;
+}
+
+.Button { @apply font-medium h-min flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 }
+
+.button-success-default { @apply accent-primary-500 bg-primary-500 hover:bg-primary-400 text-white }
+.button-success-ghost { @apply accent-primary-500 hover:bg-primary-100 text-primary-500 border-0 }
+.button-secondary-default { @apply accent-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700 }
+.button-secondary-ghost { @apply accent-gray-200 hover:bg-gray-200 text-gray-700 border-0 }
+.button-danger-default { @apply accent-red-500 bg-red-500 hover:bg-red-400 text-white }
+.button-danger-ghost { @apply accent-red-500 hover:bg-red-100 text-red-500 border-0 }
+.button-warning-default { @apply accent-yellow-500 bg-yellow-500 hover:bg-yellow-400 text-white }
+.button-warning-ghost { @apply accent-yellow-500 hover:bg-yellow-100 text-yellow-500 border-0 }
+.button-alert-default { @apply accent-violet-600 bg-violet-600 hover:bg-violet-500 text-white }
+.button-alert-ghost { @apply accent-violet-600 hover:bg-violet-100 text-violet-600 border-0 }
+
+.button-shape-square { @apply rounded }
+.button-shape-circle { @apply rounded-full p-2 !important }
+
+.button-size-small { @apply px-2 py-1 text-xs }
+.button-size-default { @apply py-2 px-4 text-sm }
+.button-size-large { @apply py-3 px-5 text-base }

@@ -8,7 +8,6 @@ import thunk from "redux-thunk";
 import { Provider } from "react-redux";
 import * as Sentry from "@sentry/browser";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
-import "tw-elements";
 
 import "./style/index.css";
 

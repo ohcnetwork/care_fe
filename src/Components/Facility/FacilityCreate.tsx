@@ -1,5 +1,4 @@
 import {
-  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -11,7 +10,6 @@ import {
   Radio,
 } from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
@@ -48,7 +46,7 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
+import GLocationPicker from "../Common/GLocationPicker";
 import { goBack } from "../../Utils/utils";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -167,7 +165,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
   >(null);
-  const [mapLoadLocation, setMapLoadLocation] = useState(DEFAULT_MAP_LOCATION);
 
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
@@ -302,6 +299,19 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
   };
 
+  const handleLocationChange = (location: google.maps.LatLng | undefined) => {
+    if (location) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          latitude: location.lat().toString(),
+          longitude: location.lng().toString(),
+        },
+      });
+    }
+  };
+
   const handleValueChange = (value: any, field: string) => {
     dispatch({
       type: "set_form",
@@ -310,12 +320,14 @@ export const FacilityCreate = (props: FacilityProps) => {
   };
 
   const handleClickLocationPicker = (event: React.MouseEvent) => {
-    if (navigator.geolocation) {
+    event.preventDefault();
+
+    if (
+      navigator.geolocation &&
+      !state.form.latitude &&
+      !state.form.longitude
+    ) {
       navigator.geolocation.getCurrentPosition((position) => {
-        setMapLoadLocation([
-          position.coords.latitude,
-          position.coords.longitude,
-        ]);
         dispatch({
           type: "set_form",
           form: {
@@ -482,18 +494,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
-  const handleLocationSelect = (location: { lat: string; lon: string }) => {
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        latitude: location.lat,
-        longitude: location.lon,
-      },
-    });
-    setMapLoadLocation([parseFloat(location.lat), parseFloat(location.lon)]);
-  };
-
   const setLocalBody = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({
       type: "set_form",
@@ -535,7 +535,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     return <Loading />;
   }
 
-  const extremeSmallScreenBreakpoint: number = 320;
+  const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
   const open = Boolean(anchorEl);
@@ -966,10 +966,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                     horizontal: "left",
                   }}
                 >
-                  <LocationSearchAndPick
-                    latitude={mapLoadLocation[0]}
-                    longitude={mapLoadLocation[1]}
-                    onSelectLocation={handleLocationSelect}
+                  <GLocationPicker
+                    lat={Number(state.form.latitude || DEFAULT_MAP_LOCATION[0])}
+                    lng={Number(
+                      state.form.longitude || DEFAULT_MAP_LOCATION[1]
+                    )}
+                    handleOnChange={handleLocationChange}
                   />
                 </Popover>
               </div>

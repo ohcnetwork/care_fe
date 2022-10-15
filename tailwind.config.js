@@ -20,11 +20,11 @@ module.exports = {
           200: "#bcf0da",
           300: "#84e1bc",
           400: "#31c48d",
-          500: "#0e9f6e",
+          500: "#0d9f6e",
           600: "#057a55",
           700: "#046c4e",
           800: "#025340",
-          900: "#014737",
+          900: "#004636",
         },
         gray: {
           100: "#FBF9FB",
@@ -46,15 +46,11 @@ module.exports = {
   corePlugins: {
     aspectRatio: false,
   },
-  content: [
-    "./src/**/*.{html,md,js,jsx,ts,tsx,res}",
-    "./node_modules/tw-elements/dist/js/**/*.js",
-  ],
+  content: ["./src/**/*.{html,md,js,jsx,ts,tsx,res}"],
   safelist: [{ pattern: /^(bg|text|border)-/, variants: ["hover"] }],
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
     require("@tailwindcss/aspect-ratio"),
-    require("tw-elements/dist/plugin"),
   ],
 };
