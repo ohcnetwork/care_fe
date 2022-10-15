@@ -76,6 +76,7 @@
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
     "moment": "^2.29.1",
+    "postcss-loader": "^7.0.1",
     "qrcode.react": "^1.0.1",
     "querystring": "^0.2.1",
     "raviger": "^4.1.0",
@@ -126,7 +127,10 @@
     "prepare": "husky install",
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
-    "format": "prettier ./src --write"
+    "format": "prettier ./src --write",
+    "storybook": "start-storybook -p 6006 -s public",
+    "build-storybook": "build-storybook -s public",
+    "serve-storybook": "serve storybook-static"
   },
   "browserslist": {
     "production": [
@@ -143,6 +147,17 @@
   "devDependencies": {
     "@pnotify/core": "^5.2.0",
     "@pnotify/mobile": "^5.2.0",
+    "@storybook/addon-actions": "^6.5.12",
+    "@storybook/addon-essentials": "^6.5.12",
+    "@storybook/addon-interactions": "^6.5.12",
+    "@storybook/addon-links": "^6.5.12",
+    "@storybook/addon-postcss": "^2.0.0",
+    "@storybook/builder-webpack5": "^6.5.12",
+    "@storybook/manager-webpack5": "^6.5.12",
+    "@storybook/node-logger": "^6.5.12",
+    "@storybook/preset-create-react-app": "^4.0.0",
+    "@storybook/react": "^6.5.12",
+    "@storybook/testing-library": "^0.0.13",
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@tailwindcss/forms": "^0.5.1",
     "@tailwindcss/typography": "^0.5.2",
@@ -256,6 +271,16 @@
   "eslintConfig": {
     "extends": [
       "react-app"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/*.stories.*"
+        ],
+        "rules": {
+          "import/no-anonymous-default-export": "off"
+        }
+      }
     ]
   },
   "engines": {
