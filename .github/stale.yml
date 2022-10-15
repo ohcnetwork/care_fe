@@ -13,13 +13,13 @@ exemptLabels:
 staleLabel: stale
 # Comment to post when marking an issue as stale. Set to `false` to disable
 markComment: >
-  Hi, @${author},
-  This pr/issue has been automatically marked as stale because it has not had recent activity.
+  Hi,
+  This pr/issue has been automatically marked as stale because it has not had any recent activity.
   It will be closed if no further activity occurs for 7 more days. Thank you for your contributions.
 # Comment to post when closing a stale issue. Set to `false` to disable
 closeComment: >
-  Hi, @${author}, @gigincg, @nihal467, @khavinshankar, @mathew-alex 
-  This pr/issue has been automatically closed because it has not had recent activity.
+  Hi, @gigincg, @nihal467, @khavinshankar, @mathew-alex 
+  This pr/issue has been automatically closed because it has not had any recent activity.
   Thank you for your contributions. Feel free to repopen the pr/issue.
 # Issue specific properties
 issue:
@@ -27,3 +27,8 @@ issue:
   daysUntilStale: 14
   # No auto closing the issues
   daysUntilClose: false
+  # Comment to post when marking an issue as stale.
+  markComment: >
+    Hi, @gigincg, @nihal467, @khavinshankar, @mathew-alex 
+    This issue has been automatically marked as stale because it has not had any recent activity.
+
