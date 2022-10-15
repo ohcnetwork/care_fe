@@ -205,6 +205,7 @@
     "redux-devtools-extension": "^2.13.9",
     "rescript": "^9.1.4",
     "snyk": "^1.618.0",
+    "storybook-dark-mode": "^1.1.2",
     "tailwindcss": "^3.0.24",
     "yarn-run-all": "^3.1.1"
   },
