@@ -40,11 +40,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const videoWrapper = useRef<HTMLDivElement>(null);
 
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
-    hostname: "",
     id: "",
-    password: "",
-    port: 123,
-    username: "",
     accessKey: "",
   });
   const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
@@ -104,15 +100,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           };
           console.log("Found " + bedAssets.data.results.length + "bedAssets:");
           if (bedAssets?.data?.results?.length) {
-            const { local_ip_address, camera_access_key, middleware_hostname } =
+            const { camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
             const config = camera_access_key.split(":");
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
-              hostname: local_ip_address,
-              username: config[0] || "",
-              password: config[1] || "",
-              port: 80,
               accessKey: config[2] || "",
             });
             setCameraMiddlewareHostname(middleware_hostname);
@@ -180,6 +172,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       middlewareHostname,
       ...cameraAsset,
     },
+    dispatch,
   });
 
   const getBedPresets = async (asset: any) => {
@@ -190,7 +183,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   };
 
   useEffect(() => {
-    if (cameraAsset.hostname) {
+    if (cameraAsset.id) {
       getPresets({
         onSuccess: (resp) => setPresets(resp.data),
         onError: (resp) => {

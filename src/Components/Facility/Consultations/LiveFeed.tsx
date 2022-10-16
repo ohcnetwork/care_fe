@@ -91,6 +91,7 @@ const LiveFeed = (props: any) => {
       middlewareHostname,
       ...cameraAsset,
     },
+    dispatch,
   });
 
   const getBedPresets = async (id: any) => {
