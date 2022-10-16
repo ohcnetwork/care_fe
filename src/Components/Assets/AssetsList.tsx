@@ -44,7 +44,7 @@ const AssetsList = () => {
   const [facilityName, setFacilityName] = useState<string>();
   const [asset_type, setAssetType] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
-  const limit = 24;
+  const limit = 21;
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const fetchData = useCallback(
@@ -320,9 +320,9 @@ const AssetsList = () => {
             {badge("Asset Type", asset_type, ["asset_type"])}
             {badge("Status", qParams.status, ["status"])}
           </div>
-          <div className="grow mt-10">
+          <div className="grow">
             <div className="py-8 md:px-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 md:-mx-8 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:-mx-8 gap-2">
                 {assetsExist ? (
                   assets.map((asset: AssetData) => (
                     <div

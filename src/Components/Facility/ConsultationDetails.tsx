@@ -1144,9 +1144,7 @@ export const ConsultationDetails = (props: any) => {
               hideBack={true}
               breadcrumbs={false}
             />
-            <PressureSoreDiagrams
-              consultationId={consultationId}
-            ></PressureSoreDiagrams>
+            <PressureSoreDiagrams consultationId={consultationId} />
           </div>
         )}
         {tab === "DIALYSIS" && (
