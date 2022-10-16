@@ -24,8 +24,6 @@ import {
   InputLabel,
   Modal,
   Tooltip,
-  useMediaQuery,
-  useTheme,
 } from "@material-ui/core";
 import { FeedCameraPTZHelpButton } from "./Feed";
 import { AxiosError } from "axios";
@@ -33,6 +31,7 @@ import { isNull } from "lodash";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../models";
 import { TextInputField } from "../../Common/HelperInputFields";
+import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -57,8 +56,10 @@ const LiveFeed = (props: any) => {
   });
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
-  const theme = useTheme();
-  const isExtremeSmallScreen = useMediaQuery(theme.breakpoints.down(320));
+  const { width } = useWindowDimensions();
+  const extremeSmallScreenBreakpoint: number = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
   const liveFeedPlayerRef = useRef<any>(null);
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
@@ -154,17 +155,21 @@ const LiveFeed = (props: any) => {
       onSuccess: () => setLoading(undefined),
     });
   };
+
   useEffect(() => {
-    getPresets({
-      onSuccess: (resp) => setPresets(resp.data),
-      onError: (resp) => {
-        resp instanceof AxiosError &&
-          Notification.Error({
-            msg: "Fetching presets failed",
-          });
-      },
-    });
+    if (cameraAsset?.hostname) {
+      getPresets({
+        onSuccess: (resp) => setPresets(resp.data),
+        onError: (resp) => {
+          resp instanceof AxiosError &&
+            Notification.Error({
+              msg: "Fetching presets failed",
+            });
+        },
+      });
+    }
   }, []);
+
   useEffect(() => {
     setNewPreset(toUpdate?.meta?.preset_name);
     setBed(toUpdate?.bed_object);

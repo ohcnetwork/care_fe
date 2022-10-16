@@ -1,7 +1,7 @@
-import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getConsultation } from "../../../Redux/actions";
+import { formatDate } from "../../../Utils/utils";
 import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
 
 export default function ViewInvestigationSuggestions(props: {
@@ -60,7 +60,7 @@ export default function ViewInvestigationSuggestions(props: {
                                     </div>
                                 ) : (
                                     <div>
-                                        at {moment(investigation.time).format("h:mm a, MMM D YYYY")}
+                                        at {investigation.time ? formatDate(investigation.time) : "--:--"}
                                     </div>
                                 )}
                             </td>
@@ -96,7 +96,7 @@ export default function ViewInvestigationSuggestions(props: {
                             </>
                         ) : (
                             <>
-                                at {moment(investigation.time).format("h:mm a, MMM D YYYY")}
+                                at {investigation.time ? formatDate(investigation.time) : "--:--"}
                             </>
                         )}
                         </b>
