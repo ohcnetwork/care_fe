@@ -71,20 +71,3 @@ export default function AccordionV2(props: {
     </div>
   );
 }
-
-// interface Props {
-//   children: JSX.Element | JSX.Element[];
-// }
-
-// export class AccordionSummaryV2 extends React.Component<Props> {
-//   static displayName = "AccordionSummaryV2";
-//   render() {
-//     return <>{this.props.children}</>;
-//   }
-// }
-// export class AccordionDetailsV2 extends React.Component<Props> {
-//   static displayName = "AccordionDetailsV2";
-//   render() {
-//     return <>{this.props.children}</>;
-//   }
-// }
