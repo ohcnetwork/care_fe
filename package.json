@@ -91,7 +91,7 @@
     "react-google-recaptcha": "^2.1.0",
     "react-i18next": "^11.10.0",
     "react-phone-input-2": "^2.14.0",
-    "react-player": "^2.9.0",
+    "react-player": "^2.10.1",
     "react-qr-reader": "^2.2.1",
     "react-redux": "^7.2.4",
     "react-swipeable-views": "^0.13.9",
