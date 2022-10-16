@@ -18,7 +18,7 @@ const DateRangeInputV2 = ({ startDate, endDate, onChange, label }: Props) => {
             value={startDate}
             onChange={(date: Date) => onChange(date, endDate)}
             position="RIGHT"
-            placeholder="start date"
+            placeholder="Start date"
           />
         </div>
         <div className="flex-auto">
@@ -27,7 +27,7 @@ const DateRangeInputV2 = ({ startDate, endDate, onChange, label }: Props) => {
             onChange={(date: Date) => onChange(startDate, date)}
             position="CENTER"
             disabled={!startDate}
-            placeholder="end date"
+            placeholder="End date"
           />
         </div>
       </div>

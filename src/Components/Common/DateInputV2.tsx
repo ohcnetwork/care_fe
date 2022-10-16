@@ -149,7 +149,7 @@ const DateInputV2: React.FC<Props> = ({
           <input
             type="text"
             readOnly
-            className="w-full"
+            className="form-input bg-gray-200 border-gray-200"
             placeholder={placeholder ? placeholder : "Select date"}
             value={value && format(value, "yyyy-MM-dd")}
             onClick={toggleDatePicker}
