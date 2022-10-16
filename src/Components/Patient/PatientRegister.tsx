@@ -3,7 +3,6 @@ import {
   Card,
   CardContent,
   CircularProgress,
-  Collapse,
   FormControlLabel,
   InputLabel,
   Radio,
@@ -56,14 +55,11 @@ import { validatePincode } from "../../Common/validation";
 import { InfoOutlined } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { goBack } from "../../Utils/utils";
-import AccordionTW, {
-  AccordionDetailsTW,
-  AccordionSummaryTW,
-} from "../Common/components/AccordionTW";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
+import AccordionV2 from "../Common/components/AccordionV2";
+import CollapseV2 from "../Common/components/CollapseV2";
 import { debounce } from "lodash";
 // const debounce = require("lodash.debounce");
 
@@ -1142,11 +1138,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
                         </div>
 
-                        <Collapse
-                          in={String(state.form.gender) === "2"}
-                          timeout="auto"
-                          unmountOnExit
-                        >
+                        <CollapseV2 opened={String(state.form.gender) === "2"}>
                           {
                             <div id="is_antenatal-div" className="col-span-2">
                               <InputLabel
@@ -1178,7 +1170,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               </RadioGroup>
                             </div>
                           }
-                        </Collapse>
+                        </CollapseV2>
                         <div data-testid="current-address" id="address-div">
                           <InputLabel
                             id="address-label"
@@ -1431,16 +1423,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </CardContent>
                   </Card>
                   <Card elevation={0} className="mb-8 rounded">
-                    <AccordionTW
+                    <AccordionV2
                       className="mt-2 lg:mt-0 md:mt-0 bg-white shadow-sm rounded-lg p-3 relative"
                       expandIcon={<ExpandMoreIcon />}
-                    >
-                      <AccordionSummaryTW>
+                      title={
                         <h1 className="font-bold text-purple-500 text-left text-xl">
-                          Health Detailsss
+                          Health Details
                         </h1>
-                      </AccordionSummaryTW>
-                      <AccordionDetailsTW>
+                      }
+                    >
+                      <div>
                         <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2 w-full mt-5">
                           <div id="test_type-div">
                             <InputLabel
@@ -1505,13 +1497,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                               </Box>
                             </RadioGroup>
-                            <Collapse
-                              in={
+                            <CollapseV2
+                              opened={
                                 String(state.form.is_declared_positive) ===
                                 "true"
                               }
-                              timeout="auto"
-                              unmountOnExit
                               className="mt-4"
                             >
                               <div id="date_declared_positive-div">
@@ -1533,7 +1523,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   disableFuture={true}
                                 />
                               </div>
-                            </Collapse>
+                            </CollapseV2>
                           </div>
 
                           <div id="is_vaccinated-div">
@@ -1565,10 +1555,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               </Box>
                             </RadioGroup>
                           </div>
-                          <Collapse
-                            in={String(state.form.is_vaccinated) === "true"}
-                            timeout="auto"
-                            unmountOnExit
+                          <CollapseV2
+                            opened={String(state.form.is_vaccinated) === "true"}
                           >
                             {
                               <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
@@ -1671,7 +1659,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 </div>
                               </div>
                             }
-                          </Collapse>
+                          </CollapseV2>
                           <div id="contact_with_confirmed_carrier-div">
                             <InputLabel htmlFor="contact_with_confirmed_carrier">
                               Contact with confirmed Covid patient?
@@ -1725,8 +1713,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               </Box>
                             </RadioGroup>
                           </div>
-                          <Collapse
-                            in={
+                          <CollapseV2
+                            opened={
                               JSON.parse(
                                 state.form.contact_with_confirmed_carrier
                               ) ||
@@ -1734,8 +1722,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 state.form.contact_with_suspected_carrier
                               )
                             }
-                            timeout="auto"
-                            unmountOnExit
                           >
                             <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                               <div id="estimated_contact_date-div">
@@ -1784,7 +1770,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                               </div>
                             </div>
-                          </Collapse>
+                          </CollapseV2>
                           <div
                             data-testid="disease-status"
                             id="disease_status-div"
@@ -1930,8 +1916,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                         </div>
-                      </AccordionDetailsTW>
-                    </AccordionTW>
+                      </div>
+                    </AccordionV2>
                   </Card>
                   <Card elevation={0} className="mb-8 rounded">
                     <CardContent>
