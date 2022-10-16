@@ -391,24 +391,24 @@ const AssetCreate = (props: AssetProps) => {
   };
 
   return (
-    <div className="pb-2 h-screen flex flex-col">
+    <div className="pb-2 relative flex flex-col">
       <PageTitle
         title={`${assetId ? "Update" : "Create"} Asset`}
-        className="pl-6"
+        className="pl-6 flex-grow-0"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
       />
-      <div className="mt-5 flex h-full sticky top-0 sm:mx-auto">
-        <div className="hidden xl:flex flex-col bg-gray-200 rounded-l-lg pt-10 w-72">
+      <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
+        <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
           {Object.keys(sections).map((sectionTitle) => {
             const isCurrent = currentSection === sectionTitle;
             const section = sections[sectionTitle as AssetFormSection];
             return (
               <button
-                className={`flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
+                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
                   isCurrent ? "bg-white text-primary-500" : "bg-transparent"
                 } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
                 onClick={() => {
@@ -425,11 +425,11 @@ const AssetCreate = (props: AssetProps) => {
             );
           })}
         </div>
-        <div className="w-full h-full flex overflow-auto">
+        <div className="w-full h-full flex overflow-auto xl:ml-72">
           <div className="w-full max-w-3xl 2xl:max-w-4xl">
             <form
               onSubmit={handleSubmit}
-              className="rounded sm:rounded-xl xl:rounded-none xl:rounded-r-xl bg-white p-6 sm:p-12 transition-all mb-40"
+              className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
             >
               <div className="grid grid-cols-1 gap-x-12 items-start">
                 <div className="grid grid-cols-6 gap-x-6">
@@ -782,7 +782,7 @@ const AssetCreate = (props: AssetProps) => {
 
                 <div className="mt-12 flex justify-end gap-x-4 gap-y-2 flex-wrap">
                   <button
-                    className="primary-button"
+                    className="primary-button w-full md:w-auto flex justify-center"
                     id="asset-create"
                     type="submit"
                     onClick={handleSubmit}
@@ -796,7 +796,7 @@ const AssetCreate = (props: AssetProps) => {
                   </button>
                   <button
                     id="asset-cancel"
-                    className="secondary-button"
+                    className="secondary-button w-full md:w-auto flex justify-center"
                     onClick={() =>
                       navigate(
                         assetId

@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect, ReactElement } from "react";
 
 import loadable from "@loadable/component";
-import moment from "moment";
-import { AssetData, AssetTransaction } from "./AssetTypes";
+import { assetClassProps, AssetData, AssetTransaction } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch } from "react-redux";
 import { getAsset, listAssetTransaction } from "../../Redux/actions";
@@ -10,6 +9,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
+import { formatDate } from "../../Utils/utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -132,7 +132,7 @@ const AssetManage = (props: AssetManageProps) => {
             </td>
             <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
               <span className="text-gray-900 font-medium">
-                {moment(transaction.modified_date).format("lll")}
+                {formatDate(transaction.modified_date)}
               </span>
             </td>
           </tr>
@@ -159,29 +159,34 @@ const AssetManage = (props: AssetManageProps) => {
   if (isLoading) return <Loading />;
   if (isPrintMode) return <PrintPreview />;
 
+  const assetClassProp =
+    (asset?.asset_class && assetClassProps[asset.asset_class]) ||
+    assetClassProps.None;
+
   return (
     <div className="px-2 pb-2">
       <PageTitle
         title="Asset Details"
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
-      <div className="bg-white rounded-lg md:rounded-xl md:p-8 p-6">
+      <div className="my-8 bg-white rounded-lg md:rounded-xl md:p-8 p-6 max-w-6xl mx-auto">
         <div className="mb-4 flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 justify-between w-full">
             <span className="text-2xl md:text-3xl font-semibold break-words">
               {asset?.name}
             </span>
-            <div className="flex-1" />
-            {status(asset?.status)}
-            {workingStatus(asset?.is_working)}
+            <div className=" flex flex-wrap gap-2">
+              {status(asset?.status)}
+              {workingStatus(asset?.is_working)}
+            </div>
           </div>
           <span className="text-gray-700">{asset?.description}</span>
         </div>
 
-        <div className="flex flex-col 2xl:flex-row justify-between">
-          <div className="m-2 sm:m-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 md:gap-x-16 w-full mb-12">
+        <div className="flex flex-col justify-between">
+          <div className="m-2 sm:m-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 md:gap-x-16 w-full mb-12">
             {/* Location Detail */}
-            <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
+            <div className="flex flex-row items-center gap-4 mb-6 md:mb-8">
               <i className="fas fa-map-marker-alt text-xl text-gray-600" />
               <div className="flex flex-col">
                 <span className="text-gray-700">
@@ -194,7 +199,7 @@ const AssetManage = (props: AssetManageProps) => {
             </div>
 
             {/* Asset Type */}
-            <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
+            <div className="flex flex-row items-center gap-4 mb-6 md:mb-8">
               <i className="fas fa-cubes text-xl text-gray-600" />
               <div className="flex flex-col">
                 <span className="text-gray-700">Asset Type</span>
@@ -206,9 +211,22 @@ const AssetManage = (props: AssetManageProps) => {
               </div>
             </div>
 
+            {/* Asset Class */}
+            <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
+              <span className="text-gray-600 text-xl">
+                {assetClassProp.icon}
+              </span>
+              <div className="flex flex-col">
+                <span className="text-gray-700">Asset Class</span>
+                <span className="font-medium text-lg text-gray-900">
+                  {assetClassProp.name}
+                </span>
+              </div>
+            </div>
+
             {/* Not working reason */}
             {asset?.is_working === false && (
-              <div className="flex flex-row items-center gap-4 col-span-1 md:col-span-2 xl:col-span-1 2xl:col-span-2 mb-6 md:mb-12">
+              <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
                 {/* description icon */}
                 <i className="fas fa-exclamation-circle text-xl text-gray-600" />
                 <div className="flex flex-col">
@@ -220,7 +238,7 @@ const AssetManage = (props: AssetManageProps) => {
               </div>
             )}
 
-            <span className="font-medium text-gray-800 mb-4 col-span-1 md:col-span-2 xl:col-span-3 2xl:col-span-2">
+            <span className="font-medium text-gray-800 mb-4 col-span-1 md:col-span-2 xl:col-span-3">
               Service Details
             </span>
 
@@ -231,7 +249,7 @@ const AssetManage = (props: AssetManageProps) => {
                 <span className="text-gray-700">Last serviced on</span>
                 <span className="font-medium text-lg text-gray-900">
                   {asset?.last_serviced_on
-                    ? moment(asset?.last_serviced_on).format("MMM DD, YYYY")
+                    ? formatDate(asset?.last_serviced_on)
                     : "--"}
                 </span>
               </div>
@@ -247,13 +265,13 @@ const AssetManage = (props: AssetManageProps) => {
             </div>
           </div>
           {asset && (
-            <div className="flex gap-8 lg:gap-4 xl:gap-8 2xl:gap-4 3xl:gap-8 items-center justify-center flex-col lg:flex-row transition-all duration-200 ease-in">
+            <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col lg:flex-row transition-all duration-200 ease-in">
               <AssetWarrantyCard asset={asset} view="front" />
               <AssetWarrantyCard asset={asset} view="back" />
             </div>
           )}
         </div>
-        <div className="flex mt-8 gap-1">
+        <div className="flex flex-col md:flex-row mt-8 gap-1">
           <button
             onClick={() =>
               navigate(
@@ -277,8 +295,22 @@ const AssetManage = (props: AssetManageProps) => {
             </button>
           )}
         </div>
+        <div className="flex md:flex-row flex-col gap-2 justify-between pt-4 -mb-4">
+          <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
+            <div>
+              <span className="text-gray-900">Created: </span>
+              {asset?.created_date && formatDate(asset?.created_date)}
+            </div>
+          </div>
+          <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
+            <div>
+              <span className="text-gray-900">Last Modified: </span>
+              {asset?.modified_date && formatDate(asset?.modified_date)}
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="bg-white rounded-lg md:p-6 p-3 mt-2">
+      <div className="bg-white rounded-lg md:p-6 p-3 mt-2 max-w-6xl mx-auto">
         <div className="text-xl font-semibold">Transaction History</div>
         <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">

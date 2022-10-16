@@ -27,6 +27,7 @@ build
 .swp
 stats.json
 public/build-meta.json
+.vscode
 
 
 # Reason React
