@@ -1,7 +1,4 @@
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
   Card,
   CardContent,
@@ -59,11 +56,16 @@ import { validatePincode } from "../../Common/validation";
 import { InfoOutlined } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { goBack } from "../../Utils/utils";
+import AccordionTW, {
+  AccordionDetailsTW,
+  AccordionSummaryTW,
+} from "../Common/components/AccordionTW";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
+// const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -1429,18 +1431,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </CardContent>
                   </Card>
                   <Card elevation={0} className="mb-8 rounded">
-                    <Accordion className="mt-2 lg:mt-0 md:mt-0">
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1a-content"
-                        id="panel1a-header"
-                      >
-                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                          Health Details
+                    <AccordionTW
+                      className="mt-2 lg:mt-0 md:mt-0 bg-white shadow-sm rounded-lg p-3 relative"
+                      expandIcon={<ExpandMoreIcon />}
+                    >
+                      <AccordionSummaryTW>
+                        <h1 className="font-bold text-purple-500 text-left text-xl">
+                          Health Detailsss
                         </h1>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2 w-full">
+                      </AccordionSummaryTW>
+                      <AccordionDetailsTW>
+                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2 w-full mt-5">
                           <div id="test_type-div">
                             <InputLabel
                               id="test_type-label"
@@ -1929,8 +1930,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                         </div>
-                      </AccordionDetails>
-                    </Accordion>
+                      </AccordionDetailsTW>
+                    </AccordionTW>
                   </Card>
                   <Card elevation={0} className="mb-8 rounded">
                     <CardContent>

@@ -22,18 +22,24 @@ import {
   sendNotificationMessages,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import { InputLabel, TextField } from "@material-ui/core";
+
+import {
+  AccordionSummary,
+  AccordionDetails,
+  InputLabel,
+  TextField,
+} from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 import { CSVLink } from "react-csv";
 import moment from "moment";
 import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
-import Accordion from "@material-ui/core/Accordion";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import Typography from "@material-ui/core/Typography";
+import {
+  AccordionDetailsTW,
+  AccordionSummaryTW,
+} from "../Common/components/AccordionTW";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -42,6 +48,7 @@ import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
+import AccordionTW from "../Common/components/AccordionTW";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -558,19 +565,16 @@ export const HospitalList = (props: any) => {
 
         <div className="flex md:justify-end w-full md:mt-4">
           <div className="w-full md:w-auto">
-            <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
-              >
-                <Typography className={classes.heading}>
-                  {t("downloads")}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <div>
-                  <InputLabel className="text-sm">
+            <AccordionTW
+              className="lg:mt-0 md:mt-0 sm:mt-0 bg-white shadow-md rounded-lg p-3 relative"
+              expandIcon={<ExpandMoreIcon />}
+            >
+              <AccordionSummaryTW>
+                <p className="font-medium text-lg">Downloads</p>
+              </AccordionSummaryTW>
+              <AccordionDetailsTW>
+                <div className="mt-3">
+                  <InputLabel className="text-sm mb-2">
                     {t("download_type")}
                   </InputLabel>
                   <div className="flex flex-row gap-6">
@@ -583,7 +587,8 @@ export const HospitalList = (props: any) => {
                       ]}
                       selected={downloadSelect}
                       onSelect={setdownloadSelect}
-                      position="right"
+                      position="left"
+                      parentRelative={false}
                     />
                     {downloadLoading ? (
                       <div className="px-2 ml-2 my-2 pt-1 rounded">
@@ -630,8 +635,8 @@ export const HospitalList = (props: any) => {
                     id="triageDownloader"
                   ></CSVLink>
                 </div>
-              </AccordionDetails>
-            </Accordion>
+              </AccordionDetailsTW>
+            </AccordionTW>
           </div>
         </div>
       </div>
@@ -704,6 +709,33 @@ export const HospitalList = (props: any) => {
           </div>
         </div>
       </div>
+
+      <AccordionTW
+        expandIcon={
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+            />
+          </svg>
+        }
+      >
+        <AccordionSummaryTW>
+          <h3>Hello Title</h3>
+        </AccordionSummaryTW>
+        <AccordionDetailsTW>
+          <p>Hello World</p>
+        </AccordionDetailsTW>
+      </AccordionTW>
+
       <div>
         <SlideOver show={showFilters} setShow={setShowFilters}>
           <div className="bg-white min-h-screen p-4">
