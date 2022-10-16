@@ -29,10 +29,7 @@ const initForm = {
   localipAddress: "",
   cameraAccessKey: "",
 };
-const initError = Object.assign(
-  {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
-);
+const initError = { ...initForm };
 const initialState = {
   form: { ...initForm },
   errors: { ...initError },
@@ -85,7 +82,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     local_ip_address: string,
     camera_Access_Key: string
   ) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form["assetType"] = asset_type;
     form["middlewareHostname"] = middleware_hostname;
     form["localipAddress"] = local_ip_address;
@@ -94,8 +91,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   };
 
   const isFormValid = () => {
-    let form = { ...state.form };
-    let errors = { ...initError };
+    const form = { ...state.form };
+    const errors = { ...initError };
     let invalidForm = false;
 
     Object.keys(state.form).forEach((field) => {
@@ -133,7 +130,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (isFormValid()) {
-      let form = { ...state.form };
+      const form = { ...state.form };
       const data = {
         meta: {
           asset_type: "CAMERA",
@@ -214,7 +211,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   };
   if (isLoading) return <Loading />;
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch_form({ type: "set_form", form });
   };

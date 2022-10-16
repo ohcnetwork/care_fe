@@ -19,10 +19,7 @@ const initForm = {
   middlewareHostname: "",
   localipAddress: "",
 };
-const initError = Object.assign(
-  {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
-);
+const initError = { ...initForm };
 const initialState = {
   form: { ...initForm },
   errors: { ...initError },
@@ -68,7 +65,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     middleware_hostname: string,
     local_ip_address: string
   ) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form["assetType"] = asset_type;
     form["middlewareHostname"] = middleware_hostname;
     form["localipAddress"] = local_ip_address;
@@ -76,8 +73,8 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   };
 
   const isFormValid = () => {
-    let form = { ...state.form };
-    let errors = { ...initError };
+    const form = { ...state.form };
+    const errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
@@ -108,7 +105,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (isFormValid()) {
-      let form = { ...state.form };
+      const form = { ...state.form };
       const data = {
         meta: {
           asset_type: form["assetType"],
@@ -133,7 +130,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   };
   if (isLoading) return <Loading />;
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch_form({ type: "set_form", form });
   };
