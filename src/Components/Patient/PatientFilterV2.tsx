@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import {
   PATIENT_FILTER_ORDER,
   GENDER_TYPES,
@@ -21,7 +21,6 @@ import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import { getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
-
 import { debounce } from "lodash";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -40,21 +39,6 @@ const useMergeState = (initialState: any) => {
 
 export default function PatientFilterV2(props: any) {
   const { filter, onChange, closeFilter } = props;
-  const [_isFacilityLoading, setFacilityLoading] = useState(false);
-  const [_isDistrictLoading, setDistrictLoading] = useState(false);
-
-  const [lsgBody, setLsgBody] = useState<any[]>([]);
-  const [isLsgLoading, setLsgLoading] = useState(false);
-  const [hasLsgSearchText, setHasLsgSearchText] = useState(false);
-
-  const handleLsgChange = (current: any) => {
-    if (!current) {
-      setLsgBody([]);
-      setLsgLoading(false);
-      setHasLsgSearchText(false);
-    }
-    setFacility(current, "lsgBody");
-  };
 
   const [filterState, setFilterState] = useMergeState({
     district: filter.district || "",
@@ -154,36 +138,28 @@ export default function PatientFilterV2(props: any) {
   useEffect(() => {
     async function fetchData() {
       if (filter.facility) {
-        setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
           getAnyFacility(filter.facility, "facility")
         );
         setFilterState({ facility_ref: facilityData });
-        setFacilityLoading(false);
       }
+
       if (filter.district) {
-        setDistrictLoading(true);
         const { data: districtData } = await dispatch(
           getDistrict(filter.district, "district")
         );
         setFilterState({ district_ref: districtData });
-        setDistrictLoading(false);
       }
 
       if (filter.lsgBody) {
-        setLsgLoading(true);
         const { data: lsgRes } = await dispatch(getAllLocalBody({}));
-        const lsgBodyData = lsgRes.results.map((obj: any) => ({
-          id: obj.id,
-          name: obj.name,
-        }));
-        setLsgBody(lsgBodyData);
+        const lsgBodyData = lsgRes.results;
+
         setFilterState({
           lsgBody_ref: lsgBodyData.filter(
             (obj: any) => obj.id.toString() === filter.lsgBody.toString()
           )[0],
         });
-        setLsgLoading(false);
       }
     }
     fetchData();
@@ -213,26 +189,20 @@ export default function PatientFilterV2(props: any) {
     setFilterState(filterData);
   };
 
-  const handleLsgSearch = (e: any) => {
-    setHasLsgSearchText(!!e.target.value);
-    setLsgLoading(true);
-    onLsgSearch(e.target.value);
-  };
+  const lsgSearch = useMemo(
+    () =>
+      debounce(
+        async (search: string) => {
+          const res = await dispatch(
+            getAllLocalBody({ local_body_name: search })
+          );
 
-  const onLsgSearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const {
-          data: { results: lsgBodies },
-        } = await dispatch(getAllLocalBody({ local_body_name: text }));
-        setLsgBody(lsgBodies);
-        setLsgLoading(false);
-      } else {
-        setLsgBody([]);
-        setLsgLoading(false);
-      }
-    }, 300),
-    []
+          return res?.data?.results;
+        },
+        300,
+        { leading: true }
+      ),
+    [dispatch]
   );
 
   const applyFilter = () => {
@@ -445,29 +415,19 @@ export default function PatientFilterV2(props: any) {
         <div className="w-full flex-none">
           <span className="text-sm">LSG Body</span>
           <div className="">
-            <AutoCompleteAsyncField
-              name="lsgBody"
-              multiple={false}
-              variant="outlined"
-              value={filterState.lsgBody_ref}
-              options={lsgBody}
-              onSearch={handleLsgSearch}
-              onChange={(e: object, value: any) => handleLsgChange(value)}
-              loading={isLsgLoading}
-              placeholder="Search by LSG body name"
-              noOptionsText={
-                hasLsgSearchText
-                  ? "No LSG body found, please try again"
-                  : "Start typing to begin search"
+            <AutoCompleteAsync
+              className="pt-2"
+              name="lsg_body"
+              selected={filterState.lsgBody_ref}
+              fetchData={lsgSearch}
+              onChange={(selected) =>
+                setFilterState({
+                  ...filterState,
+                  lsgBody_ref: selected,
+                  lsgBody: selected.id,
+                })
               }
-              renderOption={(option: any) => <div>{option.name}</div>}
-              freeSolo={false}
-              getOptionSelected={(option: any, value: any) =>
-                option.id === value.id
-              }
-              getOptionLabel={(option: any) => option.name}
-              // className="shifting-page-filter-dropdown"
-              className="bg-red-100"
+              getOptionLabel={(option) => option.name}
             />
           </div>
         </div>
@@ -493,7 +453,6 @@ export default function PatientFilterV2(props: any) {
             showAll
             setSelected={(obj) => setFacility(obj, "facility")}
             className="shifting-page-filter-dropdown"
-            errors={""}
           />
         </div>
 
