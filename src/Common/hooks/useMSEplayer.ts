@@ -2,11 +2,7 @@ import { useEffect, useRef } from "react";
 import axios from "axios";
 
 export interface IAsset {
-  username: string;
-  password: string;
-  hostname: string;
   middlewareHostname: string;
-  port: number;
 }
 
 interface PTZPayload {
@@ -23,10 +19,6 @@ interface UseMSEMediaPlayerOption {
 
 export interface ICameraAssetState {
   id: string;
-  username: string;
-  password: string;
-  hostname: string;
-  port: number;
   accessKey: string;
 }
 
@@ -108,10 +100,10 @@ export const getPTZPayload = (action: PTZ): PTZPayload => {
  */
 
 const Utf8ArrayToStr = (array: string | any[] | Uint8Array) => {
-  var out, i, len, c;
-  var char2, char3;
+  let out, i, c;
+  let char2, char3;
   out = "";
-  len = array.length;
+  const len = array.length;
   i = 0;
   while (i < len) {
     c = array[i++];
@@ -140,15 +132,15 @@ export const useMSEMediaPlayer = ({
   url,
   videoEl,
 }: UseMSEMediaPlayerOption): UseMSEMediaPlayerReturnType => {
-  let mseQueue: any[] = [];
+  const mseQueue: any[] = [];
   let mseStreamingStarted = false;
-  let wsRef = useRef<WebSocket>();
+  const wsRef = useRef<WebSocket>();
   let mseSourceBuffer: any;
 
   const pushPacket = () => {
     if (!mseSourceBuffer.updating) {
       if (mseQueue.length > 0) {
-        let packet = mseQueue.shift();
+        const packet = mseQueue.shift();
         mseSourceBuffer.appendBuffer(packet);
       } else {
         mseStreamingStarted = false;
@@ -179,7 +171,7 @@ export const useMSEMediaPlayer = ({
     // location.protocol == 'https:' ? protocol = 'wss' : protocol = 'ws';
     try {
       wsRef.current?.close();
-      let mse = new MediaSource();
+      const mse = new MediaSource();
       if (videoEl) {
         videoEl.src = window.URL.createObjectURL(mse);
       }
@@ -189,16 +181,16 @@ export const useMSEMediaPlayer = ({
           "sourceopen",
           function () {
             wsRef.current = new WebSocket(url);
-            let ws = wsRef.current;
+            const ws = wsRef.current;
             ws.binaryType = "arraybuffer";
             ws.onopen = function (_event) {
               console.log("Connected to ws");
               onSuccess && onSuccess(undefined);
             };
             ws.onmessage = function (event) {
-              let data = new Uint8Array(event.data);
+              const data = new Uint8Array(event.data);
               if (+data[0] === 9) {
-                let decoded_arr = data.slice(1);
+                const decoded_arr = data.slice(1);
                 let mimeCodec;
                 if (window.TextDecoder) {
                   mimeCodec = new TextDecoder("utf-8").decode(decoded_arr);
