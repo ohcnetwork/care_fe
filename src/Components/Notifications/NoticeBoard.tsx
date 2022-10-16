@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getNotifications } from "../../Redux/actions";
-import moment from "moment";
 import PageTitle from "../Common/PageTitle";
 import { Card, CardContent } from "@material-ui/core";
 import Loading from "../Common/Loading";
+import { formatDate } from "../../Utils/utils";
 
 export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
@@ -41,7 +41,7 @@ export const NoticeBoard: any = () => {
               </span>
             </div>
             <div className="text-xs text-gray-900">
-              On: {moment(item.created_date).format("lll")}
+              On: {formatDate(item.created_date)}
             </div>
           </div>
         </CardContent>
