@@ -1,6 +1,5 @@
 import { CardContent } from "@material-ui/core";
 import { navigate } from "raviger";
-import moment from "moment";
 import React, { useState } from "react";
 import { SampleTestModel } from "./models";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,6 +9,7 @@ import { RoleButton } from "../Common/RoleButton";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import _ from "lodash";
+import { formatDate } from "../../Utils/utils";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -109,14 +109,14 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <div className="text-gray-600 text-sm font-bold">
               <span className="text-gray-800">Date of Sample:</span>{" "}
               {itemData.date_of_sample
-                ? moment(itemData.date_of_sample).format("lll")
+                ? formatDate(itemData.date_of_sample)
                 : "Not Available"}
             </div>
 
             <div className="text-gray-600 text-sm font-bold">
               <span className="text-gray-800">Date of Result:</span>{" "}
               {itemData.date_of_result
-                ? moment(itemData.date_of_result).format("lll")
+                ? formatDate(itemData.date_of_result)
                 : "Not Available"}
             </div>
           </div>
@@ -124,7 +124,8 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         <div className="flex flex-col mt-6 gap-2">
           {
             <div className="text-sm text-gray-700">
-              <b>Created</b> on {moment(itemData.created_date).format("lll")}{" "}
+              <b>Created</b> on{" "}
+              {itemData.created_date && formatDate(itemData.created_date)}{" "}
               {itemData.created_by && (
                 <span>
                   by{" "}
@@ -135,7 +136,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           }
           <div className="text-sm text-gray-700">
             <b>Last Modified</b> on{" "}
-            {moment(itemData.modified_date).format("lll")}{" "}
+            {itemData.modified_date && formatDate(itemData.modified_date)}{" "}
             {itemData.last_edited_by && (
               <span>
                 by{" "}

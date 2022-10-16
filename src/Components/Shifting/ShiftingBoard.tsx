@@ -14,6 +14,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import { useDrag, useDrop } from "react-dnd";
 import clsx from "clsx";
+import { formatDate } from "../../Utils/utils";
 
 const limit = 14;
 
@@ -147,7 +148,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                 >
                   <i className="fas fa-stopwatch mr-2"></i>
                   <dd className="font-bold text-sm leading-5 break-normal">
-                    {moment(shift.modified_date).format("LLL") || "--"}
+                    {formatDate(shift.modified_date) || "--"}
                   </dd>
                 </dt>
               </div>

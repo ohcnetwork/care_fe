@@ -109,7 +109,7 @@ export default function MinQuantityList(props: any) {
           </Link>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm sm:flex hidden w-full justify-between">
-          <p className="text-gray-900 whitespace-nowrap lowercase">
+          <p className="text-gray-900 whitespace-nowrap lowercase mt-2">
             {inventoryItem.min_quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
