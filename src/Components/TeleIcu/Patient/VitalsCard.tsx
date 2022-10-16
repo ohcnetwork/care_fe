@@ -42,6 +42,11 @@ export default function TeleICUPatientVitalsCard({
   const [hl7Asset, setHl7Asset] = React.useState<AssetData>();
   const [patientObservations, setPatientObservations] = React.useState<any>();
   const [stats, setStats] = React.useState(false);
+  const [waveType, setWaveType] = React.useState<"STREAM" | "REFRESH" | null>(localStorage.getItem("waveType") as any || "STREAM");
+
+  useEffect(() => {
+    localStorage.setItem("waveType", waveType || "STREAM");
+  }, [waveType]);
 
   const fetchData = async () => {
     if (patient?.last_consultation?.current_bed?.bed_object?.id) {
@@ -111,12 +116,12 @@ export default function TeleICUPatientVitalsCard({
 
   type VitalType = {
     label: ReactNode;
-    liveKey:string;
-    vitalKey:string;
-    waveformKey?:string;
-    waveformColor?:string;
-    waveformName?:string;
-    waveformDefaultSpace?:boolean;
+    liveKey: string;
+    vitalKey: string;
+    waveformKey?: string;
+    waveformColor?: string;
+    waveformName?: string;
+    waveformDefaultSpace?: boolean;
   }
 
   const vitals: VitalType[] = [
@@ -125,7 +130,7 @@ export default function TeleICUPatientVitalsCard({
       liveKey: "pulse-rate",
       vitalKey: "pulse",
       waveformKey: "II",
-      waveformColor: "blue",
+      waveformColor: "limegreen",
       waveformName: "ECG"
     },
     {
@@ -142,15 +147,15 @@ export default function TeleICUPatientVitalsCard({
       liveKey: "SpO2",
       vitalKey: "ventilator_spo2",
       waveformKey: "Pleth",
-      waveformColor: "red",
+      waveformColor: "yellow",
     },
     {
       label: <>R. Rate</>,
       liveKey: "respiratory-rate",
       vitalKey: "resp",
       waveformKey: "Respiration",
-      waveformColor: "green",
-      waveformDefaultSpace: true
+      waveformColor: "cyan",
+      //waveformDefaultSpace: true
     },
     {
       label: <>Temperature (F)</>,
@@ -166,16 +171,16 @@ export default function TeleICUPatientVitalsCard({
           {waveforms ? (
             <>
               {vitals.map((v, i) => {
-                const waveform = waveforms.filter(w=>w["wave-name"] === v.waveformKey)[0];
+                const waveform = waveforms.filter(w => w["wave-name"] === v.waveformKey)[0];
                 return (
                   (v.waveformKey && waveform) ?
                     <Waveform
                       key={i}
                       wave={{
-                        ...waveform, 
-                        data : waveforms
-                          .filter(w=>w["wave-name"] === v.waveformKey)
-                          .map(w=>w.data)
+                        ...waveform,
+                        data: waveforms
+                          .filter(w => w["wave-name"] === v.waveformKey)
+                          .map(w => w.data)
                           .join(" ")
                       }}
                       title={v.waveformName || v.waveformKey}
@@ -183,8 +188,9 @@ export default function TeleICUPatientVitalsCard({
                       metrics={stats}
                       classes={"h-[150px]"}
                       defaultSpace={v.waveformDefaultSpace}
+                      wavetype={waveType || "STREAM"}
                     /> : (<div className="flex items-center justify-center text-gray-900">
-                      
+
                     </div>)
                 )
               })}
@@ -199,7 +205,16 @@ export default function TeleICUPatientVitalsCard({
                     <i className="fas fa-chart-simple text-gray-400" />
                   </button>
                 </ToolTip>
-                
+                <ToolTip
+                  text={`Switch to ${waveType === "STREAM" ? "refresh" : "stream"} mode`}
+                  position="TOP"
+                >
+                  <button
+                    onClick={() => setWaveType(waveType === "STREAM" ? "REFRESH" : "STREAM")}
+                  >
+                    <i className="fas fa-wave-square text-gray-400" />
+                  </button>
+                </ToolTip>
               </div>
             </>
           ) : (
@@ -219,23 +234,20 @@ export default function TeleICUPatientVitalsCard({
                 <h2 className="font-bold text-xl md:text-3xl">
                   {liveReading ||
                     (vital.vitalKey === "bp"
-                      ? `${
-                          patient.last_consultation?.last_daily_round?.bp
-                            .systolic || "--"
-                        }/${
-                          patient.last_consultation?.last_daily_round?.bp
-                            .diastolic || "--"
-                        }`
+                      ? `${patient.last_consultation?.last_daily_round?.bp
+                        .systolic || "--"
+                      }/${patient.last_consultation?.last_daily_round?.bp
+                        .diastolic || "--"
+                      }`
                       : patient.last_consultation?.last_daily_round?.[
-                          vital.vitalKey || ""
-                        ]) ||
+                      vital.vitalKey || ""
+                      ]) ||
                     "--"}
                 </h2>
                 <div className="text-xs md:text-base">
                   <i
-                    className={`fas fa-circle text-xs mr-2 ${
-                      liveReading ? "text-green-600" : "text-gray-400"
-                    }`}
+                    className={`fas fa-circle text-xs mr-2 ${liveReading ? "text-green-600" : "text-gray-400"
+                      }`}
                   />
                   {vital.label}
                 </div>

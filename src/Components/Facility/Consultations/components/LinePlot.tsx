@@ -8,7 +8,7 @@ export const LinePlot = (props: any) => {
     yData,
     low = null,
     high = null,
-    defaultSpace = true,
+    defaultSpace,
   } = props;
   let generalOptions: any = {
     title: {
@@ -95,19 +95,27 @@ export const LinePlot = (props: any) => {
         text: "",
       },
       grid: {
-        left: "15px",
-        right: "15px",
+        show: false,
+        borderColor: "transparent",
+        left: "40px",
+        right: "20px",
       },
       animation: false,
       xAxis: {
         ...generalOptions.xAxis,
         show: false,
+        
       },
       yAxis: {
         ...generalOptions.yAxis,
-        show: false,
+        show: true,
         min: props.yStart,
         max: props.yEnd,
+        splitLine: {
+          lineStyle: {
+              color: '#4E4E4E'
+          }
+        },
       },
       toolbox: {
         ...generalOptions.toolbox,
@@ -137,12 +145,13 @@ export const LinePlot = (props: any) => {
               ],
             },
           },
+          connectNulls: false,
         },
       ],
     };
   }
 
-  if (!defaultSpace) {
+  if (defaultSpace != true) {
     generalOptions = {
       ...generalOptions,
       grid: {
