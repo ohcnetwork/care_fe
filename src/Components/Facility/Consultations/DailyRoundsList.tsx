@@ -1,6 +1,5 @@
 import { Grid, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
-import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -8,6 +7,8 @@ import { getDailyReport } from "../../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
+import { formatDate } from "../../../Utils/utils";
+
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
@@ -147,7 +148,7 @@ export const DailyRoundsList = (props: any) => {
                       <span className="text-gray-700">Created At:</span>{" "}
                       <div className="text-xs">
                         {itemData.created_date
-                          ? moment(itemData.created_date).format("lll")
+                          ? formatDate(itemData.created_date)
                           : "-"}
                       </div>
                     </div>
@@ -157,7 +158,7 @@ export const DailyRoundsList = (props: any) => {
                       <span className="text-gray-700">Updated At:</span>{" "}
                       <div className="text-xs">
                         {itemData.modified_date
-                          ? moment(itemData.modified_date).format("lll")
+                          ? formatDate(itemData.modified_date)
                           : "-"}
                       </div>
                     </div>

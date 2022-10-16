@@ -34,7 +34,7 @@ interface UseMSEMediaPlayerReturnType {
   startStream: (options?: IOptions) => void;
 }
 
-interface IOptions {
+export interface IOptions {
   onSuccess?: (resp: any) => void;
   onError?: (err: any) => void;
 }
@@ -198,7 +198,7 @@ export const useMSEMediaPlayer = ({
                   mimeCodec = Utf8ArrayToStr(decoded_arr);
                 }
                 mseSourceBuffer = mse.addSourceBuffer(
-                  'video/mp4; codecs="' + mimeCodec + '"'
+                  `video/mp4; codecs="${mimeCodec}"`
                 );
                 mseSourceBuffer.mode = "segments";
                 if (mseQueue.length > 0 && !mseSourceBuffer.updating) {
