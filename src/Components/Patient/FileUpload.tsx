@@ -511,7 +511,6 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const renderFileUpload = (item: FileUploadModel) => {
-    console.log(item);
     return (
       <>
         <div
@@ -783,18 +782,6 @@ export const FileUpload = (props: FileUploadProps) => {
                     <i className="fa-solid fa-circle-question mr-2 "></i>MORE
                     DETAILS
                   </label>
-                  {/* <label
-                    onClick={() => {
-                      setModalDetails({
-                        name: item.name,
-                        id: item.id,
-                      });
-                      setModalOpenForUnarchive(true);
-                    }}
-                    className="btn btn-primary m-1 sm:w-auto w-full"
-                  >
-                    <i className="fa-solid fa-box-archive mr-2 "></i>UNARCHIVE
-                  </label> */}
                 </div>
               </div>
             </>
