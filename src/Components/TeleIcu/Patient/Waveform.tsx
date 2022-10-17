@@ -35,11 +35,7 @@ export default function Waveform(props: {
   const [lastStream, setLastStream] = useState(0);
   const [rPointer, setRPointer] = useState(0);
 
-  const viewable = wavetype === "STREAM" ? data.length : data.length;
-  const tpf = Number(wave["sampling rate"].split("/")[0]) / 1000000;
-  const streamLag = Number(
-    (tpf * (queueData.length - viewable)) / 1000
-  ).toFixed(2);
+  const viewable = data.length;
   const initialRender = useRef(true);
 
   useEffect(() => {
@@ -133,7 +129,7 @@ export default function Waveform(props: {
             <div>Stream Length: {data.length}</div>
             <div>Buffer Length: {queueData.length}</div>
             <div>Sampling Rate: {wave["sampling rate"]}</div>
-            <div>Lag: {streamLag} sec</div>
+            <div>Lag: {Math.round(queueData.length / viewable)} seconds</div>
             <div>Last response: {lastStream} sec ago</div>
             {queueData.length > viewable && (
               <button
