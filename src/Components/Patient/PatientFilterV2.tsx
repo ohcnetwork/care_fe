@@ -19,15 +19,15 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
-import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import { getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
-import DateInputFormField from "../Form/FormFields/DateInputFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
+import DateRangeInputV2 from "../Common/DateRangeInputV2";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -616,150 +616,144 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-full flex-none">
-          <DateRangePicker
-            startDate={getDate(filterState.date_of_result_after)}
-            endDate={getDate(filterState.date_of_result_before)}
-            onChange={(e) =>
+          <DateRangeInputV2
+            startDate={getDate(filterState.date_of_result_after)?.toDate()}
+            endDate={getDate(filterState.date_of_result_before)?.toDate()}
+            onChange={(
+              startDate: Date | undefined,
+              endDate: Date | undefined
+            ) => {
               handleDateRangeChange(
                 "date_of_result_after",
                 "date_of_result_before",
-                e
-              )
-            }
-            endDateId={"date_of_result_before"}
-            startDateId={"date_of_result_after"}
+                { startDate: startDate, endDate: endDate }
+              );
+            }}
             label={"Date of result"}
-            size="small"
           />
-          <div className="flex gap-2">
-            <DateInputFormField
-              label="dtae input"
-              name=""
-              onChange={() => {}}
-            />
-            <DateInputFormField
-              label="dtae input"
-              name=""
-              onChange={() => {}}
-            />
-          </div>
-          <DateRangePicker
-            startDate={getDate(filterState.date_declared_positive_after)}
-            endDate={getDate(filterState.date_declared_positive_before)}
-            onChange={(e) =>
+          <DateRangeInputV2
+            startDate={getDate(
+              filterState.date_declared_positive_after
+            )?.toDate()}
+            endDate={getDate(
+              filterState.date_declared_positive_before
+            )?.toDate()}
+            onChange={(
+              startDate: Date | undefined,
+              endDate: Date | undefined
+            ) => {
               handleDateRangeChange(
                 "date_declared_positive_after",
                 "date_declared_positive_before",
-                e
-              )
-            }
-            endDateId={"date_declared_positive_before"}
-            startDateId={"date_declared_positive_after"}
+                { startDate: startDate, endDate: endDate }
+              );
+            }}
             label={"Date Declared Positive"}
-            size="small"
           />
 
-          <DateRangePicker
-            startDate={getDate(filterState.created_date_after)}
-            endDate={getDate(filterState.created_date_before)}
-            onChange={(e) =>
+          <DateRangeInputV2
+            startDate={getDate(filterState.created_date_after)?.toDate()}
+            endDate={getDate(filterState.created_date_before)?.toDate()}
+            onChange={(
+              startDate: Date | undefined,
+              endDate: Date | undefined
+            ) => {
               handleDateRangeChange(
                 "created_date_after",
                 "created_date_before",
-                e
-              )
-            }
-            endDateId={"created_date_before"}
-            startDateId={"created_date_after"}
+                { startDate: startDate, endDate: endDate }
+              );
+            }}
             label={"Created Date"}
-            size="small"
           />
-          <DateRangePicker
-            startDate={getDate(filterState.modified_date_after)}
-            endDate={getDate(filterState.modified_date_before)}
-            onChange={(e) =>
+          <DateRangeInputV2
+            startDate={getDate(filterState.modified_date_after)?.toDate()}
+            endDate={getDate(filterState.modified_date_before)?.toDate()}
+            onChange={(
+              startDate: Date | undefined,
+              endDate: Date | undefined
+            ) => {
               handleDateRangeChange(
                 "modified_date_after",
                 "modified_date_before",
-                e
-              )
-            }
-            endDateId={"modified_date_before"}
-            startDateId={"modified_date_after"}
+                { startDate: startDate, endDate: endDate }
+              );
+            }}
             label={"Modified Date"}
-            size="small"
           />
-          <DateRangePicker
+          <DateRangeInputV2
             startDate={getDate(
               filterState.last_consultation_admission_date_after
-            )}
+            )?.toDate()}
             endDate={getDate(
               filterState.last_consultation_admission_date_before
-            )}
-            onChange={(e) =>
+            )?.toDate()}
+            onChange={(
+              startDate: Date | undefined,
+              endDate: Date | undefined
+            ) => {
               handleDateRangeChange(
                 "last_consultation_admission_date_after",
                 "last_consultation_admission_date_before",
-                e
-              )
-            }
-            endDateId={"last_consultation_admission_date_before"}
-            startDateId={"last_consultation_admission_date_after"}
+                { startDate: startDate, endDate: endDate }
+              );
+            }}
             label={"Admit Date"}
-            size="small"
           />
-          <DateRangePicker
+          <DateRangeInputV2
             startDate={getDate(
               filterState.last_consultation_discharge_date_after
-            )}
+            )?.toDate()}
             endDate={getDate(
               filterState.last_consultation_discharge_date_before
-            )}
-            onChange={(e) =>
+            )?.toDate()}
+            onChange={(
+              startDate: Date | undefined,
+              endDate: Date | undefined
+            ) => {
               handleDateRangeChange(
                 "last_consultation_discharge_date_after",
                 "last_consultation_discharge_date_before",
-                e
-              )
-            }
-            endDateId={"last_consultation_discharge_date_before"}
-            startDateId={"last_consultation_discharge_date_after"}
+                { startDate: startDate, endDate: endDate }
+              );
+            }}
             label={"Discharge Date"}
-            size="small"
           />
-          <DateRangePicker
+          <DateRangeInputV2
             startDate={getDate(
               filterState.last_consultation_symptoms_onset_date_after
-            )}
+            )?.toDate()}
             endDate={getDate(
               filterState.last_consultation_symptoms_onset_date_before
-            )}
-            onChange={(e) =>
+            )?.toDate()}
+            onChange={(
+              startDate: Date | undefined,
+              endDate: Date | undefined
+            ) => {
               handleDateRangeChange(
                 "last_consultation_symptoms_onset_date_after",
                 "last_consultation_symptoms_onset_date_before",
-                e
-              )
-            }
-            endDateId={"last_consultation_symptoms_onset_date_before"}
-            startDateId={"last_consultation_symptoms_onset_date_after"}
+                { startDate: startDate, endDate: endDate }
+              );
+            }}
             label={"Onset of Symptoms Date"}
-            size="small"
           />
-          <DateRangePicker
-            startDate={getDate(filterState.last_vaccinated_date_after)}
-            endDate={getDate(filterState.last_vaccinated_date_before)}
-            onChange={(e) =>
+          <DateRangeInputV2
+            startDate={getDate(
+              filterState.last_vaccinated_date_after
+            )?.toDate()}
+            endDate={getDate(filterState.last_vaccinated_date_before)?.toDate()}
+            onChange={(
+              startDate: Date | undefined,
+              endDate: Date | undefined
+            ) => {
               handleDateRangeChange(
                 "last_vaccinated_date_after",
                 "last_vaccinated_date_before",
-                e
-              )
-            }
-            endDateId={"last_vaccinated_date_before"}
-            startDateId={"last_vaccinated_date_after"}
+                { startDate: startDate, endDate: endDate }
+              );
+            }}
             label={"Vaccination Date"}
-            size="small"
           />
         </div>
 
