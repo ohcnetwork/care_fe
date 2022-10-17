@@ -34,7 +34,7 @@
     "@date-io/date-fns": "^1.3.13",
     "@glennsl/bs-json": "^5.0.3",
     "@googlemaps/react-wrapper": "^1.1.35",
-    "@googlemaps/typescript-guards": "^2.0.0",
+    "@googlemaps/typescript-guards": "^2.0.3",
     "@headlessui/react": "^1.6.4",
     "@loadable/component": "^5.15.0",
     "@material-ui/core": "^4.11.4",
