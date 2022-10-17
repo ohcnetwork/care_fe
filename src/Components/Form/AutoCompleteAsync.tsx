@@ -1,7 +1,8 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState, useMemo } from "react";
 import { Combobox, Transition } from "@headlessui/react";
 import { Check, KeyboardArrowDown, Close } from "@material-ui/icons";
 import Spinner from "../Common/Spinner";
+import { debounce } from "lodash";
 
 interface Props {
   name?: string;
@@ -11,6 +12,7 @@ interface Props {
   getOptionLabel?: (option: any) => string;
   showNOptions?: number;
   multiple?: boolean;
+  debounceTime?: number;
   className?: string;
   placeholder?: string;
   error?: string;
@@ -25,6 +27,7 @@ const AutoCompleteAsync = (props: Props) => {
     getOptionLabel = (option: any) => option.label,
     showNOptions = 10,
     multiple = false,
+    debounceTime = 300,
     className = "",
     placeholder,
     error,
@@ -40,16 +43,20 @@ const AutoCompleteAsync = (props: Props) => {
     return "Start typing to search...";
   };
 
-  useEffect(() => {
-    const fetchDataAsync = async () => {
-      setLoading(true);
-      const data = await fetchData(query);
-      setData(data?.slice(0, showNOptions) || []);
-      setLoading(false);
-    };
+  const fetchDataAsync = useMemo(
+    () =>
+      debounce(async (query: string) => {
+        setLoading(true);
+        const data = await fetchData(query);
+        setData(data?.slice(0, showNOptions) || []);
+        setLoading(false);
+      }, debounceTime),
+    [fetchData, showNOptions, debounceTime]
+  );
 
-    fetchDataAsync();
-  }, [query, fetchData, showNOptions]);
+  useEffect(() => {
+    fetchDataAsync(query);
+  }, [query, fetchDataAsync]);
 
   return (
     <div className={className}>
@@ -71,7 +78,7 @@ const AutoCompleteAsync = (props: Props) => {
                 onChange={(event) => setQuery(event.target.value)}
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-                {loading && <Spinner />}
+                {loading && <Spinner path={{ fill: "black" }} />}
                 <KeyboardArrowDown
                   className="h-5 w-5 text-gray-900"
                   aria-hidden="true"

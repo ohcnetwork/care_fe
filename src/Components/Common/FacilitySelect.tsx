@@ -1,9 +1,8 @@
-import { useMemo } from "react";
+import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { getAllFacilities, getPermittedFacilities } from "../../Redux/actions";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { FacilityModel } from "../Facility/models";
-import { debounce } from "lodash";
 interface FacilitySelectProps {
   name: string;
   errors?: string;
@@ -33,24 +32,23 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
 
   const dispatchAction: any = useDispatch();
 
-  const facilitySearch = useMemo(
-    () =>
-      debounce(async (text: string) => {
-        const params = {
-          limit: 50,
-          offset: 0,
-          search_text: text,
-          all: searchAll,
-          facility_type: facilityType,
-          district,
-        };
+  const facilitySearch = useCallback(
+    async (text: string) => {
+      const params = {
+        limit: 50,
+        offset: 0,
+        search_text: text,
+        all: searchAll,
+        facility_type: facilityType,
+        district,
+      };
 
-        const res = await dispatchAction(
-          showAll ? getAllFacilities(params) : getPermittedFacilities(params)
-        );
+      const res = await dispatchAction(
+        showAll ? getAllFacilities(params) : getPermittedFacilities(params)
+      );
 
-        return res?.data?.results;
-      }, 300),
+      return res?.data?.results;
+    },
     [dispatchAction, searchAll, showAll, facilityType, district]
   );
 

@@ -1,8 +1,7 @@
-import React, { useMemo } from "react";
+import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { getDistrictByName } from "../../../Redux/actions";
 import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
-import { debounce } from "lodash";
 
 interface DistrictSelectProps {
   name: string;
@@ -18,14 +17,12 @@ function DistrictSelect(props: DistrictSelectProps) {
 
   const dispatchAction: any = useDispatch();
 
-  const districtSearch = useMemo(
-    () =>
-      debounce(async (text: string) => {
-        const params = { limit: 50, offset: 0, district_name: text };
-        const res = await dispatchAction(getDistrictByName(params));
-
-        return res?.data?.results;
-      }, 300),
+  const districtSearch = useCallback(
+    async (text: string) => {
+      const params = { limit: 50, offset: 0, district_name: text };
+      const res = await dispatchAction(getDistrictByName(params));
+      return res?.data?.results;
+    },
     [dispatchAction]
   );
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import {
@@ -21,7 +21,6 @@ import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
-import { debounce } from "lodash";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
@@ -189,19 +188,11 @@ export default function PatientFilterV2(props: any) {
     setFilterState(filterData);
   };
 
-  const lsgSearch = useMemo(
-    () =>
-      debounce(
-        async (search: string) => {
-          const res = await dispatch(
-            getAllLocalBody({ local_body_name: search })
-          );
-
-          return res?.data?.results;
-        },
-        300,
-        { leading: true }
-      ),
+  const lsgSearch = useCallback(
+    async (search: string) => {
+      const res = await dispatch(getAllLocalBody({ local_body_name: search }));
+      return res?.data?.results;
+    },
     [dispatch]
   );
 
