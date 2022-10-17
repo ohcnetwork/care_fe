@@ -1,7 +1,7 @@
 import { ChangeEventHandler } from "react";
+import { FieldError } from "./FieldValidators";
 
 export type FormDetails = Record<string, unknown>;
-export type FieldError = string | false | null | undefined;
 export type FormErrors<T = FormDetails> = Partial<Record<keyof T, FieldError>>;
 export type FormState<T = FormDetails> = { form: T; errors: FormErrors<T> };
 export type FormAction<T = FormDetails> =

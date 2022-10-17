@@ -1,10 +1,9 @@
 import React, { Dispatch } from "react";
-import { FieldError, FormAction, FormDetails, FormState } from "../Utils";
+import { FieldError, FieldValidator } from "../FieldValidators";
+import { FormAction, FormDetails, FormState } from "../Utils";
 
 type FieldChangeEvent<T> = { name: string; value: T };
 export type FieldChangeEventHandler<T> = (event: FieldChangeEvent<T>) => void;
-
-export type FieldValidator<T> = (value: T) => FieldError;
 
 export type FormFieldBaseProps<T> = {
   id?: string;
