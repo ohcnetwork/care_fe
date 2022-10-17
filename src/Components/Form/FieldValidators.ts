@@ -30,6 +30,10 @@ export const MultiValidator = <T>(
 };
 
 export const RequiredFieldValidator = <T>(value: T): FieldError => {
-  if (value === null || value === undefined || value === "")
+  if (
+    value === null ||
+    value === undefined ||
+    (typeof value === "string" && value === "")
+  )
     return "Field is required";
 };

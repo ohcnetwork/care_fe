@@ -1,4 +1,4 @@
-import { FieldError } from "../Utils";
+import { FieldError } from "../FieldValidators";
 import { FormFieldBaseProps, resolveFormFieldError } from "./Utils";
 
 type LabelProps = {
