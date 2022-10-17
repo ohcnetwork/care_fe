@@ -3,7 +3,6 @@ import { operateAsset } from "../../Redux/actions";
 
 export interface IAsset {
   id: string;
-  middlewareHostname: string;
 }
 
 interface PTZPayload {

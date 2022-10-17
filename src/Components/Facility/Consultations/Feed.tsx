@@ -181,10 +181,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     getPresets,
     relativeMove,
   } = useFeedPTZ({
-    config: {
-      middlewareHostname,
-      ...cameraAsset,
-    },
+    config: cameraAsset,
     dispatch,
   });
 
