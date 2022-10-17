@@ -42,11 +42,6 @@ export default function TeleICUPatientVitalsCard({
   const [hl7Asset, setHl7Asset] = React.useState<AssetData>();
   const [patientObservations, setPatientObservations] = React.useState<any>();
   const [stats, setStats] = React.useState(false);
-  const [waveType, setWaveType] = React.useState<"STREAM" | "REFRESH" | null>(localStorage.getItem("waveType") as any || "STREAM");
-
-  useEffect(() => {
-    localStorage.setItem("waveType", waveType || "STREAM");
-  }, [waveType]);
 
   const fetchData = async () => {
     if (patient?.last_consultation?.current_bed?.bed_object?.id) {
@@ -122,7 +117,8 @@ export default function TeleICUPatientVitalsCard({
     waveformColor?: string;
     waveformName?: string;
     waveformDefaultSpace?: boolean;
-  }
+    wavetype?: "STREAM" | "REFRESH";
+  };
 
   const vitals: VitalType[] = [
     {
@@ -131,7 +127,8 @@ export default function TeleICUPatientVitalsCard({
       vitalKey: "pulse",
       waveformKey: "II",
       waveformColor: "limegreen",
-      waveformName: "ECG"
+      waveformName: "ECG",
+      wavetype: "REFRESH",
     },
     {
       label: <>Blood Pressure</>,
@@ -171,48 +168,34 @@ export default function TeleICUPatientVitalsCard({
           {waveforms ? (
             <>
               {vitals.map((v, i) => {
-                const waveform = waveforms.filter(w => w["wave-name"] === v.waveformKey)[0];
-                return (
-                  (v.waveformKey && waveform) ?
-                    <Waveform
-                      key={i}
-                      wave={{
-                        ...waveform,
-                        data: waveforms
-                          .filter(w => w["wave-name"] === v.waveformKey)
-                          .map(w => w.data)
-                          .join(" ")
-                      }}
-                      title={v.waveformName || v.waveformKey}
-                      color={v.waveformColor}
-                      metrics={stats}
-                      classes={"h-[150px]"}
-                      defaultSpace={v.waveformDefaultSpace}
-                      wavetype={waveType || "STREAM"}
-                    /> : (<div className="flex items-center justify-center text-gray-900">
-
-                    </div>)
-                )
+                const waveform = waveforms.filter(
+                  (w) => w["wave-name"] === v.waveformKey
+                )[0];
+                return v.waveformKey && waveform ? (
+                  <Waveform
+                    key={i}
+                    wave={{
+                      ...waveform,
+                      data: waveforms
+                        .filter((w) => w["wave-name"] === v.waveformKey)
+                        .map((w) => w.data)
+                        .join(" "),
+                    }}
+                    title={v.waveformName || v.waveformKey}
+                    color={v.waveformColor}
+                    metrics={stats}
+                    classes={"h-[150px]"}
+                    defaultSpace={v.waveformDefaultSpace}
+                    wavetype={v.wavetype || "STREAM"}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center text-gray-900"></div>
+                );
               })}
               <div className="absolute bottom-1 right-1 flex gap-2">
-                <ToolTip
-                  text="Toggle stats for nerds"
-                  position="TOP"
-                >
-                  <button
-                    onClick={() => setStats(!stats)}
-                  >
+                <ToolTip text="Toggle stats for nerds" position="TOP">
+                  <button onClick={() => setStats(!stats)}>
                     <i className="fas fa-chart-simple text-gray-400" />
-                  </button>
-                </ToolTip>
-                <ToolTip
-                  text={`Switch to ${waveType === "STREAM" ? "refresh" : "stream"} mode`}
-                  position="TOP"
-                >
-                  <button
-                    onClick={() => setWaveType(waveType === "STREAM" ? "REFRESH" : "STREAM")}
-                  >
-                    <i className="fas fa-wave-square text-gray-400" />
                   </button>
                 </ToolTip>
               </div>
@@ -234,20 +217,23 @@ export default function TeleICUPatientVitalsCard({
                 <h2 className="font-bold text-xl md:text-3xl">
                   {liveReading ||
                     (vital.vitalKey === "bp"
-                      ? `${patient.last_consultation?.last_daily_round?.bp
-                        .systolic || "--"
-                      }/${patient.last_consultation?.last_daily_round?.bp
-                        .diastolic || "--"
-                      }`
+                      ? `${
+                          patient.last_consultation?.last_daily_round?.bp
+                            .systolic || "--"
+                        }/${
+                          patient.last_consultation?.last_daily_round?.bp
+                            .diastolic || "--"
+                        }`
                       : patient.last_consultation?.last_daily_round?.[
-                      vital.vitalKey || ""
-                      ]) ||
+                          vital.vitalKey || ""
+                        ]) ||
                     "--"}
                 </h2>
                 <div className="text-xs md:text-base">
                   <i
-                    className={`fas fa-circle text-xs mr-2 ${liveReading ? "text-green-600" : "text-gray-400"
-                      }`}
+                    className={`fas fa-circle text-xs mr-2 ${
+                      liveReading ? "text-green-600" : "text-gray-400"
+                    }`}
                   />
                   {vital.label}
                 </div>
