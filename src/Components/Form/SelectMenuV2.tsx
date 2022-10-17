@@ -1,5 +1,6 @@
-import React, { Fragment } from "react";
-import { Listbox, Transition } from "@headlessui/react";
+import React from "react";
+import { Listbox } from "@headlessui/react";
+import { DropdownMenuTransition } from "../Common/components/HelperComponents";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -80,16 +81,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                   <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
                 </div>
               </Listbox.Button>
-              <Transition
-                show={open}
-                as={Fragment}
-                leave="transition ease-in duration-200"
-                enter="transition ease-out duration-100"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
-              >
+              <DropdownMenuTransition show={open}>
                 <Listbox.Options className="origin-top-right absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
                   {options.map((option, index) => (
                     <Listbox.Option
@@ -136,7 +128,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                     </Listbox.Option>
                   ))}
                 </Listbox.Options>
-              </Transition>
+              </DropdownMenuTransition>
             </div>
           </>
         )}
