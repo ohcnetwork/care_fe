@@ -38,7 +38,7 @@ const LocationRow = (props: LocationRowProps) => {
           <p className="text-sm break-all lg:w-3/4">{description}</p>
         </div>
       </div>
-      <div className="flex">
+      <div className="sm:flex">
         <div className="px-2 py-2 w-full">
           <RoleButton
             className="btn btn-default bg-white w-full"

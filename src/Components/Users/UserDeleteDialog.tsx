@@ -6,7 +6,6 @@ import {
   DialogActions,
   Button,
 } from "@material-ui/core";
-import { WithStyles, withStyles } from "@material-ui/styles";
 
 interface ConfirmDialogProps {
   name: string;
@@ -14,17 +13,8 @@ interface ConfirmDialogProps {
   handleOk: () => void;
 }
 
-const styles = {
-  paper: {
-    "max-width": "650px",
-    "min-width": "400px",
-  },
-};
-
-const UserDeleteDialog = (
-  props: ConfirmDialogProps & WithStyles<typeof styles>
-) => {
-  const { name, handleCancel, handleOk, classes } = props;
+const UserDeleteDialog = (props: ConfirmDialogProps) => {
+  const { name, handleCancel, handleOk } = props;
 
   const [disable, setDisable] = useState(false);
 
@@ -33,21 +23,14 @@ const UserDeleteDialog = (
     setDisable(true);
   };
   return (
-    <Dialog
-      open={true}
-      classes={{
-        paper: classes.paper,
-      }}
-      onClose={handleCancel}
-    >
+    <Dialog open={true} maxWidth={"md"} onClose={handleCancel}>
       <DialogContent>
         <DialogContentText
           id="alert-dialog-description"
           className="flex text-gray-800 leading-relaxed"
         >
-          <div className="flex">
-            Are you sure you want to delete user{" "}
-            <p className="mx-1 font-semibold capitalize">{name}</p> ?
+          <div className="justify-center">
+            Are you sure you want to delete user <strong>{name}</strong> ?
           </div>
         </DialogContentText>
       </DialogContent>
@@ -67,4 +50,4 @@ const UserDeleteDialog = (
   );
 };
 
-export default withStyles(styles)(UserDeleteDialog);
+export default UserDeleteDialog;

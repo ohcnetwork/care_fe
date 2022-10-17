@@ -5,6 +5,7 @@ import {
   SelectField,
   DateInputField,
   TextInputField,
+  PhoneNumberField,
 } from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
@@ -20,6 +21,7 @@ import { CircularProgress } from "@material-ui/core";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import parsePhoneNumberFromString from "libphonenumber-js";
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -201,7 +203,9 @@ export default function ListFilter(props: any) {
       assigned_facility: assigned_facility || "",
       emergency: emergency || "",
       is_up_shift: is_up_shift || "",
-      patient_phone_number: patient_phone_number || "",
+      patient_phone_number: patient_phone_number
+        ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164")
+        : "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()
           ? moment(created_date_before).format("YYYY-MM-DD")
@@ -344,6 +348,7 @@ export default function ListFilter(props: any) {
               <CircularProgress size={20} />
             ) : (
               <UserSelect
+                name="assigned_to"
                 multiple={false}
                 selected={filterState.assigned_user_ref}
                 setSelected={(obj) => setAssignedUser(obj)}
@@ -470,13 +475,13 @@ export default function ListFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Patient Phone Number</span>
-          <TextInputField
+          <PhoneNumberField
             name="patient_phone_number"
-            variant="outlined"
-            margin="dense"
-            errors=""
+            placeholder="Patinet phone number"
             value={filterState.patient_phone_number}
-            onChange={handleChange}
+            onChange={(value: string) => {
+              handleChange({ target: { name: "patient_phone_number", value } });
+            }}
           />
         </div>
 

@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getDistrict } from "../../Redux/actions";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import {
+  PhoneNumberField,
+  SelectField,
+  TextInputField,
+} from "../Common/HelperInputFields";
 import { USER_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
+import parsePhoneNumberFromString from "libphonenumber-js";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -74,8 +79,12 @@ export default function UserFilter(props: any) {
     const data = {
       first_name: first_name || "",
       last_name: last_name || "",
-      phone_number: phone_number || "",
-      alt_phone_number: alt_phone_number || "",
+      phone_number: phone_number
+        ? parsePhoneNumberFromString(phone_number)?.format("E.164")
+        : "",
+      alt_phone_number: alt_phone_number
+        ? parsePhoneNumberFromString(alt_phone_number)?.format("E.164")
+        : "",
       user_type: user_type || "",
       district_id: district_id || "",
     };
@@ -161,35 +170,27 @@ export default function UserFilter(props: any) {
           <span className="text-sm font-semibold">Phone Number</span>
           <div className="flex justify-between">
             <div className="w-full">
-              <TextInputField
-                id="phone_number"
-                name="phone_number"
-                variant="outlined"
-                margin="dense"
-                errors=""
+              <PhoneNumberField
+                placeholder="Phone Number"
                 value={filterState.phone_number}
-                onChange={handleChange}
-                label="Phone Number"
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+                onChange={(value: string) => {
+                  handleChange({ target: { name: "phone_number", value } });
+                }}
               />
             </div>
           </div>
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Alt Phone Number</span>
+          <span className="text-sm font-semibold">WhatsApp Phone Number</span>
           <div className="flex justify-between">
             <div className="w-full">
-              <TextInputField
-                id="alt_phone_number"
-                name="alt_phone_number"
-                variant="outlined"
-                margin="dense"
-                errors=""
+              <PhoneNumberField
+                placeholder="WhatsApp Phone Number"
                 value={filterState.alt_phone_number}
-                onChange={handleChange}
-                label="Alt Phone Number"
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+                onChange={(value: string) => {
+                  handleChange({ target: { name: "alt_phone_number", value } });
+                }}
               />
             </div>
           </div>

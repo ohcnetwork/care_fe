@@ -3,6 +3,7 @@ import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { Modal } from "@material-ui/core";
 import Beds from "../../Facility/Consultations/Beds";
+import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
 import { useState } from "react";
 
 export default function TeleICUPatientInfoCard(props: {
@@ -14,7 +15,6 @@ export default function TeleICUPatientInfoCard(props: {
   const patient = props.patient;
   const ip_no = props.ip_no;
 
-  console.log(patient);
   return (
     <section className="flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
       <Modal
@@ -42,13 +42,29 @@ export default function TeleICUPatientInfoCard(props: {
       <div className="bg-white px-4 py-2 lg:p-6 flex flex-col lg:flex-row lg:w-7/12 w-full">
         {/* Can support for patient picture in the future */}
         <div className="mt-2 flex flex-col items-center">
-          <div className="w-24 h-24 rounded-2xl bg-primary-100 text-5xl flex justify-center items-center">
-            {!patient.last_consultation?.current_bed ? (
-              <i className="fas fa-user-injured text-primary-600"></i>
+          <div className="w-24 h-24 min-w-[5rem] bg-gray-200 rounded border border-gray-500 overflow-">
+            {patient?.last_consultation &&
+            patient?.last_consultation?.current_bed ? (
+              <div
+                className="flex flex-col items-center justify-center h-full"
+                title={`
+                ${patient?.last_consultation?.current_bed?.bed_object?.location_object?.name}\n${patient?.last_consultation?.current_bed?.bed_object.name}
+              `}
+              >
+                <p className="overflow-hidden px-2 whitespace-nowrap w-full text-gray-900 text-sm text-center text-ellipsis ">
+                  {
+                    patient?.last_consultation?.current_bed?.bed_object
+                      ?.location_object?.name
+                  }
+                </p>
+                <p className="w-full text-base px-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold text-center">
+                  {patient?.last_consultation?.current_bed?.bed_object.name}
+                </p>
+              </div>
             ) : (
-              <span className="text-base text-primary-600 font-semibold whitespace-normal leading-tight">
-                {patient.last_consultation?.current_bed?.bed_object?.name}
-              </span>
+              <div className="flex items-center justify-center h-full">
+                <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+              </div>
             )}
           </div>
           <button
@@ -155,7 +171,7 @@ export default function TeleICUPatientInfoCard(props: {
               <Link
                 key={i}
                 href={`${action[0]}`}
-                className="btn btn-primary hover:text-white flex justify-center"
+                className="btn btn-primary hover:text-white flex justify-start"
               >
                 <i className={`fas fa-${action[2]} w-4 mr-3`}></i>
                 <p className="font-semibold">{action[1]}</p>

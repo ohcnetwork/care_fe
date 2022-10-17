@@ -41,6 +41,7 @@ import FacillityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
+import ToolTip from "../Common/utils/Tooltip";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -330,7 +331,7 @@ export const HospitalList = (props: any) => {
     facilityList = data.map((facility: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
-          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
+          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
               <div className="md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center">
                 {facility.cover_image_url ? (
@@ -343,7 +344,7 @@ export const HospitalList = (props: any) => {
                   <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                 )}
               </div>
-              <div className="h-full w-full grow overflow-clip">
+              <div className="h-full w-full grow">
                 <div className="h-full flex flex-col justify-between w-full">
                   <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
                     <div className="flow-root">
@@ -357,18 +358,42 @@ export const HospitalList = (props: any) => {
                       </div>
                     </div>
 
-                    <div className="block">
-                      <div className="inline-flex items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                    <div className="flex gap-1 flex-wrap mt-2">
+                      <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
+                      {facility.features?.map(
+                        (feature: number, i: number) =>
+                          FACILITY_FEATURE_TYPES.some(
+                            (f) => f.id === feature
+                          ) && (
+                            <div
+                              key={i}
+                              className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                              title={
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            >
+                              <i
+                                className={`fas fa-${
+                                  FACILITY_FEATURE_TYPES.filter(
+                                    (f) => f.id === feature
+                                  )[0]?.icon
+                                }`}
+                              />{" "}
+                              &nbsp;
+                              {
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            </div>
+                          )
+                      )}
                     </div>
-                    <div className="flex gap-1 flex-wrap mt-2">
-                      {facility.features?.map((feature : number, i : number)=>(
-                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border text-xs" title={FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}>
-                          <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/>
-                        </div>
-                      ))}
-                    </div>
+
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
                         <div className="font-semibold">
@@ -389,7 +414,7 @@ export const HospitalList = (props: any) => {
                         <div>
                           {userType !== "Staff" ? (
                             <button
-                              className="mx-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                              className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                               onClick={(_) => setModalFor(facility.id)}
                             >
                               <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
@@ -432,17 +457,17 @@ export const HospitalList = (props: any) => {
                                     variant="outlined"
                                   />
                                 </div>
-                                <div className="flex flex-row justify-end">
+                                <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
                                   <button
                                     type="button"
-                                    className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
+                                    className="btn-danger btn mr-2 w-full md:w-auto"
                                     onClick={(_) => setModalFor(undefined)}
                                   >
                                     Cancel
                                   </button>
                                   <button
                                     type="submit"
-                                    className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
+                                    className="btn-primary btn mr-2 w-full md:w-auto"
                                   >
                                     Send Notification
                                   </button>
@@ -501,8 +526,10 @@ export const HospitalList = (props: any) => {
     );
   } else if (data && data.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
-      <div className="w-full">
-        <div className="text-3xl mt-4">{t("no_facilities")}</div>
+      <div className="w-full bg-white rounded-lg p-3">
+        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+          {t("no_facilities")}
+        </div>
       </div>
     ) : (
       <div>
@@ -530,7 +557,7 @@ export const HospitalList = (props: any) => {
         />
 
         <div className="flex md:justify-end w-full md:mt-4">
-          <div>
+          <div className="w-full md:w-auto">
             <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
@@ -648,8 +675,8 @@ export const HospitalList = (props: any) => {
             </dl>
           </div>
         </div>
-        <div className="flex my-4 gap-2 flex-wrap justify-between flex-grow">
-          <div className="w-72">
+        <div className="flex my-4 gap-2 flex-col md:flex-row justify-between flex-grow">
+          <div className="w-full md:w-72">
             <InputSearchBox
               value={qParams.search}
               search={onSearchSuspects}
@@ -658,46 +685,42 @@ export const HospitalList = (props: any) => {
             />
           </div>
 
-          <div className="flex">
-            <div>
-              <div className="flex items-start mb-2">
-                <button
-                  className="btn btn-primary-ghost"
-                  onClick={() => setShowFilters(true)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="fill-current w-4 h-4 mr-2"
-                  >
-                    <line x1="8" y1="6" x2="21" y2="6"></line>
-                    <line x1="8" y1="12" x2="21" y2="12">
-                      {" "}
-                    </line>
-                    <line x1="8" y1="18" x2="21" y2="18">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="6" x2="3.01" y2="6">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="12" x2="3.01" y2="12">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="18" x2="3.01" y2="18">
-                      {" "}
-                    </line>
-                  </svg>
-                  <span>{t("advanced_filters")}</span>
-                </button>
-              </div>
-            </div>
+          <div className="flex items-start mb-2 w-full md:w-auto">
+            <button
+              className="btn btn-primary-ghost w-full md:w-auto"
+              onClick={() => setShowFilters(true)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="fill-current w-4 h-4 mr-2"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12">
+                  {" "}
+                </line>
+                <line x1="8" y1="18" x2="21" y2="18">
+                  {" "}
+                </line>
+                <line x1="3" y1="6" x2="3.01" y2="6">
+                  {" "}
+                </line>
+                <line x1="3" y1="12" x2="3.01" y2="12">
+                  {" "}
+                </line>
+                <line x1="3" y1="18" x2="3.01" y2="18">
+                  {" "}
+                </line>
+              </svg>
+              <span>{t("advanced_filters")}</span>
+            </button>
           </div>
         </div>
       </div>
