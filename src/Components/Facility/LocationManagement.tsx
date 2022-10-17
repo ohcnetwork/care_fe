@@ -133,15 +133,15 @@ export const LocationManagement = (props: LocationManagementProps) => {
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
-      <div className="mt-5 pb-48 h-screen grid content-center justify-items-center">
-        <div className="flex justify-center">
+      <div className="h-full content-center grid justify-items-center">
+        <div className="flex justify-center w-full items-center">
           <img
-            className="w-full"
-            src={"https://cdn.coronasafe.network/location-finding-error.png"}
+            className="w-3/12 sm:w-3/12 md:w-3/12 lg:w-2/12 xl:w-2/12 2xl:w-2/12"
+            src={"https://cdn.coronasafe.network/location.png"}
             alt={"No locations found"}
           />
         </div>
-        <p className="font-sans text-xl text-center text-teal-500">
+        <p className="font-sans mt-5 sm:text-sm md:text-lg lg:text-xl text-center text-green-800">
           No locations found.
         </p>
       </div>
@@ -171,14 +171,14 @@ export const LocationManagement = (props: LocationManagementProps) => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col">
       <PageTitle
         title="Location Management"
         hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
-      <div className="container mx-auto px-4 py-2 sm:px-8">
+      <div className="container mx-auto h-screen px-4 py-2 sm:px-8">
         <div className="flex justify-end">
           <RoleButton
             className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
