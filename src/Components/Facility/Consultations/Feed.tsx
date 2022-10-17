@@ -25,7 +25,6 @@ import * as Notification from "../../../Utils/Notifications.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
-import { AxiosError } from "axios";
 import ReactPlayer from "react-player";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import { findDOMNode } from "react-dom";
@@ -195,12 +194,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   useEffect(() => {
     if (cameraAsset.id) {
       getPresets({
-        onSuccess: (resp) => setPresets(resp.data),
-        onError: (resp) => {
-          resp instanceof AxiosError &&
-            Notification.Error({
-              msg: "Fetching presets failed",
-            });
+        onSuccess: (resp) => setPresets(resp),
+        onError: (_) => {
+          Notification.Error({
+            msg: "Fetching presets failed",
+          });
         },
       });
       getBedPresets(cameraAsset);
@@ -244,9 +242,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             setLoading(CAMERA_STATES.IDLE);
             setCurrentPreset(preset);
           },
-          onError: (err: AxiosError<any>) => {
+          onError: (err: Record<any, any>) => {
             setLoading(CAMERA_STATES.IDLE);
-            const responseData = err.response?.data;
+            const responseData = err.data.result;
             if (responseData.status) {
               switch (responseData.status) {
                 case "error":

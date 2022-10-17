@@ -1,4 +1,3 @@
-import { AxiosError, AxiosResponse } from "axios";
 import { operateAsset } from "../../Redux/actions";
 
 export interface IAsset {
@@ -52,8 +51,8 @@ interface UseMSEMediaPlayerReturnType {
 }
 
 interface IOptions {
-  onSuccess?: (resp: AxiosResponse) => void;
-  onError?: (err: AxiosError) => void;
+  onSuccess?: (resp: Record<any, any>) => void;
+  onError?: (resp: Record<any, any>) => void;
 }
 
 export enum PTZ {
@@ -75,8 +74,10 @@ const getCameraStatus =
         },
       })
     );
-    options?.onSuccess && options.onSuccess(resp);
-    // .catch((err: any) => options?.onError && options.onError(err));
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
   };
 
 const getPresets =
@@ -89,8 +90,10 @@ const getPresets =
         },
       })
     );
-    options?.onSuccess && options.onSuccess(resp);
-    // .catch((err: any) => options?.onError && options.onError(err));
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
   };
 
 interface IGotoPresetPayload {
@@ -108,10 +111,10 @@ const gotoPreset =
         },
       })
     );
-    // .then(
-    options?.onSuccess && options.onSuccess(resp);
-    // )
-    // .catch((err: AxiosError) => options?.onError && options.onError(err));
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
   };
 
 const absoluteMove =
@@ -125,8 +128,10 @@ const absoluteMove =
         },
       })
     );
-    options?.onSuccess && options.onSuccess(resp.data.result);
-    // options?.onError && options.onError(err);
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
   };
 
 const relativeMove =
@@ -140,8 +145,10 @@ const relativeMove =
         },
       })
     );
-    options?.onSuccess && options.onSuccess(resp);
-    // .catch((err: any) => options?.onError && options.onError(err));
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
   };
 
 export const getPTZPayload = (
