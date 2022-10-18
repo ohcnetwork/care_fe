@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Combobox } from "@headlessui/react";
-import { Check, KeyboardArrowDown, Close } from "@material-ui/icons";
 import Spinner from "../Common/Spinner";
 import { debounce } from "lodash";
 import { DropdownTransition } from "../Common/components/HelperComponents";
@@ -80,10 +79,7 @@ const AutoCompleteAsync = (props: Props) => {
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-2">
                 {loading && <Spinner path={{ fill: "black" }} />}
-                <KeyboardArrowDown
-                  className="h-5 w-5 text-gray-900"
-                  aria-hidden="true"
-                />
+                <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
               </div>
             </Combobox.Button>
           </div>
@@ -121,7 +117,7 @@ const AutoCompleteAsync = (props: Props) => {
                               active ? "text-white" : "text-primary-500"
                             }`}
                           >
-                            <Check className="h-5 w-5" aria-hidden="true" />
+                            <i className="fa-solid fa-check" />
                           </span>
                         ) : null}
                       </>
@@ -136,8 +132,8 @@ const AutoCompleteAsync = (props: Props) => {
               {selected?.map((option: any) => (
                 <span className="bg-gray-200 border border-gray-400 text-gray-800 rounded-full text-xs px-2 py-1">
                   {getOptionLabel(option)}
-                  <Close
-                    className="h-3 w-3 ml-1 text-gray-700 cursor-pointer"
+                  <i
+                    className="fa-solid fa-x h-3 w-3 ml-1 text-gray-700 cursor-pointer"
                     onClick={() => {
                       onChange(
                         selected.filter((item: any) => item.id !== option.id)
