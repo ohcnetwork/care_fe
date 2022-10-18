@@ -33,7 +33,7 @@ function DistrictSelect(props: DistrictSelectProps) {
       selected={selected}
       fetchData={districtSearch}
       onChange={setSelected}
-      getOptionLabel={(option: any) => option.name}
+      optionLabel={(option: any) => option.name}
       error={errors}
       className={className}
     />

@@ -406,7 +406,7 @@ export default function PatientFilterV2(props: any) {
                   lsgBody: selected.id,
                 })
               }
-              getOptionLabel={(option) => option.name}
+              optionLabel={(option) => option.name}
             />
           </div>
         </div>

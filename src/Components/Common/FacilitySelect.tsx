@@ -59,7 +59,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
       selected={selected}
       onChange={setSelected}
       fetchData={facilitySearch}
-      getOptionLabel={(option: any) =>
+      optionLabel={(option: any) =>
         option.name +
         (option.district_object ? `, ${option.district_object.name}` : "")
       }

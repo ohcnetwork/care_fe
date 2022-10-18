@@ -9,7 +9,7 @@ interface Props {
   selected: any | any[];
   fetchData: (search: string) => Promise<any> | undefined;
   onChange: (selected: any) => void;
-  getOptionLabel?: (option: any) => string;
+  optionLabel?: (option: any) => string;
   showNOptions?: number;
   multiple?: boolean;
   debounceTime?: number;
@@ -24,7 +24,7 @@ const AutoCompleteAsync = (props: Props) => {
     selected,
     fetchData,
     onChange,
-    getOptionLabel = (option: any) => option.label,
+    optionLabel = (option: any) => option.label,
     showNOptions = 10,
     multiple = false,
     debounceTime = 300,
@@ -37,11 +37,13 @@ const AutoCompleteAsync = (props: Props) => {
   const [loading, setLoading] = useState(false);
 
   const getPlaceholder = () => {
-    if (placeholder) return placeholder;
+    if (!multiple && selected) return optionLabel(selected);
     if (multiple && selected?.length > 0) return `${selected.length} selected`;
-    if (!multiple && selected) return getOptionLabel(selected);
-    return "Start typing to search...";
+    return placeholder || "Start typing to search...";
   };
+
+  const hasSelection =
+    (!multiple && selected) || (multiple && selected?.length > 0);
 
   const fetchDataAsync = useMemo(
     () =>
@@ -68,12 +70,13 @@ const AutoCompleteAsync = (props: Props) => {
       >
         <div className="relative mt-1">
           <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
-            <Combobox.Button
-              onClick={(event: React.MouseEvent) => event.preventDefault()}
-              className="block w-full pl-3 pr-10 py-1 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-sm"
-            >
+            <Combobox.Button className="block w-full pl-3 pr-10 py-1 focus:outline-none focus:ring-0 sm:text-sm">
               <Combobox.Input
-                className="w-full border-none text-sm leading-5 text-gray-900 focus:ring-0 bg-inherit shadow-none"
+                className={`w-full border-none text-sm leading-5 text-gray-900 ${
+                  hasSelection
+                    ? "placeholder:text-gray-900 font-medium"
+                    : "placeholder:text-gray-500"
+                } focus:ring-0 bg-inherit shadow-none`}
                 placeholder={getPlaceholder()}
                 onChange={(event) => setQuery(event.target.value)}
               />
@@ -84,7 +87,7 @@ const AutoCompleteAsync = (props: Props) => {
             </Combobox.Button>
           </div>
           <DropdownTransition afterLeave={() => setQuery("")}>
-            <Combobox.Options className="z-40 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Combobox.Options className="top-12 absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none text-sm">
               {data?.length === 0 ? (
                 <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                   {query !== ""
@@ -109,7 +112,7 @@ const AutoCompleteAsync = (props: Props) => {
                             selected ? "font-medium" : "font-normal"
                           }`}
                         >
-                          {getOptionLabel(item)}
+                          {optionLabel(item)}
                         </span>
                         {selected ? (
                           <span
@@ -131,7 +134,7 @@ const AutoCompleteAsync = (props: Props) => {
             <div className="p-2 flex flex-wrap gap-2">
               {selected?.map((option: any) => (
                 <span className="bg-gray-200 border border-gray-400 text-gray-800 rounded-full text-xs px-2 py-1">
-                  {getOptionLabel(option)}
+                  {optionLabel(option)}
                   <i
                     className="fa-solid fa-x h-3 w-3 ml-1 text-gray-700 cursor-pointer"
                     onClick={() => {
