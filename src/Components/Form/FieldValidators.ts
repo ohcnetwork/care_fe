@@ -1,4 +1,4 @@
-export type FieldError = string | false | null | undefined;
+export type FieldError = string | undefined;
 export type FieldValidator<T> = (value: T) => FieldError;
 
 /**
@@ -30,10 +30,6 @@ export const MultiValidator = <T>(
 };
 
 export const RequiredFieldValidator = <T>(value: T): FieldError => {
-  if (
-    value === null ||
-    value === undefined ||
-    (typeof value === "string" && value === "")
-  )
+  if (value === undefined || (typeof value === "string" && value === ""))
     return "Field is required";
 };
