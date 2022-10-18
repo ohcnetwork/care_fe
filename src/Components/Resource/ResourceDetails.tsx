@@ -12,7 +12,6 @@ import {
   TEST_TYPE_CHOICES,
   KeralaLogo,
 } from "../../Common/constants";
-import moment from "moment";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -20,6 +19,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
 import CommentSection from "./CommentSection";
+import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -122,7 +122,7 @@ export default function ResourceDetails(props: { id: string }) {
               {" "}
               Date and Time:{" "}
             </span>
-            {moment(data.created_date).format("LLL" || "--")}
+            {formatDate(data.created_date)}
           </div>
           <div className="text-right mt-2">
             <span className="font-semibold leading-relaxed"> Unique Id: </span>
@@ -437,7 +437,7 @@ export default function ResourceDetails(props: { id: string }) {
                   {data?.created_by_object?.last_name}
                 </div>
                 <div className="text-xs">
-                  {data.created_date && moment(data.created_date).format("lll")}
+                  {data.created_date && formatDate(data.created_date)}
                 </div>
               </div>
             </div>
@@ -451,8 +451,7 @@ export default function ResourceDetails(props: { id: string }) {
                   {data?.last_edited_by_object?.last_name}
                 </div>
                 <div className="text-xs">
-                  {data.modified_date &&
-                    moment(data.modified_date).format("lll")}
+                  {data.modified_date && formatDate(data.modified_date)}
                 </div>
               </div>
             </div>
