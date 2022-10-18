@@ -11,6 +11,7 @@ import {
 } from "date-fns";
 import clsx from "clsx";
 import { DropdownTransition } from "./components/HelperComponents";
+import { Popover } from "@headlessui/react";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
@@ -37,7 +38,6 @@ const DateInputV2: React.FC<Props> = ({
   const [dayCount, setDayCount] = useState<Array<number>>([]);
   const [blankDays, setBlankDays] = useState<Array<number>>([]);
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerHeaderDate, setDatePickerHeaderDate] = useState(new Date());
   const [type, setType] = useState<DatePickerType>("date");
 
@@ -85,8 +85,6 @@ const DateInputV2: React.FC<Props> = ({
         date
       )
     );
-
-    setShowDatePicker(false);
   };
 
   const getDayCount = (date: Date) => {
@@ -121,8 +119,6 @@ const DateInputV2: React.FC<Props> = ({
     setType("date");
   };
 
-  const toggleDatePicker = () => setShowDatePicker((prev) => !prev);
-
   const showMonthPicker = () => setType("month");
 
   const showYearPicker = () => setType("date");
@@ -147,26 +143,24 @@ const DateInputV2: React.FC<Props> = ({
   return (
     <div className={disabled ? "pointer-events-none opacity-0.8" : ""}>
       <div className="container mx-auto text-black">
-        <div className="relative">
-          <input type="hidden" name="date" />
-          <input
-            type="text"
-            readOnly
-            className={`form-input ${className}`}
-            placeholder={placeholder ? placeholder : "Select date"}
-            value={value && format(value, "yyyy-MM-dd")}
-            onClick={toggleDatePicker}
-          />
-          <div
-            className="cursor-pointer absolute top-1/2 right-0 p-2 -translate-y-1/2"
-            onClick={toggleDatePicker}
-          >
-            <i className="fa-regular fa-calendar text-slate-500"></i>
-          </div>
-          <DropdownTransition show={showDatePicker}>
-            <div
+        <Popover className="relative">
+          <Popover.Button>
+            <input type="hidden" name="date" />
+            <input
+              type="text"
+              readOnly
+              className={`form-input ${className}`}
+              placeholder={placeholder ? placeholder : "Select date"}
+              value={value && format(value, "yyyy-MM-dd")}
+            />
+            <div className="cursor-pointer absolute top-1/2 right-0 p-2 -translate-y-1/2">
+              <i className="fa-regular fa-calendar text-slate-500"></i>
+            </div>
+          </Popover.Button>
+          <DropdownTransition>
+            <Popover.Panel
               className={clsx(
-                "z-10 w-72 bg-white border border-slate-300 rounded-lg shadow p-4 absolute top-[105%]",
+                "z-10 w-72 bg-white border border-slate-300 rounded-lg shadow p-4 absolute top-[110%]",
                 getPosition()
               )}
             >
@@ -268,9 +262,9 @@ const DateInputV2: React.FC<Props> = ({
                     ))}
                 </div>
               )}
-            </div>
+            </Popover.Panel>
           </DropdownTransition>
-        </div>
+        </Popover>
       </div>
     </div>
   );
