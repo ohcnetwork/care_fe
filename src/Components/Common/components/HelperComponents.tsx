@@ -6,7 +6,7 @@ type DropdownMenuTransitionProps = {
   children: ReactNode;
 } & TransitionEvents;
 
-export const DropdownMenuTransition = ({
+export const DropdownTransition = ({
   show,
   children,
   ...transitionEvents

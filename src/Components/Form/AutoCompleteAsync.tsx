@@ -3,7 +3,7 @@ import { Combobox } from "@headlessui/react";
 import { Check, KeyboardArrowDown, Close } from "@material-ui/icons";
 import Spinner from "../Common/Spinner";
 import { debounce } from "lodash";
-import { DropdownMenuTransition } from "../Common/components/HelperComponents";
+import { DropdownTransition } from "../Common/components/HelperComponents";
 
 interface Props {
   name?: string;
@@ -87,7 +87,7 @@ const AutoCompleteAsync = (props: Props) => {
               </div>
             </Combobox.Button>
           </div>
-          <DropdownMenuTransition afterLeave={() => setQuery("")}>
+          <DropdownTransition afterLeave={() => setQuery("")}>
             <Combobox.Options className="z-40 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {data?.length === 0 ? (
                 <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
@@ -130,7 +130,7 @@ const AutoCompleteAsync = (props: Props) => {
                 ))
               )}
             </Combobox.Options>
-          </DropdownMenuTransition>
+          </DropdownTransition>
           {multiple && selected?.length > 0 && (
             <div className="p-2 flex flex-wrap gap-2">
               {selected?.map((option: any) => (

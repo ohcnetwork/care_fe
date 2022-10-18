@@ -10,7 +10,7 @@ import {
   getDay,
 } from "date-fns";
 import clsx from "clsx";
-import { DropdownMenuTransition } from "./components/HelperComponents";
+import { DropdownTransition } from "./components/HelperComponents";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
@@ -163,7 +163,7 @@ const DateInputV2: React.FC<Props> = ({
           >
             <i className="fa-regular fa-calendar text-slate-500"></i>
           </div>
-          <DropdownMenuTransition show={showDatePicker}>
+          <DropdownTransition show={showDatePicker}>
             <div
               className={clsx(
                 "z-10 w-72 bg-white border border-slate-300 rounded-lg shadow p-4 absolute top-[105%]",
@@ -269,7 +269,7 @@ const DateInputV2: React.FC<Props> = ({
                 </div>
               )}
             </div>
-          </DropdownMenuTransition>
+          </DropdownTransition>
         </div>
       </div>
     </div>

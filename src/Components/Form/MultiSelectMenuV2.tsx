@@ -1,6 +1,6 @@
 import React from "react";
 import { Listbox } from "@headlessui/react";
-import { DropdownMenuTransition } from "../Common/components/HelperComponents";
+import { DropdownTransition } from "../Common/components/HelperComponents";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -92,7 +92,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                   </div>
                 )}
               </div>
-              <DropdownMenuTransition show={open}>
+              <DropdownTransition show={open}>
                 <Listbox.Options className="top-12 absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
                   {options.map((option, index) => (
                     <Listbox.Option
@@ -143,7 +143,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                     </Listbox.Option>
                   ))}
                 </Listbox.Options>
-              </DropdownMenuTransition>
+              </DropdownTransition>
             </div>
           </>
         )}
