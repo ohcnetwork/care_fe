@@ -9,22 +9,24 @@ import {
   getDaysInMonth,
   getDay,
 } from "date-fns";
-// import { ArrowLeft, ArrowRight, Calendar } from 'react-feather'
 import clsx from "clsx";
 
 type DatePickerType = "date" | "month" | "year";
+export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
 
 interface Props {
+  className?: string;
   value: Date | undefined;
   onChange: (date: Date) => void;
-  position?: "LEFT" | "RIGHT" | "CENTER";
+  position?: DatePickerPosition;
   disabled?: boolean;
-  placeholder: string;
+  placeholder?: string;
 }
 
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 const DateInputV2: React.FC<Props> = ({
+  className,
   value,
   onChange,
   position,
@@ -149,7 +151,7 @@ const DateInputV2: React.FC<Props> = ({
           <input
             type="text"
             readOnly
-            className="form-input bg-gray-200 border-gray-200"
+            className={`form-input ${className}`}
             placeholder={placeholder ? placeholder : "Select date"}
             value={value && format(value, "yyyy-MM-dd")}
             onClick={toggleDatePicker}
@@ -275,6 +277,7 @@ const DateInputV2: React.FC<Props> = ({
 
 DateInputV2.defaultProps = {
   position: "CENTER",
+  className: "bg-gray-200 border-gray-200",
 };
 
 export default DateInputV2;

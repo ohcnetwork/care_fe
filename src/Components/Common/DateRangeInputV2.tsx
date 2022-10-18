@@ -1,35 +1,41 @@
-import React from "react";
 import DateInputV2 from "./DateInputV2";
 
-type Props = {
-  startDate: Date | undefined;
-  endDate: Date | undefined;
-  onChange: (startDate: Date | undefined, endDate: Date | undefined) => void;
-  label?: string;
+export type DateRange = {
+  start: Date | undefined;
+  end: Date | undefined;
 };
 
-const DateRangeInputV2 = ({ startDate, endDate, onChange, label }: Props) => {
+type Props = {
+  value?: DateRange | undefined;
+  onChange: (value: DateRange) => void;
+  className?: string;
+  disabled?: boolean | undefined;
+};
+
+const DateRangeInputV2 = ({ value, onChange, className, disabled }: Props) => {
+  const { start, end } = value ?? { start: undefined, end: undefined };
+
   return (
-    <div className="my-2">
-      {label && <span className="text-sm font-semibold">{label}</span>}
-      <div className="flex gap-2">
-        <div className="flex-auto">
-          <DateInputV2
-            value={startDate}
-            onChange={(date: Date) => onChange(date, endDate)}
-            position="RIGHT"
-            placeholder="Start date"
-          />
-        </div>
-        <div className="flex-auto">
-          <DateInputV2
-            value={endDate}
-            onChange={(date: Date) => onChange(startDate, date)}
-            position="CENTER"
-            disabled={!startDate}
-            placeholder="End date"
-          />
-        </div>
+    <div className="flex gap-2">
+      <div className="flex-auto">
+        <DateInputV2
+          className={className}
+          value={start}
+          onChange={(start) => onChange({ start, end })}
+          position="RIGHT"
+          placeholder="Start date"
+          disabled={disabled}
+        />
+      </div>
+      <div className="flex-auto">
+        <DateInputV2
+          className={className}
+          value={end}
+          onChange={(end) => onChange({ start, end })}
+          position="CENTER"
+          disabled={disabled || !start}
+          placeholder="End date"
+        />
       </div>
     </div>
   );

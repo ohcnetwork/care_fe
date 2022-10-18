@@ -2,7 +2,7 @@ import React, { Dispatch } from "react";
 import { FieldError, FieldValidator } from "../FieldValidators";
 import { FormAction, FormDetails, FormState } from "../Utils";
 
-type FieldChangeEvent<T> = { name: string; value: T };
+export type FieldChangeEvent<T> = { name: string; value: T };
 export type FieldChangeEventHandler<T> = (event: FieldChangeEvent<T>) => void;
 
 export type FormFieldBaseProps<T> = {
@@ -12,6 +12,8 @@ export type FormFieldBaseProps<T> = {
   disabled?: boolean;
   className?: string;
   required?: boolean;
+  labelClassName?: string;
+  errorClassName?: string;
 } & (
   | {
       error?: undefined;

@@ -889,7 +889,17 @@ button:disabled,
   z-index: 100000 !important;
 }
 
-.Button { @apply font-medium h-min flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 }
+.field-label {
+  @apply mb-2 block text-gray-900 text-base font-normal
+}
+
+.field-error {
+  @apply font-medium tracking-wide text-red-500 text-xs mt-2 ml-1
+}
+
+.Button { 
+  @apply font-medium h-min flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500
+}
 
 .button-success-default { @apply accent-primary-500 bg-primary-500 hover:bg-primary-400 text-white }
 .button-success-ghost { @apply accent-primary-500 hover:bg-primary-100 text-primary-500 border-0 }
