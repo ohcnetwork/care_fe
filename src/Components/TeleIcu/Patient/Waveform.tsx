@@ -69,7 +69,7 @@ export default function Waveform(props: {
           setQueueData(queueData.slice(2));
         }
       }
-    }, 4);
+    }, 6);
     return () => clearTimeout(timeout);
   }, [queueData]);
 
@@ -80,11 +80,11 @@ export default function Waveform(props: {
     } else {
       timeout = setTimeout(() => {
         setRefreshData([
-          ...data.slice(0, rPointer - 10),
+          ...data.slice(0, rPointer - 50),
           ...Array(20).fill(null),
-          ...lastData.slice(rPointer - 10),
+          ...lastData.slice(rPointer - 50),
         ]);
-        setRPointer(rPointer + Math.round(viewable / 100));
+        setRPointer(rPointer + Math.round(viewable / 150));
       }, 2);
     }
     return () => clearTimeout(timeout);
