@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Button, CircularProgress, InputLabel } from "@material-ui/core";
+import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import loadable from "@loadable/component";
@@ -27,7 +28,6 @@ import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
-import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -336,7 +336,9 @@ export const FileUpload = (props: FileUploadProps) => {
               <span className="font-semibold leading-relaxed">
                 Created On :
               </span>{" "}
-              {item.created_date ? formatDate(item.created_date) : "-"}
+              {item.created_date
+                ? moment(item.created_date).format("lll")
+                : "-"}
             </div>
           </div>
           <div className="flex items-center">
@@ -639,7 +641,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         disabled={button[3] as boolean}
                       >
                         <i className={`fas fa-${button[1]} mr-2`} />
-                        {button[0] as string}
+                        {button[0] as String}
                       </button>
                     ))}
                   </>
@@ -789,7 +791,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <div>
                       <button
                         type="submit"
-                        className="px-4 w-full flex gap-2 md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2"
+                        className="px-4 w-full justify-center items-center flex gap-2 md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2"
                         onClick={() => {
                           handleUpload({ status });
                         }}
