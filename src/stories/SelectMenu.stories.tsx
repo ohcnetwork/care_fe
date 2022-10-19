@@ -1,7 +1,7 @@
 import { ComponentStory } from "@storybook/react";
 import { useState } from "react";
-import { GENDER_TYPES } from "../../Common/constants";
-import SelectMenuV2 from "../../Components/Form/SelectMenuV2";
+import { GENDER_TYPES } from "../Common/constants";
+import SelectMenuV2 from "../Components/Form/SelectMenuV2";
 
 export default {
   title: "Care UI / Select",
@@ -20,8 +20,8 @@ const Template: ComponentStory<typeof SelectMenuV2> = (args) => {
   );
 };
 
-export const Default = Template.bind({});
-Default.args = {
+export const SelectMenu = Template.bind({});
+SelectMenu.args = {
   placeholder: "Show all",
   className: "w-72",
   options: GENDER_TYPES,
