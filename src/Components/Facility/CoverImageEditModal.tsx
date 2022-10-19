@@ -68,7 +68,7 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
           <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
             {preview || facility.read_cover_image_url ? (
               <img
-                src={preview || facility.read_cover_image_url}
+                src={`${preview || facility.read_cover_image_url}`}
                 alt={facility.name}
                 className="w-full h-full object-cover"
               />
