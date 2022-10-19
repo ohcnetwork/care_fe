@@ -213,7 +213,8 @@ const DateInputV2: React.FC<Props> = ({
                 <button
                   type="button"
                   disabled={
-                    type === "year" && isSelectedYear(new Date().getFullYear())
+                    type === "year" &&
+                    new Date().getFullYear() === year.getFullYear()
                   }
                   className="transition ease-in-out duration-100 h-full p-2 rounded inline-flex items-center justify-center aspect-square cursor-pointer hover:bg-slate-200"
                   onClick={increment}
