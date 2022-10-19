@@ -10,4 +10,4 @@ const Template: ComponentStory<typeof ButtonV2> = (args) => (
   <ButtonV2 {...args}>Label</ButtonV2>
 );
 
-export const Button = Template.bind({});
+export const Default = Template.bind({});

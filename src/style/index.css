@@ -701,7 +701,7 @@ button:disabled,
   border-color: #28a745;
 }
 
-/* .react-tel-input .form-control + div:before {
+.react-tel-input .form-control + div:before {
   content: "";
 }
 
@@ -721,9 +721,9 @@ button:disabled,
 .react-tel-input .form-control:focus {
   border-color: #28a745;
   box-shadow: 0 0 0 1px #28a745;
-} */
+}
 
-.react-tel-input, .form-input, .form-textarea{
+.form-input, .form-textarea{
   @apply text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out !important
 }
 
