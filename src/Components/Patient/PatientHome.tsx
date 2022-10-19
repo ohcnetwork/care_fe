@@ -307,28 +307,28 @@ export const PatientHome = (props: any) => {
     (i) => i.id === patientData.gender
   )?.text;
 
-  let patientMedHis: any[] = [];
-  if (
-    patientData &&
-    patientData.medical_history &&
-    patientData.medical_history.length
-  ) {
-    const medHis = patientData.medical_history;
-    patientMedHis = medHis.map((item: any, idx: number) => (
-      <div className="sm:col-span-1" key={`med_his_${idx}`}>
-        {item?.disease !== "NO" && (
-          <>
-            <div className="text-sm leading-5 font-medium text-gray-700 overflow-x-scroll">
-              {item.disease}
-            </div>
-            <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
-              {item.details}
-            </div>
-          </>
-        )}
-      </div>
-    ));
-  }
+  // let patientMedHis: any[] = [];
+  // if (
+  //   patientData &&
+  //   patientData.medical_history &&
+  //   patientData.medical_history.length
+  // ) {
+  //   const medHis = patientData.medical_history;
+  //   patientMedHis = medHis.map((item: any, idx: number) => (
+  //     <div className="sm:col-span-1" key={`med_his_${idx}`}>
+  //       {item?.disease !== "NO" && (
+  //         <>
+  //           <div className="text-sm leading-5 font-medium text-gray-700 overflow-x-scroll">
+  //             {item.disease}
+  //           </div>
+  //           <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
+  //             {item.details}
+  //           </div>
+  //         </>
+  //       )}
+  //     </div>
+  //   ));
+  // }
 
   let consultationList, sampleList;
 
@@ -570,36 +570,6 @@ export const PatientHome = (props: any) => {
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900">
                       {formatDate(patientData.date_of_return)}
-                    </div>
-                  </div>
-                )}
-                {patientData.is_vaccinated && patientData.number_of_doses && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-medium text-gray-500">
-                      Number of vaccine doses
-                    </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900">
-                      {patientData.number_of_doses}
-                    </div>
-                  </div>
-                )}
-                {patientData.is_vaccinated && patientData.vaccine_name && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-medium text-gray-500">
-                      Vaccine name
-                    </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900">
-                      {patientData.vaccine_name}
-                    </div>
-                  </div>
-                )}
-                {patientData.is_vaccinated && patientData.last_vaccinated_date && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-medium text-gray-500">
-                      Last Vaccinated on
-                    </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900">
-                      {formatDate(patientData.last_vaccinated_date)}
                     </div>
                   </div>
                 )}
@@ -1088,37 +1058,39 @@ export const PatientHome = (props: any) => {
           <div className="w-full flex flex-col">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                Medical
+                Medical History
               </div>
-              {!patientData.present_health &&
-                !patientData.allergies &&
-                !patientData.ongoing_medication &&
-                !(patientData.gender === 2 && patientData.is_antenatal) &&
-                !patientData.medical_history?.some(
-                  (history) => history.disease !== "NO"
-                ) && (
-                  <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
-                    No Medical History Available
-                  </div>
-                )}
+              {!consultationListData.at(-1)?.medical_history_object && (
+                <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
+                  No Medical History Available
+                </div>
+              )}
               <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
-                {patientData.present_health && (
+                {consultationListData.at(-1)?.medical_history_object
+                  ?.present_health && (
                   <div className="sm:col-span-1">
                     <div className="text-sm leading-5 font-medium text-gray-500">
-                      Present Health
+                      Present Health Condition
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
-                      {patientData.present_health}
+                      {
+                        consultationListData.at(-1)?.medical_history_object
+                          ?.present_health
+                      }
                     </div>
                   </div>
                 )}
-                {patientData.ongoing_medication && (
+                {consultationListData.at(-1)?.medical_history_object
+                  ?.ongoing_medication && (
                   <div className="sm:col-span-1">
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Ongoing Medications
                     </div>
                     <div className="my-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
-                      {patientData.ongoing_medication}
+                      {
+                        consultationListData.at(-1)?.medical_history_object
+                          ?.ongoing_medication
+                      }
                     </div>
                   </div>
                 )}
@@ -1132,7 +1104,7 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
-                {patientMedHis}
+                {/* {patientMedHis} */}
               </div>
             </div>
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">

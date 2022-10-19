@@ -73,6 +73,9 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import VaccinationBuilder, {
   VaccinationDetails,
 } from "../Common/prescription-builder/VaccinationBuilder";
+import DiseaseBuilder, {
+  DiseaseDetails,
+} from "../Common/prescription-builder/DiseaseBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -128,9 +131,18 @@ type FormDetails = {
   vaccination_history: {
     vaccine: string;
     doses: number;
-    last_vaccinated_date: string;
+    date: string;
+    precision: number;
   }[];
-  modified_date: string;
+  // Medical History
+  ongoing_medication: string;
+  present_health: string;
+  patient_diseases: {
+    disease: string;
+    details: string;
+    date: string;
+    precision: number;
+  }[];
 };
 
 type Action =
@@ -180,7 +192,9 @@ const initForm: FormDetails = {
   height: 0.0,
   weight: 0.0,
   vaccination_history: [],
-  modified_date: "",
+  ongoing_medication: "",
+  present_health: "",
+  patient_diseases: [],
   bed: null,
 };
 
@@ -236,6 +250,7 @@ export const ConsultationForm = (props: any) => {
   );
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
   const [vaccination, setVaccination] = useState<VaccinationDetails[]>([]);
+  const [diseases, setDiseases] = useState<DiseaseDetails[]>([]);
   const [InvestigationAdvice, setInvestigationAdvice] = useState<
     InvestigationType[]
   >([]);
@@ -283,6 +298,11 @@ export const ConsultationForm = (props: any) => {
           ? []
           : res.data.health_details_object?.vaccination_history
       );
+      setDiseases(
+        !Array.isArray(res.data.medical_history_object?.patient_diseases)
+          ? []
+          : res.data.medical_history_object?.patient_diseases
+      );
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -321,6 +341,11 @@ export const ConsultationForm = (props: any) => {
             weight: res.data.health_details_object?.weight || 0.0,
             vaccination_history:
               res.data.health_details_object?.vaccination_history || [],
+            ongoing_medication:
+              res.data.medical_history_object?.ongoing_medication,
+            present_health: res.data.medical_history_object?.present_health,
+            patient_diseases:
+              res.data.medical_history_object?.patient_diseases || [],
             bed: res.data?.current_bed?.bed_object || null,
           };
           dispatch({ type: "set_form", form: formData });
@@ -524,12 +549,11 @@ export const ConsultationForm = (props: any) => {
           return;
 
         case "vaccination_history": {
-          console.log("yes");
           let invalid = false;
           for (const f of vaccination) {
             if (
               !f.vaccine?.replace(/\s/g, "").length ||
-              !f.last_vaccinated_date?.replace(/\s/g, "").length
+              !f.date?.replace(/\s/g, "").length
             ) {
               invalid = true;
               break;
@@ -537,6 +561,25 @@ export const ConsultationForm = (props: any) => {
           }
           if (invalid) {
             errors[field] = "Vaccination field can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        }
+        case "patient_diseases": {
+          let invalid = false;
+          for (const f of diseases) {
+            if (
+              !f.disease?.replace(/\s/g, "").length ||
+              !f.details?.replace(/\s/g, "").length ||
+              !f.date?.replace(/\s/g, "").length
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Disease field can not be empty";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -618,6 +661,11 @@ export const ConsultationForm = (props: any) => {
           height: state.form.height,
           weight: state.form.weight,
           vaccination_history: vaccination,
+        },
+        new_medical_history: {
+          ongoing_medication: state.form.ongoing_medication,
+          present_health: state.form.present_health,
+          patient_diseases: diseases,
         },
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
       };
@@ -1365,6 +1413,73 @@ export const ConsultationForm = (props: any) => {
                         (state.form.weight * state.form.height) / 3600
                       ).toFixed(2)}{" "}
                       m<sup>2</sup>
+                    </div>
+                  </div>
+                </AccordionDetails>
+              </Accordion>
+            </Card>
+            <Card elevation={0} className="mb-4 rounded">
+              <Accordion className="mt-2 lg:mt-0 md:mt-0">
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="panel1a-content"
+                  id="panel1a-header"
+                >
+                  <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                    Medical History
+                  </h1>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <div className="w-full grid gap-4 grid-cols-1">
+                    <div id="ongoing_medication-div">
+                      <InputLabel
+                        htmlFor="ongoing_medication"
+                        id="ongoing_medication_label"
+                      >
+                        Ongoing Medication
+                      </InputLabel>
+                      <MultilineInputField
+                        rows={1}
+                        id="ongoing_medication"
+                        name="ongoing_medication"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        placeholder="Ongoing Medication"
+                        value={state.form.ongoing_medication}
+                        onChange={handleChange}
+                        errors={state.errors.ongoing_medication}
+                      />
+                    </div>
+                    <div id="present_health-div">
+                      <InputLabel
+                        htmlFor="present_health"
+                        id="present_health_label"
+                      >
+                        Present Health
+                      </InputLabel>
+                      <MultilineInputField
+                        rows={1}
+                        id="present_health"
+                        name="present_health"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        placeholder="Present Health"
+                        value={state.form.present_health}
+                        onChange={handleChange}
+                        errors={state.errors.present_health}
+                      />
+                    </div>
+
+                    <div id="patient_diseases-div" className="mt-4">
+                      <InputLabel>Disease History</InputLabel>
+                      <DiseaseBuilder
+                        diseases={diseases}
+                        setDiseases={setDiseases}
+                      />
+                      <br />
+                      <ErrorHelperText error={state.errors.patient_diseases} />
                     </div>
                   </div>
                 </AccordionDetails>

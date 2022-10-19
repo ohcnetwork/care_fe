@@ -3,46 +3,44 @@ import { PrescriptionDropdown } from "./PrescriptionDropdown";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 export const vaccines = require("./assets/vaccines");
 
-interface VaccinationBuilderProps<T> {
-  vaccinations: T[];
-  setVaccinations: React.Dispatch<React.SetStateAction<T[]>>;
+interface DiseaseBuilderProps<T> {
+  diseases: T[];
+  setDiseases: React.Dispatch<React.SetStateAction<T[]>>;
 }
 
-export type VaccinationDetails = {
-  vaccine?: string;
-  doses?: number;
+export type DiseaseDetails = {
+  disease?: string;
+  details?: string;
   date?: string;
   precision?: number;
 };
 
 export const emptyValues = {
-  vaccine: "",
-  doses: 0,
+  disease: "",
+  details: "",
   date: "",
   precision: 0,
 };
 
-export default function VaccinationBuilder(
-  props: VaccinationBuilderProps<VaccinationDetails>
+export default function DiseaseBuilder(
+  props: DiseaseBuilderProps<DiseaseDetails>
 ) {
-  const { vaccinations, setVaccinations } = props;
+  const { diseases, setDiseases } = props;
 
-  const setItem = (object: VaccinationDetails, i: number) => {
-    setVaccinations(
-      vaccinations.map((vaccination, index) =>
-        index === i ? object : vaccination
-      )
+  const setItem = (object: DiseaseDetails, i: number) => {
+    setDiseases(
+      diseases.map((disease, index) => (index === i ? object : disease))
     );
   };
 
   return (
     <div className="mt-2">
-      {vaccinations.map((vaccination, i) => {
-        const setVaccine = (vaccine: string) => {
+      {diseases.map((disease, i) => {
+        const setDisease = (dis: string) => {
           setItem(
             {
-              ...vaccination,
-              vaccine,
+              ...disease,
+              disease: dis,
             },
             i
           );
@@ -59,27 +57,22 @@ export default function VaccinationBuilder(
                 <PrescriptionDropdown
                   placeholder="Vaccine"
                   options={vaccines}
-                  value={vaccination.vaccine || ""}
-                  setValue={setVaccine}
+                  value={disease.disease || ""}
+                  setValue={setDisease}
                 />
               </div>
               <div>
                 Doses
                 <input
-                  type="number"
+                  type="string"
                   className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                  value={vaccination.doses}
-                  placeholder="Doses"
-                  min={0}
+                  value={disease.details}
+                  placeholder="Details"
                   onChange={(e) => {
-                    let value = parseInt(e.target.value);
-                    if (value < 0) {
-                      value = 0;
-                    }
                     setItem(
                       {
-                        ...vaccination,
-                        doses: value,
+                        ...disease,
+                        details: e.target.value,
                       },
                       i
                     );
@@ -92,12 +85,12 @@ export default function VaccinationBuilder(
                 <input
                   type="date"
                   className="focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                  value={vaccination.date}
+                  value={disease.date}
                   placeholder="Date"
                   onChange={(e) => {
                     setItem(
                       {
-                        ...vaccination,
+                        ...disease,
                         date: e.target.value,
                       },
                       i
@@ -110,9 +103,7 @@ export default function VaccinationBuilder(
                 type="button"
                 className="text-gray-400 text-base transition hover:text-red-500"
                 onClick={() => {
-                  setVaccinations(
-                    vaccinations.filter((vaccination, index) => i != index)
-                  );
+                  setDiseases(diseases.filter((disease, index) => i != index));
                 }}
               >
                 <i className="fas fa-trash" />
@@ -124,11 +115,11 @@ export default function VaccinationBuilder(
       <button
         type="button"
         onClick={() => {
-          setVaccinations([...vaccinations, emptyValues]);
+          setDiseases([...diseases, emptyValues]);
         }}
         className="shadow-sm mt-4 bg-gray-200 w-full font-bold block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
       >
-        + Add Vaccination History
+        + Add Disease History
       </button>
     </div>
   );

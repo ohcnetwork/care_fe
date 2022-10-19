@@ -87,7 +87,19 @@ export interface HealthDetailsModel {
   vaccination_history?: {
     vaccine?: string;
     doses?: number;
-    last_vaccinated_date?: string;
+    date?: string;
+    precision?: number;
+  }[];
+}
+
+export interface MedicalHistoyModel {
+  ongoing_medication?: string;
+  present_health?: string;
+  patient_diseases?: {
+    disease?: string;
+    details?: string;
+    date?: string;
+    precision?: number;
   }[];
 }
 
@@ -101,8 +113,10 @@ export interface ConsultationModel {
   discharge_date?: string;
   examination_details?: string;
   history_of_present_illness?: string;
-  health_details?: string;
+  last_health_details?: string;
   health_details_object?: HealthDetailsModel;
+  last_medical_history?: string;
+  medical_history_object?: MedicalHistoyModel;
   facility?: number;
   facility_name?: string;
   id?: number;
