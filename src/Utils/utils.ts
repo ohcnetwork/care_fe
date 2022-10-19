@@ -1,3 +1,4 @@
+import moment from "moment";
 import { navigate } from "raviger";
 
 interface ApacheParams {
@@ -77,4 +78,8 @@ export const goBack = (deltaOrUrl?: string | number | false | void) => {
   }
 
   window.history.back();
+};
+
+export const formatDate = (date: string | Date) => {
+  return moment(date).format("hh:mm A; DD/MM/YYYY");
 };

@@ -3,11 +3,12 @@ import { useDispatch } from "react-redux";
 import { getPatient, getInvestigation } from "../../Redux/actions";
 import { ConsultationModel } from "./models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { PatientModel, DailyRoundsModel } from "../Patient/models";
+import { PatientModel } from "../Patient/models";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { getConsultation } from "../../Redux/actions";
 import { GENDER_TYPES } from "../../Common/constants";
+import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
@@ -93,7 +94,7 @@ const TreatmentSummary = (props: any) => {
         <Loading />
       ) : (
         <div className="my-4">
-          <div className="my-4 flex justify-end ">
+          <div className="my-4 flex sm:justify-end flex-wrap justify-center gap-2">
             <button
               onClick={(_) => window.print()}
               className="btn btn-primary mr-2"
@@ -120,8 +121,8 @@ const TreatmentSummary = (props: any) => {
             </div>
 
             <div className="mt-2 mb-5 border border-gray-800">
-              <div className="border-b-2 border-gray-800 grid grid-cols-3">
-                <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
+              <div className="border-b-2 border-gray-800 grid sm:grid-cols-3 print:grid-cols-3">
+                <div className="col-span-1 py-2 px-3 sm:border-r-2 sm:border-b-0 print:border-r-2 print:border-b-0 border-b-2 border-gray-800">
                   <b>Name :</b> {patientData.name}
                 </div>
                 <div className="col-span-1 py-2 px-3">
@@ -129,11 +130,11 @@ const TreatmentSummary = (props: any) => {
                 </div>
               </div>
 
-              <div className="border-b-2 border-gray-800 grid grid-cols-3">
-                <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
+              <div className="border-b-2 border-gray-800 grid sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3">
+                <div className="col-span-1 py-2 px-3 sm:border-r-2 md:border-b-0 print:border-r-2 print:border-b-0 border-b-2 border-gray-800 ">
                   <b>Age :</b> {patientData.age}
                 </div>
-                <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
+                <div className="col-span-1 py-2 px-3 md:border-r-2 md:border-b-0 print:border-r-2 print:border-b-0 border-b-2 border-gray-800">
                   <b>Date of admission :</b>
                   <span>
                     {consultationData.admitted
@@ -151,13 +152,13 @@ const TreatmentSummary = (props: any) => {
                 </div>
               </div>
 
-              <div className="border-b-2 border-gray-800 grid grid-cols-3">
-                <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
+              <div className="border-b-2 border-gray-800 grid sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3">
+                <div className="col-span-1 py-2 px-3 sm:border-r-2 md:border-b-0 print:border-r-2 print:border-b-0 border-b-2 border-gray-800">
                   <b>Gender :</b>
                   {GENDER_TYPES.find((i) => i.id === patientData.gender)?.text}
                 </div>
 
-                <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
+                <div className="col-span-1 py-2 px-3 md:border-r-2 md:border-b-0 print:border-r-2 print:border-b-0 border-b-2 border-gray-800">
                   <b>Contact person :</b>
                   <span>
                     {" "}
@@ -179,7 +180,7 @@ const TreatmentSummary = (props: any) => {
 
               <div className="border-b-2 border-gray-800 px-5 py-2">
                 <b>Comorbidities :</b>
-                <div className="mx-5">
+                <div className="print:mx-5 mx-0 sm:mx-5">
                   <table className="border-collapse border border-gray-800 w-full">
                     <thead>
                       <tr>
@@ -267,7 +268,7 @@ const TreatmentSummary = (props: any) => {
               <div className="border-b-2 border-gray-800 px-5 py-2">
                 <b>Relevant investigations :</b>
 
-                <div className="mx-5">
+                <div className="print:mx-5 mx-0 sm:mx-5 overflow-x-auto">
                   <table className="border-collapse border border-gray-800 w-full">
                     <thead>
                       <tr>
@@ -365,7 +366,7 @@ const TreatmentSummary = (props: any) => {
                 )}
                 <b className="mb-2">Treatment summary/Treament Plan :</b>
 
-                <div className="mx-5">
+                <div className="print:mx-5 mx-0 sm:mx-5 overflow-x-auto">
                   <table className="border-collapse border border-gray-800 w-full">
                     <thead>
                       <tr>
@@ -379,9 +380,7 @@ const TreatmentSummary = (props: any) => {
                       {dailyRounds ? (
                         <tr>
                           <td className="border border-gray-800 text-center">
-                            {moment(dailyRounds.modified_date).format(
-                              "DD/MM/YYYY (h:mm A)"
-                            )}
+                            {formatDate(dailyRounds.modified_date)}
                           </td>
                           <td className="border border-gray-800 text-center">
                             {dailyRounds.ventilator_spo2 || "-"}

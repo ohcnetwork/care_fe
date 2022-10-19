@@ -53,7 +53,7 @@ let showPrescriptionForm = (item, index, send) =>
     <div className="m-1 rounded-md shadow-sm w-1/6">
       <input
         id={"days" ++ (index |> string_of_int)}
-        className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
+        className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:ring-primary-500"
         placeholder="Days"
         onChange={e => send(UpdateDays(ReactEvent.Form.target(e)["value"], index))}
         value={item |> Prescription__Prescription.days |> string_of_int}

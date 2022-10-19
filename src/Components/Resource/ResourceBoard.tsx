@@ -11,6 +11,7 @@ import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import clsx from "clsx";
 import { useDrag, useDrop } from "react-dnd";
+import { formatDate } from "../../Utils/utils";
 
 const limit = 14;
 
@@ -117,7 +118,7 @@ const ResourceCard = ({ resource }: any) => {
                 >
                   <i className="fas fa-stopwatch mr-2"></i>
                   <dd className="font-bold text-sm leading-5">
-                    {moment(resource.modified_date).format("LLL") || "--"}
+                    {formatDate(resource.modified_date) || "--"}
                   </dd>
                 </dt>
               </div>

@@ -586,9 +586,7 @@ export default function PatientFilterV2(props: any) {
             value={filterState.category}
             options={[
               { id: "", text: "Show All" },
-              ...PATIENT_FILTER_CATEGORIES.map((o) => {
-                return { id: o, text: o };
-              }),
+              ...PATIENT_FILTER_CATEGORIES,
             ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
