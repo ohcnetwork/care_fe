@@ -3,7 +3,6 @@ import axios from "axios";
 import { ChangeEventHandler, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { deleteFacilityCoverImage } from "../../Redux/actions";
-import ImageWithFallback from "../Common/ImageWithFallback";
 import { FacilityModel } from "./models";
 
 interface Props {
@@ -68,9 +67,9 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
           </div>
           <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
             {preview || facility.read_cover_image_url ? (
-              <ImageWithFallback
+              <img
                 src={preview || facility.read_cover_image_url}
-                alt="Facility"
+                alt={facility.name}
                 className="w-full h-full object-cover"
               />
             ) : (

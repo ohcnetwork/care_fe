@@ -42,7 +42,6 @@ import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
-import ImageWithFallback from "../Common/ImageWithFallback";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -336,9 +335,9 @@ export const HospitalList = (props: any) => {
             <div className="flex h-full">
               <div className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
                 {(facility.read_cover_image_url && (
-                  <ImageWithFallback
+                  <img
                     src={facility.read_cover_image_url}
-                    alt="Facility"
+                    alt={facility.name}
                     className="w-full h-full object-cover"
                   />
                 )) || (

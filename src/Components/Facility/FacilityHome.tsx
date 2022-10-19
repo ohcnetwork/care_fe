@@ -33,7 +33,6 @@ import {
 import moment from "moment";
 import { RoleButton } from "../Common/RoleButton";
 import CoverImageEditModal from "./CoverImageEditModal";
-import ImageWithFallback from "../Common/ImageWithFallback";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -230,9 +229,9 @@ export const FacilityHome = (props: any) => {
   );
 
   const CoverImage = () => (
-    <ImageWithFallback
+    <img
       src={facilityData.read_cover_image_url}
-      alt="Facility"
+      alt={facilityData.name}
       className="w-full h-full object-cover"
     />
   );
