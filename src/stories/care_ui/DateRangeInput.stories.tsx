@@ -1,5 +1,5 @@
 import { ComponentStory } from "@storybook/react";
-import Component from "../Components/Common/DateRangeInputV2";
+import Component from "../../Components/Common/DateRangeInputV2";
 
 export default {
   title: "Care UI / DateRangeInput",

@@ -1,5 +1,5 @@
 import { ComponentStory } from "@storybook/react";
-import ButtonV2 from "../Components/Common/components/ButtonV2";
+import ButtonV2 from "../../Components/Common/components/ButtonV2";
 
 export default {
   title: "Care UI / Button",

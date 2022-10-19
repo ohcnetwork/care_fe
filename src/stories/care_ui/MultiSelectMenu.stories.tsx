@@ -1,7 +1,7 @@
 import { ComponentStory } from "@storybook/react";
 import { useState } from "react";
-import { PATIENT_FILTER_ADMITTED_TO } from "../Common/constants";
-import MultiSelectMenuV2 from "../Components/Form/MultiSelectMenuV2";
+import { PATIENT_FILTER_ADMITTED_TO } from "../../Common/constants";
+import MultiSelectMenuV2 from "../../Components/Form/MultiSelectMenuV2";
 
 export default {
   title: "Care UI / Select",

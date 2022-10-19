@@ -1,5 +1,5 @@
 import { ComponentStory } from "@storybook/react";
-import Component from "../../Components/Form/FormFields/TextAreaFormField";
+import Component from "../../../Components/Form/FormFields/TextAreaFormField";
 
 export default {
   title: "Care UI / Form Elements",

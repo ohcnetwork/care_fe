@@ -1,7 +1,7 @@
 import { ComponentStory } from "@storybook/react";
 import { useState } from "react";
-import { GENDER_TYPES } from "../Common/constants";
-import SelectMenuV2 from "../Components/Form/SelectMenuV2";
+import { GENDER_TYPES } from "../../Common/constants";
+import SelectMenuV2 from "../../Components/Form/SelectMenuV2";
 
 export default {
   title: "Care UI / Select",
