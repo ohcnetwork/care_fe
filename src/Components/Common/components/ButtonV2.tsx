@@ -1,7 +1,7 @@
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
 export type ButtonVariant =
-  | "success"
+  | "primary"
   | "secondary"
   | "danger"
   | "warning"
@@ -56,7 +56,7 @@ const shadowClasses =
 
 const ButtonV2 = ({
   size = "default",
-  variant = "success",
+  variant = "primary",
   circle,
   shadow,
   ghost,
