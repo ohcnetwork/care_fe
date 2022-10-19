@@ -1,6 +1,6 @@
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
-export type ButtonStyle =
+export type ButtonVariant =
   | "success"
   | "secondary"
   | "danger"
@@ -35,7 +35,7 @@ export type ButtonProps = RawButtonProps & {
    * - `"warning"` is ideal for actions that require caution such as archive.
    * - `"alert"` is ideal for actions that require alert.
    */
-  style?: ButtonStyle;
+  variant?: ButtonVariant;
   /** If set, gives an elevated button with hover effects. */
   shadow?: boolean | undefined;
   /** If set, removes the background to give a simple text button. */
@@ -56,7 +56,7 @@ const shadowClasses =
 
 const ButtonV2 = ({
   size = "default",
-  style = "success",
+  variant = "success",
   circle,
   shadow,
   ghost,
@@ -73,7 +73,7 @@ const ButtonV2 = ({
         "Button outline-offset-1",
         `button-size-${size}`,
         `button-shape-${circle ? "circle" : "square"}`,
-        `button-${style}-${ghost ? "ghost" : "default"}`,
+        `button-${variant}-${ghost ? "ghost" : "default"}`,
         shadow && shadowClasses,
         className,
       ].join(" ")}

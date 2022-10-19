@@ -9,10 +9,10 @@ type Props = {
 const FilterButtons = ({ onClose, onClear, onApply }: Props) => {
   return (
     <div className="flex items-center mb-4 max-w-sm w-full fixed -ml-4 pl-4 pr-8 z-10 -mt-8 pt-8 pb-4 bg-gray-50">
-      <ButtonV2 style="secondary" ghost onClick={onClose}>
+      <ButtonV2 variant="secondary" ghost onClick={onClose}>
         <i className="text-base fa-solid fa-xmark" /> Cancel
       </ButtonV2>
-      <ButtonV2 style="danger" ghost onClick={onClear}>
+      <ButtonV2 variant="danger" ghost onClick={onClear}>
         <i className="text-base fa-solid fa-xmark" /> Clear Filter
       </ButtonV2>
       <div className="flex-1" />
