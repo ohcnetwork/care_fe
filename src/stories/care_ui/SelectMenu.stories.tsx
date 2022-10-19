@@ -4,7 +4,7 @@ import { GENDER_TYPES } from "../../Common/constants";
 import SelectMenuV2 from "../../Components/Form/SelectMenuV2";
 
 export default {
-  title: "Care UI / Select",
+  title: "CARE UI / Select",
   component: SelectMenuV2,
 };
 
