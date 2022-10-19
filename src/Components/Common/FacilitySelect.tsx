@@ -5,7 +5,7 @@ import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { FacilityModel } from "../Facility/models";
 interface FacilitySelectProps {
   name: string;
-  errors?: string;
+  errors?: string | undefined;
   className?: string;
   searchAll?: boolean;
   multiple?: boolean;
