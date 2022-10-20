@@ -11,7 +11,7 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LanguageSelector from "../Common/LanguageSelector";
 import { RECAPTCHA_SITE_KEY } from "../../Common/env";
-import get from "lodash.get";
+import { get } from "lodash";
 
 export const Login = () => {
   const dispatch: any = useDispatch();

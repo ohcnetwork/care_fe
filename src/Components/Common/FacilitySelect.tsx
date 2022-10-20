@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { getAllFacilities, getPermittedFacilities } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
 interface FacilitySelectProps {
   name: string;
   margin?: string;

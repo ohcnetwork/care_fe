@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { getUserList } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { UserModel } from "../Users/models";
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
 interface UserSelectProps {
   name?: string | "";
   margin?: string;
