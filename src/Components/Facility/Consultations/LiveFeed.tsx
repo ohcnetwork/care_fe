@@ -57,7 +57,7 @@ const LiveFeed = (props: any) => {
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
   const { width } = useWindowDimensions();
-  const extremeSmallScreenBreakpoint: number = 320;
+  const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
   const liveFeedPlayerRef = useRef<any>(null);
@@ -163,7 +163,7 @@ const LiveFeed = (props: any) => {
         onError: (resp) => {
           resp instanceof AxiosError &&
             Notification.Error({
-              msg: "Fetching presets failed",
+              msg: "Camera is offline",
             });
         },
       });
@@ -635,7 +635,7 @@ const LiveFeed = (props: any) => {
                     getPresets({
                       onError: () => {
                         Notification.Error({
-                          msg: "Fetching presets failed",
+                          msg: "Camera is offline",
                         });
                       },
                     });

@@ -210,7 +210,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         onError: (resp) => {
           resp instanceof AxiosError &&
             Notification.Error({
-              msg: "Fetching presets failed",
+              msg: "Camera is offline",
             });
         },
       });
