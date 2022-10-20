@@ -108,7 +108,7 @@ type FormDetails = {
   review_interval: number;
   weight: string;
   height: string;
-  bed: string | null;
+  bed: BedModel | null;
 };
 
 type Action =
@@ -126,7 +126,7 @@ const initForm: FormDetails = {
   facility: "",
   admitted: "false",
   admitted_to: "",
-  category: "Comfort Care",
+  category: "Comfort",
   admission_date: new Date().toISOString(),
   discharge_date: null,
   referred_to: "",
@@ -264,7 +264,9 @@ export const ConsultationForm = (props: any) => {
               !!res.data.symptoms.filter((i: number) => i === 9).length,
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
-            category: res.data.category || "Comfort Care",
+            category: res.data.category
+              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)?.id || "Comfort"
+              : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
@@ -275,9 +277,10 @@ export const ConsultationForm = (props: any) => {
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
-            bed: res.data?.current_bed?.bed_object?.id || null,
+            bed: res.data?.current_bed?.bed_object || null,
           };
           dispatch({ type: "set_form", form: formData });
+          setBed(formData.bed);
         } else {
           goBack();
         }
@@ -313,7 +316,9 @@ export const ConsultationForm = (props: any) => {
         case "category":
           if (
             !state.form[field] ||
-            !PATIENT_CATEGORIES.includes(state.form[field])
+            !PATIENT_CATEGORIES.map((category) => category.id).includes(
+              state.form[field]
+            )
           ) {
             errors[field] = "Please select a category";
             if (!error_div) error_div = field;
@@ -773,12 +778,7 @@ export const ConsultationForm = (props: any) => {
                     name="category"
                     variant="standard"
                     value={state.form.category}
-                    options={PATIENT_CATEGORIES.map((c) => {
-                      return {
-                        id: c,
-                        text: c,
-                      };
-                    })}
+                    options={PATIENT_CATEGORIES}
                     onChange={handleChange}
                     errors={state.errors.category}
                   />
@@ -856,6 +856,7 @@ export const ConsultationForm = (props: any) => {
                         errors=""
                         multiple={false}
                         margin="dense"
+                        disabled={true}
                         // location={state.form.}
                         facility={facilityId}
                       />
