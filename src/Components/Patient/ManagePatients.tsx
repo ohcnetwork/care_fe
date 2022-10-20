@@ -32,8 +32,8 @@ import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { FacilityModel } from "../Facility/models";
-import clsx from "clsx";
 import { Badge } from "../Common/Badge";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -86,6 +86,14 @@ export const PatientManager = (props: any) => {
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadgeName] = useState("");
   const [facilityCrumbName, setFacilityCrumbName] = useState("");
+  const { width } = useWindowDimensions();
+  const extremeSmallScreenBreakpoint = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
+  const isTwoColumnCardBreakpointRange =
+    width <= 900 && width >= 769 ? true : false;
+  const isThreeColumnCardBreakpointRange =
+    width <= 1220 && width >= 1025 ? true : false;
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -464,7 +472,15 @@ export const PatientManager = (props: any) => {
           href={patientUrl}
           className="w-full cursor-pointer p-4 rounded-lg bg-white shadow text-black border border-transparent hover:border-primary-500 transition-all duration-200 ease-in-out"
         >
-          <div className="flex gap-4 items-start">
+          <div
+            className={`flex ${
+              isExtremeSmallScreen ||
+              isTwoColumnCardBreakpointRange ||
+              isThreeColumnCardBreakpointRange
+                ? " flex-wrap "
+                : ""
+            }  gap-4 items-start`}
+          >
             <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
               {patient?.last_consultation &&
               patient?.last_consultation?.current_bed ? (
