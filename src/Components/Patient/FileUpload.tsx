@@ -733,15 +733,17 @@ export const FileUpload = (props: FileUploadProps) => {
                     <button
                       type="submit"
                       style={{ marginLeft: "auto" }}
-                      className="flex gap-2 w-full md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2"
+                      className="w-full md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2"
                       onClick={() => {
                         handleAudioUpload();
                       }}
                     >
-                      <p className="text-sm">
-                        <CloudUploadOutlineIcon />
-                      </p>
-                      &nbsp; Save Recording
+                      <div className="flex gap-2 justify-center items-center md:w-auto w-full">
+                        <p className="text-sm">
+                          <CloudUploadOutlineIcon />
+                        </p>
+                        &nbsp; Save Recording
+                      </div>
                     </button>
                   )}
                 </>
@@ -802,19 +804,6 @@ export const FileUpload = (props: FileUploadProps) => {
                         &nbsp; Upload
                       </button>
                     </div>
-                  </div>
-                )}
-                {file && (
-                  <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
-                    {file?.name}
-                    <button
-                      onClick={() => {
-                        setFile(null);
-                        setUploadFileName("");
-                      }}
-                    >
-                      <i className="fas fa-times"></i>
-                    </button>
                   </div>
                 )}
                 {file && (
