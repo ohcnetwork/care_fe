@@ -80,9 +80,9 @@ export default function Waveform(props: {
     } else {
       timeout = setTimeout(() => {
         setRefreshData([
-          ...data.slice(0, rPointer - 50),
-          ...Array(20).fill(null),
-          ...lastData.slice(rPointer - 50),
+          ...data.slice(0, rPointer - 25),
+          ...Array(50).fill(null),
+          ...lastData.slice(rPointer - 25),
         ]);
         setRPointer(rPointer + Math.round(viewable / 150));
       }, 2);
