@@ -169,176 +169,178 @@ const AssetManage = (props: AssetManageProps) => {
         title="Asset Details"
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
-      <div className="my-8 bg-white rounded-lg md:rounded-xl md:p-8 p-6 max-w-6xl mx-auto">
-        <div className="mb-4 flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2 justify-between w-full">
-            <span className="text-2xl md:text-3xl font-semibold break-words">
-              {asset?.name}
-            </span>
-            <div className=" flex flex-wrap gap-2">
-              {status(asset?.status)}
-              {workingStatus(asset?.is_working)}
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="bg-white rounded-lg md:rounded-xl md:p-8 p-6 w-full flex flex-col md:flex-row">
+          <div className="mb-4 flex flex-col gap-1">
+            <div className="flex flex-wrap items-center gap-2 justify-between w-full">
+              <span className="text-2xl md:text-3xl font-semibold break-words">
+                {asset?.name}
+              </span>
+              <div className=" flex flex-wrap gap-2">
+                {status(asset?.status)}
+                {workingStatus(asset?.is_working)}
+              </div>
             </div>
+            <span className="text-gray-700">{asset?.description}</span>
           </div>
-          <span className="text-gray-700">{asset?.description}</span>
-        </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 justify-between">
-          <div className="flex flex-col justify-between">
-            <div className="m-2 sm:m-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-x-16 w-full mb-12">
-              {/* Location Detail */}
-              <div className="flex flex-row items-center gap-4">
-                <i className="fas fa-map-marker-alt text-xl text-gray-600" />
-                <div className="flex flex-col">
-                  <span className="text-gray-700">
-                    {asset?.location_object.facility.name}
-                  </span>
-                  <span className="font-medium text-lg text-gray-900">
-                    {asset?.location_object.name}
-                  </span>
-                </div>
-              </div>
-
-              {/* Asset Type */}
-              <div className="flex flex-row items-center gap-4">
-                <i className="fas fa-cubes text-xl text-gray-600" />
-                <div className="flex flex-col">
-                  <span className="text-gray-700">Asset Type</span>
-                  <span className="font-medium text-lg text-gray-900">
-                    {asset?.asset_type === "INTERNAL"
-                      ? "Internal Asset"
-                      : "External Asset"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Asset Class */}
-              <div className="flex flex-row items-center gap-4">
-                <span className="text-gray-600 text-xl">
-                  {assetClassProp.icon}
-                </span>
-                <div className="flex flex-col">
-                  <span className="text-gray-700">Asset Class</span>
-                  <span className="font-medium text-lg text-gray-900">
-                    {assetClassProp.name}
-                  </span>
-                </div>
-              </div>
-
-              {/* Not working reason */}
-              {asset?.is_working === false && (
+          <div className="flex flex-col lg:flex-row gap-6 justify-between">
+            <div className="flex flex-col justify-between">
+              <div className="m-2 sm:m-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-x-16 w-full mb-12">
+                {/* Location Detail */}
                 <div className="flex flex-row items-center gap-4">
-                  {/* description icon */}
-                  <i className="fas fa-exclamation-circle text-xl text-gray-600" />
+                  <i className="fas fa-map-marker-alt text-xl text-gray-600" />
                   <div className="flex flex-col">
-                    <span className="text-gray-700">Not working reason</span>
-                    <span className="text-gray-900">
-                      {asset?.not_working_reason || "--"}
+                    <span className="text-gray-700">
+                      {asset?.location_object.facility.name}
+                    </span>
+                    <span className="font-medium text-lg text-gray-900">
+                      {asset?.location_object.name}
                     </span>
                   </div>
                 </div>
-              )}
 
-              {/* Last Serviced On */}
-              <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
-                <i className="fas fa-tools text-xl text-gray-600" />
-                <div className="flex flex-col">
-                  <span className="text-gray-700">Last serviced on</span>
-                  <span className="font-medium text-lg text-gray-900">
-                    {asset?.last_serviced_on
-                      ? formatDate(asset?.last_serviced_on)
-                      : "--"}
+                {/* Asset Type */}
+                <div className="flex flex-row items-center gap-4">
+                  <i className="fas fa-cubes text-xl text-gray-600" />
+                  <div className="flex flex-col">
+                    <span className="text-gray-700">Asset Type</span>
+                    <span className="font-medium text-lg text-gray-900">
+                      {asset?.asset_type === "INTERNAL"
+                        ? "Internal Asset"
+                        : "External Asset"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Asset Class */}
+                <div className="flex flex-row items-center gap-4">
+                  <span className="text-gray-600 text-xl">
+                    {assetClassProp.icon}
                   </span>
+                  <div className="flex flex-col">
+                    <span className="text-gray-700">Asset Class</span>
+                    <span className="font-medium text-lg text-gray-900">
+                      {assetClassProp.name}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Notes */}
-              <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
-                <i className="fas fa-sticky-note text-xl text-gray-600" />
-                <div className="flex flex-col">
-                  <span className="text-gray-700">Notes</span>
-                  <span className="text-gray-900">{asset?.notes || "--"}</span>
+                {/* Not working reason */}
+                {asset?.is_working === false && (
+                  <div className="flex flex-row items-center gap-4">
+                    {/* description icon */}
+                    <i className="fas fa-exclamation-circle text-xl text-gray-600" />
+                    <div className="flex flex-col">
+                      <span className="text-gray-700">Not working reason</span>
+                      <span className="text-gray-900">
+                        {asset?.not_working_reason || "--"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Last Serviced On */}
+                <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
+                  <i className="fas fa-tools text-xl text-gray-600" />
+                  <div className="flex flex-col">
+                    <span className="text-gray-700">Last serviced on</span>
+                    <span className="font-medium text-lg text-gray-900">
+                      {asset?.last_serviced_on
+                        ? formatDate(asset?.last_serviced_on)
+                        : "--"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
+                  <i className="fas fa-sticky-note text-xl text-gray-600" />
+                  <div className="flex flex-col">
+                    <span className="text-gray-700">Notes</span>
+                    <span className="text-gray-900">
+                      {asset?.notes || "--"}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <div className="text-xs text-gray-700">
-                <span className="text-gray-900">Created: </span>
-                {asset?.created_date && formatDate(asset?.created_date)}
-                <br />
-                <span className="text-gray-900">Last Modified: </span>
-                {asset?.modified_date && formatDate(asset?.modified_date)}
-              </div>
-              <div className="flex flex-col md:flex-row gap-1">
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
-                    )
-                  }
-                  id="update-asset"
-                  className="primary-button"
-                >
-                  <i className="fas fa-pencil-alt text-white mr-4" />
-                  Update
-                </button>
-                {asset?.asset_class && (
+              <div className="flex flex-col gap-3">
+                <div className="text-xs text-gray-700">
+                  <span className="text-gray-900">Created: </span>
+                  {asset?.created_date && formatDate(asset?.created_date)}
+                  <br />
+                  <span className="text-gray-900">Last Modified: </span>
+                  {asset?.modified_date && formatDate(asset?.modified_date)}
+                </div>
+                <div className="flex flex-col md:flex-row gap-1">
                   <button
-                    onClick={() => navigate(`/assets/${asset?.id}/configure`)}
-                    id="configure-asset"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
+                      )
+                    }
+                    id="update-asset"
                     className="primary-button"
                   >
-                    <i className="fas fa-cog text-white mr-4"></i>
-                    Configure
+                    <i className="fas fa-pencil-alt text-white mr-4" />
+                    Update
                   </button>
-                )}
+                  {asset?.asset_class && (
+                    <button
+                      onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+                      id="configure-asset"
+                      className="primary-button"
+                    >
+                      <i className="fas fa-cog text-white mr-4"></i>
+                      Configure
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
+            {asset && (
+              <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col md:flex-row lg:flex-col transition-all duration-200 ease-in">
+                <AssetWarrantyCard asset={asset} view="front" />
+                <AssetWarrantyCard asset={asset} view="back" />
+              </div>
+            )}
           </div>
-          {asset && (
-            <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col md:flex-row lg:flex-col transition-all duration-200 ease-in">
-              <AssetWarrantyCard asset={asset} view="front" />
-              <AssetWarrantyCard asset={asset} view="back" />
-            </div>
-          )}
         </div>
       </div>
-      <div className="bg-white rounded-lg md:p-6 p-3 mt-2 max-w-6xl mx-auto">
-        <div className="text-xl font-semibold">Transaction History</div>
-        <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved from
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved to
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved By
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved On
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {transactionDetails}
-            </tbody>
-          </table>
-        </div>
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
-        )}
+      <div className="text-xl font-semibold mt-8 mb-4">Transaction History</div>
+      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved from
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved to
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved By
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved On
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {transactionDetails}
+          </tbody>
+        </table>
       </div>
+      {totalCount > limit && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };
