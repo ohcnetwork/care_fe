@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { listFacilityAssetLocation } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { AssetLocationObject } from "../Assets/AssetTypes";
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
 interface LocationSelectProps {
   name: string;
   margin?: string;

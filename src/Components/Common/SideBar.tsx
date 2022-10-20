@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import get from "lodash.get";
+import { get } from "lodash";
 import { useSelector } from "react-redux";
 import { Link, navigate, usePath } from "raviger";
 import { IconButton } from "@material-ui/core";
