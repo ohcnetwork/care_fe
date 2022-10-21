@@ -3,7 +3,6 @@ import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { Modal } from "@material-ui/core";
 import Beds from "../../Facility/Consultations/Beds";
-import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
 import { useState } from "react";
 
 export default function TeleICUPatientInfoCard(props: {

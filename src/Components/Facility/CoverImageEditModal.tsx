@@ -3,16 +3,19 @@ import axios from "axios";
 import { ChangeEventHandler, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { deleteFacilityCoverImage } from "../../Redux/actions";
+import { Success } from "../../Utils/Notifications";
+import { sleep } from "../../Utils/utils";
 import { FacilityModel } from "./models";
 
 interface Props {
   open: boolean;
-  onClose: () => void | undefined;
+  onClose: (() => void) | undefined;
+  onSave?: (() => void) | undefined;
   facility: FacilityModel;
 }
 
-const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
-  const dispatch = useDispatch();
+const CoverImageEditModal = ({ open, onClose, onSave, facility }: Props) => {
+  const dispatch = useDispatch<any>();
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
   const [preview, setPreview] = useState<string>();
@@ -20,7 +23,7 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
   const closeModal = () => {
     setPreview(undefined);
     setSelectedFile(undefined);
-    onClose();
+    onClose && onClose();
   };
 
   useEffect(() => {
@@ -41,26 +44,40 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
 
   const handleUpload = async () => {
     if (!selectedFile) {
+      closeModal();
       return;
     }
     const formData = new FormData();
     formData.append("cover_image", selectedFile);
     setIsUploading(true);
-    await axios.post(`/api/v1/facility/${facility.id}/cover_image/`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: "Bearer " + localStorage.getItem("care_access_token"),
-      },
-    });
+    const response = await axios.post(
+      `/api/v1/facility/${facility.id}/cover_image/`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: "Bearer " + localStorage.getItem("care_access_token"),
+        },
+      }
+    );
+    if (response.status === 200) Success({ msg: "Cover image updated." });
+    await sleep(1000);
     setIsUploading(false);
+    onSave && onSave();
     closeModal();
-    window.location.reload();
+  };
+
+  const handleDelete = async () => {
+    const res = await dispatch(deleteFacilityCoverImage(facility.id as any));
+    if (res.statusCode === 200) Success({ msg: "Cover image deleted" });
+    onSave && onSave();
+    closeModal();
   };
 
   return (
     <Modal open={open} onClose={closeModal}>
       <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-        <form className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-screen flex flex-col shadow overflow-clip">
+        <form className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-screen overflow-auto flex flex-col shadow">
           <div className="px-6 py-6 flex flex-col bg-gray-300">
             <span className="text-xl font-medium">Edit Cover Photo</span>
             <span className="mt-1 text-gray-700">{facility.name}</span>
@@ -106,11 +123,7 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
               <button
                 type="button"
                 className="rounded-lg bg-error py-2 px-4 text-white font-medium text-sm flex gap-1 items-center justify-center  transition-all"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  dispatch(deleteFacilityCoverImage(facility.id as any));
-                  closeModal();
-                }}
+                onClick={handleDelete}
                 disabled={isUploading}
               >
                 Delete
