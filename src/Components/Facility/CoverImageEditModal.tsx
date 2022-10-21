@@ -78,9 +78,9 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
               </span>
             )}
           </div>
-          <div className="flex p-4 gap-2">
+          <div className="flex flex-col sm:flex-row p-4 gap-2">
             <div>
-              <label className="rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center cursor-pointer transition-all">
+              <label className="rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center justify-center cursor-pointer transition-all">
                 <i className="fas fa-cloud-upload-alt mr-2"></i>Upload an image
                 <input
                   title="changeFile"
@@ -90,10 +90,10 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
                 />
               </label>
             </div>
-            <div className="flex-1" />
+            <div className="sm:flex-1" />
             <button
               type="button"
-              className="rounded-lg bg-gray-100 hover:bg-gray-300 py-2 px-4 text-slate-600 hover:text-slate-800 font-medium text-sm flex gap-1 items-center transition-all"
+              className="rounded-lg bg-gray-100 hover:bg-gray-300 py-2 px-4 text-slate-600 hover:text-slate-800 font-medium text-sm flex gap-1 items-center justify-center  transition-all"
               onClick={(e) => {
                 e.stopPropagation();
                 closeModal();
@@ -105,7 +105,7 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
             {facility.read_cover_image_url && (
               <button
                 type="button"
-                className="rounded-lg bg-error py-2 px-4 text-white font-medium text-sm flex gap-1 items-center transition-all"
+                className="rounded-lg bg-error py-2 px-4 text-white font-medium text-sm flex gap-1 items-center justify-center  transition-all"
                 onClick={(e) => {
                   e.stopPropagation();
                   dispatch(deleteFacilityCoverImage(facility.id as any));
@@ -118,7 +118,7 @@ const CoverImageEditModal = ({ open, onClose, facility }: Props) => {
             )}
             <button
               type="button"
-              className="rounded-lg bg-primary-500 py-2 px-4 text-white font-medium hover:bg-primary-400 text-sm flex gap-3 items-center transition-all"
+              className="rounded-lg bg-primary-500 py-2 px-4 text-white font-medium hover:bg-primary-400 text-sm flex gap-3 items-center justify-center transition-all"
               onClick={handleUpload}
               disabled={isUploading}
             >
