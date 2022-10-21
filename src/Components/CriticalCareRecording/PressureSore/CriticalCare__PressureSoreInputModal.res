@@ -61,7 +61,7 @@ let make = (~show: bool, ~hideModal: ReactEvent.Mouse.t => unit, ~position: posi
             ~top=`${position["y"]->Belt.Int.toString}px`,
             ()
           )}
-          className="transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit">
+          className="transform overflow-hidden w-4/5 rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit">
         <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
           <div className="sm:flex sm:items-start">
             <div className="mt-3 text-center sm:mt-0 sm:text-left">
