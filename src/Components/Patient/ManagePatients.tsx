@@ -26,14 +26,15 @@ import {
   TELEMEDICINE_ACTIONS,
   PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
+  PatientCategoryTailwindClass,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { FacilityModel } from "../Facility/models";
-import clsx from "clsx";
+import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Badge } from "../Common/Badge";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -67,6 +68,14 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 const RESULT_LIMIT = 12;
 
+const PatientCategoryDisplayText: Record<PatientCategory, string> = {
+  "Comfort Care": "COMFORT CARE",
+  Stable: "STABLE",
+  "Slightly Abnormal": "ABNORMAL",
+  Critical: "CRITICAL",
+  unknown: "UNKNOWN",
+};
+
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
   const dispatch: any = useDispatch();
@@ -86,6 +95,14 @@ export const PatientManager = (props: any) => {
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadgeName] = useState("");
   const [facilityCrumbName, setFacilityCrumbName] = useState("");
+  const { width } = useWindowDimensions();
+  const extremeSmallScreenBreakpoint = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
+  const isTwoColumnCardBreakpointRange =
+    width <= 900 && width >= 769 ? true : false;
+  const isThreeColumnCardBreakpointRange =
+    width <= 1220 && width >= 1025 ? true : false;
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -458,12 +475,24 @@ export const PatientManager = (props: any) => {
       } else {
         patientUrl = `/patient/${patient.id}`;
       }
+
+      const category: PatientCategory =
+        patient?.last_consultation?.category || "unknown";
+      const categoryClass = PatientCategoryTailwindClass[category];
+
       return (
         <Link
           key={`usr_${patient.id}`}
           href={patientUrl}
-          className="w-full cursor-pointer p-4 rounded-lg bg-white shadow text-black border border-transparent hover:border-primary-500 transition-all duration-200 ease-in-out"
+          className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-9 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${categoryClass}-ring`}
         >
+          <div
+            className={`rounded-l-lg absolute top-0 bottom-0 left-0 h-full w-1 group-hover:w-5 transition-all duration-200 ease-in-out flex items-center ${categoryClass}`}
+          >
+            <span className="absolute -left-32 -right-32 top-0 bottom-0 flex justify-center items-center text-center transform -rotate-90 text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out">
+              {PatientCategoryDisplayText[category]}
+            </span>
+          </div>
           <div className="flex gap-4 items-start">
             <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
               {patient?.last_consultation &&
@@ -501,8 +530,9 @@ export const PatientManager = (props: any) => {
             <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
               <div>
                 <div className="md:flex justify-between w-full">
-                  <div className="text-xl font-bold capitalize">
-                    {patient.name} - {patient.age}
+                  <div className="text-xl font-semibold capitalize">
+                    <span>{patient.name}</span>
+                    <span className="text-gray-800">{" - " + patient.age}</span>
                     {patient.action && patient.action != 10 && (
                       <span className="font-semibold ml-2 text-gray-700">
                         -{" "}

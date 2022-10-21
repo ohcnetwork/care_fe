@@ -3,9 +3,26 @@ import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { Modal } from "@material-ui/core";
 import Beds from "../../Facility/Consultations/Beds";
-import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
 import { useState } from "react";
 import moment from "moment";
+import { PatientCategoryTailwindClass } from "../../../Common/constants";
+import { PatientCategory } from "../../Facility/models";
+
+const PatientCategoryDisplayText: Record<PatientCategory, string> = {
+  "Comfort Care": "COMFORT CARE",
+  Stable: "STABLE",
+  "Slightly Abnormal": "SLIGHTLY ABNORMAL",
+  Critical: "CRITICAL",
+  unknown: "UNKNOWN",
+};
+
+const PatientCategoryClasses: Record<PatientCategory, string> = {
+  "Comfort Care": "h-10",
+  Stable: "h-6",
+  "Slightly Abnormal": "h-10",
+  Critical: "h-6",
+  unknown: "h-6",
+};
 
 export default function TeleICUPatientInfoCard(props: {
   patient: PatientModel;
@@ -16,6 +33,10 @@ export default function TeleICUPatientInfoCard(props: {
 
   const patient = props.patient;
   const ip_no = props.ip_no;
+
+  const category: PatientCategory =
+    patient?.last_consultation?.category || "unknown";
+  const categoryClass = PatientCategoryTailwindClass[category];
 
   return (
     <section className="flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
@@ -45,7 +66,9 @@ export default function TeleICUPatientInfoCard(props: {
       <div className="bg-white px-4 py-2 lg:p-6 flex flex-col lg:flex-row lg:w-7/12 w-full">
         {/* Can support for patient picture in the future */}
         <div className="mt-2 flex flex-col items-center">
-          <div className="w-24 h-24 min-w-[5rem] bg-gray-200 rounded border border-gray-500 overflow-">
+          <div
+            className={`w-24 h-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile`}
+          >
             {patient?.last_consultation &&
             patient?.last_consultation?.current_bed ? (
               <div
@@ -70,6 +93,13 @@ export default function TeleICUPatientInfoCard(props: {
               </div>
             )}
           </div>
+          {category !== "unknown" && (
+            <div
+              className={`text-xs font-bold rounded-b w-24 text-center pb-1 px-2 ${categoryClass}`}
+            >
+              {PatientCategoryDisplayText[category]}
+            </div>
+          )}
           <button
             className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded m-1"
             onClick={() => setOpen(true)}
@@ -82,7 +112,7 @@ export default function TeleICUPatientInfoCard(props: {
           </button>
         </div>
         <div className="flex flex-col lg:pl-6 items-center lg:items-start gap-4 lg:gap-0">
-          <div className="sm:text-xl md:text-4xl font-bold mb-1">
+          <div className="sm:text-xl md:text-4xl font-semibold mb-1">
             {patient.name}
           </div>
           <div>
