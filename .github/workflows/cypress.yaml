@@ -13,37 +13,37 @@ jobs:
   cypress-run:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout 📥
         uses: actions/checkout@v3
 
-      - name: Checkout care
+      - name: Checkout care 📥
         uses: actions/checkout@v3
         with:
           repository: coronasafe/care
           path: care
 
-      - name: Docker Layer Caching
+      - name: Docker Layer Caching 🍥
         uses: satackey/action-docker-layer-caching@v0.0.11
 
-      - name: Run docker compose up on care
+      - name: Run docker compose up on care 🐳
         run: cd care && touch .env && make build && make up && cd .. && sleep 30s
         # Voluntarily kept 30 seconds delay to wait for migrations to complete.
 
-      - name: Run docker exec
+      - name: Run Django collectstatic and load dummy data on care 🐍
         run: |
           docker exec care python manage.py collectstatic
           docker exec care python manage.py load_dummy_data
 
-      - name: Check if care is up
+      - name: Check care is up ♻
         run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
 
-      - name: Replace proxy with local care
+      - name: Change api proxy url 📝
         run: 'sed --in-place "s^\"proxy\": .*,^\"proxy\": \"http://localhost:9000\",^g" package.json'
 
-      - name: Install dependencies
+      - name: Install dependencies 📦
         run: npm install --legacy-peer-deps
 
-      - name: Cypress run
+      - name: Cypress run 🥬
         uses: cypress-io/github-action@v4
         with:
           install: false
@@ -52,7 +52,7 @@ jobs:
           wait-on-timeout: 300
           browser: electron
 
-      - name: Upload cypress screenshots on failure
+      - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v2
         if: failure()
         with:
@@ -60,7 +60,7 @@ jobs:
           path: cypress/screenshots
 
       # Test run video was always captured, so this action uses "always()" condition
-      - name: Upload cypress videos
+      - name: Upload cypress videos 📹
         uses: actions/upload-artifact@v2
         if: always()
         with:
