@@ -14,7 +14,6 @@ interface DistrictSelectProps {
 
 function DistrictSelect(props: DistrictSelectProps) {
   const { name, errors, className, multiple, selected, setSelected } = props;
-
   const dispatchAction: any = useDispatch();
 
   const districtSearch = useCallback(

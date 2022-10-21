@@ -883,6 +883,56 @@ button:disabled,
   @apply text-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none;
 }
 
+/* Patient Category Styles */
+
+.patient-comfort { 
+  @apply bg-patient-comfort text-patient-comfort-fore
+}
+.patient-stable { 
+  @apply bg-patient-stable text-patient-stable-fore
+}
+.patient-abnormal { 
+  @apply bg-patient-abnormal text-patient-abnormal-fore
+}
+.patient-critical { 
+  @apply bg-patient-critical text-patient-critical-fore
+}
+.patient-unknown {
+  @apply bg-patient-unknown text-patient-unknown-fore
+}
+
+.patient-comfort-ring { 
+  @apply ring-patient-comfort
+}
+.patient-stable-ring { 
+  @apply ring-patient-stable
+}
+.patient-abnormal-ring { 
+  @apply ring-patient-abnormal
+}
+.patient-critical-ring { 
+  @apply ring-patient-critical
+}
+.patient-unknown-ring {
+  @apply ring-patient-unknown
+}
+
+.patient-comfort-profile { 
+  @apply border-2 border-patient-comfort rounded-t
+}
+.patient-stable-profile { 
+  @apply border-2 border-patient-stable rounded-t
+}
+.patient-abnormal-profile { 
+  @apply border-2 border-patient-abnormal rounded-t
+}
+.patient-critical-profile { 
+  @apply border-2 border-patient-critical rounded-t
+}
+.patient-unknown-profile {
+  @apply border border-patient-unknown rounded
+}
+
 /* for gmaps search dropdown */
 .pac-container {
   z-index: 100000 !important;
