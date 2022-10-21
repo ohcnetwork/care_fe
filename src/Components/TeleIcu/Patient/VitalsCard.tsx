@@ -111,13 +111,13 @@ export default function TeleICUPatientVitalsCard({
 
   type VitalType = {
     label: ReactNode;
-    liveKey:string;
-    vitalKey:string;
-    waveformKey?:string;
-    waveformColor?:string;
-    waveformName?:string;
-    waveformDefaultSpace?:boolean;
-  }
+    liveKey: string;
+    vitalKey: string;
+    waveformKey?: string;
+    waveformColor?: string;
+    waveformName?: string;
+    waveformDefaultSpace?: boolean;
+  };
 
   const vitals: VitalType[] = [
     {
@@ -126,7 +126,7 @@ export default function TeleICUPatientVitalsCard({
       vitalKey: "pulse",
       waveformKey: "II",
       waveformColor: "blue",
-      waveformName: "ECG"
+      waveformName: "ECG",
     },
     {
       label: <>Blood Pressure</>,
@@ -150,7 +150,7 @@ export default function TeleICUPatientVitalsCard({
       vitalKey: "resp",
       waveformKey: "Respiration",
       waveformColor: "green",
-      waveformDefaultSpace: true
+      waveformDefaultSpace: true,
     },
     {
       label: <>Temperature (F)</>,
@@ -166,40 +166,35 @@ export default function TeleICUPatientVitalsCard({
           {waveforms ? (
             <>
               {vitals.map((v, i) => {
-                const waveform = waveforms.filter(w=>w["wave-name"] === v.waveformKey)[0];
-                return (
-                  (v.waveformKey && waveform) ?
-                    <Waveform
-                      key={i}
-                      wave={{
-                        ...waveform, 
-                        data : waveforms
-                          .filter(w=>w["wave-name"] === v.waveformKey)
-                          .map(w=>w.data)
-                          .join(" ")
-                      }}
-                      title={v.waveformName || v.waveformKey}
-                      color={v.waveformColor}
-                      metrics={stats}
-                      classes={"h-[150px]"}
-                      defaultSpace={v.waveformDefaultSpace}
-                    /> : (<div className="flex items-center justify-center text-gray-900">
-                      
-                    </div>)
-                )
+                const waveform = waveforms.filter(
+                  (w) => w["wave-name"] === v.waveformKey
+                )[0];
+                return v.waveformKey && waveform ? (
+                  <Waveform
+                    key={i}
+                    wave={{
+                      ...waveform,
+                      data: waveforms
+                        .filter((w) => w["wave-name"] === v.waveformKey)
+                        .map((w) => w.data)
+                        .join(" "),
+                    }}
+                    title={v.waveformName || v.waveformKey}
+                    color={v.waveformColor}
+                    metrics={stats}
+                    classes={"h-[150px]"}
+                    defaultSpace={v.waveformDefaultSpace}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center text-gray-900"></div>
+                );
               })}
               <div className="absolute bottom-1 right-1 flex gap-2">
-                <ToolTip
-                  text="Toggle stats for nerds"
-                  position="TOP"
-                >
-                  <button
-                    onClick={() => setStats(!stats)}
-                  >
+                <ToolTip text="Toggle stats for nerds" position="LEFT">
+                  <button onClick={() => setStats(!stats)}>
                     <i className="fas fa-chart-simple text-gray-400" />
                   </button>
                 </ToolTip>
-                
               </div>
             </>
           ) : (
