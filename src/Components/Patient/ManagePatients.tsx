@@ -33,8 +33,8 @@ import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { FacilityModel, PatientCategory } from "../Facility/models";
-import clsx from "clsx";
 import { Badge } from "../Common/Badge";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -95,6 +95,14 @@ export const PatientManager = (props: any) => {
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadgeName] = useState("");
   const [facilityCrumbName, setFacilityCrumbName] = useState("");
+  const { width } = useWindowDimensions();
+  const extremeSmallScreenBreakpoint = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
+  const isTwoColumnCardBreakpointRange =
+    width <= 900 && width >= 769 ? true : false;
+  const isThreeColumnCardBreakpointRange =
+    width <= 1220 && width >= 1025 ? true : false;
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
