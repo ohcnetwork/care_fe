@@ -157,7 +157,6 @@ export const DailyRounds = (props: any) => {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
           setPreviousReviewInterval(res.data.last_consultation.review_interval);
-          getExpectedReviewTime();
         }
       } else {
         setPatientName("");
