@@ -11,10 +11,10 @@ on:
 
 jobs:
   cypress-run:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Checkout care
         uses: actions/checkout@v3
@@ -25,12 +25,14 @@ jobs:
       - name: Docker Layer Caching
         uses: satackey/action-docker-layer-caching@v0.0.11
 
-      - name: Compose Up Care
+      - name: Run docker compose up on care
         run: cd care && touch .env && make build && make up && cd .. && sleep 30s
         # Voluntarily kept 30 seconds delay to wait for migrations to complete.
 
-      - run: docker exec care python manage.py collectstatic
-      - run: docker exec care python manage.py load_dummy_data
+      - name: Run docker exec
+        run: |
+          docker exec care python manage.py collectstatic
+          docker exec care python manage.py load_dummy_data
 
       - name: Check if care is up
         run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
@@ -38,22 +40,28 @@ jobs:
       - name: Replace proxy with local care
         run: 'sed --in-place "s^\"proxy\": .*,^\"proxy\": \"http://localhost:9000\",^g" package.json'
 
-      - run: yarn install
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
           install: false
-          start: yarn start
+          start: npm run start
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: electron
-      - uses: actions/upload-artifact@v2
+
+      - name: Upload cypress screenshots on failure
+        uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
+
       # Test run video was always captured, so this action uses "always()" condition
-      - uses: actions/upload-artifact@v2
+      - name: Upload cypress videos
+        uses: actions/upload-artifact@v2
         if: always()
         with:
           name: cypress-videos
