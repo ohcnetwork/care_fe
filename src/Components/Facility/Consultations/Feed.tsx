@@ -26,6 +26,9 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
 import { AxiosError } from "axios";
+import ReactPlayer from "react-player";
+import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
+import { findDOMNode } from "react-dom";
 
 interface IFeedProps {
   facilityId: string;
@@ -77,7 +80,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     return () => clearTimeout(timeout);
   }, [cameraState]);
 
-  const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  const liveFeedPlayerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -157,18 +163,25 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     StreamStatus.Offline
   );
 
-  const url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
+  const url = !isIOS
+    ? `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
+    : `https://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
+
   const {
     startStream,
     // setVideoEl,
-  } = useMSEMediaPlayer({
-    config: {
-      middlewareHostname,
-      ...cameraAsset,
-    },
-    url,
-    videoEl: liveFeedPlayerRef.current,
-  });
+  } = isIOS
+    ? // eslint-disable-next-line react-hooks/rules-of-hooks
+      useHLSPLayer(liveFeedPlayerRef.current as ReactPlayer)
+    : // eslint-disable-next-line react-hooks/rules-of-hooks
+      useMSEMediaPlayer({
+        config: {
+          middlewareHostname,
+          ...cameraAsset,
+        },
+        url,
+        videoEl: liveFeedPlayerRef.current as HTMLVideoElement,
+      });
 
   const {
     absoluteMove,
@@ -197,7 +210,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         onError: (resp) => {
           resp instanceof AxiosError &&
             Notification.Error({
-              msg: "Fetching presets failed",
+              msg: "Camera is offline",
             });
         },
       });
@@ -294,11 +307,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       !screenfull.isFullscreen
-        ? screenfull.request(
-            videoWrapper.current
-              ? videoWrapper.current
-              : liveFeedPlayerRef.current
-          )
+        ? isIOS
+          ? screenfull.request(
+              videoWrapper.current
+                ? videoWrapper.current
+                : (liveFeedPlayerRef.current as HTMLElement)
+            )
+          : screenfull.request(findDOMNode(liveFeedPlayerRef.current) as any)
         : screenfull.exit();
     },
     updatePreset: (option) => {
@@ -402,14 +417,40 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden"
         ref={videoWrapper}
       >
-        <video
-          id="mse-video"
-          autoPlay
-          muted
-          playsInline
-          className="max-h-full max-w-full"
-          ref={liveFeedPlayerRef}
-        />
+        {isIOS ? (
+          <ReactPlayer
+            url={url}
+            ref={liveFeedPlayerRef.current as any}
+            controls={false}
+            playsinline={true}
+            playing={true}
+            muted={true}
+            width="100%"
+            height="100%"
+            onBuffer={() => {
+              setStreamStatus(StreamStatus.Loading);
+            }}
+            onError={(e: any, _: any, hlsInstance: any) => {
+              if (e === "hlsError") {
+                const recovered = hlsInstance.recoverMediaError();
+                console.log(recovered);
+              }
+            }}
+            onEnded={() => {
+              setStreamStatus(StreamStatus.Stop);
+            }}
+          />
+        ) : (
+          <video
+            id="mse-video"
+            autoPlay
+            muted
+            playsInline
+            className="max-h-full max-w-full"
+            ref={liveFeedPlayerRef as any}
+          />
+        )}
+
         {loading !== CAMERA_STATES.IDLE && (
           <div className="absolute inset-x-0 top-2 text-center flex items-center justify-center">
             <div className="inline-flex items-center rounded p-4 gap-2 bg-white/70">
@@ -451,10 +492,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           )}
         </div>
         <div className="absolute top-8 right-8 z-20 flex flex-col gap-4">
-          {[10, 9, 7, 5, 6].map((button) => {
+          {[10, 9, 7, 5, 6].map((button, index) => {
             const option = cameraPTZ[button];
             return (
               <FeedButton
+                key={index}
                 camProp={option}
                 styleType="CHHOTUBUTTON"
                 clickAction={() => cameraPTZ[button].callback()}
@@ -492,6 +534,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               const button = c as any;
               out = (
                 <FeedButton
+                  key={i}
                   camProp={button}
                   styleType="BUTTON"
                   clickAction={() => {

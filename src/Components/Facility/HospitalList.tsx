@@ -351,7 +351,7 @@ export const HospitalList = (props: any) => {
                           {KASP_STRING}
                         </div>
                       )}
-                      <div className="float-left font-black text-xl capitalize">
+                      <div className="float-left font-bold text-xl capitalize">
                         {facility.name}
                       </div>
                     </div>

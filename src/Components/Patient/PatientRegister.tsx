@@ -58,10 +58,12 @@ import { goBack } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+
 import AccordionV2 from "../Common/components/AccordionV2";
 import CollapseV2 from "../Common/components/CollapseV2";
 import { debounce } from "lodash";
 // const debounce = require("lodash.debounce");
+
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;

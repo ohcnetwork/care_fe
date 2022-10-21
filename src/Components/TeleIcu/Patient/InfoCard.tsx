@@ -81,7 +81,7 @@ export default function TeleICUPatientInfoCard(props: {
           </button>
         </div>
         <div className="flex flex-col lg:pl-6 items-center lg:items-start gap-4 lg:gap-0">
-          <div className="sm:text-xl md:text-4xl font-bold mb-1">
+          <div className="sm:text-xl md:text-4xl font-semibold mb-1">
             {patient.name}
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-1 lg:mb-2">
