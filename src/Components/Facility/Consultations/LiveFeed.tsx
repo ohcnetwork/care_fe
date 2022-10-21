@@ -57,7 +57,7 @@ const LiveFeed = (props: any) => {
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
   const { width } = useWindowDimensions();
-  const extremeSmallScreenBreakpoint: number = 320;
+  const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
   const liveFeedPlayerRef = useRef<any>(null);
@@ -155,17 +155,21 @@ const LiveFeed = (props: any) => {
       onSuccess: () => setLoading(undefined),
     });
   };
+
   useEffect(() => {
-    getPresets({
-      onSuccess: (resp) => setPresets(resp.data),
-      onError: (resp) => {
-        resp instanceof AxiosError &&
-          Notification.Error({
-            msg: "Fetching presets failed",
-          });
-      },
-    });
+    if (cameraAsset?.hostname) {
+      getPresets({
+        onSuccess: (resp) => setPresets(resp.data),
+        onError: (resp) => {
+          resp instanceof AxiosError &&
+            Notification.Error({
+              msg: "Camera is offline",
+            });
+        },
+      });
+    }
   }, []);
+
   useEffect(() => {
     setNewPreset(toUpdate?.meta?.preset_name);
     setBed(toUpdate?.bed_object);
@@ -631,7 +635,7 @@ const LiveFeed = (props: any) => {
                     getPresets({
                       onError: () => {
                         Notification.Error({
-                          msg: "Fetching presets failed",
+                          msg: "Camera is offline",
                         });
                       },
                     });

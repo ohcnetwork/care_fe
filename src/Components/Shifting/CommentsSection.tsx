@@ -4,7 +4,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftComments, addShiftComments } from "../../Redux/actions";
 import { Button, CircularProgress } from "@material-ui/core";
 import * as Notification from "../../Utils/Notifications.js";
-import moment from "moment";
+import { formatDate } from "../../Utils/utils";
 
 interface CommentSectionProps {
   id: string;
@@ -85,7 +85,9 @@ const CommentSection = (props: CommentSectionProps) => {
               </div>
               <div className="mt-3">
                 <span className="text-xs text-gray-500">
-                  {moment(comment.modified_date).format("LLL") || "-"}
+                  {comment.modified_date
+                    ? formatDate(comment.modified_date)
+                    : "-"}
                 </span>
               </div>
               <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">

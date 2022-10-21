@@ -18,6 +18,7 @@ import Pagination from "../Common/Pagination";
 import { Modal, Button, CircularProgress } from "@material-ui/core";
 
 import { limit, formatFilter } from "./Commons";
+import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -257,7 +258,7 @@ export default function ListView() {
                   >
                     <i className="fas fa-stopwatch mr-2"></i>
                     <dd className="font-bold text-sm leading-5">
-                      {moment(shift.modified_date).format("LLL") || "--"}
+                      {formatDate(shift.modified_date) || "--"}
                     </dd>
                   </dt>
                 </div>
