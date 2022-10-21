@@ -43,9 +43,9 @@ export const FacilityHome = (props: any) => {
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
-  const [editCoverImage, setEditCoverImage] = React.useState(false);
-  const [imageKey, setImageKey] = React.useState(0);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [editCoverImage, setEditCoverImage] = useState(false);
+  const [imageKey, setImageKey] = useState(0);
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
@@ -231,7 +231,6 @@ export const FacilityHome = (props: any) => {
 
   const CoverImage = () => (
     <img
-      key={imageKey}
       src={`${facilityData.read_cover_image_url}?imgKey=${imageKey}`}
       alt={facilityData.name}
       className="w-full h-full object-cover"
@@ -277,8 +276,13 @@ export const FacilityHome = (props: any) => {
       </Dialog>
       <CoverImageEditModal
         open={editCoverImage}
-        onSave={() => setImageKey(Date.now())}
+        onSave={() =>
+          facilityData.read_cover_image_url
+            ? setImageKey(Date.now())
+            : window.location.reload()
+        }
         onClose={() => setEditCoverImage(false)}
+        onDelete={() => window.location.reload()}
         facility={facilityData}
       />
       {hasCoverImage && (

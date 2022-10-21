@@ -11,10 +11,17 @@ interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
   onSave?: (() => void) | undefined;
+  onDelete?: (() => void) | undefined;
   facility: FacilityModel;
 }
 
-const CoverImageEditModal = ({ open, onClose, onSave, facility }: Props) => {
+const CoverImageEditModal = ({
+  open,
+  onClose,
+  onSave,
+  onDelete,
+  facility,
+}: Props) => {
   const dispatch = useDispatch<any>();
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
@@ -47,8 +54,10 @@ const CoverImageEditModal = ({ open, onClose, onSave, facility }: Props) => {
       closeModal();
       return;
     }
+
     const formData = new FormData();
     formData.append("cover_image", selectedFile);
+
     setIsUploading(true);
     const response = await axios.post(
       `/api/v1/facility/${facility.id}/cover_image/`,
@@ -60,17 +69,24 @@ const CoverImageEditModal = ({ open, onClose, onSave, facility }: Props) => {
         },
       }
     );
-    if (response.status === 200) Success({ msg: "Cover image updated." });
+
+    if (response.status === 200) {
+      Success({ msg: "Cover image updated." });
+    }
     await sleep(1000);
     setIsUploading(false);
+
     onSave && onSave();
     closeModal();
   };
 
   const handleDelete = async () => {
     const res = await dispatch(deleteFacilityCoverImage(facility.id as any));
-    if (res.statusCode === 200) Success({ msg: "Cover image deleted" });
-    onSave && onSave();
+    if (res.statusCode === 204) {
+      Success({ msg: "Cover image deleted" });
+    }
+
+    onDelete && onDelete();
     closeModal();
   };
 
@@ -85,7 +101,10 @@ const CoverImageEditModal = ({ open, onClose, onSave, facility }: Props) => {
           <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
             {preview || facility.read_cover_image_url ? (
               <img
-                src={`${preview || facility.read_cover_image_url}`}
+                src={`${
+                  preview ||
+                  `${facility.read_cover_image_url}?requested_on=${Date.now()}`
+                }`}
                 alt={facility.name}
                 className="w-full h-full object-cover"
               />
