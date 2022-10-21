@@ -64,7 +64,6 @@ import CollapseV2 from "../Common/components/CollapseV2";
 import { debounce } from "lodash";
 // const debounce = require("lodash.debounce");
 
-
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
 }
@@ -1595,7 +1594,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     onChange={handleChange}
                                     style={{ padding: "0px 5px" }}
                                   >
-                                    <Box display="flex" flexDirection="row">
+                                    <div className="flex flex-wrap">
                                       <FormControlLabel
                                         value="1"
                                         control={<Radio />}
@@ -1611,7 +1610,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         control={<Radio />}
                                         label="3 (Booster/Precautionary Dose)"
                                       />
-                                    </Box>
+                                    </div>
                                   </RadioGroup>
                                 </div>
                                 <div id="vaccine_name-div">

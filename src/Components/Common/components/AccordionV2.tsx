@@ -54,16 +54,16 @@ export default function AccordionV2(props: {
         </button>
       </div>
       <div
-        className="transition-[height] ease-in-out duration-300 overflow-hidden"
+        className="transition-all ease-in-out duration-500 overflow-hidden"
         ref={contentEl}
         style={
           toggle
             ? {
-                height: contentEl.current
-                  ? contentEl.current.scrollHeight
+                maxHeight: contentEl.current
+                  ? contentEl.current.scrollHeight * 2
                   : "0px",
               }
-            : { height: "0px" }
+            : { maxHeight: "0px" }
         }
       >
         {props.children}
