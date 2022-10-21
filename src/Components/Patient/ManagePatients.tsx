@@ -671,7 +671,7 @@ export const PatientManager = (props: any) => {
         breadcrumbs={!!facilityId}
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
       />
-      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 ">
+      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-24px]">
         <div>
           <div className="flex flex-col right-3 top-0 gap-2 my-3 mr-3 sm:absolute sm:flex-row">
             <Tooltip
@@ -864,7 +864,7 @@ export const PatientManager = (props: any) => {
                 </div>
               </div>
             </div>
-            <div className="md:flex md:gap-4 mt-2">
+            <div className="md:flex md:gap-4 mt-4">
               <div className="grow lg:max-w-sm w-full">
                 <div className="text-sm font-semibold mt-2">
                   Search by Primary Number
@@ -893,166 +893,162 @@ export const PatientManager = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap w-full col-span-3 ml-[-10px]">
-            {qParams.phone_number?.trim().split(" ").length - 1
-              ? badge("Primary Number", qParams.phone_number, "phone_number")
-              : null}
-            {qParams.emergency_phone_number?.trim().split(" ").length - 1
-              ? badge(
-                  "Emergency Number",
-                  qParams.emergency_phone_number,
-                  "emergency_phone_number"
-                )
-              : null}
-            {badge("Patient Name", qParams.name, "name")}
-            {badge("IP number", qParams.ip_no, "ip_no")}
-            {badge(
-              "Modified After",
-              qParams.modified_date_after,
-              "modified_date_after"
-            )}
-            {badge(
-              "Modified Before",
-              qParams.modified_date_before,
-              "modified_date_before"
-            )}
-            {badge(
-              "Created Before",
-              qParams.created_date_before,
-              "created_date_before"
-            )}
-            {badge(
-              "Created After",
-              qParams.created_date_after,
-              "created_date_after"
-            )}
-            {qParams.last_consultation_admission_date_before ===
-            qParams.last_consultation_admission_date_after ? (
-              badge(
-                "Admission Date",
-                qParams.last_consultation_admission_date_before,
-                [
-                  "last_consultation_admission_date_before",
-                  "last_consultation_admission_date_after",
-                ]
-              )
-            ) : (
-              <>
-                {badge(
-                  "Admitted Before",
-                  qParams.last_consultation_admission_date_before,
-                  "last_consultation_admission_date_before"
-                )}
-                {badge(
-                  "Admitted After",
-                  qParams.last_consultation_admission_date_after,
-                  "last_consultation_admission_date_after"
-                )}
-              </>
-            )}
-            {badge(
-              "Discharged Before",
-              qParams.last_consultation_discharge_date_before,
-              "last_consultation_discharge_date_before"
-            )}
-            {badge(
-              "Discharged After",
-              qParams.last_consultation_discharge_date_after,
-              "last_consultation_discharge_date_after"
-            )}
-            {qParams.last_consultation_admitted_to_list &&
-              LastAdmittedToTypeBadges()}
-            {qParams.number_of_doses &&
-              badge(
-                "Number of Vaccination Doses",
-                qParams.number_of_doses,
-                "number_of_doses"
-              )}
-            {qParams.is_kasp &&
-              badge(
-                KASP_STRING,
-                qParams.is_kasp === "true" ? KASP_STRING : `Non ${KASP_STRING}`,
-                "is_kasp"
-              )}
-            {badge("COWIN ID", qParams.covin_id, "covin_id")}
-            {badge("Is Antenatal", qParams.is_antenatal, "is_antenatal")}
-            {badge("Facility", facilityBadgeName, "facility")}
-            {badge("Facility Type", qParams.facility_type, "facility_type")}
-            {badge("District", districtName, "district")}
-            {badge("Ordering", qParams.ordering, "ordering")}
-            {badge("Category", qParams.category, "category")}
-            {badge("Disease Status", qParams.disease_status, "disease_status")}
-            {badge(
-              "Gender",
-              parseOptionId(GENDER_TYPES, qParams.gender),
-              "gender"
-            )}
-            {badge(
-              "Admitted to",
-              ADMITTED_TO[qParams.last_consultation_admitted_to],
-              "last_consultation_admitted_to"
-            )}
-            {badge("Age min", qParams.age_min, "age_min")}
-            {badge("Age max", qParams.age_max, "age_max")}
-            {badge("SRF ID", qParams.srf_id, "srf_id")}
-            {badge("LSG Body", localbodyName, "lsgBody")}
-            {badge(
-              "Declared Status",
-              qParams.is_declared_positive,
-              "is_declared_positive"
-            )}
-            {badge(
-              "Result before",
-              qParams.date_of_result_before,
-              "date_of_result_before"
-            )}
-            {badge(
-              "Result after",
-              qParams.date_of_result_after,
-              "date_of_result_after"
-            )}
-
-            {badge(
-              "Declared positive before",
-              qParams.date_declared_positive_before,
-              "date_declared_positive_before"
-            )}
-
-            {badge(
-              "Declared positive after",
-              qParams.date_declared_positive_after,
-              "date_declared_positive_after"
-            )}
-
-            {badge(
-              "Onset of symptoms before",
-              qParams.last_consultation_symptoms_onset_date_before,
-              "last_consultation_symptoms_onset_date_before"
-            )}
-
-            {badge(
-              "Onset of symptoms after",
-              qParams.last_consultation_symptoms_onset_date_after,
-              "last_consultation_symptoms_onset_date_after"
-            )}
-            {badge(
-              "Vaccinated Date before",
-              qParams.last_vaccinated_date_before,
-              "last_vaccinated_date_before"
-            )}
-
-            {badge(
-              "Vaccinated Date after",
-              qParams.last_vaccinated_date_after,
-              "last_vaccinated_date_after"
-            )}
-            {badge(
-              "Telemedicine",
-              qParams.last_consultation_is_telemedicine,
-              "last_consultation_is_telemedicine"
-            )}
-          </div>
         </div>
+      </div>
+      <div className="flex flex-wrap w-full col-span-3 ml-[-10px]">
+        {qParams.phone_number?.trim().split(" ").length - 1
+          ? badge("Primary Number", qParams.phone_number, "phone_number")
+          : null}
+        {qParams.emergency_phone_number?.trim().split(" ").length - 1
+          ? badge(
+              "Emergency Number",
+              qParams.emergency_phone_number,
+              "emergency_phone_number"
+            )
+          : null}
+        {badge("Patient Name", qParams.name, "name")}
+        {badge("IP number", qParams.ip_no, "ip_no")}
+        {badge(
+          "Modified After",
+          qParams.modified_date_after,
+          "modified_date_after"
+        )}
+        {badge(
+          "Modified Before",
+          qParams.modified_date_before,
+          "modified_date_before"
+        )}
+        {badge(
+          "Created Before",
+          qParams.created_date_before,
+          "created_date_before"
+        )}
+        {badge(
+          "Created After",
+          qParams.created_date_after,
+          "created_date_after"
+        )}
+        {qParams.last_consultation_admission_date_before ===
+        qParams.last_consultation_admission_date_after ? (
+          badge(
+            "Admission Date",
+            qParams.last_consultation_admission_date_before,
+            [
+              "last_consultation_admission_date_before",
+              "last_consultation_admission_date_after",
+            ]
+          )
+        ) : (
+          <>
+            {badge(
+              "Admitted Before",
+              qParams.last_consultation_admission_date_before,
+              "last_consultation_admission_date_before"
+            )}
+            {badge(
+              "Admitted After",
+              qParams.last_consultation_admission_date_after,
+              "last_consultation_admission_date_after"
+            )}
+          </>
+        )}
+        {badge(
+          "Discharged Before",
+          qParams.last_consultation_discharge_date_before,
+          "last_consultation_discharge_date_before"
+        )}
+        {badge(
+          "Discharged After",
+          qParams.last_consultation_discharge_date_after,
+          "last_consultation_discharge_date_after"
+        )}
+        {qParams.last_consultation_admitted_to_list &&
+          LastAdmittedToTypeBadges()}
+        {qParams.number_of_doses &&
+          badge(
+            "Number of Vaccination Doses",
+            qParams.number_of_doses,
+            "number_of_doses"
+          )}
+        {qParams.is_kasp &&
+          badge(
+            KASP_STRING,
+            qParams.is_kasp === "true" ? KASP_STRING : `Non ${KASP_STRING}`,
+            "is_kasp"
+          )}
+        {badge("COWIN ID", qParams.covin_id, "covin_id")}
+        {badge("Is Antenatal", qParams.is_antenatal, "is_antenatal")}
+        {badge("Facility", facilityBadgeName, "facility")}
+        {badge("Facility Type", qParams.facility_type, "facility_type")}
+        {badge("District", districtName, "district")}
+        {badge("Ordering", qParams.ordering, "ordering")}
+        {badge("Category", qParams.category, "category")}
+        {badge("Disease Status", qParams.disease_status, "disease_status")}
+        {badge("Gender", parseOptionId(GENDER_TYPES, qParams.gender), "gender")}
+        {badge(
+          "Admitted to",
+          ADMITTED_TO[qParams.last_consultation_admitted_to],
+          "last_consultation_admitted_to"
+        )}
+        {badge("Age min", qParams.age_min, "age_min")}
+        {badge("Age max", qParams.age_max, "age_max")}
+        {badge("SRF ID", qParams.srf_id, "srf_id")}
+        {badge("LSG Body", localbodyName, "lsgBody")}
+        {badge(
+          "Declared Status",
+          qParams.is_declared_positive,
+          "is_declared_positive"
+        )}
+        {badge(
+          "Result before",
+          qParams.date_of_result_before,
+          "date_of_result_before"
+        )}
+        {badge(
+          "Result after",
+          qParams.date_of_result_after,
+          "date_of_result_after"
+        )}
+
+        {badge(
+          "Declared positive before",
+          qParams.date_declared_positive_before,
+          "date_declared_positive_before"
+        )}
+
+        {badge(
+          "Declared positive after",
+          qParams.date_declared_positive_after,
+          "date_declared_positive_after"
+        )}
+
+        {badge(
+          "Onset of symptoms before",
+          qParams.last_consultation_symptoms_onset_date_before,
+          "last_consultation_symptoms_onset_date_before"
+        )}
+
+        {badge(
+          "Onset of symptoms after",
+          qParams.last_consultation_symptoms_onset_date_after,
+          "last_consultation_symptoms_onset_date_after"
+        )}
+        {badge(
+          "Vaccinated Date before",
+          qParams.last_vaccinated_date_before,
+          "last_vaccinated_date_before"
+        )}
+
+        {badge(
+          "Vaccinated Date after",
+          qParams.last_vaccinated_date_after,
+          "last_vaccinated_date_after"
+        )}
+        {badge(
+          "Telemedicine",
+          qParams.last_consultation_is_telemedicine,
+          "last_consultation_is_telemedicine"
+        )}
       </div>
       <div>
         <SlideOver show={showFilters} setShow={setShowFilters}>
