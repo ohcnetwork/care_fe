@@ -2,7 +2,7 @@ import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";
-const phone_number = "9" + parseInt(Math.random() * 10 ** 9).toString();
+const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
 const emergency_phone_number = "9430123487";
 let patient_url = "";
 
