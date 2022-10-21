@@ -163,15 +163,15 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
   }, [bedTypes]);
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
 
   const validateData = () => {
-    let errors = { ...initForm };
+    const errors = { ...initForm };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       if (!state.form[field]) {
         errors[field] = "Field is required";
         invalidForm = true;
@@ -191,7 +191,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
     return true;
   };
 
-  const handleSubmit = async (e: any, btnType: string = "Save") => {
+  const handleSubmit = async (e: any, btnType = "Save") => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {

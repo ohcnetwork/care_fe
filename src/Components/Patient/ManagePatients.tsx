@@ -26,12 +26,13 @@ import {
   TELEMEDICINE_ACTIONS,
   PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
+  PatientCategoryTailwindClass,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { FacilityModel } from "../Facility/models";
+import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Badge } from "../Common/Badge";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
@@ -66,6 +67,14 @@ function TabPanel(props: TabPanelProps) {
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 const RESULT_LIMIT = 12;
+
+const PatientCategoryDisplayText: Record<PatientCategory, string> = {
+  "Comfort Care": "COMFORT CARE",
+  Stable: "STABLE",
+  "Slightly Abnormal": "ABNORMAL",
+  Critical: "CRITICAL",
+  unknown: "UNKNOWN",
+};
 
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
@@ -466,21 +475,25 @@ export const PatientManager = (props: any) => {
       } else {
         patientUrl = `/patient/${patient.id}`;
       }
+
+      const category: PatientCategory =
+        patient?.last_consultation?.category || "unknown";
+      const categoryClass = PatientCategoryTailwindClass[category];
+
       return (
         <Link
           key={`usr_${patient.id}`}
           href={patientUrl}
-          className="w-full cursor-pointer p-4 rounded-lg bg-white shadow text-black border border-transparent hover:border-primary-500 transition-all duration-200 ease-in-out"
+          className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-9 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${categoryClass}-ring`}
         >
           <div
-            className={`flex ${
-              isExtremeSmallScreen ||
-              isTwoColumnCardBreakpointRange ||
-              isThreeColumnCardBreakpointRange
-                ? " flex-wrap "
-                : ""
-            }  gap-4 items-start`}
+            className={`rounded-l-lg absolute top-0 bottom-0 left-0 h-full w-1 group-hover:w-5 transition-all duration-200 ease-in-out flex items-center ${categoryClass}`}
           >
+            <span className="absolute -left-32 -right-32 top-0 bottom-0 flex justify-center items-center text-center transform -rotate-90 text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out">
+              {PatientCategoryDisplayText[category]}
+            </span>
+          </div>
+          <div className="flex gap-4 items-start">
             <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
               {patient?.last_consultation &&
               patient?.last_consultation?.current_bed ? (

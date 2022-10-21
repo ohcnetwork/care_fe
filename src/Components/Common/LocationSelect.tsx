@@ -28,7 +28,6 @@ export const LocationSelect = (props: LocationSelectProps) => {
     margin,
     errors,
     searchAll,
-    showAll = true,
     className = "",
     facilityId,
   } = props;
