@@ -91,7 +91,8 @@ const CoverImageEditModal = ({ open, onClose, onSave, facility }: Props) => {
               />
             ) : (
               <span className="mt-10 w-max text-xl text-gray-700 font-medium">
-                No cover photo uploaded for this facility
+                No cover photo uploaded for this facility. Recommended aspect
+                ratio for facility cover photo is 1:1.
               </span>
             )}
           </div>
