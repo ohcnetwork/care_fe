@@ -4,6 +4,7 @@ import { PatientModel } from "../../Patient/models";
 import { Modal } from "@material-ui/core";
 import Beds from "../../Facility/Consultations/Beds";
 import { useState } from "react";
+import moment from "moment";
 import { PatientCategoryTailwindClass } from "../../../Common/constants";
 import { PatientCategory } from "../../Facility/models";
 
@@ -113,6 +114,24 @@ export default function TeleICUPatientInfoCard(props: {
         <div className="flex flex-col lg:pl-6 items-center lg:items-start gap-4 lg:gap-0">
           <div className="sm:text-xl md:text-4xl font-semibold mb-1">
             {patient.name}
+          </div>
+          <div>
+            {patient.review_time && (
+              <div
+                className={
+                  "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center border-gray-500 border " +
+                  (moment().isBefore(patient.review_time)
+                    ? " bg-gray-100"
+                    : " p-1 bg-red-400 text-white")
+                }
+              >
+                <i className="mr-2 text-md fas fa-clock"></i>
+                {(moment().isBefore(patient.review_time)
+                  ? "Review before: "
+                  : "Review Missed: ") +
+                  moment(patient.review_time).format("lll")}
+              </div>
+            )}
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-1 lg:mb-2">
             <Link
