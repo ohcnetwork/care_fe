@@ -15,14 +15,6 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   unknown: "UNKNOWN",
 };
 
-const PatientCategoryClasses: Record<PatientCategory, string> = {
-  "Comfort Care": "h-10",
-  Stable: "h-6",
-  "Slightly Abnormal": "h-10",
-  Critical: "h-6",
-  unknown: "h-6",
-};
-
 export default function TeleICUPatientInfoCard(props: {
   patient: PatientModel;
   ip_no?: string | undefined;
@@ -65,6 +57,13 @@ export default function TeleICUPatientInfoCard(props: {
       <div className="bg-white px-4 py-2 lg:p-6 flex flex-col lg:flex-row lg:w-7/12 w-full">
         {/* Can support for patient picture in the future */}
         <div className="mt-2 flex flex-col items-center">
+          {category !== "unknown" && (
+            <div
+              className={`text-xs font-bold rounded-t w-24 text-center pb-1 px-2 ${categoryClass}`}
+            >
+              {PatientCategoryDisplayText[category]}
+            </div>
+          )}
           <div
             className={`w-24 h-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile`}
           >
@@ -92,13 +91,7 @@ export default function TeleICUPatientInfoCard(props: {
               </div>
             )}
           </div>
-          {category !== "unknown" && (
-            <div
-              className={`text-xs font-bold rounded-b w-24 text-center pb-1 px-2 ${categoryClass}`}
-            >
-              {PatientCategoryDisplayText[category]}
-            </div>
-          )}
+
           <button
             className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded m-1"
             onClick={() => setOpen(true)}

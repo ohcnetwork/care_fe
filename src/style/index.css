@@ -928,16 +928,16 @@ button:disabled,
 }
 
 .patient-comfort-profile { 
-  @apply border-2 border-patient-comfort rounded-t
+  @apply border-2 border-patient-comfort rounded-b
 }
 .patient-stable-profile { 
-  @apply border-2 border-patient-stable rounded-t
+  @apply border-2 border-patient-stable rounded-b
 }
 .patient-abnormal-profile { 
-  @apply border-2 border-patient-abnormal rounded-t
+  @apply border-2 border-patient-abnormal rounded-b
 }
 .patient-critical-profile { 
-  @apply border-2 border-patient-critical rounded-t
+  @apply border-2 border-patient-critical rounded-b
 }
 .patient-unknown-profile {
   @apply border border-patient-unknown rounded
