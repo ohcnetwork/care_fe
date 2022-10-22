@@ -331,7 +331,7 @@ const AssetsList = () => {
                       onClick={() => navigate(`/assets/${asset.id}`)}
                     >
                       <div className="md:flex">
-                        <p className="text-xl flex font-normal capitalize break-words">
+                        <p className="text-xl flex font-medium capitalize break-words">
                           <span className="mr-2 text-primary-500">
                             {" "}
                             <i
