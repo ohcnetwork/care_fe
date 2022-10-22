@@ -43,14 +43,18 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
               ["Email", asset.support_email, "envelope"],
             ].map((item) => (
               <div className="flex items-center">
-                <div className="w-16 text-gray-200 italic">{item[0]} :</div>
-                <a
-                  href={(item[0] === "Email" ? "mailto:" : "") + item[1]}
-                  className="text-primary-300 hover:text-primary-400 border-b border-primary-300"
-                >
-                  <i className={"mr-1 uil uil-" + item[2]} />
-                  {item[1] || "--"}
-                </a>
+                {item[1] && (
+                  <>
+                    <div className="w-16 text-gray-200 italic">{item[0]} :</div>
+                    <a
+                      href={(item[0] === "Email" ? "mailto:" : "") + item[1]}
+                      className="text-primary-300 hover:text-primary-400 border-b border-primary-300"
+                    >
+                      <i className={"mr-1 uil uil-" + item[2]} />
+                      {item[1]}
+                    </a>
+                  </>
+                )}
               </div>
             ))}
           </div>
