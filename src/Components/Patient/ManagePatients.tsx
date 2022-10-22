@@ -552,10 +552,8 @@ export const PatientManager = (props: any) => {
                         {" "}
                         {patient.facility_object.name}
                       </p>
-                      <p className="text-base">
-                        <span className="text-sm text-gray-600">
-                          last updated
-                        </span>{" "}
+                      <p className="text-sm">
+                        <span className="text-gray-600">last updated</span>{" "}
                         <span className="font-medium text-gray-900">
                           {" "}
                           {moment(patient.modified_date).fromNow()}
