@@ -1,4 +1,4 @@
-import { formatDate } from "../../Utils/utils";
+import moment from "moment";
 import { AssetData } from "./AssetTypes";
 
 export default function AssetWarrantyCard(props: { asset: AssetData }) {
@@ -8,7 +8,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
     "Serial Number": asset.serial_number,
     Expiry:
       asset.warranty_amc_end_of_validity &&
-      formatDate(asset.warranty_amc_end_of_validity),
+      moment(asset.warranty_amc_end_of_validity).format("DD/MM/YYYY"),
     Vendor: asset.vendor_name,
   };
 

@@ -244,7 +244,7 @@ const AssetManage = (props: AssetManageProps) => {
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-2 justify-between md:p-8 p-6 border-l border-gray-300 flex-shrink-0">
+          <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 flex-shrink-0">
             <div>
               <div className="font-bold text-lg mb-5">Service Details</div>
               <div className="flex flex-col gap-6">
