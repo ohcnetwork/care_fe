@@ -90,6 +90,7 @@ const CoverImageEditModal = ({
     closeModal();
   };
 
+  const hasImage = !!(preview || facility.read_cover_image_url);
   const imgSrc =
     preview || `${facility.read_cover_image_url}?requested_on=${Date.now()}`;
 
@@ -102,7 +103,7 @@ const CoverImageEditModal = ({
             <span className="mt-1 text-gray-700">{facility.name}</span>
           </div>
           <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
-            {preview || facility.read_cover_image_url ? (
+            {hasImage ? (
               <img
                 src={imgSrc}
                 alt={facility.name}
