@@ -90,6 +90,7 @@ export interface PatientModel {
   last_vaccinated_date?: string;
   date_of_birth?: string;
   blood_group?: string;
+  review_interval?: number;
   review_time?: string;
   date_of_return?: string;
   cluster_name?: string;
