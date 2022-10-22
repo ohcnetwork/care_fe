@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { postLogin } from "../../Redux/actions";
 import { navigate } from "raviger";
-import { CardContent, Grid, CircularProgress } from "@material-ui/core";
+import { Grid, CircularProgress } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
 import { useTranslation } from "react-i18next";
@@ -99,11 +99,10 @@ export const Login = () => {
             window.location.pathname === "/" ||
             window.location.pathname === "/login"
           ) {
-            navigate("/facility");
+            window.location.href = "/facility";
           } else {
-            navigate(window.location.pathname.toString());
+            window.location.href = window.location.pathname.toString();
           }
-          window.location.reload();
         } else {
           // error from server set back to login button
           setLoading(false);

@@ -2,7 +2,7 @@ import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";
-const phone_number = "9" + parseInt(Math.random() * 10 ** 9).toString();
+const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
 const emergency_phone_number = "9430123487";
 let patient_url = "";
 
@@ -50,8 +50,8 @@ describe("Patient Creation", () => {
       emergency_phone_number,
       { delay: 100 }
     );
-    cy.get("[data-testid=pincode] input").click();
-    cy.get("[data-testid=submit-button]").click();
+    cy.wait(1000);
+    cy.get("button").get("[data-testid=submit-button]").click();
     cy.url().should("include", "/consultation");
     cy.url().then((url) => {
       cy.log(url);

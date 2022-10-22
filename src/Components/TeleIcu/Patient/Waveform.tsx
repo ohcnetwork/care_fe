@@ -39,7 +39,7 @@ export default function Waveform(props: {
 
     let seconds = 1;
     setLastStream(0);
-    let timer = setInterval(() => {
+    const timer = setInterval(() => {
       setLastStream(seconds);
       seconds++;
     }, 1000);
@@ -47,7 +47,7 @@ export default function Waveform(props: {
   }, [props]);
 
   useEffect(() => {
-    let timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       setQueueData(queueData.slice(1));
     }, tpf);
     return () => clearTimeout(timeout);
