@@ -90,6 +90,9 @@ const CoverImageEditModal = ({
     closeModal();
   };
 
+  const imgSrc =
+    preview || `${facility.read_cover_image_url}?requested_on=${Date.now()}`;
+
   return (
     <Modal open={open} onClose={closeModal}>
       <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
@@ -101,17 +104,14 @@ const CoverImageEditModal = ({
           <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
             {preview || facility.read_cover_image_url ? (
               <img
-                src={`${
-                  preview ||
-                  `${facility.read_cover_image_url}?requested_on=${Date.now()}`
-                }`}
+                src={imgSrc}
                 alt={facility.name}
                 className="w-full h-full object-cover"
               />
             ) : (
               <span className="mt-10 w-max text-xl text-gray-700 font-medium text-center">
-                No cover photo uploaded for this facility. Recommended aspect
-                ratio for facility cover photo is 1:1.
+                No cover photo uploaded for this facility. <br />
+                Recommended aspect ratio for facility cover photo is 1:1.
               </span>
             )}
           </div>

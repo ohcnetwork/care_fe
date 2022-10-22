@@ -45,7 +45,7 @@ export const FacilityHome = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
-  const [imageKey, setImageKey] = useState(0);
+  const [imageKey, setImageKey] = useState(Date.now());
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
