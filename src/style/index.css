@@ -176,12 +176,13 @@ button:focus {
     background-image: none;
 }
 
+
 .primary-button {
-    @apply focus: outline-none text-white bg-primary-500 hover: bg-primary-800 focus: ring-4 focus: ring-green-300 font-medium rounded-lg text-sm px-6 py-2.5 mr-2 mb-2 transition-all ease-in-out duration-200 !important;
+    @apply focus:outline-none text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-6 py-2.5 mr-2 mb-2 transition-all ease-in-out duration-200 !important;
 }
 
 .secondary-button {
-    @apply text-gray-900 bg-white border border-gray-300 focus: outline-none hover: bg-gray-100 focus: ring-4 focus: ring-gray-200 font-medium rounded-lg text-sm px-6 py-2.5 mr-2 mb-2 transition-all ease-in-out duration-200 !important;
+    @apply text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-6 py-2.5 mr-2 mb-2 transition-all ease-in-out duration-200 !important;
 }
 
 button:disabled,
@@ -349,7 +350,7 @@ label {
 }
 
 input {
-    @apply border-gray-300 rounded-md shadow-sm focus: ring-primary-500 focus: border-primary-500 transition-colors duration-300 !important;
+    @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300 !important;
 }
 
 input:disabled,
@@ -358,7 +359,7 @@ input:disabled,
 }
 
 textarea {
-    @apply border-gray-300 rounded-md shadow-sm focus: ring-primary-500 focus: border-primary-500 transition-colors duration-300;
+    @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300;
 }
 
 button:disabled,
@@ -859,7 +860,7 @@ button:disabled,
 }
 
 [type="checkbox"] {
-    @apply text-primary-500 focus: ring-1 focus: ring-primary-500 focus: outline-none;
+    @apply text-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none;
 }
 
 
