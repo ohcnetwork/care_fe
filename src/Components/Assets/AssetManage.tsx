@@ -150,9 +150,11 @@ const AssetManage = (props: AssetManageProps) => {
           <div className="w-8">
             <i className={`uil uil-${item.icon} text-gray-700 text-lg`}></i>
           </div>
-          <div className="text-gray-700">{item.label}</div>
+          <div className="text-gray-700 break-words">{item.label}</div>
         </div>
-        <div className="font-semibold text-lg ml-8">{item.content || "--"}</div>
+        <div className="font-semibold text-lg ml-8 break-words">
+          {item.content || "--"}
+        </div>
       </div>
     );
 
@@ -162,7 +164,7 @@ const AssetManage = (props: AssetManageProps) => {
         title="Asset Details"
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-8">
         <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
           <div className="w-full md:p-8 p-6 flex flex-col justify-between gap-6">
             <div>
@@ -263,7 +265,7 @@ const AssetManage = (props: AssetManageProps) => {
               </div>
             </div>
 
-            <div className="text-xs text-gray-900">
+            <div className="text-xs text-gray-900 break-words">
               <i className="text-gray-700">Created: </i>
               {asset?.created_date && formatDate(asset?.created_date)}
               <br />

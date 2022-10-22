@@ -6,33 +6,31 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
 
   const details = {
     "Serial Number": asset.serial_number,
-    Expiry: formatDate(asset.warranty_amc_end_of_validity),
+    Expiry:
+      asset.warranty_amc_end_of_validity &&
+      formatDate(asset.warranty_amc_end_of_validity),
     Vendor: asset.vendor_name,
   };
 
   return (
-    <div className="rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 text-white p-6 sm:w-96 vs:w-80 h-full w-screen transition-all">
-      <div className="flex flex-col justify-between gap-3 h-full">
-        <div>
-          <div className="text-right font-bold text-lg italic mb-3">
-            {asset.manufacturer}
-          </div>
-          <div className="flex flex-col gap-4">
-            {Object.keys(details).map((key) => (
-              <div className="">
-                <div className="italic text-gray-200 uppercase text-xs tracking-widest mb-1">
-                  {key}
-                </div>
-                <div className="font-semibold">
-                  {details[key as keyof typeof details] || "--"}
-                </div>
+    <div className="warranty-card md:rounded-xl relative overflow-hidden z-10 hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 text-white p-6 md:w-full lg:w-[300px] xl:w-96 h-full w-screen transition-all flex flex-col">
+      <div className="text-right font-bold text-lg italic mb-3">
+        {asset.manufacturer}
+      </div>
+      <div className="flex flex-col md:flex-row lg:flex-col justify-between gap-6 h-full">
+        <div className="flex flex-col gap-4 border-b md:border-r md:border-b-0 lg:border-r-0 lg:border-b border-white/40 h-full w-full lg:w-auto">
+          {Object.keys(details).map((key) => (
+            <div className="">
+              <div className="italic text-gray-200 uppercase text-xs tracking-widest mb-1">
+                {key}
               </div>
-            ))}
-          </div>
+              <div className="font-semibold">
+                {details[key as keyof typeof details] || "--"}
+              </div>
+            </div>
+          ))}
         </div>
-
-        <hr className="border-white/40" />
-        <div>
+        <div className="shrink-0">
           <div>
             <div className="italic text-gray-200 uppercase text-xs tracking-widest mb-1">
               Customer Support Details

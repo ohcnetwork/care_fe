@@ -898,3 +898,27 @@ button:disabled,
 .pac-container {
   z-index: 100000 !important;
 }
+
+.warranty-card::before{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background: url('../../public/images/wave_scene.svg'), linear-gradient(to bottom right, #057a55, #03543f);
+  background-position: top right;
+  background-size: cover;
+}
+
+.warranty-card::after{
+  content : "";
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  top: 0;
+  width: 50%;
+  height: 50%;
+  /*background: url('../../public/images/circle.svg') no-repeat center;*/
+}
