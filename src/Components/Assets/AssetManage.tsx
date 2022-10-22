@@ -185,7 +185,7 @@ const AssetManage = (props: AssetManageProps) => {
                   {asset?.is_working ? (
                     <Chip color="green" text="Working" startIcon="check" />
                   ) : (
-                    <Chip color="red" text="Not Working" startIcon="check" />
+                    <Chip color="red" text="Not Working" startIcon="times" />
                   )}
                 </div>
               </div>
