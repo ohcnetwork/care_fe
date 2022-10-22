@@ -371,9 +371,7 @@ const AssetsList = () => {
                   ))
                 ) : (
                   <div className="w-full pb-2 cursor-pointer mb-3">
-                    <p className="text-xl font-bold capitalize text-center">
-                      No Assets Found
-                    </p>
+                    <p className="text-xl font-bold px-4">No Assets Found</p>
                   </div>
                 )}
               </div>
