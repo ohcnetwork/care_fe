@@ -60,14 +60,21 @@ const AutoCompleteAsync = (props: Props) => {
     fetchDataAsync(query);
   }, [query, fetchDataAsync]);
 
+  const WrappedCombobox = (props: { children: any }) => {
+    return multiple ? (
+      <Combobox name={name} value={selected} onChange={onChange} multiple>
+        {props.children}
+      </Combobox>
+    ) : (
+      <Combobox name={name} value={selected} onChange={onChange}>
+        {props.children}
+      </Combobox>
+    );
+  };
+
   return (
     <div className={className}>
-      <Combobox
-        name={name}
-        value={selected}
-        multiple={multiple}
-        onChange={onChange}
-      >
+      <WrappedCombobox>
         <div className="relative mt-1">
           <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
             <Combobox.Button className="block w-full pl-3 pr-10 py-1 focus:outline-none focus:ring-0 sm:text-sm">
@@ -151,7 +158,7 @@ const AutoCompleteAsync = (props: Props) => {
             <div className="text-red-500 text-sm font-medium mt-1">{error}</div>
           )}
         </div>
-      </Combobox>
+      </WrappedCombobox>
     </div>
   );
 };
