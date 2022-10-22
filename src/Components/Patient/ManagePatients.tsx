@@ -743,6 +743,22 @@ export const PatientManager = (props: any) => {
             </div>
             <div>
               <button
+                className="btn btn-primary w-full md:w-fit sm:w-fit mb-2 sm:mb-0 sm:mr-2"
+                onClick={() => {
+                  if (facilityId) {
+                    navigate(`/facility/${facilityId}/patient`);
+                  } else {
+                    setShowDialog(true);
+                  }
+                }}
+                data-testid="add-patient-button"
+              >
+                <i className="fas fa-plus mr-2 text-white"></i>
+                <span className="pt-[2px]">Add Details of a Patient</span>
+              </button>
+            </div>
+            <div>
+              <button
                 className="btn btn-primary-ghost w-full md:w-fit"
                 onClick={(_) => setShowFilters((show) => !show)}
               >
@@ -781,7 +797,7 @@ export const PatientManager = (props: any) => {
           </div>
           <div className="flex flex-col mt-2">
             <div className="bg-white overflow-hidden shadow rounded-lg mb-2">
-              <div className="px-4 py-5 sm:p-6">
+              <div className="px-4 py-5 sm:p-[35px]">
                 <dl>
                   <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                     Total Patients
@@ -818,27 +834,13 @@ export const PatientManager = (props: any) => {
                 </dl>
               </div>
             </div>
-            <button
-              className="btn-primary btn w-full md:w-fit"
-              onClick={() => {
-                if (facilityId) {
-                  navigate(`/facility/${facilityId}/patient`);
-                } else {
-                  setShowDialog(true);
-                }
-              }}
-              data-testid="add-patient-button"
-            >
-              <i className="fas fa-plus mr-2 text-white"></i>
-              Add Details of a Patient
-            </button>
           </div>
         </div>
         <div className="w-full col-span-2">
           <div className="col-span-2 mt-2">
             <div>
               <div>
-                <div className="md:flex md:gap-4 mt-2">
+                <div className="md:flex md:gap-4 mt-1">
                   <div className="grow lg:max-w-sm w-full mb-2">
                     <div className="text-sm font-semibold mb-2">
                       Search by Name
@@ -864,9 +866,9 @@ export const PatientManager = (props: any) => {
                 </div>
               </div>
             </div>
-            <div className="md:flex md:gap-4 mt-4">
+            <div className="md:flex md:gap-4">
               <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-semibold mt-2">
+                <div className="text-sm font-semibold">
                   Search by Primary Number
                 </div>
                 <PhoneNumberField
@@ -879,7 +881,7 @@ export const PatientManager = (props: any) => {
                 />
               </div>
               <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-semibold mt-2">
+                <div className="text-sm font-semibold">
                   Search by Emergency Number
                 </div>
                 <PhoneNumberField
