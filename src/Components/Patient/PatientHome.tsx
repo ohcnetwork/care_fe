@@ -32,7 +32,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { RoleButton } from "../Common/RoleButton";
 import clsx from "clsx";
-import { Badge } from "../Common/Badge";
+import Chip from "../../CAREUI/display/Chip";
 import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -607,22 +607,22 @@ export const PatientHome = (props: any) => {
               </div>
               <div className="flex flex-wrap mt-2 gap-2">
                 {patientData.is_vaccinated ? (
-                  <Badge color="blue" startIcon="syringe" text="Vaccinated" />
+                  <Chip color="blue" startIcon="syringe" text="Vaccinated" />
                 ) : (
-                  <Badge
+                  <Chip
                     color="yellow"
                     startIcon="exclamation-triangle"
                     text="Not Vaccinated"
                   />
                 )}
                 {patientData.allow_transfer ? (
-                  <Badge
+                  <Chip
                     color="yellow"
                     startIcon="unlock"
                     text="Transfer Allowed"
                   />
                 ) : (
-                  <Badge
+                  <Chip
                     color="primary"
                     startIcon="lock"
                     text="Transfer Blocked"
@@ -631,35 +631,35 @@ export const PatientHome = (props: any) => {
                 {patientData.gender === 2 &&
                   patientData.is_antenatal &&
                   patientData.is_active && (
-                    <Badge
+                    <Chip
                       color="blue"
                       startIcon="baby-carriage"
                       text="Antenatal"
                     />
                   )}
                 {patientData.contact_with_confirmed_carrier && (
-                  <Badge
+                  <Chip
                     color="red"
                     startIcon="exclamation-triangle"
                     text="Contact with confirmed carrier"
                   />
                 )}
                 {patientData.contact_with_suspected_carrier && (
-                  <Badge
+                  <Chip
                     color="yellow"
                     startIcon="exclamation-triangle"
                     text="Contact with suspected carrier"
                   />
                 )}
                 {patientData.past_travel && (
-                  <Badge
+                  <Chip
                     color="yellow"
                     startIcon="exclamation-triangle"
                     text="Travel (within last 28 days)"
                   />
                 )}
                 {patientData.last_consultation?.is_telemedicine && (
-                  <Badge color="purple" startIcon="phone" text="Telemedicine" />
+                  <Chip color="purple" startIcon="phone" text="Telemedicine" />
                 )}
               </div>
             </div>

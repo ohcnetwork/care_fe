@@ -33,7 +33,7 @@ import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
-import { Badge } from "../Common/Badge";
+import Chip from "../../CAREUI/display/Chip";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -537,43 +537,39 @@ export const PatientManager = (props: any) => {
                 <div className="flex w-full">
                   <div className="flex flex-wrap gap-2 flex-row justify-start">
                     {patient.allow_transfer ? (
-                      <Badge
+                      <Chip
                         color="yellow"
                         startIcon="unlock"
                         text="Transfer Allowed"
                       />
                     ) : (
-                      <Badge
+                      <Chip
                         color="primary"
                         startIcon="lock"
                         text="Transfer Blocked"
                       />
                     )}
                     {patient.disease_status === "POSITIVE" && (
-                      <Badge
-                        color="red"
-                        startIcon="radiation"
-                        text="Positive"
-                      />
+                      <Chip color="red" startIcon="radiation" text="Positive" />
                     )}
                     {patient.gender === 2 &&
                       patient.is_antenatal &&
                       patient.is_active && (
-                        <Badge
+                        <Chip
                           color="blue"
                           startIcon="baby-carriage"
                           text="Antenatal"
                         />
                       )}
                     {patient.is_medical_worker && patient.is_active && (
-                      <Badge
+                      <Chip
                         color="blue"
                         startIcon="user-md"
                         text="Medical Worker"
                       />
                     )}
                     {patient.disease_status === "EXPIRED" && (
-                      <Badge
+                      <Chip
                         color="yellow"
                         startIcon="exclamation-triangle"
                         text="Patient Expired"
@@ -583,7 +579,7 @@ export const PatientManager = (props: any) => {
                       patient.last_consultation?.facility !==
                         patient.facility) && (
                       <span className="relative inline-flex">
-                        <Badge
+                        <Chip
                           color="red"
                           startIcon="notes-medical"
                           text="No Consultation Filed"
