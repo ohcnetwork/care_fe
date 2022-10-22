@@ -85,7 +85,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
   }, "");
 
   const { width } = useWindowDimensions();
-  const mobileBreakpoint: number = 768;
+  const mobileBreakpoint = 768;
   const isMobile = width <= mobileBreakpoint ? true : false;
   const [enableCollapse, setEnableCollapse] = useState(
     localStorage.getItem(PREFERENCE_SIDEBAR_KEY) === SIDEBAR.COLLAPSED

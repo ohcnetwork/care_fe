@@ -105,7 +105,7 @@ type FormDetails = {
   assigned_to: string;
   assigned_to_object: UserModel | null;
   special_instruction: string;
-  review_time: number;
+  review_interval: number;
   weight: string;
   height: string;
   bed: BedModel | null;
@@ -150,7 +150,7 @@ const initForm: FormDetails = {
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
-  review_time: 0,
+  review_interval: 0,
   weight: "",
   height: "",
   bed: null,
@@ -514,7 +514,7 @@ export const ConsultationForm = (props: any) => {
         consultation_notes: state.form.consultation_notes,
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
-        review_time: state.form.review_time,
+        review_interval: state.form.review_interval,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
         special_instruction: state.form.special_instruction,
@@ -1041,20 +1041,20 @@ export const ConsultationForm = (props: any) => {
                 </div>
 
                 {JSON.parse(state.form.is_telemedicine) && (
-                  <div className="flex-1" id="review_time">
-                    <InputLabel id="review_time-label">
+                  <div className="flex-1" id="review_interval">
+                    <InputLabel id="review_interval-label">
                       Review After{" "}
                     </InputLabel>
                     <SelectField
-                      name="review_time"
+                      name="review_interval"
                       variant="standard"
-                      value={state.form.review_time}
+                      value={state.form.review_interval}
                       options={[
                         { id: "", text: "select" },
                         ...REVIEW_AT_CHOICES,
                       ]}
                       onChange={handleChange}
-                      errors={state.errors.review_time}
+                      errors={state.errors.review_interval}
                     />
                   </div>
                 )}

@@ -40,6 +40,28 @@ module.exports = {
           800: "#6A5F7A",
           900: "#453C52",
         },
+        patient: {
+          comfort: {
+            DEFAULT: colors.slate[200],
+            fore: colors.slate[700],
+          },
+          stable: {
+            DEFAULT: "#59D4FF",
+            fore: colors.white,
+          },
+          abnormal: {
+            DEFAULT: "#F6CB23",
+            fore: colors.yellow[900],
+          },
+          critical: {
+            DEFAULT: colors.red[500],
+            fore: colors.red[100],
+          },
+          unknown: {
+            DEFAULT: colors.gray[400],
+            fore: colors.gray[800],
+          },
+        },
       },
       padding: {
         "1/5": "20%",

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { getDistrictByName, getStates } from "../../../Redux/actions";
+import { getDistrictByName } from "../../../Redux/actions";
 import { AutoCompleteAsyncField } from "../../Common/HelperInputFields";
 import { debounce } from "lodash";
 
@@ -16,16 +16,8 @@ interface DistrictSelectProps {
 }
 
 function DistrictSelect(props: DistrictSelectProps) {
-  const {
-    name,
-    errors,
-    className,
-    multiple,
-    selected,
-    searchAll,
-    setSelected,
-    margin,
-  } = props;
+  const { name, errors, className, multiple, selected, setSelected, margin } =
+    props;
   const [isdistrictLoading, setDistrictLoading] = useState(false);
   const [hasSearchText, setHasSearchText] = useState(false);
   const [districtList, setDistrictList] = useState([]);
