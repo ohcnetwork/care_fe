@@ -40,6 +40,9 @@ import {
 import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
 
+import { goBack } from "../../Utils/utils";
+import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -108,10 +111,6 @@ const user_create_reducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 export const UserAdd = (props: UserProps) => {
@@ -260,40 +259,6 @@ export const UserAdd = (props: UserProps) => {
     [dispatchAction]
   );
 
-  // const fetchData = useCallback(
-  //   async (status: statusType) => {
-  //     if (userId) {
-  //       setIsLoading(true);
-  //       const res = await dispatchAction(getFacility(userId));
-  //       if (!status.aborted && res.data) {
-  //         const formData = {
-  //           facility_type: res.data.facility_type,
-  //           name: res.data.name,
-  //           state: res.data.state ? res.data.state : "",
-  //           district: res.data.district ? res.data.district : "",
-  //           local_body: res.data.local_body ? res.data.local_body : "",
-  //           address: res.data.address,
-  //           phone_number: res.data.phone_number,
-  //           latitude: res.data.location ? res.data.location.latitude : "",
-  //           longitude: res.data.location ? res.data.location.longitude : "",
-  //           oxygen_capacity: res.data.oxygen_capacity
-  //             ? res.data.oxygen_capacity
-  //             : ""
-  //         };
-  //         dispatch({ type: "set_form", form: formData });
-  //         Promise.all([
-  //           fetchDistricts(res.data.state),
-  //           fetchLocalBody(res.data.district)
-  //         ]);
-  //       } else {
-  //         navigate(`/facility/${userId}`);
-  //       }
-  //       setIsLoading(false);
-  //     }
-  //   },
-  //   [dispatchAction, fetchDistricts, fetchLocalBody, userId]
-  // );
-
   const fetchStates = useCallback(
     async (status: statusType) => {
       setIsStateLoading(true);
@@ -330,9 +295,6 @@ export const UserAdd = (props: UserProps) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      // if (userId) {
-      //   fetchData(status);
-      // }
       fetchStates(status);
       if (userType === "Staff" || userType === "StaffReadOnly") {
         fetchFacilities(status);
@@ -942,7 +904,11 @@ export const UserAdd = (props: UserProps) => {
               )}
             </div>
             <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-              <Button color="default" variant="contained" onClick={goBack}>
+              <Button
+                color="default"
+                variant="contained"
+                onClick={() => goBack()}
+              >
                 Cancel
               </Button>
               <Button

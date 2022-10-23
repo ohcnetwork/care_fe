@@ -2,7 +2,7 @@ name: Cypress Tests
 
 on:
   schedule:
-    - cron: '30 22 * * *'
+    - cron: "30 22 * * *"
   pull_request:
     branches:
       - develop
@@ -15,13 +15,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Checkout care
+        uses: actions/checkout@v3
+        with:
+          repository: coronasafe/care
+          path: care
+
+      - name: Docker Layer Caching
+        uses: satackey/action-docker-layer-caching@v0.0.11
+
+      - name: Compose Up Care
+        run: cd care && make build && make up && cd .. && sleep 30s
+        # Voluntarily kept 30 seconds delay to wait for migrations to complete.
+
+      - run: docker exec care python manage.py collectstatic
+      - run: docker exec care python manage.py load_dummy_data
+
+      - name: Check if care is up
+        run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
+
+      - name: Replace proxy with local care
+        run: 'sed --in-place "s^\"proxy\": .*,^\"proxy\": \"http://localhost:9000\",^g" package.json'
+
       - run: yarn install
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
           install: false
           start: yarn start
-          wait-on: 'http://localhost:4000'
+          wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: electron
       - uses: actions/upload-artifact@v2
