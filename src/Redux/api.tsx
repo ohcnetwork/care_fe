@@ -554,7 +554,7 @@ const routes: Routes = {
   //Profile
 
   checkUsername: {
-    path: "/api/v1/checkusername/",
+    path: "/api/v1/users/{username}/check_availability/",
     method: "GET",
   },
 

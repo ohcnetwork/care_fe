@@ -147,12 +147,13 @@ export const UserAdd = (props: UserProps) => {
 
   const check_username = async (username: string) => {
     setUsernameExists(userExistsEnums.checking);
-    const usernameCheck = await dispatchAction(checkUsername(username), true);
-    setUsernameExists(
-      usernameCheck.status === 200
-        ? userExistsEnums.avaliable
-        : userExistsEnums.exists
+    const usernameCheck = await dispatchAction(
+      checkUsername({ username: username }),
+      false
     );
+    if (usernameCheck === undefined) setUsernameExists(userExistsEnums.exists);
+    else if (usernameCheck.status === 200)
+      setUsernameExists(userExistsEnums.avaliable);
   };
 
   useEffect(() => {

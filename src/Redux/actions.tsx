@@ -551,8 +551,8 @@ export const dischargePatient = (params: object, pathParams: object) => {
 
 //Profile
 
-export const checkUsername = (username: string) => {
-  return fireRequest("checkUsername", [], { username: username }, {});
+export const checkUsername = (params: object) => {
+  return fireRequest("checkUsername", [], {}, params);
 };
 
 export const getUserDetails = (username: string, suppress?: boolean) => {
