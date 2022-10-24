@@ -242,8 +242,8 @@ export const FacilityCreate = (props: FacilityProps) => {
               res.data.phone_number.length == 10
                 ? "+91" + res.data.phone_number
                 : res.data.phone_number,
-            latitude: res.data.location ? res.data.location.latitude : "",
-            longitude: res.data.location ? res.data.location.longitude : "",
+            latitude: res.data.latitude || "",
+            longitude: res.data.longitude || "",
             type_b_cylinders: res.data.type_b_cylinders,
             type_c_cylinders: res.data.type_c_cylinders,
             type_d_cylinders: res.data.type_d_cylinders,
@@ -423,13 +423,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         features: state.form.features,
         ward: state.form.ward,
         kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
-        location:
-          state.form.latitude && state.form.longitude
-            ? {
-                latitude: Number(state.form.latitude),
-                longitude: Number(state.form.longitude),
-              }
-            : undefined,
+        latitude: state.form.latitude,
+        longitude: state.form.longitude,
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
         )?.format("E.164"),

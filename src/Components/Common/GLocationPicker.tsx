@@ -45,8 +45,13 @@ const GLocationPicker = ({
       setLocation(latLng);
     };
 
-    if (lat && lng) setLatLng();
-  }, [lat, lng]);
+    if (lat && lng)
+      setLatLng().catch((err) => {
+        if (err instanceof ReferenceError) {
+          console.info("Google Maps API not loaded yet");
+        }
+      });
+  }, [lat, lng, window?.google]);
 
   const onClick = (e: google.maps.MapMouseEvent) => {
     if (e.latLng) handleOnChange(e.latLng);
