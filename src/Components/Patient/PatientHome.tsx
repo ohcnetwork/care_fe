@@ -746,7 +746,7 @@ export const PatientHome = (props: any) => {
                 </div>
               </div>
               <div className="space-y-2 py-2">
-                {patientData?.last_consultation?.discharge_reason === "EXP" && (
+                {patientData.last_consultation?.discharge_reason === "EXP" && (
                   <div>
                     <button
                       className="btn btn-primary w-full"
