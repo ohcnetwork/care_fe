@@ -241,11 +241,11 @@ export const FacilityHome = (props: any) => {
       <div className="bg-white rounded p-3 md:p-6 shadow">
         <div className="lg:flex justify-between gap-2">
           <div className="md:flex flex-col justify-between">
-            <div className="flex flex-col flex-1 gap-3">
+            <div className="flex flex-col flex-1 gap-10">
               <div>
-                <h1 className="text-4xl font-bold">{facilityData.name}</h1>
+                <h1 className="text-3xl font-bold">{facilityData.name}</h1>
                 <p className="mt-1 text-sm text-gray-700">
-                  Last updated{" "}
+                  Last updated:{" "}
                   {facilityData?.modified_date &&
                     moment(facilityData?.modified_date).fromNow()}
                 </p>
@@ -253,42 +253,66 @@ export const FacilityHome = (props: any) => {
               <div className="flex items-center flex-1">
                 <div className="grid grid-cols-1  lg:grid-cols-2 gap-4 mb-6 md:mb-0 w-full">
                   <div className="md:flex flex-col justify-between lg:flex-1 ">
-                    <div className="mb-4">
-                      <h1 className="text-lg font-bold">Address</h1>
-                      <p className="text-lg">{facilityData.address}</p>
+                    <div className="mb-10">
+                      <h1 className="font-semibold text-[#B9B9B9] text-base">
+                        Address
+                      </h1>
+                      <p className="font-medium text-base">
+                        {facilityData.address}
+                      </p>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <div>
-                        <h1 className="text-lg font-bold">Phone Number</h1>
+                        <h1 className="text-base font-semibold text-[#B9B9B9]">
+                          Phone Number
+                        </h1>
                         <a
                           href={`tel:${facilityData.phone_number}`}
-                          className="block text-lg font-normal"
+                          className="text-base font-medium flex items-center gap-2 border-b border-[#0038FF] text-[#0038FF]"
                         >
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 14 14"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M11.9601 7.66668C11.8134 7.66668 11.6601 7.62001 11.5134 7.58668C11.2164 7.52123 10.9245 7.43434 10.6401 7.32668C10.3308 7.21417 9.99083 7.22001 9.68561 7.34309C9.38038 7.46616 9.13146 7.69777 8.98673 7.99335L8.84007 8.29335C8.19074 7.93213 7.59406 7.4835 7.06673 6.96001C6.54325 6.43269 6.09462 5.83601 5.7334 5.18668L6.0134 5.00001C6.30898 4.85529 6.54059 4.60637 6.66366 4.30114C6.78674 3.99592 6.79258 3.65596 6.68007 3.34668C6.57422 3.06163 6.48736 2.76988 6.42007 2.47335C6.38673 2.32668 6.36007 2.17335 6.34007 2.02001C6.25911 1.55043 6.01315 1.12518 5.64648 0.82084C5.27981 0.516505 4.81653 0.353086 4.34007 0.360014H2.34007C2.05275 0.357316 1.76823 0.416556 1.50587 0.533701C1.24351 0.650845 1.00947 0.823144 0.819687 1.03887C0.629901 1.25459 0.488824 1.50868 0.406059 1.78382C0.323295 2.05897 0.300787 2.34872 0.340067 2.63335C0.695226 5.42627 1.97075 8.02127 3.96517 10.0084C5.95958 11.9956 8.55921 13.2617 11.3534 13.6067H11.6067C12.0983 13.6074 12.573 13.427 12.9401 13.1C13.151 12.9114 13.3195 12.6801 13.4344 12.4216C13.5493 12.163 13.608 11.883 13.6067 11.6V9.60001C13.5986 9.13694 13.4299 8.69105 13.1296 8.33846C12.8293 7.98587 12.4159 7.74843 11.9601 7.66668V7.66668ZM12.2934 11.6667C12.2933 11.7613 12.273 11.8549 12.2339 11.9411C12.1948 12.0273 12.1378 12.1042 12.0667 12.1667C11.9922 12.231 11.9051 12.279 11.811 12.3077C11.7169 12.3364 11.6178 12.3452 11.5201 12.3333C9.02333 12.0132 6.70422 10.871 4.92854 9.08687C3.15286 7.30274 2.02167 4.97824 1.7134 2.48001C1.70279 2.38236 1.71209 2.28357 1.74074 2.18961C1.76938 2.09565 1.81678 2.00847 1.88007 1.93335C1.94254 1.86223 2.01944 1.80524 2.10565 1.76616C2.19186 1.72708 2.28541 1.7068 2.38007 1.70668H4.38007C4.5351 1.70323 4.68648 1.75393 4.80816 1.85006C4.92984 1.94619 5.01421 2.08173 5.04673 2.23335C5.0734 2.41557 5.10673 2.59557 5.14673 2.77335C5.22375 3.12478 5.32624 3.47013 5.4534 3.80668L4.52007 4.24001C4.44026 4.27663 4.36848 4.32864 4.30884 4.39308C4.2492 4.45751 4.20287 4.53309 4.17251 4.61548C4.14216 4.69786 4.12838 4.78543 4.13197 4.87316C4.13555 4.96089 4.15643 5.04704 4.1934 5.12668C5.15287 7.18185 6.8049 8.83388 8.86007 9.79335C9.02237 9.86003 9.20443 9.86003 9.36673 9.79335C9.44988 9.76361 9.52628 9.71765 9.59151 9.65814C9.65675 9.59863 9.70951 9.52675 9.74673 9.44668L10.1601 8.51335C10.5047 8.6366 10.8565 8.73901 11.2134 8.82001C11.3912 8.86001 11.5712 8.89335 11.7534 8.92001C11.905 8.95254 12.0406 9.0369 12.1367 9.15858C12.2328 9.28027 12.2835 9.43165 12.2801 9.58668L12.2934 11.6667ZM13.5734 0.786681C13.5058 0.623781 13.3763 0.49433 13.2134 0.426681C13.1333 0.39252 13.0472 0.3744 12.9601 0.373347H10.2934C10.1166 0.373347 9.94702 0.443585 9.822 0.568609C9.69697 0.693633 9.62673 0.863203 9.62673 1.04001C9.62673 1.21682 9.69697 1.38639 9.822 1.51142C9.94702 1.63644 10.1166 1.70668 10.2934 1.70668H11.3467L9.1534 3.90668C9.02923 4.03159 8.95954 4.20056 8.95954 4.37668C8.95954 4.5528 9.02923 4.72177 9.1534 4.84668C9.27831 4.97085 9.44728 5.04054 9.6234 5.04054C9.79952 5.04054 9.96849 4.97085 10.0934 4.84668L12.2934 2.65335V3.70668C12.2934 3.88349 12.3636 4.05306 12.4887 4.17809C12.6137 4.30311 12.7833 4.37335 12.9601 4.37335C13.1369 4.37335 13.3064 4.30311 13.4315 4.17809C13.5565 4.05306 13.6267 3.88349 13.6267 3.70668V1.04001C13.6257 0.952896 13.6076 0.866829 13.5734 0.786681V0.786681Z"
+                              fill="#0038FF"
+                            />
+                          </svg>
                           {facilityData.phone_number}
                         </a>
                       </div>
                     </div>
                   </div>
                   <div className="lg:flex-1 min-w-[300px] md:flex flex-col">
-                    <div className="mb-4">
-                      <h1 className="text-lg font-bold">Local Body</h1>
-                      <p className="text-lg w-2/3 md:w-full">
+                    <div className="mb-10">
+                      <h1 className="text-base font-semibold text-[#B9B9B9]">
+                        Local Body
+                      </h1>
+                      <p className="text-base font-medium w-2/3 md:w-full">
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
-                    <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex flex-col md:flex-row gap-10">
                       <div>
-                        <h1 className="text-lg font-bold">Ward</h1>
-                        <p className="text-lg">
+                        <h1 className="text-base font-semibold text-[#B9B9B9]">
+                          Ward
+                        </h1>
+                        <p className="text-base font-medium">
                           {facilityData?.ward_object?.number +
                             ", " +
                             facilityData?.ward_object?.name}
                         </p>
                       </div>
                       <div>
-                        <h1 className="text-lg font-bold">District</h1>
-                        <p className="text-lg">
+                        <h1 className="text-base font-semibold text-[#B9B9B9]">
+                          District
+                        </h1>
+                        <p className="text-base font-medium">
                           {facilityData?.district_object?.name}
                         </p>
                       </div>
@@ -297,18 +321,20 @@ export const FacilityHome = (props: any) => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 mt-4">
+            <div className="flex items-center gap-3 mt-10">
               <div>
                 {facilityData.features?.some((feature) =>
                   FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
-                ) && <h1 className="text-lg font-bold">Features</h1>}
-                <div className="flex gap-2 flex-wrap mt-2">
+                ) && (
+                  <h1 className="text-lg font-semibold">Available features</h1>
+                )}
+                <div className="flex gap-2 flex-wrap mt-5">
                   {facilityData.features?.map(
                     (feature, i) =>
                       FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
                         <div
                           key={i}
-                          className="bg-primary-100 text-primary-600 font-semibold px-3 py-1 rounded-full border border-primary-600 text-sm"
+                          className=" bg-[#F0FFF9] text-primary-500 font-medium px-4 py-3 rounded border border-primary-500 text-sm"
                         >
                           <i
                             className={`fas fa-${
@@ -449,7 +475,7 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="flex flex-col justify-end">
               <RoleButton
-                className="btn-primary btn mt-2 w-full md:w-auto"
+                className="btn-secondary mt-2 w-full md:w-auto"
                 handleClickCB={() =>
                   navigate(`/facility/${facilityId}/patient`)
                 }
@@ -457,15 +483,15 @@ export const FacilityHome = (props: any) => {
                 disableFor="readOnly"
                 buttonType="html"
               >
-                <i className="fas fa-plus text-white mr-2"></i>
+                <i className="fas fa-plus"></i>
                 Add Details of a Patient
               </RoleButton>
 
               <button
-                className="btn-primary btn mt-2 w-full md:w-auto"
+                className="btn-secondary mt-2 w-full md:w-auto"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
-                <i className="fas fa-user-injured text-white mr-2"></i>
+                <i className="fas fa-user-injured"></i>
                 View Patients
               </button>
             </div>
@@ -502,44 +528,44 @@ export const FacilityHome = (props: any) => {
         />
       </div>
       <div className="bg-white rounded p-3 md:p-6 shadow mt-5">
-        <div className="mt-6">
-          <div className="md:flex justify-between  md:border-b md:pb-2">
-            <div className="font-semibold text-xl">Bed Capacity</div>
-            <RoleButton
-              className="btn-primary btn w-full md:w-auto"
-              handleClickCB={() => navigate(`/facility/${facilityId}/bed`)}
-              disableFor="readOnly"
-              buttonType="html"
-            >
-              <i className="fas fa-bed text-white mr-2"></i>
-              Add More Bed Types
-            </RoleButton>
-          </div>
-          <div className="mt-4 flex flex-wrap w-full">{capacityList}</div>
+        <div className="md:flex justify-between md:pb-2">
+          <div className="font-bold text-xl mb-2">Bed Capacity</div>
+          <RoleButton
+            className="btn-primary btn w-full md:w-auto"
+            handleClickCB={() => navigate(`/facility/${facilityId}/bed`)}
+            disableFor="readOnly"
+            buttonType="html"
+          >
+            <i className="fas fa-bed text-white mr-2"></i>
+            Add More Bed Types
+          </RoleButton>
+        </div>
+        <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
+          {capacityList}
         </div>
       </div>
       <div className="bg-white rounded p-3 md:p-6 shadow mt-5">
-        <div className="mt-4">
-          <div className="md:flex justify-between  md:border-b md:pb-2">
-            <div className="font-semibold text-xl">Doctors List</div>
-            <RoleButton
-              className="btn-primary btn w-full md:w-auto"
-              handleClickCB={() => navigate(`/facility/${facilityId}/doctor`)}
-              disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
-              disableFor="readOnly"
-              buttonType="html"
-            >
-              <i className="fas fa-user-md text-white mr-2"></i>
-              Add Doctor Types
-            </RoleButton>
-          </div>
-          <div className="mt-4 flex flex-wrap">{doctorList}</div>
+        <div className="md:flex justify-between md:pb-2">
+          <div className="font-bold text-xl mb-2">Doctors List</div>
+          <RoleButton
+            className="btn-primary btn w-full md:w-auto"
+            handleClickCB={() => navigate(`/facility/${facilityId}/doctor`)}
+            disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
+            disableFor="readOnly"
+            buttonType="html"
+          >
+            <i className="fas fa-user-md text-white mr-2"></i>
+            Add Doctor Types
+          </RoleButton>
+        </div>
+        <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
+          {doctorList}
         </div>
       </div>
       <div className="bg-white rounded p-3 md:p-6 shadow mt-5">
         <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="md:flex justify-between md:pb-2">
-            <div className="text-xl font-bold">Corona Triage</div>
+            <div className="text-xl font-bold mb-2">Corona Triage</div>
             <RoleButton
               className="btn-primary btn w-full md:w-auto"
               handleClickCB={() => navigate(`/facility/${facilityId}/triage`)}
@@ -566,7 +592,7 @@ export const FacilityHome = (props: any) => {
             {stats.length === 0 && (
               <div>
                 <hr />
-                <div className="p-4 text-xl text-gray-500 font-bold flex justify-center items-center">
+                <div className="p-4 text-xl text-gray-600 border rounded-sm border-[#D2D6DC] mt-3 font-bold flex justify-center items-center">
                   No Data Found
                 </div>
               </div>
