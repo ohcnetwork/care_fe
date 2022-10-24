@@ -156,7 +156,9 @@ export const DailyRounds = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
-          setPreviousReviewInterval(res.data.last_consultation.review_interval);
+          setPreviousReviewInterval(
+            Number(res.data.last_consultation.review_interval)
+          );
         }
       } else {
         setPatientName("");
@@ -243,6 +245,8 @@ export const DailyRounds = (props: any) => {
     return map.toFixed(2);
   };
 
+  console.log(state.form.review_interval);
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
@@ -275,7 +279,9 @@ export const DailyRounds = (props: any) => {
           consultation: consultationId,
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: state.form.action,
-          review_interval: state.form.review_interval,
+          review_interval: Number(
+            state.form.review_interval || prevReviewInterval
+          ),
           // bed: isTeleicu === "true" ? state.form.bed : undefined,
         };
         if (state.form.rounds_type === "NORMAL") {
