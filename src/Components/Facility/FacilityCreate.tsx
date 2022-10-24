@@ -319,14 +319,8 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
   };
 
-  const handleClickLocationPicker = (event: React.MouseEvent) => {
-    event.preventDefault();
-
-    if (
-      navigator.geolocation &&
-      !state.form.latitude &&
-      !state.form.longitude
-    ) {
+  const handleSelectCurrentLocation = () => {
+    if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         dispatch({
           type: "set_form",
@@ -337,9 +331,9 @@ export const FacilityCreate = (props: FacilityProps) => {
           },
         });
       });
-    }
 
-    setAnchorEl(event.currentTarget);
+      // setAnchorEl(null);
+    }
   };
 
   const handleClose = () => {
@@ -948,7 +942,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div className="pt-4">
                 <IconButton
                   id="facility-location-button"
-                  onClick={handleClickLocationPicker}
+                  onClick={(event) => setAnchorEl(event.currentTarget)}
                 >
                   <MyLocationIcon />
                 </IconButton>
@@ -972,6 +966,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                       state.form.longitude || DEFAULT_MAP_LOCATION[1]
                     )}
                     handleOnChange={handleLocationChange}
+                    handleOnClose={handleClose}
+                    handleOnSelectCurrentLocation={handleSelectCurrentLocation}
                   />
                 </Popover>
               </div>

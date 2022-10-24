@@ -2,7 +2,8 @@ import React from "react";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { deepEqual } from "../../Common/utils";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
-
+import CloseIcon from "@material-ui/icons/Close";
+import PersonPinIcon from "@material-ui/icons/PersonPin";
 import { GMAPS_API_KEY } from "../../Common/env";
 import Spinner from "./Spinner";
 
@@ -18,12 +19,16 @@ interface GLocationPickerProps {
   lat: number;
   lng: number;
   handleOnChange: (location: google.maps.LatLng) => void;
+  handleOnClose?: () => void;
+  handleOnSelectCurrentLocation?: () => void;
 }
 
 const GLocationPicker = ({
   lat,
   lng,
   handleOnChange,
+  handleOnClose,
+  handleOnSelectCurrentLocation,
 }: GLocationPickerProps) => {
   const [location, setLocation] = React.useState<google.maps.LatLng | null>(
     null
@@ -60,6 +65,8 @@ const GLocationPicker = ({
           onClick={onClick}
           onIdle={onIdle}
           handleOnChange={handleOnChange}
+          handleOnClose={handleOnClose}
+          handleOnSelectCurrentLocation={handleOnSelectCurrentLocation}
           zoom={zoom}
           style={{ flexGrow: "1", height: "100%" }}
         >
@@ -74,6 +81,8 @@ interface MapProps extends google.maps.MapOptions {
   onClick?: (e: google.maps.MapMouseEvent) => void;
   onIdle?: (map: google.maps.Map) => void;
   handleOnChange?: (location: google.maps.LatLng) => void;
+  handleOnClose?: () => void;
+  handleOnSelectCurrentLocation?: () => void;
   children?: React.ReactNode;
 }
 
@@ -81,6 +90,8 @@ const Map: React.FC<MapProps> = ({
   onClick,
   onIdle,
   handleOnChange,
+  handleOnClose,
+  handleOnSelectCurrentLocation,
   children,
   style,
   ...options
@@ -88,19 +99,27 @@ const Map: React.FC<MapProps> = ({
   const ref = React.useRef<HTMLDivElement>(null);
   const searchRef = React.useRef<HTMLInputElement>(null);
   const [map, setMap] = React.useState<google.maps.Map & Partial<unknown>>();
+  const mapCloseRef = React.useRef<HTMLDivElement>(null);
+  const currentLocationSelectRef = React.useRef<HTMLDivElement>(null);
   const [searchBox, setSearchBox] =
     React.useState<google.maps.places.SearchBox>();
 
   React.useEffect(() => {
     if (ref.current && !map) {
       setMap(
-        new window.google.maps.Map(ref.current, { mapTypeControl: false })
+        new window.google.maps.Map(ref.current, {
+          mapTypeControl: false,
+        })
       );
     }
   }, [ref, map]);
 
   React.useEffect(() => {
-    if (searchRef.current && !searchBox) {
+    if (searchRef.current && map && !searchBox) {
+      map.controls[google.maps.ControlPosition.TOP_CENTER].push(
+        searchRef.current
+      );
+
       setSearchBox(new window.google.maps.places.SearchBox(searchRef.current));
     }
 
@@ -123,6 +142,22 @@ const Map: React.FC<MapProps> = ({
       });
     }
   }, [searchRef, map, searchBox, handleOnChange]);
+
+  React.useEffect(() => {
+    if (mapCloseRef.current && map) {
+      map.controls[google.maps.ControlPosition.TOP_RIGHT].push(
+        mapCloseRef.current
+      );
+    }
+  }, [mapCloseRef, map]);
+
+  React.useEffect(() => {
+    if (currentLocationSelectRef.current && map) {
+      map.controls[google.maps.ControlPosition.TOP_LEFT].push(
+        currentLocationSelectRef.current
+      );
+    }
+  }, [currentLocationSelectRef, map]);
 
   useDeepCompareEffectForMaps(() => {
     if (map) {
@@ -148,14 +183,37 @@ const Map: React.FC<MapProps> = ({
 
   return (
     <>
+      <>
+        <input
+          id="pac-input"
+          ref={searchRef}
+          type="text"
+          className="rounded m-[10px] p-2 w-[60%] border-0"
+          placeholder="Start typing to search"
+        />
+        {handleOnClose && (
+          <div
+            id="map-close"
+            className="bg-white m-[10px] p-2 rounded cursor-pointer"
+            ref={mapCloseRef}
+            onClick={handleOnClose}
+          >
+            <CloseIcon />
+          </div>
+        )}
+        {handleOnSelectCurrentLocation && (
+          <div
+            id="current-loaction-select"
+            className="bg-white m-[10px] p-2 rounded cursor-pointer"
+            ref={currentLocationSelectRef}
+            onClick={handleOnSelectCurrentLocation}
+          >
+            <PersonPinIcon />
+          </div>
+        )}
+      </>
+
       <div ref={ref} style={style} />
-      <input
-        id="pac-input"
-        ref={searchRef}
-        type="text"
-        className="absolute top-2 left-2 p-2 rounded"
-        placeholder="Start typing to search"
-      />
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
           return React.cloneElement(child as React.ReactElement, { map });
