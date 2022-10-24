@@ -161,7 +161,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const [modalOpenForEdit, setModalOpenForEdit] = useState(false);
   const [modalOpenForArchive, setModalOpenForArchive] = useState(false);
   const [modalOpenForMoreDetails, setModalOpenForMoreDetails] = useState(false);
-  const [modalOpenForUnarchive, setModalOpenForUnarchive] = useState(false);
   const [archiveReason, setArchiveReason] = useState("");
   const [archiveReasonError, setArchiveReasonError] = useState("");
   const [modalDetails, setModalDetails] = useState<ModalDetails>();
@@ -322,41 +321,44 @@ export const FileUpload = (props: FileUploadProps) => {
   const getIconClassName = (extensionName: string | undefined) => {
     // check for image files
     if (
-      extensionName === ".png" ||
-      extensionName === ".jpg" ||
-      extensionName === ".jpeg" ||
-      extensionName === ".tif" ||
-      extensionName === ".tiff" ||
-      extensionName === ".bmp" ||
-      extensionName === ".eps" ||
-      extensionName === ".apng" ||
-      extensionName === ".avif" ||
-      extensionName === ".jfif" ||
-      extensionName === ".pjpeg" ||
-      extensionName === ".pjp" ||
-      extensionName === ".svg" ||
-      extensionName === ".webp"
+      [
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".tif",
+        ".tiff",
+        ".bmp",
+        ".eps",
+        ".apng",
+        ".avif",
+        ".jfif",
+        ".pjpeg",
+        ".pjp",
+        ".svg",
+        ".webp",
+      ].some((ext) => ext === extensionName)
     ) {
       return "fa-solid fa-file-image";
     }
     // check for video files
     if (
-      extensionName === ".webm" ||
-      extensionName === ".mpg" ||
-      extensionName === ".mp2" ||
-      extensionName === ".mpeg" ||
-      extensionName === ".mpe" ||
-      extensionName === ".mpv" ||
-      extensionName === ".ogg" ||
-      extensionName === ".mp4" ||
-      extensionName === ".m4p" ||
-      extensionName === ".m4v" ||
-      extensionName === ".avi" ||
-      extensionName === ".wmv" ||
-      extensionName === ".mov" ||
-      extensionName === ".qt" ||
-      extensionName === ".flv" ||
-      extensionName === ".swf"
+      [
+        ".webm",
+        ".mpg",
+        ".mp2",
+        ".mpeg",
+        ".mpe",
+        ".mpv",
+        ".ogg",
+        ".mp4",
+        ".m4v",
+        ".avi",
+        ".wmv",
+        ".mov",
+        ".qt",
+        ".flv",
+        ".swf",
+      ].some((ext) => ext === extensionName)
     ) {
       return "fa-solid fa-file-video";
     }
@@ -477,34 +479,6 @@ export const FileUpload = (props: FileUploadProps) => {
       } else {
         setbtnloader(false);
       }
-    } else {
-      setbtnloader(false);
-    }
-  };
-
-  const unarchiveFile = async (id: any) => {
-    const data = {
-      file_type: type,
-      is_archived: false,
-      associating_id: getAssociatedId(),
-    };
-    const res = await dispatch(
-      editUpload(
-        {
-          is_archived: data.is_archived,
-        },
-        id,
-        data.file_type,
-        data.associating_id
-      )
-    );
-    if (res && res.status === 200) {
-      fetchData(res.status);
-      Notification.Success({
-        msg: "File archived successfully",
-      });
-      setbtnloader(false);
-      setModalOpenForArchive(false);
     } else {
       setbtnloader(false);
     }
@@ -708,12 +682,12 @@ export const FileUpload = (props: FileUploadProps) => {
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="absolute w-12 h-12 bottom-1 right-2 text-white"
+                          className="absolute w-6 h-6 bottom-1 right-1 text-red-600"
                         >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
+                            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
 
@@ -727,14 +701,15 @@ export const FileUpload = (props: FileUploadProps) => {
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="absolute w-12 h-12 bottom-1 right-2 text-white"
+                          className="absolute w-6 h-6 bottom-1 right-1 text-red-600"
                         >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
+                            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
+
                         <i
                           className={`${getIconClassName(
                             item?.extension
@@ -953,7 +928,6 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const validateAudioUpload = () => {
-    const filenameLength = audioName.trim().length;
     const f = audioBlob;
     if (f === undefined) {
       return false;
@@ -1244,60 +1218,6 @@ export const FileUpload = (props: FileUploadProps) => {
                 onClick={(_) => setModalOpenForMoreDetails(false)}
               >
                 Close
-              </button>
-            </div>
-          </div>
-        </div>
-      </Modal>
-      <Modal open={modalOpenForUnarchive}>
-        <div className="h-screen w-full absolute flex items-center justify-center ">
-          <div className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content">
-            <div>
-              <div className="text-xl" id="archivereasonlabel">
-                Are you sure you want to unarchive
-                <b>{modalDetails?.name}</b> file?
-              </div>
-            </div>
-            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-              <button
-                onClick={(event: any) => {
-                  event.preventDefault();
-                  setbtnloader(true);
-                  unarchiveFile(modalDetails?.id);
-                }}
-                className="btn-primary btn mr-2 w-full md:w-auto"
-              >
-                <svg
-                  className={clsx(
-                    "animate-spin -ml-1 mr-3 h-5 w-5 text-white",
-                    !btnloader ? " hidden" : ""
-                  )}
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Proceed
-              </button>
-              <button
-                type="button"
-                className="btn-danger btn mr-2 w-full md:w-auto"
-                onClick={(_) => setModalOpenForUnarchive(false)}
-              >
-                Cancel
               </button>
             </div>
           </div>
