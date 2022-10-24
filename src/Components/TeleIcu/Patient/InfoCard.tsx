@@ -16,14 +16,6 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   unknown: "UNKNOWN",
 };
 
-const PatientCategoryClasses: Record<PatientCategory, string> = {
-  "Comfort Care": "h-10",
-  Stable: "h-6",
-  "Slightly Abnormal": "h-10",
-  Critical: "h-6",
-  unknown: "h-6",
-};
-
 export default function TeleICUPatientInfoCard(props: {
   patient: PatientModel;
   ip_no?: string | undefined;
@@ -116,22 +108,24 @@ export default function TeleICUPatientInfoCard(props: {
             {patient.name}
           </div>
           <div>
-            {patient.review_time && (
-              <div
-                className={
-                  "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center border-gray-500 border " +
-                  (moment().isBefore(patient.review_time)
-                    ? " bg-gray-100"
-                    : " p-1 bg-red-400 text-white")
-                }
-              >
-                <i className="mr-2 text-md fas fa-clock"></i>
-                {(moment().isBefore(patient.review_time)
-                  ? "Review before: "
-                  : "Review Missed: ") +
-                  moment(patient.review_time).format("lll")}
-              </div>
-            )}
+            {patient.review_time &&
+              !patient.last_consultation?.discharge_date &&
+              Number(patient.last_consultation?.review_interval) > 0 && (
+                <div
+                  className={
+                    "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center border-gray-500 border " +
+                    (moment().isBefore(patient.review_time)
+                      ? " bg-gray-100"
+                      : " p-1 bg-red-400 text-white")
+                  }
+                >
+                  <i className="mr-2 text-md fas fa-clock"></i>
+                  {(moment().isBefore(patient.review_time)
+                    ? "Review before: "
+                    : "Review Missed: ") +
+                    moment(patient.review_time).format("lll")}
+                </div>
+              )}
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-1 lg:mb-2">
             <Link
