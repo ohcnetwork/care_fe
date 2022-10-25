@@ -193,7 +193,7 @@ export default function PRNPrescriptionBuilder(props : PrescriptionBuilderProps<
                                         </div>    
                                     </div>
                                 </div>
-                                <div className="w-[130px] shrink-0">
+                                <div className="w-[160px] shrink-0">
                                     Min. time btwn. 2 doses
                                     <div className="flex items-center">
                                         <PrescriptionDropdown
