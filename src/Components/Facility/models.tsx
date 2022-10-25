@@ -75,7 +75,8 @@ export type PatientCategory =
   | "Comfort Care"
   | "Stable"
   | "Slightly Abnormal"
-  | "Critical";
+  | "Critical"
+  | "unknown";
 
 export interface ConsultationModel {
   admission_date?: string;
@@ -125,6 +126,7 @@ export interface ConsultationModel {
   lines?: any;
   last_daily_round?: any;
   current_bed?: CurrentBed;
+  review_interval?: number;
 }
 export interface PatientStatsModel {
   id?: number;

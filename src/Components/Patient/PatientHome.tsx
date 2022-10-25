@@ -670,22 +670,25 @@ export const PatientHome = (props: any) => {
               className="space-y-2 flex-col justify-between flex h-full"
             >
               <div>
-                {patientData.review_time && (
-                  <div
-                    className={
-                      "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center " +
-                      (moment().isBefore(patientData.review_time)
-                        ? " bg-gray-100"
-                        : " p-1 bg-red-400 text-white")
-                    }
-                  >
-                    <i className="mr-2 text-md fas fa-clock"></i>
-                    {(moment().isBefore(patientData.review_time)
-                      ? "Review at: "
-                      : "Review Missed: ") +
-                      formatDate(patientData.review_time)}
-                  </div>
-                )}
+                {patientData.review_time &&
+                  !patientData.last_consultation?.discharge_date &&
+                  Number(patientData.last_consultation?.review_interval) >
+                    0 && (
+                    <div
+                      className={
+                        "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center border-gray-500 border " +
+                        (moment().isBefore(patientData.review_time)
+                          ? " bg-gray-100"
+                          : " p-1 bg-red-400 text-white")
+                      }
+                    >
+                      <i className="mr-2 text-md fas fa-clock"></i>
+                      {(moment().isBefore(patientData.review_time)
+                        ? "Review before: "
+                        : "Review Missed: ") +
+                        formatDate(patientData.review_time)}
+                    </div>
+                  )}
                 <div className="p-2 bg-white rounded-lg shadow text-center">
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2 truncate">

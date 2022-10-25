@@ -63,7 +63,7 @@ import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;

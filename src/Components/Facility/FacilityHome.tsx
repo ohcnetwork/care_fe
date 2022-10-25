@@ -253,7 +253,7 @@ export const FacilityHome = (props: any) => {
             <div className="flex flex-col flex-1 gap-3">
               <div>
                 <h1 className="text-4xl font-bold">{facilityData.name}</h1>
-                <p className="text-xl text-gray-700">
+                <p className="mt-1 text-sm text-gray-700">
                   Last updated{" "}
                   {facilityData?.modified_date &&
                     moment(facilityData?.modified_date).fromNow()}
