@@ -566,13 +566,16 @@ export const PatientManager = (props: any) => {
                 )}
                 <div className="flex w-full">
                   <div className="flex flex-wrap gap-2 flex-row justify-start">
-                    {moment().isAfter(patient.review_time) && (
-                      <Badge
-                        color="red"
-                        startIcon="clock"
-                        text="Review Missed"
-                      />
-                    )}
+                    {patient.review_time &&
+                      !patient.last_consultation?.discharge_date &&
+                      Number(patient.last_consultation?.review_interval) > 0 &&
+                      moment().isAfter(patient.review_time) && (
+                        <Badge
+                          color="red"
+                          startIcon="clock"
+                          text="Review Missed"
+                        />
+                      )}
                     {patient.allow_transfer ? (
                       <Badge
                         color="yellow"

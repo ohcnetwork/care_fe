@@ -126,6 +126,7 @@ export interface ConsultationModel {
   lines?: any;
   last_daily_round?: any;
   current_bed?: CurrentBed;
+  review_interval?: number;
 }
 export interface PatientStatsModel {
   id?: number;
