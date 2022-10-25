@@ -150,9 +150,14 @@ export const UserAdd = (props: UserProps) => {
       checkUsername({ username: username }),
       false
     );
-    if (usernameCheck === undefined) setUsernameExists(userExistsEnums.exists);
+    if (usernameCheck === undefined || usernameCheck.status === 409)
+      setUsernameExists(userExistsEnums.exists);
     else if (usernameCheck.status === 200)
       setUsernameExists(userExistsEnums.avaliable);
+    else
+      Notification.Error({
+        msg: "Some error checking username availabality. Please try again later.",
+      });
   };
 
   useEffect(() => {

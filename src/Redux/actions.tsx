@@ -552,7 +552,7 @@ export const dischargePatient = (params: object, pathParams: object) => {
 //Profile
 
 export const checkUsername = (params: object) => {
-  return fireRequest("checkUsername", [], {}, params);
+  return fireRequest("checkUsername", [], {}, params, undefined, true);
 };
 
 export const getUserDetails = (username: string, suppress?: boolean) => {
