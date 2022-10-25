@@ -133,7 +133,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
-      <div className="h-full content-center grid justify-items-center">
+      <div className="h-full content-center grid justify-items-center mt-60">
         <div className="flex justify-center w-full items-center">
           <img
             className="w-3/12 sm:w-3/12 md:w-3/12 lg:w-2/12 xl:w-2/12 2xl:w-2/12"
@@ -178,7 +178,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
         className="mx-3 md:mx-8"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
-      <div className="container mx-auto h-screen px-4 py-2 sm:px-8">
+      <div className="container mx-auto px-4 py-2 sm:px-8">
         <div className="flex justify-end">
           <RoleButton
             className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
