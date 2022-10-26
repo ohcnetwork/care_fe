@@ -775,31 +775,25 @@ export const FileUpload = (props: FileUploadProps) => {
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="flex flex-col md:flex-row justify-between gap-2">
-                    <div>
-                      <label className="w-full flex justify-center gap-1 items-center md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2">
-                        <i className="fas fa-file-arrow-down mr-2 text-sm" />
-                        Browse
-                        <input
-                          title="changeFile"
-                          onChange={onFileChange}
-                          type="file"
-                          hidden
-                        />
-                      </label>
-                    </div>
-                    <div>
-                      <button
-                        type="submit"
-                        className="w-full justify-center items-center flex md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2"
-                        onClick={() => {
-                          handleUpload({ status });
-                        }}
-                      >
-                        <i className="fas fa-cloud-arrow-up mr-2 text-sm" />
-                        Upload
-                      </button>
-                    </div>
+                  <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
+                    <label className="flex items-center btn btn-primary">
+                      <i className="fas fa-file-arrow-down mr-2" /> Choose file
+                      <input
+                        title="changeFile"
+                        onChange={onFileChange}
+                        type="file"
+                        hidden
+                      />
+                    </label>
+                    <button
+                      className="btn btn-primary"
+                      disabled={!file || !uploadFileName}
+                      onClick={() => {
+                        handleUpload({ status });
+                      }}
+                    >
+                      <i className="fas fa-cloud-arrow-up mr-2" /> Upload
+                    </button>
                   </div>
                 )}
                 {file && (
