@@ -12,6 +12,7 @@ type Props<T> = {
   selected?: T;
   label?: string;
   position?: string;
+  parentRelative?: boolean;
 };
 
 /** Deprecated. Use SelectMenuV2. */
@@ -35,7 +36,13 @@ export default function SelectMenu<T>(props: Props<T>) {
       {({ open }) => (
         <>
           <Listbox.Label className="sr-only">{props.label}</Listbox.Label>
-          <div className="relative">
+          <div
+            className={
+              props.parentRelative || props.parentRelative === undefined
+                ? "relative"
+                : ""
+            }
+          >
             <Listbox.Button className="w-full flex shadow-sm rounded bg-gray-50 hover:bg-gray-200 focus:ring-primary-500 border focus:ring-1 ring-gray-400 focus:border-primary-500 border-gray-400 transition-all duration-200 ease-in-out">
               <div className="relative z-0 flex w-full">
                 <div className="relative flex-1 flex items-center py-2 pl-3 pr-4 border border-transparent rounded-l focus:outline-none focus:z-10">
