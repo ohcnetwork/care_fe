@@ -122,7 +122,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               port: 80,
               accessKey: config[2] || "",
             });
-            setCameraMiddlewareHostname(middleware_hostname);
+            setCameraMiddlewareHostname(
+              middleware_hostname || "dev_middleware.coronasafe.live"
+            );
             setCameraConfig(bedAssets.data.results[0].meta);
             setCameraState({
               ...bedAssets.data.results[0].meta.position,
@@ -136,8 +138,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     [consultationId, dispatch]
   );
-  const middlewareHostname =
-    cameraMiddlewareHostname || "dev_middleware.coronasafe.live";
 
   // const [position, setPosition] = useState<any>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -163,6 +163,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     StreamStatus.Offline
   );
 
+  const middlewareHostname = cameraMiddlewareHostname;
   const url = !isIOS
     ? `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
     : `https://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
@@ -204,7 +205,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   };
 
   useEffect(() => {
-    if (cameraAsset.hostname) {
+    if (cameraAsset.hostname && cameraMiddlewareHostname) {
       getPresets({
         onSuccess: (resp) => setPresets(resp.data),
         onError: (resp) => {
@@ -216,7 +217,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       });
       getBedPresets(cameraAsset);
     }
-  }, [cameraAsset]);
+  }, [cameraAsset, cameraMiddlewareHostname]);
 
   useEffect(() => {
     let tId: any;
