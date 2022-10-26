@@ -16,6 +16,7 @@ import React, {
   useCallback,
   useEffect,
   useReducer,
+  useRef,
   useState,
 } from "react";
 import { useDispatch } from "react-redux";
@@ -219,6 +220,14 @@ export const ConsultationForm = (props: any) => {
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
+
+  const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      topRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }, []);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -653,7 +662,7 @@ export const ConsultationForm = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
+    <div className="px-2 pb-2 max-w-3xl mx-auto" ref={topRef}>
       <PageTitle
         title={headerText}
         crumbsReplacements={{
