@@ -52,7 +52,7 @@ import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const DEFAULT_MAP_LOCATION = [10.038394700000001, 76.5074145180173]; // Ernakulam
+const DEFAULT_MAP_LOCATION = ["10.038394700000001", "76.5074145180173"]; // Ernakulam
 
 interface FacilityProps {
   facilityId?: number;
@@ -104,8 +104,8 @@ const initForm: FacilityForm = {
   features: [],
   address: "",
   phone_number: "",
-  latitude: "",
-  longitude: "",
+  latitude: DEFAULT_MAP_LOCATION[0],
+  longitude: DEFAULT_MAP_LOCATION[1],
   pincode: "",
   oxygen_capacity: "",
   type_b_cylinders: "",
@@ -956,10 +956,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                   }}
                 >
                   <GLocationPicker
-                    lat={Number(state.form.latitude || DEFAULT_MAP_LOCATION[0])}
-                    lng={Number(
-                      state.form.longitude || DEFAULT_MAP_LOCATION[1]
-                    )}
+                    lat={Number(state.form.latitude)}
+                    lng={Number(state.form.longitude)}
                     handleOnChange={handleLocationChange}
                     handleOnClose={handleClose}
                     handleOnSelectCurrentLocation={handleSelectCurrentLocation}
