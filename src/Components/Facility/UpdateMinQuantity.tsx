@@ -49,10 +49,7 @@ export const UpdateMinQuantity = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState(" ");
-  const [currentUnit, setCurrentUnit] = useState<any>();
   const [facilityName, setFacilityName] = useState("");
-
-  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -63,7 +60,7 @@ export const UpdateMinQuantity = (props: any) => {
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.item_object.name);
-          let form = { ...state.form, quantity: res.data.min_quantity };
+          const form = { ...state.form, quantity: res.data.min_quantity };
           dispatch({ type: "set_form", form });
         }
         setIsLoading(false);
@@ -112,7 +109,7 @@ export const UpdateMinQuantity = (props: any) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -173,7 +170,7 @@ export const UpdateMinQuantity = (props: any) => {
                   color="default"
                   variant="contained"
                   type="button"
-                  className="w-full sm:w-fit"
+                  className="w-full sm:w-fit mt-2"
                   onClick={() => goBack()}
                 >
                   Cancel

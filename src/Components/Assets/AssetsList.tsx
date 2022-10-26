@@ -258,7 +258,7 @@ const AssetsList = () => {
   return (
     <div className="px-6">
       <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
-      <div className="lg:flex mt-5 space-y-2 space-x-2">
+      <div className="lg:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -313,7 +313,7 @@ const AssetsList = () => {
         <Loading />
       ) : (
         <>
-          <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3">
+          <div className="flex mt-2 flex-wrap w-full col-span-3">
             {badge("Facility", facilityName, ["facility", "location"])}
             {badge("Asset Name", qParams.search, ["search"])}
             {badge("Location", locationName, ["location"])}

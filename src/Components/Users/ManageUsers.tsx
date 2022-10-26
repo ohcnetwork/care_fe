@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -78,7 +78,7 @@ export default function ManageUsers() {
 
   const limit =
     width >= 1280 ? RESULTS_PER_PAGE_LIMIT + 1 : RESULTS_PER_PAGE_LIMIT;
-  const extremeSmallScreenBreakpoint: number = 320;
+  const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
 

@@ -43,12 +43,12 @@
     "@material-ui/styles": "^4.11.4",
     "@material-ui/types": "^5.1.0",
     "@rescript/react": "^0.10.3",
-    "@sentry/browser": "^6.12.0",
+    "@sentry/browser": "^7.16.0",
     "@types/echarts": "^4.9.16",
     "@types/google.maps": "^3.50.4",
     "@types/loadable__component": "^5.13.3",
     "@types/lodash": "^4.14.186",
-    "@types/node": "^15.6.1",
+    "@types/node": "^18.11.5",
     "@types/prop-types": "*",
     "@types/qrcode.react": "^1.0.1",
     "@types/react": "18.0.21",
@@ -68,6 +68,7 @@
     "echarts-for-react": "^3.0.1",
     "i18next": "^20.3.1",
     "i18next-browser-languagedetector": "^6.1.8",
+    "postcss-loader": "^7.0.1",
     "libphonenumber-js": "^1.10.13",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
@@ -117,7 +118,10 @@
     "prepare": "husky install",
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
-    "format": "prettier ./src --write"
+    "format": "prettier ./src --write",
+    "storybook": "start-storybook -p 6006 -s public",
+    "build-storybook": "build-storybook -s public",
+    "serve-storybook": "serve storybook-static"
   },
   "browserslist": {
     "production": [
@@ -134,6 +138,17 @@
   "devDependencies": {
     "@pnotify/core": "^5.2.0",
     "@pnotify/mobile": "^5.2.0",
+    "@storybook/addon-actions": "^6.5.12",
+    "@storybook/addon-essentials": "^6.5.12",
+    "@storybook/addon-interactions": "^6.5.12",
+    "@storybook/addon-links": "^6.5.12",
+    "@storybook/addon-postcss": "^2.0.0",
+    "@storybook/builder-webpack5": "^6.5.12",
+    "@storybook/manager-webpack5": "^6.5.12",
+    "@storybook/node-logger": "^6.5.12",
+    "@storybook/preset-create-react-app": "^4.0.0",
+    "@storybook/react": "^6.5.12",
+    "@storybook/testing-library": "^0.0.13",
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@tailwindcss/forms": "^0.5.1",
     "@tailwindcss/typography": "^0.5.2",
@@ -173,6 +188,7 @@
     "redux-devtools-extension": "^2.13.9",
     "rescript": "^9.1.4",
     "snyk": "^1.618.0",
+    "storybook-dark-mode": "^1.1.2",
     "tailwindcss": "^3.0.24",
     "yarn-run-all": "^3.1.1"
   },
@@ -232,13 +248,23 @@
   "lint-staged": {
     "**/*": [
       "prettier --write --ignore-unknown",
-      "eslint --fix",
+      "eslint --fix --ignore-pattern *.stories.mdx",
       "git update-index --again"
     ]
   },
   "eslintConfig": {
     "extends": [
       "react-app"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/*.stories.*"
+        ],
+        "rules": {
+          "import/no-anonymous-default-export": "off"
+        }
+      }
     ]
   },
   "engines": {

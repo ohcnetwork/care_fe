@@ -16,6 +16,7 @@ import React, {
   useCallback,
   useEffect,
   useReducer,
+  useRef,
   useState,
 } from "react";
 import { useDispatch } from "react-redux";
@@ -150,7 +151,7 @@ const initForm: FormDetails = {
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
-  review_interval: 0,
+  review_interval: -1,
   weight: "",
   height: "",
   bed: null,
@@ -220,6 +221,14 @@ export const ConsultationForm = (props: any) => {
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
 
+  const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      topRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }, []);
+
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
@@ -265,7 +274,8 @@ export const ConsultationForm = (props: any) => {
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)?.id || "Comfort"
+              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
+                  ?.id || "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
@@ -652,7 +662,7 @@ export const ConsultationForm = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
+    <div className="px-2 pb-2 max-w-3xl mx-auto" ref={topRef}>
       <PageTitle
         title={headerText}
         crumbsReplacements={{
@@ -1050,7 +1060,7 @@ export const ConsultationForm = (props: any) => {
                       variant="standard"
                       value={state.form.review_interval}
                       options={[
-                        { id: "", text: "select" },
+                        { id: -1, text: "select" },
                         ...REVIEW_AT_CHOICES,
                       ]}
                       onChange={handleChange}
