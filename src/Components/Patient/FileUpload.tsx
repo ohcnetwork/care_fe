@@ -733,12 +733,12 @@ export const FileUpload = (props: FileUploadProps) => {
                     <button
                       type="submit"
                       style={{ marginLeft: "auto" }}
-                      className="w-full md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md px-6 font-bold p-2"
+                      className="w-full md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2"
                       onClick={() => {
                         handleAudioUpload();
                       }}
                     >
-                      <div className="flex gap-2 justify-center items-center md:w-auto w-full">
+                      <div className="flex gap-1 justify-center items-center md:w-auto w-full">
                         <p className="text-sm">
                           <CloudUploadOutlineIcon />
                         </p>
@@ -777,7 +777,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 ) : (
                   <div className="flex flex-col md:flex-row justify-between gap-2">
                     <div>
-                      <label className="px-4 w-full flex justify-center gap-2 items-center md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2">
+                      <label className="w-full flex justify-center gap-1 items-center md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2">
                         <p className="text-sm">
                           <InsertDriveFileIcon />
                         </p>
@@ -793,7 +793,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <div>
                       <button
                         type="submit"
-                        className="px-4 w-full justify-center items-center flex gap-2 md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2"
+                        className="w-full justify-center items-center flex md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2"
                         onClick={() => {
                           handleUpload({ status });
                         }}

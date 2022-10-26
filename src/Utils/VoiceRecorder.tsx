@@ -56,7 +56,7 @@ export const VoiceRecorder = (props: any) => {
           <button
             // style={{ marginLeft: "auto" }}
             onClick={startRecording}
-            className="flex w-full gap-1 justify-center items-center md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md px-4 font-bold p-2"
+            className="flex w-full justify-center items-center md:w-auto bg-primary-500 hover:bg-green-700 text-white rounded-md font-bold p-2"
             disabled={isRecording}
           >
             <p className="text-sm">
