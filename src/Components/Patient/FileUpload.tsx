@@ -778,10 +778,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   <div className="flex flex-col md:flex-row justify-between gap-2">
                     <div>
                       <label className="w-full flex justify-center gap-1 items-center md:w-auto bg-primary-500 hover:bg-green-700 text-white mt-2 rounded-md font-bold p-2">
-                        <p className="text-sm">
-                          <InsertDriveFileIcon />
-                        </p>
-                        Browse
+                        <i className="fas fa-file-arrow-down mr-2" /> Browse
                         <input
                           title="changeFile"
                           onChange={onFileChange}
@@ -798,10 +795,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           handleUpload({ status });
                         }}
                       >
-                        <p className="text-sm">
-                          <CloudUploadOutlineIcon />
-                        </p>
-                        &nbsp; Upload
+                        <i className="fas fa-cloud-arrow-up mr-2" /> Upload
                       </button>
                     </div>
                   </div>
