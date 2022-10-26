@@ -36,8 +36,6 @@ let make = (~show: bool, ~hideModal: ReactEvent.Mouse.t => unit, ~position: posi
     None
   }, [state])
 
-  Js.log(PressureSore.regionToString(part.region))
-
   let ref = React.useRef(Js.Nullable.null)
   let handleClickOutside = %raw(`
     function (event, ref, hideModal) {
