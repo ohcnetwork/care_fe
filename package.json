@@ -43,7 +43,7 @@
     "@material-ui/styles": "^4.11.4",
     "@material-ui/types": "^5.1.0",
     "@rescript/react": "^0.10.3",
-    "@sentry/browser": "^6.12.0",
+    "@sentry/browser": "^7.16.0",
     "@types/echarts": "^4.9.16",
     "@types/google.maps": "^3.50.4",
     "@types/loadable__component": "^5.13.3",
