@@ -52,8 +52,6 @@ import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const DEFAULT_MAP_LOCATION = ["10.038394700000001", "76.5074145180173"]; // Ernakulam
-
 interface FacilityProps {
   facilityId?: number;
 }
@@ -104,8 +102,8 @@ const initForm: FacilityForm = {
   features: [],
   address: "",
   phone_number: "",
-  latitude: DEFAULT_MAP_LOCATION[0],
-  longitude: DEFAULT_MAP_LOCATION[1],
+  latitude: "",
+  longitude: "",
   pincode: "",
   oxygen_capacity: "",
   type_b_cylinders: "",
