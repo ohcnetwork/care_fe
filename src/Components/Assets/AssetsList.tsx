@@ -135,7 +135,7 @@ const AssetsList = () => {
         setLocationName("");
       }
     },
-    [dispatch, qParams.location]
+    [dispatch, qParams.facility, qParams.location]
   );
 
   useAbortableEffect(
@@ -255,6 +255,59 @@ const AssetsList = () => {
       </div>
     );
 
+  let manageAssets = null;
+  if (assetsExist) {
+    manageAssets = (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:-mx-8 gap-2">
+        {assets.map((asset: AssetData) => (
+          <div
+            key={asset.id}
+            className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
+            onClick={() => navigate(`/assets/${asset.id}`)}
+          >
+            <div className="md:flex">
+              <p className="text-xl flex font-medium capitalize break-words">
+                <span className="mr-2 text-primary-500">
+                  {" "}
+                  {
+                    (
+                      (asset.asset_class &&
+                        assetClassProps[asset.asset_class]) ||
+                      assetClassProps.None
+                    ).icon
+                  }
+                </span>
+                <p className="truncate w-48">{asset.name}</p>
+              </p>
+            </div>
+            <p className="font-normal text-sm">
+              {asset?.location_object?.name}
+            </p>
+
+            <div className="flex flex-wrap gap-2 mt-2">
+              {asset.is_working ? (
+                <Badge color="green" startIcon="cog" text="Working" />
+              ) : (
+                <Badge color="red" startIcon="cog" text="Not Working" />
+              )}
+              <Badge
+                color="blue"
+                startIcon="location-arrow"
+                text={asset.status}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  } else {
+    manageAssets = (
+      <div className="w-full bg-white rounded-lg p-2 text-center col-span-3 py-8 pt-4">
+        <p className="text-2xl font-bold text-gray-600">No Assets Found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="px-6">
       <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
@@ -322,59 +375,7 @@ const AssetsList = () => {
           </div>
           <div className="grow">
             <div className="py-8 md:px-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:-mx-8 gap-2">
-                {assetsExist ? (
-                  assets.map((asset: AssetData) => (
-                    <div
-                      key={asset.id}
-                      className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
-                      onClick={() => navigate(`/assets/${asset.id}`)}
-                    >
-                      <div className="md:flex">
-                        <p className="text-xl flex font-medium capitalize break-words">
-                          <span className="mr-2 text-primary-500">
-                            {" "}
-                            <i
-                              className={`fas fa-${
-                                (
-                                  (asset.asset_class &&
-                                    assetClassProps[asset.asset_class]) ||
-                                  assetClassProps.None
-                                ).icon
-                              }`}
-                            />
-                          </span>
-                          <p className="truncate w-48">{asset.name}</p>
-                        </p>
-                      </div>
-                      <p className="font-normal text-sm">
-                        {asset?.location_object?.name}
-                      </p>
-
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {asset.is_working ? (
-                          <Chip color="green" startIcon="cog" text="Working" />
-                        ) : (
-                          <Chip
-                            color="red"
-                            startIcon="cog"
-                            text="Not Working"
-                          />
-                        )}
-                        <Chip
-                          color="blue"
-                          startIcon="location-arrow"
-                          text={asset.status}
-                        />
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="w-full pb-2 cursor-pointer mb-3">
-                    <p className="text-xl font-bold px-4">No Assets Found</p>
-                  </div>
-                )}
-              </div>
+              {manageAssets}
               {totalCount > limit && (
                 <div className="mt-4 flex w-full justify-center">
                   <Pagination
