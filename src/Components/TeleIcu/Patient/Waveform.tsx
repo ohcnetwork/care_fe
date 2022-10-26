@@ -26,7 +26,7 @@ export default function Waveform(props: {
 }) {
   const wave = props.wave;
   const data = wave.data.split(" ").map(Number);
-  const [queueData, setQueueData] = useState<number[]>([]);
+  const [queueData, setQueueData] = useState<number[]>(Array(200).fill(0));
   const [xData, setXData] = useState<number[]>([]);
   const [lastStream, setLastStream] = useState(0);
 
@@ -44,7 +44,7 @@ export default function Waveform(props: {
       seconds++;
     }, 1000);
     return () => clearInterval(timer);
-  }, [props]);
+  }, [props.wave.data]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {

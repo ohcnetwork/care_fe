@@ -150,7 +150,7 @@ const initForm: FormDetails = {
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
-  review_interval: 0,
+  review_interval: -1,
   weight: "",
   height: "",
   bed: null,
@@ -265,7 +265,8 @@ export const ConsultationForm = (props: any) => {
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)?.id || "Comfort"
+              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
+                  ?.id || "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
@@ -1050,7 +1051,7 @@ export const ConsultationForm = (props: any) => {
                       variant="standard"
                       value={state.form.review_interval}
                       options={[
-                        { id: "", text: "select" },
+                        { id: -1, text: "select" },
                         ...REVIEW_AT_CHOICES,
                       ]}
                       onChange={handleChange}
