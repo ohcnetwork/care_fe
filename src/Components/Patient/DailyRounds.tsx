@@ -52,7 +52,7 @@ const initForm: any = {
   current_health: 0,
   recommend_discharge: false,
   actions: null,
-  review_interval: null,
+  review_interval: 0,
   admitted_to: "",
   taken_at: null,
   rounds_type: "NORMAL",
@@ -107,7 +107,7 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [prevReviewInterval, setPreviousReviewInterval] = useState("");
+  const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
   const [hasPreviousLog, setHasPreviousLog] = useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
@@ -156,7 +156,9 @@ export const DailyRounds = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
-          setPreviousReviewInterval(res.data.last_consultation.review_interval);
+          setPreviousReviewInterval(
+            Number(res.data.last_consultation.review_interval)
+          );
         }
       } else {
         setPatientName("");
@@ -243,6 +245,8 @@ export const DailyRounds = (props: any) => {
     return map.toFixed(2);
   };
 
+  console.log(state.form.review_interval);
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
@@ -275,7 +279,9 @@ export const DailyRounds = (props: any) => {
           consultation: consultationId,
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: state.form.action,
-          review_interval: state.form.review_interval,
+          review_interval: Number(
+            state.form.review_interval || prevReviewInterval
+          ),
           // bed: isTeleicu === "true" ? state.form.bed : undefined,
         };
         if (state.form.rounds_type === "NORMAL") {
@@ -460,8 +466,10 @@ export const DailyRounds = (props: any) => {
   };
 
   const getExpectedReviewTime = () => {
-    const nextReviewTime = state.form.review_interval || prevReviewInterval;
-    if (Number(nextReviewTime))
+    const nextReviewTime = Number(
+      state.form.review_interval || prevReviewInterval
+    );
+    if (nextReviewTime > 0)
       return `Review before ${formatDate(
         moment().add(nextReviewTime, "minutes").toDate()
       )}`;
@@ -674,7 +682,7 @@ export const DailyRounds = (props: any) => {
                         variant="standard"
                         value={state.form.review_interval || prevReviewInterval}
                         options={[
-                          { id: 0, text: "select" },
+                          { id: -1, text: "select" },
                           ...REVIEW_AT_CHOICES,
                         ]}
                         onChange={handleChange}
