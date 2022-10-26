@@ -32,10 +32,11 @@ let make = (~show: bool, ~hideModal: ReactEvent.Mouse.t => unit, ~position: posi
     let tissueScore = tissueTypes->Belt.Array.getIndexBy(tissue => tissue == state.tissue_type->PressureSore.tissueTypeToString)->Belt.Option.getWithDefault(0)->float_of_int
 
     let score = areaScore +. exudateScore +. tissueScore
-    Js.log4(area, areaScore, exudateScore, tissueScore)
     setPushScore(_ => score)
     None
   }, [state])
+
+  Js.log(PressureSore.regionToString(part.region))
 
   let ref = React.useRef(Js.Nullable.null)
   let handleClickOutside = %raw(`
@@ -52,26 +53,29 @@ let make = (~show: bool, ~hideModal: ReactEvent.Mouse.t => unit, ~position: posi
     className="fixed w-full inset-0 z-40 overflow-y-auto"
   >
     <div
-      className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+      hidden={!show} 
+      className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"
+    >
       <div
-          ref={ReactDOM.Ref.domRef(ref)}
-          style={ReactDOMStyle.make(
-            ~position={innerWidth >= 640 ? "absolute" : ""},
-            ~left= `${position["x"]->Belt.Int.toString}px`,
-            ~top=`${position["y"]->Belt.Int.toString}px`,
-            ()
-          )}
-          className="transform overflow-hidden w-4/5 rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit">
-        <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        ref={ReactDOM.Ref.domRef(ref)}
+        style={ReactDOMStyle.make(
+          ~position={innerWidth >= 640 ? "absolute" : ""},
+          ~left= `${position["x"]->Belt.Int.toString}px`,
+          ~top=`${position["y"]->Belt.Int.toString}px`,
+          ()
+        )}
+        className="transform w-4/5 rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit"
+      >
+        <div className="bg-white px-4 pt-2 pb-4 sm:p-6 sm:pb-4">
           <div className="sm:flex sm:items-start">
             <div className="mt-3 text-center sm:mt-0 sm:text-left">
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-center">
                 <span>{str("Region: ")}</span>
                 <span className="text-black">{str(PressureSore.regionToString(state.region))}</span>
               </div>
-              <div className="sm:flex gap-2 mt-2">
+              <div className="flex flex-col sm:flex-row gap-2 mt-2">
                 <div>
-                  <label className="block font-medium text-black">{str("Width")}</label>
+                  <label className="block font-medium text-black text-left">{str("Width")}</label>
                   <input
                     type_="number"
                     value={state.width->Belt.Float.toString}
@@ -88,7 +92,7 @@ let make = (~show: bool, ~hideModal: ReactEvent.Mouse.t => unit, ~position: posi
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-black">{str("Height")}</label>
+                  <label className="block font-medium text-black text-left">{str("Height")}</label>
                   <input
                     type_="number"
                     value={state.length->Belt.Float.toString}
@@ -105,7 +109,7 @@ let make = (~show: bool, ~hideModal: ReactEvent.Mouse.t => unit, ~position: posi
                   />
                 </div>
               </div>
-              <div className="sm:flex gap-2 mt-2">
+              <div className="flex flex-col sm:flex-row gap-2 mt-2">
                   <CriticalCare__Dropdown
                     id="exudate-amount"
                     label="Exudate amount"
@@ -125,7 +129,7 @@ let make = (~show: bool, ~hideModal: ReactEvent.Mouse.t => unit, ~position: posi
               </div>
               
               <div className="mt-2">
-                <label className="block font-medium text-black">{str("Description")}</label>
+                <label className="block font-medium text-black text-left">{str("Description")}</label>
                 <textarea
                   placeholder="Description"
                   value={state.description}
@@ -139,12 +143,12 @@ let make = (~show: bool, ~hideModal: ReactEvent.Mouse.t => unit, ~position: posi
             </div>
           </div>
         </div>
-        <div className="bg-gray-50 px-4 py-3 sm:px-6 flex items-center justify-between">
-          <div className="flex gap-2">
+        <div className="bg-gray-50 px-4 py-3 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex gap-2 w-full justify-center sm:justify-start items-center">
             <span>{str("Push Score: ")}</span>
             <span className="text-black">{str(pushScore->Belt.Float.toString)}</span>
           </div>
-          <div className="sm:flex sm:flex-row-reverse">
+          <div className="flex flex-col-reverse sm:flex-row-reverse w-full gap-2">
             <button
               type_="button"
               onClick=(e => {

@@ -36,6 +36,7 @@ type action =
   | Update(array<PressureSore.part>)
   | SetSelectedRegion(PressureSore.region)
   | SetModalPosition(CriticalCare__PressureSoreInputModal.position)
+  | ShowInputModal(PressureSore.region, CriticalCare__PressureSoreInputModal.position)
   | SetPreviewMode
   | ClearPreviewMode
   | SetSaving
@@ -95,6 +96,11 @@ let reducer = (state, action) => {
     }
   | SetModalPosition(position) => {
       ...state,
+      modalPosition: position,
+    }
+  | ShowInputModal(region, position) => {
+      ...state,
+      selectedRegion: region,
       modalPosition: position,
     }
   | SetSaving => {...state, saving: true}
@@ -232,7 +238,10 @@ let getIntoView = (region: string, isPart: bool) => {
 }
 
 let renderBody = (state, send, title, partPaths, substr) => {
-  Js.log(state)
+  
+  let show = state.selectedRegion !== PressureSore.Other && partPaths->Belt.Array.some(p => PressureSore.regionForPath(p) === state.selectedRegion)
+
+
   <div className=" w-full text-center mx-2">
     <div className="text-2xl font-bold mt-8"> {str(title)} </div>
     <div className="text-left font-bold mx-auto mt-5">
@@ -285,7 +294,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
     // Diagram
     <div className="flex justify-center mx-auto border-2">
       <CriticalCare__PressureSoreInputModal
-        show={state.selectedRegion !== PressureSore.Other}
+        show={show}
         hideModal={_ => send(SetSelectedRegion(PressureSore.Other))}
         position={state.modalPosition}
         part={
@@ -310,9 +319,9 @@ let renderBody = (state, send, title, partPaths, substr) => {
             onClick={state.previewMode
               ? _ => getIntoView(PressureSore.regionToString(regionType), true)
               : e => {
-                  send(SetSelectedRegion(part.region))
-                  send(SetModalPosition({"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
-                }}>
+                  send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
+                }}
+          >
             <title className=""> {str(PressureSore.regionToString(regionType))} </title>
           </path>
         }, partPaths)->React.array}
@@ -363,7 +372,7 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
         : React.null}
     </div>
     <div className="flex md:flex-row flex-col justify-between">
-      {renderBody(state, send, "Front", PressureSore.anteriorParts, 8, )}
+      {renderBody(state, send, "Front", PressureSore.anteriorParts, 8)}
       {renderBody(state, send, "Back", PressureSore.posteriorParts, 9)}
     </div>
     {!previewMode
