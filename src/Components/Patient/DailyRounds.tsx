@@ -282,7 +282,6 @@ export const DailyRounds = (props: any) => {
           review_interval: Number(
             state.form.review_interval || prevReviewInterval
           ),
-          // bed: isTeleicu === "true" ? state.form.bed : undefined,
         };
         if (state.form.rounds_type === "NORMAL") {
           data = {

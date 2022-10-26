@@ -132,13 +132,13 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
-export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
-  { id: 1, text: "created_date", desc: "ASC Created Date" },
-  { id: 2, text: "-created_date", desc: "DESC Created Date" },
-  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
-  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
-  { id: 5, text: "review_time", desc: "ASC Review Time" },
-  { id: 6, text: "-review_time", desc: "DESC Review Time" },
+export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
+  { id: 1, text: "created_date", desc: "Created Date", order: "Ascending" },
+  { id: 2, text: "-created_date", desc: "Created Date", order: "Descending" },
+  { id: 3, text: "modified_date", desc: "Modified Date", order: "Ascending" },
+  { id: 4, text: "-modified_date", desc: "Modified Date", order: "Descending" },
+  { id: 5, text: "review_time", desc: "Review Time", order: "Ascending" },
+  { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
 ];
 
 const KASP_BED_TYPES = KASP_ENABLED
@@ -233,10 +233,10 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 7, text: "Other" },
 ];
 
-export const GENDER_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Male" },
-  { id: 2, text: "Female" },
-  { id: 3, text: "Non-binary" },
+export const GENDER_TYPES = [
+  { id: 1, text: "Male", icon: <i className="fa-solid fa-person" /> },
+  { id: 2, text: "Female", icon: <i className="fa-solid fa-person-dress" /> },
+  { id: 3, text: "Non-binary", icon: <i className="fa-solid fa-genderless" /> },
 ];
 
 export const SAMPLE_TEST_RESULT = [
