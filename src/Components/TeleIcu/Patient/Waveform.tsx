@@ -24,13 +24,13 @@ export default function Waveform(props: {
   classes?: string;
   defaultSpace?: boolean;
 }) {
+  const viewable = 400;
   const wave = props.wave;
   const data = wave.data.split(" ").map(Number);
-  const [queueData, setQueueData] = useState<number[]>(Array(200).fill(0));
+  const [queueData, setQueueData] = useState<number[]>(Array(viewable).fill(0));
   const [xData, setXData] = useState<number[]>([]);
   const [lastStream, setLastStream] = useState(0);
 
-  const viewable = 400;
   const tpf = 4000 / data.length;
 
   useEffect(() => {
