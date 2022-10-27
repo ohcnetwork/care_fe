@@ -47,7 +47,9 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
                   <>
                     <div className="w-16 text-gray-200 italic">{item[0]} :</div>
                     <a
-                      href={(item[0] === "Email" ? "mailto:" : "") + item[1]}
+                      href={
+                        (item[0] === "Email" ? "mailto:" : "tel:") + item[1]
+                      }
                       className="text-primary-300 hover:text-primary-400 border-b border-primary-300"
                     >
                       <i className={"mr-1 uil uil-" + item[2]} />
