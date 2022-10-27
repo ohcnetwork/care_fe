@@ -5,6 +5,7 @@ import screenfull from "screenfull";
 import {
   CameraPTZ,
   CAMERA_STATES,
+  DEFAULT_CAMERA_MIDDLEWARE_HOST,
   getCameraPTZ,
 } from "../../../Common/constants";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
@@ -123,7 +124,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               accessKey: config[2] || "",
             });
             setCameraMiddlewareHostname(
-              middleware_hostname || "dev_middleware.coronasafe.live"
+              middleware_hostname || DEFAULT_CAMERA_MIDDLEWARE_HOST
             );
             setCameraConfig(bedAssets.data.results[0].meta);
             setCameraState({
@@ -163,10 +164,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     StreamStatus.Offline
   );
 
-  const middlewareHostname = cameraMiddlewareHostname;
   const url = !isIOS
-    ? `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
-    : `https://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
+    ? `wss://${cameraMiddlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
+    : `https://${cameraMiddlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const {
     startStream,
@@ -177,7 +177,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     : // eslint-disable-next-line react-hooks/rules-of-hooks
       useMSEMediaPlayer({
         config: {
-          middlewareHostname,
+          middlewareHostname: cameraMiddlewareHostname,
           ...cameraAsset,
         },
         url,
@@ -192,7 +192,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     relativeMove,
   } = useFeedPTZ({
     config: {
-      middlewareHostname,
+      middlewareHostname: cameraMiddlewareHostname,
       ...cameraAsset,
     },
   });
