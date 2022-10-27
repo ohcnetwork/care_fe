@@ -666,10 +666,6 @@ export type CameraPTZ = {
   value?: number;
 };
 
-export const DEFAULT_CAMERA_MIDDLEWARE_HOST =
-  process.env.REACT_APP_DEFAULT_CAMERA_MIDDLEWARE_HOST ||
-  "dev_middleware.coronasafe.live";
-
 export const CAMERA_STATES = {
   IDLE: "idle",
   MOVING: {

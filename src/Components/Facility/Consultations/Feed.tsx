@@ -5,7 +5,6 @@ import screenfull from "screenfull";
 import {
   CameraPTZ,
   CAMERA_STATES,
-  DEFAULT_CAMERA_MIDDLEWARE_HOST,
   getCameraPTZ,
 } from "../../../Common/constants";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
@@ -123,9 +122,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               port: 80,
               accessKey: config[2] || "",
             });
-            setCameraMiddlewareHostname(
-              middleware_hostname || DEFAULT_CAMERA_MIDDLEWARE_HOST
-            );
+            setCameraMiddlewareHostname(middleware_hostname);
             setCameraConfig(bedAssets.data.results[0].meta);
             setCameraState({
               ...bedAssets.data.results[0].meta.position,
