@@ -15,7 +15,7 @@ export const StackedLinePlot = (props: any) => {
 
   const generalOptions = {
     grid: {
-      left: "15px",
+      left: "20px",
       right: "30px",
       containLabel: true,
     },
@@ -71,9 +71,9 @@ export const StackedLinePlot = (props: any) => {
       boundaryGap: false,
       data: xData,
       axisLabel: {
-        width: 85,
+        width: 60,
         overflow: "break",
-        align: "left",
+        align: "center",
       },
     },
     yAxis: {
