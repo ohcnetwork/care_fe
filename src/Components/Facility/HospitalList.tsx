@@ -557,8 +557,8 @@ export const HospitalList = (props: any) => {
         <div className="flex md:justify-end w-full md:mt-4">
           <div className="w-full md:w-auto">
             <AccordionV2
-              title={<p className="font-medium text-lg">Downloads</p>}
-              className="lg:mt-0 md:mt-0 sm:mt-0 bg-white shadow-md rounded-lg p-3 relative"
+              title={<p className="pl-2 text-lg">Downloads</p>}
+              className="lg:mt-0 md:mt-0 sm:mt-0 bg-white shadow-md rounded-lg p-2 relative"
               expandIcon={<ExpandMoreIcon />}
             >
               <div className="mt-3">
