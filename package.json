@@ -99,7 +99,7 @@
     "screenfull": "^5.1.0",
     "typescript": "^4.8.4",
     "use-keyboard-shortcut": "^1.1.6",
-    "uuid": "^8.3.2"
+    "uuid": "^9.0.0"
   },
   "scripts": {
     "build:react": "DISABLE_ESLINT_PLUGIN='true' cross-env NODE_ENV=production react-scripts build",
