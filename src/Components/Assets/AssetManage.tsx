@@ -29,7 +29,7 @@ const AssetManage = (props: AssetManageProps) => {
     ReactElement | ReactElement[]
   >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const limit = 14;
 
   const fetchData = useCallback(
