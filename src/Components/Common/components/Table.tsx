@@ -20,13 +20,13 @@ export default function Table(props: {
         {props.headings.map((heading, i) => {
           if (i === 0) {
             return (
-              <div className="text-sm font-medium text-[#808080] flex items-center py-[14px] pl-4">
+              <div className="text-sm font-medium text-[#808080] flex items-center py-[14px] pl-4 min-w-[24px]">
                 {heading}
               </div>
             );
           }
           return (
-            <div className="text-sm font-medium text-[#808080] flex justify-center items-center text-center py-[14px]">
+            <div className="text-sm font-medium text-[#808080] flex justify-center items-center text-center py-[14px] min-w-[24px]">
               {heading}
             </div>
           );
@@ -45,13 +45,13 @@ export default function Table(props: {
             {row.map((item, i) => {
               if (i === 0) {
                 return (
-                  <div className="text-sm text-[#808080] font-medium flex items-center py-[14px] pl-4">
+                  <div className="text-sm text-[#808080] font-medium flex items-center py-[14px] pl-4 min-w-[24px]">
                     {item}
                   </div>
                 );
               }
               return (
-                <div className="text-sm text-gray-900 font-bold flex justify-center items-center text-center py-[14px]">
+                <div className="text-sm text-gray-900 font-bold flex justify-center items-center text-center py-[14px] min-w-[24px]">
                   <>{item}</>
                 </div>
               );

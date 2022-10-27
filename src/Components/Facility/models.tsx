@@ -26,7 +26,7 @@ export interface FacilityModel {
   id?: number;
   name?: string;
   district?: number;
-  cover_image_url?: string;
+  read_cover_image_url?: string;
   facility_type?: string;
   address?: string;
   features?: number[];
@@ -126,6 +126,7 @@ export interface ConsultationModel {
   lines?: any;
   last_daily_round?: any;
   current_bed?: CurrentBed;
+  review_interval?: number;
 }
 export interface PatientStatsModel {
   id?: number;
