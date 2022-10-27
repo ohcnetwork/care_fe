@@ -32,8 +32,8 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
-import { Badge } from "../Common/Badge";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -574,50 +574,46 @@ export const PatientManager = (props: any) => {
                       !patient.last_consultation?.discharge_date &&
                       Number(patient.last_consultation?.review_interval) > 0 &&
                       moment().isAfter(patient.review_time) && (
-                        <Badge
+                        <Chip
                           color="red"
                           startIcon="clock"
                           text="Review Missed"
                         />
                       )}
                     {patient.allow_transfer ? (
-                      <Badge
+                      <Chip
                         color="yellow"
                         startIcon="unlock"
                         text="Transfer Allowed"
                       />
                     ) : (
-                      <Badge
+                      <Chip
                         color="primary"
                         startIcon="lock"
                         text="Transfer Blocked"
                       />
                     )}
                     {patient.disease_status === "POSITIVE" && (
-                      <Badge
-                        color="red"
-                        startIcon="radiation"
-                        text="Positive"
-                      />
+                      <Chip color="red" startIcon="radiation" text="Positive" />
                     )}
                     {patient.gender === 2 &&
                       patient.is_antenatal &&
                       patient.is_active && (
-                        <Badge
+                        <Chip
                           color="blue"
                           startIcon="baby-carriage"
                           text="Antenatal"
                         />
                       )}
                     {patient.is_medical_worker && patient.is_active && (
-                      <Badge
+                      <Chip
                         color="blue"
                         startIcon="user-md"
                         text="Medical Worker"
                       />
                     )}
                     {patient.disease_status === "EXPIRED" && (
-                      <Badge
+                      <Chip
                         color="yellow"
                         startIcon="exclamation-triangle"
                         text="Patient Expired"
@@ -627,7 +623,7 @@ export const PatientManager = (props: any) => {
                       patient.last_consultation?.facility !==
                         patient.facility) && (
                       <span className="relative inline-flex">
-                        <Badge
+                        <Chip
                           color="red"
                           startIcon="notes-medical"
                           text="No Consultation Filed"

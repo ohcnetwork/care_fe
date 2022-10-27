@@ -792,3 +792,5 @@ export const FACILITY_FEATURE_TYPES = [
     icon: "droplet",
   },
 ];
+
+export const WAVEFORM_VIEWABLE_LENGTH = 400;

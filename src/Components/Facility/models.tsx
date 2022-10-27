@@ -86,6 +86,7 @@ export interface ConsultationModel {
   category?: PatientCategory;
   created_date?: string;
   discharge_date?: string;
+  discharge_reason?: string;
   examination_details?: string;
   history_of_present_illness?: string;
   facility?: number;
