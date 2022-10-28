@@ -8,7 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-
+import { goBack } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
@@ -54,7 +54,6 @@ import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
 import { InfoOutlined } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { goBack } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -970,10 +969,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         backButtonCB={() => {
           if (showImport) {
             setShowImport(false);
-          } else {
-            navigate(`/facility/${facilityId}`);
           }
         }}
+        backUrl={
+          showImport
+            ? `/facility/${facilityId}/patient/${id}/update`
+            : `/facility/${facilityId}/patient/${id}`
+        }
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: { name: patientName },
