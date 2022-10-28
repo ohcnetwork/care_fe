@@ -46,12 +46,6 @@ export default function FacilityUsers(props: any) {
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
-  const isSuperuser = currentUser.data.is_superuser;
-  const userType = currentUser.data.user_type;
-  const userIndex = USER_TYPES.indexOf(userType);
-  const userTypes = isSuperuser
-    ? [...USER_TYPES]
-    : USER_TYPES.slice(0, userIndex + 1);
   const [linkFacility, setLinkFacility] = useState<{
     show: boolean;
     username: string;

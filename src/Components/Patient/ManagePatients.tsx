@@ -32,8 +32,8 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
-import { Badge } from "../Common/Badge";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -558,10 +558,8 @@ export const PatientManager = (props: any) => {
                         {" "}
                         {patient.facility_object.name}
                       </p>
-                      <p className="text-base">
-                        <span className="text-sm text-gray-600">
-                          last updated
-                        </span>{" "}
+                      <p className="text-sm">
+                        <span className="text-gray-600">last updated</span>{" "}
                         <span className="font-medium text-gray-900">
                           {" "}
                           {moment(patient.modified_date).fromNow()}
@@ -576,50 +574,46 @@ export const PatientManager = (props: any) => {
                       !patient.last_consultation?.discharge_date &&
                       Number(patient.last_consultation?.review_interval) > 0 &&
                       moment().isAfter(patient.review_time) && (
-                        <Badge
+                        <Chip
                           color="red"
                           startIcon="clock"
                           text="Review Missed"
                         />
                       )}
                     {patient.allow_transfer ? (
-                      <Badge
+                      <Chip
                         color="yellow"
                         startIcon="unlock"
                         text="Transfer Allowed"
                       />
                     ) : (
-                      <Badge
+                      <Chip
                         color="primary"
                         startIcon="lock"
                         text="Transfer Blocked"
                       />
                     )}
                     {patient.disease_status === "POSITIVE" && (
-                      <Badge
-                        color="red"
-                        startIcon="radiation"
-                        text="Positive"
-                      />
+                      <Chip color="red" startIcon="radiation" text="Positive" />
                     )}
                     {patient.gender === 2 &&
                       patient.is_antenatal &&
                       patient.is_active && (
-                        <Badge
+                        <Chip
                           color="blue"
                           startIcon="baby-carriage"
                           text="Antenatal"
                         />
                       )}
                     {patient.is_medical_worker && patient.is_active && (
-                      <Badge
+                      <Chip
                         color="blue"
                         startIcon="user-md"
                         text="Medical Worker"
                       />
                     )}
                     {patient.disease_status === "EXPIRED" && (
-                      <Badge
+                      <Chip
                         color="yellow"
                         startIcon="exclamation-triangle"
                         text="Patient Expired"
@@ -629,13 +623,13 @@ export const PatientManager = (props: any) => {
                       patient.last_consultation?.facility !==
                         patient.facility) && (
                       <span className="relative inline-flex">
-                        <Badge
+                        <Chip
                           color="red"
                           startIcon="notes-medical"
                           text="No Consultation Filed"
                         />
-                        <span className="flex absolute h-3 w-3 -top-1 -right-1">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                          <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
                           <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
                         </span>
                       </span>

@@ -36,7 +36,7 @@ interface BedsProps {
 }
 
 const Beds = (props: BedsProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = React.useState<BedModel>({});
   const [startDate, setStartDate] = React.useState<string>(formatDateTime());

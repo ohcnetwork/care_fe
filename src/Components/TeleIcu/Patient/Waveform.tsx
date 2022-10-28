@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { WAVEFORM_VIEWABLE_LENGTH } from "../../../Common/constants";
 import { LinePlot } from "../../Facility/Consultations/components/LinePlot";
 
 export type WaveformType = {
@@ -26,16 +27,17 @@ export default function Waveform(props: {
 }) {
   const wave = props.wave;
   const data = wave.data.split(" ").map(Number);
-  const [queueData, setQueueData] = useState<number[]>(Array(200).fill(0));
+  const [queueData, setQueueData] = useState<number[]>(
+    Array(WAVEFORM_VIEWABLE_LENGTH).fill(0)
+  );
   const [xData, setXData] = useState<number[]>([]);
   const [lastStream, setLastStream] = useState(0);
 
-  const viewable = 400;
   const tpf = 4000 / data.length;
 
   useEffect(() => {
     setQueueData(queueData.concat(data));
-    setXData(Array.from(Array(viewable).keys()));
+    setXData(Array.from(Array(WAVEFORM_VIEWABLE_LENGTH).keys()));
 
     let seconds = 1;
     setLastStream(0);
@@ -62,7 +64,7 @@ export default function Waveform(props: {
         title={props.title}
         name={props.title}
         xData={xData}
-        yData={queueData.slice(0, viewable)}
+        yData={queueData.slice(0, WAVEFORM_VIEWABLE_LENGTH)}
         yStart={Math.min(...queueData)}
         yEnd={Math.max(...queueData)}
         classes={props.classes || "h-[90px]"}
@@ -74,14 +76,20 @@ export default function Waveform(props: {
         {props.metrics && (
           <div className="flex flex-row flex-wrap justify-end gap-2 text-[10px] text-gray-400">
             <div>
-              <div>Lowest: {Math.min(...queueData.slice(0, viewable))}</div>
-              <div>Highest: {Math.max(...queueData.slice(0, viewable))}</div>
+              <div>
+                Lowest:{" "}
+                {Math.min(...queueData.slice(0, WAVEFORM_VIEWABLE_LENGTH))}
+              </div>
+              <div>
+                Highest:{" "}
+                {Math.max(...queueData.slice(0, WAVEFORM_VIEWABLE_LENGTH))}
+              </div>
               <div>Stream Length: {data.length}</div>
               <div>
                 Lag:{" "}
-                {Number((tpf * (queueData.length - viewable)) / 1000).toFixed(
-                  2
-                )}{" "}
+                {Number(
+                  (tpf * (queueData.length - WAVEFORM_VIEWABLE_LENGTH)) / 1000
+                ).toFixed(2)}{" "}
                 sec
               </div>
             </div>
@@ -92,10 +100,12 @@ export default function Waveform(props: {
               <div>Last response: {lastStream} sec ago</div>
             </div>
 
-            {queueData.length > viewable && (
+            {queueData.length > WAVEFORM_VIEWABLE_LENGTH && (
               <button
                 className="text-blue-400"
-                onClick={() => setQueueData(queueData.slice(-1 * viewable))}
+                onClick={() =>
+                  setQueueData(queueData.slice(-1 * WAVEFORM_VIEWABLE_LENGTH))
+                }
               >
                 Clear Buffer
               </button>
