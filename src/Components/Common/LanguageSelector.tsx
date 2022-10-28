@@ -1,9 +1,10 @@
 import { useEffect } from "react";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_NAMES } from "../../Locale/config";
 import clsx from "clsx";
 
-export const LanguageSelector = () => {
+export const LanguageSelector = (props: any) => {
   const { i18n } = useTranslation();
 
   useEffect(() => {
@@ -19,22 +20,25 @@ export const LanguageSelector = () => {
   };
 
   return (
-    <div className="text-sm text-gray-800 flex flex-col items-center mt-8">
-      Available in:
-      <br />
-      <div className="inline-flex gap-3 flex-wrap">
+    <div className="flex justify-end items-center relative w-full">
+      <select
+        className={clsx(
+          props.className,
+          "py-2 pl-2 pr-10 appearance-none rounded-md shadow-lg cursor-pointer focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+        )}
+        id="language-selector"
+        name="language"
+        value={i18n.language}
+        onChange={(e: any) => handleLanguage(e.target.value)}
+      >
         {Object.keys(LANGUAGE_NAMES).map((e: string) => (
-          <button
-            key={e}
-            onClick={() => handleLanguage(e)}
-            className={clsx({
-              "text-primary-600 underline": i18n.language === e,
-              "text-primary-400 hover:text-primary-600": true,
-            })}
-          >
+          <option key={e} value={e}>
             {LANGUAGE_NAMES[e]}
-          </button>
+          </option>
         ))}
+      </select>
+      <div className="absolute right-0 mr-1 z-10 h-auto w-8 pointer-events-none">
+        <ExpandMoreIcon className={props.className} />
       </div>
     </div>
   );

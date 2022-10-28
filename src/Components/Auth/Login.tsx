@@ -4,10 +4,10 @@ import { postLogin } from "../../Redux/actions";
 import { Grid, CircularProgress } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
-import LanguageSelector from "../Common/LanguageSelector";
 import { RECAPTCHA_SITE_KEY } from "../../Common/env";
 import { get } from "lodash";
 import TextInput from "../../CAREUI/interactive/Input";
+import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 
 export const Login = () => {
   const dispatch: any = useDispatch();
@@ -217,7 +217,7 @@ export const Login = () => {
                 </Grid>
               </div>
             </form>
-            <LanguageSelector />
+            <LanguageSelectorLogin />
           </div>
         </div>
       </div>
