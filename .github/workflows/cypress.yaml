@@ -52,6 +52,12 @@ jobs:
           wait-on-timeout: 300
           browser: electron
 
+      - name: Add cypress failed label on failure 🏷️
+        uses: actions-ecosystem/action-add-labels@v1
+        if: failure()
+        with:
+          label: cypress failed
+
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v2
         if: failure()
