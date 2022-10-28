@@ -946,3 +946,37 @@ button:disabled,
 .pac-container {
   z-index: 100000 !important;
 }
+
+.tooltip {
+  @apply relative
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  @apply bg-black/50 backdrop-blur text-white text-center px-2 py-1 rounded absolute z-50 text-sm block
+}
+
+.tooltip .tooltip-right {
+  top: 20%;
+  left: 105%;
+}
+
+
+.tooltip .tooltip-top {
+  bottom: 100%;
+  left: 50%;
+}
+
+.tooltip .tooltip-bottom {
+  top: 100%;
+  left: 50%;
+}
+
+.tooltip .tooltip-left {
+  top: -5px;
+  right: 105%;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+}
