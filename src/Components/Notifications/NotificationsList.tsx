@@ -395,30 +395,6 @@ export default function NotificationsList({
         do={() => setShowNotifications(!showNotifications)}
         icon={<NotificationBell />}
       />
-      {/* <button
-        onClick={() => setShowNotifications(!showNotifications)}
-        className={clsx(
-          "flex justify-items-start items-center overflow-hidden w-10 text-primary-300 hover:text-white hover:bg-primary-700 rounded transition-all duration-300",
-          showNotifications
-            ? "bg-primary-900 hover:bg-primary-900 text-white"
-            : "bg-primary-800",
-          !shrinked && "w-60"
-        )}
-      >
-        <div className="shrink-0 flex items-center justify-center w-10 h-9">
-          <i className={clsx("fas fa-bell", "text-lg")}></i>
-        </div>
-
-        <div
-          className={clsx(
-            "transition-all text-left duration-300 whitespace-nowrap",
-            shrinked ? "w-60" : "w-0"
-          )}
-        >
-          {t("Notifications")}
-        </div>
-      </button> */}
-
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
         <div className="bg-white h-full">
           <div className="w-full bg-gray-100 border-b sticky top-0 z-30 px-4 pb-1 lg:px-8">

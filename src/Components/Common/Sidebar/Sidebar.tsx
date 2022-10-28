@@ -47,7 +47,7 @@ const StatelessSidebar = ({
     <nav
       className={`h-screen group flex flex-col bg-primary-800 pt-8 md:pt-14 pb-5 md:pb-10 ${
         shrinked ? "w-14" : "w-60"
-      } transition-all duration-300 ease-in-out overflow-x-auto`}
+      } transition-all duration-300 ease-in-out`}
     >
       <img
         className={`${

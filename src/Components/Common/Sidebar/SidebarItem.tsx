@@ -29,9 +29,7 @@ const SidebarItemBase = (props: SidebarItemBaseProps) => {
       onClick={props.do}
     >
       <span
-        className={`tooltip-text tooltip-right translate-x-0 hover:-translate-x-1 transition ${
-          !props.shrinked && "hidden"
-        }`}
+        className={`tooltip-text tooltip-right ${!props.shrinked && "hidden"}`}
       >
         {props.text}
       </span>
