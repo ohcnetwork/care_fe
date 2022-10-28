@@ -1,17 +1,13 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { postLogin } from "../../Redux/actions";
-import { navigate } from "raviger";
 import { Grid, CircularProgress } from "@material-ui/core";
-import { TextInputField } from "../Common/HelperInputFields";
-import { PublicDashboard } from "../Dashboard/PublicDashboard";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LanguageSelector from "../Common/LanguageSelector";
 import { RECAPTCHA_SITE_KEY } from "../../Common/env";
 import { get } from "lodash";
+import TextInput from "../../CAREUI/interactive/Input";
 
 export const Login = () => {
   const dispatch: any = useDispatch();
@@ -23,7 +19,6 @@ export const Login = () => {
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const captchaKey = RECAPTCHA_SITE_KEY ?? "";
   const { t } = useTranslation();
   // display spinner while login is under progress
@@ -121,103 +116,109 @@ export const Login = () => {
 
   return (
     <div className="flex flex-col md:flex-row md:h-screen relative">
-      <div className="md:absolute top-2 right-2 p-2 md:p-0 bg-primary-500 md:bg-white">
-        <LanguageSelector className="md:bg-primary-500 md:text-white bg-white" />
-      </div>
-      <div className="flex flex-col justify-center md:w-1/2 md:h-full bg-primary-500 border-primary-500">
-        <div className="pl-1/5">
-          <a href={"/"}>
-            <img
-              src={process.env.REACT_APP_LIGHT_LOGO}
-              className="h-8 w-auto"
-              alt="care logo"
-            />{" "}
-          </a>
+      <div className="flex px-16 flex-col justify-center md:w-[calc(50%+130px)] md:h-full login-hero relative">
+        <a href={"/"} className="inline-block">
+          <img
+            src={process.env.REACT_APP_LIGHT_LOGO}
+            className="h-8 w-auto"
+            alt="care logo"
+          />{" "}
+        </a>
+        <div className="mt-4 md:mt-12 rounded-lg py-4">
+          <div className="max-w-lg">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl tracking-tight font-black text-white leading-tight">
+              {t("coronasafe_network")}
+            </h1>
+            <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
+              {t("goal")}
+            </div>
+          </div>
         </div>
-        <div className="mt-4 md:mt-20 rounded-lg px-1/5 py-4">
-          <PublicDashboard />
+        <div className="flex items-center absolute inset-x-0 p-16 pb-10 bottom-0 z-20">
+          <div className="text-sm max-w-lg">
+            <a href="https://coronasafe.network/" className="text-gray-500">
+              {t("footer_body")}
+            </a>
+            <div className="mx-auto">
+              <a
+                href={process.env.REACT_APP_GITHUB_URL}
+                className="text-primary-400 hover:text-primary-500"
+              >
+                {t("contribute_github")}
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-center w-full my-4 md:mt-0 md:w-1/2 md:h-full">
-        <div className="bg-white mt-4 md:mt-20 px-4 py-4">
-          <div className="text-2xl font-bold text-center pt-4 text-primary-600">
-            {t("auth_login_title")}
-          </div>
-          <form onSubmit={handleSubmit}>
-            <div>
-              <TextInputField
-                name="username"
-                label={t("username")}
-                variant="outlined"
-                margin="dense"
-                autoFocus={true}
-                InputLabelProps={{ shrink: true }}
-                value={form.username}
-                onChange={handleChange}
-                errors={errors.username}
-              />
-              <div className="relative w-full">
-                <TextInputField
-                  className="w-full"
-                  type={showPassword ? "text" : "password"}
+      <div className="w-full my-4 md:mt-0 md:w-1/2 md:h-full login-hero-form">
+        <div className="flex items-center justify-center h-full">
+          <div className="w-[400px]">
+            <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
+              {t("auth_login_title")}
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div>
+                <TextInput
+                  name="username"
+                  type="TEXT"
+                  legend={t("username")}
+                  value={form.username}
+                  onChange={handleChange}
+                  error={errors.username}
+                  outerClassName="mb-4"
+                  required
+                  size="large"
+                  className="font-extrabold"
+                />
+                <TextInput
+                  type="PASSWORD"
                   name="password"
-                  label={t("password")}
-                  variant="outlined"
-                  margin="dense"
-                  autoComplete="off"
-                  InputLabelProps={{ shrink: true }}
+                  legend={t("password")}
                   value={form.password}
                   onChange={handleChange}
-                  errors={errors.password}
+                  error={errors.password}
+                  required
+                  size="large"
+                  className="font-extrabold"
                 />
-                {showPassword ? (
-                  <VisibilityIcon
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-4"
-                  />
-                ) : (
-                  <VisibilityOffIcon
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-4"
-                  />
-                )}
-              </div>
-              <Grid container justify="center">
-                {isCaptchaEnabled && (
-                  <Grid item className="px-8 py-4">
-                    <ReCaptcha
-                      sitekey={captchaKey}
-                      onChange={onCaptchaChange}
-                    />
-                    <span className="text-red-500">{errors.captcha}</span>
-                  </Grid>
-                )}
+                <Grid container justify="center">
+                  {isCaptchaEnabled && (
+                    <Grid item className="px-8 py-4">
+                      <ReCaptcha
+                        sitekey={captchaKey}
+                        onChange={onCaptchaChange}
+                      />
+                      <span className="text-red-500">{errors.captcha}</span>
+                    </Grid>
+                  )}
 
-                <div className="w-full flex justify-between items-center pb-4">
-                  <a
-                    href="/forgot-password"
-                    className="text-sm text-primary-400 hover:text-primary-500"
-                  >
-                    {t("forget_password")}
-                  </a>
-                </div>
-
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <CircularProgress className="text-primary-500" />
+                  <div className="w-full flex justify-between items-center py-4">
+                    <a
+                      href="/forgot-password"
+                      className="text-sm text-primary-400 hover:text-primary-500"
+                    >
+                      {t("forget_password")}
+                    </a>
                   </div>
-                ) : (
-                  <button
-                    type="submit"
-                    className="w-full bg-primary-500 inline-flex items-center justify-center text-sm font-semibold py-2 px-4 rounded cursor-pointer text-white"
-                  >
-                    {t("login")}
-                  </button>
-                )}
-              </Grid>
-            </div>
-          </form>
+
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <CircularProgress className="text-primary-500" />
+                    </div>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="w-full bg-primary-500 inline-flex items-center justify-center text-sm font-semibold py-2 px-4 rounded cursor-pointer text-white"
+                    >
+                      {t("login")}
+                    </button>
+                  )}
+                </Grid>
+              </div>
+            </form>
+            <LanguageSelector />
+          </div>
         </div>
       </div>
     </div>

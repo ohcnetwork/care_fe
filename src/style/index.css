@@ -4,6 +4,7 @@
 @import "@pnotify/core/dist/PNotify.css";
 @import "@pnotify/mobile/dist/PNotifyMobile.css";
 @import "@pnotify/core/dist/BrightTheme.css";
+@import "./CAREUI.css";
 
 html {
   @apply w-full h-full;
@@ -960,6 +961,70 @@ button:disabled,
   width: 50%;
   height: 50%;
   /*background: url('../../public/images/circle.svg') no-repeat center;*/
+}
+
+.login-hero{
+  background: linear-gradient(to bottom right, rgba(4, 78, 55, 0.466), rgba(2, 54, 40, 0.521)), url('../../public/images/wave_scene_square.svg');
+  background-size: cover;
+  background-position: center;
+  animation: alternate-reverse 30s linear infinite herobg;
+}
+
+.login-hero::before{
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0px;
+  width: 200px;
+  z-index: 2;
+  background: url('../../public/images/wave_long_4.svg');
+  background-position: top right;
+  transition: 0.2s;
+  animation: 120s linear infinite wave alternate-reverse;
+  -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.101));
+}
+
+.login-hero::after{
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 10px;
+  width: 200px;
+  z-index: 1;
+  background: url('../../public/images/wave_long_3.svg');
+  opacity: 0.5;
+  background-position: bottom right;
+  animation: 120s linear infinite wave_2 alternate-reverse;
+  -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.116));
+}
+
+@keyframes wave {
+  0% {
+    background-position: top right;
+  }
+  100% {
+    background-position: bottom right;
+  }
+}
+
+@keyframes wave_2{
+  0% {
+    background-position: bottom right;
+  }
+  100% {
+    background-position: top right;
+  }
+}
+
+@keyframes herobg {
+  0% {
+    background-size: 110%;
+  }
+  100% {
+    background-size: 200%;
+  }
 }
 
 .field-label {
