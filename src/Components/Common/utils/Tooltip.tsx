@@ -1,11 +1,25 @@
 import clsx from "clsx";
 import { ReactNode, useState } from "react";
 
-export default function ToolTip(props: {
+interface TooltipProps {
   children: ReactNode;
   text: ReactNode;
   position?: "TOP" | "BOTTOM" | "LEFT" | "RIGHT";
-}) {
+}
+
+/**
+ * Deprecated. Use `tooltip` and `tooltip-text` with `tooltip-{left/right/top/bottom}` classes on elements.
+ *
+ * **Example:**
+ * ```html
+ * <button class="tooltip">
+ *   <span class="tooltip-text tooltip-bottom">Tooltip Text</span>
+ *   <!--children of component-->
+ *   <span>Hover over me</span>
+ * </button>
+ * ```
+ */
+export default function ToolTip(props: TooltipProps) {
   const position = props.position || "TOP";
 
   const [status, show] = useState(false);
