@@ -133,7 +133,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
-      <div className="h-full content-center grid justify-items-center mt-60">
+      <div className="h-full content-center grid justify-items-center mt-40">
         <div className="flex justify-center w-full items-center">
           <img
             className="w-3/12 sm:w-3/12 md:w-3/12 lg:w-2/12 xl:w-2/12 2xl:w-2/12"
