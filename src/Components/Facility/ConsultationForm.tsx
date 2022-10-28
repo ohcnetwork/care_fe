@@ -866,7 +866,8 @@ export const ConsultationForm = (props: any) => {
                         errors=""
                         multiple={false}
                         margin="dense"
-                        disabled={true}
+                        unoccupiedOnly={true}
+                        disabled={!!id} // disabled while editing
                         // location={state.form.}
                         facility={facilityId}
                       />
