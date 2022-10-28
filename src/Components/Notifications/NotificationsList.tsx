@@ -16,10 +16,14 @@ import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
-import { useTranslation } from "react-i18next";
 
 import * as Sentry from "@sentry/browser";
 import { formatDate } from "../../Utils/utils";
+import {
+  ShrinkedSidebarItem,
+  SidebarItem,
+} from "../Common/Sidebar/SidebarItem";
+import { NotificationBell } from "../../Common/icons";
 
 const RESULT_LIMIT = 14;
 
@@ -127,17 +131,16 @@ const NotificationTile = ({
 };
 
 interface NotificationsListProps {
-  expanded: boolean;
+  shrinked: boolean;
   onClickCB?: () => void;
 }
 
 export default function NotificationsList({
-  expanded = false,
+  shrinked,
   onClickCB,
 }: NotificationsListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
-  const { t } = useTranslation();
   const username = currentUser.data.username;
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
@@ -378,21 +381,28 @@ export default function NotificationsList({
     );
   }
 
+  const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
+
   return (
-    <div className={clsx("cursor-pointer", unreadCount && "-mt-5")}>
+    <>
       {!!unreadCount && (
-        <span className="relative top-5 left-5 w-5 h-5 flex items-center justify-center text-xs text-white bg-red-400 rounded-full">
+        <span className="relative top-5 left-5 w-5 h-5 flex items-center justify-center text-[10px] text-white bg-red-400 rounded-full">
           {unreadCount}
         </span>
       )}
-      <button
+      <Item
+        text="Notifications"
+        do={() => setShowNotifications(!showNotifications)}
+        icon={<NotificationBell />}
+      />
+      {/* <button
         onClick={() => setShowNotifications(!showNotifications)}
         className={clsx(
           "flex justify-items-start items-center overflow-hidden w-10 text-primary-300 hover:text-white hover:bg-primary-700 rounded transition-all duration-300",
           showNotifications
             ? "bg-primary-900 hover:bg-primary-900 text-white"
             : "bg-primary-800",
-          expanded && "w-60"
+          !shrinked && "w-60"
         )}
       >
         <div className="shrink-0 flex items-center justify-center w-10 h-9">
@@ -402,12 +412,12 @@ export default function NotificationsList({
         <div
           className={clsx(
             "transition-all text-left duration-300 whitespace-nowrap",
-            expanded ? "w-60" : "w-0"
+            shrinked ? "w-60" : "w-0"
           )}
         >
           {t("Notifications")}
         </div>
-      </button>
+      </button> */}
 
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
         <div className="bg-white h-full">
@@ -491,6 +501,6 @@ export default function NotificationsList({
           <div>{manageResults}</div>
         </div>
       </SlideOver>
-    </div>
+    </>
   );
 }
