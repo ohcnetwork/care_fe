@@ -1,60 +1,68 @@
 import { Link, usePath } from "raviger";
-import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { ExternalLink } from "../../../Common/icons";
 
 export type SidebarIcon = React.ReactNode;
 
-interface SidebarItemProps {
+type SidebarItemProps = {
   text: string;
-  to: string;
   icon: SidebarIcon;
   external?: true | undefined;
-}
+} & ({ to: string; do?: undefined } | { to?: undefined; do: () => void });
 
-type SidebarItemBaseProps = SidebarItemProps & { children: ReactNode };
+type SidebarItemBaseProps = SidebarItemProps & { shrinked?: boolean };
 const SidebarItemBase = (props: SidebarItemBaseProps) => {
   const path = usePath();
-  const selected = path?.includes(props.to);
+  const { t } = useTranslation();
+  const selected = props.to && path?.includes(props.to);
 
   return (
     <Link
-      className={`w-full flex h-10 items-center justify-start text-white ${
+      className={`w-full flex-1 min-h-[40px] md:flex-none md:h-10 text-white ${
         selected
           ? "font-bold bg-primary-900"
           : "font-normal bg-primary-800 hover:bg-primary-700"
-      } transition-all duration-200 ease-in-out cursor-pointer`}
+      } tooltip transition-all duration-200 ease-in-out cursor-pointer`}
       target={props.external && "_blank"}
       rel={props.external && "noreferrer"}
-      href={props.to}
+      href={props.to ?? ""}
+      onClick={props.do}
     >
-      {props.children}
+      <span
+        className={`tooltip-text tooltip-right translate-x-0 hover:-translate-x-1 transition ${
+          !props.shrinked && "hidden"
+        }`}
+      >
+        {props.text}
+      </span>
+      <div
+        className={`flex items-center h-full ${
+          props.shrinked ? "justify-center" : "justify-start ml-10 mr-9"
+        } transition-all duration-200 ease-in-out`}
+      >
+        <div className="flex-none h-5 w-5 fill-white">{props.icon}</div>
+
+        <div
+          className={`${
+            props.shrinked ? "hidden" : "grow"
+          } w-full flex items-center`}
+        >
+          <div className="text-sm pl-4 grow">{t(props.text)}</div>
+          {props.external && (
+            <div className="flex-none h-4 w-4 fill-white">
+              <ExternalLink />
+            </div>
+          )}
+        </div>
+      </div>
     </Link>
   );
 };
 
-export const SidebarItem = (props: SidebarItemProps) => {
-  const { t } = useTranslation();
-  return (
-    <SidebarItemBase {...props}>
-      <div className="ml-10 mr-9 transition-all duration-200 ease-in-out">
-        <div className="h-5 w-5">{props.icon}</div>
-        <div className="ml-4 text-sm">{t(props.text)}</div>
-        {props.external && <ExternalIcon />}
-      </div>
-    </SidebarItemBase>
-  );
-};
+export const SidebarItem = (props: SidebarItemProps) => (
+  <SidebarItemBase {...props} />
+);
 
-export const ShrinkedSidebarItem = (props: SidebarItemProps) => {
-  return (
-    <SidebarItemBase {...props}>
-      <div className="mx-2 transition-all duration-200 ease-in-out">
-        <div className="h-5 w-5">{props.icon}</div>
-      </div>
-    </SidebarItemBase>
-  );
-};
-
-const ExternalIcon = () => (
-  <i className="h-4 w-4 fa-solid fa-arrow-up-right-from-square" />
+export const ShrinkedSidebarItem = (props: SidebarItemProps) => (
+  <SidebarItemBase shrinked {...props} />
 );
