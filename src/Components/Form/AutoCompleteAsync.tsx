@@ -62,16 +62,12 @@ const AutoCompleteAsync = (props: Props) => {
 
   return (
     <div className={className}>
-      <Combobox
-        name={name}
-        value={selected}
-        onChange={onChange}
-        multiple={multiple as any}
-      >
+      <Combobox value={selected} onChange={onChange} multiple={multiple as any}>
         <div className="relative mt-1">
           <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
             <Combobox.Button className="block w-full pl-3 pr-10 py-1 focus:outline-none focus:ring-0 sm:text-sm">
               <Combobox.Input
+                name={name}
                 className={`w-full border-none text-sm leading-5 text-gray-900 ${
                   hasSelection
                     ? "placeholder:text-gray-900 font-medium"
