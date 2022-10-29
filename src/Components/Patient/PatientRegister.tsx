@@ -972,11 +972,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             setShowImport(false);
           }
         }}
-        backUrl={
-          showImport
-            ? `/facility/${facilityId}/patient`
-            : `/facility/${facilityId}`
-        }
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: { name: patientName },
