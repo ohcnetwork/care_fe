@@ -156,32 +156,36 @@ export default function UserFilter(props: any) {
           />
         </div>
 
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Phone Number</span>
-          <div className="flex justify-between">
-            <div className="w-full">
-              <PhoneNumberField
-                placeholder="Phone Number"
-                value={filterState.phone_number}
-                onChange={(value: string) => {
-                  handleChange({ target: { name: "phone_number", value } });
-                }}
-              />
+        <div className="flex flex-wrap">
+          <div className="w-full flex-none">
+            <FieldLabel className="text-sm">Phone Number</FieldLabel>
+            <div className="flex justify-between">
+              <div className="w-full">
+                <PhoneNumberField
+                  placeholder="Phone Number"
+                  value={filterState.phone_number}
+                  onChange={(value: string) => {
+                    handleChange({ target: { name: "phone_number", value } });
+                  }}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">WhatsApp Phone Number</span>
-          <div className="flex justify-between">
-            <div className="w-full">
-              <PhoneNumberField
-                placeholder="WhatsApp Phone Number"
-                value={filterState.alt_phone_number}
-                onChange={(value: string) => {
-                  handleChange({ target: { name: "alt_phone_number", value } });
-                }}
-              />
+          <div className="w-full flex-none -mt-2">
+            <FieldLabel className="text-sm">Whatsapp Number</FieldLabel>
+            <div className="flex justify-between">
+              <div className="w-full">
+                <PhoneNumberField
+                  placeholder="WhatsApp Phone Number"
+                  value={filterState.alt_phone_number}
+                  onChange={(value: string) => {
+                    handleChange({
+                      target: { name: "alt_phone_number", value },
+                    });
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
