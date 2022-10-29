@@ -43,11 +43,14 @@ jobs:
       - name: Install dependencies 📦
         run: npm install --legacy-peer-deps
 
+      - name: Compile rescript files ⚙️
+        run: "npm run re:build"
+
       - name: Cypress run 🥬
         uses: cypress-io/github-action@v4
         with:
           install: false
-          start: npm run start
+          start: "npm run start:react"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: electron
