@@ -48,11 +48,9 @@ jobs:
 
       - name: Cypress run 🥬
         uses: cypress-io/github-action@v4
-        env:
-          SKIP_PREFLIGHT_CHECK: true
         with:
           install: false
-          start: "npm run start:react"
+          start: "npx cross-env SKIP_PREFLIGHT_CHECK=true npm run start:react"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: electron
@@ -65,16 +63,16 @@ jobs:
           labels: cypress failed
 
       - name: Upload cypress screenshots on failure 📸
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots
-          path: cypress/screenshots
+          path: cypress/screenshots/**/*
 
       # Test run video was always captured, so this action uses "always()" condition
       - name: Upload cypress videos 📹
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: cypress-videos
-          path: cypress/videos
+          path: cypress/videos/**/*
