@@ -48,9 +48,11 @@ jobs:
 
       - name: Cypress run 🥬
         uses: cypress-io/github-action@v4
+        env:
+          SKIP_PREFLIGHT_CHECK: true
         with:
           install: false
-          start: "SKIP_PREFLIGHT_CHECK=true npm run start:react"
+          start: "npm run start:react"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: electron
@@ -59,7 +61,8 @@ jobs:
         uses: actions-ecosystem/action-add-labels@v1
         if: failure()
         with:
-          label: cypress failed
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: cypress failed
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v2
