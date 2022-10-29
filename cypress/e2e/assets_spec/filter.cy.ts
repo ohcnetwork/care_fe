@@ -15,7 +15,7 @@ describe("Assets Filter", () => {
   });
 
   it("Filter by Facility", () => {
-    cy.get("[name=Facilities]")
+    cy.get("[name=Facility]")
       .type("test")
       .wait(3000)
       .type("{downarrow}{enter}");
