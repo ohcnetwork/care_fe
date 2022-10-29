@@ -15,21 +15,24 @@ export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
 export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
 export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
-export const USER_TYPES: Array<string> = [
-  "Pharmacist",
-  "Volunteer",
-  "StaffReadOnly",
-  "Staff",
-  "Doctor",
-  "WardAdmin",
-  "LocalBodyAdmin",
-  "DistrictLabAdmin",
-  "DistrictReadOnlyAdmin",
-  "DistrictAdmin",
-  "StateLabAdmin",
-  "StateReadOnlyAdmin",
-  "StateAdmin",
+const readOnly = true;
+export const USER_TYPE_OPTIONS = [
+  { id: "Pharmacist", role: "Pharmacist" },
+  { id: "Volunteer", role: "Volunteer" },
+  { id: "StaffReadOnly", role: "Staff", readOnly },
+  { id: "Staff", role: "Staff" },
+  { id: "Doctor", role: "Doctor" },
+  { id: "WardAdmin", role: "Ward Admin" },
+  { id: "LocalBodyAdmin", role: "Local Body Admin" },
+  { id: "DistrictLabAdmin", role: "District Lab Admin" },
+  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly },
+  { id: "DistrictAdmin", role: "District Admin" },
+  { id: "StateLabAdmin", role: "State Lab Admin" },
+  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly },
+  { id: "StateAdmin", role: "State Admin" },
 ];
+
+export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
 
 export const DOWNLOAD_TYPES: Array<string> = [
   "Facility List",
