@@ -1,7 +1,11 @@
+import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
+import SelectMenuV2 from "../../Form/SelectMenuV2";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
 import { PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
 
-export const medicines = require("./assets/medicines");
+import medicines_list from "./assets/medicines.json";
+
+export const medicines = medicines_list;
 
 const frequency = ["Stat", "od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"];
 const frequencyTips = {
@@ -102,31 +106,47 @@ export default function PrescriptionBuilder(
             <div className="flex gap-2 flex-col md:flex-row">
               <div className="w-full">
                 Medicine
-                <PrescriptionDropdown
+                <AutoCompleteAsync
                   placeholder="Medicine"
-                  options={medicines}
-                  value={prescription.medicine || ""}
-                  setValue={setMedicine}
+                  selected={prescription.medicine}
+                  fetchData={(search) => {
+                    return Promise.resolve(
+                      medicines.filter((medicine: string) =>
+                        medicine.toLowerCase().includes(search.toLowerCase())
+                      )
+                    );
+                  }}
+                  optionLabel={(option) => option}
+                  onChange={setMedicine}
+                  showNOptions={medicines.length}
                 />
               </div>
               <div className="flex gap-2">
                 <div>
                   Route
-                  <PrescriptionDropdown
+                  <SelectMenuV2
                     placeholder="Route"
                     options={routes}
-                    value={prescription.route || ""}
-                    setValue={setRoute}
+                    value={prescription.route}
+                    onChange={(route) => setRoute(route || "")}
+                    optionLabel={(option) => option}
+                    required={false}
+                    className="mt-[2px]"
                   />
                 </div>
                 <div>
                   Frequency
-                  <PrescriptionDropdown
+                  <SelectMenuV2
                     placeholder="Frequency"
                     options={frequency}
-                    tips={frequencyTips}
-                    value={prescription.dosage || ""}
-                    setValue={setFrequency}
+                    value={prescription.dosage}
+                    onChange={(freq) => setFrequency(freq || "")}
+                    optionLabel={(option) => option}
+                    optionDescription={(option) =>
+                      frequencyTips[option as keyof typeof frequencyTips]
+                    }
+                    required={false}
+                    className="mt-[2px]"
                   />
                 </div>
               </div>
