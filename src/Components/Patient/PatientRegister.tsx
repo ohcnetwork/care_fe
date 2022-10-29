@@ -970,10 +970,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         backButtonCB={() => {
           if (showImport) {
             setShowImport(false);
-          } else {
-            navigate(`/facility/${facilityId}`);
           }
         }}
+        backUrl={
+          showImport
+            ? `/facility/${facilityId}/patient`
+            : `/facility/${facilityId}`
+        }
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: { name: patientName },
