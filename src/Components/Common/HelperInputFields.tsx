@@ -670,7 +670,6 @@ export const PhoneNumberField = (props: any) => {
           disabled={disabled}
           autoFormat={!turnOffAutoFormat}
           {...countryRestriction}
-          inputClass="form-input !leading-8"
         />
         <div
           className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
