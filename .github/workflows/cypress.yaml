@@ -57,6 +57,13 @@ jobs:
           wait-on-timeout: 300
           browser: electron
 
+      - name: Remove cypress failed label on success 🏷️
+        uses: actions-ecosystem/action-remove-labels@v1
+        if: success()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: cypress failed
+
       - name: Add cypress failed label on failure 🏷️
         uses: actions-ecosystem/action-add-labels@v1
         if: failure()
