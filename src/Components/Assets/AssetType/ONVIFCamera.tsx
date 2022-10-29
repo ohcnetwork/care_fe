@@ -37,7 +37,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [refreshPresetsHash, setRefreshPresetsHash] = React.useState(
     Number(new Date())
   );
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
 
   useEffect(() => {
     setAssetType(asset?.asset_class);

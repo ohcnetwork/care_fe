@@ -11,6 +11,7 @@ interface BedSelectProps {
   errors: string;
   className?: string;
   searchAll?: boolean;
+  unoccupiedOnly?: boolean;
   multiple?: boolean;
   facility?: string;
   location?: string;
@@ -29,6 +30,7 @@ export const BedSelect = (props: BedSelectProps) => {
     margin,
     errors,
     searchAll,
+    unoccupiedOnly,
     className = "",
     facility,
     location,
@@ -64,8 +66,12 @@ export const BedSelect = (props: BedSelectProps) => {
 
       const res = await dispatchAction(listFacilityBeds(params));
       if (res && res.data) {
-        setBedList(res.data.results);
-        console.log(res.data.results);
+        let beds = res.data.results;
+        if (unoccupiedOnly) {
+          beds = beds.filter((bed: BedModel) => bed?.is_occupied === false);
+        }
+
+        setBedList(beds);
       }
       isBedLoading(false);
     }, 300),
@@ -99,7 +105,7 @@ export const BedSelect = (props: BedSelectProps) => {
           | {option?.location_object?.name}
         </div>
       )}
-      getOptionSelected={(option: any, value: any) => option.id === value.id}
+      getOptionSelected={(option: any, value: any) => option?.id === value?.id}
       getOptionLabel={(option: any) => option?.name || ""}
       filterOptions={(options: BedModel[]) => options}
       errors={errors}

@@ -12,7 +12,7 @@ export const LinePlot = (props: any) => {
   } = props;
   let generalOptions: any = {
     grid: {
-      left: "15px",
+      left: "20px",
       right: "30px",
       containLabel: true,
     },
@@ -56,9 +56,9 @@ export const LinePlot = (props: any) => {
       boundaryGap: false,
       data: xData,
       axisLabel: {
-        width: 85,
+        width: 60,
         overflow: "break",
-        align: "left",
+        align: "center",
       },
     },
     yAxis: {
@@ -104,7 +104,6 @@ export const LinePlot = (props: any) => {
       grid: {
         left: "15px",
         right: "30px",
-        containLabel: true,
       },
       animation: false,
       xAxis: {
