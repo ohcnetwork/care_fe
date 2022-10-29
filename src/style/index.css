@@ -978,7 +978,7 @@ button:disabled,
   right: 0px;
   width: 200px;
   z-index: 2;
-  background: url('../../public/images/wave_long_4.svg');
+  background: url('../../public/images/wave_long_2.svg');
   background-position: top right;
   transition: 0.2s;
   animation: 120s linear infinite wave alternate-reverse;
@@ -993,11 +993,20 @@ button:disabled,
   right: 10px;
   width: 200px;
   z-index: 1;
-  background: url('../../public/images/wave_long_3.svg');
+  background: url('../../public/images/wave_long.svg');
   opacity: 0.5;
   background-position: bottom right;
   animation: 120s linear infinite wave_2 alternate-reverse;
   -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.116));
+}
+
+@media screen and (max-width: 768px) {
+  .login-hero::before{
+    display: none;
+  }
+  .login-hero::after{
+    display: none;
+  }
 }
 
 @keyframes wave {
@@ -1024,6 +1033,17 @@ button:disabled,
   }
   100% {
     background-size: 200%;
+  }
+}
+
+@media screen and (max-width: 1078px) {
+  @keyframes herobg {
+    0% {
+      background-size: 140%;
+    }
+    100% {
+      background-size: 200%;
+    }
   }
 }
 

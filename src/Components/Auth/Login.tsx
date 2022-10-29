@@ -115,12 +115,12 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row md:h-screen relative">
-      <div className="flex px-16 flex-col justify-center md:w-[calc(50%+130px)] md:h-full login-hero relative">
+    <div className="flex flex-col-reverse md:flex-row md:h-screen relative">
+      <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
         <a href={"/"} className="inline-block">
           <img
             src={process.env.REACT_APP_LIGHT_LOGO}
-            className="h-8 w-auto"
+            className="h-8 hidden md:inline-block"
             alt="care logo"
           />{" "}
         </a>
@@ -134,8 +134,8 @@ export const Login = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center absolute inset-x-0 p-16 pb-10 bottom-0 z-20">
-          <div className="text-sm max-w-lg">
+        <div className="flex items-center md:absolute md:inset-x-0 md:p-16 pb-10 md:bottom-0 md:z-20">
+          <div className="text-xs md:text-sm max-w-lg">
             <a href="https://coronasafe.network/" className="text-gray-500">
               {t("footer_body")}
             </a>
@@ -153,7 +153,12 @@ export const Login = () => {
 
       <div className="w-full my-4 md:mt-0 md:w-1/2 md:h-full login-hero-form">
         <div className="flex items-center justify-center h-full">
-          <div className="w-[400px]">
+          <div className="w-full p-8 md:p-0 md:w-4/5 lg:w-[400px]">
+            <img
+              src={process.env.REACT_APP_BLACK_LOGO}
+              className="h-8 w-auto mb-4 md:hidden"
+              alt="care logo"
+            />{" "}
             <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
               {t("auth_login_title")}
             </div>

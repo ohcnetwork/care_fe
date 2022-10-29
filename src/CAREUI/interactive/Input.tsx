@@ -1,9 +1,10 @@
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 
 type InputProps = {
   name: string;
   type: "TEXT" | "PASSWORD" | "EMAIL" | "NUMBER";
+  ref?: RefObject<HTMLInputElement>;
   label?: string;
   legend?: string;
   required?: boolean;
@@ -25,6 +26,7 @@ type InputProps = {
 export default function TextInput(props: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const ref = props.ref || inputRef;
   const legendRef = useRef<HTMLLabelElement>(null);
   const [focused, setFocused] = useState(false);
 
@@ -48,18 +50,18 @@ export default function TextInput(props: InputProps) {
             htmlFor={props.name}
             ref={legendRef}
             className={clsx({
-              "absolute h-full flex items-center z-10 transition-all font-semibold":
+              "absolute flex items-center z-10 transition-all font-semibold":
                 true,
-              "top-0": !(focused || inputRef.current?.value),
-              "h-auto cui-input-legend": focused || inputRef.current?.value,
+              "top-0 h-full": !(focused || ref.current?.value),
+              "h-auto cui-input-legend": focused || ref.current?.value,
               "left-4": !props.size || !["small", "large"].includes(props.size),
               "text-xs left-3": props.size === "small",
               "left-5": props.size === "large",
               "-top-2.5":
-                (focused || inputRef.current?.value) &&
+                (focused || ref.current?.value) &&
                 (!props.size || props.size !== "small"),
               "-top-[7px]":
-                (focused || inputRef.current?.value) && props.size === "small",
+                (focused || ref.current?.value) && props.size === "small",
               "text-red-500": props.error,
             })}
           >
@@ -68,7 +70,7 @@ export default function TextInput(props: InputProps) {
         )}
 
         <input
-          ref={inputRef}
+          ref={ref}
           type={
             props.type === "PASSWORD" && !showPassword ? "password" : "text"
           }
