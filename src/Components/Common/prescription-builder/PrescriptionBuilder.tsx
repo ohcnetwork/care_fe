@@ -4,6 +4,7 @@ import { PrescriptionDropdown } from "./PrescriptionDropdown";
 import { PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
 
 import medicines_list from "./assets/medicines.json";
+import ToolTip from "../utils/Tooltip";
 
 export const medicines = medicines_list;
 
@@ -142,11 +143,26 @@ export default function PrescriptionBuilder(
                     value={prescription.dosage}
                     onChange={(freq) => setFrequency(freq || "")}
                     optionLabel={(option) => option}
-                    optionDescription={(option) =>
-                      frequencyTips[option as keyof typeof frequencyTips]
-                    }
+                    optionIcon={(option) => (
+                      <ToolTip
+                        className="-right-2 bottom-[calc(100%+1px)] w-[100px]"
+                        position="CUSTOM"
+                        text={
+                          <span>
+                            {
+                              frequencyTips[
+                                option as keyof typeof frequencyTips
+                              ]
+                            }
+                          </span>
+                        }
+                      >
+                        <i className="fa-solid fa-circle-info"></i>
+                      </ToolTip>
+                    )}
+                    showIconWhenSelected={false}
                     required={false}
-                    className="mt-[2px]"
+                    className="mt-[2px] w-[150px]"
                   />
                 </div>
               </div>
