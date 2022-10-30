@@ -66,6 +66,8 @@ import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
 import { ICD11DiagnosisModel } from "./models";
+import ToggleButtons from "../Form/ToggleButtons";
+import _ from "lodash";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -599,6 +601,9 @@ export const ConsultationForm = (props: any) => {
         form: { ...state.form, [e.target.name]: e.target.value },
       });
   };
+
+  //console.log(state.form.procedure);
+
   const handleProcedureChange: ChangeEventHandler<HTMLInputElement> = (
     e: any
   ) => {
@@ -668,6 +673,8 @@ export const ConsultationForm = (props: any) => {
   //     dispatch({ type: "set_form", form });
   //   }
 
+  // console.log(state.form.procedure);
+
   const handleDateChange = (
     date: MaterialUiPickersDate,
     key: string,
@@ -679,8 +686,14 @@ export const ConsultationForm = (props: any) => {
         newValue = { [i]: newValue };
       });
     }
+
+    console.log(date, { ..._.merge(state.form, newValue) });
+
     moment(date).isValid() &&
-      dispatch({ type: "set_form", form: { ...state.form, ...newValue } });
+      dispatch({
+        type: "set_form",
+        form: { ..._.merge(state.form, newValue) },
+      });
   };
 
   const handleDoctorSelect = (doctor: UserModel | null) => {
@@ -980,27 +993,45 @@ export const ConsultationForm = (props: any) => {
                 <br />
                 <ErrorHelperText error={state.errors.discharge_advice} />
               </div>
+
+              <div id="discharge_advice-div" className="mt-4">
+                <InputLabel>PRN Prescription</InputLabel>
+                <PRNPrescriptionBuilder
+                  prescriptions={PRNAdvice}
+                  setPrescriptions={setPRNAdvice}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.prn_prescription} />
+              </div>
+
               <div
                 id="procedure-div"
-                className="mt-4 border-b-2 border-dashed border-gray-500 rounded p-2"
+                className="mt-4 border-gray-500 rounded p-2"
               >
                 <InputLabel>Procedure</InputLabel>
                 <div className="mt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <InputLabel className="text-sm">Repetitive</InputLabel>
-                      <SelectField
-                        name="isRepetitive"
-                        variant="standard"
-                        value={state.form.procedure.isRepetitive}
-                        options={[
-                          { id: "false", text: "No" },
-                          { id: "true", text: "Yes" },
-                        ]}
-                        onChange={handleProcedureChange}
-                        errors={state.errors.procedure.isRepetitive}
-                      />
-                    </div>
+                  <div className="flex justify-between items-center gap-2">
+                    <ToggleButtons
+                      name="isRepetitive"
+                      label="Repetitive"
+                      selected={state.form.procedure.isRepetitive}
+                      buttons={[
+                        { value: "false", label: "No" },
+                        { value: "true", label: "Yes" },
+                      ]}
+                      onChange={(value) => {
+                        dispatch({
+                          type: "set_form",
+                          form: {
+                            ...state.form,
+                            procedure: {
+                              ...state.form.procedure,
+                              isRepetitive: value as BooleanStrings,
+                            },
+                          },
+                        });
+                      }}
+                    />
                     <div>
                       {state.form.procedure.isRepetitive === "true" ? (
                         <>
@@ -1075,15 +1106,7 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 </div>
               </div>
-              <div id="discharge_advice-div" className="mt-4">
-                <InputLabel>PRN Prescription</InputLabel>
-                <PRNPrescriptionBuilder
-                  prescriptions={PRNAdvice}
-                  setPrescriptions={setPRNAdvice}
-                />
-                <br />
-                <ErrorHelperText error={state.errors.prn_prescription} />
-              </div>
+
               <div id="ip_no-div" className="mt-4">
                 <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
