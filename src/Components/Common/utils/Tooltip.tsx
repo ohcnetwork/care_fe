@@ -32,7 +32,8 @@ export default function ToolTip(props: TooltipProps) {
     position === "RIGHT" && "left-[calc(100%+5px)] top-[calc(50%-75px)]",
     status === true
       ? "visible opacity-100 -translate-y-1"
-      : "invisible opacity-0 translate-y-0"
+      : "invisible opacity-0 translate-y-0",
+    props.className && props.className
   );
 
   return (

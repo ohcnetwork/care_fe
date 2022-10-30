@@ -866,10 +866,17 @@ export const ConsultationForm = (props: any) => {
                         errors=""
                         multiple={false}
                         margin="dense"
-                        disabled={true}
+                        unoccupiedOnly={true}
+                        disabled={!!id} // disabled while editing
                         // location={state.form.}
                         facility={facilityId}
                       />
+                      {!!id && (
+                        <p className="text-gray-500 text-sm -mt-5 mb-1">
+                          Can't be edited while Consultation update. To change
+                          bed use the form bellow
+                        </p>
+                      )}
                     </div>
                   </>
                 )}
@@ -1192,6 +1199,7 @@ export const ConsultationForm = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
               consultationId={id}
+              fetchPatientData={fetchData}
             ></Beds>
           </CardContent>
         </div>
