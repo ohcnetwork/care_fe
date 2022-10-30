@@ -5,6 +5,7 @@ interface TooltipProps {
   children: ReactNode;
   text: ReactNode;
   position?: "TOP" | "BOTTOM" | "LEFT" | "RIGHT";
+  className?: string;
 }
 
 /**
