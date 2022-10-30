@@ -103,7 +103,7 @@ export default function PRNPrescriptionBuilder(
             key={i}
             className="border-b border-b-gray-500 border-dashed py-2 text-xs text-gray-600"
           >
-            <div className="flex gap-2 flex-col md:flex-row">
+            <div className="flex gap-2 flex-col md:flex-row items-center">
               <div className="w-full">
                 Medicine
                 <AutoCompleteAsync
@@ -119,7 +119,7 @@ export default function PRNPrescriptionBuilder(
                   optionLabel={(option) => option}
                   onChange={setMedicine}
                   showNOptions={medicines.length}
-                  className=""
+                  className="-mt-1"
                 />
               </div>
               <div className="flex gap-2">
@@ -187,7 +187,7 @@ export default function PRNPrescriptionBuilder(
                 Indicator
                 <input
                   type="text"
-                  className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                  className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-3 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                   value={prescription.indicator}
                   placeholder="Indicator"
                   onChange={(e) => {
@@ -249,6 +249,7 @@ export default function PRNPrescriptionBuilder(
                   <PrescriptionDropdown
                     type="number"
                     placeholder="hours"
+                    className="!py-3"
                     options={DOSAGE_HRS}
                     value={prescription.min_time || 0}
                     setValue={setMinTime}
