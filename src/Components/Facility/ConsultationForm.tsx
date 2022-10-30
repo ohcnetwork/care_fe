@@ -40,7 +40,6 @@ import {
   DateInputField,
   ErrorHelperText,
   MultilineInputField,
-  MultiSelectField,
   NativeSelectField,
   SelectField,
   TextInputField,
@@ -67,6 +66,8 @@ import ProcedureBuilder, {
 } from "../Common/prescription-builder/ProcedureBuilder";
 import { ICD11DiagnosisModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
+import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
+import { FieldLabel } from "../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -598,34 +599,16 @@ export const ConsultationForm = (props: any) => {
         form: {
           ...state.form,
           [e.target.name]: e.target.value,
-          // admitted: e.target.value === "A" ? "true" : "false",
         },
       });
   };
 
-  const handleSymptomChange = (e: any, child?: any) => {
-    const form = { ...state.form };
-    const { value } = e?.target;
-    const otherSymptoms = value.filter((i: number) => i !== 1);
-    // prevent user from selecting asymptomatic along with other options
-    form.symptoms =
-      child?.props?.value === 1
-        ? otherSymptoms.length
-          ? [1]
-          : value
-        : otherSymptoms;
-    form.hasSymptom = !!form.symptoms.filter((i: number) => i !== 1).length;
-    form.otherSymptom = !!form.symptoms.filter((i: number) => i === 9).length;
-    dispatch({ type: "set_form", form });
+  const handleValueChange = (value: any, field: string) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [field]: value },
+    });
   };
-
-  // ------------- DEPRECATED -------------
-  // const handleDateChange = (date: any, key: string) => {
-  //   if (moment(date).isValid()) {
-  //     const form = { ...state.form };
-  //     form[key] = date;
-  //     dispatch({ type: "set_form", form });
-  //   }
 
   const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
     moment(date).isValid() &&
@@ -683,13 +666,15 @@ export const ConsultationForm = (props: any) => {
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
                 <div id="symptoms-div">
-                  <InputLabel id="symptoms-label">Symptoms*</InputLabel>
-                  <MultiSelectField
-                    name="symptoms"
-                    variant="outlined"
+                  <FieldLabel className="text-sm">Symptoms</FieldLabel>
+                  <MultiSelectMenuV2
+                    id="symptoms"
+                    placeholder="Symptoms"
                     value={state.form.symptoms}
                     options={symptomChoices}
-                    onChange={handleSymptomChange}
+                    optionLabel={(o) => o.text}
+                    optionValue={(o) => o.id}
+                    onChange={(o) => handleValueChange(o, "symptoms")}
                   />
                   <ErrorHelperText error={state.errors.symptoms} />
                 </div>
