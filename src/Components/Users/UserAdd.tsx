@@ -40,8 +40,6 @@ import {
 import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
 import { goBack } from "../../Utils/utils";
-import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
-
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -122,7 +120,7 @@ export const UserAdd = (props: UserProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
-  const [current_user_facilities, setFacilities] = useState<
+  const [_current_user_facilities, setFacilities] = useState<
     Array<FacilityModel>
   >([]);
   const [states, setStates] = useState(initialStates);
@@ -161,7 +159,7 @@ export const UserAdd = (props: UserProps) => {
       !(state.form.username?.length < 2) &&
       /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
     ) {
-      let timeout = setTimeout(() => {
+      const timeout = setTimeout(() => {
         checkUsername(usernameInput);
       }, 500);
       return () => clearTimeout(timeout);
