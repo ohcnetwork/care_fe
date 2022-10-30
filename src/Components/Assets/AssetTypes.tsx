@@ -10,8 +10,15 @@ export interface AssetLocationObject {
   };
 }
 
-export type AssetType = "INTERNAL" | "EXTERNAL";
-export type AssetClass = "ONVIF" | "HL7MONITOR";
+export enum AssetType {
+  internal = "INTERNAL",
+  external = "EXTERNAL",
+}
+
+export enum AssetClass {
+  onvif = "ONVIF",
+  hl7monitor = "HL7MONITOR",
+}
 
 export const assetClassProps = {
   ONVIF: {

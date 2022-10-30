@@ -25,12 +25,12 @@ import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
-import SelectMenu from "../Common/components/SelectMenu";
 import moment from "moment";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError = {
@@ -164,7 +164,7 @@ const AssetCreate = (props: AssetProps) => {
         setIsLoading(false);
       });
     }
-  }, [assetId]);
+  }, [assetId, dispatchAction, facilityId]);
 
   useEffect(() => {
     if (asset) {
@@ -482,22 +482,19 @@ const AssetCreate = (props: AssetProps) => {
                     <div>
                       <label htmlFor="asset-location">Location * </label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
+                          required
                           options={[
-                            {
-                              title: "Select",
-                              description:
-                                "Select an Asset Location from the following",
-                              value: "",
-                            },
                             ...locations.map((location: any) => ({
                               title: location.name,
                               description: location.facility.name,
                               value: location.id,
                             })),
                           ]}
-                          selected={location}
-                          onSelect={setLocation}
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) => o.value}
+                          value={location}
+                          onChange={(e) => setLocation(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.location} />
@@ -507,14 +504,9 @@ const AssetCreate = (props: AssetProps) => {
                     <div>
                       <label htmlFor="asset-type">Asset Type * </label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
+                          required
                           options={[
-                            {
-                              title: "Select",
-                              description:
-                                "Select an Asset Type from the following",
-                              value: undefined,
-                            },
                             {
                               title: "Internal",
                               description:
@@ -528,8 +520,14 @@ const AssetCreate = (props: AssetProps) => {
                               value: "EXTERNAL",
                             },
                           ]}
-                          selected={asset_type}
-                          onSelect={setAssetType}
+                          value={asset_type}
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) =>
+                            o.value === "INTERNAL"
+                              ? AssetType.internal
+                              : AssetType.external
+                          }
+                          onChange={(e) => setAssetType(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.asset_type} />
@@ -539,17 +537,23 @@ const AssetCreate = (props: AssetProps) => {
                     <div>
                       <label htmlFor="asset-class">Asset Class</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
+                          required
                           options={[
-                            { title: "Not Applicable", value: undefined },
                             { title: "ONVIF Camera", value: "ONVIF" },
                             {
                               title: "HL7 Vitals Monitor",
                               value: "HL7MONITOR",
                             },
                           ]}
-                          selected={asset_class}
-                          onSelect={setAssetClass}
+                          value={asset_class}
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) =>
+                            o.value === "ONVIF"
+                              ? AssetClass.onvif
+                              : AssetClass.hl7monitor
+                          }
+                          onChange={(e) => setAssetClass(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.asset_class} />
