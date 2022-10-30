@@ -104,7 +104,7 @@ export default function PRNPrescriptionBuilder(
             className="border-b border-b-gray-500 border-dashed py-2 text-xs text-gray-600"
           >
             <div className="flex gap-2 flex-col md:flex-row">
-              <div className="w-1/2">
+              <div className="w-full">
                 Medicine
                 <AutoCompleteAsync
                   placeholder="Medicine"
@@ -123,7 +123,7 @@ export default function PRNPrescriptionBuilder(
                 />
               </div>
               <div className="flex gap-2">
-                <div className="w-32">
+                <div className="w-[100px]">
                   Route
                   <SelectMenuV2
                     placeholder="Route"
@@ -132,6 +132,7 @@ export default function PRNPrescriptionBuilder(
                     onChange={(route) => setRoute(route || "")}
                     optionLabel={(option) => option}
                     required={false}
+                    showChevronIcon={false}
                     className="mt-[2px]"
                   />
                 </div>
@@ -142,7 +143,7 @@ export default function PRNPrescriptionBuilder(
                       <div className="flex gap-1 mt-[2px] h-12">
                         <input
                           type="number"
-                          className="w-full md:w-20 focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                          className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                           value={prescription.dosage?.split(" ")[0]}
                           placeholder="Dosage"
                           min={0}
@@ -164,7 +165,7 @@ export default function PRNPrescriptionBuilder(
                           }}
                           required
                         />
-                        <div className="w-32 shrink-0">
+                        <div className="w-[80px] shrink-0">
                           <SelectMenuV2
                             placeholder="Unit"
                             options={units}
@@ -172,6 +173,7 @@ export default function PRNPrescriptionBuilder(
                             onChange={(dosage) => setDosageUnit(dosage || "")}
                             optionLabel={(option) => option}
                             required={false}
+                            showChevronIcon={false}
                           />
                         </div>
                       </div>
@@ -228,11 +230,14 @@ export default function PRNPrescriptionBuilder(
                       required
                     />
                     <div className="w-[80px] shrink-0">
-                      <PrescriptionDropdown
+                      <SelectMenuV2
                         placeholder="Unit"
                         options={units}
                         value={prescription.max_dosage?.split(" ")[1] || "mg"}
-                        setValue={setMaxDosageUnit}
+                        onChange={(dosage) => setMaxDosageUnit(dosage || "")}
+                        optionLabel={(option) => option}
+                        required={false}
+                        showChevronIcon={false}
                       />
                     </div>
                   </div>
