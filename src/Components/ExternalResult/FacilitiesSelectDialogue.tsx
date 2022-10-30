@@ -9,6 +9,16 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles({
+  paperFullWidth: {
+    overflowY: "visible",
+  },
+  dialogContentRoot: {
+    overflowY: "visible",
+  },
+});
 
 interface Props {
   handleOk: () => void;
@@ -19,6 +29,7 @@ interface Props {
 
 const FacilitiesSelectDialog = (props: Props) => {
   const { handleOk, handleCancel, selectedFacility, setSelected } = props;
+  const classes = useStyles();
 
   const handleEscKeyPress = (event: any) => {
     if (event.key === "Escape") {
@@ -27,14 +38,25 @@ const FacilitiesSelectDialog = (props: Props) => {
   };
 
   return (
-    <Dialog open={true} onKeyDown={(e) => handleEscKeyPress(e)}>
+    <Dialog
+      open={true}
+      fullWidth={true}
+      classes={{
+        paperFullWidth: classes.paperFullWidth,
+      }}
+      onKeyDown={(e) => handleEscKeyPress(e)}
+    >
       <DialogTitle
         className="font-semibold text-3xl max-w-md md:min-w-[400px]"
         id="font-semibold text-3xl"
       >
         Search for a facility
       </DialogTitle>
-      <DialogContent>
+      <DialogContent
+        classes={{
+          root: classes.dialogContentRoot,
+        }}
+      >
         <FacilitySelect
           name="facilities"
           selected={selectedFacility}
@@ -42,6 +64,7 @@ const FacilitiesSelectDialog = (props: Props) => {
           errors=""
           showAll={false}
           multiple={false}
+          className="z-40"
         />
       </DialogContent>
       <DialogActions style={{ justifyContent: "space-between" }}>
