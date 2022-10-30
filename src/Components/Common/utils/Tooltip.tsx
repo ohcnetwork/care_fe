@@ -17,7 +17,6 @@ export default function ToolTip(props: {
     position === "BOTTOM" && "top-[calc(100%+5px)] left-[calc(50%-75px)]",
     position === "LEFT" && "right-[calc(100%+5px)] top-[calc(50%-75px)]",
     position === "RIGHT" && "left-[calc(100%+5px)] top-[calc(50%-75px)]",
-    position === "CUSTOM" && "",
     status === true
       ? "visible opacity-100 -translate-y-1"
       : "invisible opacity-0 translate-y-0",

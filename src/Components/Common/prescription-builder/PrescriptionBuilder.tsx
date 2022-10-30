@@ -145,7 +145,7 @@ export default function PrescriptionBuilder(
                     optionLabel={(option) => option}
                     optionIcon={(option) => (
                       <ToolTip
-                        className="-right-2 bottom-[calc(100%+1px)] w-[100px]"
+                        className="-right-2 bottom-[calc(100%+1px)] max-w-[100px]"
                         position="CUSTOM"
                         text={
                           <span>
