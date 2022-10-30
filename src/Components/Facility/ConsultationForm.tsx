@@ -1199,6 +1199,7 @@ export const ConsultationForm = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
               consultationId={id}
+              fetchPatientData={fetchData}
             ></Beds>
           </CardContent>
         </div>
