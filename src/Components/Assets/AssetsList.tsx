@@ -20,7 +20,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
-import { Badge } from "../Common/Badge";
+import Chip from "../../CAREUI/display/Chip";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -258,7 +258,7 @@ const AssetsList = () => {
   return (
     <div className="px-6">
       <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
-      <div className="lg:flex mt-5 space-y-2 space-x-2">
+      <div className="lg:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -313,7 +313,7 @@ const AssetsList = () => {
         <Loading />
       ) : (
         <>
-          <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3">
+          <div className="flex mt-2 flex-wrap w-full col-span-3">
             {badge("Facility", facilityName, ["facility", "location"])}
             {badge("Asset Name", qParams.search, ["search"])}
             {badge("Location", locationName, ["location"])}
@@ -334,13 +334,15 @@ const AssetsList = () => {
                         <p className="text-xl flex font-medium capitalize break-words">
                           <span className="mr-2 text-primary-500">
                             {" "}
-                            {
-                              (
-                                (asset.asset_class &&
-                                  assetClassProps[asset.asset_class]) ||
-                                assetClassProps.None
-                              ).icon
-                            }
+                            <i
+                              className={`fas fa-${
+                                (
+                                  (asset.asset_class &&
+                                    assetClassProps[asset.asset_class]) ||
+                                  assetClassProps.None
+                                ).icon
+                              }`}
+                            />
                           </span>
                           <p className="truncate w-48">{asset.name}</p>
                         </p>
@@ -351,15 +353,15 @@ const AssetsList = () => {
 
                       <div className="flex flex-wrap gap-2 mt-2">
                         {asset.is_working ? (
-                          <Badge color="green" startIcon="cog" text="Working" />
+                          <Chip color="green" startIcon="cog" text="Working" />
                         ) : (
-                          <Badge
+                          <Chip
                             color="red"
                             startIcon="cog"
                             text="Not Working"
                           />
                         )}
-                        <Badge
+                        <Chip
                           color="blue"
                           startIcon="location-arrow"
                           text={asset.status}

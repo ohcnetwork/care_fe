@@ -22,7 +22,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [localipAddress, setLocalIPAddress] = React.useState("");
   const [ipadrdress_error, setIpAddress_error] = React.useState("");
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   useEffect(() => {
     setAssetType(asset?.asset_class);
     setMiddlewareHostname(asset?.meta?.middleware_hostname);

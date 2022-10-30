@@ -15,21 +15,24 @@ export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
 export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
 export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
-export const USER_TYPES: Array<string> = [
-  "Pharmacist",
-  "Volunteer",
-  "StaffReadOnly",
-  "Staff",
-  "Doctor",
-  "WardAdmin",
-  "LocalBodyAdmin",
-  "DistrictLabAdmin",
-  "DistrictReadOnlyAdmin",
-  "DistrictAdmin",
-  "StateLabAdmin",
-  "StateReadOnlyAdmin",
-  "StateAdmin",
+const readOnly = true;
+export const USER_TYPE_OPTIONS = [
+  { id: "Pharmacist", role: "Pharmacist" },
+  { id: "Volunteer", role: "Volunteer" },
+  { id: "StaffReadOnly", role: "Staff", readOnly },
+  { id: "Staff", role: "Staff" },
+  { id: "Doctor", role: "Doctor" },
+  { id: "WardAdmin", role: "Ward Admin" },
+  { id: "LocalBodyAdmin", role: "Local Body Admin" },
+  { id: "DistrictLabAdmin", role: "District Lab Admin" },
+  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly },
+  { id: "DistrictAdmin", role: "District Admin" },
+  { id: "StateLabAdmin", role: "State Lab Admin" },
+  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly },
+  { id: "StateAdmin", role: "State Admin" },
 ];
+
+export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
 
 export const DOWNLOAD_TYPES: Array<string> = [
   "Facility List",
@@ -132,13 +135,13 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
-export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
-  { id: 1, text: "created_date", desc: "ASC Created Date" },
-  { id: 2, text: "-created_date", desc: "DESC Created Date" },
-  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
-  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
-  { id: 5, text: "review_time", desc: "ASC Review Time" },
-  { id: 6, text: "-review_time", desc: "DESC Review Time" },
+export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
+  { id: 1, text: "created_date", desc: "Created Date", order: "Ascending" },
+  { id: 2, text: "-created_date", desc: "Created Date", order: "Descending" },
+  { id: 3, text: "modified_date", desc: "Modified Date", order: "Ascending" },
+  { id: 4, text: "-modified_date", desc: "Modified Date", order: "Descending" },
+  { id: 5, text: "review_time", desc: "Review Time", order: "Ascending" },
+  { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
 ];
 
 const KASP_BED_TYPES = KASP_ENABLED
@@ -233,10 +236,10 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 7, text: "Other" },
 ];
 
-export const GENDER_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Male" },
-  { id: 2, text: "Female" },
-  { id: 3, text: "Non-binary" },
+export const GENDER_TYPES = [
+  { id: 1, text: "Male", icon: <i className="fa-solid fa-person" /> },
+  { id: 2, text: "Female", icon: <i className="fa-solid fa-person-dress" /> },
+  { id: 3, text: "Non-binary", icon: <i className="fa-solid fa-genderless" /> },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -792,3 +795,5 @@ export const FACILITY_FEATURE_TYPES = [
     icon: "droplet",
   },
 ];
+
+export const WAVEFORM_VIEWABLE_LENGTH = 400;

@@ -1,82 +1,39 @@
-import React, { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { getDistrictByName } from "../../../Redux/actions";
-import { AutoCompleteAsyncField } from "../../Common/HelperInputFields";
-import { debounce } from "lodash";
+import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
 
 interface DistrictSelectProps {
   name: string;
   errors: string;
   className?: string;
   multiple?: boolean;
-  searchAll?: boolean;
   selected: string;
-  margin?: string;
   setSelected: (selected: string) => void;
 }
 
 function DistrictSelect(props: DistrictSelectProps) {
-  const { name, errors, className, multiple, selected, setSelected, margin } =
-    props;
-  const [isdistrictLoading, setDistrictLoading] = useState(false);
-  const [hasSearchText, setHasSearchText] = useState(false);
-  const [districtList, setDistrictList] = useState([]);
+  const { name, errors, className, multiple, selected, setSelected } = props;
   const dispatchAction: any = useDispatch();
 
-  const handleValueChange = (current: string) => {
-    if (!current) {
-      setDistrictList([]);
-      setDistrictLoading(false);
-      setHasSearchText(false);
-    }
-    setSelected(current);
-  };
-
-  const handleSearch = (e: any) => {
-    setDistrictLoading(true);
-    setHasSearchText(!!e.target.value);
-    onDistrictSearch(e.target.value);
-  };
-
-  const onDistrictSearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const params = { limit: 50, offset: 0, district_name: text };
-        const res = await dispatchAction(getDistrictByName(params));
-        if (res && res.data) {
-          setDistrictList(res.data.results);
-        }
-        setDistrictLoading(false);
-      } else {
-        setDistrictList([]);
-        setDistrictLoading(false);
-      }
-    }, 300),
-    []
+  const districtSearch = useCallback(
+    async (text: string) => {
+      const params = { limit: 50, offset: 0, district_name: text };
+      const res = await dispatchAction(getDistrictByName(params));
+      return res?.data?.results;
+    },
+    [dispatchAction]
   );
 
   return (
-    <AutoCompleteAsyncField
+    <AutoCompleteAsync
       name={name}
       multiple={multiple}
-      variant="outlined"
-      margin={margin}
-      value={selected}
-      options={districtList}
-      onSearch={handleSearch}
-      onChange={(e: any, selected: any) => handleValueChange(selected)}
-      loading={isdistrictLoading}
-      placeholder="Enter district name"
-      noOptionsText={
-        hasSearchText
-          ? "No district found, please try again"
-          : "Start typing to begin search"
-      }
-      renderOption={(option: any) => <div>{option.name}</div>}
-      getOptionSelected={(option: any, value: any) => option.id === value.id}
-      getOptionLabel={(option: any) => option.name}
-      filterOptions={(options: string) => options}
-      errors={errors}
+      selected={selected}
+      fetchData={districtSearch}
+      onChange={setSelected}
+      optionLabel={(option: any) => option.name}
+      error={errors}
       className={className}
     />
   );
