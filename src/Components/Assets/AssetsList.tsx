@@ -286,11 +286,11 @@ const AssetsList = () => {
 
             <div className="flex flex-wrap gap-2 mt-2">
               {asset.is_working ? (
-                <Badge color="green" startIcon="cog" text="Working" />
+                <Chip color="green" startIcon="cog" text="Working" />
               ) : (
-                <Badge color="red" startIcon="cog" text="Not Working" />
+                <Chip color="red" startIcon="cog" text="Not Working" />
               )}
-              <Badge
+              <Chip
                 color="blue"
                 startIcon="location-arrow"
                 text={asset.status}
