@@ -26,6 +26,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
 import clsx from "clsx";
 import { formatDate } from "../../Utils/utils";
+import SelectMenu from "../Common/components/SelectMenu";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -167,6 +168,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [editFileName, setEditFileName] = useState<any>("");
   const [editFileNameError, setEditFileNameError] = useState("");
   const [btnloader, setbtnloader] = useState(false);
+  const [sortFileState, setSortFileState] = useState("UNARCHIVED");
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const currentuser_username = currentUser.data.username;
@@ -1350,11 +1352,31 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={true}
         breadcrumbs={false}
       />
+      <div className="mt-2 sm:w-1/3 w-full">
+        <SelectMenu
+          options={[
+            { title: "Unarchived Files", value: "UNARCHIVED" },
+            { title: "Archived Files", value: "ARCHIVED" },
+          ]}
+          selected={sortFileState}
+          onSelect={setSortFileState}
+        />
+      </div>
       {uploadedFiles && uploadedFiles.length > 0 ? (
-        [
-          ...uploadedFiles.filter((item: FileUploadModel) => !item.is_archived),
-          ...uploadedFiles.filter((item: FileUploadModel) => item.is_archived),
-        ].map((item: FileUploadModel) => renderFileUpload(item))
+        sortFileState === "UNARCHIVED" ? (
+          [
+            // ...uploadedFiles.filter((item: FileUploadModel) => !item.is_archived),
+            ...uploadedFiles.filter(
+              (item: FileUploadModel) => !item.is_archived
+            ),
+          ].map((item: FileUploadModel) => renderFileUpload(item))
+        ) : (
+          [
+            ...uploadedFiles.filter(
+              (item: FileUploadModel) => item.is_archived
+            ),
+          ].map((item: FileUploadModel) => renderFileUpload(item))
+        )
       ) : (
         <div className="mt-4 border bg-white shadow rounded-lg p-4">
           <div className="font-bold text-gray-500 text-md flex justify-center items-center">
