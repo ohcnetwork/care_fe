@@ -1,11 +1,20 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const colors = require("tailwindcss/colors");
+const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
   important: true,
   theme: {
+    screens: {
+      vs: "348px",
+      ...defaultTheme.screens,
+    },
     extend: {
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+      },
       colors: {
+        error: colors.red["500"],
         green: colors.emerald,
         yellow: colors.amber,
         purple: colors.violet,
@@ -14,22 +23,44 @@ module.exports = {
           200: "#bcf0da",
           300: "#84e1bc",
           400: "#31c48d",
-          500: "#0e9f6e",
+          500: "#0d9f6e",
           600: "#057a55",
           700: "#046c4e",
-          800: "#03543f",
-          900: "#014737",
+          800: "#025340",
+          900: "#004636",
         },
         gray: {
-          100: "#FBFAFC",
-          200: "#F7F5FA",
+          100: "#FBF9FB",
+          200: "#F6F6F6",
           300: "#F1EDF7",
           400: "#DFDAE8",
           500: "#BFB8CC",
-          600: "#9187A1",
-          700: "#7D728F",
+          600: "#9C9C9C",
+          700: "#808080",
           800: "#6A5F7A",
           900: "#453C52",
+        },
+        patient: {
+          comfort: {
+            DEFAULT: colors.slate[200],
+            fore: colors.slate[700],
+          },
+          stable: {
+            DEFAULT: "#59D4FF",
+            fore: colors.white,
+          },
+          abnormal: {
+            DEFAULT: "#F6CB23",
+            fore: colors.yellow[900],
+          },
+          critical: {
+            DEFAULT: colors.red[500],
+            fore: colors.red[100],
+          },
+          unknown: {
+            DEFAULT: colors.gray[400],
+            fore: colors.gray[800],
+          },
         },
       },
       padding: {

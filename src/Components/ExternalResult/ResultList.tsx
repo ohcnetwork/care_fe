@@ -45,7 +45,6 @@ export default function ResultList() {
   });
 
   let manageResults: any = null;
-  let pagination: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
     localStorage.getItem("lsg-ward-data") ||
@@ -79,8 +78,8 @@ export default function ResultList() {
         if (res && res.data) {
           setData(res.data.results);
           setTotalCount(res.data.count);
+          setIsLoading(false);
         }
-        setIsLoading(false);
       })
       .catch(() => {
         setIsLoading(false);
@@ -124,10 +123,6 @@ export default function ResultList() {
   const searchByPhone = (value: string) => {
     updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
-
-  // const handleFilter = (value: string) => {
-  //   updateQuery({ disease_status: value, page: 1 });
-  // };
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
@@ -320,29 +315,17 @@ export default function ResultList() {
     );
   } else if (data && data.length) {
     manageResults = <>{resultList}</>;
-    pagination = (
-      <>
-        {totalCount > RESULT_LIMIT && (
-          <div className="mt-4 w-full flex justify-center items-center">
-            <Pagination
-              cPage={qParams.page}
-              defaultPerPage={RESULT_LIMIT}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
-        )}
-      </>
-    );
   } else if (data && data.length === 0) {
     manageResults = (
-      <Grid item xs={12} md={12}>
-        <Grid container justify="center" alignItems="center">
-          <h5 className="flex justify-center items-center text-gray-600">
-            No Results Found
-          </h5>
-        </Grid>
-      </Grid>
+      <tr className="bg-white">
+        <td colSpan={5}>
+          <div className="w-full bg-white rounded-lg p-3">
+            <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+              No Results Found
+            </div>
+          </div>
+        </td>
+      </tr>
     );
   }
 
@@ -368,13 +351,19 @@ export default function ResultList() {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Results
               </dt>
-              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                {totalCount}
-              </dd>
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
             </dl>
           </div>
         </div>
-        <div className="md:mt-2">
+        <div className="mt-2">
           <div>
             <div className="text-sm font-semibold mb-2">Search by Name</div>
             <InputSearchBox
@@ -389,20 +378,21 @@ export default function ResultList() {
             <PhoneNumberField
               value={qParams.mobile_number || "+91"}
               onChange={(value: string) => searchByPhone(value)}
+              placeholder="Search by Phone Number"
               turnOffAutoFormat={false}
               errors=""
             />
           </div>
         </div>
         <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
-          <div className="flex justify-end gap-2">
-            <div
+          <div className="flex flex-col md:flex-row md:justify-end gap-2">
+            <button
               className="btn btn-primary"
               onClick={(_) => navigate("external_results/upload")}
             >
               Upload List
-            </div>
-            <div
+            </button>
+            <button
               className={clsx(
                 "btn btn-primary",
                 downloadLoading && "pointer-events-none"
@@ -417,7 +407,7 @@ export default function ResultList() {
                 )}
                 Export
               </span>
-            </div>
+            </button>
           </div>
           <div className="flex ml-auto gap-2 md:pt-0 pt-2">
             <button
@@ -473,7 +463,7 @@ export default function ResultList() {
         )}
         {badge("SRF ID", qParams.srf_id, "srf_id")}
       </div>
-      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
+      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-t-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
@@ -498,8 +488,17 @@ export default function ResultList() {
             {manageResults}
           </tbody>
         </table>
-        <div className="bg-white divide-y divide-gray-200">{pagination}</div>
       </div>
+      {totalCount > RESULT_LIMIT && (
+        <div className="flex w-full pt-5 pb-1 items-center justify-center shadow sm:rounded-b-lg min-w-full bg-gray-50 border-t border-gray-200">
+          <Pagination
+            cPage={qParams.page}
+            defaultPerPage={RESULT_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
       <CSVLink
         data={downloadFile}
         filename={`external-result--${now}.csv`}

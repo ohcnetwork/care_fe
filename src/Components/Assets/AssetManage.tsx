@@ -1,16 +1,16 @@
-import React, { useState, useCallback, useEffect, ReactElement } from "react";
+import { useState, useCallback, useEffect, ReactElement } from "react";
 
 import loadable from "@loadable/component";
-import moment from "moment";
-import { AssetData, AssetTransaction } from "./AssetTypes";
-import * as Notification from "../../Utils/Notifications.js";
+import { assetClassProps, AssetData, AssetTransaction } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch } from "react-redux";
-import { Typography } from "@material-ui/core";
 import { getAsset, listAssetTransaction } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
+import AssetWarrantyCard from "./AssetWarrantyCard";
+import { formatDate } from "../../Utils/utils";
+import Chip from "../../CAREUI/display/Chip";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -30,7 +30,7 @@ const AssetManage = (props: AssetManageProps) => {
     ReactElement | ReactElement[]
   >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const limit = 14;
 
   const fetchData = useCallback(
@@ -42,14 +42,12 @@ const AssetManage = (props: AssetManageProps) => {
       ]);
       if (!status.aborted) {
         setIsLoading(false);
-        if (!assetData.data)
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        else {
+        if (assetData && assetData.data) {
           setAsset(assetData.data);
           setTransactions(transactionsData.data.results);
           setTotalCount(transactionsData.data.count);
+        } else {
+          navigate("/not-found");
         }
       }
     },
@@ -91,35 +89,6 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
     </div>
   );
-
-  const working_status = (is_working: boolean | undefined) => {
-    const bgColorClass = is_working ? "bg-green-500" : "bg-red-500";
-    return (
-      <span
-        className={`${bgColorClass} text-white text-sm px-2 py-1 uppercase rounded-full`}
-      >
-        {!is_working && "Not "} Working
-      </span>
-    );
-  };
-
-  const status = (
-    asset_status: "ACTIVE" | "TRANSFER_IN_PROGRESS" | undefined
-  ) => {
-    if (asset_status === "ACTIVE") {
-      return (
-        <span className="bg-green-500 text-white text-sm px-2 py-1 uppercase rounded-full">
-          ACTIVE
-        </span>
-      );
-    }
-    return (
-      <span className="bg-yellow-500 text-white text-sm px-2 py-1 uppercase rounded-full">
-        TRANSFER IN PROGRESS
-      </span>
-    );
-  };
-
   const populateTableRows = (txns: AssetTransaction[]) => {
     if (txns.length > 0) {
       setTransactionDetails(
@@ -143,7 +112,7 @@ const AssetManage = (props: AssetManageProps) => {
             </td>
             <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
               <span className="text-gray-900 font-medium">
-                {moment(transaction.modified_date).format("lll")}
+                {formatDate(transaction.modified_date)}
               </span>
             </td>
           </tr>
@@ -169,148 +138,182 @@ const AssetManage = (props: AssetManageProps) => {
 
   if (isLoading) return <Loading />;
   if (isPrintMode) return <PrintPreview />;
+
+  const assetClassProp =
+    (asset?.asset_class && assetClassProps[asset.asset_class]) ||
+    assetClassProps.None;
+
+  const detailBlock = (item: any) =>
+    item.hide ? null : (
+      <div className="flex flex-col">
+        <div className="flex flex-start items-center">
+          <div className="w-8">
+            <i className={`uil uil-${item.icon} text-gray-700 text-lg`}></i>
+          </div>
+          <div className="text-gray-700 break-words">{item.label}</div>
+        </div>
+        <div className="font-semibold text-lg ml-8 break-words">
+          {item.content || "--"}
+        </div>
+      </div>
+    );
+
   return (
     <div className="px-2 pb-2">
       <PageTitle
-        title={asset?.name || "Asset"}
+        title="Asset Details"
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
-      <div className="bg-white rounded-lg md:p-6 p-3 shadow">
-        <div className="text-2xl font-semibold mb-4 break-words">
-          {asset?.name}
-        </div>
-        <div className="md:flex justify-between">
-          <div className="mb-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Typography className="flex flex-col">
-                <span className="font-bold">Location</span>
-                <span>{asset?.location_object.name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Facility</span>
-                <span>{asset?.location_object.facility.name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Serial Number</span>
-                <span>{asset?.serial_number || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Warranty Details</span>
-                <span>{asset?.warranty_details || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Type</span>
-                <span>{asset?.asset_type || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Vendor Name</span>
-                <span>{asset?.vendor_name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Customer Support Name</span>
-                <span>{asset?.support_name || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Contact Phone Number</span>
-                <span>{asset?.support_phone || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Contact Email</span>
-                <span>{asset?.support_email || "--"}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Status</span>
-                <span>{status(asset?.status)}</span>
-              </Typography>
-              <Typography className="flex flex-col">
-                <span className="font-bold">Working status</span>
-                <span>{working_status(asset?.is_working)}</span>
-              </Typography>
-              {!asset?.is_working && (
-                <Typography className="flex flex-col">
-                  <span className="font-bold">Not working reason</span>
-                  <span>{asset?.not_working_reason || "--"}</span>
-                </Typography>
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
+          <div className="w-full md:p-8 p-6 flex flex-col justify-between gap-6">
+            <div>
+              <div className="flex flex-wrap items-center gap-2 justify-between w-full">
+                <span className="text-2xl md:text-3xl font-bold break-words">
+                  {asset?.name}
+                </span>
+                <div className=" flex flex-wrap gap-2">
+                  {asset?.status === "ACTIVE" ? (
+                    <Chip color="green" text="Active" startIcon="check" />
+                  ) : (
+                    <Chip
+                      color="yellow"
+                      text="Transfer in progress"
+                      startIcon="exclamation"
+                    />
+                  )}
+                  {asset?.is_working ? (
+                    <Chip color="green" text="Working" startIcon="check" />
+                  ) : (
+                    <Chip color="red" text="Not Working" startIcon="times" />
+                  )}
+                </div>
+              </div>
+              <span className="text-gray-700">{asset?.description}</span>
+            </div>
+            <div className="flex flex-col gap-6">
+              {[
+                {
+                  label: asset?.location_object.facility.name,
+                  icon: "location-pin-alt",
+                  content: asset?.location_object.name,
+                },
+                {
+                  label: "Asset Type",
+                  icon: "apps",
+                  content:
+                    asset?.asset_type === "INTERNAL"
+                      ? "Internal Asset"
+                      : "External Asset",
+                },
+                {
+                  label: "Asset Class",
+                  icon: assetClassProp.uicon,
+                  content: assetClassProp.name,
+                },
+                {
+                  label: "Not working reason",
+                  icon: "exclamation-circle",
+                  content: asset?.not_working_reason,
+                  hide: asset?.is_working,
+                },
+              ].map(detailBlock)}
+            </div>
+            <div className="flex flex-col md:flex-row gap-1">
+              <button
+                onClick={() =>
+                  navigate(
+                    `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
+                  )
+                }
+                id="update-asset"
+                className="primary-button"
+              >
+                <i className="uil uil-pen text-white mr-4" />
+                Update
+              </button>
+              {asset?.asset_class && (
+                <button
+                  onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+                  id="configure-asset"
+                  className="primary-button"
+                >
+                  <i className="uil uil-setting text-white mr-4"></i>
+                  Configure
+                </button>
               )}
             </div>
           </div>
-          <div className="flex mt-2 flex-col gap-1">
-            <div className="mb-3 flex justify-center">
-              <QRCode
-                bgColor="#FFFFFF"
-                fgColor="#000000"
-                level="Q"
-                size={128}
-                value={asset?.id || ""}
-              />
+          <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 flex-shrink-0">
+            <div>
+              <div className="font-bold text-lg mb-5">Service Details</div>
+              <div className="flex flex-col gap-6">
+                {[
+                  {
+                    label: "Last serviced on",
+                    icon: "wrench",
+                    content:
+                      asset?.last_serviced_on &&
+                      formatDate(asset?.last_serviced_on),
+                  },
+                  {
+                    label: "Notes",
+                    icon: "notes",
+                    content: asset?.notes,
+                  },
+                ].map(detailBlock)}
+              </div>
             </div>
-            <button
-              className="btn btn-primary"
-              onClick={() => setIsPrintMode(true)}
-            >
-              Print QR
-            </button>
-            <button
-              onClick={() =>
-                navigate(
-                  `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
-                )
-              }
-              id="update-asset"
-              className="btn-primary btn"
-            >
-              <i className="fas fa-pencil-alt text-white mr-2"></i>
-              Update Asset
-            </button>
-            {asset?.asset_class && (
-              <button
-                onClick={() => navigate(`/assets/${asset?.id}/configure`)}
-                id="update-asset"
-                className="btn-primary btn"
-              >
-                <i className="fas fa-cog text-white mr-2"></i>
-                Configure Asset
-              </button>
-            )}
+
+            <div className="text-xs text-gray-900 break-words">
+              <i className="text-gray-700">Created: </i>
+              {asset?.created_date && formatDate(asset?.created_date)}
+              <br />
+              <i className="text-gray-700">Last Modified: </i>
+              {asset?.modified_date && formatDate(asset?.modified_date)}
+            </div>
           </div>
         </div>
-      </div>
-      <div className="bg-white rounded-lg md:p-6 p-3 shadow mt-2">
-        <div className="text-xl font-semibold">Transaction History</div>
-        <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved from
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved to
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved By
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved On
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {transactionDetails}
-            </tbody>
-          </table>
-        </div>
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
+        {asset && (
+          <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col md:flex-row lg:flex-col transition-all duration-200 ease-in">
+            <AssetWarrantyCard asset={asset} />
           </div>
         )}
       </div>
+      <div className="text-xl font-semibold mt-8 mb-4">Transaction History</div>
+      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved from
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved to
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved By
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved On
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {transactionDetails}
+          </tbody>
+        </table>
+      </div>
+      {totalCount > limit && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };

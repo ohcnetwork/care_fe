@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { Check, KeyboardArrowDown } from "@material-ui/icons";
-import classNames from "classnames";
 
 type Props<T> = {
   options: {
@@ -12,8 +11,11 @@ type Props<T> = {
   onSelect: (value: T) => void;
   selected?: T;
   label?: string;
+  position?: string;
+  parentRelative?: boolean;
 };
 
+/** Deprecated. Use SelectMenuV2. */
 export default function SelectMenu<T>(props: Props<T>) {
   const options = props.options.map((option) => {
     return {
@@ -34,21 +36,23 @@ export default function SelectMenu<T>(props: Props<T>) {
       {({ open }) => (
         <>
           <Listbox.Label className="sr-only">{props.label}</Listbox.Label>
-          <div className="relative">
-            <Listbox.Button className="inline-flex shadow-sm rounded-md divide-x divide-primary-600">
-              <div className="relative z-0 inline-flex shadow-sm rounded-md divide-x divide-primary-600">
-                <div className="relative inline-flex items-center bg-primary-500 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white hover:bg-primary-600 focus:outline-none focus:z-10">
+          <div
+            className={
+              props.parentRelative || props.parentRelative === undefined
+                ? "relative"
+                : ""
+            }
+          >
+            <Listbox.Button className="w-full flex shadow-sm rounded bg-gray-50 hover:bg-gray-200 focus:ring-primary-500 border focus:ring-1 ring-gray-400 focus:border-primary-500 border-gray-400 transition-all duration-200 ease-in-out">
+              <div className="relative z-0 flex w-full">
+                <div className="relative flex-1 flex items-center py-2 pl-3 pr-4 border border-transparent rounded-l focus:outline-none focus:z-10">
                   {selected.value && (
                     <Check className="h-5 w-5" aria-hidden="true" />
                   )}
                   <p className="ml-2.5 text-sm font-medium">{selected.title}</p>
                 </div>
-                <div className="relative inline-flex items-center bg-primary-500 p-2 rounded-l-none rounded-r-md text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:z-10 ">
-                  <span className="sr-only">Change published status</span>
-                  <KeyboardArrowDown
-                    className="h-5 w-5 text-white"
-                    aria-hidden="true"
-                  />
+                <div className="items-center p-2 rounded-r text-sm font-medium focus:outline-none focus:z-10">
+                  <KeyboardArrowDown className="h-5 w-5" aria-hidden="true" />
                 </div>
               </div>
             </Listbox.Button>
@@ -56,19 +60,25 @@ export default function SelectMenu<T>(props: Props<T>) {
             <Transition
               show={open}
               as={Fragment}
-              leave="transition ease-in duration-100"
+              leave="transition ease-in duration-200"
+              enter="transition ease-out duration-100"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="origin-top-right absolute z-10 left-0 mt-2 w-72 rounded-md shadow-lg overflow-hidden bg-white divide-y divide-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none">
+              <Listbox.Options
+                className={`origin-top-right absolute z-10 mt-2 w-auto lg:w-72 rounded-md shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none ${
+                  props.position ? "md:right-0 md:left-auto" : "left-0"
+                }`}
+              >
                 {options.map((option) => (
                   <Listbox.Option
                     key={option.title}
                     className={({ active }) =>
-                      classNames(
-                        active ? "text-white bg-primary-500" : "text-gray-900",
-                        "cursor-default select-none relative p-4 text-sm"
-                      )
+                      `cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
+                        active ? "text-white bg-primary-500" : "text-gray-900"
+                      }`
                     }
                     value={option}
                   >
@@ -84,9 +94,9 @@ export default function SelectMenu<T>(props: Props<T>) {
                           </p>
                           {selected ? (
                             <span
-                              className={
+                              className={`transition-all duration-100 ease-in-out ${
                                 active ? "text-white" : "text-primary-500"
-                              }
+                              }`}
                             >
                               <Check className="h-5 w-5" aria-hidden="true" />
                             </span>
@@ -94,10 +104,9 @@ export default function SelectMenu<T>(props: Props<T>) {
                         </div>
                         {option.description && (
                           <p
-                            className={classNames(
-                              active ? "text-primary-200" : "text-gray-500",
-                              "mt-2"
-                            )}
+                            className={`mt-2 ${
+                              active ? "text-primary-200" : "text-gray-500"
+                            }`}
                           >
                             {option.description}
                           </p>

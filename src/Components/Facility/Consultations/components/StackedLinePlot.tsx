@@ -14,6 +14,11 @@ export const StackedLinePlot = (props: any) => {
   }));
 
   const generalOptions = {
+    grid: {
+      left: "20px",
+      right: "30px",
+      containLabel: true,
+    },
     color: COLORS,
     title: {
       text:
@@ -27,7 +32,7 @@ export const StackedLinePlot = (props: any) => {
           .join(" | ") +
         " ] ",
       textStyle: {
-        fontSize: 20,
+        fontSize: 14,
         rich: Object.assign(
           {},
           COLORS.map((x: any) => ({
@@ -47,9 +52,12 @@ export const StackedLinePlot = (props: any) => {
     },
     tooltip: {
       trigger: "axis",
+      confine: true,
     },
     toolbox: {
       show: true,
+      orient: "vertical",
+      top: "9%",
       feature: {
         dataZoom: {
           yAxisIndex: "none",
@@ -63,8 +71,9 @@ export const StackedLinePlot = (props: any) => {
       boundaryGap: false,
       data: xData,
       axisLabel: {
-        width: 100,
+        width: 60,
         overflow: "break",
+        align: "center",
       },
     },
     yAxis: {

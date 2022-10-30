@@ -38,7 +38,7 @@ const LocationRow = (props: LocationRowProps) => {
           <p className="text-sm break-all lg:w-3/4">{description}</p>
         </div>
       </div>
-      <div className="flex">
+      <div className="sm:flex">
         <div className="px-2 py-2 w-full">
           <RoleButton
             className="btn btn-default bg-white w-full"
@@ -131,7 +131,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
-      <p className="bg-white px-5 py-5 border-b border-gray-200 text-center text-gray-500 whitespace-nowrap">
+      <p className="bg-white flex justify-center text-2xl w-full font-bold px-5 py-5 border-b border-gray-200 text-center text-gray-500">
         No locations available
       </p>
     );

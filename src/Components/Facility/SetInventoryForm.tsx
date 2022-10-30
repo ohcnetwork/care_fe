@@ -1,6 +1,6 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import React, { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -8,6 +8,7 @@ import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -36,10 +37,6 @@ const inventoryFormReducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 export const SetInventoryForm = (props: any) => {
@@ -122,7 +119,7 @@ export const SetInventoryForm = (props: any) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -170,18 +167,6 @@ export const SetInventoryForm = (props: any) => {
                 </div>
 
                 <div>
-                  <InputLabel id="quantity">Item Min Quantity</InputLabel>
-                  <TextInputField
-                    name="quantity"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    value={state.form.quantity}
-                    onChange={handleChange}
-                    errors=""
-                  />
-                </div>
-                <div>
                   <InputLabel id="inventory_name_label">Unit</InputLabel>
                   <TextInputField
                     name="id"
@@ -192,26 +177,43 @@ export const SetInventoryForm = (props: any) => {
                     errors=""
                   />
                 </div>
+
+                <div className="md:col-span-2">
+                  <InputLabel id="quantity">Item Min Quantity</InputLabel>
+                  <TextInputField
+                    fullWidth
+                    name="quantity"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.quantity}
+                    onChange={handleChange}
+                    errors=""
+                  />
+                </div>
               </div>
-              <div className="flex justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={goBack}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  SET{" "}
-                </Button>
+              <div className="sm:flex sm:justify-between mt-4">
+                <div>
+                  <button
+                    color="default"
+                    type="button"
+                    onClick={() => goBack()}
+                    className="w-full sm:w-fit rounded-md p-2 px-6 mt-2 bg-gray-400 hover:bg-gray-500"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <div>
+                  <button
+                    color="primary"
+                    type="submit"
+                    style={{ marginLeft: "auto" }}
+                    className="w-full sm:w-fit rounded-md p-2 px-6 mt-2 bg-green-500 hover:bg-green-700 text-white"
+                    onClick={(e) => handleSubmit(e)}
+                  >
+                    <CheckCircleOutlineIcon></CheckCircleOutlineIcon> SET
+                  </button>
+                </div>
               </div>
             </CardContent>
           </form>

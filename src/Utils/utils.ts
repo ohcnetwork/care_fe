@@ -1,3 +1,6 @@
+import moment from "moment";
+import { navigate } from "raviger";
+
 interface ApacheParams {
   age: number;
   organFailure: boolean;
@@ -62,3 +65,23 @@ export const calculateApache2Score = (apacheParams: ApacheParams): number => {
 
   return totalScore;
 };
+
+export const goBack = (deltaOrUrl?: string | number | false | void) => {
+  if (typeof deltaOrUrl === "number") {
+    window.history.go(-deltaOrUrl);
+    return;
+  }
+
+  if (typeof deltaOrUrl === "string") {
+    navigate(deltaOrUrl);
+    return;
+  }
+
+  window.history.back();
+};
+
+export const formatDate = (date: string | Date) => {
+  return moment(date).format("hh:mm A; DD/MM/YYYY");
+};
+
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

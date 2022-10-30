@@ -124,7 +124,7 @@ let make = (~nursingCare, ~updateCB, ~id, ~consultationId) => {
           | Some(s) =>
             <div id={"text-area" ++ string_of_int(index)} className="px-6">
               <textarea
-                className="appearance-none mt-2 block w-full text-gray-800 border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-primary-400"
+                className="appearance-none mt-2 block w-full text-gray-800 border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:ring-primary-500"
                 value={NursingCare.description(s)}
                 onChange={handleOnChange(send, s)}
               />

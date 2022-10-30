@@ -60,11 +60,12 @@ import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import HubDashboard from "../Components/Dashboard/HubDashboard";
 import { SideBar } from "../Components/Common/SideBar";
-import { Feed } from "../Components/Facility/Consultations/Feed";
 import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 import Error404 from "../Components/ErrorPages/404";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import FacilityUsers from "../Components/Facility/FacilityUsers";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
@@ -328,9 +329,15 @@ const routes = {
     localStorage.getItem("defaultShiftView") === "list" ? (
       <ShiftListView />
     ) : (
-      <ShiftBoardView />
+      <DndProvider backend={HTML5Backend}>
+        <ShiftBoardView />
+      </DndProvider>
     ),
-  "/shifting/board-view": () => <ShiftBoardView />,
+  "/shifting/board-view": () => (
+    <DndProvider backend={HTML5Backend}>
+      <ShiftBoardView />
+    </DndProvider>
+  ),
   "/shifting/list-view": () => <ShiftListView />,
   "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
   "/shifting/:id/update": ({ id }: any) => <ShiftDetailsUpdate id={id} />,
@@ -338,10 +345,16 @@ const routes = {
     localStorage.getItem("defaultResourceView") === "list" ? (
       <ResourceListView />
     ) : (
-      <ResourceBoardView />
+      <DndProvider backend={HTML5Backend}>
+        <ResourceBoardView />
+      </DndProvider>
     ),
 
-  "/resource/board-view": () => <ResourceBoardView />,
+  "/resource/board-view": () => (
+    <DndProvider backend={HTML5Backend}>
+      <ResourceBoardView />
+    </DndProvider>
+  ),
   "/resource/list-view": () => <ResourceListView />,
   "/resource/:id": ({ id }: any) => <ResourceDetails id={id} />,
   "/resource/:id/update": ({ id }: any) => <ResourceDetailsUpdate id={id} />,
@@ -364,14 +377,6 @@ const routes = {
       tab={"updates"}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/feed":
-    ({ facilityId, patientId, consultationId }: any) => (
-      <Feed
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={consultationId}
-      />
-    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
     ({ facilityId, patientId, consultationId }: any) => (
       <TreatmentSummary
@@ -401,6 +406,7 @@ const routes = {
   "/teleicu/facility/:facilityId": ({ facilityId }: any) => (
     <TeleICUPatientsList facilityId={facilityId} />
   ),
+  "/not-found": () => <Error404 />,
 };
 
 export default function AppRouter() {
@@ -411,9 +417,19 @@ export default function AppRouter() {
   const path = usePath();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const WHITELIST: RegExp[] = [
+    /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/updates+/i,
+  ];
   useEffect(() => {
-    const pageContainer = window.document.getElementById("pages");
-    pageContainer?.scroll(0, 0);
+    let flag: boolean = false;
+    if (path)
+      WHITELIST.forEach((regex: RegExp) => {
+        flag = flag || regex.test(path);
+      });
+    if (path && flag) {
+      const pageContainer = window.document.getElementById("pages");
+      pageContainer?.scroll(0, 0);
+    }
   }, [path]);
 
   return (

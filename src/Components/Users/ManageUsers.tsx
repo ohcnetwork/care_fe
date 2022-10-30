@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -28,11 +28,15 @@ import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
 import clsx from "clsx";
+import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ManageUsers() {
+  const { width } = useWindowDimensions();
+
   const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
@@ -66,7 +70,17 @@ export default function ManageUsers() {
     name: string;
   }>({ show: false, username: "", name: "" });
 
-  const limit = RESULTS_PER_PAGE_LIMIT;
+  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
+    show: boolean;
+    userName: string;
+    facility?: FacilityModel;
+  }>({ show: false, userName: "", facility: undefined });
+
+  const limit =
+    width >= 1280 ? RESULTS_PER_PAGE_LIMIT + 1 : RESULTS_PER_PAGE_LIMIT;
+  const extremeSmallScreenBreakpoint = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
@@ -171,13 +185,6 @@ export default function ManageUsers() {
     setIsFacilityLoading(false);
   };
 
-  const removeFacility = async (username: string, facility: any) => {
-    setIsFacilityLoading(true);
-    await dispatch(deleteUserFacility(username, String(facility.id)));
-    setIsFacilityLoading(false);
-    loadFacilities(username);
-  };
-
   const showLinkFacilityModal = (username: string) => {
     setLinkFacility({
       show: true,
@@ -208,6 +215,14 @@ export default function ManageUsers() {
     );
   };
 
+  const hideUnlinkFacilityModal = () => {
+    setUnlinkFacilityData({
+      show: false,
+      facility: undefined,
+      userName: "",
+    });
+  };
+
   const hideLinkFacilityModal = () => {
     setLinkFacility({
       show: false,
@@ -233,7 +248,20 @@ export default function ManageUsers() {
     }
 
     setUserData({ show: false, username: "", name: "" });
-    window.location.reload();
+    fetchData({ aborted: false });
+  };
+
+  const handleUnlinkFacilitySubmit = async () => {
+    setIsFacilityLoading(true);
+    await dispatch(
+      deleteUserFacility(
+        unlinkFacilityData.userName,
+        String(unlinkFacilityData?.facility?.id)
+      )
+    );
+    setIsFacilityLoading(false);
+    loadFacilities(unlinkFacilityData.userName);
+    hideUnlinkFacilityModal();
   };
 
   const handleDelete = (user: any) => {
@@ -296,7 +324,13 @@ export default function ManageUsers() {
                   size="small"
                   color="secondary"
                   disabled={isFacilityLoading}
-                  onClick={() => removeFacility(username, facility)}
+                  onClick={() =>
+                    setUnlinkFacilityData({
+                      show: true,
+                      facility: facility,
+                      userName: username,
+                    })
+                  }
                 >
                   <CloseIcon />
                 </IconButton>
@@ -312,25 +346,36 @@ export default function ManageUsers() {
   const addFacility = async (username: string, facility: any) => {
     hideLinkFacilityModal();
     setIsFacilityLoading(true);
-    await dispatch(addUserFacility(username, String(facility.id)));
+    const res = await dispatch(addUserFacility(username, String(facility.id)));
+    if (res?.status === 201) {
+      Notification.Success({
+        msg: "Facility linked successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while linking facility",
+      });
+    }
     setIsFacilityLoading(false);
     loadFacilities(username);
   };
 
   const showDelete = (user: any) => {
-    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateLabAdmin");
+    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateAdmin");
     const STATE_READ_ONLY_ADMIN_LEVEL =
       USER_TYPES.indexOf("StateReadOnlyAdmin");
     const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
     const level = USER_TYPES.indexOf(user.user_type);
     const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
     if (user.is_superuser) return true;
-    if (
-      currentUserLevel >= STATE_ADMIN_LEVEL &&
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
-    )
+
+    if (currentUserLevel >= STATE_ADMIN_LEVEL)
       return user.state_object?.id === currentUser?.data?.state;
-    if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel > level)
+    if (
+      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
+      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
+      currentUserLevel > level
+    )
       return user?.district_object?.id === currentUser?.data?.district;
     return false;
   };
@@ -351,7 +396,7 @@ export default function ManageUsers() {
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="flex lg:flex-row gap-3 flex-col justify-between">
+                <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
                   {user.username && (
                     <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit">
                       {user.username}
@@ -384,7 +429,7 @@ export default function ManageUsers() {
                     )}
                   </div>
                 </div>
-                <div className="font-black text-2xl capitalize mt-2">
+                <div className="font-bold text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && cur_online ? (
@@ -404,7 +449,13 @@ export default function ManageUsers() {
                   )}
                 </div>
 
-                <div className="flex flex-row md:grid md:grid-cols-4 gap-2 justify-between">
+                <div
+                  className={`flex ${
+                    isExtremeSmallScreen
+                      ? " flex-wrap "
+                      : " flex-row justify-between "
+                  } md:grid md:grid-cols-4 gap-2`}
+                >
                   {user.user_type && (
                     <div className="col-span-2">
                       <UserDetails title="Role">
@@ -429,7 +480,13 @@ export default function ManageUsers() {
                     </div>
                   </UserDetails>
                 )}
-                <div className="grid grid-cols-4">
+                <div
+                  className={`${
+                    isExtremeSmallScreen
+                      ? "flex flex-wrap "
+                      : "grid grid-cols-4 "
+                  }`}
+                >
                   {user.created_by && (
                     <div className="col-span-2">
                       <UserDetails title="Created by">
@@ -616,7 +673,7 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <div className="flex mt-2 mx-6 flex-wrap gap-2 items-center">
+      <div className="flex my-2 mx-6 flex-wrap gap-2 items-center">
         {badge("Username", qParams.username, "username")}
         {badge("First Name", qParams.first_name, "first_name")}
         {badge("Last Name", qParams.last_name, "last_name")}
@@ -625,7 +682,7 @@ export default function ManageUsers() {
           : null}
         {qParams.alt_phone_number?.trim()
           ? badge(
-              "Alternate Phone Number",
+              "WhatsApp Phone Number",
               qParams.alt_phone_number,
               "alt_phone_number"
             )
@@ -646,6 +703,14 @@ export default function ManageUsers() {
           name={userData.name}
           handleCancel={handleCancel}
           handleOk={handleSubmit}
+        />
+      )}
+      {unlinkFacilityData.show && (
+        <UnlinkFacilityDialog
+          facilityName={unlinkFacilityData.facility?.name || ""}
+          userName={unlinkFacilityData.userName}
+          handleCancel={hideUnlinkFacilityModal}
+          handleOk={handleUnlinkFacilitySubmit}
         />
       )}
     </div>

@@ -77,17 +77,7 @@ type ActionTextFieldProps = TextFieldPropsExtended & {
   actionIcon?: React.ReactElement;
   action?: () => void;
 };
-// type Option = { text: string; score: number };
-// interface InputProps {
-//   options: Array<Option>;
-//   onChange: (
-//     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-//     index: number
-//   ) => void;
-//   handleDeleteOption: (index: number) => void;
-//   errors: Array<Option>;
-//   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-// }
+
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
   onChange: (
@@ -101,13 +91,6 @@ interface DateInputFieldProps extends DatePickerProps {
   disabled?: boolean;
   margin?: "none" | "dense" | "normal";
 }
-// interface TimeInputFieldProps {
-//   value: string;
-//   onChange: (
-//     date: MaterialUiPickersDate,
-//     value?: string | null | undefined
-//   ) => void;
-// }
 
 interface CheckboxProps extends Omit<FormControlLabelProps, "control"> {
   label: string;
@@ -280,9 +263,17 @@ export const TimeInputField = (props: any) => {
   );
 };
 
-export const ErrorHelperText = (props: { error: string }) => {
+export const ErrorHelperText = (props: { error?: string }) => {
   const { error } = props;
-  return <div className="error-text">{error}</div>;
+  return (
+    <span
+      className={`error-text mt-2 ml-1 transition-all duration-300 ${
+        error ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      {error}
+    </span>
+  );
 };
 
 export const ShowRadioOptions = (props: OptionsProps) => {
@@ -557,17 +548,21 @@ interface AutoCompleteAsyncFieldProps {
   renderOption: (option: any) => JSX.Element;
   placeholder: string;
   noOptionsText?: string;
-  value: any;
+  value?: any;
+  defaultValue?: any;
   loading?: boolean;
   errors?: string;
+  onBlur?: (e: any) => void;
   onOpen?: (e: any) => void;
   filterOptions?: (options: any) => any;
   name?: string;
   freeSolo?: boolean;
+  disabled?: boolean;
 }
 
 export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
   const {
+    name,
     margin,
     options,
     label,
@@ -580,13 +575,16 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
     onChange,
     onSearch,
     value,
+    defaultValue,
     loading,
+    onBlur,
     onOpen,
     noOptionsText,
     filterOptions,
     multiple = false,
     autoSelect = true,
     className = "",
+    disabled = false,
   } = props;
   return (
     <>
@@ -597,9 +595,12 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         autoSelect={autoSelect}
         multiple={multiple}
         onOpen={onOpen}
+        onBlur={onBlur}
         options={options}
+        disabled={disabled}
         onChange={onChange}
         value={value}
+        defaultValue={defaultValue}
         loading={loading}
         noOptionsText={noOptionsText}
         getOptionSelected={getOptionSelected}
@@ -610,6 +611,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         renderInput={(params: any) => (
           <TextField
             {...params}
+            name={name}
             variant={variant}
             margin={margin || "normal"}
             label={label}
@@ -660,6 +662,7 @@ export const PhoneNumberField = (props: any) => {
       {label && <InputLabel>{label}</InputLabel>}
       <div className="flex items-center">
         <PhoneInput
+          inputClass="bg-gray-200 py-3 text-sm border-gray-200 shadow-none focus:border-primary-400"
           countryCodeEditable={false}
           value={value}
           placeholder={placeholder}

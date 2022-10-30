@@ -1,17 +1,12 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  SelectField,
-  MultiSelectField,
-  TextInputField,
-  AutoCompleteAsyncField,
-} from "../Common/HelperInputFields";
+import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import {
   PATIENT_FILTER_ORDER,
   GENDER_TYPES,
   FACILITY_TYPES,
   DISEASE_STATUS,
-  PATIENT_FILTER_CATEGORY,
+  PATIENT_FILTER_CATEGORIES,
   PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
   KASP_ENABLED,
@@ -24,10 +19,19 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
-import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import { getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
-
-import { debounce } from "lodash";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+import {
+  FieldChangeEvent,
+  FieldChangeEventHandler,
+} from "../Form/FormFields/Utils";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
+import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
+import { DateRange } from "../Common/DateRangeInputV2";
+import FilterButtons from "../Common/FilterButtons";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -38,21 +42,6 @@ const useMergeState = (initialState: any) => {
 
 export default function PatientFilterV2(props: any) {
   const { filter, onChange, closeFilter } = props;
-  const [isFacilityLoading, setFacilityLoading] = useState(false);
-  const [isDistrictLoading, setDistrictLoading] = useState(false);
-
-  const [lsgBody, setLsgBody] = useState<any[]>([]);
-  const [isLsgLoading, setLsgLoading] = useState(false);
-  const [hasLsgSearchText, setHasLsgSearchText] = useState(false);
-
-  const handleLsgChange = (current: any) => {
-    if (!current) {
-      setLsgBody([]);
-      setLsgLoading(false);
-      setHasLsgSearchText(false);
-    }
-    setFacility(current, "lsgBody");
-  };
 
   const [filterState, setFilterState] = useMergeState({
     district: filter.district || "",
@@ -152,56 +141,45 @@ export default function PatientFilterV2(props: any) {
   useEffect(() => {
     async function fetchData() {
       if (filter.facility) {
-        setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
           getAnyFacility(filter.facility, "facility")
         );
         setFilterState({ facility_ref: facilityData });
-        setFacilityLoading(false);
       }
+
       if (filter.district) {
-        setDistrictLoading(true);
         const { data: districtData } = await dispatch(
           getDistrict(filter.district, "district")
         );
         setFilterState({ district_ref: districtData });
-        setDistrictLoading(false);
       }
 
       if (filter.lsgBody) {
-        setLsgLoading(true);
         const { data: lsgRes } = await dispatch(getAllLocalBody({}));
-        const lsgBodyData = lsgRes.results.map((obj: any) => ({
-          id: obj.id,
-          name: obj.name,
-        }));
-        setLsgBody(lsgBodyData);
+        const lsgBodyData = lsgRes.results;
+
         setFilterState({
           lsgBody_ref: lsgBodyData.filter(
             (obj: any) => obj.id.toString() === filter.lsgBody.toString()
           )[0],
         });
-        setLsgLoading(false);
       }
     }
     fetchData();
   }, [dispatch]);
 
   const VACCINATED_FILTER = [
-    { id: "", text: "Show All" },
     { id: 0, text: "Unvaccinated" },
     { id: 1, text: "1st dose only" },
     { id: 2, text: "Both doses" },
   ];
 
   const DECLARED_FILTER = [
-    { id: "", text: "Show All" },
     { id: "false", text: "Not Declared" },
     { id: "true", text: "Declared" },
   ];
 
   const TELEMEDICINE_FILTER = [
-    { id: "", text: "Show All" },
     { id: "true", text: "Yes" },
     { id: "false", text: "No" },
   ];
@@ -214,44 +192,12 @@ export default function PatientFilterV2(props: any) {
     setFilterState(filterData);
   };
 
-  const handleChange = (event: any) => {
-    const { name, value } = event.target;
-
-    const filterData: any = { ...filterState };
-    filterData[name] = value;
-
-    setFilterState(filterData);
-  };
-
-  const handleMultiSelectChange = (event: any) => {
-    const { name, value } = event.target;
-
-    const filterData: any = { ...filterState };
-    filterData[name] = [...value];
-
-    setFilterState(filterData);
-  };
-
-  const handleLsgSearch = (e: any) => {
-    setHasLsgSearchText(!!e.target.value);
-    setLsgLoading(true);
-    onLsgSearch(e.target.value);
-  };
-
-  const onLsgSearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const {
-          data: { results: lsgBodies },
-        } = await dispatch(getAllLocalBody({ local_body_name: text }));
-        setLsgBody(lsgBodies);
-        setLsgLoading(false);
-      } else {
-        setLsgBody([]);
-        setLsgLoading(false);
-      }
-    }, 300),
-    []
+  const lsgSearch = useCallback(
+    async (search: string) => {
+      const res = await dispatch(getAllLocalBody({ local_body_name: search }));
+      return res?.data?.results;
+    },
+    [dispatch]
   );
 
   const applyFilter = () => {
@@ -400,87 +346,73 @@ export default function PatientFilterV2(props: any) {
     onChange(data);
   };
 
-  const handleDateRangeChange = (
-    startDateId: string,
-    endDateId: string,
-    { startDate, endDate }: any
-  ) => {
+  const handleDateRangeChange = (event: FieldChangeEvent<DateRange>) => {
     const filterData: any = { ...filterState };
-    filterData[startDateId] = startDate?.toString();
-    filterData[endDateId] = endDate?.toString();
-
+    filterData[`${event.name}_after`] = event.value.start?.toString();
+    filterData[`${event.name}_before`] = event.value.end?.toString();
     setFilterState(filterData);
   };
 
+  const handleFormFieldChange: FieldChangeEventHandler<string> = (event) =>
+    setFilterState({ ...filterState, [event.name]: event.value });
+
   return (
-    <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />
-          Cancel
-        </button>
-        <button
-          className="btn btn-default"
-          onClick={(_) => {
-            navigate("/patients");
-            setFilterState(clearFilterState);
-          }}
-        >
-          <i className="fas fa-times mr-2" />
-          Clear Filter
-        </button>
-        <button className="btn btn-primary" onClick={applyFilter}>
-          <i className="fas fa-check mr-2" />
-          Apply
-        </button>
-      </div>
-      <div className="w-full flex-none mt-2">
-        <span className="text-sm font-semibold">Ordering</span>
-        <SelectField
-          name="ordering"
-          variant="outlined"
-          margin="dense"
-          optionKey="text"
-          optionValue="desc"
-          value={filterState.ordering}
-          options={[{ desc: "Select", text: "" }, ...PATIENT_FILTER_ORDER]}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+    <div className="pb-10">
+      <FilterButtons
+        onClose={closeFilter}
+        onApply={applyFilter}
+        onClear={() => {
+          navigate("/patients");
+          setFilterState(clearFilterState);
+        }}
+      />
+      <div className="w-full flex-none pt-20">
+        <FieldLabel className="text-sm">Ordering</FieldLabel>
+        <SelectMenuV2
+          options={PATIENT_FILTER_ORDER}
+          optionLabel={(o) => o.desc}
+          optionSelectedLabel={(option) => `${option.desc} (${option.order})`}
+          optionDescription={(o) => o.order}
+          optionIcon={(option) => (
+            <i
+              className={`fa-solid ${
+                option.order === "Ascending"
+                  ? "fa-arrow-up-short-wide"
+                  : "fa-arrow-up-wide-short"
+              }`}
+            />
+          )}
+          value={filterState.ordering || undefined}
+          optionValue={(o) => o.text}
+          onChange={(v) => setFilterState({ ...filterState, ordering: v })}
         />
       </div>
-      <div className="font-light text-md mt-2">Filter By:</div>
-      <div className="flex flex-wrap gap-2">
+      <div className="text-md my-6 flex items-center text-gray-700 gap-2">
+        <i className="fa-solid fa-filter" />
+        <p>Filter by</p>
+      </div>
+      <div className="flex flex-wrap gap-4">
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">LSG body</span>
+          <FieldLabel className="text-sm">LSG Body</FieldLabel>
           <div className="">
-            <AutoCompleteAsyncField
-              name="lsgBody"
-              multiple={false}
-              variant="outlined"
-              value={filterState.lsgBody_ref}
-              options={lsgBody}
-              onSearch={handleLsgSearch}
-              onChange={(e: object, value: any) => handleLsgChange(value)}
-              loading={isLsgLoading}
-              placeholder="Search by LSG body name"
-              noOptionsText={
-                hasLsgSearchText
-                  ? "No LSG body found, please try again"
-                  : "Start typing to begin search"
+            <AutoCompleteAsync
+              name="lsg_body"
+              selected={filterState.lsgBody_ref}
+              fetchData={lsgSearch}
+              onChange={(selected) =>
+                setFilterState({
+                  ...filterState,
+                  lsgBody_ref: selected,
+                  lsgBody: selected.id,
+                })
               }
-              renderOption={(option: any) => <div>{option.name}</div>}
-              freeSolo={false}
-              getOptionSelected={(option: any, value: any) =>
-                option.id === value.id
-              }
-              getOptionLabel={(option: any) => option.name}
-              className="shifting-page-filter-dropdown"
+              optionLabel={(option) => option.name}
             />
           </div>
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">District</span>
+          <FieldLabel className="text-sm">District</FieldLabel>
           <DistrictSelect
             multiple={false}
             name="district"
@@ -492,7 +424,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Facility</span>
+          <FieldLabel className="text-sm">Facility</FieldLabel>
           <FacilitySelect
             multiple={false}
             name="facility"
@@ -500,352 +432,291 @@ export default function PatientFilterV2(props: any) {
             showAll
             setSelected={(obj) => setFacility(obj, "facility")}
             className="shifting-page-filter-dropdown"
-            errors={""}
           />
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Facility type</span>
-          <SelectField
-            name="facility_type"
-            variant="outlined"
-            margin="dense"
+          <FieldLabel className="text-sm">Facility type</FieldLabel>
+          <SelectMenuV2
+            placeholder="Show all"
+            options={FACILITY_TYPES}
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.text}
             value={filterState.facility_type}
-            options={[
-              { id: "", text: "Show All" },
-              ...FACILITY_TYPES.map(({ id, text }) => {
-                return {
-                  id: text,
-                  text,
-                };
-              }),
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            onChange={(v) =>
+              setFilterState({ ...filterState, facility_type: v })
+            }
+            optionIcon={() => <i className="fa-solid fa-hospital" />}
           />
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Gender</span>
-          <SelectField
-            name="gender"
-            variant="outlined"
-            margin="dense"
+          <FieldLabel className="text-sm">Gender</FieldLabel>
+          <SelectMenuV2
+            placeholder="Show all"
+            options={GENDER_TYPES}
+            optionLabel={(o) => o.text}
+            optionIcon={(o) => <i className="text-base">{o.icon}</i>}
+            optionValue={(o) => o.id}
             value={filterState.gender}
-            options={[{ id: "", text: "Show All" }, ...GENDER_TYPES]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            onChange={(v) => setFilterState({ ...filterState, gender: v })}
           />
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Is Antenatal</span>
-          <SelectField
-            name="is_antenatal"
-            variant="outlined"
-            margin="dense"
+          <FieldLabel className="text-sm">Is Antenatal</FieldLabel>
+          <SelectMenuV2
+            placeholder="Show all"
+            options={[true, false]}
+            optionLabel={(o) => (o ? "Antenatal" : "Non-antenatal")}
             value={filterState.is_antenatal}
-            options={[
-              { id: "", text: "Show All" },
-              { id: "true", text: "antenatal" },
-              { id: "false", text: "non antenatal" },
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            onChange={(v) =>
+              setFilterState({ ...filterState, is_antenatal: v })
+            }
           />
         </div>
-
         {KASP_ENABLED && (
           <div className="w-full flex-none">
-            <span className="text-sm font-semibold">{KASP_STRING}</span>
-            <SelectField
-              name="is_kasp"
-              variant="outlined"
-              margin="dense"
+            <FieldLabel className="text-sm">{KASP_STRING}</FieldLabel>
+            <SelectMenuV2
+              placeholder="Show all"
+              options={[true, false]}
+              optionLabel={(o) =>
+                o ? `Show ${KASP_STRING}` : `Show Non ${KASP_STRING}`
+              }
               value={filterState.is_kasp}
-              options={[
-                { id: "", text: "Show All" },
-                { id: "true", text: `Show ${KASP_STRING}` },
-                { id: "false", text: `Show Non ${KASP_STRING}` },
-              ]}
-              onChange={handleChange}
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+              onChange={(v) => setFilterState({ ...filterState, is_kasp: v })}
             />
           </div>
         )}
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Category</span>
-          <SelectField
-            name="category"
-            variant="outlined"
-            margin="dense"
+          <FieldLabel className="text-sm">Category</FieldLabel>
+          <SelectMenuV2
+            placeholder="Show all"
+            options={PATIENT_FILTER_CATEGORIES}
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
             value={filterState.category}
-            options={[{ id: "", text: "Show All" }, ...PATIENT_FILTER_CATEGORY]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            onChange={(v) => setFilterState({ ...filterState, category: v })}
           />
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Disease Status</span>
-          <SelectField
-            name="disease_status"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
+          <FieldLabel className="text-sm">Disease Status</FieldLabel>
+          <SelectMenuV2
+            placeholder="Show all"
+            options={DISEASE_STATUS}
+            optionLabel={(o) => o}
             value={filterState.disease_status}
-            options={["Show All", ...DISEASE_STATUS]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            onChange={(v) =>
+              setFilterState({ ...filterState, disease_status: v })
+            }
           />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Vaccinated</span>
-          <SelectField
-            name="number_of_doses"
-            variant="outlined"
-            margin="dense"
-            value={filterState.number_of_doses}
+          <FieldLabel className="text-sm">Vaccinated</FieldLabel>
+          <SelectMenuV2
+            placeholder="Show all"
             options={VACCINATED_FILTER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
+            value={filterState.number_of_doses}
+            onChange={(v) =>
+              setFilterState({ ...filterState, number_of_doses: v })
+            }
           />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Declared</span>
-          <SelectField
-            name="is_declared_positive"
-            variant="outlined"
-            margin="dense"
-            value={filterState.is_declared_positive}
+          <FieldLabel className="text-sm">Declared</FieldLabel>
+          <SelectMenuV2
+            placeholder="Show all"
             options={DECLARED_FILTER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
+            value={filterState.is_declared_positive}
+            onChange={(v) =>
+              setFilterState({ ...filterState, is_declared_positive: v })
+            }
           />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Telemedicine</span>
-          <SelectField
-            name="last_consultation_is_telemedicine"
-            variant="outlined"
-            margin="dense"
-            value={filterState.last_consultation_is_telemedicine}
+          <FieldLabel className="text-sm">Telemedicine</FieldLabel>
+          <SelectMenuV2
+            placeholder="Show all"
             options={TELEMEDICINE_FILTER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
+            value={filterState.last_consultation_is_telemedicine}
+            onChange={(v) =>
+              setFilterState({
+                ...filterState,
+                last_consultation_is_telemedicine: v,
+              })
+            }
           />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">SRF ID</span>
-          <div className="flex justify-between">
-            <div className="w-full">
-              <TextInputField
-                id="srf_id"
-                name="srf_id"
-                variant="outlined"
-                margin="dense"
-                errors=""
-                value={filterState.srf_id}
-                onChange={handleChange}
-                label="Srf id"
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-              />
-            </div>
-          </div>
+          <TextFormField
+            id="srf_id"
+            name="srf_id"
+            placeholder="Filter by SRF ID"
+            label={<span className="text-sm">SRF ID</span>}
+            value={filterState.srf_id}
+            onChange={handleFormFieldChange}
+            errorClassName="hidden"
+          />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">COWIN ID</span>
-          <div className="flex justify-between">
-            <div className="w-full">
-              <TextInputField
-                id="covin_id"
-                name="covin_id"
-                variant="outlined"
-                margin="dense"
-                errors=""
-                value={filterState.covin_id}
-                onChange={handleChange}
-                label="COWIN ID"
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
-              />
-            </div>
-          </div>
+          <TextFormField
+            id="covin_id"
+            name="covin_id"
+            placeholder="Filter by COWIN ID"
+            label={<span className="text-sm">CoWIN ID</span>}
+            value={filterState.covin_id}
+            onChange={handleFormFieldChange}
+            errorClassName="hidden"
+          />
         </div>
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">
+          <FieldLabel className="text-sm">
             Last Admitted to (Bed Type)
-          </span>
-          <MultiSelectField
-            name="last_consultation_admitted_to_list"
-            variant="outlined"
+          </FieldLabel>
+          <MultiSelectMenuV2
+            id="last_consultation_admitted_to_list"
+            placeholder="Select bed types"
+            options={PATIENT_FILTER_ADMITTED_TO}
             value={filterState.last_consultation_admitted_to_list}
-            options={[...PATIENT_FILTER_ADMITTED_TO]}
-            onChange={handleMultiSelectChange}
+            optionValue={(o) => o.id}
+            optionLabel={(o) => o.text}
+            onChange={(o) =>
+              setFilterState({
+                ...filterState,
+                last_consultation_admitted_to_list: o,
+              })
+            }
           />
         </div>
-        <div className="w-full flex-none">
-          <DateRangePicker
-            startDate={getDate(filterState.date_of_result_after)}
-            endDate={getDate(filterState.date_of_result_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "date_of_result_after",
-                "date_of_result_before",
-                e
-              )
-            }
-            endDateId={"date_of_result_before"}
-            startDateId={"date_of_result_after"}
-            label={"Date of result"}
-            size="small"
-          />
-          <DateRangePicker
-            startDate={getDate(filterState.date_declared_positive_after)}
-            endDate={getDate(filterState.date_declared_positive_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "date_declared_positive_after",
-                "date_declared_positive_before",
-                e
-              )
-            }
-            endDateId={"date_declared_positive_before"}
-            startDateId={"date_declared_positive_after"}
-            label={"Date Declared Positive"}
-            size="small"
-          />
 
-          <DateRangePicker
-            startDate={getDate(filterState.created_date_after)}
-            endDate={getDate(filterState.created_date_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "created_date_after",
-                "created_date_before",
-                e
-              )
-            }
-            endDateId={"created_date_before"}
-            startDateId={"created_date_after"}
-            label={"Created Date"}
-            size="small"
-          />
-          <DateRangePicker
-            startDate={getDate(filterState.modified_date_after)}
-            endDate={getDate(filterState.modified_date_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "modified_date_after",
-                "modified_date_before",
-                e
-              )
-            }
-            endDateId={"modified_date_before"}
-            startDateId={"modified_date_after"}
-            label={"Modified Date"}
-            size="small"
-          />
-          <DateRangePicker
-            startDate={getDate(
+        <DateRangeFormField
+          labelClassName="text-sm"
+          name="date_of_result"
+          label="Date of result"
+          value={{
+            start: getDate(filterState.date_of_result_after)?.toDate(),
+            end: getDate(filterState.date_of_result_before)?.toDate(),
+          }}
+          onChange={handleDateRangeChange}
+          errorClassName="hidden"
+        />
+        <DateRangeFormField
+          labelClassName="text-sm"
+          name="date_declared_positive"
+          label="Date Declared Positive"
+          value={{
+            start: getDate(filterState.date_declared_positive_after)?.toDate(),
+            end: getDate(filterState.date_declared_positive_before)?.toDate(),
+          }}
+          onChange={handleDateRangeChange}
+          errorClassName="hidden"
+        />
+        <DateRangeFormField
+          labelClassName="text-sm"
+          name="created_date"
+          label="Created Date"
+          value={{
+            start: getDate(filterState.created_date_after)?.toDate(),
+            end: getDate(filterState.created_date_before)?.toDate(),
+          }}
+          onChange={handleDateRangeChange}
+          errorClassName="hidden"
+        />
+        <DateRangeFormField
+          labelClassName="text-sm"
+          name="modified_date"
+          label="Modified Date"
+          value={{
+            start: getDate(filterState.modified_date_after)?.toDate(),
+            end: getDate(filterState.modified_date_before)?.toDate(),
+          }}
+          onChange={handleDateRangeChange}
+          errorClassName="hidden"
+        />
+        <DateRangeFormField
+          labelClassName="text-sm"
+          name="last_consultation_admission_date"
+          label="Admit Date"
+          value={{
+            start: getDate(
               filterState.last_consultation_admission_date_after
-            )}
-            endDate={getDate(
+            )?.toDate(),
+            end: getDate(
               filterState.last_consultation_admission_date_before
-            )}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "last_consultation_admission_date_after",
-                "last_consultation_admission_date_before",
-                e
-              )
-            }
-            endDateId={"last_consultation_admission_date_before"}
-            startDateId={"last_consultation_admission_date_after"}
-            label={"Admit Date"}
-            size="small"
-          />
-          <DateRangePicker
-            startDate={getDate(
+            )?.toDate(),
+          }}
+          onChange={handleDateRangeChange}
+          errorClassName="hidden"
+        />
+        <DateRangeFormField
+          labelClassName="text-sm"
+          name="last_consultation_discharge_date"
+          label="Discharge Date"
+          value={{
+            start: getDate(
               filterState.last_consultation_discharge_date_after
-            )}
-            endDate={getDate(
+            )?.toDate(),
+            end: getDate(
               filterState.last_consultation_discharge_date_before
-            )}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "last_consultation_discharge_date_after",
-                "last_consultation_discharge_date_before",
-                e
-              )
-            }
-            endDateId={"last_consultation_discharge_date_before"}
-            startDateId={"last_consultation_discharge_date_after"}
-            label={"Discharge Date"}
-            size="small"
-          />
-          <DateRangePicker
-            startDate={getDate(
+            )?.toDate(),
+          }}
+          onChange={handleDateRangeChange}
+          errorClassName="hidden"
+        />
+        <DateRangeFormField
+          labelClassName="text-sm"
+          name="last_consultation_symptoms_onset_date"
+          label="Onset of Symptoms Date"
+          value={{
+            start: getDate(
               filterState.last_consultation_symptoms_onset_date_after
-            )}
-            endDate={getDate(
+            )?.toDate(),
+            end: getDate(
               filterState.last_consultation_symptoms_onset_date_before
-            )}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "last_consultation_symptoms_onset_date_after",
-                "last_consultation_symptoms_onset_date_before",
-                e
-              )
-            }
-            endDateId={"last_consultation_symptoms_onset_date_before"}
-            startDateId={"last_consultation_symptoms_onset_date_after"}
-            label={"Onset of Symptoms Date"}
-            size="small"
-          />
-          <DateRangePicker
-            startDate={getDate(filterState.last_vaccinated_date_after)}
-            endDate={getDate(filterState.last_vaccinated_date_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "last_vaccinated_date_after",
-                "last_vaccinated_date_before",
-                e
-              )
-            }
-            endDateId={"last_vaccinated_date_before"}
-            startDateId={"last_vaccinated_date_after"}
-            label={"Vaccination Date"}
-            size="small"
-          />
-        </div>
+            )?.toDate(),
+          }}
+          onChange={handleDateRangeChange}
+          errorClassName="hidden"
+        />
+        <DateRangeFormField
+          labelClassName="text-sm"
+          name="last_vaccinated_date"
+          label="Vaccination Date"
+          value={{
+            start: getDate(filterState.last_vaccinated_date_after)?.toDate(),
+            end: getDate(filterState.last_vaccinated_date_before)?.toDate(),
+          }}
+          onChange={handleDateRangeChange}
+          errorClassName="hidden"
+        />
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Age</span>
-          <div className="flex justify-between">
-            <TextInputField
-              id="age_min"
+          <FieldLabel className="text-sm">Age</FieldLabel>
+          <div className="flex justify-between gap-4">
+            <TextFormField
               name="age_min"
-              type="number"
-              variant="outlined"
-              margin="dense"
-              errors=""
+              placeholder="Min. age"
+              label={null}
               value={filterState.age_min}
-              onChange={handleChange}
-              label="Min Age"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+              onChange={handleFormFieldChange}
+              errorClassName="hidden"
             />
-            <TextInputField
-              id="age_max"
+            <TextFormField
               name="age_max"
-              type="number"
-              variant="outlined"
-              margin="dense"
-              errors=""
+              placeholder="Max. age"
+              label={null}
               value={filterState.age_max}
-              onChange={handleChange}
-              label="Max Age"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+              onChange={handleFormFieldChange}
+              errorClassName="hidden"
             />
           </div>
         </div>

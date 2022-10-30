@@ -9,10 +9,12 @@ type rhythm =
   | Regular
   | IrRegular
 
-export type t = {
+@genType
+type t = {
   pain: option<int>,
   bp: option<bp>,
   pulse: option<int>,
+  spo2: option<int>,
   temperature: option<float>,
   resp: option<int>,
   rhythm: rhythm,
@@ -49,10 +51,11 @@ let rhythmToString = rhythm => {
   }
 }
 
-let make = (~pain, ~bp, ~pulse, ~temperature, ~resp, ~rhythm, ~rhythmDetails) => {
+let make = (~pain, ~bp, ~pulse, ~spo2, ~temperature, ~resp, ~rhythm, ~rhythmDetails) => {
   pain: pain,
   bp: bp,
   pulse: pulse,
+  spo2: spo2,
   temperature: temperature,
   resp: resp,
   rhythm: rhythm,
@@ -69,6 +72,7 @@ let makeFromJs = dailyRound => {
     ~pain=dailyRound["pain"]->Js.Nullable.toOption,
     ~bp=makeBPFromJs(dailyRound["bp"]),
     ~pulse=dailyRound["pulse"]->Js.Nullable.toOption,
+    ~spo2=dailyRound["ventilator_spo2"]->Js.Nullable.toOption,
     ~temperature=dailyRound["temperature"]->Js.Nullable.toOption,
     ~resp=dailyRound["resp"]->Js.Nullable.toOption,
     ~rhythm=makeRhythm(dailyRound["rhythm"]),
@@ -81,6 +85,7 @@ let bp = t => t.bp
 let systolic = bp => bp.systolic
 let diastolic = bp => bp.diastolic
 let pulse = t => t.pulse
+let spo2 = t => t.spo2
 let temperature = t => t.temperature
 let resp = t => t.resp
 let rhythm = t => t.rhythm

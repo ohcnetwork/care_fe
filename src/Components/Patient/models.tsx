@@ -1,4 +1,4 @@
-import { ConsultationModel } from "../Facility/models";
+import { ConsultationModel, PatientCategory } from "../Facility/models";
 
 export interface FlowModel {
   id?: number;
@@ -90,6 +90,7 @@ export interface PatientModel {
   last_vaccinated_date?: string;
   date_of_birth?: string;
   blood_group?: string;
+  review_interval?: number;
   review_time?: string;
   date_of_return?: string;
   cluster_name?: string;
@@ -258,7 +259,7 @@ export interface DailyRoundsModel {
   id?: any;
   other_symptoms?: string;
   admitted_to?: string;
-  patient_category?: string;
+  patient_category?: PatientCategory;
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
@@ -289,6 +290,7 @@ export interface FileUploadModel {
   id?: string;
   name?: string;
   created_date?: string;
+  upload_completed?: boolean;
   uploaded_by?: { username?: string };
   file_category?: string;
 }

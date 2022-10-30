@@ -1,3 +1,5 @@
+import { PatientCategory } from "../Components/Facility/models";
+
 export const KeralaLogo = "images/kerala-logo.png";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
@@ -13,21 +15,24 @@ export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
 export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
 export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
-export const USER_TYPES: Array<string> = [
-  "Pharmacist",
-  "Volunteer",
-  "StaffReadOnly",
-  "Staff",
-  "Doctor",
-  "WardAdmin",
-  "LocalBodyAdmin",
-  "DistrictLabAdmin",
-  "DistrictReadOnlyAdmin",
-  "DistrictAdmin",
-  "StateLabAdmin",
-  "StateReadOnlyAdmin",
-  "StateAdmin",
+const readOnly = true;
+export const USER_TYPE_OPTIONS = [
+  { id: "Pharmacist", role: "Pharmacist" },
+  { id: "Volunteer", role: "Volunteer" },
+  { id: "StaffReadOnly", role: "Staff", readOnly },
+  { id: "Staff", role: "Staff" },
+  { id: "Doctor", role: "Doctor" },
+  { id: "WardAdmin", role: "Ward Admin" },
+  { id: "LocalBodyAdmin", role: "Local Body Admin" },
+  { id: "DistrictLabAdmin", role: "District Lab Admin" },
+  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly },
+  { id: "DistrictAdmin", role: "District Admin" },
+  { id: "StateLabAdmin", role: "State Lab Admin" },
+  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly },
+  { id: "StateAdmin", role: "State Admin" },
 ];
+
+export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
 
 export const DOWNLOAD_TYPES: Array<string> = [
   "Facility List",
@@ -130,13 +135,13 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
-export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
-  { id: 1, text: "created_date", desc: "ASC Created Date" },
-  { id: 2, text: "-created_date", desc: "DESC Created Date" },
-  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
-  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
-  { id: 5, text: "review_time", desc: "ASC Review Time" },
-  { id: 6, text: "-review_time", desc: "DESC Review Time" },
+export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
+  { id: 1, text: "created_date", desc: "Created Date", order: "Ascending" },
+  { id: 2, text: "-created_date", desc: "Created Date", order: "Descending" },
+  { id: 3, text: "modified_date", desc: "Modified Date", order: "Ascending" },
+  { id: 4, text: "-modified_date", desc: "Modified Date", order: "Descending" },
+  { id: 5, text: "review_time", desc: "Review Time", order: "Ascending" },
+  { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
 ];
 
 const KASP_BED_TYPES = KASP_ENABLED
@@ -231,10 +236,10 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 7, text: "Other" },
 ];
 
-export const GENDER_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Male" },
-  { id: 2, text: "Female" },
-  { id: 3, text: "Non-binary" },
+export const GENDER_TYPES = [
+  { id: 1, text: "Male", icon: <i className="fa-solid fa-person" /> },
+  { id: 2, text: "Female", icon: <i className="fa-solid fa-person-dress" /> },
+  { id: 3, text: "Non-binary", icon: <i className="fa-solid fa-genderless" /> },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -271,19 +276,22 @@ export const PATIENT_FILTER_ADMITTED_TO = [
   { id: "2", text: "ICU" },
 ];
 
-export const PATIENT_CATEGORY = [
-  { id: "ASYMPTOMATIC", text: "ASYM (ASYMPTOMATIC) " },
-  { id: "Category-A", text: "Mild (Category A)" },
-  { id: "Category-B", text: "Moderate (Category B)" },
-  { id: "Category-C", text: "Severe (Category C)" },
+export const PATIENT_CATEGORIES = [
+  { id: "Comfort", text: "Comfort Care" },
+  { id: "Stable", text: "Stable" },
+  { id: "Moderate", text: "Slightly Abnormal" },
+  { id: "Critical", text: "Critical" },
 ];
 
-export const PATIENT_FILTER_CATEGORY = [
-  { id: "ASYM", text: "ASYM (ASYMPTOMATIC) " },
-  { id: "Mild", text: "Mild (Category A)" },
-  { id: "Moderate", text: "Moderate (Category B)" },
-  { id: "Severe", text: "Severe (Category C)" },
-];
+export const PatientCategoryTailwindClass: Record<PatientCategory, string> = {
+  "Comfort Care": "patient-comfort",
+  Stable: "patient-stable",
+  "Slightly Abnormal": "patient-abnormal",
+  Critical: "patient-critical",
+  unknown: "patient-unknown",
+};
+
+export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 
 export const CURRENT_HEALTH_CHANGE = [
   { id: 0, text: "NO DATA", desc: "" },
@@ -661,61 +669,78 @@ export type CameraPTZ = {
   value?: number;
 };
 
+export const CAMERA_STATES = {
+  IDLE: "idle",
+  MOVING: {
+    GENERIC: "Moving",
+    UP: "Moving Up",
+    DOWN: "Moving Down",
+    LEFT: "Moving Left",
+    RIGHT: "Moving Right",
+  },
+  ZOOMING: {
+    IN: "Zooming In",
+    OUT: "Zooming Out",
+  },
+  PRECISION: "Setting Precision",
+  UPDATING_PRESET: "Updating Preset",
+};
+
 export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   {
     icon: "chevron-up",
     label: "Move Up",
     action: "up",
-    loadingLabel: "Moving Up",
+    loadingLabel: CAMERA_STATES.MOVING.UP,
     shortcutKey: ["Control", "Shift", "ArrowUp"],
   },
   {
     icon: "chevron-down",
     label: "Move Down",
     action: "down",
-    loadingLabel: "Moving Down",
+    loadingLabel: CAMERA_STATES.MOVING.DOWN,
     shortcutKey: ["Control", "Shift", "ArrowDown"],
   },
   {
     icon: "chevron-left",
     label: "Move Left",
     action: "left",
-    loadingLabel: "Moving Left",
+    loadingLabel: CAMERA_STATES.MOVING.LEFT,
     shortcutKey: ["Control", "Shift", "ArrowLeft"],
   },
   {
     icon: "chevron-right",
     label: "Move Right",
     action: "right",
-    loadingLabel: "Moving Right",
+    loadingLabel: CAMERA_STATES.MOVING.RIGHT,
     shortcutKey: ["Control", "Shift", "ArrowRight"],
   },
   {
     value: precision,
     label: "Precision",
     action: "precision",
-    loadingLabel: "Setting Precision",
+    loadingLabel: CAMERA_STATES.PRECISION,
     shortcutKey: ["Shift", "P"],
   },
   {
     icon: "search-plus",
     label: "Zoom In",
     action: "zoomIn",
-    loadingLabel: "Zooming In",
+    loadingLabel: CAMERA_STATES.ZOOMING.IN,
     shortcutKey: ["Shift", "I"],
   },
   {
     icon: "search-minus",
     label: "Zoom Out",
     action: "zoomOut",
-    loadingLabel: "Zooming Out",
+    loadingLabel: CAMERA_STATES.ZOOMING.OUT,
     shortcutKey: ["Shift", "O"],
   },
   {
     icon: "save",
     label: "Update Preset",
     action: "updatePreset",
-    loadingLabel: "Updating Preset",
+    loadingLabel: CAMERA_STATES.UPDATING_PRESET,
     shortcutKey: ["Shift", "S"],
   },
   {
@@ -740,9 +765,9 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
 
 export const FACILITY_FEATURE_TYPES = [
   {
-    id : 1,
-    name : "CT Scan",
-    icon : "circle-dot"
+    id: 1,
+    name: "CT Scan",
+    icon: "circle-dot",
   },
   {
     id: 2,
@@ -750,18 +775,25 @@ export const FACILITY_FEATURE_TYPES = [
     icon: "person-breastfeeding",
   },
   {
-    id : 3,
-    name : "X-Ray",
-    icon : "x-ray"
+    id: 3,
+    name: "X-Ray",
+    icon: "x-ray",
   },
   {
-    id : 4,
-    name : "Neonatal Care",
-    icon : "baby"
+    id: 4,
+    name: "Neonatal Care",
+    icon: "baby",
   },
   {
-    id : 5,
-    name : "Operation Theater",
-    icon : "syringe"
-  }
-]
+    id: 5,
+    name: "Operation Theater",
+    icon: "syringe",
+  },
+  {
+    id: 6,
+    name: "Blood Bank",
+    icon: "droplet",
+  },
+];
+
+export const WAVEFORM_VIEWABLE_LENGTH = 400;

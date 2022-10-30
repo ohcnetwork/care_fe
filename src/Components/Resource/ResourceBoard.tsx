@@ -9,6 +9,9 @@ import { navigate } from "raviger";
 import moment from "moment";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
+import clsx from "clsx";
+import { useDrag, useDrop } from "react-dnd";
+import { formatDate } from "../../Utils/utils";
 
 const limit = 14;
 
@@ -33,6 +36,125 @@ const reduceLoading = (action: string, current: any) => {
   }
 };
 
+const ResourceCard = ({ resource }: any) => {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: "resource-card",
+    item: resource,
+    collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
+  }));
+
+  return (
+    <div ref={drag} className="w-full mt-2">
+      <div
+        className="overflow-hidden shadow rounded-lg bg-white h-full mx-2"
+        style={{
+          opacity: isDragging ? 0.2 : 1,
+          cursor: isDragging ? "grabbing" : "grab",
+        }}
+      >
+        <div className="p-4 h-full flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between">
+              <div className="font-semibold text-md capitalize mb-2 text-black">
+                {resource.title}
+              </div>
+              <div>
+                {resource.emergency && (
+                  <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                    Emergency
+                  </span>
+                )}
+              </div>
+            </div>
+            <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
+              <div className="sm:col-span-1">
+                <dt
+                  title=" Origin facility"
+                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                >
+                  <i className="fas fa-plane-departure mr-2"></i>
+                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                    {(resource.orgin_facility_object || {}).name}
+                  </dd>
+                </dt>
+              </div>
+              <div className="sm:col-span-1">
+                <dt
+                  title="Resource approving facility"
+                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                >
+                  <i className="fas fa-user-check mr-2"></i>
+                  <dd className="font-bold text-sm leading-5 text-gray-900">
+                    {(resource.approving_facility_object || {}).name}
+                  </dd>
+                </dt>
+              </div>
+              {resource.assigned_facility_object && (
+                <div className="sm:col-span-1">
+                  <dt
+                    title=" Assigned facility"
+                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                  >
+                    <i className="fas fa-plane-arrival mr-2"></i>
+
+                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                      {(resource.assigned_facility_object || {}).name ||
+                        "Yet to be decided"}
+                    </dd>
+                  </dt>
+                </div>
+              )}
+              <div className="sm:col-span-1">
+                <dt
+                  title="  Last Modified"
+                  className={
+                    "text-sm leading-5 font-medium flex items-center " +
+                    (moment()
+                      .subtract(2, "hours")
+                      .isBefore(resource.modified_date)
+                      ? "text-gray-900"
+                      : "rounded p-1 bg-red-400 text-white")
+                  }
+                >
+                  <i className="fas fa-stopwatch mr-2"></i>
+                  <dd className="font-bold text-sm leading-5">
+                    {formatDate(resource.modified_date) || "--"}
+                  </dd>
+                </dt>
+              </div>
+
+              {resource.assigned_to_object && (
+                <div className="sm:col-span-1">
+                  <dt
+                    title="Assigned to"
+                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                  >
+                    <i className="fas fa-user mr-2"></i>
+                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                      {resource.assigned_to_object.first_name}{" "}
+                      {resource.assigned_to_object.last_name} -{" "}
+                      {resource.assigned_to_object.user_type}
+                    </dd>
+                  </dt>
+                </div>
+              )}
+            </dl>
+          </div>
+
+          <div className="mt-2 flex">
+            <button
+              onClick={(_) => navigate(`/resource/${resource.external_id}`)}
+              className="btn w-full btn-default bg-white mr-2"
+            >
+              <i className="fas fa-eye mr-2" /> All Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function ResourceBoard({
   board,
   filterProp,
@@ -43,9 +165,17 @@ export default function ResourceBoard({
   const [downloadFile, setDownloadFile] = useState("");
   const [totalCount, setTotalCount] = useState();
   const [currentPage, setCurrentPage] = useState(1);
-  // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [isLoading, setIsLoading] = useState({ board: false, more: false });
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: "resource-card",
+    drop: (item: any) => {
+      if (item.status !== board) {
+        navigate(`/resource/${item.id}/update?status=${board}`);
+      }
+    },
+    collect: (monitor) => ({ isOver: !!monitor.isOver() }),
+  }));
 
   const fetchData = () => {
     setIsLoading((loading) => reduceLoading("BOARD", loading));
@@ -63,6 +193,7 @@ export default function ResourceBoard({
       setIsLoading((loading) => reduceLoading("COMPLETE", loading));
     });
   };
+
   const triggerDownload = async () => {
     // while is getting ready
     setDownloadLoading(true);
@@ -117,112 +248,17 @@ export default function ResourceBoard({
     return data
       .filter(({ status }) => status === filter)
       .map((resource: any) => (
-        <div key={`resource_${resource.id}`} className="w-full mt-2 ">
-          <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
-            <div className={"p-4 h-full flex flex-col justify-between"}>
-              <div>
-                <div className="flex justify-between">
-                  <div className="font-semibold text-md capitalize mb-2 text-black">
-                    {resource.title}
-                  </div>
-                  <div>
-                    {resource.emergency && (
-                      <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
-                        Emergency
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
-                  <div className="sm:col-span-1">
-                    <dt
-                      title=" Origin facility"
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                    >
-                      <i className="fas fa-plane-departure mr-2"></i>
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
-                        {(resource.orgin_facility_object || {}).name}
-                      </dd>
-                    </dt>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt
-                      title="Resource approving facility"
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                    >
-                      <i className="fas fa-user-check mr-2"></i>
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
-                        {(resource.approving_facility_object || {}).name}
-                      </dd>
-                    </dt>
-                  </div>
-                  {resource.assigned_facility_object && (
-                    <div className="sm:col-span-1">
-                      <dt
-                        title=" Assigned facility"
-                        className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                      >
-                        <i className="fas fa-plane-arrival mr-2"></i>
-
-                        <dd className="font-bold text-sm leading-5 text-gray-900">
-                          {(resource.assigned_facility_object || {}).name ||
-                            "Yet to be decided"}
-                        </dd>
-                      </dt>
-                    </div>
-                  )}
-                  <div className="sm:col-span-1">
-                    <dt
-                      title="  Last Modified"
-                      className={
-                        "text-sm leading-5 font-medium flex items-center " +
-                        (moment()
-                          .subtract(2, "hours")
-                          .isBefore(resource.modified_date)
-                          ? "text-gray-900"
-                          : "rounded p-1 bg-red-400 text-white")
-                      }
-                    >
-                      <i className="fas fa-stopwatch mr-2"></i>
-                      <dd className="font-bold text-sm leading-5">
-                        {moment(resource.modified_date).format("LLL") || "--"}
-                      </dd>
-                    </dt>
-                  </div>
-
-                  {resource.assigned_to_object && (
-                    <div className="sm:col-span-1">
-                      <dt
-                        title="Assigned to"
-                        className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                      >
-                        <i className="fas fa-user mr-2"></i>
-                        <dd className="font-bold text-sm leading-5 text-gray-900">
-                          {resource.assigned_to_object.first_name}{" "}
-                          {resource.assigned_to_object.last_name} -{" "}
-                          {resource.assigned_to_object.user_type}
-                        </dd>
-                      </dt>
-                    </div>
-                  )}
-                </dl>
-              </div>
-
-              <div className="mt-2 flex">
-                <button
-                  onClick={(_) => navigate(`/resource/${resource.external_id}`)}
-                  className="btn w-full btn-default bg-white mr-2"
-                >
-                  <i className="fas fa-eye mr-2" /> All Details
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ResourceCard key={`resource_${resource.id}`} resource={resource} />
       ));
   };
   return (
-    <div className="bg-gray-200 mr-2 shrink-0 w-full sm:w-1/2 md:w-3/4 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
+    <div
+      ref={drop}
+      className={clsx(
+        "bg-gray-200 mr-2 shrink-0 w-full sm:w-1/2 md:w-3/4 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md",
+        isOver && "cursor-move"
+      )}
+    >
       <div className="sticky top-0 pt-2 bg-gray-200 rounded">
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">

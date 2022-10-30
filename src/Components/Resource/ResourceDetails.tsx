@@ -12,7 +12,6 @@ import {
   TEST_TYPE_CHOICES,
   KeralaLogo,
 } from "../../Common/constants";
-import moment from "moment";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -20,6 +19,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
 import CommentSection from "./CommentSection";
+import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -40,6 +40,8 @@ export default function ResourceDetails(props: { id: string }) {
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data);
+        } else {
+          navigate("/not-found");
         }
         setIsLoading(false);
       }
@@ -120,7 +122,7 @@ export default function ResourceDetails(props: { id: string }) {
               {" "}
               Date and Time:{" "}
             </span>
-            {moment(data.created_date).format("LLL" || "--")}
+            {formatDate(data.created_date)}
           </div>
           <div className="text-right mt-2">
             <span className="font-semibold leading-relaxed"> Unique Id: </span>
@@ -425,32 +427,31 @@ export default function ResourceDetails(props: { id: string }) {
           <h4 className="mt-8">Audit Log</h4>
 
           <div className="flex justify-between p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
-            <div className="w-1/2 border-r-2 truncate">
-              <div className="text-sm leading-5 font-medium text-gray-500">
+            <div className="w-1/2 border-r-2 px-1">
+              <div className="text-sm leading-5 font-medium text-black">
                 Created
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+              <div className="mt-1 text-sm leading-5 text-gray-900">
                 <div className="text-sm">
                   {data?.created_by_object?.first_name}{" "}
                   {data?.created_by_object?.last_name}
                 </div>
                 <div className="text-xs">
-                  {data.created_date && moment(data.created_date).format("lll")}
+                  {data.created_date && formatDate(data.created_date)}
                 </div>
               </div>
             </div>
-            <div className="w-1/2 truncate">
-              <div className="text-sm leading-5 font-medium text-gray-500">
+            <div className="w-1/2 px-1">
+              <div className="text-sm leading-5 font-medium text-black">
                 Last Edited
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+              <div className="mt-1 text-sm leading-5 text-gray-900">
                 <div className="text-sm">
                   {data?.last_edited_by_object?.first_name}{" "}
                   {data?.last_edited_by_object?.last_name}
                 </div>
                 <div className="text-xs">
-                  {data.modified_date &&
-                    moment(data.modified_date).format("lll")}
+                  {data.modified_date && formatDate(data.modified_date)}
                 </div>
               </div>
             </div>

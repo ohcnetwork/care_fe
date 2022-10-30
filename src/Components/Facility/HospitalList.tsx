@@ -22,7 +22,7 @@ import {
   sendNotificationMessages,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import { SelectField } from "../Common/HelperInputFields";
+
 import { InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
@@ -30,18 +30,16 @@ import { InputSearchBox } from "../Common/SearchBox";
 import { CSVLink } from "react-csv";
 import moment from "moment";
 import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
-import Accordion from "@material-ui/core/Accordion";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import GetAppIcon from "@material-ui/icons/GetApp";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
-import ToolTip from "../Common/utils/Tooltip";
+import SelectMenu from "../Common/components/SelectMenu";
+import AccordionV2 from "../Common/components/AccordionV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -82,7 +80,7 @@ export const HospitalList = (props: any) => {
   const { currentUser } = rootState;
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
-  const [modalFor, setModalFor] = useState(undefined);
+  const [notifyModalFor, setNotifyModalFor] = useState(undefined);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
@@ -315,7 +313,7 @@ export const HospitalList = (props: any) => {
         Notification.Success({
           msg: "Facility Notified",
         });
-        setModalFor(undefined);
+        setNotifyModalFor(undefined);
       } else {
         Notification.Error({ msg: "Something went wrong..." });
       }
@@ -331,17 +329,17 @@ export const HospitalList = (props: any) => {
     facilityList = data.map((facility: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
-          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500">
+          <div className="block rounded-lg overflow-clip bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
-              <div className="md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center">
-                {facility.cover_image_url ? (
+              <div className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
+                {(facility.read_cover_image_url && (
                   <img
-                    src={facility.cover_image_url}
-                    alt="Facility"
+                    src={facility.read_cover_image_url}
+                    alt={facility.name}
                     className="w-full h-full object-cover"
                   />
-                ) : (
-                  <i className="fas fa-hospital text-4xl block text-gray-600"></i>
+                )) || (
+                  <i className="fas fa-hospital text-4xl block text-gray-500" />
                 )}
               </div>
               <div className="h-full w-full grow">
@@ -353,7 +351,7 @@ export const HospitalList = (props: any) => {
                           {KASP_STRING}
                         </div>
                       )}
-                      <div className="float-left font-black text-xl capitalize">
+                      <div className="float-left font-bold text-xl capitalize">
                         {facility.name}
                       </div>
                     </div>
@@ -362,13 +360,38 @@ export const HospitalList = (props: any) => {
                       <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
-                      {facility.features?.map((feature : number, i : number)=>(
-                        <div key={i} className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5" title={FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}>
-                          <i className={`fas fa-${FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].icon}`}/> &nbsp;{FACILITY_FEATURE_TYPES.filter(f=>f.id === feature)[0].name}
-                        </div>
-                      ))}
+                      {facility.features?.map(
+                        (feature: number, i: number) =>
+                          FACILITY_FEATURE_TYPES.some(
+                            (f) => f.id === feature
+                          ) && (
+                            <div
+                              key={i}
+                              className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                              title={
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            >
+                              <i
+                                className={`fas fa-${
+                                  FACILITY_FEATURE_TYPES.filter(
+                                    (f) => f.id === feature
+                                  )[0]?.icon
+                                }`}
+                              />{" "}
+                              &nbsp;
+                              {
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            </div>
+                          )
+                      )}
                     </div>
-                    
+
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
                         <div className="font-semibold">
@@ -389,8 +412,8 @@ export const HospitalList = (props: any) => {
                         <div>
                           {userType !== "Staff" ? (
                             <button
-                              className="mx-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                              onClick={(_) => setModalFor(facility.id)}
+                              className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                              onClick={(_) => setNotifyModalFor(facility.id)}
                             >
                               <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
                               <span className="md:block hidden">Notify</span>
@@ -399,17 +422,17 @@ export const HospitalList = (props: any) => {
                             <></>
                           )}
                           <Modal
-                            open={modalFor === facility.id}
-                            onClose={(_) => setModalFor(undefined)}
+                            open={notifyModalFor === facility.id}
+                            onClose={() => setNotifyModalFor(undefined)}
                             aria-labelledby="Notify This Facility"
                             aria-describedby="Type a message and notify this facility"
                             className=""
                           >
                             <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
                               <form
-                                onSubmit={(event: any) => {
+                                onSubmit={(event) => {
                                   event.preventDefault();
-                                  handleNotifySubmit(modalFor);
+                                  handleNotifySubmit(notifyModalFor);
                                 }}
                                 className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
                               >
@@ -432,17 +455,17 @@ export const HospitalList = (props: any) => {
                                     variant="outlined"
                                   />
                                 </div>
-                                <div className="flex flex-row justify-end">
+                                <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
                                   <button
                                     type="button"
-                                    className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
-                                    onClick={(_) => setModalFor(undefined)}
+                                    className="btn-danger btn mr-2 w-full md:w-auto"
+                                    onClick={() => setNotifyModalFor(undefined)}
                                   >
                                     Cancel
                                   </button>
                                   <button
                                     type="submit"
-                                    className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
+                                    className="btn-primary btn mr-2 w-full md:w-auto"
                                   >
                                     Send Notification
                                   </button>
@@ -501,8 +524,10 @@ export const HospitalList = (props: any) => {
     );
   } else if (data && data.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
-      <div className="w-full">
-        <div className="text-3xl mt-4">{t("no_facilities")}</div>
+      <div className="w-full bg-white rounded-lg p-3">
+        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+          {t("no_facilities")}
+        </div>
       </div>
     ) : (
       <div>
@@ -530,101 +555,75 @@ export const HospitalList = (props: any) => {
         />
 
         <div className="flex md:justify-end w-full md:mt-4">
-          <div>
-            <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
-              >
-                <Typography className={classes.heading}>
-                  {t("downloads")}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <div>
-                  <InputLabel className="text-sm">
-                    {t("download_type")}
-                  </InputLabel>
-                  <div className="flex flex-row">
-                    <SelectField
-                      name="select_download"
-                      className="text-sm"
-                      variant="outlined"
-                      margin="dense"
-                      optionArray={true}
-                      value={downloadSelect}
-                      options={downloadTypes}
-                      onChange={(e) => {
-                        setdownloadSelect(e.target.value);
-                      }}
-                    />
-
-                    {downloadLoading ? (
-                      <div className="px-2 ml-2 my-2 pt-1 rounded">
-                        <CircularProgress className="text-primary-600 w-6 h-6" />
-                      </div>
-                    ) : (
-                      <button
-                        className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
-                        onClick={handleDownloader}
-                        disabled={downloadLoading}
-                      >
-                        <svg
-                          className="h-6 w-6"
-                          viewBox="0 0 16 16"
-                          fill="white"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
-                          />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
+          <div className="w-full md:w-auto">
+            <AccordionV2
+              title={<p className="pl-2 text-lg">Downloads</p>}
+              className="lg:mt-0 md:mt-0 sm:mt-0 bg-white shadow-md rounded-lg p-2 relative"
+              expandIcon={<ExpandMoreIcon />}
+            >
+              <div className="mt-3">
+                <InputLabel className="text-sm mb-2">
+                  {t("download_type")}
+                </InputLabel>
+                <div className="flex flex-row gap-6">
+                  <SelectMenu
+                    options={[
+                      ...downloadTypes.map((download) => ({
+                        title: download,
+                        value: download,
+                      })),
+                    ]}
+                    selected={downloadSelect}
+                    onSelect={setdownloadSelect}
+                    position="left"
+                    parentRelative={false}
+                  />
+                  {downloadLoading ? (
+                    <div className="px-2 ml-2 my-2 pt-1 rounded">
+                      <CircularProgress className="text-primary-600 w-6 h-6" />
+                    </div>
+                  ) : (
+                    <button
+                      className="bg-primary-600 hover:shadow-md px-2 rounded-full"
+                      onClick={handleDownloader}
+                      disabled={downloadLoading}
+                    >
+                      <GetAppIcon style={{ color: "white" }} />
+                    </button>
+                  )}
                 </div>
-                <div className="hidden">
-                  <CSVLink
-                    data={DownloadFile}
-                    filename={`facilities-${now}.csv`}
-                    target="_blank"
-                    className="hidden"
-                    id="facilityDownloader"
-                  ></CSVLink>
-                  <CSVLink
-                    data={capacityDownloadFile}
-                    filename={`facility-capacity-${now}.csv`}
-                    className="hidden"
-                    id="capacityDownloader"
-                    target="_blank"
-                  ></CSVLink>
-                  <CSVLink
-                    data={doctorsDownloadFile}
-                    filename={`facility-doctors-${now}.csv`}
-                    target="_blank"
-                    className="hidden"
-                    id="doctorsDownloader"
-                  ></CSVLink>
-                  <CSVLink
-                    data={triageDownloadFile}
-                    filename={`facility-triage-${now}.csv`}
-                    target="_blank"
-                    className="hidden"
-                    id="triageDownloader"
-                  ></CSVLink>
-                </div>
-              </AccordionDetails>
-            </Accordion>
+              </div>
+              <div className="hidden">
+                <CSVLink
+                  data={DownloadFile}
+                  filename={`facilities-${now}.csv`}
+                  target="_blank"
+                  className="hidden"
+                  id="facilityDownloader"
+                ></CSVLink>
+                <CSVLink
+                  data={capacityDownloadFile}
+                  filename={`facility-capacity-${now}.csv`}
+                  className="hidden"
+                  id="capacityDownloader"
+                  target="_blank"
+                ></CSVLink>
+                <CSVLink
+                  data={doctorsDownloadFile}
+                  filename={`facility-doctors-${now}.csv`}
+                  target="_blank"
+                  className="hidden"
+                  id="doctorsDownloader"
+                ></CSVLink>
+                <CSVLink
+                  data={triageDownloadFile}
+                  filename={`facility-triage-${now}.csv`}
+                  target="_blank"
+                  className="hidden"
+                  id="triageDownloader"
+                ></CSVLink>
+              </div>
+            </AccordionV2>
           </div>
         </div>
       </div>
@@ -648,8 +647,8 @@ export const HospitalList = (props: any) => {
             </dl>
           </div>
         </div>
-        <div className="flex my-4 gap-2 flex-wrap justify-between flex-grow">
-          <div className="w-72">
+        <div className="flex my-4 gap-2 flex-col md:flex-row justify-between flex-grow">
+          <div className="w-full md:w-72">
             <InputSearchBox
               value={qParams.search}
               search={onSearchSuspects}
@@ -658,49 +657,46 @@ export const HospitalList = (props: any) => {
             />
           </div>
 
-          <div className="flex">
-            <div>
-              <div className="flex items-start mb-2">
-                <button
-                  className="btn btn-primary-ghost"
-                  onClick={() => setShowFilters(true)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="fill-current w-4 h-4 mr-2"
-                  >
-                    <line x1="8" y1="6" x2="21" y2="6"></line>
-                    <line x1="8" y1="12" x2="21" y2="12">
-                      {" "}
-                    </line>
-                    <line x1="8" y1="18" x2="21" y2="18">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="6" x2="3.01" y2="6">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="12" x2="3.01" y2="12">
-                      {" "}
-                    </line>
-                    <line x1="3" y1="18" x2="3.01" y2="18">
-                      {" "}
-                    </line>
-                  </svg>
-                  <span>{t("advanced_filters")}</span>
-                </button>
-              </div>
-            </div>
+          <div className="flex items-start mb-2 w-full md:w-auto">
+            <button
+              className="btn btn-primary-ghost w-full md:w-auto"
+              onClick={() => setShowFilters(true)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="fill-current w-4 h-4 mr-2"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12">
+                  {" "}
+                </line>
+                <line x1="8" y1="18" x2="21" y2="18">
+                  {" "}
+                </line>
+                <line x1="3" y1="6" x2="3.01" y2="6">
+                  {" "}
+                </line>
+                <line x1="3" y1="12" x2="3.01" y2="12">
+                  {" "}
+                </line>
+                <line x1="3" y1="18" x2="3.01" y2="18">
+                  {" "}
+                </line>
+              </svg>
+              <span>{t("advanced_filters")}</span>
+            </button>
           </div>
         </div>
       </div>
+
       <div>
         <SlideOver show={showFilters} setShow={setShowFilters}>
           <div className="bg-white min-h-screen p-4">

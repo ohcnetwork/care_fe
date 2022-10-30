@@ -12,7 +12,7 @@ import { BedSelect } from "../../Common/BedSelect";
 import { Button, InputLabel } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { TextInputField } from "../../Common/HelperInputFields";
-import moment from "moment";
+import { formatDate } from "../../../Utils/utils";
 
 const formatDateTime: () => string = () => {
   const current = new Date();
@@ -32,10 +32,11 @@ interface BedsProps {
   smallLoader?: boolean;
   discharged?: boolean;
   setState?: Dispatch<SetStateAction<boolean>>;
+  fetchPatientData?: (state: { aborted: boolean }) => void;
 }
 
 const Beds = (props: BedsProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = React.useState<BedModel>({});
   const [startDate, setStartDate] = React.useState<string>(formatDateTime());
@@ -88,7 +89,8 @@ const Beds = (props: BedsProps) => {
       Notification.Success({
         msg: "Bed allocated successfully",
       });
-      window.location.reload();
+      if (props.fetchPatientData) props.fetchPatientData({ aborted: false });
+      if (props.setState) props.setState(false);
     }
   };
 
@@ -193,11 +195,11 @@ const Beds = (props: BedsProps) => {
                   {bed?.bed_object?.location_object?.name}
                 </div>
                 <div className="text-center bg-primary-100 p-2 break-words">
-                  {moment(bed?.start_date).format("MMMM Do YYYY, h:mm:ss a")}
+                  {formatDate(bed?.start_date)}
                 </div>
                 {bed?.end_date ? (
                   <div className="text-center bg-primary-100 p-2 break-words">
-                    {moment(bed?.end_date).format("MMMM Do YYYY, h:mm:ss a")}
+                    {formatDate(bed?.end_date)}
                   </div>
                 ) : (
                   <div className="text-center bg-primary-100 p-2">

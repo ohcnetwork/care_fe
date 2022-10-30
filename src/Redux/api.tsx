@@ -139,6 +139,11 @@ const routes: Routes = {
     method: "PATCH",
   },
 
+  deleteFacilityCoverImage: {
+    path: "/api/v1/facility/{id}/cover_image/",
+    method: "DELETE",
+  },
+
   getFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/get_users/",
   },
@@ -322,6 +327,11 @@ const routes: Routes = {
 
   getCapacityBed: {
     path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
+  },
+
+  deleteCapacityBed: {
+    path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
+    method: "DELETE",
   },
 
   listDoctor: {
@@ -624,6 +634,10 @@ const routes: Routes = {
     path: "/api/v1/files/{fileId}/",
     method: "GET",
   },
+  editUpload: {
+    path: "/api/v1/files/{fileId}/?file_type={fileType}&associating_id={associatingId}",
+    method: "PATCH",
+  },
 
   // Investigation
   listInvestigations: {
@@ -653,6 +667,11 @@ const routes: Routes = {
   editInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/batchUpdate/",
     method: "PUT",
+  },
+
+  // ICD11
+  listICD11Diagnosis: {
+    path: "/api/v1/icd/",
   },
 
   // Resource

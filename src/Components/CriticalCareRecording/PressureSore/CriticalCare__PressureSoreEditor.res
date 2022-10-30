@@ -19,6 +19,8 @@ type scrollIntoView = {
 }
 
 type state = {
+  modalPosition: CriticalCare__PressureSoreInputModal.position,
+  selectedRegion: PressureSore.region,
   parts: array<PressureSore.part>,
   saving: bool,
   dirty: bool,
@@ -28,8 +30,13 @@ type state = {
 type action =
   | AutoManageScale(PressureSore.part)
   | AddPressureSore(PressureSore.region)
+  | AddSelectedPart(PressureSore.region)
+  | UpdateSelectedPart(PressureSore.part)
   | RemoveFromSelectedParts(PressureSore.part)
   | Update(array<PressureSore.part>)
+  | SetSelectedRegion(PressureSore.region)
+  | SetModalPosition(CriticalCare__PressureSoreInputModal.position)
+  | ShowInputModal(PressureSore.region, CriticalCare__PressureSoreInputModal.position)
   | SetPreviewMode
   | ClearPreviewMode
   | SetSaving
@@ -62,6 +69,40 @@ let reducer = (state, action) => {
       parts: Js.Array.concat(state.parts, [PressureSore.makeDefault(region)]),
       dirty: true,
     }
+  | AddSelectedPart(region) => {
+      ...state,
+      parts: Js.Array.concat(
+        Js.Array.filter(p => PressureSore.region(p) !== region, state.parts), 
+        [
+          Belt.Option.getWithDefault(
+            Js.Array.find(p => PressureSore.region(p) === region, state.parts), 
+            PressureSore.makeDefault(region)
+          )
+        ]
+      ),
+      dirty: true,
+    }
+  | UpdateSelectedPart(part) => {
+      ...state,
+      parts: Js.Array.concat(
+        Js.Array.filter((item: PressureSore.part) => item.region != part.region, state.parts), 
+        [part],
+      ),
+      dirty: true,
+    }
+  | SetSelectedRegion(region) => {
+      ...state,
+      selectedRegion: region,
+    }
+  | SetModalPosition(position) => {
+      ...state,
+      modalPosition: position,
+    }
+  | ShowInputModal(region, position) => {
+      ...state,
+      selectedRegion: region,
+      modalPosition: position,
+    }
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
   | Update(parts) => {
@@ -77,6 +118,11 @@ let makeField = p => {
   let payload = Js.Dict.empty()
   Js.Dict.set(payload, "region", Js.Json.string(PressureSore.endcodeRegion(p)))
   Js.Dict.set(payload, "scale", Js.Json.number(float_of_int(PressureSore.scale(p))))
+  Js.Dict.set(payload, "width", Js.Json.number(p.width))
+  Js.Dict.set(payload, "length", Js.Json.number(p.length))
+  Js.Dict.set(payload, "tissue_type", Js.Json.string(PressureSore.tissueTypeToString(p.tissue_type)))
+  Js.Dict.set(payload, "exudate_amount", Js.Json.string(PressureSore.extrudateAmountToString(p.exudate_amount)))
+  Js.Dict.set(payload, "description", Js.Json.string(p.description))
   payload
 }
 
@@ -107,6 +153,8 @@ let saveData = (id, consultationId, state, send, updateCB) => {
 let initialState = (psp, previewMode) => {
   {
     parts: psp,
+    modalPosition: {"x": 0, "y": 0},
+    selectedRegion: PressureSore.Other,
     saving: false,
     dirty: false,
     previewMode: previewMode,
@@ -190,6 +238,10 @@ let getIntoView = (region: string, isPart: bool) => {
 }
 
 let renderBody = (state, send, title, partPaths, substr) => {
+  
+  let show = state.selectedRegion !== PressureSore.Other && partPaths->Belt.Array.some(p => PressureSore.regionForPath(p) === state.selectedRegion)
+
+
   <div className=" w-full text-center mx-2">
     <div className="text-2xl font-bold mt-8"> {str(title)} </div>
     <div className="text-left font-bold mx-auto mt-5">
@@ -241,6 +293,18 @@ let renderBody = (state, send, title, partPaths, substr) => {
     </div>
     // Diagram
     <div className="flex justify-center mx-auto border-2">
+      <CriticalCare__PressureSoreInputModal
+        show={show}
+        hideModal={_ => send(SetSelectedRegion(PressureSore.Other))}
+        position={state.modalPosition}
+        part={
+          Belt.Option.getWithDefault(
+            Js.Array.find(p => PressureSore.region(p) === state.selectedRegion, state.parts), 
+            PressureSore.makeDefault(state.selectedRegion)
+          )
+        }
+        updatePart={part => send(UpdateSelectedPart(part))}
+      />
       <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
         {Js.Array.mapi((part, renderIndex) => {
           let regionType = PressureSore.regionForPath(part)
@@ -254,12 +318,10 @@ let renderBody = (state, send, title, partPaths, substr) => {
             id={"part" ++ PressureSore.regionToString(regionType)}
             onClick={state.previewMode
               ? _ => getIntoView(PressureSore.regionToString(regionType), true)
-              : _ => {
-                  switch selectedPart {
-                  | Some(p) => send(AutoManageScale(p))
-                  | None => send(AddPressureSore(regionType))
-                  }
-                }}>
+              : e => {
+                  send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
+                }}
+          >
             <title className=""> {str(PressureSore.regionToString(regionType))} </title>
           </path>
         }, partPaths)->React.array}
@@ -278,11 +340,11 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
   }, [pressureSoreParameter])
 
   <div className="my-5">
-    <div className="flex justify-between">
+    <div className="flex flex-col sm:flex-row justify-between">
       {!previewMode
         ? <>
             <h2> {str("Pressure Sore")} </h2>
-            <label className="flex items-center cursor-pointer">
+            <label className="flex items-center cursor-pointer  sm:mt-0 mt-4">
               // Toggle
 
               //Toggle Button

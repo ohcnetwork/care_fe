@@ -8,7 +8,6 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
@@ -17,12 +16,13 @@ import React, {
   useCallback,
   useEffect,
   useReducer,
+  useRef,
   useState,
 } from "react";
 import { useDispatch } from "react-redux";
 import {
   CONSULTATION_SUGGESTION,
-  PATIENT_CATEGORY,
+  PATIENT_CATEGORIES,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
@@ -57,6 +57,15 @@ import Beds from "./Consultations/Beds";
 import PrescriptionBuilder, {
   PrescriptionType,
 } from "../Common/prescription-builder/PrescriptionBuilder";
+import PRNPrescriptionBuilder, {
+  PRNPrescriptionType,
+} from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import { DiagnosisSelect } from "../Common/DiagnosisSelect";
+import { goBack } from "../../Utils/utils";
+import InvestigationBuilder, {
+  InvestigationType,
+} from "../Common/prescription-builder/InvestigationBuilder";
+import { ICD11DiagnosisModel } from "./models";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -86,7 +95,10 @@ type FormDetails = {
   admission_date: string;
   discharge_date: null;
   referred_to: string;
-  diagnosis: string;
+  icd11_diagnoses: string[];
+  icd11_diagnoses_object: ICD11DiagnosisModel[];
+  icd11_provisional_diagnoses: string[];
+  icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
   verified_by: string;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
@@ -97,15 +109,17 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: PrescriptionType[];
+  prn_prescription: PRNPrescriptionType[];
+  investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
   special_instruction: string;
-  review_time: number;
+  review_interval: number;
   weight: string;
   height: string;
-  bed: string | null;
+  bed: BedModel | null;
 };
 
 type Action =
@@ -123,11 +137,14 @@ const initForm: FormDetails = {
   facility: "",
   admitted: "false",
   admitted_to: "",
-  category: "",
+  category: "Comfort",
   admission_date: new Date().toISOString(),
   discharge_date: null,
   referred_to: "",
-  diagnosis: "",
+  icd11_diagnoses: [],
+  icd11_diagnoses_object: [],
+  icd11_provisional_diagnoses: [],
+  icd11_provisional_diagnoses_object: [],
   verified_by: "",
   is_kasp: "false",
   kasp_enabled_date: null,
@@ -144,12 +161,14 @@ const initForm: FormDetails = {
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
+  prn_prescription: [],
+  investigation: [],
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
-  review_time: 0,
+  review_interval: -1,
   weight: "",
   height: "",
   bed: null,
@@ -192,19 +211,6 @@ const suggestionTypes = [
 
 const symptomChoices = [...SYMPTOM_CHOICES];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const categoryChoices = [
-  {
-    id: 0,
-    text: "Select suspect category",
-  },
-  ...PATIENT_CATEGORY,
-];
-
-const goBack = () => {
-  window.history.go(-1);
-};
-
 const scrollTo = (id: any) => {
   const element = document.querySelector(`#${id}-div`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -218,23 +224,26 @@ export const ConsultationForm = (props: any) => {
   const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
     []
   );
-
-  useEffect(() => {
-    console.log("da", dischargeAdvice);
-  }, [dischargeAdvice]);
-  useEffect(() => {
-    console.log(state.form.procedure.isRepetitive);
-  }, [state.form.procedure]);
-
+  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
+  const [InvestigationAdvice, setInvestigationAdvice] = useState<
+    InvestigationType[]
+  >([]);
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
-  //const [diseaseStatus, setDiseaseStatus] = useState("");
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
+
+  const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      topRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }, []);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -243,7 +252,6 @@ export const ConsultationForm = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
-          //setDiseaseStatus(res.data.disease_status);
         }
       } else {
         setPatientName("");
@@ -257,14 +265,15 @@ export const ConsultationForm = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
-      if (
-        res &&
-        res.data &&
-        res.data.discharge_advice &&
-        Object.keys(res.data.discharge_advice).length != 0
-      ) {
-        setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      }
+      setDischargeAdvice(res && res.data && res.data.discharge_advice);
+      setPRNAdvice(
+        !Array.isArray(res.data.prn_prescription)
+          ? []
+          : res.data.prn_prescription
+      );
+      setInvestigationAdvice(
+        !Array.isArray(res.data.investigation) ? [] : res.data.investigation
+      );
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -295,9 +304,11 @@ export const ConsultationForm = (props: any) => {
               !!res.data.symptoms.filter((i: number) => i === 9).length,
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
-            category: res.data.category ? res.data.category : "",
+            category: res.data.category
+              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
+                  ?.id || "Comfort"
+              : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
-            diagnosis: res.data.diagnosis ? res.data.diagnosis : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
@@ -307,9 +318,10 @@ export const ConsultationForm = (props: any) => {
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
-            bed: res.data?.current_bed?.bed_object?.id || null,
+            bed: res.data?.current_bed?.bed_object || null,
           };
           dispatch({ type: "set_form", form: formData });
+          setBed(formData.bed);
         } else {
           goBack();
         }
@@ -331,7 +343,6 @@ export const ConsultationForm = (props: any) => {
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
-    let invalid = false;
     let error_div = "";
 
     Object.keys(state.form).forEach((field) => {
@@ -339,6 +350,18 @@ export const ConsultationForm = (props: any) => {
         case "symptoms":
           if (!state.form[field] || !state.form[field].length) {
             errors[field] = "Please select the symptoms";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "category":
+          if (
+            !state.form[field] ||
+            !PATIENT_CATEGORIES.map((category) => category.id).includes(
+              state.form[field]
+            )
+          ) {
+            errors[field] = "Please select a category";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -421,7 +444,8 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "discharge_advice":
+        case "discharge_advice": {
+          let invalid = false;
           for (const f of dischargeAdvice) {
             if (
               !f.dosage?.replace(/\s/g, "").length ||
@@ -437,6 +461,48 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        }
+        case "prn_prescription": {
+          let invalid = false;
+          for (const f of PRNAdvice) {
+            if (
+              !f.dosage?.replace(/\s/g, "").length ||
+              !f.medicine?.replace(/\s/g, "").length ||
+              f.indicator === "" ||
+              f.indicator === " "
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "PRN Prescription field can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        }
+
+        case "investigation": {
+          let invalid = false;
+          for (const f of InvestigationAdvice) {
+            if (
+              f.type?.length === 0 ||
+              (f.repetitive
+                ? !f.frequency?.replace(/\s/g, "").length
+                : !f.time?.replace(/\s/g, "").length)
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Investigation Suggestion field can not be empty";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        }
         default:
           return;
       }
@@ -476,10 +542,13 @@ export const ConsultationForm = (props: any) => {
         prescribed_medication: state.form.prescribed_medication,
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
-        diagnosis: state.form.diagnosis,
+        icd11_diagnoses: state.form.icd11_diagnoses,
+        icd11_provisional_diagnoses: state.form.icd11_provisional_diagnoses,
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
         procedure: state.form.procedure,
+        prn_prescription: PRNAdvice,
+        investigation: InvestigationAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -487,7 +556,7 @@ export const ConsultationForm = (props: any) => {
         consultation_notes: state.form.consultation_notes,
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
-        review_time: state.form.review_time,
+        review_interval: state.form.review_interval,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
         special_instruction: state.form.special_instruction,
@@ -615,8 +684,7 @@ export const ConsultationForm = (props: any) => {
   };
 
   const handleDoctorSelect = (doctor: UserModel | null) => {
-    doctor &&
-      doctor.id &&
+    if (doctor?.id) {
       dispatch({
         type: "set_form",
         form: {
@@ -625,6 +693,16 @@ export const ConsultationForm = (props: any) => {
           assigned_to_object: doctor,
         },
       });
+    } else {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          assigned_to: "",
+          assigned_to_object: null,
+        },
+      });
+    }
   };
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
@@ -642,7 +720,7 @@ export const ConsultationForm = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
+    <div className="px-2 pb-2 max-w-3xl mx-auto" ref={topRef}>
       <PageTitle
         title={headerText}
         crumbsReplacements={{
@@ -760,17 +838,19 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.prescribed_medication}
                   />
                 </div>
-                {/* <div className="flex-1" id="category-div">
-                  <InputLabel id="category-label">Category*</InputLabel>
+                <div className="flex-1" id="category-div">
+                  <InputLabel id="category-label" required>
+                    Category
+                  </InputLabel>
                   <SelectField
                     name="category"
                     variant="standard"
                     value={state.form.category}
-                    options={categoryChoices}
+                    options={PATIENT_CATEGORIES}
                     onChange={handleChange}
                     errors={state.errors.category}
                   />
-                </div> */}
+                </div>
 
                 <div id="suggestion-div">
                   <InputLabel
@@ -844,16 +924,24 @@ export const ConsultationForm = (props: any) => {
                         errors=""
                         multiple={false}
                         margin="dense"
+                        unoccupiedOnly={true}
+                        disabled={!!id} // disabled while editing
                         // location={state.form.}
                         facility={facilityId}
                       />
+                      {!!id && (
+                        <p className="text-gray-500 text-sm -mt-5 mb-1">
+                          Can't be edited while Consultation update. To change
+                          bed use the form bellow
+                        </p>
+                      )}
                     </div>
                   </>
                 )}
               </div>
 
               <div className="mt-4" id="consultation_notes-div">
-                <InputLabel>Advice*</InputLabel>
+                <InputLabel>General Instructions (Advice)*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   className="mt-2"
@@ -869,6 +957,15 @@ export const ConsultationForm = (props: any) => {
                   onChange={handleChange}
                   errors={state.errors.consultation_notes}
                 />
+              </div>
+              <div id="investigation-div" className="mt-4">
+                <InputLabel>Investigation Suggestions</InputLabel>
+                <InvestigationBuilder
+                  investigations={InvestigationAdvice}
+                  setInvestigations={setInvestigationAdvice}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.investigation} />
               </div>
               <div id="discharge_advice-div" className="mt-4">
                 <InputLabel>Prescription Medication</InputLabel>
@@ -978,6 +1075,15 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 </div>
               </div>
+              <div id="discharge_advice-div" className="mt-4">
+                <InputLabel>PRN Prescription</InputLabel>
+                <PRNPrescriptionBuilder
+                  prescriptions={PRNAdvice}
+                  setPrescriptions={setPRNAdvice}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.prn_prescription} />
+              </div>
               <div id="ip_no-div" className="mt-4">
                 <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
@@ -1009,21 +1115,45 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.verified_by}
                 />
               </div>
-              <div id="diagnosis-div" className="mt-4">
-                <InputLabel id="exam-details-label">Diagnosis</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="diagnosis"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.diagnosis,
+              <div id="provisional-diagnosis-div" className="mt-4">
+                <InputLabel id="diagnosis-label">
+                  Provisional Diagnosis
+                </InputLabel>
+                <DiagnosisSelect
+                  name="icd11_provisional_diagnoses"
+                  selected={state.form.icd11_provisional_diagnoses_object}
+                  setSelected={(selected: ICD11DiagnosisModel[] | null) => {
+                    dispatch({
+                      type: "set_form",
+                      form: {
+                        ...state.form,
+                        icd11_provisional_diagnoses:
+                          selected?.map(
+                            (diagnosis: ICD11DiagnosisModel) => diagnosis.id
+                          ) || [],
+                      },
+                    });
                   }}
-                  value={state.form.diagnosis}
-                  onChange={handleChange}
-                  errors={state.errors.diagnosis}
+                />
+              </div>
+
+              <div id="diagnosis-div" className="mt-4">
+                <InputLabel id="diagnosis-label">Diagnosis</InputLabel>
+                <DiagnosisSelect
+                  name="icd11_diagnoses"
+                  selected={state.form.icd11_diagnoses_object}
+                  setSelected={(selected: ICD11DiagnosisModel[] | null) => {
+                    dispatch({
+                      type: "set_form",
+                      form: {
+                        ...state.form,
+                        icd11_diagnoses:
+                          selected?.map(
+                            (diagnosis: ICD11DiagnosisModel) => diagnosis.id
+                          ) || [],
+                      },
+                    });
+                  }}
                 />
               </div>
 
@@ -1081,20 +1211,20 @@ export const ConsultationForm = (props: any) => {
                 </div>
 
                 {JSON.parse(state.form.is_telemedicine) && (
-                  <div className="flex-1" id="review_time">
-                    <InputLabel id="review_time-label">
+                  <div className="flex-1" id="review_interval">
+                    <InputLabel id="review_interval-label">
                       Review After{" "}
                     </InputLabel>
                     <SelectField
-                      name="review_time"
+                      name="review_interval"
                       variant="standard"
-                      value={state.form.review_time}
+                      value={state.form.review_interval}
                       options={[
-                        { id: "", text: "select" },
+                        { id: -1, text: "select" },
                         ...REVIEW_AT_CHOICES,
                       ]}
                       onChange={handleChange}
-                      errors={state.errors.review_time}
+                      errors={state.errors.review_interval}
                     />
                   </div>
                 )}

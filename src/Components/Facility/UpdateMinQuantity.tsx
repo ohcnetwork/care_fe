@@ -1,7 +1,7 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import React, { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -11,6 +11,7 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
+import { goBack } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -41,10 +42,6 @@ const inventoryFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
-
 export const UpdateMinQuantity = (props: any) => {
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId, inventoryId, itemId } = props;
@@ -52,10 +49,7 @@ export const UpdateMinQuantity = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState(" ");
-  const [currentUnit, setCurrentUnit] = useState<any>();
   const [facilityName, setFacilityName] = useState("");
-
-  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -66,7 +60,7 @@ export const UpdateMinQuantity = (props: any) => {
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.item_object.name);
-          let form = { ...state.form, quantity: res.data.min_quantity };
+          const form = { ...state.form, quantity: res.data.min_quantity };
           dispatch({ type: "set_form", form });
         }
         setIsLoading(false);
@@ -115,7 +109,7 @@ export const UpdateMinQuantity = (props: any) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -171,18 +165,20 @@ export const UpdateMinQuantity = (props: any) => {
                   />
                 </div>
               </div>
-              <div className="flex justify-between mt-4">
+              <div className="sm:flex sm:justify-between mt-4">
                 <Button
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={goBack}
+                  className="w-full sm:w-fit mt-2"
+                  onClick={() => goBack()}
                 >
                   Cancel
                 </Button>
                 <Button
                   color="primary"
                   variant="contained"
+                  className="w-full sm:w-fit mt-2"
                   type="submit"
                   style={{ marginLeft: "auto" }}
                   startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}

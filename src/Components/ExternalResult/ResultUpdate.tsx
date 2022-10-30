@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useReducer } from "react";
+import { useCallback, useState, useReducer } from "react";
 import {
   Button,
   CardContent,
@@ -20,17 +20,14 @@ import {
   externalResult,
   partialUpdateExternalResult,
 } from "../../Redux/actions";
-import {
-  MultilineInputField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
+import { goBack } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const initForm: any = {
+const initForm = {
   address: "",
   local_body: "",
   ward: "",
@@ -148,10 +145,10 @@ export default function UpdateResult(props: any) {
   );
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
 
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "address":
           if (!state.form[field]) {
@@ -188,10 +185,6 @@ export default function UpdateResult(props: any) {
     }
     dispatch({ type: "set_error", errors });
     return true;
-  };
-
-  const goBack = () => {
-    window.history.go(-1);
   };
 
   const handleChange = (e: any) => {
@@ -331,27 +324,26 @@ export default function UpdateResult(props: any) {
               </RadioGroup>
             </div>
           </div>
-          <div className="flex justify-end mt-4">
+          <div className="flex flex-col md:flex-row gap-2 justify-end mt-4">
             <Button
               color="default"
               variant="contained"
               type="button"
-              onClick={goBack}
+              className="w-full md:w-auto"
+              onClick={() => goBack()}
             >
-              {" "}
-              Cancel{" "}
+              Cancel
             </Button>
             <Button
               color="primary"
               variant="contained"
               type="submit"
-              style={{ marginLeft: "10px" }}
               startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
               onClick={(e) => handleSubmit(e)}
               data-testid="submit-button"
+              className="w-full md:w-auto"
             >
-              {" "}
-              Submit{" "}
+              Submit
             </Button>
           </div>
         </form>

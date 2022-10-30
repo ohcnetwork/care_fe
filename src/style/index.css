@@ -10,7 +10,6 @@ html {
 }
 
 body {
-  font-family: "Open Sans", sans-serif;
   color: #453c52;
   @apply font-sans text-gray-900 w-full h-full antialiased;
 }
@@ -83,10 +82,6 @@ a:hover {
 }
 
 /* Button */
-
-button:focus {
-  outline: none;
-}
 
 .btn {
   @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
@@ -191,6 +186,14 @@ button:focus {
 .btn-danger:focus {
   @apply bg-red-800;
   background-image: none;
+}
+
+.primary-button {
+  @apply focus:outline-none text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-6 py-2.5 mr-2 mb-2 transition-all ease-in-out duration-200 !important;
+}
+
+.secondary-button {
+  @apply text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-6 py-2.5 mr-2 mb-2 transition-all ease-in-out duration-200 !important;
 }
 
 button:disabled,
@@ -352,9 +355,21 @@ button:disabled:focus,
   }
 }
 
+label {
+  @apply block text-gray-700 text-sm font-medium;
+}
+
+input {
+  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300 !important;
+}
+
 input:disabled,
 .disabled {
-  @apply cursor-not-allowed bg-gray-200 text-gray-700;
+  @apply cursor-not-allowed bg-gray-200 border-gray-400 text-gray-700;
+}
+
+textarea {
+  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300;
 }
 
 button:disabled,
@@ -582,8 +597,7 @@ button:disabled,
 }
 
 .error-text {
-  font-size: 14px;
-  color: red;
+  @apply font-medium tracking-wide text-error text-xs
 }
 
 .textMarginCenter {
@@ -708,17 +722,12 @@ button:disabled,
   box-shadow: 0 0 0 1px #28a745;
 }
 
-.form-input {
-  padding-top: 6px;
-  padding-bottom: 6px;
-  width: 100%;
-  border-radius: 4px;
-  height: 38px;
+.form-input, .form-textarea{
+  @apply text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out !important
 }
 
-.form-input:focus {
-  border-color: #28a745 !important;
-  box-shadow: 0 0 0 1px #28a745 !important;
+.form-textarea {
+  @apply resize-none !important
 }
 
 .shifting-page-filter-dropdown .MuiFormControl-root {
@@ -833,8 +842,7 @@ button:disabled,
   border-radius: 50%;
 }
 
-@media (min-width:471px)
-  {
+@media (min-width:471px) {
     .csv-input {
       display: block; 
       font-size: 0.875rem;
@@ -842,9 +850,9 @@ button:disabled,
       margin: auto;
       width: 50%;
     }
-  }
-  @media (max-width:470px)
-  {
+}
+
+@media (max-width:470px) {
     .csv-input {
       display: block; 
       font-size: 0.875rem;
@@ -852,23 +860,134 @@ button:disabled,
       margin: auto;
       width: 100%;
     }
-  }
-  
+}
+
 .csv-input::file-selector-button{
-padding-top: 0.5rem;
-padding-bottom: 0.5rem; 
-padding-left: 1rem;
-padding-right: 1rem; 
-font-size: 0.875rem;
-line-height: 1.25rem; 
-font-weight: 600; 
-border-width: 0; 
-background-color: #def7ec;
-color:#046c4e;
-
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem; 
+  padding-left: 1rem;
+  padding-right: 1rem; 
+  font-size: 0.875rem;
+  line-height: 1.25rem; 
+  font-weight: 600; 
+  border-width: 0; 
+  background-color: #def7ec;
+  color:#046c4e;
 }
- 
 
-.csv-input::file-selector-button:hover{
-background-color: #84e1bc;
+.csv-input::file-selector-button:hover {
+  background-color: #84e1bc;
 }
+
+[type="checkbox"] {
+  @apply text-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none;
+}
+
+/* Patient Category Styles */
+
+.patient-comfort { 
+  @apply bg-patient-comfort text-patient-comfort-fore
+}
+.patient-stable { 
+  @apply bg-patient-stable text-patient-stable-fore
+}
+.patient-abnormal { 
+  @apply bg-patient-abnormal text-patient-abnormal-fore
+}
+.patient-critical { 
+  @apply bg-patient-critical text-patient-critical-fore
+}
+.patient-unknown {
+  @apply bg-patient-unknown text-patient-unknown-fore
+}
+
+.patient-comfort-ring { 
+  @apply ring-patient-comfort
+}
+.patient-stable-ring { 
+  @apply ring-patient-stable
+}
+.patient-abnormal-ring { 
+  @apply ring-patient-abnormal
+}
+.patient-critical-ring { 
+  @apply ring-patient-critical
+}
+.patient-unknown-ring {
+  @apply ring-patient-unknown
+}
+
+.patient-comfort-profile { 
+  @apply border-2 border-patient-comfort rounded-t
+}
+.patient-stable-profile { 
+  @apply border-2 border-patient-stable rounded-t
+}
+.patient-abnormal-profile { 
+  @apply border-2 border-patient-abnormal rounded-t
+}
+.patient-critical-profile { 
+  @apply border-2 border-patient-critical rounded-t
+}
+.patient-unknown-profile {
+  @apply border border-patient-unknown rounded
+}
+
+/* for gmaps search dropdown */
+.pac-container {
+  z-index: 100000 !important;
+}
+
+.warranty-card::before{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background: url('../../public/images/wave_scene.svg'), linear-gradient(to bottom right, #057a55, #03543f);
+  background-position: top right;
+  background-size: cover;
+}
+
+.warranty-card::after{
+  content : "";
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  top: 0;
+  width: 50%;
+  height: 50%;
+  /*background: url('../../public/images/circle.svg') no-repeat center;*/
+}
+
+.field-label {
+  @apply mb-2 block text-gray-900 text-base font-normal
+}
+
+.field-error {
+  @apply font-medium tracking-wide text-red-500 text-xs mt-2 ml-1
+}
+
+.Button { 
+  @apply font-medium h-min flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500
+}
+
+.button-primary-default { @apply accent-primary-500 bg-primary-500 hover:bg-primary-400 text-white }
+.button-primary-ghost { @apply accent-primary-500 hover:bg-primary-100 text-primary-500 border-0 }
+.button-secondary-default { @apply accent-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700 }
+.button-secondary-ghost { @apply accent-gray-200 hover:bg-gray-200 text-gray-700 border-0 }
+.button-danger-default { @apply accent-red-500 bg-red-500 hover:bg-red-400 text-white }
+.button-danger-ghost { @apply accent-red-500 hover:bg-red-100 text-red-500 border-0 }
+.button-warning-default { @apply accent-yellow-500 bg-yellow-500 hover:bg-yellow-400 text-white }
+.button-warning-ghost { @apply accent-yellow-500 hover:bg-yellow-100 text-yellow-500 border-0 }
+.button-alert-default { @apply accent-violet-600 bg-violet-600 hover:bg-violet-500 text-white }
+.button-alert-ghost { @apply accent-violet-600 hover:bg-violet-100 text-violet-600 border-0 }
+
+.button-shape-square { @apply rounded }
+.button-shape-circle { @apply rounded-full p-2 !important }
+
+.button-size-small { @apply px-2 py-1 text-xs }
+.button-size-default { @apply py-2 px-4 text-sm }
+.button-size-large { @apply py-3 px-5 text-base }

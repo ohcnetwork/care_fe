@@ -1,6 +1,5 @@
 import { Grid, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
-import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -8,12 +7,18 @@ import { getDailyReport } from "../../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
-import { PATIENT_CATEGORY } from "../../../Common/constants";
-import { smallCard } from "../../Common/components/SkeletonLoading.gen";
+import { formatDate } from "../../../Utils/utils";
+
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
-const patientCategoryChoices = [...PATIENT_CATEGORY];
+const getName = (item: any) => {
+  const fallback = "Virtual Nursing Assistant";
+  if (item?.first_name === "" && item?.last_name === "") {
+    return fallback;
+  }
+  return `${item?.first_name} ${item?.last_name} - ${item?.user_type}`;
+};
 
 export const DailyRoundsList = (props: any) => {
   const { facilityId, patientId, consultationId, consultationData } = props;
@@ -31,7 +36,10 @@ export const DailyRoundsList = (props: any) => {
     async (status: statusType) => {
       setIsDailyRoundLoading(true);
       const res = await dispatch(
-        getDailyReport({ limit, offset }, { consultationId })
+        getDailyReport(
+          { limit, offset, rounds_type: "NORMAL,VENTILATOR,ICU" },
+          { consultationId }
+        )
       );
       if (!status.aborted) {
         if (res && res.data) {
@@ -60,7 +68,21 @@ export const DailyRoundsList = (props: any) => {
   let roundsList: any;
 
   if (isDailyRoundLoading) {
-    roundsList = smallCard();
+    roundsList = (
+      <div className="m-1">
+        <div className="border border-gray-300 bg-white shadow rounded-md p-4 max-w-sm w-full mx-auto">
+          <div className="animate-pulse flex space-x-4 ">
+            <div className="flex-1 space-y-4 py-1">
+              <div className="h-4 bg-gray-400 rounded w-3/4"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-400 rounded"></div>
+                <div className="h-4 bg-gray-400 rounded w-5/6"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   } else if (dailyRoundsListData.length === 0) {
     roundsList = (
       <Typography>No Consultation Update data is available.</Typography>
@@ -87,9 +109,7 @@ export const DailyRoundsList = (props: any) => {
                         <span className="text-gray-700">Updated by:</span>{" "}
                         {telemedicine_doctor_update &&
                         consultationData.assigned_to_object
-                          ? consultationData.assigned_to_object.first_name +
-                            " " +
-                            consultationData.assigned_to_object.last_name
+                          ? getName(consultationData.assigned_to_object)
                           : "-"}
                       </Typography>
                     </Grid>
@@ -99,11 +119,7 @@ export const DailyRoundsList = (props: any) => {
                     <Grid item xs={12}>
                       <Typography>
                         <span className="text-gray-700">Updated by:</span>{" "}
-                        {itemData.last_edited_by.first_name +
-                          " " +
-                          itemData.last_edited_by.last_name +
-                          " - " +
-                          itemData.last_edited_by.user_type}
+                        {getName(itemData.last_edited_by)}
                       </Typography>
                     </Grid>
                   ) : null}
@@ -112,11 +128,7 @@ export const DailyRoundsList = (props: any) => {
                     <Grid item xs={12}>
                       <Typography>
                         <span className="text-gray-700">Created by:</span>{" "}
-                        {itemData.created_by.first_name +
-                          " " +
-                          itemData.created_by.last_name +
-                          " - " +
-                          itemData.created_by.user_type}
+                        {getName(itemData.created_by)}
                       </Typography>
                     </Grid>
                   ) : null}
@@ -126,9 +138,7 @@ export const DailyRoundsList = (props: any) => {
                       <Typography>
                         <span className="text-gray-700">Category: </span>
                         <span className="badge badge-pill badge-warning">
-                          {patientCategoryChoices.find(
-                            (i) => i.id === itemData.patient_category
-                          )?.text || "-"}
+                          {itemData.patient_category || "-"}
                         </span>
                       </Typography>
                     </Grid>
@@ -138,7 +148,7 @@ export const DailyRoundsList = (props: any) => {
                       <span className="text-gray-700">Created At:</span>{" "}
                       <div className="text-xs">
                         {itemData.created_date
-                          ? moment(itemData.created_date).format("lll")
+                          ? formatDate(itemData.created_date)
                           : "-"}
                       </div>
                     </div>
@@ -148,7 +158,7 @@ export const DailyRoundsList = (props: any) => {
                       <span className="text-gray-700">Updated At:</span>{" "}
                       <div className="text-xs">
                         {itemData.modified_date
-                          ? moment(itemData.modified_date).format("lll")
+                          ? formatDate(itemData.modified_date)
                           : "-"}
                       </div>
                     </div>
@@ -221,7 +231,7 @@ export const DailyRoundsList = (props: any) => {
             breadcrumbs={false}
           />
         </div>
-        <div className="flex flex-wrap">
+        <div className={!isDailyRoundLoading ? "flex flex-wrap" : ""}>
           <div className="overflow-y-auto h-screen space-y-4">{roundsList}</div>
           {!isDailyRoundLoading && totalCount > limit && (
             <div className="mt-4 flex justify-center">

@@ -1,12 +1,8 @@
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
   Card,
   CardContent,
   CircularProgress,
-  Collapse,
   FormControlLabel,
   InputLabel,
   Radio,
@@ -58,11 +54,15 @@ import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
 import { InfoOutlined } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { goBack } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const debounce = require("lodash.debounce");
+import AccordionV2 from "../Common/components/AccordionV2";
+import CollapseV2 from "../Common/components/CollapseV2";
+import { debounce } from "lodash";
+// const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -180,10 +180,6 @@ const patientFormReducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const goBack = () => {
-  window.history.go(-1);
 };
 
 const scrollTo = (id: any) => {
@@ -527,21 +523,30 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "local_body":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select local body";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "ward":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select ward";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "district":
-          if (state.form.nationality === "India" && !state.form[field]) {
+          if (
+            state.form.nationality === "India" &&
+            !Number(state.form[field])
+          ) {
             errors[field] = "Please select district";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -824,6 +829,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   const handleChange = (e: any) => {
     const form = { ...state.form };
+    switch (e.target.name) {
+      case "state":
+        form["district"] = "0";
+        form["local_body"] = "0";
+        form["ward"] = "0";
+        break;
+
+      case "district":
+        form["local_body"] = "0";
+        form["ward"] = "0";
+        break;
+
+      case "local_body":
+        form["ward"] = "0";
+        break;
+    }
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -973,7 +994,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         <>
           {showAlertMessage.show && (
             <AlertDialog
-              handleClose={() => goBack()}
+              handleClose={goBack}
               message={showAlertMessage.message}
               title={showAlertMessage.title}
             />
@@ -1118,11 +1139,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
                         </div>
 
-                        <Collapse
-                          in={String(state.form.gender) === "2"}
-                          timeout="auto"
-                          unmountOnExit
-                        >
+                        <CollapseV2 opened={String(state.form.gender) === "2"}>
                           {
                             <div id="is_antenatal-div" className="col-span-2">
                               <InputLabel
@@ -1154,7 +1171,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               </RadioGroup>
                             </div>
                           }
-                        </Collapse>
+                        </CollapseV2>
                         <div data-testid="current-address" id="address-div">
                           <InputLabel
                             id="address-label"
@@ -1407,18 +1424,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </CardContent>
                   </Card>
                   <Card elevation={0} className="mb-8 rounded">
-                    <Accordion className="mt-2 lg:mt-0 md:mt-0">
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1a-content"
-                        id="panel1a-header"
-                      >
-                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                    <AccordionV2
+                      className="mt-2 lg:mt-0 md:mt-0 bg-white shadow-sm rounded-lg p-3 relative"
+                      expandIcon={<ExpandMoreIcon />}
+                      title={
+                        <h1 className="font-bold text-purple-500 text-left text-xl">
                           Health Details
                         </h1>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2 w-full">
+                      }
+                    >
+                      <div>
+                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2 w-full mt-5">
                           <div id="test_type-div">
                             <InputLabel
                               id="test_type-label"
@@ -1482,13 +1498,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                               </Box>
                             </RadioGroup>
-                            <Collapse
-                              in={
+                            <CollapseV2
+                              opened={
                                 String(state.form.is_declared_positive) ===
                                 "true"
                               }
-                              timeout="auto"
-                              unmountOnExit
                               className="mt-4"
                             >
                               <div id="date_declared_positive-div">
@@ -1510,7 +1524,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   disableFuture={true}
                                 />
                               </div>
-                            </Collapse>
+                            </CollapseV2>
                           </div>
 
                           <div id="is_vaccinated-div">
@@ -1542,11 +1556,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               </Box>
                             </RadioGroup>
                           </div>
-                          <Collapse
-                            in={String(state.form.is_vaccinated) === "true"}
-                            timeout="auto"
-                            unmountOnExit
-                            className="col-span-2"
+                          <CollapseV2
+                            opened={String(state.form.is_vaccinated) === "true"}
                           >
                             {
                               <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
@@ -1583,7 +1594,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     onChange={handleChange}
                                     style={{ padding: "0px 5px" }}
                                   >
-                                    <Box display="flex" flexDirection="row">
+                                    <div className="flex flex-wrap">
                                       <FormControlLabel
                                         value="1"
                                         control={<Radio />}
@@ -1599,7 +1610,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         control={<Radio />}
                                         label="3 (Booster/Precautionary Dose)"
                                       />
-                                    </Box>
+                                    </div>
                                   </RadioGroup>
                                 </div>
                                 <div id="vaccine_name-div">
@@ -1649,7 +1660,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 </div>
                               </div>
                             }
-                          </Collapse>
+                          </CollapseV2>
                           <div id="contact_with_confirmed_carrier-div">
                             <InputLabel htmlFor="contact_with_confirmed_carrier">
                               Contact with confirmed Covid patient?
@@ -1703,8 +1714,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               </Box>
                             </RadioGroup>
                           </div>
-                          <Collapse
-                            in={
+                          <CollapseV2
+                            opened={
                               JSON.parse(
                                 state.form.contact_with_confirmed_carrier
                               ) ||
@@ -1712,9 +1723,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 state.form.contact_with_suspected_carrier
                               )
                             }
-                            timeout="auto"
-                            unmountOnExit
-                            className="col-span-2"
                           >
                             <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                               <div id="estimated_contact_date-div">
@@ -1728,7 +1736,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <DateInputField
                                   fullWidth={true}
                                   id="estimated_contact_date"
-                                  label="Estimate date of contact"
                                   value={state.form.estimated_contact_date}
                                   onChange={(date) =>
                                     handleDateChange(
@@ -1764,7 +1771,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                               </div>
                             </div>
-                          </Collapse>
+                          </CollapseV2>
                           <div
                             data-testid="disease-status"
                             id="disease_status-div"
@@ -1910,8 +1917,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                         </div>
-                      </AccordionDetails>
-                    </Accordion>
+                      </div>
+                    </AccordionV2>
                   </Card>
                   <Card elevation={0} className="mb-8 rounded">
                     <CardContent>
@@ -2025,7 +2032,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <button
                       className="btn btn-default bg-gray-300 hover:bg-gray-400 btn-large   mr-4"
                       type="button"
-                      onClick={goBack}
+                      onClick={() => goBack()}
                     >
                       {" "}
                       Cancel{" "}

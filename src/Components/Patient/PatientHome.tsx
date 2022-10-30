@@ -32,6 +32,8 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { RoleButton } from "../Common/RoleButton";
 import clsx from "clsx";
+import Chip from "../../CAREUI/display/Chip";
+import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -80,14 +82,6 @@ export const PatientHome = (props: any) => {
 
   const initErr: any = {};
   const errors = initErr;
-
-  console.log(
-    patientData.is_active,
-    patientData?.last_consultation,
-    patientData.is_active &&
-      (!patientData?.last_consultation ||
-        patientData?.last_consultation?.discharge_date)
-  );
 
   useEffect(() => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
@@ -150,22 +144,6 @@ export const PatientHome = (props: any) => {
       }
     });
   };
-
-  function Badge(props: { color: string; icon: string; text: string }) {
-    return (
-      <span
-        className="inline-flex items-center py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
-        title={props.text}
-      >
-        <i
-          className={
-            "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-          }
-        ></i>
-        {props.text}
-      </span>
-    );
-  }
 
   const handleVolunteerSelect = (volunteer: any) => {
     setAssignedVolunteerObject(volunteer);
@@ -338,12 +316,12 @@ export const PatientHome = (props: any) => {
     const medHis = patientData.medical_history;
     patientMedHis = medHis.map((item: any, idx: number) => (
       <div className="sm:col-span-1" key={`med_his_${idx}`}>
-        {item?.disease != "NO" && (
+        {item?.disease !== "NO" && (
           <>
-            <div className="text-sm leading-5 font-medium text-gray-500">
+            <div className="text-sm leading-5 font-medium text-gray-700 overflow-x-scroll">
               {item.disease}
             </div>
-            <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+            <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
               {item.details}
             </div>
           </>
@@ -387,16 +365,27 @@ export const PatientHome = (props: any) => {
       </div>
     );
   } else if (sampleListData.length > 0) {
-    sampleList = sampleListData.map((itemData, idx) => (
-      <SampleTestCard
-        itemData={itemData}
-        key={idx}
-        handleApproval={confirmApproval}
-        facilityId={facilityId}
-        patientId={id}
-      />
-    ));
+    sampleList = (
+      <div className="lg:grid lg:grid-cols-2 lg:gap-4">
+        {sampleListData.map((itemData, idx) => (
+          <SampleTestCard
+            itemData={itemData}
+            key={idx}
+            handleApproval={confirmApproval}
+            facilityId={facilityId}
+            patientId={id}
+          />
+        ))}
+      </div>
+    );
   }
+
+  const isPatientInactive = (patientData: PatientModel, facilityId: number) => {
+    return (
+      !patientData.is_active ||
+      !(patientData?.last_consultation?.facility === facilityId)
+    );
+  };
 
   return (
     <div className="px-2 pb-2">
@@ -566,7 +555,7 @@ export const PatientHome = (props: any) => {
                       Date of Return
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900">
-                      {moment(patientData.date_of_return).format("LL")}
+                      {formatDate(patientData.date_of_return)}
                     </div>
                   </div>
                 )}
@@ -596,7 +585,7 @@ export const PatientHome = (props: any) => {
                       Last Vaccinated on
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900">
-                      {moment(patientData.last_vaccinated_date).format("LL")}
+                      {formatDate(patientData.last_vaccinated_date)}
                     </div>
                   </div>
                 )}
@@ -616,49 +605,61 @@ export const PatientHome = (props: any) => {
                     </div>
                   )}
               </div>
-              <div className="flex flex-wrap mt-2 space-x-2">
+              <div className="flex flex-wrap mt-2 gap-2">
                 {patientData.is_vaccinated ? (
-                  <Badge color="blue" icon="syringe" text="Vaccinated" />
+                  <Chip color="blue" startIcon="syringe" text="Vaccinated" />
                 ) : (
-                  <Badge
+                  <Chip
                     color="yellow"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Not Vaccinated"
                   />
                 )}
                 {patientData.allow_transfer ? (
-                  <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
+                  <Chip
+                    color="yellow"
+                    startIcon="unlock"
+                    text="Transfer Allowed"
+                  />
                 ) : (
-                  <Badge color="primary" icon="lock" text="Transfer Blocked" />
+                  <Chip
+                    color="primary"
+                    startIcon="lock"
+                    text="Transfer Blocked"
+                  />
                 )}
                 {patientData.gender === 2 &&
                   patientData.is_antenatal &&
                   patientData.is_active && (
-                    <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+                    <Chip
+                      color="blue"
+                      startIcon="baby-carriage"
+                      text="Antenatal"
+                    />
                   )}
                 {patientData.contact_with_confirmed_carrier && (
-                  <Badge
+                  <Chip
                     color="red"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Contact with confirmed carrier"
                   />
                 )}
                 {patientData.contact_with_suspected_carrier && (
-                  <Badge
+                  <Chip
                     color="yellow"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Contact with suspected carrier"
                   />
                 )}
                 {patientData.past_travel && (
-                  <Badge
+                  <Chip
                     color="yellow"
-                    icon="exclamation-triangle"
+                    startIcon="exclamation-triangle"
                     text="Travel (within last 28 days)"
                   />
                 )}
                 {patientData.last_consultation?.is_telemedicine && (
-                  <Badge color="purple" icon="phone" text="Telemedicine" />
+                  <Chip color="purple" startIcon="phone" text="Telemedicine" />
                 )}
               </div>
             </div>
@@ -669,22 +670,25 @@ export const PatientHome = (props: any) => {
               className="space-y-2 flex-col justify-between flex h-full"
             >
               <div>
-                {patientData.review_time && (
-                  <div
-                    className={
-                      "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center " +
-                      (moment().isBefore(patientData.review_time)
-                        ? " bg-gray-100"
-                        : " p-1 bg-red-400 text-white")
-                    }
-                  >
-                    <i className="mr-2 text-md fas fa-clock"></i>
-                    {(moment().isBefore(patientData.review_time)
-                      ? "Review at: "
-                      : "Review Missed: ") +
-                      moment(patientData.review_time).format("lll")}
-                  </div>
-                )}
+                {patientData.review_time &&
+                  !patientData.last_consultation?.discharge_date &&
+                  Number(patientData.last_consultation?.review_interval) >
+                    0 && (
+                    <div
+                      className={
+                        "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center border-gray-500 border " +
+                        (moment().isBefore(patientData.review_time)
+                          ? " bg-gray-100"
+                          : " p-1 bg-red-400 text-white")
+                      }
+                    >
+                      <i className="mr-2 text-md fas fa-clock"></i>
+                      {(moment().isBefore(patientData.review_time)
+                        ? "Review before: "
+                        : "Review Missed: ") +
+                        formatDate(patientData.review_time)}
+                    </div>
+                  )}
                 <div className="p-2 bg-white rounded-lg shadow text-center">
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2 truncate">
@@ -715,9 +719,12 @@ export const PatientHome = (props: any) => {
                         {patientData?.created_by?.first_name}{" "}
                         {patientData?.created_by?.last_name}
                       </div>
-                      <div className="text-xs">
-                        {patientData.created_date &&
-                          moment(patientData.created_date).format("lll")}
+                      <div className="text-xs flex justify-center">
+                        {patientData.created_date && (
+                          <div className="flex flex-col md:flex-row gap-1">
+                            <div>{formatDate(patientData.created_date)}</div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -730,16 +737,19 @@ export const PatientHome = (props: any) => {
                         {patientData?.last_edited?.first_name}{" "}
                         {patientData?.last_edited?.last_name}
                       </div>
-                      <div className="text-xs">
-                        {patientData.modified_date &&
-                          moment(patientData.modified_date).format("lll")}
+                      <div className="text-xs flex justify-center">
+                        {patientData.modified_date && (
+                          <div className="flex flex-col md:flex-row gap-1">
+                            <div>{formatDate(patientData.modified_date)}</div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="space-y-2 py-2">
-                {patientData.disease_status === "EXPIRED" && (
+                {patientData.last_consultation?.discharge_reason === "EXP" && (
                   <div>
                     <button
                       className="btn btn-primary w-full"
@@ -793,7 +803,7 @@ export const PatientHome = (props: any) => {
         </section>
         <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
           <div
-            className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
+            className="flex justify-between border-b border-dashed cursor-pointer text-gray-900 font-semibold text-left text-lg pb-2"
             onClick={() => {
               setShowShifts(!showShifts);
               setIsShiftClicked(true);
@@ -900,8 +910,7 @@ export const PatientHome = (props: any) => {
                             >
                               <i className="fas fa-stopwatch mr-2"></i>
                               <dd className="font-bold text-sm leading-5">
-                                {moment(shift.modified_date).format("LLL") ||
-                                  "--"}
+                                {formatDate(shift.modified_date) || "--"}
                               </dd>
                             </dt>
                           </div>
@@ -1062,12 +1071,13 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Medical
               </div>
-              {/* No medical data found */}
               {!patientData.present_health &&
                 !patientData.allergies &&
                 !patientData.ongoing_medication &&
-                patientData.gender === 2 &&
-                !patientData.is_antenatal && (
+                !(patientData.gender === 2 && patientData.is_antenatal) &&
+                !patientData.medical_history?.some(
+                  (history) => history.disease !== "NO"
+                ) && (
                   <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
                     No Medical History Available
                   </div>
@@ -1078,7 +1088,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Present Health
                     </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="mt-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
                       {patientData.present_health}
                     </div>
                   </div>
@@ -1088,7 +1098,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Ongoing Medications
                     </div>
-                    <div className="my-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="my-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
                       {patientData.ongoing_medication}
                     </div>
                   </div>
@@ -1098,7 +1108,7 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Allergies
                     </div>
-                    <div className="my-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                    <div className="my-1 text-sm leading-5 text-gray-900 overflow-x-scroll">
                       {patientData.allergies}
                     </div>
                   </div>
@@ -1192,28 +1202,21 @@ export const PatientHome = (props: any) => {
               <div
                 className="w-full"
                 onClick={() => {
-                  if (
-                    !(
-                      !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility === facilityId)
-                    )
-                  ) {
+                  if (!isPatientInactive(patientData, facilityId)) {
                     navigate(`/facility/${facilityId}/patient/${id}/shift/new`);
                   }
                 }}
               >
                 <div
                   className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
-                    !patientData.is_active ||
-                    !(patientData?.last_consultation?.facility === facilityId)
+                    isPatientInactive(patientData, facilityId)
                       ? " hover:cursor-not-allowed "
                       : " hover:bg-gray-200 hover:cursor-pointer "
                   } `}
                 >
                   <div
                     className={`${
-                      !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility === facilityId)
+                      isPatientInactive(patientData, facilityId)
                         ? "text-gray-700"
                         : "text-green-700"
                     }  text-center `}
@@ -1226,11 +1229,7 @@ export const PatientHome = (props: any) => {
                   <div>
                     <p
                       className={`${
-                        !patientData.is_active ||
-                        !(
-                          patientData?.last_consultation?.facility ===
-                          facilityId
-                        )
+                        isPatientInactive(patientData, facilityId)
                           ? "text-gray-700"
                           : "text-green-700"
                       }  text-center `}
@@ -1243,12 +1242,7 @@ export const PatientHome = (props: any) => {
               <div
                 className="w-full"
                 onClick={() => {
-                  if (
-                    !(
-                      !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility === facilityId)
-                    )
-                  ) {
+                  if (!isPatientInactive(patientData, facilityId)) {
                     navigate(
                       `/facility/${patientData?.facility}/patient/${id}/sample-test`
                     );
@@ -1256,17 +1250,16 @@ export const PatientHome = (props: any) => {
                 }}
               >
                 <div
-                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 ${
-                    !patientData.is_active ||
-                    !(patientData?.last_consultation?.facility === facilityId)
+                  className={clsx(
+                    "bg-white rounded-lg shadow p-4 h-full space-y-2",
+                    isPatientInactive(patientData, facilityId)
                       ? " hover:cursor-not-allowed "
                       : " hover:bg-gray-200 hover:cursor-pointer "
-                  } `}
+                  )}
                 >
                   <div
                     className={`${
-                      !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility === facilityId)
+                      isPatientInactive(patientData, facilityId)
                         ? " text-gray-700 "
                         : " text-green-700 "
                     } text-center  `}
@@ -1278,11 +1271,7 @@ export const PatientHome = (props: any) => {
                   <div>
                     <p
                       className={`${
-                        !patientData.is_active ||
-                        !(
-                          patientData?.last_consultation?.facility ===
-                          facilityId
-                        )
+                        isPatientInactive(patientData, facilityId)
                           ? " text-gray-700 "
                           : " text-green-700 "
                       } text-center  `}
@@ -1315,16 +1304,41 @@ export const PatientHome = (props: any) => {
               </div>
               <div
                 className="w-full"
-                onClick={() => setOpenAssignVolunteerDialog(true)}
+                onClick={() => {
+                  if (!isPatientInactive(patientData, facilityId)) {
+                    setOpenAssignVolunteerDialog(true);
+                  }
+                }}
               >
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 hover:bg-gray-200 hover:cursor-pointer">
-                  <div className="text-green-700 text-center">
+                <div
+                  className={clsx(
+                    "bg-white rounded-lg shadow p-4 h-full space-y-2",
+                    isPatientInactive(patientData, facilityId)
+                      ? "hover:cursor-not-allowed "
+                      : "hover:bg-gray-200 hover:cursor-pointer "
+                  )}
+                >
+                  <div
+                    className={clsx(
+                      "text-center",
+                      isPatientInactive(patientData, facilityId)
+                        ? "text-gray-700"
+                        : "text-green-700"
+                    )}
+                  >
                     <span>
                       <i className="fa-solid fa-hospital-user fa-4x"></i>
                     </span>
                   </div>
                   <div>
-                    <p className="text-green-700 text-center">
+                    <p
+                      className={clsx(
+                        "text-center",
+                        isPatientInactive(patientData, facilityId)
+                          ? "text-gray-700"
+                          : "text-green-700"
+                      )}
+                    >
                       Assign to a volunteer
                     </p>
                   </div>
@@ -1382,10 +1396,7 @@ export const PatientHome = (props: any) => {
                 <div>
                   <RoleButton
                     className="btn btn-primary w-full"
-                    disabled={
-                      !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility == facilityId)
-                    }
+                    disabled={isPatientInactive(patientData, facilityId)}
                     handleClickCB={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${id}/shift/new`
@@ -1400,10 +1411,7 @@ export const PatientHome = (props: any) => {
                 <div>
                   <RoleButton
                     className="btn btn-primary w-full"
-                    disabled={
-                      !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility == facilityId)
-                    }
+                    disabled={isPatientInactive(patientData, facilityId)}
                     handleClickCB={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/sample-test`
@@ -1459,9 +1467,7 @@ export const PatientHome = (props: any) => {
           <div>
             <OnlineUsersSelect
               userId={assignedVolunteerObject?.id || patientData.assigned_to}
-              selectedUser={
-                assignedVolunteerObject || patientData.assigned_to_object
-              }
+              selectedUser={assignedVolunteerObject}
               onSelect={handleVolunteerSelect}
               user_type={"Volunteer"}
               outline={false}
@@ -1472,7 +1478,7 @@ export const PatientHome = (props: any) => {
           <DialogActions>
             <Button
               onClick={() => {
-                handleVolunteerSelect("");
+                handleVolunteerSelect(patientData.assigned_to_object);
                 setOpenAssignVolunteerDialog(false);
               }}
               color="primary"

@@ -387,16 +387,16 @@ export default function UserProfile() {
             {!showEdit && (
               <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
                 <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1 my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Username
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.username || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Contact No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -404,95 +404,81 @@ export default function UserProfile() {
                     </dd>
                   </div>
 
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Whatsapp No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.alt_phone_number || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Email address
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.email || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       First Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.first_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Last Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Age
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.age || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Verification Status
-                    </dt>
-                    {details.verified && (
-                      <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
-                        Verified
-                      </dd>
-                    )}
-                    {!details.verified && (
-                      <dd className="mt-1 text-sm leading-5 text-gray-900">
-                        Not Verified
-                      </dd>
-                    )}
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Access Level
                     </dt>
-                    <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
+                      <i className="fa-solid fa-user-check mr-1"></i>{" "}
                       {details.user_type || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Gender
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.gender || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Local Body
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       District
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       State
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -521,7 +507,7 @@ export default function UserProfile() {
                             variant="outlined"
                             margin="dense"
                             type="text"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             value={states.form.firstName}
                             onChange={handleChangeInput}
                             errors={states.errors.firstName}
@@ -539,7 +525,7 @@ export default function UserProfile() {
                             name="lastName"
                             variant="outlined"
                             margin="dense"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             type="text"
                             value={states.form.lastName}
                             onChange={handleChangeInput}
@@ -556,7 +542,7 @@ export default function UserProfile() {
                           </label>
                           <TextInputField
                             name="age"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             variant="outlined"
                             margin="dense"
                             value={states.form.age}
@@ -586,6 +572,7 @@ export default function UserProfile() {
                         <div className="col-span-6 sm:col-span-3">
                           <PhoneNumberField
                             label="Phone Number*"
+                            placeholder="Phone Number"
                             value={states.form.phoneNumber}
                             onChange={(value: string) =>
                               handleValueChange(value, "phoneNumber")
@@ -598,6 +585,7 @@ export default function UserProfile() {
                           <PhoneNumberField
                             name="altPhoneNumber"
                             label="Whatsapp Number"
+                            placeholder="WhatsApp Number"
                             value={states.form.altPhoneNumber}
                             onChange={(value: string) =>
                               handleWhatsappNumChange(value, "altPhoneNumber")
@@ -652,7 +640,7 @@ export default function UserProfile() {
                             variant="outlined"
                             margin="dense"
                             type="password"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             value={changePasswordForm.old_password}
                             onChange={(e) =>
                               setChangePasswordForm({
@@ -675,7 +663,7 @@ export default function UserProfile() {
                             variant="outlined"
                             margin="dense"
                             type="password"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             value={changePasswordForm.new_password_1}
                             onChange={(e) =>
                               setChangePasswordForm({
@@ -698,7 +686,7 @@ export default function UserProfile() {
                             variant="outlined"
                             margin="dense"
                             type="password"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             value={changePasswordForm.new_password_2}
                             onChange={(e) =>
                               setChangePasswordForm({

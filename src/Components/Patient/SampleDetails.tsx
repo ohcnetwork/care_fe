@@ -1,5 +1,4 @@
 import { Card, CardContent, Button } from "@material-ui/core";
-import moment from "moment";
 import loadable from "@loadable/component";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -10,6 +9,7 @@ import { FileUpload } from "./FileUpload";
 import { navigate } from "raviger";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
 import _ from "lodash";
+import { formatDate } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -31,6 +31,8 @@ export const SampleDetails = (props: SampleDetailsProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           setSampleDetails(res.data);
+        } else {
+          navigate("/not-found");
         }
         setIsLoading(false);
       }
@@ -97,7 +99,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
                 Date of Test:{" "}
               </span>
               {(patientData?.date_of_test &&
-                moment(patientData?.date_of_test).format("LL")) ||
+                formatDate(patientData?.date_of_test)) ||
                 "-"}
             </div>
 
@@ -191,7 +193,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
                 <span className="font-semibold leading-relaxed">
                   Estimated contact date:{" "}
                 </span>
-                {moment(patientData?.estimated_contact_date).format("LL")}
+                {formatDate(patientData?.estimated_contact_date)}
               </div>
             )}
             <div className="md:col-span-2">
@@ -272,17 +274,13 @@ export const SampleDetails = (props: SampleDetailsProps) => {
               <span className="font-semibold leading-relaxed">
                 Created On :
               </span>{" "}
-              {flow.created_date
-                ? moment(flow.created_date).format("lll")
-                : "-"}
+              {flow.created_date ? formatDate(flow.created_date) : "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Modified on:
               </span>{" "}
-              {flow.modified_date
-                ? moment(flow.modified_date).format("lll")
-                : "-"}
+              {flow.modified_date ? formatDate(flow.modified_date) : "-"}
             </div>
           </div>
         </CardContent>
@@ -339,13 +337,13 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             <div>
               <span className="font-semibold leading-relaxed">Tested on: </span>
               {sampleDetails.date_of_result
-                ? moment(sampleDetails.date_of_result).format("lll")
+                ? formatDate(sampleDetails.date_of_result)
                 : "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Result on: </span>
               {sampleDetails.date_of_result
-                ? moment(sampleDetails.date_of_result).format("lll")
+                ? formatDate(sampleDetails.date_of_result)
                 : "-"}
             </div>
             {sampleDetails.fast_track && (
