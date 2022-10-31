@@ -13,7 +13,7 @@ describe("Location Management Section", () => {
       .should("contain", "Facility")
       .contains("Facility")
       .click({ force: true });
-    cy.contains("Location Management").click();
+    cy.contains("Manage Locations").click();
   });
 
   it("Adds Location", () => {
