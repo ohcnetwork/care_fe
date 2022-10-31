@@ -1,9 +1,5 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-} from "@material-ui/core";
 import { useEffect, useState } from "react";
+import AccordionV2 from "./AccordionV2";
 
 function getWindowSize() {
   const { innerWidth, innerHeight } = window;
@@ -67,31 +63,11 @@ export default function ResponsiveMedicineTable(props: {
       ) : (
         <div className="rounded-md shadow-sm">
           {props.list.map((med: any, index: number) => (
-            <Accordion elevation={0} key={index}>
-              <AccordionSummary
-                className="overflow-hidden"
-                expandIcon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-5 h-5"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                    />
-                  </svg>
-                }
-                aria-controls={`panel${index + 1}a-content`}
-                id={`panel${index + 1}a-header`}
-              >
+            <AccordionV2
+              title={
                 <div className="grid">
                   <div className="flex flex-col">
-                    <h3 className="text-sm font-medium overflow-hidden text-ellipsis w-full">
+                    <h3 className="text-sm font-medium overflow-hidden text-ellipsis w-full text-left">
                       {med[props.objectKeys[0]]}
                     </h3>
                   </div>
@@ -106,35 +82,40 @@ export default function ResponsiveMedicineTable(props: {
                     ))}
                   </div>
                 </div>
-              </AccordionSummary>
-              <AccordionDetails className="border-t border-t-gray-400">
-                <div className="flex flex-col w-full">
-                  <div className="grid grid-cols-2 gap-3 w-full">
-                    {props.objectKeys.map((key, i) => {
-                      if (i !== 0 && i !== props.objectKeys.length - 1)
-                        return (
-                          <div>
-                            <h4 className="font-semibold text-base">
-                              {props.theads[i]}
-                            </h4>{" "}
-                            <p>{med[key]}</p>
-                          </div>
-                        );
+              }
+              className={
+                props.list.length - 1 === index
+                  ? "bg-white p-5 "
+                  : "bg-white p-5 border-b border-b-gray-400"
+              }
+              key={index}
+            >
+              <div className="flex flex-col w-full border-t border-t-gray-400 mt-3">
+                <div className="grid grid-cols-2 gap-3 w-full mt-3">
+                  {props.objectKeys.map((key, i) => {
+                    if (i !== 0 && i !== props.objectKeys.length - 1)
+                      return (
+                        <div>
+                          <h4 className="font-semibold text-base">
+                            {props.theads[i]}
+                          </h4>{" "}
+                          <p>{med[key]}</p>
+                        </div>
+                      );
 
-                      if (i === props.objectKeys.length - 1)
-                        return (
-                          <div className="col-span-2">
-                            <h4 className="font-semibold text-base">
-                              {props.theads[i]}
-                            </h4>{" "}
-                            <p>{med[key]}</p>
-                          </div>
-                        );
-                    })}
-                  </div>
+                    if (i === props.objectKeys.length - 1)
+                      return (
+                        <div className="col-span-2">
+                          <h4 className="font-semibold text-base">
+                            {props.theads[i]}
+                          </h4>{" "}
+                          <p>{med[key]}</p>
+                        </div>
+                      );
+                  })}
                 </div>
-              </AccordionDetails>
-            </Accordion>
+              </div>
+            </AccordionV2>
           ))}
         </div>
       )}

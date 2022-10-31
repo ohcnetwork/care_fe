@@ -87,7 +87,7 @@ const Map: React.FC<MapProps> = ({
 }) => {
   const ref = React.useRef<HTMLDivElement>(null);
   const searchRef = React.useRef<HTMLInputElement>(null);
-  const [map, setMap] = React.useState<google.maps.Map>();
+  const [map, setMap] = React.useState<google.maps.Map & Partial<unknown>>();
   const [searchBox, setSearchBox] =
     React.useState<google.maps.places.SearchBox>();
 
@@ -158,7 +158,7 @@ const Map: React.FC<MapProps> = ({
       />
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-          return React.cloneElement(child, { map });
+          return React.cloneElement(child as React.ReactElement, { map });
         }
       })}
     </>

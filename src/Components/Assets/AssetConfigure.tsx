@@ -18,7 +18,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
   const [asset, setAsset] = React.useState<AssetData>();
   const [isLoading, setIsLoading] = React.useState(true);
   const [assetType, setAssetType] = React.useState("");
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
 
   const fetchData = useCallback(
     async (status: statusType) => {

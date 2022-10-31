@@ -16,6 +16,7 @@ import React, {
   useCallback,
   useEffect,
   useReducer,
+  useRef,
   useState,
 } from "react";
 import { useDispatch } from "react-redux";
@@ -105,7 +106,7 @@ type FormDetails = {
   assigned_to: string;
   assigned_to_object: UserModel | null;
   special_instruction: string;
-  review_time: number;
+  review_interval: number;
   weight: string;
   height: string;
   bed: BedModel | null;
@@ -150,7 +151,7 @@ const initForm: FormDetails = {
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
-  review_time: 0,
+  review_interval: -1,
   weight: "",
   height: "",
   bed: null,
@@ -220,6 +221,14 @@ export const ConsultationForm = (props: any) => {
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
 
+  const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      topRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }, []);
+
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
@@ -265,7 +274,8 @@ export const ConsultationForm = (props: any) => {
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)?.id || "Comfort"
+              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
+                  ?.id || "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
@@ -514,7 +524,7 @@ export const ConsultationForm = (props: any) => {
         consultation_notes: state.form.consultation_notes,
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
-        review_time: state.form.review_time,
+        review_interval: state.form.review_interval,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
         special_instruction: state.form.special_instruction,
@@ -652,7 +662,7 @@ export const ConsultationForm = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
+    <div className="px-2 pb-2 max-w-3xl mx-auto" ref={topRef}>
       <PageTitle
         title={headerText}
         crumbsReplacements={{
@@ -856,10 +866,17 @@ export const ConsultationForm = (props: any) => {
                         errors=""
                         multiple={false}
                         margin="dense"
-                        disabled={true}
+                        unoccupiedOnly={true}
+                        disabled={!!id} // disabled while editing
                         // location={state.form.}
                         facility={facilityId}
                       />
+                      {!!id && (
+                        <p className="text-gray-500 text-sm -mt-5 mb-1">
+                          Can't be edited while Consultation update. To change
+                          bed use the form bellow
+                        </p>
+                      )}
                     </div>
                   </>
                 )}
@@ -1041,20 +1058,20 @@ export const ConsultationForm = (props: any) => {
                 </div>
 
                 {JSON.parse(state.form.is_telemedicine) && (
-                  <div className="flex-1" id="review_time">
-                    <InputLabel id="review_time-label">
+                  <div className="flex-1" id="review_interval">
+                    <InputLabel id="review_interval-label">
                       Review After{" "}
                     </InputLabel>
                     <SelectField
-                      name="review_time"
+                      name="review_interval"
                       variant="standard"
-                      value={state.form.review_time}
+                      value={state.form.review_interval}
                       options={[
-                        { id: "", text: "select" },
+                        { id: -1, text: "select" },
                         ...REVIEW_AT_CHOICES,
                       ]}
                       onChange={handleChange}
-                      errors={state.errors.review_time}
+                      errors={state.errors.review_interval}
                     />
                   </div>
                 )}
@@ -1182,6 +1199,7 @@ export const ConsultationForm = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
               consultationId={id}
+              fetchPatientData={fetchData}
             ></Beds>
           </CardContent>
         </div>

@@ -22,6 +22,7 @@ import {
   sendNotificationMessages,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
+
 import { InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
@@ -29,11 +30,7 @@ import { InputSearchBox } from "../Common/SearchBox";
 import { CSVLink } from "react-csv";
 import moment from "moment";
 import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
-import Accordion from "@material-ui/core/Accordion";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -42,6 +39,7 @@ import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
+import AccordionV2 from "../Common/components/AccordionV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -82,7 +80,7 @@ export const HospitalList = (props: any) => {
   const { currentUser } = rootState;
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
-  const [modalFor, setModalFor] = useState(undefined);
+  const [notifyModalFor, setNotifyModalFor] = useState(undefined);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
@@ -315,7 +313,7 @@ export const HospitalList = (props: any) => {
         Notification.Success({
           msg: "Facility Notified",
         });
-        setModalFor(undefined);
+        setNotifyModalFor(undefined);
       } else {
         Notification.Error({ msg: "Something went wrong..." });
       }
@@ -331,17 +329,17 @@ export const HospitalList = (props: any) => {
     facilityList = data.map((facility: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
-          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500">
+          <div className="block rounded-lg overflow-clip bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
-              <div className="md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center">
-                {facility.cover_image_url ? (
+              <div className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
+                {(facility.read_cover_image_url && (
                   <img
-                    src={facility.cover_image_url}
-                    alt="Facility"
+                    src={facility.read_cover_image_url}
+                    alt={facility.name}
                     className="w-full h-full object-cover"
                   />
-                ) : (
-                  <i className="fas fa-hospital text-4xl block text-gray-600"></i>
+                )) || (
+                  <i className="fas fa-hospital text-4xl block text-gray-500" />
                 )}
               </div>
               <div className="h-full w-full grow">
@@ -353,7 +351,7 @@ export const HospitalList = (props: any) => {
                           {KASP_STRING}
                         </div>
                       )}
-                      <div className="float-left font-black text-xl capitalize">
+                      <div className="float-left font-bold text-xl capitalize">
                         {facility.name}
                       </div>
                     </div>
@@ -415,7 +413,7 @@ export const HospitalList = (props: any) => {
                           {userType !== "Staff" ? (
                             <button
                               className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                              onClick={(_) => setModalFor(facility.id)}
+                              onClick={(_) => setNotifyModalFor(facility.id)}
                             >
                               <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
                               <span className="md:block hidden">Notify</span>
@@ -424,17 +422,17 @@ export const HospitalList = (props: any) => {
                             <></>
                           )}
                           <Modal
-                            open={modalFor === facility.id}
-                            onClose={(_) => setModalFor(undefined)}
+                            open={notifyModalFor === facility.id}
+                            onClose={() => setNotifyModalFor(undefined)}
                             aria-labelledby="Notify This Facility"
                             aria-describedby="Type a message and notify this facility"
                             className=""
                           >
                             <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
                               <form
-                                onSubmit={(event: any) => {
+                                onSubmit={(event) => {
                                   event.preventDefault();
-                                  handleNotifySubmit(modalFor);
+                                  handleNotifySubmit(notifyModalFor);
                                 }}
                                 className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
                               >
@@ -461,7 +459,7 @@ export const HospitalList = (props: any) => {
                                   <button
                                     type="button"
                                     className="btn-danger btn mr-2 w-full md:w-auto"
-                                    onClick={(_) => setModalFor(undefined)}
+                                    onClick={() => setNotifyModalFor(undefined)}
                                   >
                                     Cancel
                                   </button>
@@ -558,80 +556,74 @@ export const HospitalList = (props: any) => {
 
         <div className="flex md:justify-end w-full md:mt-4">
           <div className="w-full md:w-auto">
-            <Accordion className="lg:mt-0 md:mt-0 sm:mt-0">
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
-              >
-                <Typography className={classes.heading}>
-                  {t("downloads")}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <div>
-                  <InputLabel className="text-sm">
-                    {t("download_type")}
-                  </InputLabel>
-                  <div className="flex flex-row gap-6">
-                    <SelectMenu
-                      options={[
-                        ...downloadTypes.map((download) => ({
-                          title: download,
-                          value: download,
-                        })),
-                      ]}
-                      selected={downloadSelect}
-                      onSelect={setdownloadSelect}
-                      position="right"
-                    />
-                    {downloadLoading ? (
-                      <div className="px-2 ml-2 my-2 pt-1 rounded">
-                        <CircularProgress className="text-primary-600 w-6 h-6" />
-                      </div>
-                    ) : (
-                      <button
-                        className="bg-primary-600 hover:shadow-md px-2 rounded-full"
-                        onClick={handleDownloader}
-                        disabled={downloadLoading}
-                      >
-                        <GetAppIcon style={{ color: "white" }} />
-                      </button>
-                    )}
-                  </div>
+            <AccordionV2
+              title={<p className="pl-2 text-lg">Downloads</p>}
+              className="lg:mt-0 md:mt-0 sm:mt-0 bg-white shadow-md rounded-lg p-2 relative"
+              expandIcon={<ExpandMoreIcon />}
+            >
+              <div className="mt-3">
+                <InputLabel className="text-sm mb-2">
+                  {t("download_type")}
+                </InputLabel>
+                <div className="flex flex-row gap-6">
+                  <SelectMenu
+                    options={[
+                      ...downloadTypes.map((download) => ({
+                        title: download,
+                        value: download,
+                      })),
+                    ]}
+                    selected={downloadSelect}
+                    onSelect={setdownloadSelect}
+                    position="left"
+                    parentRelative={false}
+                  />
+                  {downloadLoading ? (
+                    <div className="px-2 ml-2 my-2 pt-1 rounded">
+                      <CircularProgress className="text-primary-600 w-6 h-6" />
+                    </div>
+                  ) : (
+                    <button
+                      className="bg-primary-600 hover:shadow-md px-2 rounded-full"
+                      onClick={handleDownloader}
+                      disabled={downloadLoading}
+                    >
+                      <GetAppIcon style={{ color: "white" }} />
+                    </button>
+                  )}
                 </div>
-                <div className="hidden">
-                  <CSVLink
-                    data={DownloadFile}
-                    filename={`facilities-${now}.csv`}
-                    target="_blank"
-                    className="hidden"
-                    id="facilityDownloader"
-                  ></CSVLink>
-                  <CSVLink
-                    data={capacityDownloadFile}
-                    filename={`facility-capacity-${now}.csv`}
-                    className="hidden"
-                    id="capacityDownloader"
-                    target="_blank"
-                  ></CSVLink>
-                  <CSVLink
-                    data={doctorsDownloadFile}
-                    filename={`facility-doctors-${now}.csv`}
-                    target="_blank"
-                    className="hidden"
-                    id="doctorsDownloader"
-                  ></CSVLink>
-                  <CSVLink
-                    data={triageDownloadFile}
-                    filename={`facility-triage-${now}.csv`}
-                    target="_blank"
-                    className="hidden"
-                    id="triageDownloader"
-                  ></CSVLink>
-                </div>
-              </AccordionDetails>
-            </Accordion>
+              </div>
+              <div className="hidden">
+                <CSVLink
+                  data={DownloadFile}
+                  filename={`facilities-${now}.csv`}
+                  target="_blank"
+                  className="hidden"
+                  id="facilityDownloader"
+                ></CSVLink>
+                <CSVLink
+                  data={capacityDownloadFile}
+                  filename={`facility-capacity-${now}.csv`}
+                  className="hidden"
+                  id="capacityDownloader"
+                  target="_blank"
+                ></CSVLink>
+                <CSVLink
+                  data={doctorsDownloadFile}
+                  filename={`facility-doctors-${now}.csv`}
+                  target="_blank"
+                  className="hidden"
+                  id="doctorsDownloader"
+                ></CSVLink>
+                <CSVLink
+                  data={triageDownloadFile}
+                  filename={`facility-triage-${now}.csv`}
+                  target="_blank"
+                  className="hidden"
+                  id="triageDownloader"
+                ></CSVLink>
+              </div>
+            </AccordionV2>
           </div>
         </div>
       </div>
@@ -704,6 +696,7 @@ export const HospitalList = (props: any) => {
           </div>
         </div>
       </div>
+
       <div>
         <SlideOver show={showFilters} setShow={setShowFilters}>
           <div className="bg-white min-h-screen p-4">

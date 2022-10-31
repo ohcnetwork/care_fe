@@ -83,3 +83,5 @@ export const goBack = (deltaOrUrl?: string | number | false | void) => {
 export const formatDate = (date: string | Date) => {
   return moment(date).format("hh:mm A; DD/MM/YYYY");
 };
+
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
