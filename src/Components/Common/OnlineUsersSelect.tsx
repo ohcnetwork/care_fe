@@ -194,7 +194,12 @@ export const OnlineUsersSelect = (props: Props) => {
                             }
                           ></span>
                           <span className="font-normal block truncate">
-                            {user.first_name} {user.last_name}
+                            {user.first_name} {user.last_name}{" "}
+                            {`${
+                              user.home_facility_object?.name
+                                ? `@ ${user.home_facility_object?.name}`
+                                : " "
+                            }`}
                           </span>
                         </div>
                         {user.id?.toString() == userId && (
