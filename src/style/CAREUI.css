@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+
 .cui-input-legend::before{
     content: " ";
     position: absolute;
@@ -15,4 +18,11 @@
     font-size: 1.2em;
     font-weight: bold;
     margin-left: 4px;
+}
+
+.cui-input:-webkit-autofill,
+.cui-input:-webkit-autofill:hover, 
+.cui-input:-webkit-autofill:focus, 
+.cui-input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 40px #f9fafb inset !important;
 }

@@ -21,6 +21,7 @@ type InputProps = {
   className?: string;
   outerClassName?: string;
   size?: "small" | "medium" | "large";
+  autoComplete?: string;
 };
 
 export default function TextInput(props: InputProps) {
@@ -50,7 +51,7 @@ export default function TextInput(props: InputProps) {
             htmlFor={props.name}
             ref={legendRef}
             className={clsx({
-              "absolute flex items-center z-10 transition-all font-semibold":
+              "absolute flex items-center z-10 transition-all font-semibold cursor-text":
                 true,
               "top-0 h-full": !(focused || ref.current?.value),
               "h-auto cui-input-legend": focused || ref.current?.value,
@@ -92,8 +93,9 @@ export default function TextInput(props: InputProps) {
           onKeyPress={props.onKeyPress}
           disabled={props.disabled}
           required={props.required}
+          autoComplete={props.autoComplete}
           className={clsx([
-            "w-full bg-gray-50 focus:bg-gray-100",
+            "w-full bg-gray-50 focus:bg-gray-100 cui-input",
             { "text-xs px-3 py-2": props.size === "small" },
             {
               "px-4 py-3":
@@ -101,7 +103,7 @@ export default function TextInput(props: InputProps) {
             },
             { "text-lg px-5 py-4": props.size === "large" },
             { "pr-10": props.type === "PASSWORD" },
-            { "border border-red-500 ring-red-500": props.error },
+            { "border-red-500": props.error },
             props.className,
           ])}
         />

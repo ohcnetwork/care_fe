@@ -136,12 +136,17 @@ export const Login = () => {
         </div>
         <div className="flex items-center md:absolute md:inset-x-0 md:p-16 pb-10 md:bottom-0 md:z-20">
           <div className="text-xs md:text-sm max-w-lg">
-            <a href="https://coronasafe.network/" className="text-gray-500">
+            <a
+              href="https://coronasafe.network/"
+              target={"_blank"}
+              className="text-gray-500"
+            >
               {t("footer_body")}
             </a>
             <div className="mx-auto">
               <a
                 href={process.env.REACT_APP_GITHUB_URL}
+                target={"_blank"}
                 className="text-primary-400 hover:text-primary-500"
               >
                 {t("contribute_github")}
@@ -156,7 +161,7 @@ export const Login = () => {
           <div className="w-full p-8 md:p-0 md:w-4/5 lg:w-[400px]">
             <img
               src={process.env.REACT_APP_BLACK_LOGO}
-              className="h-8 w-auto mb-4 md:hidden"
+              className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
               alt="care logo"
             />{" "}
             <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
