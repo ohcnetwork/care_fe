@@ -137,11 +137,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     [consultationId, dispatch]
   );
 
-  // const [position, setPosition] = useState<any>();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [presets, setPresets] = useState<any>([]);
   const [currentPreset, setCurrentPreset] = useState<any>();
-  // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<string>(CAMERA_STATES.IDLE);
   const [camTimeout, setCamTimeout] = useState<number>(0);
@@ -204,7 +200,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   useEffect(() => {
     if (cameraAsset.hostname && cameraMiddlewareHostname) {
       getPresets({
-        onSuccess: (resp) => setPresets(resp.data),
         onError: (resp) => {
           resp instanceof AxiosError &&
             Notification.Error({
