@@ -13,7 +13,11 @@ describe("Resource Page", () => {
 
   it("checks if all download button works", () => {
     cy.get("svg.MuiSvgIcon-root.cursor-pointer").each(($button) => {
-      cy.wrap($button).click({ force: true }).wait(100);
+      cy.intercept(/\/api\/v1\/resource/).as("resource_download");
+      cy.wrap($button).click({ force: true });
+      cy.wait("@resource_download").then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
+      });
     });
   });
 
@@ -23,11 +27,18 @@ describe("Resource Page", () => {
   });
 
   it("switch between active/completed", () => {
-    cy.contains("Completed").click().wait(2000);
+    cy.intercept(/\/api\/v1\/resource/).as("resource");
+    cy.contains("Completed").click();
+    cy.wait("@resource").then((interception) => {
+      expect(interception.response.statusCode).to.equal(200);
+    });
     cy.contains("Active").should("have.class", "bg-gray-200");
     cy.contains("Completed").should("have.class", "bg-white");
-
-    cy.contains("Active").click().wait(2000);
+    cy.intercept(/\/api\/v1\/resource/).as("resource");
+    cy.contains("Active").click();
+    cy.wait("@resource").then((interception) => {
+      expect(interception.response.statusCode).to.equal(200);
+    });
     cy.contains("Active").should("have.class", "bg-white");
     cy.contains("Completed").should("have.class", "bg-gray-200");
   });

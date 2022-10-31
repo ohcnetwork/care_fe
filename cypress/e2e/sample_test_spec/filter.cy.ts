@@ -21,8 +21,14 @@ describe("Sample Filter", () => {
     cy.get("[name='result']").select("POSITIVE");
   });
 
+  it("Filter by sample type", () => {
+    cy.get("[name='sample_type']").select("Biopsy");
+  });
+
   afterEach(() => {
+    cy.intercept(/\/api\/v1\/test_sample/).as("sample_filter");
     cy.contains("Apply").click();
+    cy.wait("@sample_filter");
     cy.saveLocalStorage();
   });
 });
