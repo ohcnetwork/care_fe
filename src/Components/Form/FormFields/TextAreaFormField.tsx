@@ -24,7 +24,7 @@ const TextAreaFormField = ({ rows = 3, ...props }: TextAreaFormFieldProps) => {
     <FormField props={props}>
       <textarea
         id={props.id}
-        className={`form-textarea ${bgColor} ${borderColor}`}
+        className={`text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out resize-none ${bgColor} ${borderColor}`}
         disabled={props.disabled}
         rows={rows}
         placeholder={props.placeholder}

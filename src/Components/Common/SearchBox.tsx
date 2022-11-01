@@ -43,7 +43,7 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
           name="search"
           type="text"
           {...inputProps}
-          className="form-input pr-8 sm:text-sm sm:leading-5 text-ellipsis"
+          className="text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out pr-8 sm:text-sm sm:leading-5 text-ellipsis"
         />
         {searchValue ? (
           <div

@@ -33,7 +33,7 @@ const TextFormField = (props: TextFormFieldProps) => {
       className={
         props.removeDefaultClasses
           ? props.className
-          : `form-input ${bgColor} ${borderColor} ${props.className} ${padding}`
+          : `text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out ${bgColor} ${borderColor} ${props.className} ${padding}`
       }
       disabled={props.disabled}
       type={props.type || "text"}

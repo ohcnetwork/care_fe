@@ -722,12 +722,8 @@ button:disabled,
   box-shadow: 0 0 0 1px #28a745;
 }
 
-.form-input, .form-textarea{
-  @apply text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none !ring-0 transition-all duration-200 ease-in-out
-}
-
-.form-textarea {
-  @apply resize-none !important
+.form-input {
+  @apply text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none !ring-0 transition-all duration-200 ease-in-out !important
 }
 
 .shifting-page-filter-dropdown .MuiFormControl-root {
