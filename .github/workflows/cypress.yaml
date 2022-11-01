@@ -11,6 +11,11 @@ on:
 
 jobs:
   cypress-run:
+    permissions:
+      # All other permissions are set to none
+      checks: write
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 📥
