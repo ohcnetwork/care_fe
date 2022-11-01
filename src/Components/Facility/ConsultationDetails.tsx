@@ -951,18 +951,6 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "MEDICINES" && (
           <div>
-            {consultationData.history_of_present_illness && (
-              <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                    History of present illness:{" "}
-                  </h3>
-                  <div className="mt-2">
-                    {consultationData.history_of_present_illness}
-                  </div>
-                </div>
-              </div>
-            )}
             {consultationData.discharge_advice && (
               <div className="mt-4">
                 <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900 mb-2">

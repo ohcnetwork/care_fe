@@ -136,8 +136,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     [consultationId, dispatch]
   );
-  const middlewareHostname =
-    cameraMiddlewareHostname || "dev_middleware.coronasafe.live";
 
   // const [position, setPosition] = useState<any>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -164,8 +162,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   );
 
   const url = !isIOS
-    ? `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
-    : `https://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
+    ? `wss://${cameraMiddlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
+    : `https://${cameraMiddlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const {
     startStream,
@@ -176,7 +174,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     : // eslint-disable-next-line react-hooks/rules-of-hooks
       useMSEMediaPlayer({
         config: {
-          middlewareHostname,
+          middlewareHostname: cameraMiddlewareHostname,
           ...cameraAsset,
         },
         url,
@@ -191,7 +189,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     relativeMove,
   } = useFeedPTZ({
     config: {
-      middlewareHostname,
+      middlewareHostname: cameraMiddlewareHostname,
       ...cameraAsset,
     },
   });
@@ -204,19 +202,19 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   };
 
   useEffect(() => {
-    if (cameraAsset.hostname) {
+    if (cameraAsset.hostname && cameraMiddlewareHostname) {
       getPresets({
         onSuccess: (resp) => setPresets(resp.data),
         onError: (resp) => {
           resp instanceof AxiosError &&
             Notification.Error({
-              msg: "Fetching presets failed",
+              msg: "Camera is offline",
             });
         },
       });
       getBedPresets(cameraAsset);
     }
-  }, [cameraAsset]);
+  }, [cameraAsset, cameraMiddlewareHostname]);
 
   useEffect(() => {
     let tId: any;

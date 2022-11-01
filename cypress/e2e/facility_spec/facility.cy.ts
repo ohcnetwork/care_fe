@@ -138,12 +138,15 @@ describe("Facility", () => {
     cy.get("[id=bed-capacity-cancel]").click();
 
     // add doctor information
+    cy.get("button")
+      .should("contain", "Add Doctor Types")
+      .contains("Add Doctor Types")
+      .click({ force: true });
     cy.url().should("include", "doctor");
     cy.get("[id=area-of-specialization]").select("1");
     cy.get("[id=count]").type("15");
     cy.get("[id=doctor-save").click();
     cy.verifyNotification("Doctor count added successfully");
-
     cy.url().should("include", "doctor");
     cy.get("[id=doctor-cancel").click();
     cy.url().then((url) => {

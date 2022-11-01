@@ -15,7 +15,7 @@ describe("Assets Filter", () => {
   });
 
   it("Filter by Facility", () => {
-    cy.get("[placeholder='Search by facility name or by district']")
+    cy.get("[name=Facilities]")
       .type("test")
       .wait(3000)
       .type("{downarrow}{enter}");

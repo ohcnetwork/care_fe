@@ -25,21 +25,22 @@ export default function Waveform(props: {
   defaultSpace?: boolean;
   wavetype?: "STREAM" | "REFRESH";
 }) {
-  const { wave, color, title, metrics, classes, defaultSpace, wavetype } =
-    props;
+  const wave = props.wave;
   const data = wave.data.split(" ").map(Number);
-  const [queueData, setQueueData] = useState<number[]>([]);
+  const viewable = data.length;
+  const [queueData, setQueueData] = useState<number[]>(
+    Array(viewable).fill(0)
+  );
   const [refreshData, setRefreshData] = useState<number[]>([]);
   const [lastData, setLastData] = useState<number[]>([]);
   const [xData, setXData] = useState<number[]>([]);
   const [lastStream, setLastStream] = useState(0);
   const [rPointer, setRPointer] = useState(0);
 
-  const viewable = data.length;
   const initialRender = useRef(true);
 
   useEffect(() => {
-    if (wavetype === "STREAM") {
+    if (props.wavetype === "STREAM") {
       setQueueData(queueData.concat(data));
     } else {
       if (lastData.length === 0) {
@@ -62,7 +63,7 @@ export default function Waveform(props: {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (wavetype === "STREAM") {
+      if (props.wavetype === "STREAM") {
         if (queueData.length > 30000) {
           setQueueData(queueData.slice(-viewable));
         } else {
@@ -106,23 +107,23 @@ export default function Waveform(props: {
 
   return (
     <div className="w-full relative">
-      <div className="text-gray-400 absolute top-0 left-5 text-xs">{title}</div>
+      <div className="text-gray-400 absolute top-0 left-5 text-xs">{props.title}</div>
       <LinePlot
-        title={title}
-        name={title}
+        title={props.title}
+        name={props.title}
         xData={xData}
         yData={
-          wavetype === "STREAM" ? queueData.slice(0, viewable) : refreshData
+          props.wavetype === "STREAM" ? queueData.slice(0, viewable) : refreshData
         }
         yStart={wave["data-low-limit"]}
         yEnd={wave["data-high-limit"]}
-        classes={classes || "h-[90px]"}
+        classes={props.classes || "h-[90px]"}
         type="WAVEFORM"
-        color={color || "green"}
-        defaultSpace={defaultSpace}
+        color={props.color || "green"}
+        defaultSpace={props.defaultSpace}
       />
       <div className="absolute bottom-0 right-5 w-full md:w-[70%]">
-        {metrics && (
+        {props.metrics && (
           <div className="flex flex-row flex-wrap justify-end gap-2 text-[10px] text-gray-400">
             <div>Lowest: {Math.min(...queueData.slice(0, viewable))}</div>
             <div>Highest: {Math.max(...queueData.slice(0, viewable))}</div>

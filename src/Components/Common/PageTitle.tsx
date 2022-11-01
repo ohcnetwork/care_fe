@@ -46,7 +46,7 @@ export default function PageTitle(props: PageTitleProps) {
   }, [divRef, focusOnLoad]);
 
   const onBackButtonClick = () =>
-    goBack((backButtonCB && backButtonCB()) || backUrl);
+    backButtonCB ? goBack(backButtonCB()) : goBack(backUrl);
 
   return (
     <div ref={divRef} className={`pt-4 mb-4 ${className}`}>

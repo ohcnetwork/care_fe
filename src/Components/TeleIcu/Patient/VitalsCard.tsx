@@ -193,7 +193,7 @@ export default function TeleICUPatientVitalsCard({
                 );
               })}
               <div className="absolute bottom-1 right-1 flex gap-2">
-                <ToolTip text="Toggle stats for nerds" position="TOP">
+                <ToolTip text="Toggle stats for nerds" position="LEFT">
                   <button onClick={() => setStats(!stats)}>
                     <i className="fas fa-chart-simple text-gray-400" />
                   </button>
@@ -217,23 +217,20 @@ export default function TeleICUPatientVitalsCard({
                 <h2 className="font-bold text-xl md:text-3xl">
                   {liveReading ||
                     (vital.vitalKey === "bp"
-                      ? `${
-                          patient.last_consultation?.last_daily_round?.bp
-                            .systolic || "--"
-                        }/${
-                          patient.last_consultation?.last_daily_round?.bp
-                            .diastolic || "--"
-                        }`
+                      ? `${patient.last_consultation?.last_daily_round?.bp
+                        .systolic || "--"
+                      }/${patient.last_consultation?.last_daily_round?.bp
+                        .diastolic || "--"
+                      }`
                       : patient.last_consultation?.last_daily_round?.[
-                          vital.vitalKey || ""
-                        ]) ||
+                      vital.vitalKey || ""
+                      ]) ||
                     "--"}
                 </h2>
                 <div className="text-xs md:text-base">
                   <i
-                    className={`fas fa-circle text-xs mr-2 ${
-                      liveReading ? "text-green-600" : "text-gray-400"
-                    }`}
+                    className={`fas fa-circle text-xs mr-2 ${liveReading ? "text-green-600" : "text-gray-400"
+                      }`}
                   />
                   {vital.label}
                 </div>

@@ -119,7 +119,7 @@ export const SetInventoryForm = (props: any) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -198,7 +198,7 @@ export const SetInventoryForm = (props: any) => {
                     color="default"
                     type="button"
                     onClick={() => goBack()}
-                    className="w-full sm:w-fit bg-gray-400 hover:bg-gray-500 rounded-md p-2 px-6 mt-2"
+                    className="w-full sm:w-fit rounded-md p-2 px-6 mt-2 bg-gray-400 hover:bg-gray-500"
                   >
                     Cancel
                   </button>
@@ -208,7 +208,7 @@ export const SetInventoryForm = (props: any) => {
                     color="primary"
                     type="submit"
                     style={{ marginLeft: "auto" }}
-                    className="bg-green-500 hover:bg-green-700 w-full text-white sm:w-fit mt-2 rounded-md px-6 font-bold p-2"
+                    className="w-full sm:w-fit rounded-md p-2 px-6 mt-2 bg-green-500 hover:bg-green-700 text-white"
                     onClick={(e) => handleSubmit(e)}
                   >
                     <CheckCircleOutlineIcon></CheckCircleOutlineIcon> SET
