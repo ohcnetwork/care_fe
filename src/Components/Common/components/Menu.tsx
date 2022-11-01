@@ -1,5 +1,4 @@
 import { Menu, Transition } from "@headlessui/react";
-import { ExpandMore } from "@material-ui/icons";
 import { Fragment } from "react";
 
 export default function DropdownMenu(props: {
@@ -10,16 +9,13 @@ export default function DropdownMenu(props: {
   return (
     <div className="text-right">
       <Menu as="div" className="relative inline-block text-left w-full">
-        <Menu.Button className="inline-flex w-full lg:justify-between justify-center rounded-[4px] bg-primary-500 px-4 py-3 text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+        <Menu.Button className="flex w-full lg:justify-between justify-center items-center rounded-[4px] bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
           <div className="flex gap-2 items-center">
             {props.icon}
             {props.title}
           </div>
 
-          <ExpandMore
-            className="ml-2 -mr-1 h-5 w-5 text-violet-200 hover:text-violet-100"
-            aria-hidden="true"
-          />
+          <i className="ml-2 -mr-1 text-violet-200 hover:text-violet-100 uil uil-angle-down text-2xl font-bold"></i>
         </Menu.Button>
         <Transition
           as={Fragment}
