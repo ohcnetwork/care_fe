@@ -12,8 +12,8 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   type?: "email" | "password" | "search" | "text";
   className?: string | undefined;
   removeDefaultClasses?: true | undefined;
-  // prefixIcon?: React.ReactNode;
-  // suffixIcon?: React.ReactNode;
+  leading?: React.ReactNode | undefined;
+  trailing?: React.ReactNode | undefined;
 };
 
 const TextFormField = (props: TextFormFieldProps) => {
@@ -23,29 +23,51 @@ const TextFormField = (props: TextFormFieldProps) => {
   const bgColor = error ? "bg-red-50" : "bg-gray-200";
   const borderColor = error ? "border-red-500" : "border-gray-200";
 
-  return (
-    <FormField props={props}>
-      <input
-        id={props.id}
-        className={
-          props.removeDefaultClasses
-            ? props.className
-            : `form-input ${bgColor} ${borderColor} ${props.className}`
-        }
-        disabled={props.disabled}
-        type={props.type || "text"}
-        placeholder={props.placeholder}
-        name={props.name}
-        value={props.value}
-        autoComplete={props.autoComplete}
-        required={props.required}
-        onChange={(event) => {
-          event.preventDefault();
-          handleChange(event.target);
-        }}
-      />
-    </FormField>
+  const { leading, trailing } = props;
+  const hasIcon = !!(leading || trailing);
+  const padding = hasIcon && `${leading && "pl-8"} ${trailing && "pr-8"}`;
+
+  let child = (
+    <input
+      id={props.id}
+      className={
+        props.removeDefaultClasses
+          ? props.className
+          : `form-input ${bgColor} ${borderColor} ${props.className} ${padding}`
+      }
+      disabled={props.disabled}
+      type={props.type || "text"}
+      placeholder={props.placeholder}
+      name={props.name}
+      value={props.value}
+      autoComplete={props.autoComplete}
+      required={props.required}
+      onChange={(event) => {
+        event.preventDefault();
+        handleChange(event.target);
+      }}
+    />
   );
+
+  if (hasIcon) {
+    child = (
+      <div className="relative">
+        {leading && (
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            {leading}
+          </div>
+        )}
+        {child}
+        {trailing && (
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            {trailing}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return <FormField props={props}>{child}</FormField>;
 };
 
 export default TextFormField;
