@@ -105,6 +105,9 @@ export const OnlineUsersSelect = (props: Props) => {
                     !isDropdownExpanded && "hidden"
                   )}
                   value={searchTerm}
+                  onBlur={(_) => {
+                    setDropdownExpand(false);
+                  }}
                   onChange={(e) =>
                     setState({ ...state, searchTerm: e.target.value })
                   }
@@ -169,7 +172,7 @@ export const OnlineUsersSelect = (props: Props) => {
                     return (
                       <button
                         key={user.id}
-                        onClick={(_) => {
+                        onMouseDown={(_) => {
                           setDropdownExpand(false);
                           onSelect(user);
                           setState({
