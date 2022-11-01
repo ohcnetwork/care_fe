@@ -5,16 +5,18 @@ import {
   resolveFormFieldError,
 } from "./Utils";
 
-type Props = FormFieldBaseProps<string> & {
+export type TextFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
   value?: string | number;
   autoComplete?: string;
   type?: "email" | "password" | "search" | "text";
+  className?: string | undefined;
+  removeDefaultClasses?: true | undefined;
   // prefixIcon?: React.ReactNode;
   // suffixIcon?: React.ReactNode;
 };
 
-const TextFormField = (props: Props) => {
+const TextFormField = (props: TextFormFieldProps) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
 
@@ -25,7 +27,11 @@ const TextFormField = (props: Props) => {
     <FormField props={props}>
       <input
         id={props.id}
-        className={`form-input ${bgColor} ${borderColor}`}
+        className={
+          props.removeDefaultClasses
+            ? props.className
+            : `form-input ${bgColor} ${borderColor} ${props.className}`
+        }
         disabled={props.disabled}
         type={props.type || "text"}
         placeholder={props.placeholder}
