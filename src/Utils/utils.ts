@@ -85,3 +85,27 @@ export const formatDate = (date: string | Date) => {
 };
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Referred from: https://stackoverflow.com/a/9039885/7887936
+ * @returns `true` if device is iOS, else `false`
+ */
+function _iOS() {
+  return (
+    [
+      "iPad Simulator",
+      "iPhone Simulator",
+      "iPod Simulator",
+      "iPad",
+      "iPhone",
+      "iPod",
+    ].includes(navigator.platform) ||
+    // iPad on iOS 13 detection
+    (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+  );
+}
+
+/**
+ * `true` if device is iOS, else `false`
+ */
+export const iOS = _iOS();
