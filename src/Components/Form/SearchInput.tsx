@@ -6,6 +6,7 @@ import TextFormField, { TextFormFieldProps } from "./FormFields/TextFormField";
 type SearchInputProps = TextFormFieldProps & {
   className?: string | undefined;
   debouncePeriod?: number;
+  secondary?: true | undefined;
 } & (
     | {
         hotkey: string[];
@@ -17,11 +18,11 @@ type SearchInputProps = TextFormFieldProps & {
       }
   );
 
-export default function SearchInput({
+const SearchInput = ({
   debouncePeriod = 500,
   onChange,
   ...props
-}: SearchInputProps) {
+}: SearchInputProps) => {
   // Debounce related
   const [value, setValue] = useState(() => props.value || "");
   useEffect(() => {
@@ -36,9 +37,9 @@ export default function SearchInput({
   const ref = createRef<HTMLInputElement>();
   useKeyboardShortcut(
     props.hotkey || [isAppleDevice ? "Meta" : "Control", "K"],
-    () => ref.current?.focus(),
+    () => !props.secondary && ref.current?.focus(),
     {
-      overrideSystem: true,
+      overrideSystem: !props.secondary,
     }
   );
 
@@ -68,13 +69,14 @@ export default function SearchInput({
         props.leading || <i className="text-gray-600 uil uil-search-alt" />
       }
       trailing={
-        props.trailing || (
+        props.trailing ||
+        (!props.secondary && (
           <div className="hidden md:flex absolute inset-y-0 right-0 py-1.5 pr-1.5">
             <kbd className="inline-flex items-center rounded border border-gray-200 px-2 font-sans text-sm font-medium text-gray-500">
               {shortcutKeyIcon}
             </kbd>
           </div>
-        )
+        ))
       }
       trailingFocused={
         <div className="hidden md:flex absolute inset-y-0 right-0 py-1.5 pr-1.5 gap-1">
@@ -92,4 +94,6 @@ export default function SearchInput({
       validate={undefined}
     />
   );
-}
+};
+
+export default SearchInput;
