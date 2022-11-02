@@ -55,7 +55,7 @@ const SidebarItemBase = (props: SidebarItemBaseProps) => {
         </div>
       </div>
       {!!props.badgeCount && (
-        <span className="absolute right-9 inset-y-0 h-6 my-auto flex items-center justify-center text-xs text-white font-semibold bg-primary-500 px-2 rounded-md z-10 transition-all duration-200 ease-in-out">
+        <span className="absolute right-9 inset-y-0 h-6 my-auto flex items-center justify-center text-xs text-white font-semibold bg-primary-500 px-2 rounded-md z-10 transition-all duration-200 ease-in-out animate-pulse">
           {props.badgeCount > 9 ? "9+" : props.badgeCount}
         </span>
       )}
