@@ -86,6 +86,16 @@ export const formatDate = (date: string | Date) => {
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+export const handleSignOut = (forceReload: boolean) => {
+  localStorage.removeItem("care_access_token");
+  localStorage.removeItem("care_refresh_token");
+  localStorage.removeItem("shift-filters");
+  localStorage.removeItem("external-filters");
+  localStorage.removeItem("lsg-ward-data");
+  navigate("/");
+  if (forceReload) window.location.reload();
+};
+
 /**
  * Referred from: https://stackoverflow.com/a/9039885/7887936
  * @returns `true` if device is iOS, else `false`
