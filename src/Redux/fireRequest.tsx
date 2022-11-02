@@ -136,6 +136,9 @@ export const fireRequest = (
           // 4xx Errors
           if (error.response.status > 400 && error.response.status < 500) {
             if (error.response.data && error.response.data.detail) {
+              if (error.response.data.code === "token_not_valid") {
+                window.location.href = "/session-expired";
+              }
               Notification.Error({
                 msg: error.response.data.detail,
               });

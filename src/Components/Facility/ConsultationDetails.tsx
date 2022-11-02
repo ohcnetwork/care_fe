@@ -649,8 +649,8 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>
         {tab === "UPDATES" && (
-          <div className="flex md:flex-row flex-col">
-            <div className="md:w-2/3">
+          <div className="flex xl:flex-row flex-col">
+            <div className="xl:w-2/3 w-full">
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
               {!consultationData.discharge_date && (
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
@@ -905,7 +905,7 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               </div>
             </div>
-            <div className="md:w-1/3 pl-4">
+            <div className="xl:w-1/3 w-full pl-4">
               <PageTitle
                 title="Update Log"
                 hideBack={true}
