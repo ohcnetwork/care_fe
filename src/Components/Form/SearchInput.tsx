@@ -20,6 +20,7 @@ type SearchInputProps = TextFormFieldProps & {
 
 const SearchInput = ({
   debouncePeriod = 500,
+  className = "w-full md:max-w-sm",
   onChange,
   name = "search",
   ...props
@@ -69,7 +70,7 @@ const SearchInput = ({
       validate={undefined}
       type="search"
       ref={ref}
-      className={`${props.className} enabled:bg-white`}
+      className={`${className} enabled:bg-white`}
       leading={
         props.leading || <i className="text-gray-600 uil uil-search-alt" />
       }
