@@ -67,7 +67,6 @@
     "echarts-for-react": "^3.0.1",
     "i18next": "^20.3.1",
     "i18next-browser-languagedetector": "^7.0.0",
-    "postcss-loader": "^7.0.1",
     "libphonenumber-js": "^1.10.13",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
@@ -161,7 +160,7 @@
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.13.0",
     "autoprefixer": "^10.4.12",
-    "cypress": "^10.10.0",
+    "cypress": "^10.11.0",
     "cypress-localstorage-commands": "^2.1.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.5.0",
@@ -268,6 +267,6 @@
     ]
   },
   "engines": {
-    "node": "16.x"
+    "node": "16.x || 18.x"
   }
 }

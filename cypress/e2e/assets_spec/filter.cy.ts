@@ -15,10 +15,12 @@ describe("Assets Filter", () => {
   });
 
   it("Filter by Facility", () => {
-    cy.get("[name=Facilities]")
-      .type("test")
-      .wait(3000)
-      .type("{downarrow}{enter}");
+    cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities");
+    cy.get("[name=Facilities]").type("test");
+    cy.wait("@facilities").then((interception) => {
+      expect(interception.response.statusCode).to.equal(200);
+      expect(interception.request.url).to.include("search_text=test");
+    });
   });
 
   it("Filter by Asset Type", () => {

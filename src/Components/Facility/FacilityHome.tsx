@@ -242,6 +242,7 @@ export const FacilityHome = (props: any) => {
       <PageTitle
         title={facilityData.name || "Facility"}
         crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
+        focusOnLoad={true}
       />
       <Dialog
         maxWidth={"md"}
