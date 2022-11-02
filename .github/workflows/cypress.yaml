@@ -12,6 +12,7 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    if: github.repository == 'coronasafe/care_fe' || contains(github.event.pull_request.labels.*.name, 'needs testing')
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
