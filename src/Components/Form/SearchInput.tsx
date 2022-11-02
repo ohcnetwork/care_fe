@@ -21,17 +21,18 @@ type SearchInputProps = TextFormFieldProps & {
 const SearchInput = ({
   debouncePeriod = 500,
   onChange,
+  name = "search",
   ...props
 }: SearchInputProps) => {
   // Debounce related
   const [value, setValue] = useState(() => props.value || "");
   useEffect(() => {
     const timeoutId = setTimeout(
-      () => onChange && onChange({ name: props.name, value: value || "" }),
+      () => onChange && onChange({ name, value: value || "" }),
       debouncePeriod
     );
     return () => clearTimeout(timeoutId);
-  }, [value, debouncePeriod, props.name, onChange]);
+  }, [value, debouncePeriod, name, onChange]);
 
   // Focus hotkey related
   const ref = createRef<HTMLInputElement>();
@@ -62,6 +63,10 @@ const SearchInput = ({
   return (
     <TextFormField
       {...props}
+      name={name}
+      errorClassName="hidden"
+      reducerProps={undefined}
+      validate={undefined}
       type="search"
       ref={ref}
       className={`${props.className} enabled:bg-white`}
@@ -87,11 +92,6 @@ const SearchInput = ({
       }
       value={value}
       onChange={({ value }) => setValue(value)}
-      label=""
-      labelClassName="hidden"
-      errorClassName="hidden"
-      reducerProps={undefined}
-      validate={undefined}
     />
   );
 };

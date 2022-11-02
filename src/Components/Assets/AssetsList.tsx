@@ -281,9 +281,6 @@ const AssetsList = () => {
         <div className="flex-1">
           <SearchInput
             name="search"
-            label=""
-            labelClassName="hidden"
-            errorClassName="hidden"
             value={qParams.search}
             onChange={({ value }) => onSearchSuspects(value)}
             placeholder="Search assets"
