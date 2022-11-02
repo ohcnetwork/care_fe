@@ -117,9 +117,9 @@ export const TriageForm = (props: triageFormProps) => {
   }, [dispatchAction, facilityId]);
 
   const validateForm = () => {
-    let errors = { ...initForm };
+    const errors = { ...initForm };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field, _) => {
       switch (field) {
         case "entry_date":
           if (!state.form[field]) {
@@ -176,7 +176,7 @@ export const TriageForm = (props: triageFormProps) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -208,7 +208,7 @@ export const TriageForm = (props: triageFormProps) => {
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div>
+              <div className="max-w-[250px]">
                 <DateInputField
                   label="Entry Date"
                   value={state.form.entry_date}

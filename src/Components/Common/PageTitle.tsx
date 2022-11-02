@@ -41,12 +41,12 @@ export default function PageTitle(props: PageTitleProps) {
 
   useEffect(() => {
     if (divRef.current && focusOnLoad) {
-      divRef.current.scrollIntoView({ behavior: "smooth" });
+      divRef.current.scrollIntoView();
     }
   }, [divRef, focusOnLoad]);
 
   const onBackButtonClick = () =>
-    goBack((backButtonCB && backButtonCB()) || backUrl);
+    backButtonCB ? goBack(backButtonCB()) : goBack(backUrl);
 
   return (
     <div ref={divRef} className={`pt-4 mb-4 ${className}`}>
