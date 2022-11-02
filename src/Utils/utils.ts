@@ -90,7 +90,8 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * Referred from: https://stackoverflow.com/a/9039885/7887936
  * @returns `true` if device is iOS, else `false`
  */
-function _iOS() {
+function _isAppleDevice() {
+  if (navigator.platform.includes("Mac")) return true;
   return (
     [
       "iPad Simulator",
@@ -108,4 +109,4 @@ function _iOS() {
 /**
  * `true` if device is iOS, else `false`
  */
-export const iOS = _iOS();
+export const isAppleDevice = _isAppleDevice();

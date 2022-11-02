@@ -1,6 +1,6 @@
 import { createRef, useEffect, useState } from "react";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import { iOS } from "../../Utils/utils";
+import { isAppleDevice } from "../../Utils/utils";
 import TextFormField, { TextFormFieldProps } from "./FormFields/TextFormField";
 
 type SearchInputProps = TextFormFieldProps & {
@@ -26,14 +26,14 @@ export default function SearchInput({
   // Shortcut key related
   const ref = createRef<HTMLInputElement>();
   useKeyboardShortcut(
-    [iOS ? "Meta" : "Control", "K"],
+    [isAppleDevice ? "Meta" : "Control", "K"],
     () => ref.current?.focus(),
     {
       overrideSystem: true,
     }
   );
 
-  const shortcutKey = iOS ? (
+  const shortcutKey = isAppleDevice ? (
     "⌘K"
   ) : (
     <div className="flex font-medium gap-1">
@@ -46,7 +46,7 @@ export default function SearchInput({
     <TextFormField
       {...props}
       ref={ref}
-      className={`${props.className} !bg-white`}
+      className={`${props.className} placeholder-shown:bg-white`}
       leading={
         props.leading || <i className="text-gray-600 uil uil-search-alt" />
       }
