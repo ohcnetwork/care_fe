@@ -251,6 +251,28 @@ const AssetCreate = (props: AssetProps) => {
     return true;
   };
 
+  const resetFilters = () => {
+    setName("");
+    setDescription("");
+    setLocation("");
+    setAssetType(assetTypeInitial);
+    setAssetClass(assetClassInitial);
+    setIsWorking("");
+    setNotWorkingReason("");
+    setSerialNumber("");
+    setVendorName("");
+    setSupportName("");
+    setSupportEmail("");
+    setSupportPhone("");
+    setQrCodeId("");
+    setManufacturer("");
+    setWarrantyAmcEndOfValidity("");
+    setLastServicedOn("");
+    setNotes("");
+    setWarrantyAmcEndOfValidity(null);
+    setLastServicedOn(null);
+  };
+
   const handleSubmit = async (e: React.SyntheticEvent, addMore: boolean) => {
     e.preventDefault();
     const validated = validateForm();
@@ -285,26 +307,7 @@ const AssetCreate = (props: AssetProps) => {
           if (!addMore) {
             goBack();
           } else {
-            // clear all fields
-            setName("");
-            setDescription("");
-            setLocation("");
-            setAssetType(assetTypeInitial);
-            setAssetClass(assetClassInitial);
-            setIsWorking("");
-            setNotWorkingReason("");
-            setSerialNumber("");
-            setVendorName("");
-            setSupportName("");
-            setSupportEmail("");
-            setSupportPhone("");
-            setQrCodeId("");
-            setManufacturer("");
-            setWarrantyAmcEndOfValidity("");
-            setLastServicedOn("");
-            setNotes("");
-            setWarrantyAmcEndOfValidity(null);
-            setLastServicedOn(null);
+            resetFilters();
           }
         }
         setIsLoading(false);
