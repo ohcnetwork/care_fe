@@ -403,15 +403,23 @@ export const FacilityHome = (props: any) => {
                       FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
                         <div
                           key={i}
-                          className=" bg-[#F0FFF9] text-primary-500 font-medium px-4 py-3 rounded border border-primary-500 text-sm"
+                          className="flex items-center gap-1 bg-[#F0FFF9] text-primary-500 font-medium px-4 py-3 rounded border border-primary-500 text-sm"
                         >
-                          <i
-                            className={`fas fa-${
-                              FACILITY_FEATURE_TYPES.filter(
-                                (f) => f.id === feature
-                              )[0]?.icon
-                            }`}
-                          />{" "}
+                          {typeof FACILITY_FEATURE_TYPES.filter(
+                            (f) => f.id === feature
+                          )[0]?.icon === "string" ? (
+                            <i
+                              className={`text-lg font-extrabold ${
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.icon
+                              }`}
+                            />
+                          ) : (
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0]?.icon
+                          )}{" "}
                           &nbsp;
                           {
                             FACILITY_FEATURE_TYPES.filter(
@@ -441,7 +449,7 @@ export const FacilityHome = (props: any) => {
                     disableFor="readOnly"
                     buttonType="html"
                   >
-                    <i className="fas fa-pencil-alt text-primary-500"></i>
+                    <i className="uil uil-edit-alt text-lg font-bold text-primary-500"></i>
                     Update Facility
                   </RoleButton>
                 </DropdownItem>
@@ -452,7 +460,7 @@ export const FacilityHome = (props: any) => {
                       navigate(`/facility/${facilityId}/inventory`)
                     }
                   >
-                    <i className="fas fa-dolly-flatbed text-primary-500"></i>
+                    <i className="uil uil-clipboard-alt text-lg font-bold text-primary-500"></i>
                     Inventory Management
                   </button>
                 </DropdownItem>
@@ -465,7 +473,7 @@ export const FacilityHome = (props: any) => {
                     disableFor="readOnly"
                     buttonType="html"
                   >
-                    <i className="fas fa-map-marker-alt text-primary-500"></i>
+                    <i className="uil uil-location-point text-lg font-bold text-primary-500"></i>
                     Location Management
                   </RoleButton>
                 </DropdownItem>
@@ -478,7 +486,7 @@ export const FacilityHome = (props: any) => {
                     disableFor="readOnly"
                     buttonType="html"
                   >
-                    <i className="fas fa-dolly-flatbed text-primary-500"></i>
+                    <i className="uil uil-gold text-lg font-bold text-primary-500"></i>
                     Resource Request
                   </RoleButton>
                 </DropdownItem>
@@ -491,7 +499,7 @@ export const FacilityHome = (props: any) => {
                     disableFor="readOnly"
                     buttonType="html"
                   >
-                    <i className="fas fa-plus-circle text-primary-500"></i>
+                    <i className="uil uil-plus-circle text-lg font-bold text-primary-500"></i>
                     Create Asset
                   </RoleButton>
                 </DropdownItem>
@@ -500,7 +508,7 @@ export const FacilityHome = (props: any) => {
                     className="flex gap-3 items-center"
                     onClick={() => navigate(`/assets?facility=${facilityId}`)}
                   >
-                    <i className="fas fa-boxes text-primary-500"></i>
+                    <i className="uil uil-medkit text-lg font-bold text-primary-500"></i>
                     View Assets
                   </button>
                 </DropdownItem>
@@ -509,7 +517,7 @@ export const FacilityHome = (props: any) => {
                     className="flex gap-3 items-center"
                     onClick={() => navigate(`/facility/${facilityId}/users`)}
                   >
-                    <i className="fas fa-users text-primary-500"></i>
+                    <i className="uil uil-users-alt text-lg font-bold text-primary-500"></i>
                     View Users
                   </button>
                 </DropdownItem>
@@ -521,7 +529,7 @@ export const FacilityHome = (props: any) => {
                       className="text-[#C81E1E] flex gap-3 items-center"
                       onClick={() => setOpenDeleteDialog(true)}
                     >
-                      <i className="fas fa-trash text-[#C81E1E]"></i>
+                      <i className="uil uil-trash-alt font-bold text-lg text-[#C81E1E]"></i>
                       Delete Facility
                     </button>
                   </DropdownItem>
@@ -532,7 +540,7 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="flex flex-col justify-end">
               <RoleButton
-                className="btn-secondary mt-2 w-full md:w-auto"
+                className="btn-secondary py-2 mt-2 w-full md:w-auto"
                 handleClickCB={() =>
                   navigate(`/facility/${facilityId}/patient`)
                 }
@@ -540,7 +548,7 @@ export const FacilityHome = (props: any) => {
                 disableFor="readOnly"
                 buttonType="html"
               >
-                <i className="uil uil-plus text-xl"></i>
+                <i className="uil uil-plus text-lg"></i>
                 <span className="text-sm">Add Details of a Patient</span>
               </RoleButton>
 

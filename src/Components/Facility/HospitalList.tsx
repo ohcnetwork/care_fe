@@ -367,20 +367,28 @@ export const HospitalList = (props: any) => {
                           ) && (
                             <div
                               key={i}
-                              className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                              className="flex gap-1 items-center bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
                               title={
                                 FACILITY_FEATURE_TYPES.filter(
                                   (f) => f.id === feature
                                 )[0]?.name
                               }
                             >
-                              <i
-                                className={`fas fa-${
-                                  FACILITY_FEATURE_TYPES.filter(
-                                    (f) => f.id === feature
-                                  )[0]?.icon
-                                }`}
-                              />{" "}
+                              {typeof FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0]?.icon === "string" ? (
+                                <i
+                                  className={`${
+                                    FACILITY_FEATURE_TYPES.filter(
+                                      (f) => f.id === feature
+                                    )[0]?.icon
+                                  }`}
+                                />
+                              ) : (
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.icon
+                              )}{" "}
                               &nbsp;
                               {
                                 FACILITY_FEATURE_TYPES.filter(
