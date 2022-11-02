@@ -454,7 +454,11 @@ export const ConsultationDetails = (props: any) => {
               [facilityId]: { name: patientData?.facility_object?.name },
               [patientId]: { name: patientData?.name },
               [consultationId]: {
-                name: `${patientData?.facility_object?.name} - ${patientData?.name}`,
+                name: `Admitted on ${formatDate(
+                  consultationData.admission_date
+                    ? consultationData.admission_date
+                    : "00:00"
+                )}`,
               },
             }}
             breadcrumbs={true}
