@@ -192,7 +192,7 @@ export const Login = (props: { forgot?: boolean }) => {
         <div className="flex items-center lg:absolute lg:inset-x-0 lg:py-12 lg:px-16 pb-10 lg:bottom-0 lg:z-20">
           <div className="text-xs md:text-sm max-w-lg">
             <a
-              className="flex items-center text-gray-300"
+              className="flex items-center text-gray-300 mb-3 font-bold"
               href="https://coronasafe.network/"
               rel="noopener noreferrer"
               target={"_blank"}
@@ -204,8 +204,6 @@ export const Login = (props: { forgot?: boolean }) => {
                 alt="coronasafe logo"
               />
             </a>
-
-            <br />
             <a
               href="https://coronasafe.network/"
               target={"_blank"}
