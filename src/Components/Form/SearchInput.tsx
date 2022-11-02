@@ -63,6 +63,7 @@ const SearchInput = ({
 
   return (
     <TextFormField
+      labelClassName="text-sm font-medium"
       {...props}
       name={name}
       errorClassName="hidden"
