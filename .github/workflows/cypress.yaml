@@ -3,8 +3,7 @@ name: Cypress Tests
 on:
   schedule:
     - cron: "30 22 * * *"
-  pull_request_target:
-    types: [opened, edited, labeled]
+  pull_request:
     branches:
       - develop
       - master
@@ -13,7 +12,6 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    if: github.repository == 'coronasafe/care_fe' || contains(github.event.pull_request.labels.*.name, 'needs testing')
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
