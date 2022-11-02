@@ -1,13 +1,13 @@
 import loadable from "@loadable/component";
 import { Login, ResetPassword } from "../Components/Auth";
-import { Redirect, useRoutes } from "raviger";
+import { useRoutes } from "raviger";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 const TopBar = loadable(() => import("../Components/Common/TopBar"));
 
 const routes = {
   "/": () => <Login />,
   "/login": () => <Login />,
-  "/forgot-password": () => <Redirect to="/login?forgot=true" />,
+  "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
   "/session-expired": () => <SessionExpired />,
 };

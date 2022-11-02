@@ -9,15 +9,14 @@ import * as Notification from "../../Utils/Notifications.js";
 import { get } from "lodash";
 import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
-import { useQueryParams } from "raviger";
 
-export const Login = () => {
+export const Login = (props: { forgot?: boolean }) => {
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
     password: "",
   };
-  const [{ forgot = false }, setQuery] = useQueryParams();
+  const { forgot } = props;
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
@@ -77,10 +76,6 @@ export const Login = () => {
       setLoading(false);
     };
   }, []);
-
-  useEffect(() => {
-    setQuery({ forgot: forgotPassword });
-  }, [forgotPassword]);
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -179,14 +174,14 @@ export const Login = () => {
           rel="noopener noreferrer"
         >
           <img
-            src="https://3451063158-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-M233b0_JITp4nk0uAFp%2F-M2Dx6gKxOSU45cjfgNX%2F-M2DxFOkMmkPNn0I6U9P%2FCoronasafe-logo.png?alt=media&token=178cc96d-76d9-4e27-9efb-88f3186368e8"
-            className="h-12 inline-block"
+            src={process.env.REACT_APP_LIGHT_LOGO}
+            className="h-8 hidden md:inline-block"
             alt="coronasafe logo"
-          />{" "}
+          />
         </a>
         <div className="mt-4 md:mt-12 rounded-lg py-4">
           <div className="max-w-lg">
-            <h1 className="text-4xl md:text-5xl lg:text-7xl tracking-tight font-black text-white leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-wider">
               CARE
             </h1>
             <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
@@ -197,8 +192,24 @@ export const Login = () => {
         <div className="flex items-center lg:absolute lg:inset-x-0 lg:py-12 lg:px-16 pb-10 lg:bottom-0 lg:z-20">
           <div className="text-xs md:text-sm max-w-lg">
             <a
+              className="flex items-center text-gray-300"
+              href="https://coronasafe.network/"
+              rel="noopener noreferrer"
+              target={"_blank"}
+            >
+              <span>Powered By</span>
+              <img
+                src="https://3451063158-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-M233b0_JITp4nk0uAFp%2F-M2Dx6gKxOSU45cjfgNX%2F-M2DxFOkMmkPNn0I6U9P%2FCoronasafe-logo.png?alt=media&token=178cc96d-76d9-4e27-9efb-88f3186368e8"
+                className="h-8 inline-block"
+                alt="coronasafe logo"
+              />
+            </a>
+
+            <br />
+            <a
               href="https://coronasafe.network/"
               target={"_blank"}
+              rel="noopener noreferrer"
               className="text-gray-500"
             >
               {t("footer_body")}
