@@ -1,3 +1,4 @@
+import React from "react";
 import FormField from "./FormField";
 import {
   FormFieldBaseProps,
@@ -16,7 +17,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   trailing?: React.ReactNode | undefined;
 };
 
-const TextFormField = (props: TextFormFieldProps) => {
+const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
 
@@ -29,6 +30,7 @@ const TextFormField = (props: TextFormFieldProps) => {
 
   let child = (
     <input
+      ref={ref as any}
       id={props.id}
       className={
         props.removeDefaultClasses
@@ -68,6 +70,6 @@ const TextFormField = (props: TextFormFieldProps) => {
   }
 
   return <FormField props={props}>{child}</FormField>;
-};
+});
 
 export default TextFormField;
