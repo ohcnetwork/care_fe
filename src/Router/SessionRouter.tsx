@@ -1,12 +1,12 @@
 import loadable from "@loadable/component";
-import { ForgotPassword, Login, ResetPassword } from "../Components/Auth";
-import { useRoutes } from "raviger";
+import { Login, ResetPassword } from "../Components/Auth";
+import { Redirect, useRoutes } from "raviger";
 const TopBar = loadable(() => import("../Components/Common/TopBar"));
 
 const routes = {
   "/": () => <Login />,
   "/login": () => <Login />,
-  "/forgot-password": () => <ForgotPassword />,
+  "/forgot-password": () => <Redirect to="/login?forgot=true" />,
   "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
 };
 

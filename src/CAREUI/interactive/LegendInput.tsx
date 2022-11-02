@@ -24,7 +24,10 @@ type InputProps = {
   autoComplete?: string;
 };
 
-export default function TextInput(props: InputProps) {
+export default function LegendInput(props: InputProps) {
+  /**
+   * Useful for small input forms. Should only be used in special cases.
+   */
   const [showPassword, setShowPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const ref = props.ref || inputRef;

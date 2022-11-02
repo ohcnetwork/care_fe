@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { postLogin } from "../../Redux/actions";
+import { postForgotPassword, postLogin } from "../../Redux/actions";
 import { Grid, CircularProgress } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
 import { RECAPTCHA_SITE_KEY } from "../../Common/env";
+import * as Notification from "../../Utils/Notifications.js";
 import { get } from "lodash";
-import TextInput from "../../CAREUI/interactive/Input";
+import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
+import { useQueryParams } from "raviger";
 
 export const Login = () => {
   const dispatch: any = useDispatch();
@@ -15,6 +17,7 @@ export const Login = () => {
     username: "",
     password: "",
   };
+  const [{ forgot = false }, setQuery] = useQueryParams();
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
@@ -23,6 +26,9 @@ export const Login = () => {
   const { t } = useTranslation();
   // display spinner while login is under progress
   const [loading, setLoading] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(forgot);
+
+  // Login form validation
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
@@ -72,6 +78,10 @@ export const Login = () => {
     };
   }, []);
 
+  useEffect(() => {
+    setQuery({ forgot: forgotPassword });
+  }, [forgotPassword]);
+
   const handleSubmit = (e: any) => {
     e.preventDefault();
     const valid = validateData();
@@ -106,6 +116,51 @@ export const Login = () => {
     }
   };
 
+  const validateForgetData = () => {
+    let hasError = false;
+    const err = Object.assign({}, errors);
+    Object.keys(form).forEach((key) => {
+      if (typeof form[key] === "string") {
+        if (!form[key].match(/\w/)) {
+          hasError = true;
+          err[key] = t("field_request");
+        }
+      }
+      if (!form[key]) {
+        hasError = true;
+        err[key] = t("field_request");
+      }
+    });
+    if (hasError) {
+      setErrors(err);
+      return false;
+    }
+    return form;
+  };
+
+  const handleForgetSubmit = (e: any) => {
+    e.preventDefault();
+    const valid = validateForgetData();
+    if (valid) {
+      setLoading(true);
+      dispatch(postForgotPassword(valid)).then((resp: any) => {
+        setLoading(false);
+        const res = resp && resp.data;
+        if (res && res.status === "OK") {
+          Notification.Success({
+            msg: t("password_sent"),
+          });
+        } else if (res && res.data) {
+          setErrors(res.data);
+        } else {
+          Notification.Error({
+            msg: t("something_wrong"),
+          });
+        }
+      });
+    }
+  };
+
   const onCaptchaChange = (value: any) => {
     if (value && isCaptchaEnabled) {
       const formCaptcha = { ...form };
@@ -117,24 +172,29 @@ export const Login = () => {
   return (
     <div className="flex flex-col-reverse md:flex-row md:h-screen relative">
       <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
-        <a href={"/"} className="inline-block">
+        <a
+          href={"https://coronasafe.network?ref=care_login"}
+          className="inline-block"
+          target={"_blank"}
+          rel="noopener noreferrer"
+        >
           <img
-            src={process.env.REACT_APP_LIGHT_LOGO}
-            className="h-8 hidden md:inline-block"
-            alt="care logo"
+            src="https://3451063158-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-M233b0_JITp4nk0uAFp%2F-M2Dx6gKxOSU45cjfgNX%2F-M2DxFOkMmkPNn0I6U9P%2FCoronasafe-logo.png?alt=media&token=178cc96d-76d9-4e27-9efb-88f3186368e8"
+            className="h-12 inline-block"
+            alt="coronasafe logo"
           />{" "}
         </a>
         <div className="mt-4 md:mt-12 rounded-lg py-4">
           <div className="max-w-lg">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl tracking-tight font-black text-white leading-tight">
-              {t("coronasafe_network")}
+            <h1 className="text-4xl md:text-5xl lg:text-7xl tracking-tight font-black text-white leading-tight">
+              CARE
             </h1>
             <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
               {t("goal")}
             </div>
           </div>
         </div>
-        <div className="flex items-center md:absolute md:inset-x-0 md:p-16 pb-10 md:bottom-0 md:z-20">
+        <div className="flex items-center lg:absolute lg:inset-x-0 lg:py-12 lg:px-16 pb-10 lg:bottom-0 lg:z-20">
           <div className="text-xs md:text-sm max-w-lg">
             <a
               href="https://coronasafe.network/"
@@ -143,10 +203,11 @@ export const Login = () => {
             >
               {t("footer_body")}
             </a>
-            <div className="mx-auto">
+            <div className="mx-auto mt-2">
               <a
                 href={process.env.REACT_APP_GITHUB_URL}
                 target={"_blank"}
+                rel="noopener noreferrer"
                 className="text-primary-400 hover:text-primary-500"
               >
                 {t("contribute_github")}
@@ -157,8 +218,15 @@ export const Login = () => {
       </div>
 
       <div className="w-full my-4 md:mt-0 md:w-1/2 md:h-full login-hero-form">
-        <div className="flex items-center justify-center h-full">
-          <div className="w-full p-8 md:p-0 md:w-4/5 lg:w-[400px]">
+        <div className="flex items-center justify-center h-full relative">
+          <div
+            className={
+              "w-full p-8 md:p-0 md:w-4/5 lg:w-[400px] transition-all " +
+              (forgotPassword
+                ? "invisible opacity-0 -translate-x-5"
+                : "visible opacity-100 -translate-x-0")
+            }
+          >
             <img
               src={process.env.REACT_APP_BLACK_LOGO}
               className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
@@ -169,7 +237,7 @@ export const Login = () => {
             </div>
             <form onSubmit={handleSubmit}>
               <div>
-                <TextInput
+                <LegendInput
                   name="username"
                   type="TEXT"
                   legend={t("username")}
@@ -181,7 +249,7 @@ export const Login = () => {
                   size="large"
                   className="font-extrabold"
                 />
-                <TextInput
+                <LegendInput
                   type="PASSWORD"
                   name="password"
                   legend={t("password")}
@@ -204,12 +272,15 @@ export const Login = () => {
                   )}
 
                   <div className="w-full flex justify-between items-center py-4">
-                    <a
-                      href="/forgot-password"
+                    <button
+                      onClick={() => {
+                        setForgotPassword(true);
+                      }}
+                      type="button"
                       className="text-sm text-primary-400 hover:text-primary-500"
                     >
                       {t("forget_password")}
-                    </a>
+                    </button>
                   </div>
 
                   {loading ? (
@@ -222,6 +293,64 @@ export const Login = () => {
                       className="w-full bg-primary-500 inline-flex items-center justify-center text-sm font-semibold py-2 px-4 rounded cursor-pointer text-white"
                     >
                       {t("login")}
+                    </button>
+                  )}
+                </Grid>
+              </div>
+            </form>
+            <LanguageSelectorLogin />
+          </div>
+          <div
+            className={
+              "w-full p-8 md:p-0 md:w-4/5 lg:w-[400px] absolute transition-all " +
+              (!forgotPassword
+                ? "invisible opacity-0 translate-x-5"
+                : "visible opacity-100 translate-x-0")
+            }
+          >
+            <img
+              src={process.env.REACT_APP_BLACK_LOGO}
+              className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
+              alt="care logo"
+            />{" "}
+            <button
+              onClick={() => {
+                setForgotPassword(false);
+              }}
+              type="button"
+              className="text-sm text-primary-400 hover:text-primary-500 mb-4"
+            >
+              <i className="uil uil-arrow-left" /> Back to login
+            </button>
+            <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
+              {t("forget_password")}
+            </div>
+            <form onSubmit={handleForgetSubmit}>
+              <div>
+                {t("forget_password_instruction")}
+                <LegendInput
+                  name="username"
+                  type="TEXT"
+                  legend={t("username")}
+                  value={form.username}
+                  onChange={handleChange}
+                  error={errors.username}
+                  outerClassName="my-4"
+                  required
+                  size="large"
+                  className="font-extrabold"
+                />
+                <Grid container justify="center">
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <CircularProgress className="text-primary-500" />
+                    </div>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="w-full bg-primary-500 inline-flex items-center justify-center text-sm font-semibold py-2 px-4 rounded cursor-pointer text-white"
+                    >
+                      {t("send_reset_link")}
                     </button>
                   )}
                 </Grid>
