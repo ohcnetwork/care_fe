@@ -303,6 +303,8 @@ const AssetCreate = (props: AssetProps) => {
             setWarrantyAmcEndOfValidity("");
             setLastServicedOn("");
             setNotes("");
+            setWarrantyAmcEndOfValidity(null);
+            setLastServicedOn(null);
           }
         }
         setIsLoading(false);
