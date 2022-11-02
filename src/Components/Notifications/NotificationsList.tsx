@@ -385,15 +385,11 @@ export default function NotificationsList({
 
   return (
     <>
-      {!!unreadCount && (
-        <span className="relative top-5 left-5 w-5 h-5 flex items-center justify-center text-[10px] text-white bg-red-400 rounded-full">
-          {unreadCount}
-        </span>
-      )}
       <Item
         text="Notifications"
         do={() => setShowNotifications(!showNotifications)}
         icon={<NotificationBell />}
+        badgeCount={unreadCount}
       />
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
         <div className="bg-white h-full">
