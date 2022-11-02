@@ -55,15 +55,16 @@ const SidebarItemBase = (props: SidebarItemBaseProps) => {
         </div>
       </div>
       {!!props.badgeCount && (
-        <span className="absolute right-9 inset-y-0 h-6 my-auto flex items-center justify-center text-xs text-white font-semibold bg-primary-500 px-2 rounded-md z-10 transition-all duration-200 ease-in-out animate-pulse">
+        <span
+          className={`absolute flex items-center justify-center text-white font-semibold bg-primary-500 ${
+            props.shrinked
+              ? "right-3 top-0.5 h-4 w-5 text-[9px] rounded-md"
+              : "right-9 inset-y-0 h-6 my-auto text-xs px-2 rounded-md"
+          } z-10 transition-all duration-200 ease-in-out animate-pulse`}
+        >
           {props.badgeCount > 9 ? "9+" : props.badgeCount}
         </span>
       )}
-      {/* {!!props.badgeCount && (
-        <span className="absolute top-1 left-9 w-5 h-5 flex items-center justify-center text-[10px] text-white bg-primary-300 bg-opacity-80 rounded-full z-10">
-          {props.badgeCount > 9 ? "9+" : props.badgeCount}
-        </span>
-      )} */}
     </Link>
   );
 };
