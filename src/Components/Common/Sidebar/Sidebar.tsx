@@ -47,16 +47,14 @@ const StatelessSidebar = ({
     <nav
       className={`h-screen group flex flex-col bg-primary-800 pt-8 md:pt-14 pb-5 md:pb-10 ${
         shrinked ? "w-14" : "w-60"
-      } transition-all duration-300 ease-in-out`}
+      } transition-all duration-300 ease-in-out overflow-y-auto`}
     >
       <img
         className={`${
           shrinked ? "mx-auto" : "ml-10"
-        } h-5 md:h-8 self-start transition`}
+        } h-5 md:h-8 self-start transition mb-10`}
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
-
-      <div className="h-10" />
 
       <Item text="Facilities" to="/facility" icon={<Facility />} />
       <Item text="Patients" to="/patients" icon={<Patient />} />
@@ -76,7 +74,7 @@ const StatelessSidebar = ({
         <div
           className={`${
             shrinked ? "mx-auto" : "self-end"
-          } flex mt-0 self-end group-hover:mb-2 h-0 group-hover:h-12 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
+          } flex mt-10 self-end group-hover:mb-2 h-0 group-hover:h-12 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
         >
           <ToggleShrink
             shrinked={shrinked}
