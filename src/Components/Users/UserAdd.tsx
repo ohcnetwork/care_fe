@@ -132,6 +132,8 @@ export const UserAdd = (props: UserProps) => {
   const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
   const [passwordInputInFocus, setPasswordInputInFocus] = useState(false);
+  const [confirmPasswordInputInFocus, setConfirmPasswordInputInFocus] =
+    useState(false);
   const [usernameInput, setUsernameInput] = useState("");
 
   const userExistsEnums = {
@@ -166,28 +168,6 @@ export const UserAdd = (props: UserProps) => {
       return () => clearTimeout(timeout);
     }
   }, [usernameInput]);
-
-  useEffect(() => {
-    if (!passwordInputInFocus) return;
-    console.log(
-      !validatePassword(state.form.password)
-        ? "Password should have 1 lowercase letter, 1 uppercase letter, 1 number, and be at least 8 characters long"
-        : ""
-    );
-    dispatch({
-      type: "set_error",
-      errors: {
-        ...state.errors,
-        password: !validatePassword(state.form.password)
-          ? "Password should have 1 lowercase letter, 1 uppercase letter, 1 number, and be at least 8 characters long"
-          : "",
-        c_password:
-          state.form.password !== state.form.c_password
-            ? "Passwords not matching"
-            : "",
-      },
-    });
-  }, [state.form.password, state.form.c_password, passwordInputInFocus]);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -792,9 +772,81 @@ export const UserAdd = (props: UserProps) => {
                   onChange={handleChange}
                   errors={state.errors.password}
                   onFocus={() => setPasswordInputInFocus(true)}
+                  onBlur={() => setPasswordInputInFocus(false)}
                 />
+                {passwordInputInFocus && (
+                  <div className="pl-2 text-small text-gray-500">
+                    <div>
+                      {state.form.password?.length < 8 ? (
+                        <i className="fas fa-circle-xmark text-red-500" />
+                      ) : (
+                        <i className="fas fa-circle-check text-green-500" />
+                      )}{" "}
+                      <span
+                        className={clsx(
+                          state.form.password?.length < 8
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Password should be atleast 8 characters long
+                      </span>
+                    </div>
+                    <div>
+                      {state.form.password ===
+                      state.form.password.toUpperCase() ? (
+                        <i className="fas fa-circle-xmark text-red-500" />
+                      ) : (
+                        <i className="fas fa-circle-check text-green-500" />
+                      )}{" "}
+                      <span
+                        className={clsx(
+                          state.form.password ===
+                            state.form.password.toUpperCase()
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Password should contain at least 1 lowercase letter
+                      </span>
+                    </div>
+                    <div>
+                      {state.form.password ===
+                      state.form.password.toLowerCase() ? (
+                        <i className="fas fa-circle-xmark text-red-500" />
+                      ) : (
+                        <i className="fas fa-circle-check text-green-500" />
+                      )}{" "}
+                      <span
+                        className={clsx(
+                          state.form.password ===
+                            state.form.password.toLowerCase()
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Password should contain at least 1 uppercase letter
+                      </span>
+                    </div>
+                    <div>
+                      {!/\d/.test(state.form.password) ? (
+                        <i className="fas fa-circle-xmark text-red-500" />
+                      ) : (
+                        <i className="fas fa-circle-check text-green-500" />
+                      )}{" "}
+                      <span
+                        className={clsx(
+                          !/\d/.test(state.form.password)
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Password should contain at least 1 number
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-
               <div>
                 <InputLabel>Confirm Password*</InputLabel>
                 <TextInputField
@@ -807,9 +859,30 @@ export const UserAdd = (props: UserProps) => {
                   value={state.form.c_password}
                   onChange={handleChange}
                   errors={state.errors.c_password}
+                  onFocus={() => setConfirmPasswordInputInFocus(true)}
+                  onBlur={() => setConfirmPasswordInputInFocus(false)}
                 />
+                {confirmPasswordInputInFocus && (
+                  <div className="pl-2 text-small text-gray-500">
+                    <div>
+                      {state.form.password != state.form.c_password ? (
+                        <i className="fas fa-circle-xmark text-red-500" />
+                      ) : (
+                        <i className="fas fa-circle-check text-green-500" />
+                      )}{" "}
+                      <span
+                        className={clsx(
+                          state.form.password != state.form.c_password
+                            ? "text-red-500"
+                            : "text-primary-500"
+                        )}
+                      >
+                        Confirm password should match the password
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-
               <div>
                 <InputLabel>First name*</InputLabel>
                 <TextInputField
