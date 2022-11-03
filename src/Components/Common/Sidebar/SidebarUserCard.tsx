@@ -2,7 +2,6 @@ import { get } from "lodash";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import { Profile } from "../../../Common/icons";
 import { handleSignOut } from "../../../Utils/utils";
 
 const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
@@ -19,8 +18,8 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
         shrinked ? "mx-auto" : "mx-10"
       } transition-all duration-200 ease-in-out`}
     >
-      <Link href="/user/profile" className="w-8 h-8 fill-white flex-none">
-        <Profile />
+      <Link href="/user/profile" className="flex-none">
+        <i className="text-white text-3xl uil uil-user-circle" />
       </Link>
       <div className={`${shrinked ? "hidden" : "grow"} pl-3 flex flex-col`}>
         <div className="h-6 flex items-center">

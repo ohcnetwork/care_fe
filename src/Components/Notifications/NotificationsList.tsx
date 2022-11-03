@@ -23,7 +23,6 @@ import {
   ShrinkedSidebarItem,
   SidebarItem,
 } from "../Common/Sidebar/SidebarItem";
-import { NotificationBell } from "../../Common/icons";
 
 const RESULT_LIMIT = 14;
 
@@ -388,7 +387,7 @@ export default function NotificationsList({
       <Item
         text="Notifications"
         do={() => setShowNotifications(!showNotifications)}
-        icon={<NotificationBell />}
+        icon={<i className="uil uil-bell" />}
         badgeCount={unreadCount}
       />
       <SlideOver show={showNotifications} setShow={setShowNotifications}>

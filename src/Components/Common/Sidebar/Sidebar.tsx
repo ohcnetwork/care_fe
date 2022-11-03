@@ -1,16 +1,4 @@
 import { Fragment, useEffect, useState } from "react";
-import {
-  Asset,
-  Facility,
-  Gauge,
-  NoticeBoard,
-  Patient,
-  Resource,
-  Result,
-  SampleTest,
-  Shifting,
-  Users,
-} from "../../../Common/icons";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
@@ -36,6 +24,18 @@ type StatelessSidebarProps =
       setShrinked?: undefined;
     };
 
+// Sidebar item icons.
+const Facility = () => <i className="uil uil-hospital" />;
+const Patient = () => <i className="uil uil-wheelchair" />;
+const Asset = () => <i className="uil uil-shopping-cart-alt" />;
+const SampleTest = () => <i className="uil uil-medkit" />;
+const Shifting = () => <i className="uil uil-ambulance" />;
+const Resource = () => <i className="uil uil-heart-medical" />;
+const Result = () => <i className="uil uil-clipboard-notes" />;
+const Users = () => <i className="uil uil-users-alt" />;
+const NoticeBoard = () => <i className="uil uil-meeting-board" />;
+const Dashboard = () => <i className="uil uil-dashboard" />;
+
 const StatelessSidebar = ({
   shrinkable = false,
   shrinked = false,
@@ -45,17 +45,18 @@ const StatelessSidebar = ({
 
   return (
     <nav
-      className={`h-screen group flex flex-col bg-primary-800 pt-8 md:pt-14 pb-5 md:pb-10 ${
+      className={`h-screen group flex flex-col bg-primary-800 pt-5 md:pt-7 pb-5 md:pb-10 ${
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out`}
     >
+      <div className="h-3" /> {/* flexible spacing */}
       <img
         className={`${
           shrinked ? "mx-auto" : "ml-10"
-        } h-5 md:h-8 self-start transition mb-10`}
+        } h-5 md:h-8 self-start transition mb-5`}
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
-
+      <div className="h-7" /> {/* flexible spacing */}
       <Item text="Facilities" to="/facility" icon={<Facility />} />
       <Item text="Patients" to="/patients" icon={<Patient />} />
       <Item text="Assets" to="/assets" icon={<Asset />} />
@@ -66,10 +67,8 @@ const StatelessSidebar = ({
       <Item text="Users" to="/users" icon={<Users />} />
       <Item text="Notice Board" to="/notice_board" icon={<NoticeBoard />} />
       <NotificationItem shrinked={shrinked} />
-      <Item text="Dashboard" to={DASHBOARD} icon={<Gauge />} external />
-
+      <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
       <div className="flex-1" />
-
       {shrinkable && (
         <div
           className={`${
