@@ -1,4 +1,4 @@
-interface home_facilty_object {
+interface HomeFacilityObjectModel {
   id?: string;
   name?: string;
 }
@@ -19,5 +19,5 @@ export interface UserModel {
   is_superuser?: boolean;
   verified?: boolean;
   last_login?: Date;
-  home_facility_object?: home_facilty_object;
+  home_facility_object?: HomeFacilityObjectModel;
 }
