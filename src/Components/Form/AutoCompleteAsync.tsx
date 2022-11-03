@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo, Fragment } from "react";
-import { Combobox, Transition } from "@headlessui/react";
+import React, { useEffect, useState, useMemo } from "react";
+import { Combobox } from "@headlessui/react";
 import Spinner from "../Common/Spinner";
 import { debounce } from "lodash";
 
@@ -92,69 +92,61 @@ const AutoCompleteAsync = (props: Props) => {
               </div>
             </Combobox.Button>
           </div>
-          <Transition
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-            afterLeave={() => setQuery("")}
-          >
-            <div className={visible ? "visible" : "hidden"}>
-              <Combobox.Options
-                static
-                onClick={() => {
-                  setQuery("");
-                  setVisible(false);
-                  if (queryInputRef.current) queryInputRef.current.value = "";
-                }}
-                className="top-12 absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none text-sm"
-              >
-                {data?.length === 0 ? (
-                  <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                    {query !== ""
-                      ? "Nothing found."
-                      : "Start typing to search..."}
-                  </div>
-                ) : (
-                  data?.map((item: any) => (
-                    <Combobox.Option
-                      key={item.id}
-                      className={({ active }) =>
-                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                          active ? "text-white bg-primary-500" : "text-gray-900"
-                        }`
-                      }
-                      value={item}
-                      onClick={() => {
-                        setVisible(false);
-                      }}
-                    >
-                      {({ selected, active }) => (
-                        <>
+          <div className={visible ? "visible" : "hidden"}>
+            <Combobox.Options
+              static
+              onClick={() => {
+                setQuery("");
+                setVisible(false);
+                if (queryInputRef.current) queryInputRef.current.value = "";
+              }}
+              className="top-12 absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none text-sm"
+            >
+              {data?.length === 0 ? (
+                <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                  {query !== ""
+                    ? "Nothing found."
+                    : "Start typing to search..."}
+                </div>
+              ) : (
+                data?.map((item: any) => (
+                  <Combobox.Option
+                    key={item.id}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                        active ? "text-white bg-primary-500" : "text-gray-900"
+                      }`
+                    }
+                    value={item}
+                    onClick={() => {
+                      setVisible(false);
+                    }}
+                  >
+                    {({ selected, active }) => (
+                      <>
+                        <span
+                          className={`block truncate ${
+                            selected ? "font-medium" : "font-normal"
+                          }`}
+                        >
+                          {optionLabel(item)}
+                        </span>
+                        {selected ? (
                           <span
-                            className={`block truncate ${
-                              selected ? "font-medium" : "font-normal"
+                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                              active ? "text-white" : "text-primary-500"
                             }`}
                           >
-                            {optionLabel(item)}
+                            <i className="fa-solid fa-check" />
                           </span>
-                          {selected ? (
-                            <span
-                              className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                                active ? "text-white" : "text-primary-500"
-                              }`}
-                            >
-                              <i className="fa-solid fa-check" />
-                            </span>
-                          ) : null}
-                        </>
-                      )}
-                    </Combobox.Option>
-                  ))
-                )}
-              </Combobox.Options>
-            </div>
-          </Transition>
+                        ) : null}
+                      </>
+                    )}
+                  </Combobox.Option>
+                ))
+              )}
+            </Combobox.Options>
+          </div>
           {multiple && selected?.length > 0 && (
             <div className="p-2 flex flex-wrap gap-2">
               {selected?.map((option: any) => (
