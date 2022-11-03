@@ -40,7 +40,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -59,7 +58,6 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export const HospitalList = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
-  const classes = useStyles();
   const dispatchAction: any = useDispatch();
   const [data, setData] = useState<Array<FacilityModel>>([]);
   let manageFacilities: any = null;
@@ -82,9 +80,6 @@ export const HospitalList = (props: any) => {
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
-  const { width } = useWindowDimensions();
-  const smallScreenBreakpoint = 767;
-  const isSmallScreen = width <= smallScreenBreakpoint ? true : false;
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
@@ -347,21 +342,17 @@ export const HospitalList = (props: any) => {
                 )}
               </div>
               <div className="h-full w-full grow">
-                {isSmallScreen ? (
-                  <div className="group flex w-full self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
-                    {(facility.read_cover_image_url && (
-                      <img
-                        src={facility.read_cover_image_url}
-                        alt={facility.name}
-                        className="w-full h-full object-cover"
-                      />
-                    )) || (
-                      <i className="fas fa-hospital text-4xl block text-gray-500 p-10" />
-                    )}
-                  </div>
-                ) : (
-                  " "
-                )}
+                <div className="group md:hidden flex w-full self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
+                  {(facility.read_cover_image_url && (
+                    <img
+                      src={facility.read_cover_image_url}
+                      alt={facility.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )) || (
+                    <i className="fas fa-hospital text-4xl block text-gray-500 p-10" />
+                  )}
+                </div>
 
                 <div className="h-full flex flex-col justify-between w-full h-fit">
                   <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
