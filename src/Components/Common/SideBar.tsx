@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { get } from "lodash";
 import { useSelector } from "react-redux";
-import { Link, navigate, usePath } from "raviger";
+import { Link, usePath } from "raviger";
 import { IconButton } from "@material-ui/core";
 import Drawer from "@material-ui/core/Drawer";
 import clsx from "clsx";
@@ -10,6 +10,7 @@ import NotificationsList from "../Notifications/NotificationsList";
 import { Close } from "@material-ui/icons";
 import { PREFERENCE_SIDEBAR_KEY, SIDEBAR } from "../../Common/constants";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import { handleSignOut } from "../../Utils/utils";
 
 const LOGO = process.env.REACT_APP_LIGHT_LOGO;
 const LOGO_COLLAPSE =
@@ -92,15 +93,6 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
   );
   const [expanded, setExpanded] = useState(!enableCollapse);
   const { t } = useTranslation();
-  const handleSignOut = () => {
-    localStorage.removeItem("care_access_token");
-    localStorage.removeItem("care_refresh_token");
-    localStorage.removeItem("shift-filters");
-    localStorage.removeItem("external-filters");
-    localStorage.removeItem("lsg-ward-data");
-    navigate("/");
-    window.location.reload();
-  };
 
   useEffect(() => {
     window.addEventListener("storage", () => {
@@ -248,7 +240,9 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
               {loginUser}
             </Link>
             <p
-              onClick={handleSignOut}
+              onClick={() => {
+                handleSignOut(true);
+              }}
               className="cursor-pointer text-sm leading-4 font-medium text-primary-200 group-hover:text-primary-100 transition ease-in-out duration-150"
             >
               {t("sign_out")}
