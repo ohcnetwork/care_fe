@@ -90,7 +90,12 @@ export const OnlineUsersSelect = (props: Props) => {
                 aria-haspopup="listbox"
                 aria-expanded="true"
                 aria-labelledby="listbox-label"
-                className="h-14 cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:ring-green-500 focus:border-green-500 transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+                className={clsx(
+                  "border-2 h-14 cursor-default relative w-full rounded-md pl-3 pr-10 py-2 text-left transition ease-in-out duration-150 sm:text-sm sm:leading-5",
+                  isDropdownExpanded &&
+                    outline &&
+                    "ring-primary-500 border-primary-500"
+                )}
               >
                 <input
                   ref={searchFieldRef}
@@ -98,13 +103,13 @@ export const OnlineUsersSelect = (props: Props) => {
                   type="text"
                   placeholder="Search by name or username"
                   className={clsx(
-                    "py-2 pl-3 w-full focus:outline-none",
-                    outline
-                      ? "focus:ring-primary-500 focus:border-primary-500"
-                      : "ring-transparent border-transparent",
+                    "py-2 pl-3 w-full outline-none focus:ring-gray-200 border-none",
                     !isDropdownExpanded && "hidden"
                   )}
                   value={searchTerm}
+                  onBlur={(_) => {
+                    setDropdownExpand(false);
+                  }}
                   onChange={(e) =>
                     setState({ ...state, searchTerm: e.target.value })
                   }
@@ -169,7 +174,7 @@ export const OnlineUsersSelect = (props: Props) => {
                     return (
                       <button
                         key={user.id}
-                        onClick={(_) => {
+                        onMouseDown={(_) => {
                           setDropdownExpand(false);
                           onSelect(user);
                           setState({
