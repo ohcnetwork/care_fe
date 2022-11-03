@@ -114,18 +114,18 @@ export const Login = (props: { forgot?: boolean }) => {
   const validateForgetData = () => {
     let hasError = false;
     const err = Object.assign({}, errors);
-    Object.keys(form).forEach((key) => {
-      if (typeof form[key] === "string") {
-        if (!form[key].match(/\w/)) {
-          hasError = true;
-          err[key] = t("field_request");
-        }
-      }
-      if (!form[key]) {
+
+    if (typeof form.username === "string") {
+      if (!form.username.match(/\w/)) {
         hasError = true;
-        err[key] = t("field_request");
+        err.username = t("field_request");
       }
-    });
+    }
+    if (!form.username) {
+      hasError = true;
+      err.username = t("field_request");
+    }
+
     if (hasError) {
       setErrors(err);
       return false;
@@ -254,7 +254,6 @@ export const Login = (props: { forgot?: boolean }) => {
                   onChange={handleChange}
                   error={errors.username}
                   outerClassName="mb-4"
-                  required
                   size="large"
                   className="font-extrabold"
                 />
@@ -265,7 +264,6 @@ export const Login = (props: { forgot?: boolean }) => {
                   value={form.password}
                   onChange={handleChange}
                   error={errors.password}
-                  required
                   size="large"
                   className="font-extrabold"
                 />
@@ -338,6 +336,7 @@ export const Login = (props: { forgot?: boolean }) => {
               <div>
                 {t("forget_password_instruction")}
                 <LegendInput
+                  id="forgot_username"
                   name="username"
                   type="TEXT"
                   legend={t("username")}

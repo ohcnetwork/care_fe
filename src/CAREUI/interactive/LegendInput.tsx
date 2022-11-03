@@ -1,7 +1,8 @@
 import clsx from "clsx";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { RefObject, useRef, useState } from "react";
 
 type InputProps = {
+  id?: string;
   name: string;
   type: "TEXT" | "PASSWORD" | "EMAIL" | "NUMBER";
   ref?: RefObject<HTMLInputElement>;
@@ -34,10 +35,6 @@ export default function LegendInput(props: InputProps) {
   const legendRef = useRef<HTMLLabelElement>(null);
   const [focused, setFocused] = useState(false);
 
-  useEffect(() => {
-    console.log(document.activeElement);
-  }, [document.activeElement]);
-
   return (
     <div className={clsx([props.outerClassName])}>
       {props.label && (
@@ -51,7 +48,7 @@ export default function LegendInput(props: InputProps) {
       <div className="relative">
         {props.legend && (
           <label
-            htmlFor={props.name}
+            htmlFor={props.id || props.name}
             ref={legendRef}
             className={clsx({
               "absolute flex items-center z-10 transition-all font-semibold cursor-text":
@@ -79,7 +76,7 @@ export default function LegendInput(props: InputProps) {
             props.type === "PASSWORD" && !showPassword ? "password" : "text"
           }
           name={props.name}
-          id={props.name}
+          id={props.id || props.name}
           placeholder={props.placeholder}
           value={props.value}
           onChange={props.onChange}
@@ -120,6 +117,9 @@ export default function LegendInput(props: InputProps) {
           </button>
         )}
       </div>
+      {props.error && (
+        <div className="text-red-500 text-xs mt-1">{props.error}</div>
+      )}
     </div>
   );
 }
