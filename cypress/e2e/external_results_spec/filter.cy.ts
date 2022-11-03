@@ -41,7 +41,19 @@ describe("External Results Filters", () => {
 
   it("filter by srf id", () => {
     cy.get("[name='srf_id']").type("432");
+  });
+
+  it("Apply filter", () => {
+    cy.intercept(/\/api\/v1\/external_result/).as("external_result_filter");
     cy.contains("Apply").click();
+    cy.wait("@external_result_filter").then((interception) => {
+      expect(interception.response.statusCode).to.equal(200);
+      expect(interception.request.url).to.include("srf_id=");
+      expect(interception.request.url).to.include("created_date_before=");
+      expect(interception.request.url).to.include("created_date_after=");
+      expect(interception.request.url).to.include("wards=");
+      expect(interception.request.url).to.include("local_bodies=");
+    });
   });
 
   afterEach(() => {

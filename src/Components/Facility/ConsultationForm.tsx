@@ -1083,7 +1083,7 @@ export const ConsultationForm = (props: any) => {
                     selectedUser={state.form.assigned_to_object}
                     onSelect={handleDoctorSelect}
                     user_type={"Doctor"}
-                    outline={false}
+                    outline={true}
                   />
                 </div>
               )}

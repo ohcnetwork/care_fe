@@ -81,6 +81,9 @@ type AssetFormSection =
 const AssetCreate = (props: AssetProps) => {
   const { facilityId, assetId } = props;
 
+  let assetTypeInitial: AssetType;
+  let assetClassInitial: AssetClass;
+
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState("");
   const [asset_type, setAssetType] = useState<AssetType>();
@@ -248,7 +251,29 @@ const AssetCreate = (props: AssetProps) => {
     return true;
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
+  const resetFilters = () => {
+    setName("");
+    setDescription("");
+    setLocation("");
+    setAssetType(assetTypeInitial);
+    setAssetClass(assetClassInitial);
+    setIsWorking("");
+    setNotWorkingReason("");
+    setSerialNumber("");
+    setVendorName("");
+    setSupportName("");
+    setSupportEmail("");
+    setSupportPhone("");
+    setQrCodeId("");
+    setManufacturer("");
+    setWarrantyAmcEndOfValidity("");
+    setLastServicedOn("");
+    setNotes("");
+    setWarrantyAmcEndOfValidity(null);
+    setLastServicedOn(null);
+  };
+
+  const handleSubmit = async (e: React.SyntheticEvent, addMore: boolean) => {
     e.preventDefault();
     const validated = validateForm();
     if (validated) {
@@ -279,7 +304,11 @@ const AssetCreate = (props: AssetProps) => {
           Notification.Success({
             msg: "Asset created successfully",
           });
-          goBack();
+          if (!addMore) {
+            goBack();
+          } else {
+            resetFilters();
+          }
         }
         setIsLoading(false);
       } else {
@@ -428,7 +457,7 @@ const AssetCreate = (props: AssetProps) => {
         <div className="w-full h-full flex overflow-auto xl:ml-72">
           <div className="w-full max-w-3xl 2xl:max-w-4xl">
             <form
-              onSubmit={handleSubmit}
+              onSubmit={(e) => handleSubmit(e, false)}
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
             >
               <div className="grid grid-cols-1 gap-x-12 items-start">
@@ -785,15 +814,30 @@ const AssetCreate = (props: AssetProps) => {
                     className="primary-button w-full md:w-auto flex justify-center"
                     id="asset-create"
                     type="submit"
-                    onClick={handleSubmit}
+                    onClick={(e) => handleSubmit(e, false)}
                   >
                     <div className="flex items-center justify-start gap-2">
                       <CheckCircleOutlineIcon className="text-base">
                         save
                       </CheckCircleOutlineIcon>
-                      {assetId ? "Update" : "Create"}
+                      {assetId ? "Update" : "Create Asset"}
                     </div>
                   </button>
+                  {!assetId && (
+                    <button
+                      className="primary-button w-full md:w-auto flex justify-center"
+                      id="asset-create"
+                      type="submit"
+                      onClick={(e) => handleSubmit(e, true)}
+                    >
+                      <div className="flex items-center justify-start gap-2">
+                        <CheckCircleOutlineIcon className="text-base">
+                          save
+                        </CheckCircleOutlineIcon>
+                        Create & Add More
+                      </div>
+                    </button>
+                  )}
                   <button
                     id="asset-cancel"
                     className="secondary-button w-full md:w-auto flex justify-center"
