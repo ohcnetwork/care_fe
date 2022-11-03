@@ -683,7 +683,10 @@ export const PatientManager = (props: any) => {
           setSelected={(e) => setSelectedFacility(e)}
           selectedFacility={selectedFacility}
           handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
-          handleCancel={() => setShowDialog(false)}
+          handleCancel={() => {
+            setShowDialog(false);
+            setSelectedFacility({ name: "" });
+          }}
         />
       )}
       <PageTitle
