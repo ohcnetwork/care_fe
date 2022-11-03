@@ -269,13 +269,15 @@ const AssetsList = () => {
               <p className="text-xl flex font-medium capitalize break-words">
                 <span className="mr-2 text-primary-500">
                   {" "}
-                  {
-                    (
-                      (asset.asset_class &&
-                        assetClassProps[asset.asset_class]) ||
-                      assetClassProps.None
-                    ).icon
-                  }
+                  <i
+                    className={`fas fa-${
+                      (
+                        (asset.asset_class &&
+                          assetClassProps[asset.asset_class]) ||
+                        assetClassProps.None
+                      ).icon
+                    }`}
+                  />
                 </span>
                 <p className="truncate w-48">{asset.name}</p>
               </p>
