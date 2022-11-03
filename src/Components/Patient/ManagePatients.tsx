@@ -8,7 +8,7 @@ import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { Tooltip } from "@material-ui/core";
+import { CircularProgress, Tooltip } from "@material-ui/core";
 
 import {
   getAllPatient,
@@ -683,139 +683,143 @@ export const PatientManager = (props: any) => {
           setSelected={(e) => setSelectedFacility(e)}
           selectedFacility={selectedFacility}
           handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
-          handleCancel={() => setShowDialog(false)}
+          handleCancel={() => {
+            setShowDialog(false);
+            setSelectedFacility({ name: "" });
+          }}
         />
       )}
+      <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-max">
+        <Tooltip
+          title={
+            !isDownloadAllowed ? (
+              <p className="self-end text-sm italic ">
+                * Select a 7 day period
+              </p>
+            ) : (
+              ""
+            )
+          }
+          arrow={true}
+          interactive={true}
+          enterNextDelay={100}
+          enterTouchDelay={0}
+          leaveTouchDelay={1000}
+        >
+          <div className="text-center">
+            <button
+              onClick={handleDownloadFiltered}
+              disabled={!isDownloadAllowed}
+              className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
+            >
+              <span>
+                <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
+                {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
+              </span>
+            </button>
+            <CSVLink
+              id="downloadlink"
+              className="hidden"
+              data={DownloadFile}
+              filename={`patients-${now}.csv`}
+              target="_blank"
+            ></CSVLink>
+          </div>
+        </Tooltip>
+        <div className="flex flex-col gap-2">
+          <Tooltip
+            title={
+              !isDownloadAllowed ? (
+                <p className="self-end text-sm italic ">
+                  * Select a 7 day period
+                </p>
+              ) : (
+                ""
+              )
+            }
+            arrow={true}
+            interactive={true}
+            enterNextDelay={100}
+            enterTouchDelay={0}
+            leaveTouchDelay={1000}
+          >
+            <div>
+              <button
+                disabled={!isDownloadAllowed}
+                onClick={handleDownloadAll}
+                className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
+              >
+                <span>
+                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
+                  DOWNLOAD ALL PATIENTS
+                </span>
+              </button>
+            </div>
+          </Tooltip>
+        </div>
+        <div>
+          <button
+            className="btn btn-primary w-full md:w-fit sm:w-fit mb-2 sm:mb-0 sm:mr-2"
+            onClick={() => {
+              if (facilityId) {
+                navigate(`/facility/${facilityId}/patient`);
+              } else {
+                setShowDialog(true);
+              }
+            }}
+            data-testid="add-patient-button"
+          >
+            <i className="fas fa-plus mr-2 text-white"></i>
+            <span className="pt-[2px]">Add Details of a Patient</span>
+          </button>
+        </div>
+        <div>
+          <button
+            className="btn btn-primary-ghost w-full md:w-fit"
+            onClick={(_) => setShowFilters((show) => !show)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="fill-current w-4 h-4 mr-2"
+            >
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12">
+                {" "}
+              </line>
+              <line x1="8" y1="18" x2="21" y2="18">
+                {" "}
+              </line>
+              <line x1="3" y1="6" x2="3.01" y2="6">
+                {" "}
+              </line>
+              <line x1="3" y1="12" x2="3.01" y2="12">
+                {" "}
+              </line>
+              <line x1="3" y1="18" x2="3.01" y2="18">
+                {" "}
+              </line>
+            </svg>
+            <span>Advanced Filters</span>
+          </button>
+        </div>
+      </div>
       <PageTitle
         title="Patients"
         hideBack={!facilityId}
         breadcrumbs={!!facilityId}
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
+        className="md:mt-[-15px]"
       />
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-24px]">
         <div>
-          <div className="flex flex-col right-3 top-0 gap-2 my-3 mr-3 sm:absolute sm:flex-row">
-            <Tooltip
-              title={
-                !isDownloadAllowed ? (
-                  <p className="self-end text-sm italic ">
-                    * Select a 7 day period
-                  </p>
-                ) : (
-                  ""
-                )
-              }
-              arrow={true}
-              interactive={true}
-              enterNextDelay={100}
-              enterTouchDelay={0}
-              leaveTouchDelay={1000}
-            >
-              <div className="text-center">
-                <button
-                  onClick={handleDownloadFiltered}
-                  disabled={!isDownloadAllowed}
-                  className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-                >
-                  <span>
-                    <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
-                    {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
-                  </span>
-                </button>
-                <CSVLink
-                  id="downloadlink"
-                  className="hidden"
-                  data={DownloadFile}
-                  filename={`patients-${now}.csv`}
-                  target="_blank"
-                ></CSVLink>
-              </div>
-            </Tooltip>
-            <div className="flex flex-col gap-2">
-              <Tooltip
-                title={
-                  !isDownloadAllowed ? (
-                    <p className="self-end text-sm italic ">
-                      * Select a 7 day period
-                    </p>
-                  ) : (
-                    ""
-                  )
-                }
-                arrow={true}
-                interactive={true}
-                enterNextDelay={100}
-                enterTouchDelay={0}
-                leaveTouchDelay={1000}
-              >
-                <div>
-                  <button
-                    disabled={!isDownloadAllowed}
-                    onClick={handleDownloadAll}
-                    className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-                  >
-                    <span>
-                      <i className="fa-solid fa-arrow-down-long mr-2"></i>
-                      DOWNLOAD ALL PATIENTS
-                    </span>
-                  </button>
-                </div>
-              </Tooltip>
-            </div>
-            <div>
-              <button
-                className="btn btn-primary w-full md:w-fit sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-                onClick={() => {
-                  if (facilityId) {
-                    navigate(`/facility/${facilityId}/patient`);
-                  } else {
-                    setShowDialog(true);
-                  }
-                }}
-                data-testid="add-patient-button"
-              >
-                <i className="fas fa-plus mr-2 text-white"></i>
-                <span className="pt-[2px]">Add Details of a Patient</span>
-              </button>
-            </div>
-            <div>
-              <button
-                className="btn btn-primary-ghost w-full md:w-fit"
-                onClick={(_) => setShowFilters((show) => !show)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
-            </div>
-          </div>
           <div className="flex flex-col mt-2">
             <div className="bg-white overflow-hidden shadow rounded-lg mb-2">
               <div className="px-4 py-5 sm:p-[35px]">
@@ -826,26 +830,7 @@ export const PatientManager = (props: any) => {
                   {/* Show spinner until count is fetched from server */}
                   {isLoading ? (
                     <dd className="mt-4 text-5xl leading-9">
-                      <svg
-                        className="animate-spin -ml-1 mr-3 h-10 w-10 text-primary-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cy="12"
-                          cx="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
+                      <CircularProgress className="text-primary-500" />
                     </dd>
                   ) : (
                     <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
