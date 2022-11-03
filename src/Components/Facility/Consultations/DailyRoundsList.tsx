@@ -8,9 +8,27 @@ import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
 import { formatDate } from "../../../Utils/utils";
-
+import { PatientCategory } from "../models";
+import { PatientCategoryTailwindClass } from "../../../Common/constants";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
+
+export type PatientCategoryBadgeProps = {
+  category?: PatientCategory;
+};
+
+export const PatientCategoryBadge = ({
+  category,
+}: PatientCategoryBadgeProps) => {
+  const categoryClass = PatientCategoryTailwindClass[category || "unknown"];
+  return (
+    <span
+      className={`px-2 py-1 text-sm rounded-full ${categoryClass} font-medium`}
+    >
+      {category}
+    </span>
+  );
+};
 
 const getName = (item: any) => {
   const fallback = "Virtual Nursing Assistant";
@@ -135,12 +153,10 @@ export const DailyRoundsList = (props: any) => {
 
                   {itemData.patient_category && (
                     <Grid item xs={12}>
-                      <Typography>
-                        <span className="text-gray-700">Category: </span>
-                        <span className="badge badge-pill badge-warning">
-                          {itemData.patient_category || "-"}
-                        </span>
-                      </Typography>
+                      <span className="text-gray-700">Category: </span>
+                      <PatientCategoryBadge
+                        category={itemData.patient_category}
+                      />
                     </Grid>
                   )}
                   <Grid item xs={6}>
