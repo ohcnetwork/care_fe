@@ -419,7 +419,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "c_password":
           if (!state.form.password) {
-            errors.password = "Confirm password is required";
+            errors.c_password = "Confirm password is required";
             invalidForm = true;
           } else if (state.form.password !== state.form.c_password) {
             errors.c_password = "Passwords not matching";
