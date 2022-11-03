@@ -85,35 +85,26 @@ const NotificationTile = ({
         result.read_at && "text-gray-500"
       )}
     >
-      <div className="text-lg font-bold">
-        {getNotificationTitle(result.event)}
+      <div className="flex justify-between">
+        <div className="text-lg font-bold">
+          {getNotificationTitle(result.event)}
+        </div>
+        <div className="">
+          <i className={`${getNotificationIcon(result.event)} fa-2x `} />
+        </div>
       </div>
       <div className="text-sm py-1">{result.message}</div>
-      <div className="grid grid-cols-2 ">
-        <div>
-          <i className={`${getNotificationIcon(result.event)} fa-2x py-4`}></i>
-        </div>
-        <div>
-          <div className="text-xs text-right py-1">
-            {formatDate(result.created_date)}
-          </div>
-          <div className="mt-2 text-right">
-            <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
-              <i className="fas fa-eye mr-2 text-primary-500" /> Visit Link
-            </button>
-          </div>
-        </div>
-      </div>
-      {!result.read_at && (
+      <div className="flex justify-between items-end">
         <button
-          className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+          className={`${
+            result.read_at && "invisible"
+          } h-min inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0`}
           disabled={isMarkingAsRead}
           onClick={(event) => {
             event.stopPropagation();
             handleMarkAsRead();
           }}
         >
-          {" "}
           {isMarkingAsRead ? (
             <Spinner />
           ) : (
@@ -121,7 +112,17 @@ const NotificationTile = ({
           )}
           Mark as Read
         </button>
-      )}
+        <div>
+          <div className="text-xs text-right py-1">
+            {formatDate(result.created_date)}
+          </div>
+          <div className="mt-2 text-right min-h-min">
+            <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
+              <i className="fas fa-eye mr-2 text-primary-500" /> Visit Link
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
