@@ -9,7 +9,7 @@ export default function DropdownMenu(props: {
   return (
     <div className="text-right">
       <Menu as="div" className="relative inline-block text-left w-full">
-        <Menu.Button className="flex w-full lg:justify-between justify-center items-center rounded-[4px] bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+        <Menu.Button className="flex w-full lg:justify-between justify-center items-center button-primary-default Button outline-offset-1 button-size-default button-shape-square">
           <div className="flex gap-2 items-center">
             {props.icon}
             {props.title}

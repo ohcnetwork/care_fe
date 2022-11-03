@@ -196,10 +196,6 @@ a:hover {
   @apply text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-6 py-2.5 mr-2 mb-2 transition-all ease-in-out duration-200 !important;
 }
 
-.btn-secondary {
-  @apply px-4 py-3 border bg-white border-primary-500 rounded font-medium text-sm text-primary-500 flex justify-center items-center gap-2 hover:bg-primary-500 hover:text-white transition duration-300 ease-in-out
-}
-
 button:disabled,
 .disabled {
   @apply cursor-not-allowed bg-gray-300 text-gray-500 shadow-none border-transparent;
@@ -1014,7 +1010,7 @@ button:disabled,
 
 .button-primary-default { @apply accent-primary-500 bg-primary-500 hover:bg-primary-400 text-white }
 .button-primary-ghost { @apply accent-primary-500 hover:bg-primary-100 text-primary-500 border-0 }
-.button-secondary-default { @apply accent-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700 }
+.button-secondary-default { @apply border border-primary-500 bg-white hover:text-white hover:bg-primary-500 text-primary-500 }
 .button-secondary-ghost { @apply accent-gray-200 hover:bg-gray-200 text-gray-700 border-0 }
 .button-danger-default { @apply accent-red-500 bg-red-500 hover:bg-red-400 text-white }
 .button-danger-ghost { @apply accent-red-500 hover:bg-red-100 text-red-500 border-0 }

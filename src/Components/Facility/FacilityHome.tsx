@@ -35,6 +35,7 @@ import { RoleButton } from "../Common/RoleButton";
 import CoverImageEditModal from "./CoverImageEditModal";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import Table from "../Common/components/Table";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -541,25 +542,27 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="flex flex-col justify-end">
               <RoleButton
-                className="btn-secondary py-2 mt-2 w-full md:w-auto"
+                className="mt-2 w-full md:w-auto"
                 handleClickCB={() =>
                   navigate(`/facility/${facilityId}/patient`)
                 }
                 data-testid="add-patient-button"
                 disableFor="readOnly"
-                buttonType="html"
+                buttonType="buttonV2"
+                buttonV2Props={{ variant: "secondary" }}
               >
                 <i className="uil uil-plus text-lg"></i>
                 <span className="text-sm">Add Details of a Patient</span>
               </RoleButton>
 
-              <button
-                className="btn-secondary mt-2 w-full md:w-auto"
+              <ButtonV2
+                variant="secondary"
+                className="mt-2 w-full md:w-auto py-3"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
                 <i className="fas fa-user-injured"></i>
                 View Patients
-              </button>
+              </ButtonV2>
             </div>
           </div>
         </div>
