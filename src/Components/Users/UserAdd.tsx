@@ -40,8 +40,6 @@ import {
 import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
 import { goBack } from "../../Utils/utils";
-import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
-
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -122,7 +120,7 @@ export const UserAdd = (props: UserProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
-  const [current_user_facilities, setFacilities] = useState<
+  const [_current_user_facilities, setFacilities] = useState<
     Array<FacilityModel>
   >([]);
   const [states, setStates] = useState(initialStates);
@@ -133,6 +131,7 @@ export const UserAdd = (props: UserProps) => {
   >([]);
   const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
+  const [passwordInputInFocus, setPasswordInputInFocus] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
 
   const userExistsEnums = {
@@ -161,12 +160,34 @@ export const UserAdd = (props: UserProps) => {
       !(state.form.username?.length < 2) &&
       /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
     ) {
-      let timeout = setTimeout(() => {
+      const timeout = setTimeout(() => {
         checkUsername(usernameInput);
       }, 500);
       return () => clearTimeout(timeout);
     }
   }, [usernameInput]);
+
+  useEffect(() => {
+    if (!passwordInputInFocus) return;
+    console.log(
+      !validatePassword(state.form.password)
+        ? "Password should have 1 lowercase letter, 1 uppercase letter, 1 number, and be at least 8 characters long"
+        : ""
+    );
+    dispatch({
+      type: "set_error",
+      errors: {
+        ...state.errors,
+        password: !validatePassword(state.form.password)
+          ? "Password should have 1 lowercase letter, 1 uppercase letter, 1 number, and be at least 8 characters long"
+          : "",
+        c_password:
+          state.form.password !== state.form.c_password
+            ? "Passwords not matching"
+            : "",
+      },
+    });
+  }, [state.form.password, state.form.c_password, passwordInputInFocus]);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -770,6 +791,7 @@ export const UserAdd = (props: UserProps) => {
                   value={state.form.password}
                   onChange={handleChange}
                   errors={state.errors.password}
+                  onFocus={() => setPasswordInputInFocus(true)}
                 />
               </div>
 
