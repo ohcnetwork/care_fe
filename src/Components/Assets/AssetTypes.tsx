@@ -11,13 +11,15 @@ export interface AssetLocationObject {
 }
 
 export enum AssetType {
-  internal = "INTERNAL",
-  external = "EXTERNAL",
+  NONE = "NONE",
+  INTERNAL = "INTERNAL",
+  EXTERNAL = "EXTERNAL",
 }
 
 export enum AssetClass {
-  onvif = "ONVIF",
-  hl7monitor = "HL7MONITOR",
+  NONE = "",
+  ONVIF = "ONVIF",
+  HL7MONITOR = "HL7MONITOR",
 }
 
 export const assetClassProps = {
@@ -33,7 +35,7 @@ export const assetClassProps = {
     icon: "tv",
     uicon: "tv-retro",
   },
-  None: {
+  NONE: {
     name: "N/A",
     icon: "cart-plus",
     uicon: "shopping-cart",

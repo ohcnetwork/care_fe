@@ -216,7 +216,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "asset_type":
-          if (!asset_type) {
+          if (!asset_type || asset_type == "NONE") {
             errors[field] = "Select an asset type";
             invalidForm = true;
           }
@@ -480,11 +480,16 @@ const AssetCreate = (props: AssetProps) => {
                   <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
                     {/* Location */}
                     <div>
-                      <label htmlFor="asset-location">Location * </label>
+                      <label htmlFor="asset-location">Location *</label>
                       <div className="mt-2">
                         <SelectMenuV2
                           required
                           options={[
+                            {
+                              title: "Select",
+                              description: "Select the location",
+                              value: "0",
+                            },
                             ...locations.map((location: any) => ({
                               title: location.name,
                               description: location.facility.name,
@@ -502,11 +507,16 @@ const AssetCreate = (props: AssetProps) => {
 
                     {/* Asset Type */}
                     <div>
-                      <label htmlFor="asset-type">Asset Type * </label>
+                      <label htmlFor="asset-type">Asset Type *</label>
                       <div className="mt-2">
                         <SelectMenuV2
                           required
                           options={[
+                            {
+                              title: "Select",
+                              description: "Select the asset type",
+                              value: "NONE",
+                            },
                             {
                               title: "Internal",
                               description:
@@ -523,9 +533,11 @@ const AssetCreate = (props: AssetProps) => {
                           value={asset_type}
                           optionLabel={(o) => o.title}
                           optionValue={(o) =>
-                            o.value === "INTERNAL"
-                              ? AssetType.internal
-                              : AssetType.external
+                            o.value == "NONE"
+                              ? AssetType.NONE
+                              : o.value === "INTERNAL"
+                              ? AssetType.INTERNAL
+                              : AssetType.EXTERNAL
                           }
                           onChange={(e) => setAssetType(e)}
                         />
@@ -540,6 +552,7 @@ const AssetCreate = (props: AssetProps) => {
                         <SelectMenuV2
                           required
                           options={[
+                            { title: "Select", value: "NONE" },
                             { title: "ONVIF Camera", value: "ONVIF" },
                             {
                               title: "HL7 Vitals Monitor",
@@ -549,9 +562,11 @@ const AssetCreate = (props: AssetProps) => {
                           value={asset_class}
                           optionLabel={(o) => o.title}
                           optionValue={(o) =>
-                            o.value === "ONVIF"
-                              ? AssetClass.onvif
-                              : AssetClass.hl7monitor
+                            o.value == "NONE"
+                              ? AssetClass.NONE
+                              : o.value === "ONVIF"
+                              ? AssetClass.ONVIF
+                              : AssetClass.HL7MONITOR
                           }
                           onChange={(e) => setAssetClass(e)}
                         />
