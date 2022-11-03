@@ -3,6 +3,7 @@ import { ForgotPassword, Login, ResetPassword } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import { PublicDashboard } from "../Components/Dashboard/PublicDashboard";
 import { useTranslation } from "react-i18next";
+import SessionExpired from "../Components/ErrorPages/SessionExpired";
 const TopBar = loadable(() => import("../Components/Common/TopBar"));
 
 const routes = {
@@ -11,9 +12,10 @@ const routes = {
   "/dashboard": () => <PublicDashboard />,
   "/forgot-password": () => <ForgotPassword />,
   "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
+  "/session-expired": () => <SessionExpired />,
 };
 
-export default function SessionRouter(props: any) {
+export default function SessionRouter() {
   const content = useRoutes(routes) || <Login />;
   const { t } = useTranslation();
   const path =
