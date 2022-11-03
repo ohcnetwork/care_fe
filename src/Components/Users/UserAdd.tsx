@@ -862,26 +862,27 @@ export const UserAdd = (props: UserProps) => {
                   onFocus={() => setConfirmPasswordInputInFocus(true)}
                   onBlur={() => setConfirmPasswordInputInFocus(false)}
                 />
-                {confirmPasswordInputInFocus && (
-                  <div className="pl-2 text-small text-gray-500">
-                    <div>
-                      {state.form.password != state.form.c_password ? (
-                        <i className="fas fa-circle-xmark text-red-500" />
-                      ) : (
-                        <i className="fas fa-circle-check text-green-500" />
-                      )}{" "}
-                      <span
-                        className={clsx(
-                          state.form.password != state.form.c_password
-                            ? "text-red-500"
-                            : "text-primary-500"
-                        )}
-                      >
-                        Confirm password should match the password
-                      </span>
+                {confirmPasswordInputInFocus &&
+                  state.form.c_password.length > 0 && (
+                    <div className="pl-2 text-small text-gray-500">
+                      <div>
+                        {state.form.password != state.form.c_password ? (
+                          <i className="fas fa-circle-xmark text-red-500" />
+                        ) : (
+                          <i className="fas fa-circle-check text-green-500" />
+                        )}{" "}
+                        <span
+                          className={clsx(
+                            state.form.password != state.form.c_password
+                              ? "text-red-500"
+                              : "text-primary-500"
+                          )}
+                        >
+                          Confirm password should match the password
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
               <div>
                 <InputLabel>First name*</InputLabel>
