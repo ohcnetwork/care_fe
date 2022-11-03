@@ -18,7 +18,7 @@ const SidebarItemBase = ({
 }: SidebarItemBaseProps) => {
   const path = usePath();
   const { t } = useTranslation();
-  const selected = props.to && path?.includes(props.to);
+  const selected = props.to && path?.startsWith(props.to);
 
   return (
     <Link
