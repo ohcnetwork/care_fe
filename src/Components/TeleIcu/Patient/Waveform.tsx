@@ -29,7 +29,7 @@ export default function Waveform(props: {
   const data = wave.data.split(" ").map(Number);
   const viewable = data.length;
   const [queueData, setQueueData] = useState<number[]>(
-    Array(viewable).fill(0)
+    Array(viewable).fill(null)
   );
   const [refreshData, setRefreshData] = useState<number[]>([]);
   const [lastData, setLastData] = useState<number[]>([]);
@@ -107,13 +107,17 @@ export default function Waveform(props: {
 
   return (
     <div className="w-full relative">
-      <div className="text-gray-400 absolute top-0 left-5 text-xs">{props.title}</div>
+      <div className="text-gray-400 absolute top-0 left-5 text-xs">
+        {props.title}
+      </div>
       <LinePlot
         title={props.title}
         name={props.title}
         xData={xData}
         yData={
-          props.wavetype === "STREAM" ? queueData.slice(0, viewable) : refreshData
+          props.wavetype === "STREAM"
+            ? queueData.slice(0, viewable)
+            : refreshData
         }
         yStart={wave["data-low-limit"]}
         yEnd={wave["data-high-limit"]}
