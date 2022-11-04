@@ -164,37 +164,34 @@ let initialState = (psp, previewMode) => {
   }
 }
 
-let selectedClass = part => {
+let selectedClass = (part: option<PressureSore.part>) => {
   switch part {
   | Some(p) =>
-    switch PressureSore.scale(p) {
-    | 1 => "text-red-200 hover:bg-red-400 tooltip"
-    | 2 => "text-red-400 hover:bg-red-500 tooltip"
-    | 3 => "text-red-500 hover:bg-red-600 tooltip"
-    | 4 => "text-red-600 hover:bg-red-700 tooltip"
-    | 5 => "text-red-700 hover:bg-gray-400 tooltip"
-    | _ => "text-gray-400 hover:bg-red-400 tooltip"
-    }
+    let score =  PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type) 
+    if score <= 0.0 { "text-gray-400 hover:bg-red-400 tooltip" } 
+    else if score <= 3.0 { "text-red-200 hover:bg-red-400 tooltip" }
+    else if score <= 6.0 { "text-red-400 hover:bg-red-500 tooltip" }
+    else if score <= 10.0 { "text-red-500 hover:bg-red-600 tooltip" }
+    else if score <= 15.0 { "text-red-600 hover:bg-red-700 tooltip" }
+    else { "text-red-700 hover:bg-red-800 tooltip" }
   | None => "text-gray-400 hover:text-red-200 tooltip"
   }
 }
 // UI for each Label
-let selectedLabelClass = part => {
+let selectedLabelClass = (part: option<PressureSore.part>) => {
   switch part {
   | Some(p) =>
-    switch PressureSore.scale(p) {
-    | 1 => "bg-red-200 text-red-700 hover:bg-red-400"
-    | 2 => "bg-red-400 text-white hover:bg-red-500"
-    | 3 => "bg-red-500 text-white hover:bg-red-600"
-    | 4 => "bg-red-600 text-white hover:bg-red-700"
-    | 5 => "bg-red-700 text-white hover:bg-red-200"
-    | _ => "bg-gray-300 text-black hover:bg-gray-400"
-    }
+    let score =  PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type) 
+    if score <= 0.0 { "bg-gray-300 text-black hover:bg-gray-400" }
+    else if score <= 3.0 { "bg-red-200 text-red-700 hover:bg-red-400" }
+    else if score <= 6.0 { "bg-red-400 text-white hover:bg-red-500" }
+    else if score <= 10.0 { "bg-red-500 text-white hover:bg-red-600" }
+    else if score <= 15.0 { "bg-red-600 text-white hover:bg-red-700" }
+    else { "bg-red-700 text-white hover:bg-red-200" }
   | None => "bg-gray-300 text-black hover:bg-red-200"
   }
 }
 
-// String for Braden Scale Value
 let pushScoreValue = (selectedPart: option<PressureSore.part>) => {
   switch selectedPart {
   | Some(p) => PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type)
@@ -307,17 +304,14 @@ let renderBody = (state, send, title, partPaths, substr) => {
             fill="currentColor"
             id={"part" ++ PressureSore.regionToString(regionType)}
             onClick={e => {
-              Js.log("clicked")
               send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
             }}
             onMouseOver={e => {
-              Js.log("enter")
               if state.previewMode {
                 send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
               }
             }}
             onMouseLeave={_ => {
-              Js.log("left")
               if state.previewMode {
                 send(SetSelectedRegion(PressureSore.Other))
               }
