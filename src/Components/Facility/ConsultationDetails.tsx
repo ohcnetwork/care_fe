@@ -450,6 +450,17 @@ export const ConsultationDetails = (props: any) => {
           <PageTitle
             title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
+            crumbsReplacements={{
+              [facilityId]: { name: patientData?.facility_object?.name },
+              [patientId]: { name: patientData?.name },
+              [consultationId]: {
+                name: `Admitted on ${formatDate(
+                  consultationData.admission_date
+                    ? consultationData.admission_date
+                    : "00:00"
+                )}`,
+              },
+            }}
             breadcrumbs={true}
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">

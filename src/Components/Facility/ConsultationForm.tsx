@@ -64,6 +64,9 @@ import { goBack } from "../../Utils/utils";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
+import ProcedureBuilder, {
+  ProcedureType,
+} from "../Common/prescription-builder/ProcedureBuilder";
 import { ICD11DiagnosisModel } from "./models";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -211,6 +214,7 @@ export const ConsultationForm = (props: any) => {
   const [InvestigationAdvice, setInvestigationAdvice] = useState<
     InvestigationType[]
   >([]);
+  const [procedures, setProcedures] = useState<ProcedureType[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -257,6 +261,9 @@ export const ConsultationForm = (props: any) => {
       );
       setInvestigationAdvice(
         !Array.isArray(res.data.investigation) ? [] : res.data.investigation
+      );
+      setProcedures(
+        !Array.isArray(res.data.procedure) ? [] : res.data.procedure
       );
 
       if (!status.aborted) {
@@ -517,6 +524,7 @@ export const ConsultationForm = (props: any) => {
         discharge_advice: dischargeAdvice,
         prn_prescription: PRNAdvice,
         investigation: InvestigationAdvice,
+        procedure: procedures,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -908,6 +916,15 @@ export const ConsultationForm = (props: any) => {
                 />
                 <br />
                 <ErrorHelperText error={state.errors.investigation} />
+              </div>
+              <div id="procedures-div" className="mt-4">
+                <InputLabel>Procedures</InputLabel>
+                <ProcedureBuilder
+                  procedures={procedures}
+                  setProcedures={setProcedures}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.procedures} />
               </div>
               <div id="discharge_advice-div" className="mt-4">
                 <InputLabel>Prescription Medication</InputLabel>
