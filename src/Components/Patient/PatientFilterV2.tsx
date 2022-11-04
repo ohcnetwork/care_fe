@@ -375,10 +375,10 @@ export default function PatientFilterV2(props: any) {
           optionDescription={(o) => o.order}
           optionIcon={(option) => (
             <i
-              className={`fa-solid ${
+              className={`uil ${
                 option.order === "Ascending"
-                  ? "fa-arrow-up-short-wide"
-                  : "fa-arrow-up-wide-short"
+                  ? "uil-sort-amount-up"
+                  : "uil-sort-amount-down"
               }`}
             />
           )}
@@ -446,7 +446,7 @@ export default function PatientFilterV2(props: any) {
             onChange={(v) =>
               setFilterState({ ...filterState, facility_type: v })
             }
-            optionIcon={() => <i className="fa-solid fa-hospital" />}
+            optionIcon={() => <i className="uil uil-hospital" />}
           />
         </div>
 
