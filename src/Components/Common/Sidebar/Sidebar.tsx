@@ -3,6 +3,7 @@ import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
 import { Dialog, Transition } from "@headlessui/react";
+import { usePath } from "raviger";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -36,12 +37,30 @@ const Users = () => <i className="uil uil-users-alt" />;
 const NoticeBoard = () => <i className="uil uil-meeting-board" />;
 const Dashboard = () => <i className="uil uil-dashboard" />;
 
+const NavItems = [
+  { text: "Facilities", to: "/facility", icon: <Facility /> },
+  { text: "Patients", to: "/patients", icon: <Patient /> },
+  { text: "Assets", to: "/assets", icon: <Asset /> },
+  { text: "Sample Test", to: "/sample", icon: <SampleTest /> },
+  { text: "Shifting", to: "/shifting", icon: <Shifting /> },
+  { text: "Resource", to: "/resource", icon: <Resource /> },
+  { text: "External Results", to: "/external_results", icon: <Result /> },
+  { text: "Users", to: "/users", icon: <Users /> },
+  { text: "Notice Board", to: "/notice_board", icon: <NoticeBoard /> },
+];
+
 const StatelessSidebar = ({
   shrinkable = false,
   shrinked = false,
   setShrinked,
 }: StatelessSidebarProps) => {
+  const path = usePath();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
+
+  const activeItem = NavItems.reduce((acc, item) => {
+    const tag = item.to.replaceAll("/", "");
+    return path?.includes(tag) ? tag : acc;
+  }, "");
 
   return (
     <nav
@@ -57,15 +76,10 @@ const StatelessSidebar = ({
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
       <div className="h-7" /> {/* flexible spacing */}
-      <Item text="Facilities" to="/facility" icon={<Facility />} />
-      <Item text="Patients" to="/patients" icon={<Patient />} />
-      <Item text="Assets" to="/assets" icon={<Asset />} />
-      <Item text="Sample Test" to="/sample" icon={<SampleTest />} />
-      <Item text="Shifting" to="/shifting" icon={<Shifting />} />
-      <Item text="Resource" to="/resource" icon={<Resource />} />
-      <Item text="External Results" to="/external_results" icon={<Result />} />
-      <Item text="Users" to="/users" icon={<Users />} />
-      <Item text="Notice Board" to="/notice_board" icon={<NoticeBoard />} />
+      {NavItems.map((item) => {
+        const itemSelected = item.to.replaceAll("/", "") === activeItem;
+        return <Item key={item.text} {...item} selected={itemSelected} />;
+      })}
       <NotificationItem shrinked={shrinked} />
       <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
       <div className="flex-1" />
