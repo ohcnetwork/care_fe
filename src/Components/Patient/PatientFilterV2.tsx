@@ -467,8 +467,8 @@ export default function PatientFilterV2(props: any) {
           <FieldLabel className="text-sm">Is Antenatal</FieldLabel>
           <SelectMenuV2
             placeholder="Show all"
-            options={[true, false]}
-            optionLabel={(o) => (o ? "Antenatal" : "Non-antenatal")}
+            options={["true", "false"]}
+            optionLabel={(o) => (o === "true" ? "Antenatal" : "Non-antenatal")}
             value={filterState.is_antenatal}
             onChange={(v) =>
               setFilterState({ ...filterState, is_antenatal: v })
