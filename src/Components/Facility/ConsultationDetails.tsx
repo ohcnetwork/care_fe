@@ -271,8 +271,10 @@ export const ConsultationDetails = (props: any) => {
   }
 
   const tabButtonClasses = (selected: boolean) =>
-    `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
-      selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
+    `capitalize min-w-max-content cursor-pointer rounded-md py-1 px-2 mb-1 sm:px-4 border-transparent font-bold whitespace-nowrap text-xs sm:text-base md:text-sm ${
+      selected === true
+        ? "bg-primary-500 sm:hover:bg-primary-700 text-white"
+        : "text-gray-700"
     }`;
 
   const ShowDiagnosis = ({
@@ -625,27 +627,25 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>
 
-        <div className="border-b-2 border-gray-200 mt-4 w-full">
-          <div className="sm:flex sm:items-baseline overflow-x-auto">
-            <div className="mt-4 sm:mt-0">
-              <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
-                {CONSULTATION_TABS.map((p: OptionsType) => {
-                  if (p.text === "FEED") {
-                    if (!consultationData?.current_bed?.bed_object?.id)
-                      return null;
-                  }
-                  return (
-                    <Link
-                      key={p.text}
-                      className={tabButtonClasses(tab === p.text)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
-                    >
-                      {p.desc}
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
+        <div className="border-b-2 bg-white rounded-md shadow-sm border-gray-200 mt-4 px-4 py-2 w-full">
+          <div className="sm:flex sm:items-baseline flex-wrap">
+            <nav className="flex flex-wrap justify-start">
+              {CONSULTATION_TABS.map((p: OptionsType) => {
+                if (p.text === "FEED") {
+                  if (!consultationData?.current_bed?.bed_object?.id)
+                    return null;
+                }
+                return (
+                  <Link
+                    key={p.text}
+                    className={tabButtonClasses(tab === p.text)}
+                    href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
+                  >
+                    {p.desc}
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
         </div>
         {tab === "UPDATES" && (
