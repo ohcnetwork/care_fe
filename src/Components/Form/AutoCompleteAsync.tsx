@@ -80,26 +80,23 @@ const AutoCompleteAsync = (props: Props) => {
         {({ open }) => (
           <div className="relative mt-1">
             <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
-              <Combobox.Button
-                className="block w-full pl-3 pr-10 py-1 focus:outline-none focus:ring-0 sm:text-sm"
-                as="div"
-              >
-                <Combobox.Input
-                  ref={queryInputRef}
-                  onFocus={() => {
-                    setQuery("");
-                    setVisible(true);
-                  }}
-                  name={name}
-                  className={`w-full border-none text-sm leading-5 text-gray-900 ${
-                    hasSelection
-                      ? "placeholder:text-gray-900 font-medium"
-                      : "placeholder:text-gray-500"
-                  } focus:ring-0 bg-inherit shadow-none`}
-                  placeholder={getPlaceholder()}
-                  onChange={(event) => setQuery(event.target.value)}
-                />
-                <div className="absolute top-2 right-0 flex items-center pr-2">
+              <Combobox.Input
+                ref={queryInputRef}
+                onFocus={() => {
+                  setQuery("");
+                  setVisible(true);
+                }}
+                name={name}
+                className={`w-full border-none text-sm leading-5 text-gray-900 ${
+                  hasSelection
+                    ? "placeholder:text-gray-900 font-medium"
+                    : "placeholder:text-gray-500"
+                } focus:ring-0 bg-inherit shadow-none`}
+                placeholder={getPlaceholder()}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+              <Combobox.Button className="block w-full pl-3 pr-10 py-1 focus:outline-none focus:ring-0 sm:text-sm">
+                <div className="absolute top-1 right-0 flex items-center pr-2">
                   {loading && <Spinner path={{ fill: "black" }} />}
                   <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
                 </div>
