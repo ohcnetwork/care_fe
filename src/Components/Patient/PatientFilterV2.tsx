@@ -367,7 +367,10 @@ export default function PatientFilterV2(props: any) {
         }}
       />
       <div className="w-full flex-none pt-20">
-        <FieldLabel className="text-sm">Ordering</FieldLabel>
+        <div className="mb-3 text-md flex items-center text-gray-700 gap-2">
+          <i className="text-lg uil uil-sort" />
+          <p>Ordering</p>
+        </div>
         <SelectMenuV2
           options={PATIENT_FILTER_ORDER}
           optionLabel={(o) => o.desc}
@@ -375,7 +378,7 @@ export default function PatientFilterV2(props: any) {
           optionDescription={(o) => o.order}
           optionIcon={(option) => (
             <i
-              className={`uil ${
+              className={`text-lg uil ${
                 option.order === "Ascending"
                   ? "uil-sort-amount-up"
                   : "uil-sort-amount-down"
@@ -388,7 +391,7 @@ export default function PatientFilterV2(props: any) {
         />
       </div>
       <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-        <i className="uil uil-filter" />
+        <i className="text-lg uil uil-filter" />
         <p>Filter by</p>
       </div>
       <div className="flex flex-wrap gap-4">
