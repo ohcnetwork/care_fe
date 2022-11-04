@@ -11,6 +11,7 @@ interface Props {
   optionLabel?: (option: any) => string;
   showNOptions?: number;
   multiple?: boolean;
+  compareBy?: string;
   debounceTime?: number;
   className?: string;
   placeholder?: string;
@@ -26,6 +27,7 @@ const AutoCompleteAsync = (props: Props) => {
     optionLabel = (option: any) => option.label,
     showNOptions = 10,
     multiple = false,
+    compareBy = "id",
     debounceTime = 300,
     className = "",
     placeholder,
@@ -69,7 +71,12 @@ const AutoCompleteAsync = (props: Props) => {
 
   return (
     <div className={className}>
-      <Combobox value={selected} onChange={onChange} multiple={multiple as any}>
+      <Combobox
+        value={selected}
+        onChange={onChange}
+        by={compareBy}
+        multiple={multiple as any}
+      >
         {({ open }) => (
           <div className="relative mt-1">
             <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
