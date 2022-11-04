@@ -522,8 +522,14 @@ export default function PatientFilterV2(props: any) {
           <SelectMenuV2
             placeholder="Show all"
             options={VACCINATED_FILTER}
-            optionLabel={(o) => o.text}
-            optionValue={(o) => o.id}
+            optionLabel={({ text }) => text}
+            optionValue={({ id }) => id}
+            optionIcon={({ id }) => (
+              <>
+                <i className="uil uil-syringe mr-2" />
+                <span className="font-bold">{id}</span>
+              </>
+            )}
             value={filterState.number_of_doses}
             onChange={(v) =>
               setFilterState({ ...filterState, number_of_doses: v })
