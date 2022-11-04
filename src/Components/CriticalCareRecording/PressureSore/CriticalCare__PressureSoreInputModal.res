@@ -25,32 +25,7 @@ let make = (
   }, (part, show))
 
   React.useEffect1(() => {
-    let areaIntervalPoints = [0.0, 0.3, 0.6, 1.0, 2.2, 3.0, 4.0, 8.0, 12.0, 24.0]
-    let exudateAmounts = ["None", "Light", "Moderate", "Heavy"]
-    let tissueTypes = ["Closed", "Epithelial", "Granulation", "Slough", "Necrotic"]
-
-    let area = state.length *. state.width
-    let areaScore =
-      areaIntervalPoints
-      ->Belt.Array.getIndexBy(interval => interval >= area)
-      ->Belt.Option.getWithDefault(10)
-      ->float_of_int
-    let exudateScore =
-      exudateAmounts
-      ->Belt.Array.getIndexBy(amount =>
-        amount == state.exudate_amount->PressureSore.extrudateAmountToString
-      )
-      ->Belt.Option.getWithDefault(0)
-      ->float_of_int
-    let tissueScore =
-      tissueTypes
-      ->Belt.Array.getIndexBy(tissue =>
-        tissue == state.tissue_type->PressureSore.tissueTypeToString
-      )
-      ->Belt.Option.getWithDefault(0)
-      ->float_of_int
-
-    let score = areaScore +. exudateScore +. tissueScore
+    let score = PressureSore.calculatePushScore(state.length, state.width, state.exudate_amount, state.tissue_type)
     setPushScore(_ => score)
     None
   }, [state])

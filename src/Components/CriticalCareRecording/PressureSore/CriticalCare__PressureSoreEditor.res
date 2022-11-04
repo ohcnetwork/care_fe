@@ -192,19 +192,11 @@ let selectedLabelClass = part => {
 }
 
 // String for Braden Scale Value
-let bradenScaleValue = selectedPart => {
+let pushScoreValue = (selectedPart: option<PressureSore.part>) => {
   switch selectedPart {
-  | Some(p) =>
-    switch PressureSore.scale(p) {
-    | 1 => ": 1"
-    | 2 => ": 2"
-    | 3 => ": 3"
-    | 4 => ": 4"
-    | 5 => ": 5"
-    | _ => ""
-    }
-  | None => ""
-  }
+  | Some(p) => PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type)
+  | None => 0.0
+  }->Js.Float.toString
 }
 
 let getIntoView = (region: string, isPart: bool) => {
@@ -272,7 +264,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
                 {str(
                   Js.String.sliceToEnd(
                     ~from=substr,
-                    PressureSore.regionToString(regionType) ++ bradenScaleValue(selectedPart),
+                    PressureSore.regionToString(regionType) ++ (pushScoreValue(selectedPart) === "0" ? "" : " : " ++ pushScoreValue(selectedPart)),
                   ),
                 )}
               </div>
@@ -317,11 +309,9 @@ let renderBody = (state, send, title, partPaths, substr) => {
             className={selectedClass(selectedPart)}
             fill="currentColor"
             id={"part" ++ PressureSore.regionToString(regionType)}
-            onClick={state.previewMode
-              ? _ => getIntoView(PressureSore.regionToString(regionType), true)
-              : e => {
-                  send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
-                }}
+            onClick={e => {
+              send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
+            }}
             onMouseOver={e => {
               if state.previewMode {
                 send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
