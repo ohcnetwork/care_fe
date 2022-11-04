@@ -1,6 +1,9 @@
 @val external setTimeout: (unit => unit, int) => float = "setTimeout"
 @val external clearTimeout: float => unit = "clearTimeout"
 
+@val external innerWidth: int = "window.innerWidth"
+@val external innerHeight: int = "window.innerHeight"
+
 @val external document: 'a = "document"
 %%raw("import './styles.css'")
 
@@ -239,7 +242,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
     <div className="text-left font-bold mx-auto mt-5">
       {str("Braden Scale (Risk Severity) (" ++ title ++ ")")}
     </div>
-    // Braden Scale Divs
+    // Badges
     <div className="mx-auto overflow-x-scroll my-3 border-2">
       <div className="grid grid-rows-3 grid-flow-col auto-cols-max md:flex md:flex-wrap">
         {Js.Array.mapi((part, index) => {
@@ -251,14 +254,8 @@ let renderBody = (state, send, title, partPaths, substr) => {
             className={"p-1 col-auto text-sm rounded m-1 cursor-pointer " ++
             selectedLabelClass(selectedPart)}
             id={PressureSore.regionToString(regionType)}
-            onClick={state.previewMode
-              ? _ => getIntoView(PressureSore.regionToString(regionType), false)
-              : _ => {
-                  switch selectedPart {
-                  | Some(p) => send(AutoManageScale(p))
-                  | None => send(AddPressureSore(regionType))
-                  }
-                }}>
+            onClick={_ => getIntoView(PressureSore.regionToString(regionType), false)}
+          >
             <div className="flex justify-between">
               <div className="border-white px-1">
                 {str(
@@ -312,7 +309,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
             onClick={e => {
               send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
             }}
-            onMouseOver={e => {
+            onMouseEnter={e => {
               if state.previewMode {
                 send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
               }

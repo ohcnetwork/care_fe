@@ -1,4 +1,5 @@
 @val external innerWidth: int = "window.innerWidth"
+@val external innerHeight: int = "window.innerHeight"
 
 let str = React.string
 open CriticalCare__Types
@@ -25,7 +26,12 @@ let make = (
   }, (part, show))
 
   React.useEffect1(() => {
-    let score = PressureSore.calculatePushScore(state.length, state.width, state.exudate_amount, state.tissue_type)
+    let score = PressureSore.calculatePushScore(
+      state.length,
+      state.width,
+      state.exudate_amount,
+      state.tissue_type,
+    )
     setPushScore(_ => score)
     None
   }, [state])
@@ -50,11 +56,15 @@ let make = (
         ref={ReactDOM.Ref.domRef(ref)}
         style={ReactDOMStyle.make(
           ~position={innerWidth >= 640 ? "absolute" : ""},
-          ~left=`${position["x"]->Belt.Int.toString}px`,
-          ~top=`${position["y"]->Belt.Int.toString}px`,
+          ~left=`${(
+              innerWidth - position["x"] < 350 ? position["x"] - 350 : position["x"]
+            )->Belt.Int.toString}px`,
+          ~top=`${(
+              innerHeight - position["y"] < 352 ? position["y"] - 352 : position["y"]
+            )->Belt.Int.toString}px`,
           (),
         )}
-        className="transform w-4/5 rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit">
+        className="transform max-w-[350px] rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit">
         <div className="bg-white px-4 pt-2 pb-4 sm:p-6 sm:pb-4">
           <div className="sm:flex sm:items-start">
             <div className="mt-3 text-center sm:mt-0 sm:text-left">
