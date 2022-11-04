@@ -304,6 +304,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
           )
         }
         updatePart={part => send(UpdateSelectedPart(part))}
+        previewMode={state.previewMode}
       />
       <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
         {Js.Array.mapi((part, renderIndex) => {
@@ -321,6 +322,16 @@ let renderBody = (state, send, title, partPaths, substr) => {
               : e => {
                   send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
                 }}
+            onMouseOver={e => {
+              if state.previewMode {
+                send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
+              }
+            }}
+            onMouseLeave={_ => {
+              if state.previewMode {
+                send(SetSelectedRegion(PressureSore.Other))
+              }
+            }}
           >
             <title className=""> {str(PressureSore.regionToString(regionType))} </title>
           </path>
