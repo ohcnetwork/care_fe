@@ -81,11 +81,7 @@ const AutoCompleteAsync = (props: Props) => {
           <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
             <Combobox.Input
               name={name}
-              className={`w-full border-none text-sm leading-5 text-gray-900 ${
-                hasSelection
-                  ? "placeholder:text-gray-900 font-medium"
-                  : "placeholder:text-gray-500"
-              } focus:ring-0 bg-inherit shadow-none`}
+              className="w-full border-none text-sm leading-5 text-gray-900 placeholder:text-gray-500 font-medium placeholder:font-normal focus:ring-0 bg-inherit shadow-none pr-16 truncate"
               placeholder={getPlaceholder()}
               displayValue={() => (hasSelection ? getPlaceholder() : undefined)}
               onChange={({ target }) => setQuery(target.value)}
