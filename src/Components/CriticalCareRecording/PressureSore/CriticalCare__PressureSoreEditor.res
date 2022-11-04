@@ -307,14 +307,17 @@ let renderBody = (state, send, title, partPaths, substr) => {
             fill="currentColor"
             id={"part" ++ PressureSore.regionToString(regionType)}
             onClick={e => {
+              Js.log("clicked")
               send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
             }}
-            onMouseEnter={e => {
+            onMouseOver={e => {
+              Js.log("enter")
               if state.previewMode {
                 send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
               }
             }}
             onMouseLeave={_ => {
+              Js.log("left")
               if state.previewMode {
                 send(SetSelectedRegion(PressureSore.Other))
               }

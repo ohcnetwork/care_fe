@@ -45,6 +45,28 @@ let make = (
     }
   `)
 
+  let getModalPosition = React.useMemo(() => {
+    () => {
+      let modalWidth = 350
+      let modalHeight = 352
+      if previewMode && innerWidth < 720 {
+        {
+          "top": ((innerHeight - modalHeight) / 2)->Belt.Int.toString ++ "px",
+          "left": ((innerWidth - modalWidth) / 2)->Belt.Int.toString ++ "px",
+        }
+      } else {
+        {
+          "top": (
+            innerHeight - position["y"] < modalHeight ? position["y"] - modalHeight : position["y"]
+          )->Belt.Int.toString ++ "px",
+          "left": (
+            innerWidth - position["x"] < modalWidth ? position["x"] - modalWidth : position["x"]
+          )->Belt.Int.toString ++ "px",
+        }
+      }
+    }
+  })
+
   <div
     hidden={!show}
     onClick={e => handleClickOutside(e, ref, hideModal)}
@@ -55,13 +77,9 @@ let make = (
       <div
         ref={ReactDOM.Ref.domRef(ref)}
         style={ReactDOMStyle.make(
-          ~position={innerWidth >= 640 ? "absolute" : ""},
-          ~left=`${(
-              innerWidth - position["x"] < 350 ? position["x"] - 350 : position["x"]
-            )->Belt.Int.toString}px`,
-          ~top=`${(
-              innerHeight - position["y"] < 352 ? position["y"] - 352 : position["y"]
-            )->Belt.Int.toString}px`,
+          ~position={innerWidth >= 720 || previewMode ? "absolute" : ""},
+          ~left=getModalPosition()["left"],
+          ~top=getModalPosition()["top"],
           (),
         )}
         className="transform max-w-[350px] rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit">
@@ -163,9 +181,9 @@ let make = (
             <span> {str("Push Score: ")} </span>
             <span className="text-black"> {str(pushScore->Belt.Float.toString)} </span>
           </div>
-          {!previewMode
-            ? <div className="flex flex-col-reverse sm:flex-row-reverse w-full gap-2">
-                <button
+          <div className="flex flex-col-reverse sm:flex-row-reverse w-full gap-2">
+            {!previewMode
+              ? <button
                   type_="button"
                   onClick={e => {
                     updatePart(state)
@@ -174,14 +192,14 @@ let make = (
                   className="inline-flex w-full justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
                   {str("Apply")}
                 </button>
-                <button
-                  type_="button"
-                  onClick={hideModal}
-                  className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                  {str("Cancel")}
-                </button>
-              </div>
-            : React.null}
+              : React.null}
+            <button
+              type_="button"
+              onClick={hideModal}
+              className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              {str("Cancel")}
+            </button>
+          </div>
         </div>
       </div>
     </div>
