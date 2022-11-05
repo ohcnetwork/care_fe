@@ -37,19 +37,6 @@ const AutoCompleteAsync = (props: Props) => {
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [visible, setVisible] = useState(false);
-
-  const getPlaceholder = () => {
-    if (!multiple && selected) {
-      const option_label = optionLabel(selected);
-      if (option_label) {
-        return option_label;
-      }
-    }
-    if (!visible && multiple && selected?.length > 0)
-      return `${selected.length} selected`;
-    return placeholder || "Start typing to search...";
-  };
 
   const hasSelection =
     (!multiple && selected) || (multiple && selected?.length > 0);
@@ -82,8 +69,14 @@ const AutoCompleteAsync = (props: Props) => {
             <Combobox.Input
               name={name}
               className="w-full border-none text-sm leading-5 text-gray-900 placeholder:text-gray-500 font-medium placeholder:font-normal focus:ring-0 bg-inherit shadow-none pr-16 truncate"
-              placeholder={getPlaceholder()}
-              displayValue={() => (hasSelection ? getPlaceholder() : undefined)}
+              placeholder={
+                multiple && hasSelection
+                  ? `${selected.length} selected`
+                  : placeholder || "Start typing to search..."
+              }
+              displayValue={() =>
+                hasSelection ? optionLabel && optionLabel(selected) : undefined
+              }
               onChange={({ target }) => setQuery(target.value)}
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
@@ -111,9 +104,6 @@ const AutoCompleteAsync = (props: Props) => {
                       }`
                     }
                     value={item}
-                    onClick={() => {
-                      setVisible(false);
-                    }}
                   >
                     {({ selected, active }) => (
                       <>
