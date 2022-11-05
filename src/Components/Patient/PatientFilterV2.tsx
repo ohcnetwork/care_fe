@@ -169,9 +169,9 @@ export default function PatientFilterV2(props: any) {
   }, [dispatch]);
 
   const VACCINATED_FILTER = [
-    { id: 0, text: "Unvaccinated" },
-    { id: 1, text: "1st dose only" },
-    { id: 2, text: "Both doses" },
+    { id: "0", text: "Unvaccinated" },
+    { id: "1", text: "1st dose only" },
+    { id: "2", text: "Both doses" },
   ];
 
   const DECLARED_FILTER = [
@@ -367,7 +367,10 @@ export default function PatientFilterV2(props: any) {
         }}
       />
       <div className="w-full flex-none pt-20">
-        <FieldLabel className="text-sm">Ordering</FieldLabel>
+        <div className="mb-3 text-md flex items-center text-gray-700 gap-2">
+          <i className="text-lg uil uil-sort" />
+          <p>Ordering</p>
+        </div>
         <SelectMenuV2
           options={PATIENT_FILTER_ORDER}
           optionLabel={(o) => o.desc}
@@ -375,10 +378,10 @@ export default function PatientFilterV2(props: any) {
           optionDescription={(o) => o.order}
           optionIcon={(option) => (
             <i
-              className={`fa-solid ${
+              className={`text-lg uil ${
                 option.order === "Ascending"
-                  ? "fa-arrow-up-short-wide"
-                  : "fa-arrow-up-wide-short"
+                  ? "uil-sort-amount-up"
+                  : "uil-sort-amount-down"
               }`}
             />
           )}
@@ -388,7 +391,7 @@ export default function PatientFilterV2(props: any) {
         />
       </div>
       <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-        <i className="fa-solid fa-filter" />
+        <i className="text-lg uil uil-filter" />
         <p>Filter by</p>
       </div>
       <div className="flex flex-wrap gap-4">
@@ -447,7 +450,7 @@ export default function PatientFilterV2(props: any) {
             onChange={(v) =>
               setFilterState({ ...filterState, facility_type: v })
             }
-            optionIcon={() => <i className="fa-solid fa-hospital" />}
+            optionIcon={() => <i className="uil uil-hospital" />}
           />
         </div>
 
@@ -468,8 +471,8 @@ export default function PatientFilterV2(props: any) {
           <FieldLabel className="text-sm">Is Antenatal</FieldLabel>
           <SelectMenuV2
             placeholder="Show all"
-            options={[true, false]}
-            optionLabel={(o) => (o ? "Antenatal" : "Non-antenatal")}
+            options={["true", "false"]}
+            optionLabel={(o) => (o === "true" ? "Antenatal" : "Non-antenatal")}
             value={filterState.is_antenatal}
             onChange={(v) =>
               setFilterState({ ...filterState, is_antenatal: v })
@@ -520,8 +523,14 @@ export default function PatientFilterV2(props: any) {
           <SelectMenuV2
             placeholder="Show all"
             options={VACCINATED_FILTER}
-            optionLabel={(o) => o.text}
-            optionValue={(o) => o.id}
+            optionLabel={({ text }) => text}
+            optionValue={({ id }) => id}
+            optionIcon={({ id }) => (
+              <>
+                <i className="uil uil-syringe mr-2" />
+                <span className="font-bold">{id}</span>
+              </>
+            )}
             value={filterState.number_of_doses}
             onChange={(v) =>
               setFilterState({ ...filterState, number_of_doses: v })
