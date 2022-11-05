@@ -26,6 +26,11 @@ const routes: Routes = {
     method: "POST",
   },
 
+  checkResetToken: {
+    path: "/api/v1/password_reset/check/",
+    method: "POST",
+  },
+
   resetPassword: {
     path: "/api/v1/password_reset/confirm/",
     method: "POST",
