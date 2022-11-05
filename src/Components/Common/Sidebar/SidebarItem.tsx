@@ -1,4 +1,4 @@
-import { Link, usePath } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 export type SidebarIcon = React.ReactNode;
@@ -8,6 +8,7 @@ type SidebarItemProps = {
   icon: SidebarIcon;
   external?: true | undefined;
   badgeCount?: number | undefined;
+  selected?: boolean | undefined;
 } & ({ to: string; do?: undefined } | { to?: undefined; do: () => void });
 
 type SidebarItemBaseProps = SidebarItemProps & { shrinked?: boolean };
@@ -16,14 +17,12 @@ const SidebarItemBase = ({
   external,
   ...props
 }: SidebarItemBaseProps) => {
-  const path = usePath();
   const { t } = useTranslation();
-  const selected = props.to && path?.includes(props.to);
 
   return (
     <Link
       className={`relative w-full flex-1 min-h-[40px] md:flex-none md:h-11 text-white ${
-        selected
+        props.selected
           ? "font-bold bg-primary-900"
           : "font-normal bg-primary-800 hover:bg-primary-700"
       } tooltip transition-all duration-200 ease-in-out cursor-pointer`}
