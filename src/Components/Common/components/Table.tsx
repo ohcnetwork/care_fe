@@ -8,6 +8,8 @@ export default function Table(props: {
       style={{
         display: "grid",
         gridTemplateRows: `repeat(${props.rows.length + 1}, minmax(0, 1fr))`,
+        overflowX: "auto",
+        minWidth: "1000px",
       }}
     >
       <div
@@ -39,6 +41,8 @@ export default function Table(props: {
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${props.headings.length}, minmax(0, 1fr))`,
+              overflowX: "auto",
+              minWidth: "1000px",
             }}
             className="border border-[#D2D6DC] rounded-sm"
           >

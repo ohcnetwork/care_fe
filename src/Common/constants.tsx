@@ -168,11 +168,11 @@ export const BED_TYPES: Array<OptionsType> = [
 ];
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
-  { id: 1, text: "General Medicine" },
-  { id: 2, text: "Pulmonology" },
-  { id: 3, text: "Critical Care" },
-  { id: 4, text: "Paediatrics" },
-  { id: 5, text: "Other Speciality" },
+  { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
+  { id: 2, text: "Pulmonology", desc: "bg-doctors-pulmonology" },
+  { id: 3, text: "Critical Care", desc: "bg-doctors-critical" },
+  { id: 4, text: "Paediatrics", desc: "bg-doctors-paediatrics" },
+  { id: 5, text: "Other Speciality", desc: "bg-doctors-other" },
 ];
 
 export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [

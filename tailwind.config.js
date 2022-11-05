@@ -62,6 +62,23 @@ module.exports = {
             fore: colors.gray[800],
           },
         },
+        doctors: {
+          general: {
+            DEFAULT: "#D79B00",
+          },
+          critical: {
+            DEFAULT: "#C81E1E",
+          },
+          paediatrics: {
+            DEFAULT: "#453C52",
+          },
+          other: {
+            DEFAULT: "#03543F",
+          },
+          pulmonology: {
+            DEFAULT: "#000080",
+          },
+        },
       },
       padding: {
         "1/5": "20%",

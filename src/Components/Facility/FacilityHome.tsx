@@ -36,6 +36,7 @@ import CoverImageEditModal from "./CoverImageEditModal";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import Table from "../Common/components/Table";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -405,7 +406,7 @@ export const FacilityHome = (props: any) => {
                       FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
                         <div
                           key={i}
-                          className="flex items-center gap-1 bg-[#F0FFF9] text-primary-500 font-medium px-4 py-3 rounded border border-primary-500 text-sm"
+                          className="flex items-center gap-1 bg-[#F0FFF9] text-primary-500 font-medium px-3.5 py-2.5 rounded border border-primary-500 text-sm"
                         >
                           {typeof FACILITY_FEATURE_TYPES.filter(
                             (f) => f.id === feature
@@ -560,7 +561,7 @@ export const FacilityHome = (props: any) => {
                 className="mt-2 w-full md:w-auto py-3"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
-                <i className="fas fa-user-injured"></i>
+                <PatientIcon className="w-4 h-4 fill-current" />
                 View Patients
               </ButtonV2>
             </div>
@@ -570,35 +571,37 @@ export const FacilityHome = (props: any) => {
 
       <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
         <h1 className="text-xl font-bold mb-6">Oxygen Information</h1>
-        <Table
-          headings={[
-            "",
-            "Oxygen capacity",
-            "Type B cylinder",
-            "Type C cylinder",
-            "Type D cylinder",
-          ]}
-          rows={[
-            [
-              "Capacity",
-              String(facilityData.oxygen_capacity),
-              String(facilityData.type_b_cylinders),
-              String(facilityData.type_c_cylinders),
-              String(facilityData.type_d_cylinders),
-            ],
-            [
-              "Daily Expected Consumption",
-              String(facilityData.expected_oxygen_requirement),
-              String(facilityData.expected_type_b_cylinders),
-              String(facilityData.expected_type_c_cylinders),
-              String(facilityData.expected_type_d_cylinders),
-            ],
-          ]}
-        />
+        <div className="overflow-x-auto overflow-y-hidden">
+          <Table
+            headings={[
+              "",
+              "Oxygen capacity",
+              "Type B cylinder",
+              "Type C cylinder",
+              "Type D cylinder",
+            ]}
+            rows={[
+              [
+                "Capacity",
+                String(facilityData.oxygen_capacity),
+                String(facilityData.type_b_cylinders),
+                String(facilityData.type_c_cylinders),
+                String(facilityData.type_d_cylinders),
+              ],
+              [
+                "Daily Expected Consumption",
+                String(facilityData.expected_oxygen_requirement),
+                String(facilityData.expected_type_b_cylinders),
+                String(facilityData.expected_type_c_cylinders),
+                String(facilityData.expected_type_d_cylinders),
+              ],
+            ]}
+          />
+        </div>
       </div>
       <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
         <div className="md:flex justify-between  md:border-b md:pb-2">
-          <div className="font-semibold text-xl">Bed Capacity</div>
+          <div className="font-semibold text-xl mb-2">Bed Capacity</div>
           <RoleButton
             className="btn-primary btn w-full md:w-auto"
             handleClickCB={() => navigate(`/facility/${facilityId}/bed`)}
@@ -645,7 +648,7 @@ export const FacilityHome = (props: any) => {
               Add Triage
             </RoleButton>
           </div>
-          <div className="overflow-x-auto min-w-full overflow-hidden mt-4">
+          <div className="mt-4 overflow-x-auto overflow-y-hidden">
             <Table
               rows={stats}
               headings={[

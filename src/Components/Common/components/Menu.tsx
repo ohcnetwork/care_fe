@@ -1,5 +1,5 @@
-import { Menu, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Menu } from "@headlessui/react";
+import { DropdownTransition } from "./HelperComponents";
 
 export default function DropdownMenu(props: {
   title: string;
@@ -17,19 +17,11 @@ export default function DropdownMenu(props: {
 
           <i className="ml-2 -mr-1 text-violet-200 hover:text-violet-100 uil uil-angle-down text-2xl font-bold"></i>
         </Menu.Button>
-        <Transition
-          as={Fragment}
-          enter="transition ease-out duration-100"
-          enterFrom="transform opacity-0 scale-95"
-          enterTo="transform opacity-100 scale-100"
-          leave="transition ease-in duration-75"
-          leaveFrom="transform opacity-100 scale-100"
-          leaveTo="transform opacity-0 scale-95"
-        >
+        <DropdownTransition>
           <Menu.Items className="absolute right-0  mt-2 py-1 min-w-full sm:min-w-[250px] origin-top-right rounded-[4px] bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <>{props.children}</>
           </Menu.Items>
-        </Transition>
+        </DropdownTransition>
       </Menu>
     </div>
   );
