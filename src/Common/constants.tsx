@@ -258,22 +258,13 @@ export const CONSULTATION_SUGGESTION = [
 ];
 
 export const ADMITTED_TO = [
-  "Home Isolation",
-  "Isolation Room",
-  "Bed with Oxygen Support",
-  "ICU",
-  "ICU with Oxygen Support",
-  "ICU with Non Invasive Ventilator",
-  "ICU with Invasive Ventilator",
-  "Gynaecology Ward",
-  "Paediatric Ward",
-];
-
-export const PATIENT_FILTER_ADMITTED_TO = [
-  { id: "0", text: "Not admitted" },
-  { id: "1", text: "Isolation Room" },
-  { id: "6", text: "Bed with Oxygen Support" },
+  { id: "1", text: "ISOLATION" },
   { id: "2", text: "ICU" },
+  { id: "3", text: "ICU_WTH_NON_INVASIVE_VENTILATOR" },
+  { id: "4", text: "ICU_WITH_OXYGEN_SUPPORT" },
+  { id: "5", text: "ICU_WITH_INVASIVE_VENTILATOR" },
+  { id: "6", text: "BED_WITH_OXYGEN_SUPPORT" },
+  { id: "7", text: "REGULAR" },
 ];
 
 export const PATIENT_CATEGORIES = [
