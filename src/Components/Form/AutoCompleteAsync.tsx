@@ -68,14 +68,16 @@ const AutoCompleteAsync = (props: Props) => {
           <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
             <Combobox.Input
               name={name}
-              className="w-full border-none text-sm leading-5 text-gray-900 placeholder:text-gray-500 font-medium placeholder:font-normal focus:ring-0 bg-inherit shadow-none pr-16 truncate"
+              className="w-full border-none text-sm leading-5 text-gray-900 placeholder:text-gray-600 font-medium focus:ring-0 bg-inherit shadow-none pr-16 truncate"
               placeholder={
                 multiple && hasSelection
                   ? `${selected.length} selected`
                   : placeholder || "Start typing to search..."
               }
               displayValue={() =>
-                hasSelection ? optionLabel && optionLabel(selected) : undefined
+                hasSelection && !multiple
+                  ? optionLabel && optionLabel(selected)
+                  : ""
               }
               onChange={({ target }) => setQuery(target.value)}
             />
