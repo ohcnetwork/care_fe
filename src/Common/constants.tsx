@@ -258,13 +258,13 @@ export const CONSULTATION_SUGGESTION = [
 ];
 
 export const ADMITTED_TO = [
-  { id: "1", text: "ISOLATION" },
+  { id: "1", text: "Isolation" },
   { id: "2", text: "ICU" },
-  { id: "3", text: "ICU_WTH_NON_INVASIVE_VENTILATOR" },
-  { id: "4", text: "ICU_WITH_OXYGEN_SUPPORT" },
-  { id: "5", text: "ICU_WITH_INVASIVE_VENTILATOR" },
-  { id: "6", text: "BED_WITH_OXYGEN_SUPPORT" },
-  { id: "7", text: "REGULAR" },
+  { id: "3", text: "ICU with non-invasive ventilator" },
+  { id: "4", text: "ICU with oxygen support" },
+  { id: "5", text: "ICU with invasive ventilator" },
+  { id: "6", text: "Bed with oxygen support" },
+  { id: "7", text: "Regular" },
 ];
 
 export const PATIENT_CATEGORIES = [
