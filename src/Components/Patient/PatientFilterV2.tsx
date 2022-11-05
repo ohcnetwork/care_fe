@@ -407,6 +407,7 @@ export default function PatientFilterV2(props: any) {
                 })
               }
               optionLabel={(option) => option.name}
+              compareBy="id"
             />
           </div>
         </div>

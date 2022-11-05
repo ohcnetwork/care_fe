@@ -67,6 +67,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         option.name +
         (option.district_object ? `, ${option.district_object.name}` : "")
       }
+      compareBy="id"
       className={className}
       error={errors}
     />
