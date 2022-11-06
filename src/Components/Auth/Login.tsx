@@ -248,6 +248,7 @@ export const Login = (props: { forgot?: boolean }) => {
               <div>
                 <LegendInput
                   name="username"
+                  id="username"
                   type="TEXT"
                   legend={t("username")}
                   value={form.username}
@@ -260,6 +261,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 <LegendInput
                   type="PASSWORD"
                   name="password"
+                  id="password"
                   legend={t("password")}
                   value={form.password}
                   onChange={handleChange}
