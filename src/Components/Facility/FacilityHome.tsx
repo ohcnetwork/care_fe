@@ -440,7 +440,6 @@ export const FacilityHome = (props: any) => {
             <div className="w-full md:w-auto">
               <DropdownMenu
                 title="Manage Facility"
-                className="w-full"
                 icon={<i className="uil uil-setting text-xl text-white"></i>}
               >
                 <DropdownItem>
