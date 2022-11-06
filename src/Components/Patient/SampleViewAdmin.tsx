@@ -1,4 +1,4 @@
-import { Grid, CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
@@ -40,8 +40,6 @@ export default function SampleViewAdmin() {
   const [sample, setSample] = useState<Array<SampleTestModel>>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
   const [downloadFile, setDownloadFile] = useState("");
   const [fetchFlag, callFetchData] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -78,7 +76,7 @@ export default function SampleViewAdmin() {
       const res = await dispatch(
         getTestList({
           limit,
-          offset,
+          offset: (qParams.page ? qParams.page - 1 : 0) * limit,
           patient_name: qParams.patient_name || undefined,
           district_name: qParams.district_name || undefined,
           status: qParams.status || undefined,
@@ -97,9 +95,9 @@ export default function SampleViewAdmin() {
     },
     [
       dispatch,
-      offset,
-      qParams.district_name,
+      qParams.page,
       qParams.patient_name,
+      qParams.district_name,
       qParams.status,
       qParams.result,
       qParams.facility,
@@ -136,9 +134,7 @@ export default function SampleViewAdmin() {
   };
 
   const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
+    updateQuery({ page, limit });
   };
 
   const searchByName = async (patient_name: string) => {
@@ -338,7 +334,7 @@ export default function SampleViewAdmin() {
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
-              cPage={currentPage}
+              cPage={qParams.page}
               defaultPerPage={limit}
               data={{ totalCount }}
               onChange={handlePagination}
