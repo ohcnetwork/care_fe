@@ -58,7 +58,6 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export const HospitalList = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
-  const classes = useStyles();
   const dispatchAction: any = useDispatch();
   const [data, setData] = useState<Array<FacilityModel>>([]);
   let manageFacilities: any = null;
@@ -343,7 +342,19 @@ export const HospitalList = (props: any) => {
                 )}
               </div>
               <div className="h-full w-full grow">
-                <div className="h-full flex flex-col justify-between w-full">
+                <div className="group md:hidden flex w-full self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
+                  {(facility.read_cover_image_url && (
+                    <img
+                      src={facility.read_cover_image_url}
+                      alt={facility.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )) || (
+                    <i className="fas fa-hospital text-4xl block text-gray-500 p-10" />
+                  )}
+                </div>
+
+                <div className="h-full flex flex-col justify-between w-full h-fit">
                   <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
                     <div className="flow-root">
                       {facility.kasp_empanelled && (
