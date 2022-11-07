@@ -1,9 +1,9 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
-import { Dialog, Transition } from "@headlessui/react";
 import { usePath } from "raviger";
+import SlideOver from "../../../CAREUI/interactive/SlideOver";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -126,43 +126,11 @@ interface MobileSidebarProps {
   setOpen: (state: boolean) => void;
 }
 
-export const MobileSidebar = ({ open, setOpen }: MobileSidebarProps) => {
+export const MobileSidebar = (props: MobileSidebarProps) => {
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={setOpen}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-in-out duration-500"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in-out duration-500"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-all" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="pointer-events-none fixed inset-y-0 left-0 flex max-w-full pr-10">
-              <Transition.Child
-                as={Fragment}
-                enter="transform transition ease-out duration-200"
-                enterFrom="-translate-x-full"
-                enterTo="translate-x-0"
-                leave="transform transition ease-in duration-200"
-                leaveFrom="translate-x-0"
-                leaveTo="-translate-x-full"
-              >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-fit">
-                  <StatelessSidebar />
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+    <SlideOver {...props} slideFrom="left">
+      <StatelessSidebar />
+    </SlideOver>
   );
 };
 
