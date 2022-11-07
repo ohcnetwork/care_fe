@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   getNotifications,
@@ -8,7 +8,6 @@ import {
   updateUserPnconfig,
   getPublicKey,
 } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import { SelectField } from "../Common/HelperInputFields";
 import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
@@ -23,6 +22,7 @@ import {
   ShrinkedSidebarItem,
   SidebarItem,
 } from "../Common/Sidebar/SidebarItem";
+import SlideOver from "../../CAREUI/interactive/SlideOver";
 
 const RESULT_LIMIT = 14;
 
@@ -147,7 +147,7 @@ export default function NotificationsList({
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [open, setOpen] = useState(false);
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
@@ -158,12 +158,12 @@ export default function NotificationsList({
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setShowNotifications(false);
+        setOpen(false);
       }
     }
-    if (showNotifications) document.addEventListener("keydown", handleKeyDown);
+    if (open) document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [showNotifications]);
+  }, [open]);
 
   const intialSubscriptionState = async () => {
     try {
@@ -332,7 +332,7 @@ export default function NotificationsList({
         setOffset((prev) => prev - RESULT_LIMIT);
       });
     intialSubscriptionState();
-  }, [dispatch, reload, showNotifications, offset, eventFilter, isSubscribed]);
+  }, [dispatch, reload, open, offset, eventFilter, isSubscribed]);
 
   if (!offset && isLoading) {
     manageResults = (
@@ -348,7 +348,7 @@ export default function NotificationsList({
             key={result.id}
             notification={result}
             onClickCB={onClickCB}
-            setShowNotifications={setShowNotifications}
+            setShowNotifications={setOpen}
           />
         ))}
         {isLoading && (
@@ -387,11 +387,11 @@ export default function NotificationsList({
     <>
       <Item
         text="Notifications"
-        do={() => setShowNotifications(!showNotifications)}
+        do={() => setOpen(!open)}
         icon={<i className="uil uil-bell" />}
         badgeCount={unreadCount}
       />
-      <SlideOver show={showNotifications} setShow={setShowNotifications}>
+      <SlideOver open={open} setOpen={setOpen} slideFrom="right">
         <div className="bg-white h-full">
           <div className="w-full bg-gray-100 border-b sticky top-0 z-30 px-4 pb-1 lg:px-8">
             <div className="flex flex-col pt-4 py-2">
@@ -412,7 +412,7 @@ export default function NotificationsList({
                 </div>
                 <div>
                   <button
-                    onClick={(_) => setShowNotifications(false)}
+                    onClick={(_) => setOpen(false)}
                     className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
                   >
                     <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
