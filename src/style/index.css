@@ -1096,7 +1096,7 @@ button:disabled,
 .button-primary-default { @apply accent-primary-500 bg-primary-500 hover:bg-primary-400 text-white }
 .button-primary-ghost { @apply accent-primary-500 hover:bg-primary-100 text-primary-500 border-0 }
 .button-secondary-default { @apply accent-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700 }
-.button-secondary-ghost { @apply accent-gray-200 hover:bg-gray-200 text-gray-700 border-0 }
+.button-secondary-ghost { @apply accent-gray-200 hover:bg-gray-200 text-gray-700 border border-gray-300 }
 .button-danger-default { @apply accent-red-500 bg-red-500 hover:bg-red-400 text-white }
 .button-danger-ghost { @apply accent-red-500 hover:bg-red-100 text-red-500 border-0 }
 .button-warning-default { @apply accent-yellow-500 bg-yellow-500 hover:bg-yellow-400 text-white }
