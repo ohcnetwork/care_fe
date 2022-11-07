@@ -77,7 +77,6 @@ const StatelessSidebar = ({
       const e = indicatorRef.current;
 
       const itemHeight = 44;
-      const bottomItemOffset = 2;
 
       const indexDifference = index - lastIndicatorPosition;
       e.style.display = "block";
@@ -87,9 +86,9 @@ const StatelessSidebar = ({
         e.style.bottom = "auto";
       } else {
         e.style.bottom =
-          itemHeight * (NavItems.length + bottomItemOffset) -
-          lastIndicatorPosition * itemHeight +
-          4 +
+          itemHeight * NavItems.length -
+          lastIndicatorPosition * itemHeight -
+          28 +
           "px";
         e.style.top = "auto";
       }
@@ -102,10 +101,7 @@ const StatelessSidebar = ({
           e.style.bottom = "auto";
         } else {
           e.style.bottom =
-            itemHeight * (NavItems.length + bottomItemOffset) -
-            index * itemHeight +
-            4 +
-            "px";
+            itemHeight * NavItems.length - index * itemHeight - 28 + "px";
           e.style.top = "auto";
         }
         e.style.height = "0.75rem";
@@ -130,17 +126,18 @@ const StatelessSidebar = ({
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
       <div className="h-3" /> {/* flexible spacing */}
-      <div className="flex flex-col relative h-full mb-4 md:mb-0">
-        <div
-          ref={indicatorRef}
-          className={`absolute left-2 w-1 hidden md:block
+      <div className="flex flex-col h-full mb-4 md:mb-0">
+        <div className="relative flex flex-col">
+          <div
+            ref={indicatorRef}
+            className={`absolute left-2 w-1 hidden md:block
             bg-primary-400 rounded z-10 transition-all`}
-        />
-        {NavItems.map((item) => {
-          const itemSelected = item.to.replaceAll("/", "") === activeItem;
-          return <Item key={item.text} {...item} selected={itemSelected} />;
-        })}
-
+          />
+          {NavItems.map((item) => {
+            const itemSelected = item.to.replaceAll("/", "") === activeItem;
+            return <Item key={item.text} {...item} selected={itemSelected} />;
+          })}
+        </div>
         <NotificationItem shrinked={shrinked} />
         <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
       </div>
