@@ -74,22 +74,43 @@ const StatelessSidebar = ({
     if (index !== -1) {
       // Haha math go brrrrrrrrr
 
+      const e = indicatorRef.current;
+
       const itemHeight = 44;
+      const bottomItemOffset = 2;
 
       const indexDifference = index - lastIndicatorPosition;
-      indicatorRef.current.style.display = "block";
-      indicatorRef.current.style.height = `${
-        indexDifference * itemHeight + 12
-      }px`;
-      setTimeout(
-        () => {
-          if (!indicatorRef.current) return;
-          indicatorRef.current.style.top = index * itemHeight + 16 + "px";
-          indicatorRef.current.style.height = "0.75rem";
-          setLastIndicatorPosition(index);
-        },
-        indexDifference > 0 ? 300 : 200
-      );
+      e.style.display = "block";
+
+      if (indexDifference > 0) {
+        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
+        e.style.bottom = "auto";
+      } else {
+        e.style.bottom =
+          itemHeight * (NavItems.length + bottomItemOffset) -
+          lastIndicatorPosition * itemHeight +
+          4 +
+          "px";
+        e.style.top = "auto";
+      }
+
+      e.style.height = `${Math.abs(indexDifference) * itemHeight + 12}px`;
+      setTimeout(() => {
+        if (!e) return;
+        if (indexDifference > 0) {
+          e.style.top = index * itemHeight + 16 + "px";
+          e.style.bottom = "auto";
+        } else {
+          e.style.bottom =
+            itemHeight * (NavItems.length + bottomItemOffset) -
+            index * itemHeight +
+            4 +
+            "px";
+          e.style.top = "auto";
+        }
+        e.style.height = "0.75rem";
+        setLastIndicatorPosition(index);
+      }, 300);
     } else {
       indicatorRef.current.style.display = "none";
     }
