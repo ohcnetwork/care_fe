@@ -1,3 +1,5 @@
+import { useSelector } from "react-redux";
+
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
 export type ButtonVariant =
@@ -14,6 +16,12 @@ export type RawButtonProps = Omit<
   >,
   "style"
 >;
+
+export type AuthorizedForCB = (userType: string) => boolean;
+export const AuthorizedFor = {
+  NonReadOnlyUsers: (t: string) => !t.includes("ReadOnly"),
+  Anyone: () => true,
+};
 
 export type ButtonProps = RawButtonProps & {
   /**
@@ -49,12 +57,27 @@ export type ButtonProps = RawButtonProps & {
    * Whether the button should be disabled and show a loading animation.
    */
   loading?: boolean | undefined;
+  /**
+   * Restrict access of this button to specific roles.
+   *
+   * **Example:**
+   * ```jsx
+   * <ButtonV2 authorizedFor={(role) => !role.includes('ReadOnly')}>
+   *   Delete Facility
+   * </ButtonV2>
+   * <ButtonV2 authorizedFor={AuthorizedFor.Admins}>
+   *   Delete Facility
+   * </ButtonV2>
+   * ```
+   */
+  authorizedFor?: AuthorizedForCB | undefined;
 };
 
 const shadowClasses =
   "shadow enabled:hover:shadow-lg enabled:hover:-translate-y-1";
 
 const ButtonV2 = ({
+  authorizedFor = AuthorizedFor.Anyone,
   size = "default",
   variant = "primary",
   circle,
@@ -63,12 +86,16 @@ const ButtonV2 = ({
   className,
   disabled,
   loading,
+  children,
   ...props
 }: ButtonProps) => {
+  const state: any = useSelector((state) => state);
+  const isAuthorized = authorizedFor(state.currentUser.data.user_type);
+
   return (
     <button
       {...props}
-      disabled={disabled || loading}
+      disabled={disabled || !isAuthorized || loading}
       className={[
         "Button outline-offset-1",
         `button-size-${size}`,
@@ -78,7 +105,7 @@ const ButtonV2 = ({
         className,
       ].join(" ")}
     >
-      {props.children}
+      {children}
     </button>
   );
 };
