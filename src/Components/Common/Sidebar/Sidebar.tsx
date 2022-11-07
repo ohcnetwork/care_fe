@@ -62,6 +62,17 @@ const StatelessSidebar = ({
     return path?.includes(tag) ? tag : acc;
   }, "");
 
+  const [indicator, setIndicator] = useState(16);
+
+  useEffect(() => {
+    const tag = activeItem;
+    const index = NavItems.findIndex(
+      (item) => item.to.replaceAll("/", "") === tag
+    );
+    const itemHeight = 44;
+    setIndicator(index * itemHeight + 16);
+  }, [activeItem]);
+
   return (
     <nav
       className={`h-screen group flex flex-col bg-primary-800 pt-5 md:pt-7 pb-5 md:pb-10 ${
@@ -71,15 +82,21 @@ const StatelessSidebar = ({
       <div className="h-3" /> {/* flexible spacing */}
       <img
         className={`${
-          shrinked ? "mx-auto" : "ml-10"
+          shrinked ? "mx-auto" : "ml-5"
         } h-5 md:h-8 self-start transition mb-5`}
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
-      <div className="h-7" /> {/* flexible spacing */}
-      {NavItems.map((item) => {
-        const itemSelected = item.to.replaceAll("/", "") === activeItem;
-        return <Item key={item.text} {...item} selected={itemSelected} />;
-      })}
+      <div className="h-3" /> {/* flexible spacing */}
+      <div className="flex flex-col relative">
+        <div
+          className="absolute left-2 w-1 h-3 hidden md:block bg-primary-400 rounded z-10 transition-all"
+          style={{ top: `${indicator}px` }}
+        />
+        {NavItems.map((item) => {
+          const itemSelected = item.to.replaceAll("/", "") === activeItem;
+          return <Item key={item.text} {...item} selected={itemSelected} />;
+        })}
+      </div>
       <NotificationItem shrinked={shrinked} />
       <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
       <div className="flex-1" />
