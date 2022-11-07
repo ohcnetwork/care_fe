@@ -77,6 +77,7 @@ const StatelessSidebar = ({
       const e = indicatorRef.current;
 
       const itemHeight = 44;
+      const bottomItemOffset = 2;
 
       const indexDifference = index - lastIndicatorPosition;
       e.style.display = "block";
@@ -86,7 +87,7 @@ const StatelessSidebar = ({
         e.style.bottom = "auto";
       } else {
         e.style.bottom =
-          itemHeight * NavItems.length -
+          itemHeight * (NavItems.length + bottomItemOffset) -
           lastIndicatorPosition * itemHeight -
           28 +
           "px";
@@ -101,7 +102,10 @@ const StatelessSidebar = ({
           e.style.bottom = "auto";
         } else {
           e.style.bottom =
-            itemHeight * NavItems.length - index * itemHeight - 28 + "px";
+            itemHeight * (NavItems.length + bottomItemOffset) -
+            index * itemHeight -
+            28 +
+            "px";
           e.style.top = "auto";
         }
         e.style.height = "0.75rem";
@@ -114,7 +118,7 @@ const StatelessSidebar = ({
 
   return (
     <nav
-      className={`h-screen group flex flex-col bg-primary-800 pt-5 md:pt-7 pb-5 md:pb-10 ${
+      className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out`}
     >
@@ -122,22 +126,21 @@ const StatelessSidebar = ({
       <img
         className={`${
           shrinked ? "mx-auto" : "ml-5"
-        } h-5 md:h-8 self-start transition mb-5`}
+        } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
       <div className="h-3" /> {/* flexible spacing */}
-      <div className="flex flex-col h-full mb-4 md:mb-0">
-        <div className="relative flex flex-col">
-          <div
-            ref={indicatorRef}
-            className={`absolute left-2 w-1 hidden md:block
+      <div className="flex flex-col relative h-full md:h-auto mb-4 md:mb-0">
+        <div
+          ref={indicatorRef}
+          className={`absolute left-2 w-1 hidden md:block
             bg-primary-400 rounded z-10 transition-all`}
-          />
-          {NavItems.map((item) => {
-            const itemSelected = item.to.replaceAll("/", "") === activeItem;
-            return <Item key={item.text} {...item} selected={itemSelected} />;
-          })}
-        </div>
+        />
+        {NavItems.map((item) => {
+          const itemSelected = item.to.replaceAll("/", "") === activeItem;
+          return <Item key={item.text} {...item} selected={itemSelected} />;
+        })}
+
         <NotificationItem shrinked={shrinked} />
         <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
       </div>
