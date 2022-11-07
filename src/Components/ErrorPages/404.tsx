@@ -9,7 +9,7 @@ export default function Error404() {
     <div className="flex justify-center text-center items-center h-screen">
       <div className="text-center w-[500px]">
         <img
-          src={`${process.env.PUBLIC_URL}/images/404.png`}
+          src={`${process.env.PUBLIC_URL}/images/404.svg`}
           alt="Error 404"
           className="w-full"
         />

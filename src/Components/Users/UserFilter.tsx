@@ -108,7 +108,7 @@ export default function UserFilter(props: any) {
       />
 
       <div className="pt-20 text-md my-6 flex items-center text-gray-700 gap-2">
-        <i className="fa-solid fa-filter" />
+        <i className="uil uil-filter" />
         <p>Filter by</p>
       </div>
 

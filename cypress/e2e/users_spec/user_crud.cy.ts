@@ -38,10 +38,9 @@ describe("User management", () => {
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
       force: true,
     });
-    cy.get("[name='facilities']")
-      .type("Mysore", { delay: 200 })
-      .wait(2000)
-      .type("{downarrow}{enter}");
+    cy.intercept(/\/api\/v1\/facility/).as("facility");
+    cy.get("[name='facilities']").type("Mysore").wait("@facility");
+    cy.get("[name='facilities']").type("{downarrow}{enter}");
     cy.intercept(/users/).as("checkUsername");
     cy.get("[name='username']").type(username, { force: true });
     cy.wait("@checkUsername").its("response.statusCode").should("eq", 404);
@@ -70,7 +69,7 @@ describe("User management", () => {
   });
 
   it("link facility for user", () => {
-    cy.contains("Advanced Filters").click().wait(2000);
+    cy.contains("Advanced Filters").click();
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
     cy.get("[placeholder='Phone Number']").type(phone_number);
@@ -91,10 +90,9 @@ describe("User management", () => {
           .contains("Link new facility")
           .click({ force: true });
       });
-    cy.get("[name='facility']")
-      .type("test")
-      .wait(2000)
-      .type("{downarrow}{enter}");
+    cy.intercept(/\/api\/v1\/facility/).as("getFacilities");
+    cy.get("[name='facility']").type("test").wait("@getFacilities");
+    cy.get("[name='facility']").type("{downarrow}{enter}");
     cy.get("button > span").contains("Add").click({ force: true }).wait(1000);
   });
 

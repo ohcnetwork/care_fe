@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+
+.cui-input-legend::before{
+    content: " ";
+    position: absolute;
+    left: -4px;
+    right: -4px;
+    top: calc(50% - 3px);
+    height: 6px;
+    background: #fff;
+    z-index: -1;
+}
+
+.cui-label-required::after{
+    content: "*";
+    color: rgb(255, 81, 0);
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+.cui-input:-webkit-autofill,
+.cui-input:-webkit-autofill:hover, 
+.cui-input:-webkit-autofill:focus, 
+.cui-input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 40px #f9fafb inset !important;
+}
