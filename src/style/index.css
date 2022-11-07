@@ -598,7 +598,7 @@ button:disabled,
 }
 
 .error-text {
-  @apply font-medium tracking-wide text-error text-xs
+  @apply font-medium tracking-wide text-danger-500 text-xs
 }
 
 .textMarginCenter {
@@ -1100,28 +1100,28 @@ button:disabled,
   @apply accent-primary-500 hover:bg-primary-100 text-primary-500 border border-primary-500
 }
 .button-secondary-default { 
-  @apply accent-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700
+  @apply accent-secondary-200 bg-secondary-100 hover:bg-secondary-200 text-secondary-700
 }
 .button-secondary-ghost { 
-  @apply accent-gray-200 hover:bg-gray-200 text-gray-700 border border-gray-300
+  @apply accent-secondary-200 hover:bg-secondary-200 text-secondary-700 border border-secondary-300
 }
 .button-danger-default { 
-  @apply accent-red-500 bg-red-500 hover:bg-red-400 text-white
+  @apply accent-danger-500 bg-danger-500 hover:bg-danger-400 text-white
 }
 .button-danger-ghost { 
-  @apply accent-red-500 hover:bg-red-100 text-red-500 border border-red-500
+  @apply accent-danger-500 hover:bg-danger-100 text-danger-500 border border-danger-500
 }
 .button-warning-default { 
-  @apply accent-yellow-500 bg-yellow-500 hover:bg-yellow-400 text-white
+  @apply accent-warning-500 bg-warning-500 hover:bg-warning-400 text-white
 }
 .button-warning-ghost { 
-  @apply accent-yellow-500 hover:bg-yellow-100 text-yellow-500 border border-yellow-500
+  @apply accent-warning-500 hover:bg-warning-100 text-warning-500 border border-warning-500
 }
 .button-alert-default { 
-  @apply accent-violet-600 bg-violet-600 hover:bg-violet-500 text-white
+  @apply accent-alert-600 bg-alert-600 hover:bg-alert-500 text-white
 }
 .button-alert-ghost { 
-  @apply accent-violet-600 hover:bg-violet-100 text-violet-600 border border-violet-600
+  @apply accent-alert-600 hover:bg-alert-100 text-alert-600 border border-alert-600
 }
 
 

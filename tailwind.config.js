@@ -14,7 +14,6 @@ module.exports = {
         sans: ["Inter", "sans-serif"],
       },
       colors: {
-        error: colors.red["500"],
         green: colors.emerald,
         yellow: colors.amber,
         purple: colors.violet,
@@ -23,12 +22,17 @@ module.exports = {
           200: "#bcf0da",
           300: "#84e1bc",
           400: "#31c48d",
+          DEFAULT: "#0d9f6e",
           500: "#0d9f6e",
           600: "#057a55",
           700: "#046c4e",
           800: "#03543F",
           900: "#014737",
         },
+        secondary: colors.gray,
+        danger: colors.red,
+        warning: colors.amber,
+        alert: colors.violet,
         gray: {
           100: "#FBF9FB",
           200: "#F6F6F6",
@@ -63,21 +67,11 @@ module.exports = {
           },
         },
         doctors: {
-          general: {
-            DEFAULT: "#D79B00",
-          },
-          critical: {
-            DEFAULT: "#C81E1E",
-          },
-          paediatrics: {
-            DEFAULT: "#453C52",
-          },
-          other: {
-            DEFAULT: "#03543F",
-          },
-          pulmonology: {
-            DEFAULT: "#000080",
-          },
+          general: "#D79B00",
+          critical: "#C81E1E",
+          paediatrics: "#453C52",
+          other: "#03543F",
+          pulmonology: "#000080",
         },
       },
       padding: {
