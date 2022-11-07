@@ -1,10 +1,7 @@
 import { Menu } from "@headlessui/react";
 import { ReactNode } from "react";
-import {
-  AuthorizedElementProps,
-  AuthorizedFor,
-  useIsAuthorized,
-} from "../../../Utils/AuthorizedElementUtils";
+import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
+import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 import { ButtonVariant } from "./ButtonV2";
 import { DropdownTransition } from "./HelperComponents";
 
@@ -46,14 +43,14 @@ export type DropdownItemProps = RawDivProps &
   };
 
 export function DropdownItem({
-  authorizedFor = AuthorizedFor.Anyone,
+  authorizeFor = Anyone,
   variant = "primary",
   className,
   icon,
   children,
   ...props
 }: DropdownItemProps) {
-  const isAuthorized = useIsAuthorized(authorizedFor);
+  const isAuthorized = useIsAuthorized(authorizeFor);
 
   return (
     <Menu.Item>

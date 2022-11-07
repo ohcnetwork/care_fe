@@ -1,8 +1,5 @@
-import {
-  AuthorizedElementProps,
-  AuthorizedFor,
-  useIsAuthorized,
-} from "../../../Utils/AuthorizedElementUtils";
+import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
+import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
@@ -62,7 +59,7 @@ const shadowClasses =
   "shadow enabled:hover:shadow-lg enabled:hover:-translate-y-1";
 
 const ButtonV2 = ({
-  authorizedFor = AuthorizedFor.Anyone,
+  authorizeFor = Anyone,
   size = "default",
   variant = "primary",
   circle,
@@ -74,7 +71,7 @@ const ButtonV2 = ({
   children,
   ...props
 }: ButtonProps) => {
-  const isAuthorized = useIsAuthorized(authorizedFor);
+  const isAuthorized = useIsAuthorized(authorizeFor);
 
   return (
     <button

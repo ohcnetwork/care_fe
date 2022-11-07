@@ -34,8 +34,9 @@ import moment from "moment";
 import CoverImageEditModal from "./CoverImageEditModal";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import Table from "../Common/components/Table";
-import ButtonV2, { AuthorizedFor } from "../Common/components/ButtonV2";
+import ButtonV2 from "../Common/components/ButtonV2";
 import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -198,7 +199,7 @@ export const FacilityHome = (props: any) => {
         onClick={() =>
           navigate(`/facility/${facilityId}/triage/${patientStatsData[i].id}`)
         }
-        authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+        authorizeFor={NonReadOnlyUsers}
       >
         Edit
       </ButtonV2>
@@ -443,7 +444,7 @@ export const FacilityHome = (props: any) => {
               >
                 <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/update`)}
-                  authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+                  authorizeFor={NonReadOnlyUsers}
                   icon={<i className="uil uil-edit-alt" />}
                 >
                   Update Facility
@@ -456,7 +457,7 @@ export const FacilityHome = (props: any) => {
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/location`)}
-                  authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+                  authorizeFor={NonReadOnlyUsers}
                   icon={<i className="uil uil-location-point" />}
                 >
                   Location Management
@@ -465,14 +466,14 @@ export const FacilityHome = (props: any) => {
                   onClick={() =>
                     navigate(`/facility/${facilityId}/resource/new`)
                   }
-                  authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+                  authorizeFor={NonReadOnlyUsers}
                   icon={<i className="uil uil-gold" />}
                 >
                   Resource Request
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
-                  authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+                  authorizeFor={NonReadOnlyUsers}
                   icon={<i className="uil uil-plus-circle" />}
                 >
                   Create Asset
@@ -489,19 +490,15 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                {currentUser.data.user_type === "DistrictAdmin" ||
-                currentUser.data.user_type === "StateAdmin" ? (
-                  <DropdownItem
-                    variant="danger"
-                    onClick={() => setOpenDeleteDialog(true)}
-                    className="flex gap-3 items-center"
-                    icon={<i className="uil uil-trash-alt" />}
-                  >
-                    Delete Facility
-                  </DropdownItem>
-                ) : (
-                  <></>
-                )}
+                <DropdownItem
+                  variant="danger"
+                  onClick={() => setOpenDeleteDialog(true)}
+                  className="flex gap-3 items-center"
+                  icon={<i className="uil uil-trash-alt" />}
+                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
+                >
+                  Delete Facility
+                </DropdownItem>
               </DropdownMenu>
             </div>
             <div className="flex flex-col justify-end">
@@ -510,7 +507,7 @@ export const FacilityHome = (props: any) => {
                 ghost
                 className="mt-2 w-full md:w-auto"
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
-                authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+                authorizeFor={NonReadOnlyUsers}
               >
                 <i className="uil uil-plus text-lg"></i>
                 <span className="text-sm">Add Details of a Patient</span>
@@ -565,7 +562,7 @@ export const FacilityHome = (props: any) => {
           <ButtonV2
             className="w-full md:w-auto"
             onClick={() => navigate(`/facility/${facilityId}/bed`)}
-            authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+            authorizeFor={NonReadOnlyUsers}
           >
             <i className="fas fa-bed text-white mr-2" />
             Add More Bed Types
@@ -582,7 +579,7 @@ export const FacilityHome = (props: any) => {
             className="w-full md:w-auto"
             onClick={() => navigate(`/facility/${facilityId}/doctor`)}
             disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
-            authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+            authorizeFor={NonReadOnlyUsers}
           >
             <i className="fas fa-user-md text-white mr-2" />
             Add Doctor Types
@@ -599,7 +596,7 @@ export const FacilityHome = (props: any) => {
             <ButtonV2
               className="w-full md:w-auto"
               onClick={() => navigate(`/facility/${facilityId}/triage`)}
-              authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+              authorizeFor={NonReadOnlyUsers}
             >
               <i className="fas fa-notes-medical text-white mr-2" />
               Add Triage
