@@ -58,9 +58,7 @@ export function DropdownItem({
         {...props}
         className={[
           `dropdown-item dropdown-item-${variant}`,
-          isAuthorized
-            ? "pointer-events-auto cursor-pointer"
-            : "pointer-events-none cursor-none",
+          isAuthorized ? "pointer-events-auto cursor-pointer" : "!hidden",
           className,
         ].join(" ")}
       >
