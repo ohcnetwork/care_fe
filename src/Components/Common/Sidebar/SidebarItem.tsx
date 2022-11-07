@@ -21,7 +21,7 @@ const SidebarItemBase = ({
 
   return (
     <Link
-      className={`relative mx-1 rounded-lg flex-1 min-h-[40px] md:flex-none md:h-11 text-white tooltip transition-all duration-200 ease-in-out cursor-pointer
+      className={`relative mx-1 h-full rounded-lg flex-1 min-h-[40px] md:flex-none md:h-11 text-white tooltip transition-all duration-200 ease-in-out cursor-pointer
         ${
           props.selected
             ? "font-bold bg-primary-900"

@@ -91,7 +91,7 @@ const StatelessSidebar = ({
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
       <div className="h-3" /> {/* flexible spacing */}
-      <div className="flex flex-col relative">
+      <div className="flex flex-col relative h-full md:h-auto mb-4 md:mb-0">
         <div
           className={`absolute left-2 w-1 h-3 ${
             indicator !== 0 ? "hidden md:block" : "hidden"
