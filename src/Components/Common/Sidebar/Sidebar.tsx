@@ -3,7 +3,7 @@ import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
 import { Dialog, Transition } from "@headlessui/react";
-import { usePath } from "raviger";
+import useActiveLink from "../../../Common/hooks/useActiveLink";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -54,13 +54,8 @@ const StatelessSidebar = ({
   shrinked = false,
   setShrinked,
 }: StatelessSidebarProps) => {
-  const path = usePath();
+  const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
-
-  const activeItem = NavItems.reduce((acc, item) => {
-    const tag = item.to.replaceAll("/", "");
-    return path?.includes(tag) ? tag : acc;
-  }, "");
 
   return (
     <nav
@@ -76,10 +71,9 @@ const StatelessSidebar = ({
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
       <div className="h-7" /> {/* flexible spacing */}
-      {NavItems.map((item) => {
-        const itemSelected = item.to.replaceAll("/", "") === activeItem;
-        return <Item key={item.text} {...item} selected={itemSelected} />;
-      })}
+      {NavItems.map((i) => (
+        <Item key={i.text} {...i} selected={activeLink === i.to} />
+      ))}
       <NotificationItem shrinked={shrinked} />
       <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
       <div className="flex-1" />
