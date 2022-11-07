@@ -33,7 +33,7 @@ const SidebarItemBase = ({
       onClick={props.do}
     >
       <span className={`tooltip-text tooltip-right ${!shrinked && "hidden"}`}>
-        {props.text}
+        {t(props.text)}
       </span>
       <div
         className={`flex items-center h-full ${

@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
@@ -62,18 +62,36 @@ const StatelessSidebar = ({
     return path?.includes(tag) ? tag : acc;
   }, "");
 
-  const [indicator, setIndicator] = useState(16);
+  const indicatorRef = useRef<HTMLDivElement>(null);
+  const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
 
   useEffect(() => {
+    if (!indicatorRef.current) return;
     const tag = activeItem;
     const index = NavItems.findIndex(
       (item) => item.to.replaceAll("/", "") === tag
     );
     if (index !== -1) {
+      // Haha math go brrrrrrrrr
+
       const itemHeight = 44;
-      setIndicator(index * itemHeight + 16);
+
+      const indexDifference = index - lastIndicatorPosition;
+      indicatorRef.current.style.display = "block";
+      indicatorRef.current.style.height = `${
+        indexDifference * itemHeight + 12
+      }px`;
+      setTimeout(
+        () => {
+          if (!indicatorRef.current) return;
+          indicatorRef.current.style.top = index * itemHeight + 16 + "px";
+          indicatorRef.current.style.height = "0.75rem";
+          setLastIndicatorPosition(index);
+        },
+        indexDifference > 0 ? 300 : 200
+      );
     } else {
-      setIndicator(0);
+      indicatorRef.current.style.display = "none";
     }
   }, [activeItem]);
 
@@ -93,10 +111,9 @@ const StatelessSidebar = ({
       <div className="h-3" /> {/* flexible spacing */}
       <div className="flex flex-col relative h-full mb-4 md:mb-0">
         <div
-          className={`absolute left-2 w-1 h-3 ${
-            indicator !== 0 ? "hidden md:block" : "hidden"
-          } bg-primary-400 rounded z-10 transition-all`}
-          style={{ top: `${indicator}px` }}
+          ref={indicatorRef}
+          className={`absolute left-2 w-1 hidden md:block
+            bg-primary-400 rounded z-10 transition-all`}
         />
         {NavItems.map((item) => {
           const itemSelected = item.to.replaceAll("/", "") === activeItem;
@@ -107,18 +124,20 @@ const StatelessSidebar = ({
         <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
       </div>
       <div className="flex-1" />
-      {shrinkable && (
-        <div
-          className={`${
-            shrinked ? "mx-auto" : "self-end"
-          } flex mt-10 self-end group-hover:mb-2 h-0 group-hover:h-12 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
-        >
-          <ToggleShrink
-            shrinked={shrinked}
-            toggle={() => setShrinked && setShrinked(!shrinked)}
-          />
-        </div>
-      )}
+      <div className="relative flex justify-end">
+        {shrinkable && (
+          <div
+            className={`${
+              shrinked ? "mx-auto" : "self-end"
+            } flex self-end h-12 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
+          >
+            <ToggleShrink
+              shrinked={shrinked}
+              toggle={() => setShrinked && setShrinked(!shrinked)}
+            />
+          </div>
+        )}
+      </div>
       <SidebarUserCard shrinked={shrinked} />
     </nav>
   );
