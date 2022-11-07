@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -22,15 +21,12 @@ const SidebarItemBase = ({
 
   return (
     <Link
-      className={clsx(
-        [
-          "relative mx-1 rounded-lg flex-1 min-h-[40px] md:flex-none md:h-11 text-white tooltip transition-all duration-200 ease-in-out cursor-pointer",
-        ],
-        {
-          "font-bold bg-primary-900": props.selected,
-          "font-normal bg-primary-800 hover:bg-primary-700": !props.selected,
-        }
-      )}
+      className={`relative mx-1 rounded-lg flex-1 min-h-[40px] md:flex-none md:h-11 text-white tooltip transition-all duration-200 ease-in-out cursor-pointer
+        ${
+          props.selected
+            ? "font-bold bg-primary-900"
+            : "font-normal bg-primary-800 hover:bg-primary-700"
+        }`}
       target={external && "_blank"}
       rel={external && "noreferrer"}
       href={props.to ?? ""}

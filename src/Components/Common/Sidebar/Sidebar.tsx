@@ -69,8 +69,12 @@ const StatelessSidebar = ({
     const index = NavItems.findIndex(
       (item) => item.to.replaceAll("/", "") === tag
     );
-    const itemHeight = 44;
-    setIndicator(index * itemHeight + 16);
+    if (index !== -1) {
+      const itemHeight = 44;
+      setIndicator(index * itemHeight + 16);
+    } else {
+      setIndicator(0);
+    }
   }, [activeItem]);
 
   return (
@@ -89,16 +93,19 @@ const StatelessSidebar = ({
       <div className="h-3" /> {/* flexible spacing */}
       <div className="flex flex-col relative">
         <div
-          className="absolute left-2 w-1 h-3 hidden md:block bg-primary-400 rounded z-10 transition-all"
+          className={`absolute left-2 w-1 h-3 ${
+            indicator !== 0 ? "hidden md:block" : "hidden"
+          } bg-primary-400 rounded z-10 transition-all`}
           style={{ top: `${indicator}px` }}
         />
         {NavItems.map((item) => {
           const itemSelected = item.to.replaceAll("/", "") === activeItem;
           return <Item key={item.text} {...item} selected={itemSelected} />;
         })}
+
+        <NotificationItem shrinked={shrinked} />
+        <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
       </div>
-      <NotificationItem shrinked={shrinked} />
-      <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
       <div className="flex-1" />
       {shrinkable && (
         <div
