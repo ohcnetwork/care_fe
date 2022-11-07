@@ -9,7 +9,6 @@ import {
   getPublicKey,
 } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import { SelectField } from "../Common/HelperInputFields";
 import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
 import Spinner from "../Common/Spinner";
@@ -23,6 +22,7 @@ import {
   ShrinkedSidebarItem,
   SidebarItem,
 } from "../Common/Sidebar/SidebarItem";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 
 const RESULT_LIMIT = 14;
 
@@ -447,27 +447,16 @@ export default function NotificationsList({
               </div>
             </div>
 
-            <div>
-              <div className="w-2/3">
-                <span className="text-sm font-semibold">
-                  Filter by category
-                </span>
-                <SelectField
-                  name="event_filter"
-                  variant="outlined"
-                  margin="dense"
-                  value={eventFilter}
-                  options={[
-                    { id: "", text: "Show All" },
-                    ...NOTIFICATION_EVENTS.map((i) => {
-                      if (i.id === "MESSAGE") return { ...i, text: "Notices" };
-                      return i;
-                    }),
-                  ]}
-                  onChange={(e: any) => setEventFilter(e.target.value)}
-                />
-              </div>
-            </div>
+            <SelectMenuV2
+              className="my-2"
+              placeholder="Filter by category"
+              options={NOTIFICATION_EVENTS}
+              value={eventFilter}
+              optionLabel={(o) => o.text}
+              optionValue={(o) => o.id}
+              optionIcon={(o) => <i className={`${o.icon} `} />}
+              onChange={(v) => setEventFilter(v || "")}
+            />
           </div>
 
           <div>{manageResults}</div>
