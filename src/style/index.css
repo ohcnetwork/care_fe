@@ -1141,3 +1141,22 @@ button:disabled,
 .button-size-large { 
   @apply py-3 px-5 text-base
 }
+
+.dropdown-item { 
+  @apply rounded m-2 px-4 py-2 text-sm border-0 flex gap-3 items-center justify-start font-normal transition-all duration-200 ease-in-out
+}
+.dropdown-item-primary { 
+  @apply accent-primary-500 hover:bg-primary-100 text-black hover:text-primary-500
+}
+.dropdown-item-secondary { 
+  @apply accent-secondary-200 hover:bg-secondary-200 text-secondary-700
+}
+.dropdown-item-danger { 
+  @apply accent-danger-500 hover:bg-danger-100 text-danger-500
+}
+.dropdown-item-warning { 
+  @apply accent-warning-500 hover:bg-warning-100 text-warning-500
+}
+.dropdown-item-alert { 
+  @apply accent-alert-600 hover:bg-alert-100 text-alert-600
+}

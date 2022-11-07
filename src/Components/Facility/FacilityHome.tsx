@@ -31,11 +31,10 @@ import {
   PatientStatsModel,
 } from "./models";
 import moment from "moment";
-import { RoleButton } from "../Common/RoleButton";
 import CoverImageEditModal from "./CoverImageEditModal";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import Table from "../Common/components/Table";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2, { AuthorizedFor } from "../Common/components/ButtonV2";
 import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -193,16 +192,16 @@ export const FacilityHome = (props: any) => {
       String(patientStatsData[i].num_patient_confirmed_positive) || "0"
     );
     temp.push(
-      <RoleButton
-        className="btn btn-default"
-        handleClickCB={() =>
+      <ButtonV2
+        variant="secondary"
+        ghost
+        onClick={() =>
           navigate(`/facility/${facilityId}/triage/${patientStatsData[i].id}`)
         }
-        disableFor="readOnly"
-        buttonType="html"
+        authorizedFor={AuthorizedFor.NonReadOnlyUsers}
       >
         Edit
-      </RoleButton>
+      </ButtonV2>
     );
     stats.push(temp);
   }
@@ -440,101 +439,65 @@ export const FacilityHome = (props: any) => {
             <div className="w-full md:w-auto">
               <DropdownMenu
                 title="Manage Facility"
-                icon={<i className="uil uil-setting text-xl text-white"></i>}
+                icon={<i className="uil uil-setting text-xl"></i>}
               >
-                <DropdownItem>
-                  <RoleButton
-                    id="update-facility"
-                    className="flex gap-3 items-center"
-                    handleClickCB={() =>
-                      navigate(`/facility/${facilityId}/update`)
-                    }
-                    disableFor="readOnly"
-                    buttonType="html"
-                  >
-                    <i className="uil uil-edit-alt text-lg font-bold text-primary-500"></i>
-                    Update Facility
-                  </RoleButton>
+                <DropdownItem
+                  onClick={() => navigate(`/facility/${facilityId}/update`)}
+                  authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+                  icon={<i className="uil uil-edit-alt" />}
+                >
+                  Update Facility
                 </DropdownItem>
-                <DropdownItem>
-                  <button
-                    className="flex gap-3 items-center"
-                    onClick={() =>
-                      navigate(`/facility/${facilityId}/inventory`)
-                    }
-                  >
-                    <i className="uil uil-clipboard-alt text-lg font-bold text-primary-500"></i>
-                    Inventory Management
-                  </button>
+                <DropdownItem
+                  onClick={() => navigate(`/facility/${facilityId}/inventory`)}
+                  icon={<i className="uil uil-clipboard-alt" />}
+                >
+                  Inventory Management
                 </DropdownItem>
-                <DropdownItem>
-                  <RoleButton
-                    className="flex gap-3 items-center"
-                    handleClickCB={() =>
-                      navigate(`/facility/${facilityId}/location`)
-                    }
-                    disableFor="readOnly"
-                    buttonType="html"
-                  >
-                    <i className="uil uil-location-point text-lg font-bold text-primary-500"></i>
-                    Location Management
-                  </RoleButton>
+                <DropdownItem
+                  onClick={() => navigate(`/facility/${facilityId}/location`)}
+                  authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+                  icon={<i className="uil uil-location-point" />}
+                >
+                  Location Management
                 </DropdownItem>
-                <DropdownItem>
-                  <RoleButton
-                    className="flex gap-3 items-center"
-                    handleClickCB={() =>
-                      navigate(`/facility/${facilityId}/resource/new`)
-                    }
-                    disableFor="readOnly"
-                    buttonType="html"
-                  >
-                    <i className="uil uil-gold text-lg font-bold text-primary-500"></i>
-                    Resource Request
-                  </RoleButton>
+                <DropdownItem
+                  onClick={() =>
+                    navigate(`/facility/${facilityId}/resource/new`)
+                  }
+                  authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+                  icon={<i className="uil uil-gold" />}
+                >
+                  Resource Request
                 </DropdownItem>
-                <DropdownItem>
-                  <RoleButton
-                    className="flex gap-3 items-center"
-                    handleClickCB={() =>
-                      navigate(`/facility/${facilityId}/assets/new`)
-                    }
-                    disableFor="readOnly"
-                    buttonType="html"
-                  >
-                    <i className="uil uil-plus-circle text-lg font-bold text-primary-500"></i>
-                    Create Asset
-                  </RoleButton>
+                <DropdownItem
+                  onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
+                  authorizedFor={AuthorizedFor.NonReadOnlyUsers}
+                  icon={<i className="uil uil-plus-circle" />}
+                >
+                  Create Asset
                 </DropdownItem>
-                <DropdownItem>
-                  <button
-                    className="flex gap-3 items-center"
-                    onClick={() => navigate(`/assets?facility=${facilityId}`)}
-                  >
-                    <i className="uil uil-medkit text-lg font-bold text-primary-500"></i>
-                    View Assets
-                  </button>
+                <DropdownItem
+                  onClick={() => navigate(`/assets?facility=${facilityId}`)}
+                  icon={<i className="uil uil-medkit" />}
+                >
+                  View Assets
                 </DropdownItem>
-                <DropdownItem>
-                  <button
-                    className="flex gap-3 items-center"
-                    onClick={() => navigate(`/facility/${facilityId}/users`)}
-                  >
-                    <i className="uil uil-users-alt text-lg font-bold text-primary-500"></i>
-                    View Users
-                  </button>
+                <DropdownItem
+                  onClick={() => navigate(`/facility/${facilityId}/users`)}
+                  icon={<i className="uil uil-users-alt" />}
+                >
+                  View Users
                 </DropdownItem>
                 {currentUser.data.user_type === "DistrictAdmin" ||
                 currentUser.data.user_type === "StateAdmin" ? (
-                  <DropdownItem activeColor="#C81E1E">
-                    <button
-                      id="facility-delete"
-                      className="text-[#C81E1E] flex gap-3 items-center"
-                      onClick={() => setOpenDeleteDialog(true)}
-                    >
-                      <i className="uil uil-trash-alt font-bold text-lg text-[#C81E1E]"></i>
-                      Delete Facility
-                    </button>
+                  <DropdownItem
+                    variant="danger"
+                    onClick={() => setOpenDeleteDialog(true)}
+                    className="flex gap-3 items-center"
+                    icon={<i className="uil uil-trash-alt" />}
+                  >
+                    Delete Facility
                   </DropdownItem>
                 ) : (
                   <></>
@@ -542,22 +505,19 @@ export const FacilityHome = (props: any) => {
               </DropdownMenu>
             </div>
             <div className="flex flex-col justify-end">
-              <RoleButton
+              <ButtonV2
+                variant="primary"
+                ghost
                 className="mt-2 w-full md:w-auto"
-                handleClickCB={() =>
-                  navigate(`/facility/${facilityId}/patient`)
-                }
-                data-testid="add-patient-button"
-                disableFor="readOnly"
-                buttonType="buttonV2"
-                buttonV2Props={{ variant: "secondary" }}
+                onClick={() => navigate(`/facility/${facilityId}/patient`)}
+                authorizedFor={AuthorizedFor.NonReadOnlyUsers}
               >
                 <i className="uil uil-plus text-lg"></i>
                 <span className="text-sm">Add Details of a Patient</span>
-              </RoleButton>
-
+              </ButtonV2>
               <ButtonV2
-                variant="secondary"
+                variant="primary"
+                ghost
                 className="mt-2 w-full md:w-auto py-3"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
@@ -602,15 +562,14 @@ export const FacilityHome = (props: any) => {
       <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
         <div className="md:flex justify-between  md:border-b md:pb-2">
           <div className="font-semibold text-xl mb-2">Bed Capacity</div>
-          <RoleButton
-            className="btn-primary btn w-full md:w-auto"
-            handleClickCB={() => navigate(`/facility/${facilityId}/bed`)}
-            disableFor="readOnly"
-            buttonType="html"
+          <ButtonV2
+            className="w-full md:w-auto"
+            onClick={() => navigate(`/facility/${facilityId}/bed`)}
+            authorizedFor={AuthorizedFor.NonReadOnlyUsers}
           >
             <i className="fas fa-bed text-white mr-2" />
             Add More Bed Types
-          </RoleButton>
+          </ButtonV2>
         </div>
         <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
           {capacityList}
@@ -619,16 +578,15 @@ export const FacilityHome = (props: any) => {
       <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
         <div className="md:flex justify-between md:pb-2">
           <div className="font-bold text-xl mb-2">Doctors List</div>
-          <RoleButton
-            className="btn-primary btn w-full md:w-auto"
-            handleClickCB={() => navigate(`/facility/${facilityId}/doctor`)}
+          <ButtonV2
+            className="w-full md:w-auto"
+            onClick={() => navigate(`/facility/${facilityId}/doctor`)}
             disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
-            disableFor="readOnly"
-            buttonType="html"
+            authorizedFor={AuthorizedFor.NonReadOnlyUsers}
           >
             <i className="fas fa-user-md text-white mr-2" />
             Add Doctor Types
-          </RoleButton>
+          </ButtonV2>
         </div>
         <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
           {doctorList}
@@ -638,15 +596,14 @@ export const FacilityHome = (props: any) => {
         <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="md:flex justify-between md:pb-2">
             <div className="text-xl font-bold mb-2">Corona Triage</div>
-            <RoleButton
-              className="btn-primary btn w-full md:w-auto"
-              handleClickCB={() => navigate(`/facility/${facilityId}/triage`)}
-              disableFor="readOnly"
-              buttonType="html"
+            <ButtonV2
+              className="w-full md:w-auto"
+              onClick={() => navigate(`/facility/${facilityId}/triage`)}
+              authorizedFor={AuthorizedFor.NonReadOnlyUsers}
             >
               <i className="fas fa-notes-medical text-white mr-2" />
               Add Triage
-            </RoleButton>
+            </ButtonV2>
           </div>
           <div className="mt-4 overflow-x-auto overflow-y-hidden">
             <Table
