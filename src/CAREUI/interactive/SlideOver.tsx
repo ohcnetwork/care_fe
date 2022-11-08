@@ -8,6 +8,8 @@ export type SlideOverProps = {
   setOpen: (state: boolean) => void;
   children: React.ReactNode;
   slideFrom?: SlideFromEdges;
+  dialogClass?: string;
+  title?: string;
 };
 
 export default function SlideOver({
@@ -15,8 +17,31 @@ export default function SlideOver({
   setOpen,
   children,
   slideFrom = "right",
+  dialogClass,
+  title,
 }: SlideOverProps) {
-  const EdgeTransition = TransitionFrom[slideFrom];
+  const directionClasses = {
+    left: {
+      stick: "left-0",
+      animateStart: "-translate-x-20",
+      animateEnd: "translate-x-0",
+    },
+    right: {
+      stick: "right-0",
+      animateStart: "translate-x-20",
+      animateEnd: "-translate-x-0",
+    },
+    top: {
+      stick: "top-0",
+      animateStart: "-translate-y-20",
+      animateEnd: "translate-y-0",
+    },
+    bottom: {
+      stick: "bottom-0",
+      animateStart: "translate-y-20",
+      animateEnd: "-translate-y-0",
+    },
+  };
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -35,12 +60,48 @@ export default function SlideOver({
 
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
-            <div className="pointer-events-none fixed inset-y-0 left-0 flex max-w-full pr-10">
-              <EdgeTransition>
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-fit">
-                  {children}
+            <div
+              className={`pointer-events-none fixed md:p-2 ${directionClasses[slideFrom].stick} flex w-full h-full`}
+            >
+              <Transition.Child
+                as={Fragment}
+                enter="transition"
+                enterFrom={
+                  directionClasses[slideFrom].animateStart + " opacity-0"
+                }
+                enterTo={
+                  directionClasses[slideFrom].animateEnd + " opacity-100"
+                }
+                leave="transition"
+                leaveFrom={
+                  directionClasses[slideFrom].animateEnd + " opacity-100"
+                }
+                leaveTo={
+                  directionClasses[slideFrom].animateStart + " opacity-0"
+                }
+              >
+                <Dialog.Panel className="pointer-events-auto w-screen max-w-fit h-full">
+                  <div
+                    className={
+                      "bg-white w-full md:w-[300px] md:rounded-xl h-full flex flex-col " +
+                      dialogClass
+                    }
+                  >
+                    <div className="flex items-center p-2 gap-2">
+                      <button
+                        className="w-8 h-8 rounded-lg flex justify-center items-center text-2xl hover:bg-black/20"
+                        onClick={() => setOpen(false)}
+                      >
+                        <i className="uil uil-arrow-left" />
+                      </button>
+                      <div>
+                        <h1 className="text-xl font-black">{title}</h1>
+                      </div>
+                    </div>
+                    <div className="overflow-auto flex-1 p-3">{children}</div>
+                  </div>
                 </Dialog.Panel>
-              </EdgeTransition>
+              </Transition.Child>
             </div>
           </div>
         </div>
@@ -48,63 +109,3 @@ export default function SlideOver({
     </Transition.Root>
   );
 }
-
-type TransitionFromProps = { children: React.ReactNode };
-
-const TransitionFrom: Record<
-  SlideFromEdges,
-  ({ children }: TransitionFromProps) => JSX.Element
-> = {
-  top: ({ children }) => (
-    <Transition.Child
-      as={Fragment}
-      enter="transform transition ease-out duration-200"
-      enterFrom="-translate-x-full"
-      enterTo="translate-x-0"
-      leave="transform transition ease-in duration-200"
-      leaveFrom="translate-x-0"
-      leaveTo="-translate-x-full"
-    >
-      {children}
-    </Transition.Child>
-  ),
-  left: ({ children }) => (
-    <Transition.Child
-      as={Fragment}
-      enter="transform transition ease-out duration-200"
-      enterFrom="-translate-x-full"
-      enterTo="translate-x-0"
-      leave="transform transition ease-in duration-200"
-      leaveFrom="translate-x-0"
-      leaveTo="-translate-x-full"
-    >
-      {children}
-    </Transition.Child>
-  ),
-  bottom: ({ children }) => (
-    <Transition.Child
-      as={Fragment}
-      enter="transform transition ease-out duration-200"
-      enterFrom="-translate-x-full"
-      enterTo="translate-x-0"
-      leave="transform transition ease-in duration-200"
-      leaveFrom="translate-x-0"
-      leaveTo="-translate-x-full"
-    >
-      {children}
-    </Transition.Child>
-  ),
-  right: ({ children }) => (
-    <Transition.Child
-      as={Fragment}
-      enter="transform transition ease-out duration-200"
-      enterFrom="-translate-x-full"
-      enterTo="translate-x-0"
-      leave="transform transition ease-in duration-200"
-      leaveFrom="translate-x-0"
-      leaveTo="-translate-x-full"
-    >
-      {children}
-    </Transition.Child>
-  ),
-};
