@@ -1,7 +1,16 @@
-import React from "react";
+import PageTitle from "../Common/PageTitle";
 
 const LiveMonitoring = () => {
-  return <div>LiveMonitoring</div>;
+  return (
+    <div>
+      <PageTitle
+        title="Camera Feed"
+        breadcrumbs={false}
+        hideBack={true}
+        focusOnLoad={true}
+      />
+    </div>
+  );
 };
 
 export default LiveMonitoring;
