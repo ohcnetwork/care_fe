@@ -395,7 +395,7 @@ export default function NotificationsList({
         setOpen={setOpen}
         slideFrom="right"
         title="Notifications"
-        dialogClass="md:W-[350px]"
+        dialogClass="md:w-[350px]"
       >
         <div className="flex flex-col">
           <div className="flex gap-2 flex-wrap mb-2">

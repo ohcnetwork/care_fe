@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 
-.cui-input-legend::before{
+.cui-input-legend::before {
     content: " ";
     position: absolute;
     left: -4px;
@@ -12,7 +12,7 @@
     z-index: -1;
 }
 
-.cui-label-required::after{
+.cui-label-required::after {
     content: "*";
     color: rgb(255, 81, 0);
     font-size: 1.2em;
@@ -21,8 +21,17 @@
 }
 
 .cui-input:-webkit-autofill,
-.cui-input:-webkit-autofill:hover, 
-.cui-input:-webkit-autofill:focus, 
-.cui-input:-webkit-autofill:active{
+.cui-input:-webkit-autofill:hover,
+.cui-input:-webkit-autofill:focus,
+.cui-input:-webkit-autofill:active {
+    box-shadow: 0 0 0 40px #f9fafb inset !important;
     -webkit-box-shadow: 0 0 0 40px #f9fafb inset !important;
+}
+
+.cui-slideover-x {
+    @apply w-full md:w-[300px] h-full
+}
+
+.cui-slideover-y {
+    @apply h-full md:h-[300px] w-full
 }

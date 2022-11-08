@@ -27,25 +27,25 @@ export default function SlideOver({
       stick: "left-0 top-0 h-full",
       animateStart: "-translate-x-20",
       animateEnd: "translate-x-0",
-      proportions: "w-full md:w-[300px] h-full",
+      proportions: " cui-slideover-x",
     },
     right: {
       stick: "right-0 top-0 h-full",
       animateStart: "translate-x-20",
       animateEnd: "-translate-x-0",
-      proportions: "w-full md:w-[300px] h-full",
+      proportions: "cui-slideover-x",
     },
     top: {
       stick: "top-0 left-0 w-full",
       animateStart: "-translate-y-20",
       animateEnd: "translate-y-0",
-      proportions: "w-full h-full md:h-[300px]",
+      proportions: "cui-slideover-y",
     },
     bottom: {
       stick: "bottom-0 left-0 w-full",
       animateStart: "translate-y-20",
       animateEnd: "-translate-y-0",
-      proportions: "w-full h-full md:h-[300px]",
+      proportions: "cui-slideover-y",
     },
   };
 
