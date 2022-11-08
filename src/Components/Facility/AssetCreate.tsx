@@ -454,7 +454,7 @@ const AssetCreate = (props: AssetProps) => {
             );
           })}
         </div>
-        <div className="w-full h-full flex overflow-auto xl:ml-72">
+        <div className="w-full h-full flex xl:ml-72">
           <div className="w-full max-w-3xl 2xl:max-w-4xl">
             <form
               onSubmit={(e) => handleSubmit(e, false)}
