@@ -2,13 +2,8 @@ import PageTitle from "../Common/PageTitle";
 
 const LiveMonitoring = () => {
   return (
-    <div>
-      <PageTitle
-        title="Camera Feed"
-        breadcrumbs={false}
-        hideBack={true}
-        focusOnLoad={true}
-      />
+    <div className="px-4">
+      <PageTitle title="Live Monitoring" hideBack={true} breadcrumbs={false} />
     </div>
   );
 };
