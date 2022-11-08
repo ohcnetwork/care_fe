@@ -36,6 +36,7 @@ const Result = () => <i className="uil uil-clipboard-notes" />;
 const Users = () => <i className="uil uil-users-alt" />;
 const NoticeBoard = () => <i className="uil uil-meeting-board" />;
 const Dashboard = () => <i className="uil uil-dashboard" />;
+const LiveMonitoring = () => <i className="uil uil-video" />;
 
 const NavItems = [
   { text: "Facilities", to: "/facility", icon: <Facility /> },
@@ -47,6 +48,7 @@ const NavItems = [
   { text: "External Results", to: "/external_results", icon: <Result /> },
   { text: "Users", to: "/users", icon: <Users /> },
   { text: "Notice Board", to: "/notice_board", icon: <NoticeBoard /> },
+  { text: "Live Monitoring", to: "/live_monitoring", icon: <LiveMonitoring /> },
 ];
 
 const StatelessSidebar = ({
