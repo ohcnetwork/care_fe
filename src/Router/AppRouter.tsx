@@ -70,6 +70,7 @@ import {
   DesktopSidebar,
   MobileSidebar,
 } from "../Components/Common/Sidebar/Sidebar";
+import LiveMonitoring from "../Components/Hub/LiveMonitoring";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -409,6 +410,7 @@ const routes = {
   "/teleicu/facility/:facilityId": ({ facilityId }: any) => (
     <TeleICUPatientsList facilityId={facilityId} />
   ),
+  "/live_monitoring": () => <LiveMonitoring />,
   "/not-found": () => <Error404 />,
 };
 
