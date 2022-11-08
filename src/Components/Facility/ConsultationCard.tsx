@@ -22,91 +22,130 @@ export const ConsultationCard = (props: ConsultationProps) => {
       )}
 
       <CardContent>
-        <Grid container justify="space-between" alignItems="center">
+        <Grid
+          container
+          justify="space-between"
+          alignItems="center"
+          className="ml-2 mt-2"
+        >
           <Grid item xs={12} container spacing={1}>
-            <Grid item xs={7}>
+            <Grid item xs={3}>
               <Typography>
-                <span className="text-gray-700">Facility: </span>
-                {itemData.facility_name}{" "}
-                {itemData.is_telemedicine && (
-                  <span className="ml-2">(Telemedicine)</span>
-                )}
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    Facility
+                  </div>
+                  <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                    {itemData.facility_name}{" "}
+                    {itemData.is_telemedicine && (
+                      <span className="ml-2">(Telemedicine)</span>
+                    )}
+                  </div>
+                </div>
               </Typography>
             </Grid>
-            <Grid item xs={7}>
+            <Grid item xs={3}>
               <Typography className="capitalize">
-                <span className="text-gray-700">Suggestion: </span>
-                {itemData.suggestion_text?.toLocaleLowerCase()}
-              </Typography>
-            </Grid>
-            <Grid item xs={5}>
-              <Typography>
-                <span className="text-gray-700">Admitted: </span>
-                {itemData.admitted ? "Yes" : "No"}
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    Suggestion{" "}
+                  </div>
+                  <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                    {itemData.suggestion_text?.toLocaleLowerCase()}
+                  </div>
+                </div>
               </Typography>
             </Grid>
             {itemData.kasp_enabled_date && (
-              <Grid item xs={7}>
+              <Grid item xs={3}>
                 <Typography>
-                  <span className="text-gray-700">
-                    {KASP_STRING} Enabled date:{" "}
-                  </span>
-                  {itemData.kasp_enabled_date
-                    ? formatDate(itemData.kasp_enabled_date)
-                    : "-"}
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                      {KASP_STRING} Enabled date{" "}
+                    </div>
+                    <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                      {itemData.kasp_enabled_date
+                        ? formatDate(itemData.kasp_enabled_date)
+                        : "-"}
+                    </div>
+                  </div>
                 </Typography>
               </Grid>
             )}
             {itemData.admission_date && (
-              <Grid item xs={5}>
+              <Grid item xs={3}>
                 <Typography>
-                  <span className="text-gray-700">Admitted on: </span>
-                  {formatDate(itemData.admission_date)}
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                      Admitted on
+                    </div>
+                    <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                      {formatDate(itemData.admission_date)}
+                    </div>
+                  </div>
                 </Typography>
               </Grid>
             )}
+            <Grid item xs={3}>
+              <Typography>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    Admitted{" "}
+                  </div>
+                  <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                    {itemData.admitted ? "Yes" : "No"}
+                  </div>
+                </div>
+              </Typography>
+            </Grid>
             {itemData.discharge_date && (
               <Grid item xs={5}>
                 <Typography>
-                  <span className="text-gray-700">Discharged on: </span>
-                  {formatDate(itemData.discharge_date)}
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                      Discharged on{" "}
+                    </div>
+                    <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                      {formatDate(itemData.discharge_date)}
+                    </div>
+                  </div>
                 </Typography>
               </Grid>
             )}
           </Grid>
 
-          <div className="flex flex-col mt-6">
+          <div className="flex flex-col mt-8">
             {
               <div className="text-sm text-gray-700">
-                Created on{" "}
+                Created:{" "}
                 {itemData.created_date
                   ? formatDate(itemData.created_date)
-                  : "--:--"}
-                {itemData.created_by && (
+                  : "--:--"}{" "}
+                {/* {itemData.created_by && (
                   <span>
                     by{" "}
                     {`${itemData.created_by?.first_name} ${itemData.created_by?.last_name} @${itemData.created_by?.username} (${itemData.created_by?.user_type})`}
                   </span>
-                )}
+                )} */}
               </div>
             }
             <div className="text-sm text-gray-700">
-              Last Modified on
+              Last Modified:{" "}
               {itemData.modified_date
                 ? formatDate(itemData.modified_date)
                 : "--:--"}{" "}
-              {itemData.last_edited_by && (
+              {/* {itemData.last_edited_by && (
                 <span>
                   by{" "}
                   {`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name} @${itemData.last_edited_by?.username} (${itemData.last_edited_by?.user_type})`}
                 </span>
-              )}
+              )} */}
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between w-full">
+          <div className="mt-4 flex flex-col gap-1 md:flex-row justify-between w-full">
             <button
-              className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
+              className="px-4 py-2 border bg-white rounded-md text-sm cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1 border-gray-500"
               onClick={() =>
                 navigate(
                   `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`
@@ -116,7 +155,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               View Consultation / Consultation Updates
             </button>
             <button
-              className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
+              className="px-4 py-2 border bg-white rounded-md text-sm cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1 border-gray-500"
               onClick={() =>
                 navigate(
                   `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`
@@ -127,7 +166,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </button>
             {isLastConsultation && (
               <RoleButton
-                className="md:mr-4 px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
+                className="md:mr-4 px-4 py-2 border bg-white rounded-md text-sm cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1 border-gray-500"
                 handleClickCB={() =>
                   navigate(
                     `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`

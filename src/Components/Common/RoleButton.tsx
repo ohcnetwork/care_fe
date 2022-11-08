@@ -2,9 +2,10 @@ import React from "react";
 import { useSelector } from "react-redux";
 import Button from "@material-ui/core/Button";
 import { ButtonProps } from "@material-ui/core/Button";
+import ButtonV2 from "./components/ButtonV2";
 
 export type roleType = "readOnly";
-export type buttonType = "html" | "materialUI";
+export type buttonType = "html" | "materialUI" | "tailwind";
 
 const getDisableButton: (userType: string, disableFor: roleType) => boolean = (
   userType,
@@ -65,10 +66,25 @@ export function RoleButton(props: {
     );
   };
 
+  const renderTailwindButton = () => {
+    return (
+      <ButtonV2
+        id={props.id}
+        className={props.className}
+        onClick={props.handleClickCB}
+        disabled={getDisableButton(type, props.disableFor) || props.disabled}
+      >
+        {props.children}
+      </ButtonV2>
+    );
+  };
+
   switch (props.buttonType) {
     case "html":
       return renderHtmlButton();
     case "materialUI":
       return renderMaterialUIButton();
+    case "tailwind":
+      return renderTailwindButton();
   }
 }
