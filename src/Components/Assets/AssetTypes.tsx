@@ -17,7 +17,7 @@ export enum AssetType {
 }
 
 export enum AssetClass {
-  NONE = "",
+  NONE = "NONE",
   ONVIF = "ONVIF",
   HL7MONITOR = "HL7MONITOR",
 }

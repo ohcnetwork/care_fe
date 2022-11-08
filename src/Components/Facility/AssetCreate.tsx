@@ -513,11 +513,6 @@ const AssetCreate = (props: AssetProps) => {
                           required
                           options={[
                             {
-                              title: "Select",
-                              description: "Select the asset type",
-                              value: "NONE",
-                            },
-                            {
                               title: "Internal",
                               description:
                                 "Asset is inside the facility premises.",
@@ -531,11 +526,10 @@ const AssetCreate = (props: AssetProps) => {
                             },
                           ]}
                           value={asset_type}
+                          placeholder="Select"
                           optionLabel={(o) => o.title}
                           optionValue={(o) =>
-                            o.value == "NONE"
-                              ? AssetType.NONE
-                              : o.value === "INTERNAL"
+                            o.value === "INTERNAL"
                               ? AssetType.INTERNAL
                               : AssetType.EXTERNAL
                           }
@@ -550,9 +544,7 @@ const AssetCreate = (props: AssetProps) => {
                       <label htmlFor="asset-class">Asset Class</label>
                       <div className="mt-2">
                         <SelectMenuV2
-                          required
                           options={[
-                            { title: "Select", value: "NONE" },
                             { title: "ONVIF Camera", value: "ONVIF" },
                             {
                               title: "HL7 Vitals Monitor",
@@ -560,11 +552,10 @@ const AssetCreate = (props: AssetProps) => {
                             },
                           ]}
                           value={asset_class}
+                          placeholder="Select"
                           optionLabel={(o) => o.title}
                           optionValue={(o) =>
-                            o.value == "NONE"
-                              ? AssetClass.NONE
-                              : o.value === "ONVIF"
+                            o.value === "ONVIF"
                               ? AssetClass.ONVIF
                               : AssetClass.HL7MONITOR
                           }
