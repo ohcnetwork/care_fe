@@ -8,14 +8,12 @@ import {
   updateUserPnconfig,
   getPublicKey,
 } from "../../Redux/actions";
-import { SelectField } from "../Common/HelperInputFields";
 import { useSelector } from "react-redux";
-import { Button, CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
-
 import * as Sentry from "@sentry/browser";
 import { formatDate } from "../../Utils/utils";
 import {
@@ -23,6 +21,8 @@ import {
   SidebarItem,
 } from "../Common/Sidebar/SidebarItem";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 const RESULT_LIMIT = 14;
 
@@ -98,10 +98,11 @@ const NotificationTile = ({
       </div>
       <div className="text-sm py-1">{result.message}</div>
       <div className="flex justify-between items-end">
-        <button
-          className={`${
-            result.read_at && "invisible"
-          } h-min inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0`}
+        <ButtonV2
+          className={`${result.read_at && "invisible"} text-xs`}
+          variant="secondary"
+          ghost
+          shadow
           disabled={isMarkingAsRead}
           onClick={(event) => {
             event.stopPropagation();
@@ -114,15 +115,15 @@ const NotificationTile = ({
             <i className="fa-solid fa-check mr-2 text-primary-500" />
           )}
           Mark as Read
-        </button>
+        </ButtonV2>
         <div>
           <div className="text-xs text-right py-1">
             {formatDate(result.created_date)}
           </div>
           <div className="mt-2 text-right min-h-min">
-            <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
+            <ButtonV2 className="text-xs" variant="secondary" ghost shadow>
               <i className="fas fa-eye mr-2 text-primary-500" /> Visit Link
-            </button>
+            </ButtonV2>
           </div>
         </div>
       </div>
@@ -358,17 +359,15 @@ export default function NotificationsList({
         )}
         {totalCount > RESULT_LIMIT && offset < totalCount - RESULT_LIMIT && (
           <div className="mt-4 flex w-full justify-center py-5 px-4 lg:px-8">
-            <Button
+            <ButtonV2
+              className="w-full"
               disabled={isLoading}
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={() => {
-                setOffset((prev) => prev + RESULT_LIMIT);
-              }}
+              variant="primary"
+              shadow
+              onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
             >
               {isLoading ? "Loading..." : "Load More"}
-            </Button>
+            </ButtonV2>
           </div>
         )}
       </>
@@ -396,77 +395,63 @@ export default function NotificationsList({
         setOpen={setOpen}
         slideFrom="right"
         title="Notifications"
+        dialogClass="md:W-[350px]"
       >
-        <div className="">
-          <div className="">
-            <div className="flex flex-col pt-4 py-2">
-              <div className="grid grid-cols-3">
-                <div>
-                  <button
-                    onClick={(_) => {
-                      setReload(!reload);
-                      setData([]);
-                      setUnreadCount(0);
-                      setOffset(0);
-                    }}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
-                  >
-                    <i className="fa-fw fas fa-sync cursor-pointer mr-2" />{" "}
-                    Reload
-                  </button>
-                </div>
-                <div>
-                  <button
-                    onClick={handleSubscribeClick}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
-                    disabled={isSubscribing}
-                  >
-                    {isSubscribing && <Spinner />}
-                    {getButtonText()}
-                  </button>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <button
-                  className="inline-flex items-center font-semibold mt-4 p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
-                  disabled={isMarkingAllAsRead}
-                  onClick={handleMarkAllAsRead}
-                >
-                  {isMarkingAllAsRead ? (
-                    <Spinner />
-                  ) : (
-                    <i className="fa-solid fa-check-double mr-2 text-primary-500" />
-                  )}
-                  Mark All as Read
-                </button>
-              </div>
-            </div>
+        <div className="flex flex-col">
+          <div className="flex gap-2 flex-wrap mb-2">
+            <ButtonV2
+              className="text-xs"
+              ghost
+              variant="secondary"
+              onClick={(_) => {
+                setReload(!reload);
+                setData([]);
+                setUnreadCount(0);
+                setOffset(0);
+              }}
+            >
+              <i className="fa-fw fas fa-sync cursor-pointer mr-2" /> Reload
+            </ButtonV2>
 
-            <div>
-              <div className="w-2/3">
-                <span className="text-sm font-semibold">
-                  Filter by category
-                </span>
-                <SelectField
-                  name="event_filter"
-                  variant="outlined"
-                  margin="dense"
-                  value={eventFilter}
-                  options={[
-                    { id: "", text: "Show All" },
-                    ...NOTIFICATION_EVENTS.map((i) => {
-                      if (i.id === "MESSAGE") return { ...i, text: "Notices" };
-                      return i;
-                    }),
-                  ]}
-                  onChange={(e: any) => setEventFilter(e.target.value)}
-                />
-              </div>
-            </div>
+            <ButtonV2
+              onClick={handleSubscribeClick}
+              className="text-xs"
+              ghost
+              variant="secondary"
+              disabled={isSubscribing}
+            >
+              {isSubscribing && <Spinner />}
+              {getButtonText()}
+            </ButtonV2>
+            <ButtonV2
+              className="text-xs"
+              ghost
+              variant="secondary"
+              disabled={isMarkingAllAsRead}
+              onClick={handleMarkAllAsRead}
+            >
+              {isMarkingAllAsRead ? (
+                <Spinner />
+              ) : (
+                <i className="fa-solid fa-check-double mr-2 text-primary-500" />
+              )}
+              Mark All as Read
+            </ButtonV2>
           </div>
 
-          <div>{manageResults}</div>
+          <SelectMenuV2
+            className="mb-2"
+            placeholder="Filter by category"
+            options={NOTIFICATION_EVENTS}
+            value={eventFilter}
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
+            optionIcon={(o) => <i className={`${o.icon} `} />}
+            onChange={(v) => setEventFilter(v || "")}
+          />
         </div>
+
+        <div>{manageResults}</div>
       </SlideOver>
     </>
   );

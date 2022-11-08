@@ -128,7 +128,7 @@ interface MobileSidebarProps {
 
 export const MobileSidebar = (props: MobileSidebarProps) => {
   return (
-    <SlideOver {...props} slideFrom="left">
+    <SlideOver {...props} slideFrom="left" onlyChild={true}>
       <StatelessSidebar />
     </SlideOver>
   );

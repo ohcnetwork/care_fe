@@ -10,6 +10,7 @@ export type SlideOverProps = {
   slideFrom?: SlideFromEdges;
   dialogClass?: string;
   title?: string;
+  onlyChild?: boolean;
 };
 
 export default function SlideOver({
@@ -19,27 +20,32 @@ export default function SlideOver({
   slideFrom = "right",
   dialogClass,
   title,
+  onlyChild = false,
 }: SlideOverProps) {
   const directionClasses = {
     left: {
-      stick: "left-0",
+      stick: "left-0 top-0 h-full",
       animateStart: "-translate-x-20",
       animateEnd: "translate-x-0",
+      proportions: "w-full md:w-[300px] h-full",
     },
     right: {
-      stick: "right-0",
+      stick: "right-0 top-0 h-full",
       animateStart: "translate-x-20",
       animateEnd: "-translate-x-0",
+      proportions: "w-full md:w-[300px] h-full",
     },
     top: {
-      stick: "top-0",
+      stick: "top-0 left-0 w-full",
       animateStart: "-translate-y-20",
       animateEnd: "translate-y-0",
+      proportions: "w-full h-full md:h-[300px]",
     },
     bottom: {
-      stick: "bottom-0",
+      stick: "bottom-0 left-0 w-full",
       animateStart: "translate-y-20",
       animateEnd: "-translate-y-0",
+      proportions: "w-full h-full md:h-[300px]",
     },
   };
 
@@ -57,54 +63,47 @@ export default function SlideOver({
         >
           <div className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-all" />
         </Transition.Child>
-
-        <div className="fixed inset-0 overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden">
-            <div
-              className={`pointer-events-none fixed md:p-2 ${directionClasses[slideFrom].stick} flex w-full h-full`}
-            >
-              <Transition.Child
-                as={Fragment}
-                enter="transition"
-                enterFrom={
-                  directionClasses[slideFrom].animateStart + " opacity-0"
-                }
-                enterTo={
-                  directionClasses[slideFrom].animateEnd + " opacity-100"
-                }
-                leave="transition"
-                leaveFrom={
-                  directionClasses[slideFrom].animateEnd + " opacity-100"
-                }
-                leaveTo={
-                  directionClasses[slideFrom].animateStart + " opacity-0"
+        <Transition.Child
+          as={Fragment}
+          enter="transition-all"
+          enterFrom={directionClasses[slideFrom].animateStart + " opacity-0"}
+          enterTo={directionClasses[slideFrom].animateEnd + " opacity-100"}
+          leave="transition-all"
+          leaveFrom={directionClasses[slideFrom].animateEnd + " opacity-100"}
+          leaveTo={directionClasses[slideFrom].animateStart + " opacity-0"}
+        >
+          <Dialog.Panel
+            className={`fixed pointer-events-auto ${
+              directionClasses[slideFrom].stick
+            } ${onlyChild || "md:p-2"}`}
+          >
+            {onlyChild ? (
+              children
+            ) : (
+              <div
+                className={
+                  "bg-white md:rounded-xl flex flex-col " +
+                  directionClasses[slideFrom].proportions +
+                  " " +
+                  dialogClass
                 }
               >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-fit h-full">
-                  <div
-                    className={
-                      "bg-white w-full md:w-[300px] md:rounded-xl h-full flex flex-col " +
-                      dialogClass
-                    }
+                <div className="flex items-center p-2 gap-2">
+                  <button
+                    className="w-8 h-8 rounded-lg flex justify-center items-center text-2xl hover:bg-black/20"
+                    onClick={() => setOpen(false)}
                   >
-                    <div className="flex items-center p-2 gap-2">
-                      <button
-                        className="w-8 h-8 rounded-lg flex justify-center items-center text-2xl hover:bg-black/20"
-                        onClick={() => setOpen(false)}
-                      >
-                        <i className="uil uil-arrow-left" />
-                      </button>
-                      <div>
-                        <h1 className="text-xl font-black">{title}</h1>
-                      </div>
-                    </div>
-                    <div className="overflow-auto flex-1 p-3">{children}</div>
+                    <i className="uil uil-arrow-left" />
+                  </button>
+                  <div>
+                    <h1 className="text-xl font-black">{title}</h1>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </div>
+                </div>
+                <div className="overflow-auto flex-1 p-3">{children}</div>
+              </div>
+            )}
+          </Dialog.Panel>
+        </Transition.Child>
       </Dialog>
     </Transition.Root>
   );
