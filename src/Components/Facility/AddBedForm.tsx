@@ -115,7 +115,9 @@ export const AddBedForm = (props: BedFormProps) => {
         ? "Bed updated successfully"
         : "Bed created successfully";
 
-      navigate(`/facility/${facilityId}/location/${locationId}/beds`);
+      navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
+        replace: true,
+      });
       Notification.Success({
         msg: notificationMessage,
       });
@@ -207,7 +209,8 @@ export const AddBedForm = (props: BedFormProps) => {
                     type="button"
                     onClick={() =>
                       navigate(
-                        `/facility/${facilityId}/location/${locationId}/beds`
+                        `/facility/${facilityId}/location/${locationId}/beds`,
+                        { replace: true }
                       )
                     }
                   >
