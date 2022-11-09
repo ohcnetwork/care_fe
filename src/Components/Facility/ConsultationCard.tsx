@@ -3,9 +3,9 @@ import { navigate } from "raviger";
 import React from "react";
 import { ConsultationModel } from "./models";
 import { KASP_STRING } from "../../Common/constants";
-import { RoleButton } from "../Common/RoleButton";
 import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -176,18 +176,17 @@ export const ConsultationCard = (props: ConsultationProps) => {
               View / Upload Consultation Files
             </ButtonV2>
             {isLastConsultation && (
-              <RoleButton
-                className="md:mr-4 px-4 py-2 border bg-white rounded-md text-sm cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1 border-gray-500"
-                handleClickCB={() =>
+              <ButtonV2
+                className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+                onClick={() =>
                   navigate(
                     `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`
                   )
                 }
-                disableFor="readOnly"
-                buttonType="html"
+                authorizeFor={NonReadOnlyUsers}
               >
                 Add Consultation Updates
-              </RoleButton>
+              </ButtonV2>
             )}
           </div>
         </Grid>

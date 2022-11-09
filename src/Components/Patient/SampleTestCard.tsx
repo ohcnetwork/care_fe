@@ -5,12 +5,12 @@ import { SampleTestModel } from "./models";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { patchSample } from "../../Redux/actions";
-import { RoleButton } from "../Common/RoleButton";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import _ from "lodash";
 import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -192,14 +192,13 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               Send to Collection Centre
             </ButtonV2>
           )}
-          <RoleButton
-            handleClickCB={() => showUpdateStatus(itemData)}
-            className="px-4 py-2 border bg-white rounded-md text-sm cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1 border-gray-500"
-            disableFor="readOnly"
-            buttonType="html"
+          <ButtonV2
+            onClick={() => showUpdateStatus(itemData)}
+            className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+            authorizeFor={NonReadOnlyUsers}
           >
             UPDATE SAMPLE TEST STATUS
-          </RoleButton>
+          </ButtonV2>
           <ButtonV2
             onClick={(_e) => navigate(`/sample/${itemData.id}`)}
             className="bg-white hover:bg-gray-300 border border-gray-500 text-black"

@@ -30,11 +30,11 @@ import { ErrorHelperText } from "../Common/HelperInputFields";
 import Modal from "@material-ui/core/Modal";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import { RoleButton } from "../Common/RoleButton";
 import clsx from "clsx";
 import Chip from "../../CAREUI/display/Chip";
 import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -787,40 +787,38 @@ export const PatientHome = (props: any) => {
                   </div>
                 )}
                 <div>
-                  <RoleButton
+                  <ButtonV2
                     className="w-full mt-4"
                     disabled={!patientData.is_active}
-                    handleClickCB={() =>
+                    authorizeFor={NonReadOnlyUsers}
+                    onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/update`
                       )
                     }
-                    disableFor="readOnly"
-                    buttonType="tailwind"
                   >
                     <i className="uil uil-edit-alt text-lg" />
                     Update Details
-                  </RoleButton>
+                  </ButtonV2>
                 </div>
                 <div>
-                  <RoleButton
+                  <ButtonV2
                     className="w-full mt-4"
                     disabled={
                       !consultationListData ||
                       !consultationListData.length ||
                       !patientData.is_active
                     }
-                    handleClickCB={() =>
+                    onClick={() =>
                       handlePatientTransfer(!patientData.allow_transfer)
                     }
-                    disableFor="readOnly"
-                    buttonType="tailwind"
+                    authorizeFor={NonReadOnlyUsers}
                   >
                     <i className="uil uil-lock text-lg" />
                     {patientData.allow_transfer
                       ? "Disable Transfer"
                       : "Allow Transfer"}
-                  </RoleButton>
+                  </ButtonV2>
                 </div>
               </div>
             </div>
@@ -1416,36 +1414,34 @@ export const PatientHome = (props: any) => {
                   </ButtonV2>
                 </div>
                 <div>
-                  <RoleButton
-                    className="btn btn-primary w-full"
+                  <ButtonV2
+                    className="w-full"
                     disabled={isPatientInactive(patientData, facilityId)}
-                    handleClickCB={() =>
+                    onClick={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${id}/shift/new`
                       )
                     }
-                    disableFor="readOnly"
-                    buttonType="html"
+                    authorizeFor={NonReadOnlyUsers}
                   >
                     <i className="uil uil-ambulance fa-3x  mr-2"></i> SHIFT
                     PATIENT
-                  </RoleButton>
+                  </ButtonV2>
                 </div>
                 <div>
-                  <RoleButton
-                    className="btn btn-primary w-full"
+                  <ButtonV2
+                    className="w-full"
                     disabled={isPatientInactive(patientData, facilityId)}
-                    handleClickCB={() =>
+                    onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/sample-test`
                       )
                     }
-                    disableFor="readOnly"
-                    buttonType="html"
+                    authorizeFor={NonReadOnlyUsers}
                   >
                     <i className="uil uil-medkit fa-3x  mr-2"></i> Request
                     Sample Test
-                  </RoleButton>
+                  </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
@@ -1461,16 +1457,15 @@ export const PatientHome = (props: any) => {
                   </ButtonV2>
                 </div>
                 <div>
-                  <RoleButton
+                  <ButtonV2
                     className="btn btn-primary w-full"
-                    handleClickCB={() => setOpenAssignVolunteerDialog(true)}
+                    onClick={() => setOpenAssignVolunteerDialog(true)}
                     disabled={false}
-                    disableFor="readOnly"
-                    buttonType="html"
+                    authorizeFor={NonReadOnlyUsers}
                   >
                     <i className="uil uil-users-alt fa-3x  mr-2"></i> Assign to
                     a volunteer
-                  </RoleButton>
+                  </ButtonV2>
                 </div>
               </div>
             </div>
