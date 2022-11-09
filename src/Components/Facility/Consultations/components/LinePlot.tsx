@@ -12,6 +12,7 @@ export const LinePlot = (props: any) => {
   } = props;
   let generalOptions: any = {
     grid: {
+      top: "40px",
       left: "20px",
       right: "30px",
       containLabel: true,
@@ -111,7 +112,6 @@ export const LinePlot = (props: any) => {
       xAxis: {
         ...generalOptions.xAxis,
         show: false,
-        
       },
       yAxis: {
         ...generalOptions.yAxis,
@@ -120,8 +120,8 @@ export const LinePlot = (props: any) => {
         max: props.yEnd,
         splitLine: {
           lineStyle: {
-              color: '#4E4E4E'
-          }
+            color: "#4E4E4E",
+          },
         },
       },
       toolbox: {
@@ -158,7 +158,7 @@ export const LinePlot = (props: any) => {
     };
   }
 
-  if (defaultSpace != true) {
+  if (props.type === "WAVEFORM" && defaultSpace != true) {
     generalOptions = {
       ...generalOptions,
       grid: {
