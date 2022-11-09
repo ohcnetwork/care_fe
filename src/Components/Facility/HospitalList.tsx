@@ -97,7 +97,7 @@ export const HospitalList = (props: any) => {
         facility_type: qParams.facility_type,
         kasp_empanelled: qParams.kasp_empanelled,
       };
-
+      if (params.search_text) params.offset = 0;
       const res = await dispatchAction(getPermittedFacilities(params));
       if (!status.aborted) {
         if (res && res.data) {
