@@ -28,8 +28,6 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { ErrorHelperText } from "../Common/HelperInputFields";
 import Modal from "@material-ui/core/Modal";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import clsx from "clsx";
 import Chip from "../../CAREUI/display/Chip";
 import { formatDate } from "../../Utils/utils";
@@ -833,7 +831,11 @@ export const PatientHome = (props: any) => {
             }}
           >
             <div>Shifting</div>
-            {showShifts ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            {showShifts ? (
+              <i className="uil uil-angle-up text-2xl"></i>
+            ) : (
+              <i className="uil uil-angle-down text-2xl"></i>
+            )}
           </div>
           <div
             className={
