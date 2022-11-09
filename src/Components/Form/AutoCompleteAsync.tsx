@@ -28,7 +28,7 @@ const AutoCompleteAsync = (props: Props) => {
     optionLabel = (option: any) => option.label,
     showNOptions = 10,
     multiple = false,
-    compareBy = "id",
+    compareBy,
     debounceTime = 300,
     className = "",
     placeholder,

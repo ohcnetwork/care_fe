@@ -68,7 +68,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
       >
         {({ open }) => (
           <>
-            <Listbox.Label className="sr-only">
+            <Listbox.Label className="sr-only !relative">
               {props.placeholder}
             </Listbox.Label>
             <div className="relative">
