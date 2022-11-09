@@ -345,7 +345,7 @@ export const HospitalList = (props: any) => {
                   <img
                     src={facility.read_cover_image_url}
                     alt={facility.name}
-                    className="w-full h-full object-cover"
+                    className="w-full max-h-40 sm:max-h-52 object-cover"
                   />
                 )) || (
                   <i className="fas fa-hospital text-4xl block text-gray-500 p-10" />
