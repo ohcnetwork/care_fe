@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import loadable from "@loadable/component";
-// import { InputSearchBox } from "../Common/SearchBox";
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
 import moment from "moment";
@@ -35,10 +34,6 @@ export default function ListView() {
   const [isLoading, setIsLoading] = useState(false);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
-  // const [modalFor, setModalFor] = useState({
-  //   externalId: undefined,
-  //   loading: false,
-  // });
 
   const local = useMemo(
     () => JSON.parse(localStorage.getItem("resource-filters") || "{}"),

@@ -95,3 +95,28 @@ export const handleSignOut = (forceReload: boolean) => {
   navigate("/");
   if (forceReload) window.location.reload();
 };
+
+/**
+ * Referred from: https://stackoverflow.com/a/9039885/7887936
+ * @returns `true` if device is iOS, else `false`
+ */
+function _isAppleDevice() {
+  if (navigator.platform.includes("Mac")) return true;
+  return (
+    [
+      "iPad Simulator",
+      "iPhone Simulator",
+      "iPod Simulator",
+      "iPad",
+      "iPhone",
+      "iPod",
+    ].includes(navigator.platform) ||
+    // iPad on iOS 13 detection
+    (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+  );
+}
+
+/**
+ * `true` if device is iOS, else `false`
+ */
+export const isAppleDevice = _isAppleDevice();
