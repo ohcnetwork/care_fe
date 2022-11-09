@@ -274,7 +274,7 @@ const AssetsList = () => {
                       (
                         (asset.asset_class &&
                           assetClassProps[asset.asset_class]) ||
-                        assetClassProps.None
+                        assetClassProps.NONE
                       ).icon
                     }`}
                   />

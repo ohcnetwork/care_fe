@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
@@ -57,38 +57,99 @@ const StatelessSidebar = ({
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
 
+  const indicatorRef = useRef<HTMLDivElement>(null);
+  const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
+
+  useEffect(() => {
+    if (!indicatorRef.current) return;
+    const index = NavItems.findIndex((item) => item.to === activeLink);
+    if (index !== -1) {
+      // Haha math go brrrrrrrrr
+
+      const e = indicatorRef.current;
+
+      const itemHeight = 44;
+      const bottomItemOffset = 2;
+
+      const indexDifference = index - lastIndicatorPosition;
+      e.style.display = "block";
+
+      if (indexDifference > 0) {
+        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
+        e.style.bottom = "auto";
+      } else {
+        e.style.bottom =
+          itemHeight * (NavItems.length + bottomItemOffset) -
+          lastIndicatorPosition * itemHeight -
+          28 +
+          "px";
+        e.style.top = "auto";
+      }
+
+      e.style.height = `${Math.abs(indexDifference) * itemHeight + 12}px`;
+      setTimeout(() => {
+        if (!e) return;
+        if (indexDifference > 0) {
+          e.style.top = index * itemHeight + 16 + "px";
+          e.style.bottom = "auto";
+        } else {
+          e.style.bottom =
+            itemHeight * (NavItems.length + bottomItemOffset) -
+            index * itemHeight -
+            28 +
+            "px";
+          e.style.top = "auto";
+        }
+        e.style.height = "0.75rem";
+        setLastIndicatorPosition(index);
+      }, 300);
+    } else {
+      indicatorRef.current.style.display = "none";
+    }
+  }, [activeLink]);
+
   return (
     <nav
-      className={`h-screen group flex flex-col bg-primary-800 pt-5 md:pt-7 pb-5 md:pb-10 ${
+      className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out`}
     >
       <div className="h-3" /> {/* flexible spacing */}
       <img
         className={`${
-          shrinked ? "mx-auto" : "ml-10"
-        } h-5 md:h-8 self-start transition mb-5`}
+          shrinked ? "mx-auto" : "ml-5"
+        } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
-      <div className="h-7" /> {/* flexible spacing */}
-      {NavItems.map((i) => (
-        <Item key={i.text} {...i} selected={activeLink === i.to} />
-      ))}
-      <NotificationItem shrinked={shrinked} />
-      <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
-      <div className="flex-1" />
-      {shrinkable && (
+      <div className="h-3" /> {/* flexible spacing */}
+      <div className="flex flex-col relative h-full md:h-auto mb-4 md:mb-0">
         <div
-          className={`${
-            shrinked ? "mx-auto" : "self-end"
-          } flex mt-10 self-end group-hover:mb-2 h-0 group-hover:h-12 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
-        >
-          <ToggleShrink
-            shrinked={shrinked}
-            toggle={() => setShrinked && setShrinked(!shrinked)}
-          />
-        </div>
-      )}
+          ref={indicatorRef}
+          className={`absolute left-2 w-1 hidden md:block
+            bg-primary-400 rounded z-10 transition-all`}
+        />
+        {NavItems.map((i) => {
+          return <Item key={i.text} {...i} selected={i.to === activeLink} />;
+        })}
+
+        <NotificationItem shrinked={shrinked} />
+        <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
+      </div>
+      <div className="flex-1" />
+      <div className="relative flex justify-end">
+        {shrinkable && (
+          <div
+            className={`${
+              shrinked ? "mx-auto" : "self-end"
+            } flex self-end h-12 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
+          >
+            <ToggleShrink
+              shrinked={shrinked}
+              toggle={() => setShrinked && setShrinked(!shrinked)}
+            />
+          </div>
+        )}
+      </div>
       <SidebarUserCard shrinked={shrinked} />
     </nav>
   );
