@@ -77,7 +77,7 @@ const routes = {
   "/hub": () => <HubDashboard />,
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
-  "/user/add": () => <UserAdd />,
+  "/users/add": () => <UserAdd />,
   "/user/profile": () => <UserProfile />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
