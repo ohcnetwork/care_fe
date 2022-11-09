@@ -416,99 +416,93 @@ export const HospitalList = (props: any) => {
                     {facility.phone_number || "-"}
                   </a>
                 </div>
-                <div className="bg-gray-50 border-t px-2 md:px-6 py-2 flex-none">
-                  <div className="flex py-4 justify-between">
-                    <div className="flex justify-between w-full flex-wrap gap-2">
-                      <div>
-                        {userType !== "Staff" ? (
-                          <ButtonV2
-                            className="flex gap-3 bg-white"
-                            shadow
-                            ghost
-                            onClick={() => setNotifyModalFor(facility.id)}
-                          >
-                            <i className="far fa-comment-dots"></i>
-                            Notify
-                          </ButtonV2>
-                        ) : (
-                          <></>
-                        )}
-                        <Modal
-                          open={notifyModalFor === facility.id}
-                          onClose={() => setNotifyModalFor(undefined)}
-                          aria-labelledby="Notify This Facility"
-                          aria-describedby="Type a message and notify this facility"
-                          className=""
+                <div className="bg-gray-50 border-t px-2 md:px-6 py-3 flex-none flex justify-between w-full flex-wrap gap-2">
+                  <div>
+                    {userType !== "Staff" ? (
+                      <ButtonV2
+                        className="flex gap-3 bg-white"
+                        shadow
+                        ghost
+                        onClick={() => setNotifyModalFor(facility.id)}
+                      >
+                        <i className="far fa-comment-dots"></i>
+                        Notify
+                      </ButtonV2>
+                    ) : (
+                      <></>
+                    )}
+                    <Modal
+                      open={notifyModalFor === facility.id}
+                      onClose={() => setNotifyModalFor(undefined)}
+                      aria-labelledby="Notify This Facility"
+                      aria-describedby="Type a message and notify this facility"
+                      className=""
+                    >
+                      <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+                        <form
+                          onSubmit={(event) => {
+                            event.preventDefault();
+                            handleNotifySubmit(notifyModalFor);
+                          }}
+                          className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
                         >
-                          <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                            <form
-                              onSubmit={(event) => {
-                                event.preventDefault();
-                                handleNotifySubmit(notifyModalFor);
-                              }}
-                              className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
-                            >
-                              <div className="mb-4">
-                                <h1 className="text-2xl">
-                                  Notify: {facility.name}
-                                </h1>
-                              </div>
-                              <div>
-                                <TextField
-                                  id="NotifyModalMessageInput"
-                                  rows={6}
-                                  multiline
-                                  required
-                                  className="w-full border p-2 max-h-64"
-                                  onChange={(e) =>
-                                    setNotifyMessage(e.target.value)
-                                  }
-                                  placeholder="Type your message..."
-                                  variant="outlined"
-                                />
-                              </div>
-                              <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-                                <button
-                                  type="button"
-                                  className="btn-danger btn mr-2 w-full md:w-auto"
-                                  onClick={() => setNotifyModalFor(undefined)}
-                                >
-                                  Cancel
-                                </button>
-                                <button
-                                  type="submit"
-                                  className="btn-primary btn mr-2 w-full md:w-auto"
-                                >
-                                  Send Notification
-                                </button>
-                              </div>
-                            </form>
+                          <div className="mb-4">
+                            <h1 className="text-2xl">
+                              Notify: {facility.name}
+                            </h1>
                           </div>
-                        </Modal>
+                          <div>
+                            <TextField
+                              id="NotifyModalMessageInput"
+                              rows={6}
+                              multiline
+                              required
+                              className="w-full border p-2 max-h-64"
+                              onChange={(e) => setNotifyMessage(e.target.value)}
+                              placeholder="Type your message..."
+                              variant="outlined"
+                            />
+                          </div>
+                          <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+                            <button
+                              type="button"
+                              className="btn-danger btn mr-2 w-full md:w-auto"
+                              onClick={() => setNotifyModalFor(undefined)}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              className="btn-primary btn mr-2 w-full md:w-auto"
+                            >
+                              Send Notification
+                            </button>
+                          </div>
+                        </form>
                       </div>
-                      <div className="flex gap-2 ">
-                        <ButtonV2
-                          className="flex gap-3 bg-white"
-                          shadow
-                          ghost
-                          onClick={() => navigate(`/facility/${facility.id}`)}
-                        >
-                          <i className="fas fa-hospital"></i>
-                          {t("Facility")}
-                        </ButtonV2>
-                        <ButtonV2
-                          className="flex gap-3 bg-white"
-                          shadow
-                          ghost
-                          onClick={() =>
-                            navigate(`/facility/${facility.id}/patients`)
-                          }
-                        >
-                          <i className="fas fa-user-injured"></i>
-                          {t("Patients")}
-                        </ButtonV2>
-                      </div>
-                    </div>
+                    </Modal>
+                  </div>
+                  <div className="flex gap-2 ">
+                    <ButtonV2
+                      className="flex gap-3 bg-white"
+                      shadow
+                      ghost
+                      onClick={() => navigate(`/facility/${facility.id}`)}
+                    >
+                      <i className="fas fa-hospital"></i>
+                      {t("Facility")}
+                    </ButtonV2>
+                    <ButtonV2
+                      className="flex gap-3 bg-white"
+                      shadow
+                      ghost
+                      onClick={() =>
+                        navigate(`/facility/${facility.id}/patients`)
+                      }
+                    >
+                      <i className="fas fa-user-injured"></i>
+                      {t("Patients")}
+                    </ButtonV2>
                   </div>
                 </div>
               </div>
