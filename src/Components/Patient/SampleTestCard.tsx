@@ -1,4 +1,4 @@
-import { CardContent } from "@material-ui/core";
+import { CardContent, Tooltip } from "@material-ui/core";
 import { navigate } from "raviger";
 import React, { useState } from "react";
 import { SampleTestModel } from "./models";
@@ -145,26 +145,42 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         </div>
         <div className="flex flex-col mt-6 gap-2 ml-2">
           {
-            <div className="text-sm text-gray-700">
+            <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
               Created:{" "}
-              {itemData.created_date && formatDate(itemData.created_date)}{" "}
-              {/* {itemData.created_by && (
-                <span>
-                  by{" "}
-                  {`${itemData.created_by?.first_name} ${itemData.created_by?.last_name} @${itemData.created_by?.username} (${itemData.created_by?.user_type})`}
-                </span>
-              )} */}
+              <p>
+                {itemData.created_date && formatDate(itemData.created_date)}{" "}
+              </p>
+              {itemData.created_by && (
+                <Tooltip
+                  title={
+                    <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
+                      {`${itemData.created_by?.first_name} ${itemData.created_by?.last_name} @${itemData.created_by?.username} (${itemData.created_by?.user_type})`}
+                    </div>
+                  }
+                  children={
+                    <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                  }
+                />
+              )}
             </div>
           }
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
             Last Modified:{" "}
-            {itemData.modified_date && formatDate(itemData.modified_date)}{" "}
-            {/* {itemData.last_edited_by && (
-              <span>
-                by{" "}
-                {`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name} @${itemData.last_edited_by?.username} (${itemData.last_edited_by?.user_type})`}
-              </span>
-            )} */}
+            <p>
+              {itemData.modified_date && formatDate(itemData.modified_date)}{" "}
+            </p>
+            {itemData.last_edited_by && (
+              <Tooltip
+                title={
+                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
+                    {`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name} @${itemData.last_edited_by?.username} (${itemData.last_edited_by?.user_type})`}
+                  </div>
+                }
+                children={
+                  <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                }
+              />
+            )}
           </div>
         </div>
         <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between mx-2">

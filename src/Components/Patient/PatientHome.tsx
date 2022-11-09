@@ -1,4 +1,4 @@
-import { Button, CircularProgress } from "@material-ui/core";
+import { Button, CircularProgress, Tooltip } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
@@ -725,33 +725,51 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm leading-5 font-normal text-gray-500">
                       Created
                     </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre font-semibold">
-                      <div className="text-sm whitespace-normal">
-                        {patientData?.created_by?.first_name}{" "}
-                        {patientData?.created_by?.last_name}
-                      </div>
-                      {/* <div className="text-xs flex justify-center font-semibold">
+                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-normal font-semibold">
+                      <div className="text-sm flex justify-center font-semibold">
                         {patientData.created_date && (
                           <div className="flex flex-col md:flex-row gap-1">
-                            <div>{formatDate(patientData.created_date)}</div>
+                            <div className="flex flex-col md:flex-row items-center">
+                              <p>{formatDate(patientData.created_date)}</p>
+                              <Tooltip
+                                title={
+                                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
+                                    {patientData?.created_by?.first_name}{" "}
+                                    {patientData?.created_by?.last_name}
+                                  </div>
+                                }
+                                children={
+                                  <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                                }
+                              />
+                            </div>
                           </div>
                         )}
-                      </div> */}
+                      </div>
                     </div>
                   </div>
                   <div className="w-1/2 truncate pb-1">
                     <div className="text-sm leading-5 font-normal text-gray-500">
                       Last Edited
                     </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
-                      {/* <div className="text-sm font-semibold">
-                        {patientData?.last_edited?.first_name}{" "}
-                        {patientData?.last_edited?.last_name}
-                      </div> */}
+                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-normal">
                       <div className="text-sm flex justify-center font-semibold whitespace-normal">
                         {patientData.modified_date && (
                           <div className="flex flex-col md:flex-row gap-1">
-                            <div>{formatDate(patientData.modified_date)}</div>
+                            <div className="flex flex-col md:flex-row items-center">
+                              <p>{formatDate(patientData.modified_date)}</p>
+                              <Tooltip
+                                title={
+                                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
+                                    {patientData?.created_by?.first_name}{" "}
+                                    {patientData?.created_by?.last_name}
+                                  </div>
+                                }
+                                children={
+                                  <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                                }
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
