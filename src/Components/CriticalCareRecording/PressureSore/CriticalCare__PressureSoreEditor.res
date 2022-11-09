@@ -306,13 +306,13 @@ let renderBody = (state, send, title, partPaths, substr) => {
             onClick={e => {
               send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
             }}
-            onMouseOver={e => {
-              if state.previewMode {
+            onMouseEnter={e => {
+              if state.previewMode && innerWidth > 720 {
                 send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
               }
             }}
             onMouseLeave={_ => {
-              if state.previewMode {
+              if state.previewMode && innerWidth > 720 {
                 send(SetSelectedRegion(PressureSore.Other))
               }
             }}

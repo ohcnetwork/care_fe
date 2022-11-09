@@ -49,20 +49,14 @@ let make = (
     () => {
       let modalWidth = 350
       let modalHeight = 352
-      if previewMode && innerWidth < 720 {
-        {
-          "top": ((innerHeight - modalHeight) / 2)->Belt.Int.toString ++ "px",
-          "left": ((innerWidth - modalWidth) / 2)->Belt.Int.toString ++ "px",
-        }
-      } else {
-        {
-          "top": (
-            innerHeight - position["y"] < modalHeight ? position["y"] - modalHeight : position["y"]
-          )->Belt.Int.toString ++ "px",
-          "left": (
-            innerWidth - position["x"] < modalWidth ? position["x"] - modalWidth : position["x"]
-          )->Belt.Int.toString ++ "px",
-        }
+      
+      {
+        "top": (
+          innerHeight - position["y"] < modalHeight ? position["y"] - modalHeight : position["y"]
+        )->Belt.Int.toString ++ "px",
+        "left": (
+          innerWidth - position["x"] < modalWidth ? position["x"] - modalWidth : position["x"]
+        )->Belt.Int.toString ++ "px",
       }
     }
   })
@@ -70,14 +64,14 @@ let make = (
   <div
     hidden={!show}
     onClick={e => handleClickOutside(e, ref, hideModal)}
-    className={previewMode ? "" : "fixed w-full inset-0 z-40 overflow-y-auto"}>
+    className={previewMode && innerWidth > 720 ? "" : "fixed w-full inset-0 z-40 overflow-y-auto"}>
     <div
       hidden={!show}
       className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
       <div
         ref={ReactDOM.Ref.domRef(ref)}
         style={ReactDOMStyle.make(
-          ~position={innerWidth >= 720 || previewMode ? "absolute" : ""},
+          ~position={innerWidth >= 720 ? "absolute" : ""},
           ~left=getModalPosition()["left"],
           ~top=getModalPosition()["top"],
           (),
