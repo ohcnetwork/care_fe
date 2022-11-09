@@ -1,4 +1,4 @@
-import { Button, CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
@@ -463,8 +463,8 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
             <div className="flex items-center mt-4">
-              <button
-                className="btn btn-primary w-full"
+              <ButtonV2
+                className="w-full"
                 disabled={!patientData.is_active}
                 onClick={() =>
                   navigate(
@@ -473,7 +473,7 @@ export const PatientHome = (props: any) => {
                 }
               >
                 Create Consultation
-              </button>
+              </ButtonV2>
             </div>
           </div>
         )}
@@ -955,15 +955,13 @@ export const PatientHome = (props: any) => {
                       {shift.status === "TRANSFER IN PROGRESS" &&
                         shift.assigned_facility && (
                           <div className="mt-2">
-                            <Button
+                            <ButtonV2
                               size="small"
-                              variant="outlined"
-                              fullWidth
+                              className="w-full"
                               onClick={() => setModalFor(shift.external_id)}
                             >
                               TRANSFER TO RECEIVING FACILITY
-                            </Button>
-
+                            </ButtonV2>
                             <Modal
                               open={modalFor === shift.external_id}
                               onClose={() =>
@@ -988,10 +986,9 @@ export const PatientHome = (props: any) => {
                                     </p>
                                   </div>
                                   <div className="flex gap-2 justify-center">
-                                    <Button
+                                    <ButtonV2
                                       size="small"
-                                      variant="outlined"
-                                      fullWidth
+                                      className="w-full"
                                       onClick={() => {
                                         setModalFor({
                                           externalId: undefined,
@@ -1000,17 +997,16 @@ export const PatientHome = (props: any) => {
                                       }}
                                     >
                                       Cancel
-                                    </Button>
-                                    <Button
+                                    </ButtonV2>
+                                    <ButtonV2
                                       size="small"
-                                      variant="outlined"
-                                      fullWidth
+                                      className="w-full"
                                       onClick={() =>
                                         handleTransferComplete(shift)
                                       }
                                     >
                                       Confirm
-                                    </Button>
+                                    </ButtonV2>
                                   </div>
                                 </div>
                               </div>
@@ -1376,8 +1372,8 @@ export const PatientHome = (props: any) => {
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg space-y-2">
                 <div>
-                  <button
-                    className="btn btn-primary w-full"
+                  <ButtonV2
+                    className="w-full"
                     disabled={
                       !(
                         patientData.is_active &&
@@ -1393,22 +1389,22 @@ export const PatientHome = (props: any) => {
                   >
                     <i className="uil uil-chat-bubble-user fa-3x mr-2"></i> Add
                     Consultation
-                  </button>
+                  </ButtonV2>
                 </div>
                 <div>
-                  <button
-                    className="btn btn-primary w-full"
+                  <ButtonV2
+                    className="w-full"
                     onClick={() =>
                       navigate(`/patient/${id}/investigation_reports`)
                     }
                   >
                     <i className="uil uil-file-search-alt fa-3x  mr-2"></i>{" "}
                     Investigations Summary
-                  </button>
+                  </ButtonV2>
                 </div>
                 <div>
-                  <button
-                    className="btn btn-primary w-full"
+                  <ButtonV2
+                    className="w-full"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/files`
@@ -1417,7 +1413,7 @@ export const PatientHome = (props: any) => {
                   >
                     <i className="uil uil-file-upload fa-3x  mr-2"></i>{" "}
                     View/Upload Patient Files
-                  </button>
+                  </ButtonV2>
                 </div>
                 <div>
                   <RoleButton
@@ -1452,8 +1448,8 @@ export const PatientHome = (props: any) => {
                   </RoleButton>
                 </div>
                 <div>
-                  <button
-                    className="btn btn-primary w-full"
+                  <ButtonV2
+                    className="w-full"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/notes`
@@ -1462,7 +1458,7 @@ export const PatientHome = (props: any) => {
                   >
                     <i className="uil uil-clipboard-notes fa-3x  mr-2"></i> View
                     Patient Notes
-                  </button>
+                  </ButtonV2>
                 </div>
                 <div>
                   <RoleButton
@@ -1504,18 +1500,15 @@ export const PatientHome = (props: any) => {
           </div>
 
           <DialogActions>
-            <Button
+            <ButtonV2
               onClick={() => {
                 handleVolunteerSelect(patientData.assigned_to_object);
                 setOpenAssignVolunteerDialog(false);
               }}
-              color="primary"
             >
               Cancel
-            </Button>
-            <Button onClick={handleAssignedVolunteer} color="primary">
-              Submit
-            </Button>
+            </ButtonV2>
+            <ButtonV2 onClick={handleAssignedVolunteer}>Submit</ButtonV2>
           </DialogActions>
         </div>
       </Dialog>

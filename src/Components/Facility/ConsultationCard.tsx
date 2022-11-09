@@ -5,6 +5,7 @@ import { ConsultationModel } from "./models";
 import { KASP_STRING } from "../../Common/constants";
 import { RoleButton } from "../Common/RoleButton";
 import { formatDate } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -154,8 +155,8 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </div>
           </div>
           <div className="mt-4 flex flex-col gap-1 md:flex-row justify-between w-full">
-            <button
-              className="px-4 py-2 border bg-white rounded-md text-sm cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1 border-gray-500"
+            <ButtonV2
+              className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
               onClick={() =>
                 navigate(
                   `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`
@@ -163,9 +164,9 @@ export const ConsultationCard = (props: ConsultationProps) => {
               }
             >
               View Consultation / Consultation Updates
-            </button>
-            <button
-              className="px-4 py-2 border bg-white rounded-md text-sm cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1 border-gray-500"
+            </ButtonV2>
+            <ButtonV2
+              className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
               onClick={() =>
                 navigate(
                   `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`
@@ -173,7 +174,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               }
             >
               View / Upload Consultation Files
-            </button>
+            </ButtonV2>
             {isLastConsultation && (
               <RoleButton
                 className="md:mr-4 px-4 py-2 border bg-white rounded-md text-sm cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1 border-gray-500"

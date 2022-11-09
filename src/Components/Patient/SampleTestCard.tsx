@@ -10,6 +10,7 @@ import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import _ from "lodash";
 import { formatDate } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -181,15 +182,15 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         </div>
         <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between mx-2">
           {itemData.status === "APPROVED" && (
-            <button
+            <ButtonV2
               onClick={(e) => {
                 e.stopPropagation();
                 handleApproval(4, itemData);
               }}
-              className="px-4 py-2 border bg-white rounded-md text-sm cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1 border-gray-500"
+              className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
             >
               Send to Collection Centre
-            </button>
+            </ButtonV2>
           )}
           <RoleButton
             handleClickCB={() => showUpdateStatus(itemData)}
@@ -199,12 +200,12 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           >
             UPDATE SAMPLE TEST STATUS
           </RoleButton>
-          <button
+          <ButtonV2
             onClick={(_e) => navigate(`/sample/${itemData.id}`)}
-            className="px-4 py-2 border bg-white rounded-md text-sm cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1 border-gray-500"
+            className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
           >
             Sample Report
-          </button>
+          </ButtonV2>
         </div>
       </CardContent>
       {statusDialog.show && (
