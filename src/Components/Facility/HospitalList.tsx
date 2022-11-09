@@ -352,7 +352,7 @@ export const HospitalList = (props: any) => {
                 )}
               </div>
 
-              <div className="h-full flex flex-col justify-between w-full">
+              <div className="h-fit md:h-full flex flex-col justify-between w-full">
                 <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
                   <div className="flow-root">
                     {facility.kasp_empanelled && (
@@ -366,7 +366,7 @@ export const HospitalList = (props: any) => {
                   </div>
 
                   <div className="flex gap-1 flex-wrap mt-2">
-                    <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                    <div className="px-2.5 py-0.5 rounded-full text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                       {facility.facility_type}
                     </div>
                     {facility.features?.map(
@@ -376,7 +376,7 @@ export const HospitalList = (props: any) => {
                         ) && (
                           <div
                             key={i}
-                            className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                            className="bg-primary-100 text-primary-600 font-medium px-2.5 py-0.5 rounded-full text-sm leading-5"
                             title={
                               FACILITY_FEATURE_TYPES.filter(
                                 (f) => f.id === feature
