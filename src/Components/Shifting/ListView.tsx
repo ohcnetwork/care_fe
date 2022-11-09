@@ -32,8 +32,6 @@ export default function ListView() {
   const [data, setData] = useState<any[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
@@ -84,9 +82,7 @@ export default function ListView() {
   };
 
   const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
+    updateQuery({ page, limit });
   };
 
   const onBoardViewBtnClick = () => {
@@ -112,7 +108,13 @@ export default function ListView() {
   const fetchData = () => {
     setIsLoading(true);
     dispatch(
-      listShiftRequests(formatFilter({ ...qParams, offset }), "shift-list-call")
+      listShiftRequests(
+        formatFilter({
+          ...qParams,
+          offset: (qParams.page ? qParams.page - 1 : 0) * limit,
+        }),
+        "shift-list-call"
+      )
     ).then((res: any) => {
       if (res && res.data) {
         setData(res.data.results);
@@ -144,7 +146,7 @@ export default function ListView() {
     qParams.disease_status,
     qParams.is_antenatal,
     qParams.breathlessness_level,
-    offset,
+    qParams.page,
   ]);
 
   const updateFilter = (params: any, local: any) => {
@@ -431,7 +433,7 @@ export default function ListView() {
               {totalCount > limit && (
                 <div className="mt-4 flex w-full justify-center">
                   <Pagination
-                    cPage={currentPage}
+                    cPage={qParams.page}
                     defaultPerPage={limit}
                     data={{ totalCount }}
                     onChange={handlePagination}
