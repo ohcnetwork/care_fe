@@ -59,7 +59,6 @@ import AssetManage from "../Components/Assets/AssetManage";
 import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import HubDashboard from "../Components/Dashboard/HubDashboard";
-import { SideBar } from "../Components/Common/SideBar";
 import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
@@ -67,6 +66,11 @@ import Error404 from "../Components/ErrorPages/404";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import FacilityUsers from "../Components/Facility/FacilityUsers";
+import {
+  DesktopSidebar,
+  MobileSidebar,
+} from "../Components/Common/Sidebar/Sidebar";
+import { BLACKLISTED_PATHS } from "../Common/constants";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -74,7 +78,7 @@ const routes = {
   "/hub": () => <HubDashboard />,
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
-  "/user/add": () => <UserAdd />,
+  "/users/add": () => <UserAdd />,
   "/user/profile": () => <UserProfile />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
@@ -415,31 +419,37 @@ export default function AppRouter() {
   useRedirect("/user", "/users");
   const pages = useRoutes(routes) || <Error404 />;
   const path = usePath();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const WHITELIST: RegExp[] = [
-    /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/updates+/i,
-  ];
   useEffect(() => {
-    let flag: boolean = false;
-    if (path)
-      WHITELIST.forEach((regex: RegExp) => {
+    setSidebarOpen(false);
+    let flag = false;
+    if (path) {
+      BLACKLISTED_PATHS.forEach((regex: RegExp) => {
         flag = flag || regex.test(path);
       });
-    if (path && flag) {
-      const pageContainer = window.document.getElementById("pages");
-      pageContainer?.scroll(0, 0);
+      if (!flag) {
+        const pageContainer = window.document.getElementById("pages");
+        pageContainer?.scroll(0, 0);
+      }
     }
   }, [path]);
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
-      <SideBar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      <>
+        <div className="block md:hidden">
+          <MobileSidebar open={sidebarOpen} setOpen={setSidebarOpen} />{" "}
+        </div>
+        <div className="md:block hidden">
+          <DesktopSidebar />
+        </div>
+      </>
 
       <div className="flex flex-col w-full flex-1 overflow-hidden">
         <div className="flex md:hidden relative z-10 shrink-0 h-16 bg-white shadow">
           <button
-            onClick={() => setIsSidebarOpen(true)}
+            onClick={() => setSidebarOpen(true)}
             className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:bg-gray-100 focus:text-gray-600 md:hidden"
             aria-label="Open sidebar"
           >

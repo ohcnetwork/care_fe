@@ -25,8 +25,8 @@ import {
   getDistrictByState,
   getLocalbodyByDistrict,
   getStates,
-  getUserDetails,
   getUserListFacility,
+  checkUsername,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -39,9 +39,8 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
-import { goBack } from "../../Utils/utils";
-import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
 
+import { goBack } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -122,7 +121,7 @@ export const UserAdd = (props: UserProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
-  const [current_user_facilities, setFacilities] = useState<
+  const [_current_user_facilities, setFacilities] = useState<
     Array<FacilityModel>
   >([]);
   const [states, setStates] = useState(initialStates);
@@ -144,14 +143,19 @@ export const UserAdd = (props: UserProps) => {
 
   const [usernameExists, setUsernameExists] = useState<number>(0);
 
-  const checkUsername = async (username: string) => {
+  const check_username = async (username: string) => {
     setUsernameExists(userExistsEnums.checking);
-    const userDetails = await dispatchAction(getUserDetails(username), true);
-    setUsernameExists(
-      userDetails.status === 404
-        ? userExistsEnums.avaliable
-        : userExistsEnums.exists
+    const usernameCheck = await dispatchAction(
+      checkUsername({ username: username })
     );
+    if (usernameCheck === undefined || usernameCheck.status === 409)
+      setUsernameExists(userExistsEnums.exists);
+    else if (usernameCheck.status === 200)
+      setUsernameExists(userExistsEnums.avaliable);
+    else
+      Notification.Error({
+        msg: "Some error checking username availabality. Please try again later.",
+      });
   };
 
   useEffect(() => {
@@ -161,8 +165,8 @@ export const UserAdd = (props: UserProps) => {
       !(state.form.username?.length < 2) &&
       /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
     ) {
-      let timeout = setTimeout(() => {
-        checkUsername(usernameInput);
+      const timeout = setTimeout(() => {
+        check_username(usernameInput);
       }, 500);
       return () => clearTimeout(timeout);
     }

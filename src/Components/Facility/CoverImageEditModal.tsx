@@ -123,6 +123,7 @@ const CoverImageEditModal = ({
                 <input
                   title="changeFile"
                   type="file"
+                  accept="image/*"
                   className="hidden"
                   onChange={onSelectFile}
                 />
