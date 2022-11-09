@@ -510,6 +510,21 @@ export const UserAdd = (props: UserProps) => {
     return true;
   };
 
+  const validateRule = (valid: boolean, content: JSX.Element | string) => {
+    return (
+      <div>
+        {valid ? (
+          <i className="fas fa-circle-xmark text-red-500" />
+        ) : (
+          <i className="fas fa-circle-check text-green-500" />
+        )}{" "}
+        <span className={clsx(valid ? "text-red-500" : "text-primary-500")}>
+          {content}
+        </span>
+      </div>
+    );
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validated = validateForm();
@@ -694,57 +709,28 @@ export const UserAdd = (props: UserProps) => {
                             <span>
                               <i className="fas fa-circle-dot" /> checking...
                             </span>
-                          ) : usernameExists === userExistsEnums.exists ? (
-                            <span className="text-red-500">
-                              <i className="fas fa-circle-xmark text-red-500" />{" "}
-                              User already exists
-                            </span>
                           ) : (
-                            usernameExists === userExistsEnums.avaliable && (
-                              <span className="text-primary-500">
-                                <i className="fas fa-circle-check text-green-500" />{" "}
-                                Available!
-                              </span>
+                            validateRule(
+                              usernameExists === userExistsEnums.exists,
+                              "Username should not be taken"
                             )
                           )}
                         </>
                       )}
                     </div>
                     <div>
-                      {state.form.username?.length < 2 ? (
-                        <i className="fas fa-circle-xmark text-red-500" />
-                      ) : (
-                        <i className="fas fa-circle-check text-green-500" />
-                      )}{" "}
-                      <span
-                        className={clsx(
-                          state.form.username?.length < 2
-                            ? "text-red-500"
-                            : "text-primary-500"
-                        )}
-                      >
-                        Username should be atleast 2 characters long
-                      </span>
+                      {validateRule(
+                        state.form.username?.length < 2,
+                        "Username should be atleast 2 characters long"
+                      )}
                     </div>
                     <div>
-                      {!/[^.@+_-]/.test(
-                        state.form.username[state.form.username?.length - 1]
-                      ) ? (
-                        <i className="fas fa-circle-xmark text-red-500" />
-                      ) : (
-                        <i className="fas fa-circle-check text-green-500" />
-                      )}{" "}
-                      <span
-                        className={clsx(
-                          !/[^.@+_-]/.test(
-                            state.form.username[state.form.username?.length - 1]
-                          )
-                            ? "text-red-500"
-                            : "text-primary-500"
-                        )}
-                      >
-                        Username can't end with ^ . @ + _ -
-                      </span>
+                      {validateRule(
+                        !/[^.@+_-]/.test(
+                          state.form.username[state.form.username?.length - 1]
+                        ),
+                        "Username can't end with ^ . @ + _ -"
+                      )}
                     </div>
                   </div>
                 )}
@@ -782,74 +768,22 @@ export const UserAdd = (props: UserProps) => {
                 />
                 {passwordInputInFocus && (
                   <div className="pl-2 text-small text-gray-500">
-                    <div>
-                      {state.form.password?.length < 8 ? (
-                        <i className="fas fa-circle-xmark text-red-500" />
-                      ) : (
-                        <i className="fas fa-circle-check text-green-500" />
-                      )}{" "}
-                      <span
-                        className={clsx(
-                          state.form.password?.length < 8
-                            ? "text-red-500"
-                            : "text-primary-500"
-                        )}
-                      >
-                        Password should be atleast 8 characters long
-                      </span>
-                    </div>
-                    <div>
-                      {state.form.password ===
-                      state.form.password.toUpperCase() ? (
-                        <i className="fas fa-circle-xmark text-red-500" />
-                      ) : (
-                        <i className="fas fa-circle-check text-green-500" />
-                      )}{" "}
-                      <span
-                        className={clsx(
-                          state.form.password ===
-                            state.form.password.toUpperCase()
-                            ? "text-red-500"
-                            : "text-primary-500"
-                        )}
-                      >
-                        Password should contain at least 1 lowercase letter
-                      </span>
-                    </div>
-                    <div>
-                      {state.form.password ===
-                      state.form.password.toLowerCase() ? (
-                        <i className="fas fa-circle-xmark text-red-500" />
-                      ) : (
-                        <i className="fas fa-circle-check text-green-500" />
-                      )}{" "}
-                      <span
-                        className={clsx(
-                          state.form.password ===
-                            state.form.password.toLowerCase()
-                            ? "text-red-500"
-                            : "text-primary-500"
-                        )}
-                      >
-                        Password should contain at least 1 uppercase letter
-                      </span>
-                    </div>
-                    <div>
-                      {!/\d/.test(state.form.password) ? (
-                        <i className="fas fa-circle-xmark text-red-500" />
-                      ) : (
-                        <i className="fas fa-circle-check text-green-500" />
-                      )}{" "}
-                      <span
-                        className={clsx(
-                          !/\d/.test(state.form.password)
-                            ? "text-red-500"
-                            : "text-primary-500"
-                        )}
-                      >
-                        Password should contain at least 1 number
-                      </span>
-                    </div>
+                    {validateRule(
+                      state.form.password?.length < 8,
+                      "Password should be atleast 8 characters long"
+                    )}
+                    {validateRule(
+                      state.form.password === state.form.password.toUpperCase(),
+                      "Password should contain at least 1 lowercase letter"
+                    )}
+                    {validateRule(
+                      state.form.password === state.form.password.toLowerCase(),
+                      "Password should contain at least 1 uppercase letter"
+                    )}
+                    {validateRule(
+                      !/\d/.test(state.form.password),
+                      "Password should contain at least 1 number"
+                    )}
                   </div>
                 )}
               </div>
@@ -869,25 +803,10 @@ export const UserAdd = (props: UserProps) => {
                   onBlur={() => setConfirmPasswordInputInFocus(false)}
                 />
                 {confirmPasswordInputInFocus &&
-                  state.form.c_password.length > 0 && (
-                    <div className="pl-2 text-small text-gray-500">
-                      <div>
-                        {state.form.password != state.form.c_password ? (
-                          <i className="fas fa-circle-xmark text-red-500" />
-                        ) : (
-                          <i className="fas fa-circle-check text-green-500" />
-                        )}{" "}
-                        <span
-                          className={clsx(
-                            state.form.password != state.form.c_password
-                              ? "text-red-500"
-                              : "text-primary-500"
-                          )}
-                        >
-                          Confirm password should match the password
-                        </span>
-                      </div>
-                    </div>
+                  state.form.c_password.length > 0 &&
+                  validateRule(
+                    state.form.c_password !== state.form.password,
+                    "Confirm password should match the entered password"
                   )}
               </div>
               <div>
