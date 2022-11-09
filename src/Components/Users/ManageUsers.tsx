@@ -45,8 +45,6 @@ export default function ManageUsers() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFacilityLoading, setIsFacilityLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [districtName, setDistrictName] = useState<string | undefined>(
     undefined
@@ -98,7 +96,7 @@ export default function ManageUsers() {
       setIsLoading(true);
       const params = {
         limit,
-        offset,
+        offset: (qParams.page ? qParams.page - 1 : 0) * limit,
         username: qParams.username,
         first_name: qParams.first_name,
         last_name: qParams.last_name,
@@ -125,16 +123,16 @@ export default function ManageUsers() {
       }
     },
     [
-      dispatch,
       limit,
-      offset,
-      qParams.user_type,
+      qParams.page,
       qParams.username,
       qParams.first_name,
       qParams.last_name,
       qParams.phone_number,
       qParams.alt_phone_number,
+      qParams.user_type,
       qParams.district_id,
+      dispatch,
     ]
   );
 
@@ -146,9 +144,7 @@ export default function ManageUsers() {
   );
 
   const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
+    updateQuery({ page, limit });
   };
 
   const onUserNameChange = (value: string) => {
@@ -555,7 +551,7 @@ export default function ManageUsers() {
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
-              cPage={currentPage}
+              cPage={qParams.page}
               defaultPerPage={limit}
               data={{ totalCount }}
               onChange={handlePagination}

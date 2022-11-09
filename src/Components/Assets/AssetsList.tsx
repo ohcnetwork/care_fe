@@ -37,8 +37,6 @@ const AssetsList = () => {
   const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [offset, setOffset] = useState<number>(0);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [facilityName, setFacilityName] = useState<string>();
@@ -50,24 +48,16 @@ const AssetsList = () => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const params = qParams.search
-        ? {
-            limit,
-            offset,
-            search_text: qParams.search,
-            facility: qParams.facility,
-            asset_type: qParams.asset_type,
-            location: qParams.location,
-            status: qParams.status,
-          }
-        : {
-            limit,
-            offset,
-            facility: qParams.facility,
-            asset_type: qParams.asset_type,
-            location: qParams.location,
-            status: qParams.status,
-          };
+      const params = {
+        limit,
+        page: qParams.page,
+        offset: (qParams.page ? qParams.page - 1 : 0) * limit,
+        search_text: qParams.search || "",
+        facility: qParams.facility,
+        asset_type: qParams.asset_type,
+        location: qParams.location,
+        status: qParams.status,
+      };
       const { data }: any = await dispatch(listAssets(params));
       if (!status.aborted) {
         setIsLoading(false);
@@ -83,7 +73,7 @@ const AssetsList = () => {
     },
     [
       dispatch,
-      offset,
+      qParams.page,
       qParams.search,
       qParams.facility,
       qParams.asset_type,
@@ -176,16 +166,13 @@ const AssetsList = () => {
     else setQueryParams({ ...qParams, search: "" }, { replace: true });
   };
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
-
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
     setQueryParams(nParams, { replace: true });
-    console.log(qParams);
+  };
+
+  const handlePagination = (page: number, limit: number) => {
+    updateQuery({ page, limit });
   };
 
   const applyFilter = (data: any) => {
@@ -381,7 +368,7 @@ const AssetsList = () => {
               {totalCount > limit && (
                 <div className="mt-4 flex w-full justify-center">
                   <Pagination
-                    cPage={currentPage}
+                    cPage={qParams.page}
                     defaultPerPage={limit}
                     data={{ totalCount }}
                     onChange={handlePagination}

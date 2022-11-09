@@ -63,8 +63,6 @@ export const HospitalList = (props: any) => {
   let manageFacilities: any = null;
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
   const [capacityDownloadFile, setCapacityDownloadFile] = useState("");
   const [doctorsDownloadFile, setDoctorsDownloadFile] = useState("");
@@ -90,7 +88,8 @@ export const HospitalList = (props: any) => {
       setIsLoading(true);
       const params = {
         limit,
-        offset,
+        page: qParams.page || 1,
+        offset: (qParams.page ? qParams.page - 1 : 0) * limit,
         search_text: qParams.search || undefined,
         state: qParams.state,
         district: qParams.district,
@@ -109,14 +108,14 @@ export const HospitalList = (props: any) => {
       }
     },
     [
-      dispatchAction,
-      offset,
+      qParams.page,
       qParams.search,
-      qParams.kasp_empanelled,
       qParams.state,
       qParams.district,
       qParams.local_body,
       qParams.facility_type,
+      qParams.kasp_empanelled,
+      dispatchAction,
     ]
   );
 
@@ -296,9 +295,7 @@ export const HospitalList = (props: any) => {
   };
 
   const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
+    updateQuery({ page, limit });
   };
 
   const handleNotifySubmit = async (id: any) => {
@@ -524,7 +521,7 @@ export const HospitalList = (props: any) => {
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
-              cPage={currentPage}
+              cPage={qParams.page}
               defaultPerPage={limit}
               data={{ totalCount }}
               onChange={handlePagination}
