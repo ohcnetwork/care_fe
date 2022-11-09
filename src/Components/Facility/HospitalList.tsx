@@ -40,6 +40,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -366,7 +367,7 @@ export const HospitalList = (props: any) => {
                   </div>
 
                   <div className="flex gap-1 flex-wrap mt-2">
-                    <div className="px-2.5 py-0.5 rounded-full text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                    <div className="px-2.5 py-0.5 rounded-full text-sm leading-5 bg-blue-100 text-blue-800">
                       {facility.facility_type}
                     </div>
                     {facility.features?.map(
@@ -376,7 +377,7 @@ export const HospitalList = (props: any) => {
                         ) && (
                           <div
                             key={i}
-                            className="bg-primary-100 text-primary-600 font-medium px-2.5 py-0.5 rounded-full text-sm leading-5"
+                            className="bg-primary-100 text-primary-600 px-2.5 py-0.5 rounded-full text-sm leading-5"
                             title={
                               FACILITY_FEATURE_TYPES.filter(
                                 (f) => f.id === feature
@@ -410,7 +411,7 @@ export const HospitalList = (props: any) => {
                   </div>
                   <a
                     href={`tel:${facility.phone_number}`}
-                    className="font-semibold"
+                    className="text-sm font-medium tracking-widest"
                   >
                     {facility.phone_number || "-"}
                   </a>
@@ -420,13 +421,15 @@ export const HospitalList = (props: any) => {
                     <div className="flex justify-between w-full flex-wrap gap-2">
                       <div>
                         {userType !== "Staff" ? (
-                          <button
-                            className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                          <ButtonV2
+                            className="flex gap-3 bg-white"
+                            shadow
+                            ghost
                             onClick={() => setNotifyModalFor(facility.id)}
                           >
-                            <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
-                            <span className="md:block hidden">Notify</span>
-                          </button>
+                            <i className="far fa-comment-dots"></i>
+                            Notify
+                          </ButtonV2>
                         ) : (
                           <></>
                         )}
@@ -484,20 +487,26 @@ export const HospitalList = (props: any) => {
                         </Modal>
                       </div>
                       <div className="flex gap-2 ">
-                        <Link
-                          href={`/facility/${facility.id}`}
-                          className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                        <ButtonV2
+                          className="flex gap-3 bg-white"
+                          shadow
+                          ghost
+                          onClick={() => navigate(`/facility/${facility.id}`)}
                         >
-                          <i className="fas fa-hospital mr-2 text-primary-500"></i>
+                          <i className="fas fa-hospital"></i>
                           {t("Facility")}
-                        </Link>
-                        <Link
-                          href={`/facility/${facility.id}/patients`}
-                          className=" inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                        </ButtonV2>
+                        <ButtonV2
+                          className="flex gap-3 bg-white"
+                          shadow
+                          ghost
+                          onClick={() =>
+                            navigate(`/facility/${facility.id}/patients`)
+                          }
                         >
-                          <i className="fas fa-user-injured text-primary-500 mr-2"></i>
+                          <i className="fas fa-user-injured"></i>
                           {t("Patients")}
-                        </Link>
+                        </ButtonV2>
                       </div>
                     </div>
                   </div>
