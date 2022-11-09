@@ -197,7 +197,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
             authorizeFor={NonReadOnlyUsers}
           >
-            UPDATE SAMPLE TEST STATUS
+            Update Sample Test Status
           </ButtonV2>
           <ButtonV2
             onClick={(_e) => navigate(`/sample/${itemData.id}`)}
