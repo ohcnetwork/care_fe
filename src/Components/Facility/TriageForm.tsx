@@ -276,7 +276,7 @@ export const TriageForm = (props: triageFormProps) => {
           <div className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content">
             <div className="mb-4">
               <i className="fa-solid fa-triangle-exclamation text-red-500 fa-4x"></i>
-              <h1 className="text-xl">
+              <h1 className="sm:text-xl text-sm">
                 A Triage already exist on this date if you wish to proceed then
                 the existing triage will be over written!
               </h1>
