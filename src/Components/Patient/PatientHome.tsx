@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Tooltip } from "@material-ui/core";
+import { Button, CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
@@ -702,7 +702,7 @@ export const PatientHome = (props: any) => {
                   )}
                 <div className="p-2 bg-white rounded-sm shadow text-center mb-6">
                   <div className="flex justify-between">
-                    <div className="w-1/2 border-r-2 truncate">
+                    <div className="w-1/2 border-r-2">
                       <div className="text-sm leading-5 font-normal text-gray-500">
                         COVID Status
                       </div>
@@ -710,7 +710,7 @@ export const PatientHome = (props: any) => {
                         {patientData.disease_status}
                       </div>
                     </div>
-                    <div className="w-1/2 truncate">
+                    <div className="w-1/2">
                       <div className="text-sm leading-5 font-normal text-gray-500">
                         Status
                       </div>
@@ -721,7 +721,7 @@ export const PatientHome = (props: any) => {
                   </div>
                 </div>
                 <div className="flex justify-between p-2 bg-white rounded-sm shadow text-center px-4 mt-2">
-                  <div className="w-1/2 border-r-2 truncate pb-1">
+                  <div className="w-1/2 border-r-2 pb-1">
                     <div className="text-sm leading-5 font-normal text-gray-500">
                       Created
                     </div>
@@ -731,24 +731,22 @@ export const PatientHome = (props: any) => {
                           <div className="flex flex-col md:flex-row gap-1">
                             <div className="flex flex-col md:flex-row items-center">
                               <p>{formatDate(patientData.created_date)}</p>
-                              <Tooltip
-                                title={
-                                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
+                              <div className="tooltip">
+                                <span className="tooltip-text tooltip-top">
+                                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold w-fit">
                                     {patientData?.created_by?.first_name}{" "}
                                     {patientData?.created_by?.last_name}
                                   </div>
-                                }
-                                children={
-                                  <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
-                                }
-                              />
+                                </span>
+                                <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                              </div>
                             </div>
                           </div>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="w-1/2 truncate pb-1">
+                  <div className="w-1/2 pb-1">
                     <div className="text-sm leading-5 font-normal text-gray-500">
                       Last Edited
                     </div>
@@ -758,17 +756,15 @@ export const PatientHome = (props: any) => {
                           <div className="flex flex-col md:flex-row gap-1">
                             <div className="flex flex-col md:flex-row items-center">
                               <p>{formatDate(patientData.modified_date)}</p>
-                              <Tooltip
-                                title={
+                              <div className="tooltip">
+                                <span className="tooltip-text tooltip-top">
                                   <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
                                     {patientData?.created_by?.first_name}{" "}
                                     {patientData?.created_by?.last_name}
                                   </div>
-                                }
-                                children={
-                                  <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
-                                }
-                              />
+                                </span>
+                                <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                              </div>
                             </div>
                           </div>
                         )}

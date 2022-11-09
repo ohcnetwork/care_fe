@@ -1,4 +1,4 @@
-import { CardContent, Grid, Tooltip, Typography } from "@material-ui/core";
+import { CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import React from "react";
 import { ConsultationModel } from "./models";
@@ -123,16 +123,14 @@ export const ConsultationCard = (props: ConsultationProps) => {
                     : "--:--"}{" "}
                 </p>
                 {itemData.created_by && (
-                  <Tooltip
-                    title={
+                  <div className="tooltip">
+                    <span className="tooltip-text tooltip-top">
                       <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
                         {`${itemData.created_by?.first_name} ${itemData.created_by?.last_name} @${itemData.created_by?.username} (${itemData.created_by?.user_type})`}
                       </div>
-                    }
-                    children={
-                      <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
-                    }
-                  />
+                    </span>
+                    <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                  </div>
                 )}
               </div>
             }
@@ -144,16 +142,14 @@ export const ConsultationCard = (props: ConsultationProps) => {
                   : "--:--"}{" "}
               </p>
               {itemData.last_edited_by && (
-                <Tooltip
-                  title={
+                <div className="tooltip">
+                  <span className="tooltip-text tooltip-top">
                     <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
                       {`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name} @${itemData.last_edited_by?.username} (${itemData.last_edited_by?.user_type})`}
                     </div>
-                  }
-                  children={
-                    <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
-                  }
-                />
+                  </span>
+                  <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                </div>
               )}
             </div>
           </div>
