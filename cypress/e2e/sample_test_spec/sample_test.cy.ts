@@ -8,8 +8,7 @@ describe("Sample List", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.awaitUrl("/");
-    cy.get("a").contains("Sample Test").click();
+    cy.awaitUrl("/sample");
   });
 
   it("Search by District name", () => {
