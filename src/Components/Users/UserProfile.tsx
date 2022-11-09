@@ -3,11 +3,7 @@ import React, { useState, useCallback, useReducer } from "react";
 import { InputLabel, Button } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  GENDER_TYPES,
-  PREFERENCE_SIDEBAR_KEY,
-  SIDEBAR,
-} from "../../Common/constants";
+import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserDetails,
@@ -24,7 +20,6 @@ import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
-import Switch from "@material-ui/core/Switch";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -734,34 +729,6 @@ export default function UserProfile() {
           </div>
           <div className="mt-5 md:mt-0 md:col-span-2">
             <LanguageSelector className="bg-white w-full" />
-          </div>
-        </div>
-        <div>
-          <h1 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-            Preferences
-          </h1>
-          <div className="flex items-center gap-8">
-            <h1 className="text-base font-normal leading-6 text-gray-900">
-              Auto Collapse Sidebar
-            </h1>
-            <Switch
-              color="primary"
-              value={
-                localStorage.getItem(PREFERENCE_SIDEBAR_KEY) ===
-                SIDEBAR.COLLAPSED
-              }
-              onChange={(e) => {
-                localStorage.setItem(
-                  PREFERENCE_SIDEBAR_KEY,
-                  e.target.checked ? SIDEBAR.COLLAPSED : SIDEBAR.FULL
-                );
-                window.dispatchEvent(new Event("storage"));
-              }}
-              defaultChecked={
-                localStorage.getItem(PREFERENCE_SIDEBAR_KEY) ===
-                SIDEBAR.COLLAPSED
-              }
-            />
           </div>
         </div>
 

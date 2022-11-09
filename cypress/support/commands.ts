@@ -4,8 +4,8 @@ import "cypress-localstorage-commands";
 Cypress.Commands.add("login", (username: string, password: string) => {
   cy.log(`Logging in the user: ${username}:${password}`);
   cy.visit("/");
-  cy.get("input[name='username']").type(username);
-  cy.get("input[name='password']").type(password);
+  cy.get("input[id='username']").type(username);
+  cy.get("input[id='password']").type(password);
   cy.get("button").contains("Login").click();
   return cy.url().should("include", "/facility");
 });

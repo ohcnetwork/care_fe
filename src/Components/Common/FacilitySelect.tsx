@@ -13,6 +13,7 @@ interface FacilitySelectProps {
   facilityType?: number;
   district?: string;
   showAll?: boolean;
+  showNOptions?: number;
   selected: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
 }
@@ -25,6 +26,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     setSelected,
     searchAll,
     showAll = true,
+    showNOptions = 10,
     className = "",
     facilityType,
     district,
@@ -60,10 +62,12 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
       selected={selected}
       onChange={setSelected}
       fetchData={facilitySearch}
+      showNOptions={showNOptions}
       optionLabel={(option: any) =>
         option.name +
         (option.district_object ? `, ${option.district_object.name}` : "")
       }
+      compareBy="id"
       className={className}
       error={errors}
     />

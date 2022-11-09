@@ -25,12 +25,12 @@ import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
-import SelectMenu from "../Common/components/SelectMenu";
 import moment from "moment";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError = {
@@ -164,7 +164,7 @@ const AssetCreate = (props: AssetProps) => {
         setIsLoading(false);
       });
     }
-  }, [assetId]);
+  }, [assetId, dispatchAction, facilityId]);
 
   useEffect(() => {
     if (asset) {
@@ -216,7 +216,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "asset_type":
-          if (!asset_type) {
+          if (!asset_type || asset_type == "NONE") {
             errors[field] = "Select an asset type";
             invalidForm = true;
           }
@@ -308,6 +308,8 @@ const AssetCreate = (props: AssetProps) => {
             goBack();
           } else {
             resetFilters();
+            const pageContainer = window.document.getElementById("pages");
+            pageContainer?.scroll(0, 0);
           }
         }
         setIsLoading(false);
@@ -480,15 +482,15 @@ const AssetCreate = (props: AssetProps) => {
                   <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
                     {/* Location */}
                     <div>
-                      <label htmlFor="asset-location">Location * </label>
+                      <label htmlFor="asset-location">Location *</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
+                          required
                           options={[
                             {
                               title: "Select",
-                              description:
-                                "Select an Asset Location from the following",
-                              value: "",
+                              description: "Select the location",
+                              value: "0",
                             },
                             ...locations.map((location: any) => ({
                               title: location.name,
@@ -496,8 +498,10 @@ const AssetCreate = (props: AssetProps) => {
                               value: location.id,
                             })),
                           ]}
-                          selected={location}
-                          onSelect={setLocation}
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) => o.value}
+                          value={location}
+                          onChange={(e) => setLocation(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.location} />
@@ -505,16 +509,11 @@ const AssetCreate = (props: AssetProps) => {
 
                     {/* Asset Type */}
                     <div>
-                      <label htmlFor="asset-type">Asset Type * </label>
+                      <label htmlFor="asset-type">Asset Type *</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
+                          required
                           options={[
-                            {
-                              title: "Select",
-                              description:
-                                "Select an Asset Type from the following",
-                              value: undefined,
-                            },
                             {
                               title: "Internal",
                               description:
@@ -528,8 +527,15 @@ const AssetCreate = (props: AssetProps) => {
                               value: "EXTERNAL",
                             },
                           ]}
-                          selected={asset_type}
-                          onSelect={setAssetType}
+                          value={asset_type}
+                          placeholder="Select"
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) =>
+                            o.value === "INTERNAL"
+                              ? AssetType.INTERNAL
+                              : AssetType.EXTERNAL
+                          }
+                          onChange={(e) => setAssetType(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.asset_type} />
@@ -539,17 +545,23 @@ const AssetCreate = (props: AssetProps) => {
                     <div>
                       <label htmlFor="asset-class">Asset Class</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
                           options={[
-                            { title: "Not Applicable", value: undefined },
                             { title: "ONVIF Camera", value: "ONVIF" },
                             {
                               title: "HL7 Vitals Monitor",
                               value: "HL7MONITOR",
                             },
                           ]}
-                          selected={asset_class}
-                          onSelect={setAssetClass}
+                          value={asset_class}
+                          placeholder="Select"
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) =>
+                            o.value === "ONVIF"
+                              ? AssetClass.ONVIF
+                              : AssetClass.HL7MONITOR
+                          }
+                          onChange={(e) => setAssetClass(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.asset_class} />
