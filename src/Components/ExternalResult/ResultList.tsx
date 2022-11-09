@@ -1,5 +1,4 @@
 import loadable from "@loadable/component";
-import Grid from "@material-ui/core/Grid";
 import { Button } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate, useQueryParams } from "raviger";
@@ -7,7 +6,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import moment from "moment";
@@ -18,6 +16,7 @@ import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import parsePhoneNumberFromString from "libphonenumber-js";
+import SearchInput from "../Form/SearchInput";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -364,17 +363,15 @@ export default function ResultList() {
           </div>
         </div>
         <div className="mt-2">
-          <div>
-            <div className="text-sm font-semibold mb-2">Search by Name</div>
-            <InputSearchBox
-              search={searchByName}
-              value={qParams.name || ""}
-              placeholder="Search by Patient Name"
-              errors=""
-            />
-          </div>
-          <div className="text-sm font-semibold my-2">Search by number</div>
-          <div className="w-full">
+          <SearchInput
+            label="Search by name"
+            name="name"
+            onChange={({ value }) => searchByName(value)}
+            value={qParams.name}
+            placeholder="Search patient"
+          />
+          <div className="text-sm font-medium my-2">Search by number</div>
+          <div className="w-full max-w-sm">
             <PhoneNumberField
               value={qParams.mobile_number || "+91"}
               onChange={(value: string) => searchByPhone(value)}

@@ -19,7 +19,6 @@ import {
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
 import Pagination from "../Common/Pagination";
-import { InputSearchBox } from "../Common/SearchBox";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
@@ -35,6 +34,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import SearchInput from "../Form/SearchInput";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -843,32 +843,35 @@ export const PatientManager = (props: any) => {
           </div>
         </div>
         <div className="w-full col-span-2">
-          <div className="col-span-2">
-            <div className="md:flex md:gap-4 mt-2">
-              <div className="grow lg:max-w-sm w-full mb-1">
-                <div className="text-sm font-semibold mb-1">Search by Name</div>
-                <InputSearchBox
-                  search={searchByName}
-                  value={qParams.name}
-                  placeholder="Search by Patient Name"
-                  errors=""
-                />
-              </div>
-              <div className="grow lg:max-w-sm w-full mb-1">
-                <div className="text-sm font-semibold mb-1">
-                  Search by IP number
+          <div className="col-span-2 mt-2">
+            <div>
+              <div>
+                <div className="md:flex md:gap-4 mt-1">
+                  <div className="grow lg:max-w-sm w-full mb-2">
+                    <SearchInput
+                      label="Search by Name"
+                      name="name"
+                      onChange={({ value }) => searchByName(value)}
+                      value={qParams.name}
+                      placeholder="Search patient"
+                    />
+                  </div>
+                  <div className="grow lg:max-w-sm w-full mb-2">
+                    <SearchInput
+                      label="Search by IP Number"
+                      name="name"
+                      onChange={({ value }) => searchByIpNo(value)}
+                      value={qParams.ip_no}
+                      placeholder="Search IP Number"
+                      secondary
+                    />
+                  </div>
                 </div>
-                <InputSearchBox
-                  search={searchByIpNo}
-                  value={qParams.ip_no}
-                  placeholder="Search by IP number"
-                  errors=""
-                />
               </div>
             </div>
             <div className="md:flex md:gap-4">
               <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-semibold">
+                <div className="text-sm font-medium">
                   Search by Primary Number
                 </div>
                 <PhoneNumberField
@@ -881,7 +884,7 @@ export const PatientManager = (props: any) => {
                 />
               </div>
               <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-semibold">
+                <div className="text-sm font-medium">
                   Search by Emergency Number
                 </div>
                 <PhoneNumberField

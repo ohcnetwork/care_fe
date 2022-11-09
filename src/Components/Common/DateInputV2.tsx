@@ -166,7 +166,7 @@ const DateInputV2: React.FC<Props> = ({
             <input
               type="text"
               readOnly
-              className={`form-input ${className}`}
+              className={`text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none !ring-0 transition-all duration-200 ease-in-out ${className}`}
               placeholder={placeholder ? placeholder : "Select date"}
               value={value && format(value, "yyyy-MM-dd")}
             />

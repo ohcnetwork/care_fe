@@ -5,7 +5,6 @@ import ShiftingBoard from "./ShiftingBoard";
 import BadgesList from "./BadgesList";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import { InputSearchBox } from "../Common/SearchBox";
 import { downloadShiftRequests } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
@@ -15,6 +14,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import withScrolling from "react-dnd-scrolling";
 import { formatFilter } from "./Commons";
+import SearchInput from "../Form/SearchInput";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -112,11 +112,11 @@ export default function BoardView() {
           />
         </div>
         <div className="w-full flex pt-2 lg:space-x-4 items-center flex-col lg:flex-row justify-between">
-          <InputSearchBox
-            value={qParams.patient_name || ""}
-            search={searchByName}
-            placeholder="Patient Name"
-            errors=""
+          <SearchInput
+            name="patient_name"
+            value={qParams.patient_name}
+            onChange={({ value }) => searchByName(value)}
+            placeholder="Search patient"
           />
           <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex mt-1">
             <button

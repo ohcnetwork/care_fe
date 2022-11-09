@@ -23,11 +23,11 @@ import {
 import * as Notification from "../../Utils/Notifications";
 import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
-import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import { formatDate } from "../../Utils/utils";
+import SearchInput from "../Form/SearchInput";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
@@ -421,27 +421,20 @@ export default function SampleViewAdmin() {
             </dl>
           </div>
 
-          <div className="w-full">
-            <div className="mt-2">
-              <div className="text-sm font-semibold mb-2">
-                Search by District Name
-              </div>
-              <InputSearchBox
-                value={qParams.district_name}
-                search={searchByDistrict}
-                placeholder="District Name"
-                errors=""
-              />
-            </div>
-            <div className="mt-2">
-              <div className="text-sm font-semibold mb-2">Search by Name</div>
-              <InputSearchBox
-                value={qParams.patient_name}
-                search={searchByName}
-                placeholder="Search by Patient Name"
-                errors=""
-              />
-            </div>
+          <div className="w-full flex flex-col gap-3 p-2">
+            <SearchInput
+              name="patient_name"
+              value={qParams.patient_name}
+              onChange={({ value }) => searchByName(value)}
+              placeholder="Search patient"
+            />
+            <SearchInput
+              name="district_name"
+              value={qParams.district_name}
+              onChange={({ value }) => searchByDistrict(value)}
+              placeholder="Search by district"
+              secondary
+            />
           </div>
 
           <div>
