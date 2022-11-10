@@ -100,8 +100,6 @@ export default function Waveform(props: {
   useEffect(() => {
     if (rPointer >= data.length) {
       setLastData(data);
-      console.log("last data set");
-      //setRPointer(0);
     }
   }, [rPointer]);
 
