@@ -41,7 +41,7 @@ export default function ListView() {
   );
 
   const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
+    const filter = { ...qParams, ...data, page: 1, limit };
     updateQuery(filter);
     setShowFilters(false);
   };
@@ -75,7 +75,7 @@ export default function ListView() {
   };
 
   const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page, limit });
+    updateQuery({ ...qParams, page, limit });
   };
 
   const onBoardViewBtnClick = () => {
@@ -126,6 +126,8 @@ export default function ListView() {
     qParams.modified_date_before,
     qParams.modified_date_after,
     qParams.ordering,
+    qParams.page,
+    qParams.limit,
   ]);
 
   const showResourceCardList = (data: any) => {
