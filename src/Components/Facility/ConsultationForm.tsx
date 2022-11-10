@@ -1,14 +1,12 @@
 import loadable from "@loadable/component";
 import {
   Box,
-  Button,
   CardContent,
   FormControlLabel,
   InputLabel,
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, {
@@ -68,6 +66,7 @@ import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
 import { ICD11DiagnosisModel } from "./models";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -1180,29 +1179,25 @@ export const ConsultationForm = (props: any) => {
                 m<sup>2</sup>
               </div>
               {/* End of Telemedicine fields */}
-              <div className="mt-4 flex justify-between">
-                <Button
-                  color="default"
-                  variant="contained"
+              <div className="mt-4 sm:flex grid sm:justify-between">
+                <ButtonV2
+                  variant="secondary"
                   type="button"
+                  className="mb-2 sm:mb-0"
                   onClick={() =>
                     navigate(`/facility/${facilityId}/patient/${patientId}`)
                   }
                 >
-                  Cancel{" "}
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
+                  Cancel
+                </ButtonV2>
+                <ButtonV2
+                  variant="primary"
                   type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
                   onClick={(e) => handleSubmit(e)}
                 >
+                  <i className="fa-regular fa-circle-check" />
                   {buttonText}
-                </Button>
+                </ButtonV2>
               </div>
             </CardContent>
           </form>
