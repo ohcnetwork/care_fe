@@ -4,7 +4,6 @@ import ListFilter from "./ListFilter";
 import ResourceBoard from "./ResourceBoard";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-// import { InputSearchBox } from "../Common/SearchBox";
 import { downloadResourceRequests } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";

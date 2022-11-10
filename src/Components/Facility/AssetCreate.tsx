@@ -308,6 +308,8 @@ const AssetCreate = (props: AssetProps) => {
             goBack();
           } else {
             resetFilters();
+            const pageContainer = window.document.getElementById("pages");
+            pageContainer?.scroll(0, 0);
           }
         }
         setIsLoading(false);

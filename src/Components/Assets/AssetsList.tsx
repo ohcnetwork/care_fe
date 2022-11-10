@@ -14,13 +14,13 @@ import React, { useState, useCallback, useEffect } from "react";
 import { navigate, useQueryParams } from "raviger";
 import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
-import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
+import SearchInput from "../Form/SearchInput";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -334,11 +334,11 @@ const AssetsList = () => {
           </div>
         </div>
         <div className="flex-1">
-          <InputSearchBox
+          <SearchInput
+            name="search"
             value={qParams.search}
-            search={onSearchSuspects}
-            placeholder="Search by Asset Name"
-            errors=""
+            onChange={({ value }) => onSearchSuspects(value)}
+            placeholder="Search assets"
           />
         </div>
         <div className="flex flex-col md:flex-row lg:ml-2 justify-start items-start gap-2">

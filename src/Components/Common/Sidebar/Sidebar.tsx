@@ -3,7 +3,7 @@ import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
 import { Dialog, Transition } from "@headlessui/react";
-import { usePath } from "raviger";
+import useActiveLink from "../../../Common/hooks/useActiveLink";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -54,23 +54,15 @@ const StatelessSidebar = ({
   shrinked = false,
   setShrinked,
 }: StatelessSidebarProps) => {
-  const path = usePath();
+  const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
-
-  const activeItem = NavItems.reduce((acc, item) => {
-    const tag = item.to.replaceAll("/", "");
-    return path?.includes(tag) ? tag : acc;
-  }, "");
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
 
   useEffect(() => {
     if (!indicatorRef.current) return;
-    const tag = activeItem;
-    const index = NavItems.findIndex(
-      (item) => item.to.replaceAll("/", "") === tag
-    );
+    const index = NavItems.findIndex((item) => item.to === activeLink);
     if (index !== -1) {
       // Haha math go brrrrrrrrr
 
@@ -114,7 +106,7 @@ const StatelessSidebar = ({
     } else {
       indicatorRef.current.style.display = "none";
     }
-  }, [activeItem]);
+  }, [activeLink]);
 
   return (
     <nav
@@ -136,9 +128,8 @@ const StatelessSidebar = ({
           className={`absolute left-2 w-1 hidden md:block
             bg-primary-400 rounded z-10 transition-all`}
         />
-        {NavItems.map((item) => {
-          const itemSelected = item.to.replaceAll("/", "") === activeItem;
-          return <Item key={item.text} {...item} selected={itemSelected} />;
+        {NavItems.map((i) => {
+          return <Item key={i.text} {...i} selected={i.to === activeLink} />;
         })}
 
         <NotificationItem shrinked={shrinked} />

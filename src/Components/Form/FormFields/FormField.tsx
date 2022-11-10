@@ -42,9 +42,11 @@ const FormField = (props: {
 
   return (
     <div className={className}>
-      <FieldLabel htmlFor={id} required={required} className={labelClassName}>
-        {label}
-      </FieldLabel>
+      {label && (
+        <FieldLabel htmlFor={id} required={required} className={labelClassName}>
+          {label}
+        </FieldLabel>
+      )}
       {props.children}
       <FieldErrorText
         error={resolveFormFieldError(props.props)}
