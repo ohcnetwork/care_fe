@@ -353,7 +353,11 @@ export const PatientManager = (props: any) => {
   );
 
   const updateQuery = (params: ParamsTypes) => {
-    const nParams = Object.assign({}, qParams, params);
+    const nParams = Object.assign({}, qParams, {
+      page: 1,
+      limit: RESULT_LIMIT,
+      ...params,
+    });
     setQueryParams(nParams, { replace: true });
   };
 

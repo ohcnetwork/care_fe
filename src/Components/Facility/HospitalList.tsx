@@ -233,7 +233,7 @@ export const HospitalList = (props: any) => {
   };
 
   const updateQuery = (params: any) => {
-    const nParams = Object.assign({}, qParams, params);
+    const nParams = Object.assign({}, qParams, { page: 1, limit, ...params });
     setQueryParams(nParams, { replace: true });
   };
 
