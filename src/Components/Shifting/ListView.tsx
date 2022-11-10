@@ -43,7 +43,7 @@ export default function ListView() {
   const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
 
   const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
+    const filter = { ...qParams, ...data, page: 1, limit };
     updateQuery(filter);
     setShowFilters(false);
   };
@@ -82,7 +82,7 @@ export default function ListView() {
   };
 
   const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page, limit });
+    updateQuery({ ...qParams, page, limit });
   };
 
   const onBoardViewBtnClick = () => {
