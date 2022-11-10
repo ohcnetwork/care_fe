@@ -37,6 +37,7 @@ import Table from "../Common/components/Table";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import ContactLink from "../Common/components/ContactLink";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -350,13 +351,7 @@ export const FacilityHome = (props: any) => {
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
                           Phone Number
                         </h1>
-                        <a
-                          href={`tel:${facilityData.phone_number}`}
-                          className="text-base font-medium flex items-center gap-2 border-b border-[#0038FF] text-[#0038FF]"
-                        >
-                          <i className="uil uil-outgoing-call"></i>
-                          {facilityData.phone_number}
-                        </a>
+                        <ContactLink tel={String(facilityData.phone_number)} />
                       </div>
                     </div>
                   </div>
