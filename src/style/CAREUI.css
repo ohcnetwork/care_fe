@@ -78,5 +78,14 @@
 .cui-input:-webkit-autofill:hover,
 .cui-input:-webkit-autofill:focus,
 .cui-input:-webkit-autofill:active {
+    box-shadow: 0 0 0 40px #f9fafb inset !important;
     -webkit-box-shadow: 0 0 0 40px #f9fafb inset !important;
+}
+
+.cui-slideover-x {
+    @apply w-full md:w-[300px] h-full
+}
+
+.cui-slideover-y {
+    @apply h-full md:h-[300px] w-full
 }
