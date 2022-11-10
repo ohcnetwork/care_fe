@@ -723,12 +723,8 @@ button:disabled,
   box-shadow: 0 0 0 1px #28a745;
 }
 
-.form-input, .form-textarea{
-  @apply text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out !important
-}
-
-.form-textarea {
-  @apply resize-none !important
+.form-input {
+  @apply text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none !ring-0 transition-all duration-200 ease-in-out !important
 }
 
 .shifting-page-filter-dropdown .MuiFormControl-root {
@@ -939,40 +935,6 @@ button:disabled,
   z-index: 100000 !important;
 }
 
-.tooltip {
-  @apply relative
-}
-
-.tooltip .tooltip-text {
-  visibility: hidden;
-  @apply bg-black/50 backdrop-blur text-white text-center px-2 py-1 rounded absolute z-50 text-sm block
-}
-
-.tooltip .tooltip-right {
-  top: 20%;
-  left: 105%;
-}
-
-
-.tooltip .tooltip-top {
-  bottom: 100%;
-  left: 50%;
-}
-
-.tooltip .tooltip-bottom {
-  top: 100%;
-  left: 50%;
-}
-
-.tooltip .tooltip-left {
-  top: -5px;
-  right: 105%;
-}
-
-.tooltip:hover .tooltip-text {
-  visibility: visible;
-}
-
 .warranty-card::before{
   content: "";
   position: absolute;
@@ -1160,3 +1122,16 @@ button:disabled,
 .dropdown-item-alert { 
   @apply accent-alert-600 hover:bg-alert-100 text-alert-600
 }
+.button-size-small { @apply px-2 py-1 text-xs }
+.button-size-default { @apply py-2 px-4 text-sm }
+.button-size-large { @apply py-3 px-5 text-base }
+
+/* clears the ‘X’ from Internet Explorer for input:search */
+input[type=search]::-ms-clear { display: none; width : 0; height: 0; }
+input[type=search]::-ms-reveal { display: none; width : 0; height: 0; }
+
+/* clears the ‘X’ from Chrome for input:search */
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration { display: none; }
