@@ -124,7 +124,7 @@ export default function ResultList() {
   };
 
   const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
+    const filter = { ...qParams, ...data, page: 1, limit: RESULT_LIMIT };
     updateQuery(filter);
     setShowFilters(false);
   };
