@@ -141,7 +141,7 @@ const AssetManage = (props: AssetManageProps) => {
 
   const assetClassProp =
     (asset?.asset_class && assetClassProps[asset.asset_class]) ||
-    assetClassProps.None;
+    assetClassProps.NONE;
 
   const detailBlock = (item: any) =>
     item.hide ? null : (
