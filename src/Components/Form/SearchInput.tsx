@@ -29,14 +29,14 @@ const SearchInput = ({
   const [value, setValue] = useState(() => props.value);
   useEffect(() => setValue(props.value || undefined), [props.value]);
   useEffect(() => {
-    if (value !== undefined) {
+    if (value !== props.value) {
       const timeoutId = setTimeout(
         () => onChange && onChange({ name, value: value || "" }),
         debouncePeriod
       );
       return () => clearTimeout(timeoutId);
     }
-  }, [value, debouncePeriod, name, onChange]);
+  }, [value, debouncePeriod, name, onChange, props.value]);
 
   // Focus hotkey related
   const ref = createRef<HTMLInputElement>();
