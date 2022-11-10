@@ -162,8 +162,12 @@ const AssetsList = () => {
 
   const onSearchSuspects = (search: string) => {
     if (search !== "")
-      setQueryParams({ ...qParams, search }, { replace: true });
-    else setQueryParams({ ...qParams, search: "" }, { replace: true });
+      setQueryParams({ ...qParams, search, page: 1, limit }, { replace: true });
+    else
+      setQueryParams(
+        { ...qParams, search: "", page: 1, limit },
+        { replace: true }
+      );
   };
 
   const updateQuery = (params: any) => {
