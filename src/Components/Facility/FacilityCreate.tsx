@@ -242,8 +242,8 @@ export const FacilityCreate = (props: FacilityProps) => {
               res.data.phone_number.length == 10
                 ? "+91" + res.data.phone_number
                 : res.data.phone_number,
-            latitude: res.data.location ? res.data.location.latitude : "",
-            longitude: res.data.location ? res.data.location.longitude : "",
+            latitude: res.data.latitude,
+            longitude: res.data.longitude,
             type_b_cylinders: res.data.type_b_cylinders,
             type_c_cylinders: res.data.type_c_cylinders,
             type_d_cylinders: res.data.type_d_cylinders,
