@@ -305,7 +305,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       !screenfull.isFullscreen
-        ? isIOS
+        ? !isIOS
           ? screenfull.request(
               videoWrapper.current
                 ? videoWrapper.current
