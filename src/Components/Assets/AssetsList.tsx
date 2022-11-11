@@ -353,11 +353,10 @@ const AssetsList = () => {
         </div>
       </div>
       <AssetFilter
-        show={showFilters}
-        setShow={setShowFilters}
+        open={showFilters}
+        setOpen={setShowFilters}
         filter={qParams}
         onChange={applyFilter}
-        closeFilter={() => setShowFilters(false)}
       />
 
       {isLoading ? (
