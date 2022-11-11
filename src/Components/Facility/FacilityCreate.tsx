@@ -429,13 +429,10 @@ export const FacilityCreate = (props: FacilityProps) => {
         features: state.form.features,
         ward: state.form.ward,
         kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
-        location:
-          state.form.latitude && state.form.longitude
-            ? {
-                latitude: Number(state.form.latitude),
-                longitude: Number(state.form.longitude),
-              }
-            : undefined,
+        longitude: state.form.longitude
+          ? Number(state.form.longitude)
+          : undefined,
+        latitude: state.form.latitude ? Number(state.form.latitude) : undefined,
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
         )?.format("E.164"),
