@@ -40,6 +40,7 @@ import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
 import SearchInput from "../Form/SearchInput";
+import FilterSlideOver from "../../CAREUI/interactive/FilterSlideOver";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -354,7 +355,7 @@ export const HospitalList = (props: any) => {
                   )}
                 </div>
 
-                <div className="h-full flex flex-col justify-between w-full h-fit">
+                <div className="flex flex-col justify-between w-full h-fit">
                   <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
                     <div className="flow-root">
                       {facility.kasp_empanelled && (
@@ -558,6 +559,17 @@ export const HospitalList = (props: any) => {
 
   return (
     <div className="px-6">
+      <FilterSlideOver
+        open
+        setOpen={() => {
+          console.log("setOpen");
+        }}
+        filters={[]}
+        filterResult={{}}
+        setFilterResult={() => {
+          console.log("setFilterResult");
+        }}
+      />
       <div className="grid md:grid-cols-2">
         <PageTitle
           title={t("Facilities")}
