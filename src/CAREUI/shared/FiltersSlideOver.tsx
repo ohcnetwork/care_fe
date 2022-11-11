@@ -31,7 +31,7 @@ export default function FiltersSlideOver({ children, ...props }: Props) {
           Apply
         </ButtonV2>
       </div>
-      <div className="mt-2 p-2">{children}</div>
+      <div className="mt-2 p-2 flex flex-col gap-4">{children}</div>
     </SlideOver>
   );
 }

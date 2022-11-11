@@ -159,57 +159,55 @@ function AssetFilter(props: any) {
       onClear={clearFilter}
       onApply={applyFilter}
     >
-      <div className="flex flex-col gap-4">
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">Facility</FieldLabel>
+        <FacilitySelect
+          name="Facilities"
+          setSelected={(selected) =>
+            handleFacilitySelect(selected as FacilityModel)
+          }
+          selected={facility}
+          errors=""
+          showAll
+          multiple={false}
+        />
+      </div>
+
+      {facilityId && (
         <div className="w-full flex-none">
-          <FieldLabel className="text-sm">Facility</FieldLabel>
-          <FacilitySelect
+          <FieldLabel className="text-sm">Location</FieldLabel>
+          <LocationSelect
             name="Facilities"
             setSelected={(selected) =>
-              handleFacilitySelect(selected as FacilityModel)
+              handleLocationSelect(selected as AssetLocationObject)
             }
-            selected={facility}
+            selected={location}
             errors=""
-            showAll
+            showAll={false}
             multiple={false}
+            facilityId={facilityId}
           />
         </div>
+      )}
 
-        {facilityId && (
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Location</FieldLabel>
-            <LocationSelect
-              name="Facilities"
-              setSelected={(selected) =>
-                handleLocationSelect(selected as AssetLocationObject)
-              }
-              selected={location}
-              errors=""
-              showAll={false}
-              multiple={false}
-              facilityId={facilityId}
-            />
-          </div>
-        )}
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">Asset Type</FieldLabel>
+        <SelectMenuV2
+          placeholder="Filter by Asset type"
+          {...selectMenuV2Options(AssetTypeOptions)}
+          value={asset_type}
+          onChange={(o) => setAssetType(o || "")}
+        />
+      </div>
 
-        <div className="w-full flex-none">
-          <FieldLabel className="text-sm">Asset Type</FieldLabel>
-          <SelectMenuV2
-            placeholder="Filter by Asset type"
-            {...selectMenuV2Options(AssetTypeOptions)}
-            value={asset_type}
-            onChange={(o) => setAssetType(o || "")}
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <FieldLabel className="text-sm">Asset Status</FieldLabel>
-          <SelectMenuV2
-            placeholder="Filter by Asset status"
-            {...selectMenuV2Options(AssetStatusOptions)}
-            value={asset_status}
-            onChange={(o) => setAssetStatus(o || "")}
-          />
-        </div>
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">Asset Status</FieldLabel>
+        <SelectMenuV2
+          placeholder="Filter by Asset status"
+          {...selectMenuV2Options(AssetStatusOptions)}
+          value={asset_status}
+          onChange={(o) => setAssetStatus(o || "")}
+        />
       </div>
     </FiltersSlideOver>
   );
