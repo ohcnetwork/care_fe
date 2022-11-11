@@ -11,6 +11,7 @@ import useMergeState from "../../../Common/hooks/useMergeState";
 import FiltersSlideOver, {
   AdvancedFilterProps,
 } from "../../../CAREUI/shared/FiltersSlideOver";
+import { FieldLabel } from "../../Form/FormFields/FormField";
 
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
@@ -109,7 +110,7 @@ function FacillityFilter({ filter, onChange, ...props }: AdvancedFilterProps) {
   return (
     <FiltersSlideOver onClear={clearFilter} onApply={applyFilter} {...props}>
       <div className="w-full flex-none">
-        <span className="text-sm font-semibold">State</span>
+        <FieldLabel className="text-sm">State</FieldLabel>
         <div>
           {isStateLoading ? (
             <CircularProgress size={20} />
@@ -128,7 +129,7 @@ function FacillityFilter({ filter, onChange, ...props }: AdvancedFilterProps) {
       </div>
 
       <div className="w-full flex-none">
-        <span className="text-sm font-semibold">District</span>
+        <FieldLabel className="text-sm">District</FieldLabel>
         <div>
           {isDistrictLoading ? (
             <CircularProgress size={20} />
@@ -147,7 +148,7 @@ function FacillityFilter({ filter, onChange, ...props }: AdvancedFilterProps) {
       </div>
 
       <div className="w-full flex-none">
-        <span className="text-sm font-semibold">Local Body</span>
+        <FieldLabel className="text-sm">Local body</FieldLabel>
         <div>
           <LocalBodySelect
             name="local_body"
@@ -160,7 +161,7 @@ function FacillityFilter({ filter, onChange, ...props }: AdvancedFilterProps) {
       </div>
 
       <div className="w-full flex-none">
-        <span className="text-sm font-semibold">Facility type</span>
+        <FieldLabel className="text-sm">Facility type</FieldLabel>
         <SelectField
           name="facility_type"
           variant="outlined"
