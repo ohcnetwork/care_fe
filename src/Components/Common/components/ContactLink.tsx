@@ -11,7 +11,7 @@ export default function ContactLink(props: ContactLinkProps) {
       >
         <i
           className={`uil ${
-            props.tel ? "uil-outgoing-call" : "uil uil-envelope-alt"
+            props.tel ? "uil-outgoing-call" : "uil-envelope-alt"
           }`}
         ></i>
         {props.tel ? props.tel : props.mailto}
