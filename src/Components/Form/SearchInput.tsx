@@ -27,7 +27,7 @@ const SearchInput = ({
 }: SearchInputProps) => {
   // Debounce related
   const [value, setValue] = useState(() => props.value);
-  useEffect(() => setValue(props.value || undefined), [props.value]);
+  useEffect(() => setValue(props.value), [props.value]);
   useEffect(() => {
     if (value !== props.value) {
       const timeoutId = setTimeout(
