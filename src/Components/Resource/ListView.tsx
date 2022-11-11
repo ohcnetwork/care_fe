@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
@@ -9,10 +9,8 @@ import {
   listResourceRequests,
   downloadResourceRequests,
 } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import ResourceFilter from "./ResourceFilter";
 import Pagination from "../Common/Pagination";
-// import { Modal, Button } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { limit, formatFilter } from "./Commons";
@@ -37,20 +35,11 @@ export default function ListView() {
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
 
-  const local = useMemo(
-    () => JSON.parse(localStorage.getItem("resource-filters") || "{}"),
-    []
-  );
-
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
     updateQuery(filter);
     setShowFilters(false);
   };
-
-  useEffect(() => {
-    applyFilter(local);
-  }, []);
 
   const triggerDownload = async () => {
     // while is getting ready
@@ -82,15 +71,11 @@ export default function ListView() {
     setOffset(offset);
   };
 
-  const onBoardViewBtnClick = () => {
-    navigate("/resource/board-view", qParams);
-    localStorage.setItem("defaultResourceView", "board");
-  };
+  const onBoardViewBtnClick = () => navigate("/resource/board-view", qParams);
 
   const appliedFilters = formatFilter(qParams);
-  const updateFilter = (params: any, local: any) => {
+  const updateFilter = (params: any) => {
     updateQuery(params);
-    localStorage.setItem("resource-filters", JSON.stringify(local));
   };
 
   const refreshList = () => {
@@ -287,11 +272,7 @@ export default function ListView() {
         </div>
       </div>
 
-      <BadgesList
-        appliedFilters={appliedFilters}
-        local={local}
-        updateFilter={updateFilter}
-      />
+      <BadgesList appliedFilters={appliedFilters} updateFilter={updateFilter} />
 
       <div className="px-1">
         {isLoading ? (
@@ -334,17 +315,12 @@ export default function ListView() {
         className="hidden"
         id={"resourceRequests-ALL"}
       />
-      <SlideOver show={showFilters} setShow={setShowFilters}>
-        <div className="bg-white min-h-screen p-4">
-          <ResourceFilter
-            filter={qParams}
-            local={local}
-            showResourceStatus={true}
-            onChange={applyFilter}
-            closeFilter={() => setShowFilters(false)}
-          />
-        </div>
-      </SlideOver>
+      <ResourceFilter
+        filter={qParams}
+        onChange={applyFilter}
+        open={showFilters}
+        setOpen={setShowFilters}
+      />
     </div>
   );
 }

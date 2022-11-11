@@ -3,7 +3,6 @@ import { useQueryParams, navigate } from "raviger";
 import ResourceFilter from "./ResourceFilter";
 import ResourceBoard from "./ResourceBoard";
 import { RESOURCE_CHOICES } from "../../Common/constants";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import { downloadResourceRequests } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
@@ -183,16 +182,12 @@ export default function BoardView() {
         className="hidden"
         id={"resourceRequests-ALL"}
       />
-      <SlideOver show={showFilters} setShow={setShowFilters}>
-        <div className="bg-white min-h-screen p-4">
-          <ResourceFilter
-            filter={qParams}
-            local={local}
-            onChange={applyFilter}
-            closeFilter={() => setShowFilters(false)}
-          />
-        </div>
-      </SlideOver>
+      <ResourceFilter
+        filter={qParams}
+        onChange={applyFilter}
+        open={showFilters}
+        setOpen={setShowFilters}
+      />
     </div>
   );
 }
