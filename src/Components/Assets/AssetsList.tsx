@@ -14,7 +14,6 @@ import React, { useState, useCallback, useEffect } from "react";
 import { navigate, useQueryParams } from "raviger";
 import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
@@ -353,17 +352,14 @@ const AssetsList = () => {
           </button>
         </div>
       </div>
-      <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
-          <div className="bg-white min-h-screen p-4">
-            <AssetFilter
-              filter={qParams}
-              onChange={applyFilter}
-              closeFilter={() => setShowFilters(false)}
-            />
-          </div>
-        </SlideOver>
-      </div>
+      <AssetFilter
+        show={showFilters}
+        setShow={setShowFilters}
+        filter={qParams}
+        onChange={applyFilter}
+        closeFilter={() => setShowFilters(false)}
+      />
+
       {isLoading ? (
         <Loading />
       ) : (

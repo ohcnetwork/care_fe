@@ -88,7 +88,7 @@ export default function SlideOver({
                   dialogClass
                 }
               >
-                <div className="flex items-center p-2 gap-2">
+                <div className="flex items-center p-2 gap-2 pt-4">
                   <button
                     className="w-8 h-8 rounded-lg flex justify-center items-center text-2xl hover:bg-black/20"
                     onClick={() => setOpen(false)}

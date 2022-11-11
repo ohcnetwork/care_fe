@@ -7,11 +7,11 @@ import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
 import { getAnyFacility, getFacilityAssetLocation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField } from "../Common/HelperInputFields";
 import { LocationSelect } from "../Common/LocationSelect";
 import { AssetLocationObject } from "./AssetTypes";
-import FilterButtons from "../Common/FilterButtons";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import FiltersSlideOver from "../../CAREUI/shared/FiltersSlideOver";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 
 const initialLocation = {
   id: "",
@@ -21,6 +21,45 @@ const initialLocation = {
     id: "",
     name: "",
   },
+};
+
+type SelectMenuV2Option = { id: string; label: string; icon: string };
+
+const AssetTypeOptions = [
+  {
+    id: "EXTERNAL",
+    label: "External",
+    icon: "uil uil-arrow-up-right",
+  },
+  {
+    id: "INTERNAL",
+    label: "Internal",
+    icon: "uil uil-arrow-down-right",
+  },
+];
+
+const AssetStatusOptions = [
+  {
+    id: "ACTIVE",
+    label: "Active",
+    icon: "uil uil-check",
+  },
+  {
+    id: "TRANSFER_IN_PROGRESS",
+    label: "Transfer in progress",
+    icon: "uil uil-truck",
+  },
+];
+
+const selectMenuV2Options = (options: SelectMenuV2Option[]) => {
+  return {
+    options,
+    optionLabel: (o: SelectMenuV2Option) => o.label,
+    optionIcon: (o: SelectMenuV2Option) => (
+      <i className={o.icon + " text-lg"} />
+    ),
+    optionValue: (o: SelectMenuV2Option) => o.id,
+  };
 };
 
 function AssetFilter(props: any) {
@@ -114,112 +153,65 @@ function AssetFilter(props: any) {
   };
 
   return (
-    <div>
-      <FilterButtons
-        onClose={closeFilter}
-        onClear={clearFilter}
-        onApply={applyFilter}
-      />
-      <div className="w-full flex-none pt-14">
-        <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-          <i className="uil uil-filter" />
-          <p>Filter by</p>
+    <FiltersSlideOver
+      open={props.show}
+      setOpen={props.setShow}
+      onClear={clearFilter}
+      onApply={applyFilter}
+    >
+      <div className="flex flex-col gap-4">
+        <div className="w-full flex-none">
+          <FieldLabel className="text-sm">Facility</FieldLabel>
+          <FacilitySelect
+            name="Facilities"
+            setSelected={(selected) =>
+              handleFacilitySelect(selected as FacilityModel)
+            }
+            selected={facility}
+            errors=""
+            showAll
+            multiple={false}
+          />
         </div>
 
-        <div className="flex flex-wrap gap-4">
+        {facilityId && (
           <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Facility</FieldLabel>
-            <FacilitySelect
+            <FieldLabel className="text-sm">Location</FieldLabel>
+            <LocationSelect
               name="Facilities"
               setSelected={(selected) =>
-                handleFacilitySelect(selected as FacilityModel)
+                handleLocationSelect(selected as AssetLocationObject)
               }
-              selected={facility}
+              selected={location}
               errors=""
-              showAll
+              showAll={false}
               multiple={false}
+              facilityId={facilityId}
             />
           </div>
-          {facilityId && (
-            <div className="w-full flex-none">
-              <FieldLabel className="text-sm">Location</FieldLabel>
-              <LocationSelect
-                name="Facilities"
-                setSelected={(selected) =>
-                  handleLocationSelect(selected as AssetLocationObject)
-                }
-                selected={location}
-                errors=""
-                showAll={false}
-                multiple={false}
-                facilityId={facilityId}
-              />
-            </div>
-          )}
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Asset Type</FieldLabel>
-            <SelectField
-              id="asset-type"
-              fullWidth
-              name="asset_type"
-              placeholder=""
-              variant="outlined"
-              margin="dense"
-              options={[
-                {
-                  id: "",
-                  name: "Select",
-                },
-                {
-                  id: "EXTERNAL",
-                  name: "EXTERNAL",
-                },
-                {
-                  id: "INTERNAL",
-                  name: "INTERNAL",
-                },
-              ]}
-              optionValue="name"
-              value={asset_type}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setAssetType(e.target.value)
-              }
-            />
-          </div>
+        )}
 
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Asset Status</FieldLabel>
-            <SelectField
-              id="asset-status"
-              fullWidth
-              name="asset_status"
-              placeholder=""
-              variant="outlined"
-              margin="dense"
-              options={[
-                {
-                  id: "",
-                  name: "Select",
-                },
-                {
-                  id: "ACTIVE",
-                  name: "ACTIVE",
-                },
-                {
-                  id: "TRANSFER_IN_PROGRESS",
-                  name: "TRANSFER IN PROGRESS",
-                },
-              ]}
-              optionValue="name"
-              value={asset_status}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setAssetStatus(e.target.value)
-              }
-            />
-          </div>
+        <div className="w-full flex-none">
+          <FieldLabel className="text-sm">Asset Type</FieldLabel>
+          <SelectMenuV2
+            placeholder="Filter by Asset type"
+            {...selectMenuV2Options(AssetTypeOptions)}
+            value={asset_type}
+            onChange={(o) => setAssetType(o || "")}
+          />
+        </div>
+
+        <div className="w-full flex-none">
+          <FieldLabel className="text-sm">Asset Status</FieldLabel>
+          <SelectMenuV2
+            placeholder="Filter by Asset status"
+            {...selectMenuV2Options(AssetStatusOptions)}
+            value={asset_status}
+            onChange={(o) => setAssetStatus(o || "")}
+          />
         </div>
       </div>
-    </div>
+    </FiltersSlideOver>
   );
 }
 
