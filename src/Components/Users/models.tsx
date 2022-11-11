@@ -1,3 +1,7 @@
+interface HomeFacilityObjectModel {
+  id?: string;
+  name?: string;
+}
 export interface UserModel {
   id?: number;
   username?: string;
@@ -15,4 +19,5 @@ export interface UserModel {
   is_superuser?: boolean;
   verified?: boolean;
   last_login?: Date;
+  home_facility_object?: HomeFacilityObjectModel;
 }

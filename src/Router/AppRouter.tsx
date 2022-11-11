@@ -71,6 +71,7 @@ import {
   MobileSidebar,
 } from "../Components/Common/Sidebar/Sidebar";
 import LiveMonitoring from "../Components/Hub/LiveMonitoring";
+import { BLACKLISTED_PATHS } from "../Common/constants";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -78,7 +79,7 @@ const routes = {
   "/hub": () => <HubDashboard />,
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
-  "/user/add": () => <UserAdd />,
+  "/users/add": () => <UserAdd />,
   "/user/profile": () => <UserProfile />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
@@ -422,20 +423,17 @@ export default function AppRouter() {
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const WHITELIST: RegExp[] = [
-    /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/updates+/i,
-  ];
   useEffect(() => {
     setSidebarOpen(false);
-
     let flag = false;
-    if (path)
-      WHITELIST.forEach((regex: RegExp) => {
+    if (path) {
+      BLACKLISTED_PATHS.forEach((regex: RegExp) => {
         flag = flag || regex.test(path);
       });
-    if (path && flag) {
-      const pageContainer = window.document.getElementById("pages");
-      pageContainer?.scroll(0, 0);
+      if (!flag) {
+        const pageContainer = window.document.getElementById("pages");
+        pageContainer?.scroll(0, 0);
+      }
     }
   }, [path]);
 

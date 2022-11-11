@@ -8,7 +8,7 @@ export type FieldChangeEventHandler<T> = (event: FieldChangeEvent<T>) => void;
 export type FormFieldBaseProps<T> = {
   id?: string;
   name: string;
-  label: React.ReactNode;
+  label?: React.ReactNode;
   disabled?: boolean;
   className?: string;
   required?: boolean;
