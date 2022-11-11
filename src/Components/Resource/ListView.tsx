@@ -10,7 +10,7 @@ import {
   downloadResourceRequests,
 } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import ListFilter from "./ListFilter";
+import ResourceFilter from "./ResourceFilter";
 import Pagination from "../Common/Pagination";
 // import { Modal, Button } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -336,7 +336,7 @@ export default function ListView() {
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
-          <ListFilter
+          <ResourceFilter
             filter={qParams}
             local={local}
             showResourceStatus={true}

@@ -13,7 +13,7 @@ import useMergeState from "../../Common/hooks/useMergeState";
 
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
-export default function ListFilter(props: any) {
+export default function ResourceFilter(props: any) {
   const { filter, onChange, closeFilter, local } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isResourceLoading, setResourceLoading] = useState(false);

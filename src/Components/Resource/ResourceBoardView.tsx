@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useQueryParams, navigate } from "raviger";
-import ListFilter from "./ListFilter";
+import ResourceFilter from "./ResourceFilter";
 import ResourceBoard from "./ResourceBoard";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -185,7 +185,7 @@ export default function BoardView() {
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
-          <ListFilter
+          <ResourceFilter
             filter={qParams}
             local={local}
             onChange={applyFilter}
