@@ -148,7 +148,7 @@ export default function ManageUsers() {
   };
 
   const onUserNameChange = (value: string) => {
-    setQueryParams({ ...qParams, username: value });
+    updateQuery({ username: value });
   };
 
   const addUser = (
