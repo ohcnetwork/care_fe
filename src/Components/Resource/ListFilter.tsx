@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  SelectField,
-  DateInputField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { SelectField } from "../Common/HelperInputFields";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
 import { getAnyFacility } from "../../Redux/actions";
@@ -13,18 +9,12 @@ import { CircularProgress } from "@material-ui/core";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-}
+import useMergeState from "../../Common/hooks/useMergeState";
 
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter, local } = props;
+  const { filter, onChange, closeFilter, local } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isResourceLoading, setResourceLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
@@ -108,7 +98,7 @@ export default function ListFilter(props: any) {
   };
 
   const handleChange = (event: any) => {
-    let { name, value } = event.target;
+    const { name, value } = event.target;
 
     const filterData: any = { ...filterState };
     filterData[name] = value;

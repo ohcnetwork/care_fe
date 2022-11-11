@@ -11,16 +11,10 @@ import { FacilityModel } from "../Facility/models";
 import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
-
-const useMergeState = (initialState: any) => {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-};
+import useMergeState from "../../Common/hooks/useMergeState";
 
 export default function UserFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter } = props;
 
   const [filterState, setFilterState] = useMergeState({
     status: filter.status || "",
