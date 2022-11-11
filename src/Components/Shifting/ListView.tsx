@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import loadable from "@loadable/component";
-import { InputSearchBox } from "../Common/SearchBox";
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
 import BadgesList from "./BadgesList";
@@ -19,6 +18,7 @@ import { Modal, Button, CircularProgress } from "@material-ui/core";
 
 import { limit, formatFilter } from "./Commons";
 import { formatDate } from "../../Utils/utils";
+import SearchInput from "../Form/SearchInput";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -371,11 +371,11 @@ export default function ListView() {
         />
 
         <div className="md:px-4">
-          <InputSearchBox
-            value={qParams.patient_name || ""}
-            search={searchByName}
-            placeholder="Patient Name"
-            errors=""
+          <SearchInput
+            name="patient_name"
+            value={qParams.patient_name}
+            onChange={({ value }) => searchByName(value)}
+            placeholder="Search patient"
           />
         </div>
         <div className="w-32">

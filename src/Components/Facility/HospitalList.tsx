@@ -26,7 +26,6 @@ import loadable from "@loadable/component";
 import { InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
-import { InputSearchBox } from "../Common/SearchBox";
 import { CSVLink } from "react-csv";
 import moment from "moment";
 import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
@@ -40,6 +39,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
+import SearchInput from "../Form/SearchInput";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -659,14 +659,12 @@ export const HospitalList = (props: any) => {
           </div>
         </div>
         <div className="flex my-4 gap-2 flex-col md:flex-row justify-between flex-grow">
-          <div className="w-full md:w-72">
-            <InputSearchBox
-              value={qParams.search}
-              search={onSearchSuspects}
-              placeholder={t("facility_search_placeholder")}
-              errors=""
-            />
-          </div>
+          <SearchInput
+            name="search"
+            value={qParams.search}
+            onChange={({ value }) => onSearchSuspects(value)}
+            placeholder={t("facility_search_placeholder")}
+          />
 
           <div className="flex items-start mb-2 w-full md:w-auto">
             <button
