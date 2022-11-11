@@ -1,5 +1,13 @@
+import { QueryParam } from "raviger";
 import ButtonV2 from "../../Components/Common/components/ButtonV2";
 import SlideOver from "../interactive/SlideOver";
+
+export interface AdvancedFilterProps {
+  open: boolean;
+  setOpen: (show: boolean) => void;
+  filter: QueryParam;
+  onChange: (data: any) => void;
+}
 
 interface Props {
   open: boolean;
