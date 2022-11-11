@@ -10,7 +10,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
   value?: string | number;
   autoComplete?: string;
-  type?: "email" | "password" | "search" | "text";
+  type?: "email" | "password" | "search" | "text" | "number";
   className?: string | undefined;
   removeDefaultClasses?: true | undefined;
   leading?: React.ReactNode | undefined;

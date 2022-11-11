@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Link, navigate, useQueryParams } from "raviger";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 
@@ -20,6 +20,7 @@ import {
   getDistrict,
   getLocalBody,
   sendNotificationMessages,
+  getStates,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 
@@ -40,7 +41,10 @@ import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
 import SearchInput from "../Form/SearchInput";
-import FilterSlideOver from "../../CAREUI/interactive/FilterSlideOver";
+import FilterSlideOver, {
+  FilterOptionType,
+  FilterType,
+} from "../../CAREUI/shared/FilterSlideOver";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -81,6 +85,61 @@ export const HospitalList = (props: any) => {
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
+
+  const [filterStates, setFilterStates] = useState<FilterOptionType[]>([
+    { name: "Gujarat", value: "Gujarat" },
+  ]);
+  const [filterDistricts, setFilterDistricts] = useState<FilterOptionType[]>([
+    { name: "Vadodara", value: "Vadodara" },
+  ]);
+  const [filterLocalBodies, setFilterLocalBodies] = useState<
+    FilterOptionType[]
+  >([{ name: "Sama", value: "Sama" }]);
+
+  const [filters, setFilters] = useState<FilterType[]>([
+    {
+      name: "state",
+      label: "State",
+      type: "select",
+      options: filterStates,
+    },
+    {
+      name: "district",
+      label: "District",
+      type: "select",
+      options: filterDistricts,
+      dependsOn: "state",
+    },
+    {
+      name: "local_body",
+      label: "Local Body",
+      type: "select",
+      options: filterLocalBodies,
+      dependsOn: "district",
+    },
+    {
+      name: "facility_type",
+      label: "Facility Type",
+      type: "select",
+      options: FACILITY_TYPES.map((f) => {
+        return {
+          name: f.text,
+          value: f.id,
+        };
+      }),
+    },
+    {
+      name: "kasp",
+      label: "KASP Empanelled",
+      type: "select",
+      options: [
+        { name: "Yes", value: "true" },
+        { name: "No", value: "false" },
+      ],
+    },
+  ]);
+
+  const [filterSlideOver, setFilterSlideOver] = useState(false);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
@@ -560,14 +619,12 @@ export const HospitalList = (props: any) => {
   return (
     <div className="px-6">
       <FilterSlideOver
-        open
-        setOpen={() => {
-          console.log("setOpen");
-        }}
-        filters={[]}
-        filterResult={{}}
-        setFilterResult={() => {
-          console.log("setFilterResult");
+        open={filterSlideOver}
+        setOpen={setFilterSlideOver}
+        filters={filters}
+        setFilters={setFilters}
+        onApply={() => {
+          console.log(filters);
         }}
       />
       <div className="grid md:grid-cols-2">
@@ -717,7 +774,7 @@ export const HospitalList = (props: any) => {
           </div>
         </div>
       </div>
-
+      <button onClick={() => setFilterSlideOver(true)}>Open Flilttleer</button>
       <div>
         <SlideOver show={showFilters} setShow={setShowFilters}>
           <div className="bg-white min-h-screen p-4">

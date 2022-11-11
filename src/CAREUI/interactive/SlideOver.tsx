@@ -99,7 +99,7 @@ export default function SlideOver({
                     <h1 className="text-xl font-black">{title}</h1>
                   </div>
                 </div>
-                <div className="overflow-auto flex-1 p-3">{children}</div>
+                <div className="overflow-auto flex-1 p-4">{children}</div>
               </div>
             )}
           </Dialog.Panel>
