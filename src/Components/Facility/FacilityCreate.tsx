@@ -225,8 +225,6 @@ export const FacilityCreate = (props: FacilityProps) => {
         setIsLoading(true);
         const res = await dispatchAction(getPermittedFacility(facilityId));
         if (!status.aborted && res.data) {
-          console.log(res.data.latitude);
-          console.log(res.data.longitude);
           const formData = {
             facility_type: res.data.facility_type,
             name: res.data.name,
