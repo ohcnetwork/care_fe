@@ -7,22 +7,17 @@ import { getStates, getDistrictByState } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useAbortableEffect, statusType } from "../../../Common/utils";
 import LocalBodySelect from "./LocalBodySelect";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-
-  return [state, setMergedState];
-}
+import useMergeState from "../../../Common/hooks/useMergeState";
+import FiltersSlideOver, {
+  AdvancedFilterProps,
+} from "../../../CAREUI/shared/FiltersSlideOver";
+import { FieldLabel } from "../../Form/FormFields/FormField";
 
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
-function FacillityFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+function FacillityFilter({ filter, onChange, ...props }: AdvancedFilterProps) {
   const dispatchAction: any = useDispatch();
 
   const [isStateLoading, setIsStateLoading] = useState(false);
@@ -110,115 +105,91 @@ function FacillityFilter(props: any) {
     handleChange({ target: { name: "local_body", value: local_body_id } });
   };
 
+  const clearFilter = () => navigate("/facility");
+
   return (
-    <div>
-      <div className="flex flex-wrap justify-between">
-        <button className="btn btn-default mt-1" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />
-          Cancel
-        </button>
-        <button
-          className="btn btn-default mt-1"
-          onClick={(_) => {
-            closeFilter();
-            navigate("/facility");
-          }}
-        >
-          <i className="fas fa-times mr-2" />
-          Clear Filter
-        </button>
-        <button className="btn btn-primary mt-1" onClick={applyFilter}>
-          <i className="fas fa-check mr-2" />
-          Apply
-        </button>
-      </div>
-      <div className="w-full flex-none mt-2">
-        <div className="font-light text-md mt-2">Filter By:</div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">State</span>
-          <div>
-            {isStateLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <SelectField
-                name="state"
-                variant="outlined"
-                margin="dense"
-                value={filterState.state}
-                options={states}
-                optionValue="name"
-                onChange={handleChange}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">District</span>
-          <div>
-            {isDistrictLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <SelectField
-                name="district"
-                variant="outlined"
-                margin="dense"
-                value={filterState.district}
-                options={districts}
-                optionValue="name"
-                onChange={handleChange}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Local Body</span>
-          <div>
-            <LocalBodySelect
-              name="local_body"
-              district={filterState.district}
-              selected={filterState.local_body}
-              setSelected={handleLocalBodyChange}
+    <FiltersSlideOver onClear={clearFilter} onApply={applyFilter} {...props}>
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">State</FieldLabel>
+        <div>
+          {isStateLoading ? (
+            <CircularProgress size={20} />
+          ) : (
+            <SelectField
+              name="state"
+              variant="outlined"
               margin="dense"
+              value={filterState.state}
+              options={states}
+              optionValue="name"
+              onChange={handleChange}
             />
-          </div>
+          )}
         </div>
+      </div>
 
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Facility type</span>
-          <SelectField
-            name="facility_type"
-            variant="outlined"
-            margin="dense"
-            value={filterState.facility_type}
-            options={[{ id: "", text: "Show All" }, ...FACILITY_TYPES]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">District</FieldLabel>
+        <div>
+          {isDistrictLoading ? (
+            <CircularProgress size={20} />
+          ) : (
+            <SelectField
+              name="district"
+              variant="outlined"
+              margin="dense"
+              value={filterState.district}
+              options={districts}
+              optionValue="name"
+              onChange={handleChange}
+            />
+          )}
         </div>
+      </div>
 
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">
-            {KASP_STRING} Empanelled
-          </span>
-          <SelectField
-            name="kasp_empanelled"
-            variant="outlined"
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">Local body</FieldLabel>
+        <div>
+          <LocalBodySelect
+            name="local_body"
+            district={filterState.district}
+            selected={filterState.local_body}
+            setSelected={handleLocalBodyChange}
             margin="dense"
-            value={filterState.kasp_empanelled}
-            options={[
-              { id: "", text: "Show All" },
-              { id: true, text: "Yes" },
-              { id: false, text: "No" },
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
       </div>
-    </div>
+
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">Facility type</FieldLabel>
+        <SelectField
+          name="facility_type"
+          variant="outlined"
+          margin="dense"
+          value={filterState.facility_type}
+          options={[{ id: "", text: "Show All" }, ...FACILITY_TYPES]}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
+      </div>
+
+      <div className="w-full flex-none">
+        <span className="text-sm font-semibold">{KASP_STRING} Empanelled</span>
+        <SelectField
+          name="kasp_empanelled"
+          variant="outlined"
+          margin="dense"
+          value={filterState.kasp_empanelled}
+          options={[
+            { id: "", text: "Show All" },
+            { id: true, text: "Yes" },
+            { id: false, text: "No" },
+          ]}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
+      </div>
+    </FiltersSlideOver>
   );
 }
 

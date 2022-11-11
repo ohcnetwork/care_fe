@@ -8,16 +8,10 @@ import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "raviger";
 import moment from "moment";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-}
+import useMergeState from "../../Common/hooks/useMergeState";
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter, dataList, local } = props;
+  const { filter, onChange, closeFilter, dataList, local } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,11 +67,11 @@ export default function ListFilter(props: any) {
   };
 
   const applyFilter = () => {
-    let selectedWardIds = wards.map(function (obj) {
+    const selectedWardIds = wards.map(function (obj) {
       return obj.id;
     });
 
-    let selectedLsgIds = selectedLsgs.map(function (obj) {
+    const selectedLsgIds = selectedLsgs.map(function (obj) {
       return obj.id;
     });
 
@@ -149,7 +143,7 @@ export default function ListFilter(props: any) {
       setWardList(allWards || []);
       setLsgList(allLsgs || []);
       const filteredWard = filter?.wards?.split(",").map(Number);
-      let selectedWards: any =
+      const selectedWards: any =
         filteredWard && allWards
           ? allWards.filter(({ id }: { id: number }) => {
               return filteredWard.includes(id);
@@ -158,7 +152,7 @@ export default function ListFilter(props: any) {
       setWards(selectedWards);
 
       const filteredLsgs = filter?.local_bodies?.split(",").map(Number);
-      let selectedLsgs: any =
+      const selectedLsgs: any =
         filteredLsgs && allLsgs
           ? allLsgs.filter(({ id }: { id: number }) => {
               return filteredLsgs.includes(id);
@@ -171,11 +165,11 @@ export default function ListFilter(props: any) {
   }, []);
 
   const filterWards = () => {
-    let selectedLsgIds: any = selectedLsgs.map((e) => {
+    const selectedLsgIds: any = selectedLsgs.map((e) => {
       return e.id;
     });
 
-    let selectedwards: any =
+    const selectedwards: any =
       selectedLsgIds.length === 0
         ? wardList
         : wardList.filter(({ local_body_id }: { local_body_id: number }) => {

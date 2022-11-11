@@ -775,17 +775,12 @@ export const HospitalList = (props: any) => {
         </div>
       </div>
       <button onClick={() => setFilterSlideOver(true)}>Open Flilttleer</button>
-      <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
-          <div className="bg-white min-h-screen p-4">
-            <FacillityFilter
-              filter={qParams}
-              onChange={applyFilter}
-              closeFilter={() => setShowFilters(false)}
-            />
-          </div>
-        </SlideOver>
-      </div>
+      <FacillityFilter
+        filter={qParams}
+        onChange={applyFilter}
+        open={showFilters}
+        setOpen={setShowFilters}
+      />
       <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
         {badge("Facility/District Name", qParams.search, "search")}
         {badge("State", stateName, "state")}

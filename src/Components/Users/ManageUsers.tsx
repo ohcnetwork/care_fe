@@ -24,7 +24,6 @@ import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
 import UserFilter from "./UserFilter";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
 import clsx from "clsx";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
@@ -661,15 +660,12 @@ export default function ManageUsers() {
             </div>
           </div>
 
-          <SlideOver show={showFilters} setShow={setShowFilters}>
-            <div className="bg-white min-h-screen p-4">
-              <UserFilter
-                filter={qParams}
-                onChange={applyFilter}
-                closeFilter={() => setShowFilters(false)}
-              />
-            </div>
-          </SlideOver>
+          <UserFilter
+            open={showFilters}
+            setOpen={setShowFilters}
+            filter={qParams}
+            onChange={applyFilter}
+          />
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useAbortableEffect, statusType } from "../../Common/utils";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
@@ -10,7 +10,9 @@ import * as Notification from "../../Utils/Notifications.js";
 import { LocationSelect } from "../Common/LocationSelect";
 import { AssetLocationObject } from "./AssetTypes";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import FiltersSlideOver from "../../CAREUI/shared/FiltersSlideOver";
+import FiltersSlideOver, {
+  AdvancedFilterProps,
+} from "../../CAREUI/shared/FiltersSlideOver";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 
 const initialLocation = {
@@ -62,8 +64,7 @@ const selectMenuV2Options = (options: SelectMenuV2Option[]) => {
   };
 };
 
-function AssetFilter(props: any) {
-  const { filter, onChange, closeFilter } = props;
+function AssetFilter({ filter, onChange, ...props }: AdvancedFilterProps) {
   const dispatch: any = useDispatch();
   const [facility, setFacility] = useState<FacilityModel>({ name: "" });
   const [location, setLocation] =
@@ -74,20 +75,12 @@ function AssetFilter(props: any) {
   const [asset_status, setAssetStatus] = useState<string>(filter.status || "");
   const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
   const [locationId, setLocationId] = useState<string | "">(filter.location);
-  const [qParams, _] = useQueryParams();
 
   useEffect(() => {
     console.log(facility);
     setFacilityId(facility?.id ? facility?.id : "");
     setLocationId(location?.id ? location?.id : "");
   }, [facility, location]);
-
-  const clearFilter = useCallback(() => {
-    closeFilter();
-    const searchQuery = qParams?.search && `?search=${qParams?.search}`;
-    if (searchQuery) navigate(`/assets${searchQuery}`);
-    else navigate("/assets");
-  }, [qParams]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
@@ -152,64 +145,59 @@ function AssetFilter(props: any) {
     setLocation(selected ? selected : initialLocation);
   };
 
+  const clearFilter = () => navigate("/assets");
+
   return (
-    <FiltersSlideOver
-      open={props.show}
-      setOpen={props.setShow}
-      onClear={clearFilter}
-      onApply={applyFilter}
-    >
-      <div className="flex flex-col gap-4">
+    <FiltersSlideOver onClear={clearFilter} onApply={applyFilter} {...props}>
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">Facility</FieldLabel>
+        <FacilitySelect
+          name="Facilities"
+          setSelected={(selected) =>
+            handleFacilitySelect(selected as FacilityModel)
+          }
+          selected={facility}
+          errors=""
+          showAll
+          multiple={false}
+        />
+      </div>
+
+      {facilityId && (
         <div className="w-full flex-none">
-          <FieldLabel className="text-sm">Facility</FieldLabel>
-          <FacilitySelect
+          <FieldLabel className="text-sm">Location</FieldLabel>
+          <LocationSelect
             name="Facilities"
             setSelected={(selected) =>
-              handleFacilitySelect(selected as FacilityModel)
+              handleLocationSelect(selected as AssetLocationObject)
             }
-            selected={facility}
+            selected={location}
             errors=""
-            showAll
+            showAll={false}
             multiple={false}
+            facilityId={facilityId}
           />
         </div>
+      )}
 
-        {facilityId && (
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Location</FieldLabel>
-            <LocationSelect
-              name="Facilities"
-              setSelected={(selected) =>
-                handleLocationSelect(selected as AssetLocationObject)
-              }
-              selected={location}
-              errors=""
-              showAll={false}
-              multiple={false}
-              facilityId={facilityId}
-            />
-          </div>
-        )}
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">Asset Type</FieldLabel>
+        <SelectMenuV2
+          placeholder="Filter by Asset type"
+          {...selectMenuV2Options(AssetTypeOptions)}
+          value={asset_type}
+          onChange={(o) => setAssetType(o || "")}
+        />
+      </div>
 
-        <div className="w-full flex-none">
-          <FieldLabel className="text-sm">Asset Type</FieldLabel>
-          <SelectMenuV2
-            placeholder="Filter by Asset type"
-            {...selectMenuV2Options(AssetTypeOptions)}
-            value={asset_type}
-            onChange={(o) => setAssetType(o || "")}
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <FieldLabel className="text-sm">Asset Status</FieldLabel>
-          <SelectMenuV2
-            placeholder="Filter by Asset status"
-            {...selectMenuV2Options(AssetStatusOptions)}
-            value={asset_status}
-            onChange={(o) => setAssetStatus(o || "")}
-          />
-        </div>
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">Asset Status</FieldLabel>
+        <SelectMenuV2
+          placeholder="Filter by Asset status"
+          {...selectMenuV2Options(AssetStatusOptions)}
+          value={asset_status}
+          onChange={(o) => setAssetStatus(o || "")}
+        />
       </div>
     </FiltersSlideOver>
   );

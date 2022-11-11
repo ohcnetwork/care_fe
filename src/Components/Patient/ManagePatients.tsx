@@ -27,8 +27,7 @@ import {
   KASP_STRING,
   PatientCategoryTailwindClass,
 } from "../../Common/constants";
-import { make as SlideOver } from "../Common/SlideOver.gen";
-import PatientFilterV2 from "./PatientFilterV2";
+import PatientFilter from "./PatientFilter";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Chip from "../../CAREUI/display/Chip";
@@ -1056,15 +1055,12 @@ export const PatientManager = (props: any) => {
         )}
       </div>
       <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
-          <div className="bg-white min-h-screen p-4">
-            <PatientFilterV2
-              filter={qParams}
-              onChange={applyFilter}
-              closeFilter={() => setShowFilters(false)}
-            />
-          </div>
-        </SlideOver>
+        <PatientFilter
+          filter={qParams}
+          onChange={applyFilter}
+          open={showFilters}
+          setOpen={setShowFilters}
+        />
         <NavTabs
           onChange={handleTabChange}
           options={[
