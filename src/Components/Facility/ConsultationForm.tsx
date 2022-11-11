@@ -1195,7 +1195,7 @@ export const ConsultationForm = (props: any) => {
                   type="submit"
                   onClick={(e) => handleSubmit(e)}
                 >
-                  <i className="fa-regular fa-circle-check" />
+                  <i className="uil uil-check" />
                   {buttonText}
                 </ButtonV2>
               </div>
