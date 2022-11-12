@@ -6,7 +6,7 @@ export interface FilterBadgeProps {
 
 /**
  * **Note: If this component is intended to be used with query params, use the
- * wrapped `FilterBadge` from `usePaginatedQueryParams` hook instead.**
+ * wrapped `FilterBadge` from `useFilters` hook instead.**
  */
 const FilterBadge = ({ name, value, onRemove }: FilterBadgeProps) => {
   return (

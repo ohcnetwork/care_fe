@@ -38,7 +38,7 @@ import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
 import SearchInput from "../Form/SearchInput";
-import usePaginatedQueryParams from "../../Common/hooks/usePaginatedQueryParams";
+import useFilters from "../../Common/hooks/useFilters";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -47,8 +47,8 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 const limit = 14;
 
 export const HospitalList = () => {
-  const { qParams, updateQuery, updatePage, applyFilter, FilterBadge } =
-    usePaginatedQueryParams({
+  const { qParams, updateQuery, updatePage, FilterBadges, advancedFilter } =
+    useFilters({
       limit,
     });
   const dispatchAction: any = useDispatch();
@@ -62,7 +62,6 @@ export const HospitalList = () => {
   const [triageDownloadFile, setTriageDownloadFile] = useState("");
   const downloadTypes = [...DOWNLOAD_TYPES];
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
-  const [showFilters, setShowFilters] = useState(false);
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
@@ -616,7 +615,7 @@ export const HospitalList = () => {
           <div className="flex items-start mb-2 w-full md:w-auto">
             <button
               className="btn btn-primary-ghost w-full md:w-auto"
-              onClick={() => setShowFilters(true)}
+              onClick={() => advancedFilter.setShow(true)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -654,21 +653,14 @@ export const HospitalList = () => {
       </div>
 
       <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
+        <SlideOver {...advancedFilter}>
           <div className="bg-white min-h-screen p-4">
-            <FacillityFilter
-              filter={qParams}
-              onChange={(data: any) => {
-                applyFilter(data);
-                setShowFilters(false);
-              }}
-              closeFilter={() => setShowFilters(false)}
-            />
+            <FacillityFilter {...advancedFilter} />
           </div>
         </SlideOver>
       </div>
-      <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
-        {[
+      <FilterBadges
+        badges={[
           { name: "Facility/District Name", paramKey: "search" },
           { name: "State", value: stateName, paramKey: "state" },
           { name: "District", value: districtName, paramKey: "district" },
@@ -688,10 +680,8 @@ export const HospitalList = () => {
                 paramKey: "kasp_empanelled",
               }
             : undefined,
-        ].map(
-          (props) => props && <FilterBadge {...props} name={t(props.name)} />
-        )}
-      </div>
+        ]}
+      />
       <div className="mt-4 pb-4">
         <div>{manageFacilities}</div>
       </div>
