@@ -47,7 +47,7 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 const limit = 14;
 
 export const HospitalList = () => {
-  const { qParams, updateQuery, updatePage, filter, FilterBadge } =
+  const { qParams, updateQuery, updatePage, applyFilter, FilterBadge } =
     usePaginatedQueryParams({
       limit,
     });
@@ -659,7 +659,7 @@ export const HospitalList = () => {
             <FacillityFilter
               filter={qParams}
               onChange={(data: any) => {
-                filter.apply(data);
+                applyFilter(data);
                 setShowFilters(false);
               }}
               closeFilter={() => setShowFilters(false)}

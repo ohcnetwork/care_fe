@@ -32,6 +32,14 @@ export default function usePaginatedQueryParams({ limit }: { limit: number }) {
     updateQuery({ ...qParams, [param]: "" });
   };
 
+  const removeFilters = (params: string[]) => {
+    const filter = { ...qParams };
+    params.forEach((key) => {
+      filter[key] = "";
+    });
+    updateQuery(filter);
+  };
+
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
     return (
       <GenericFilterBadge
@@ -56,18 +64,22 @@ export default function usePaginatedQueryParams({ limit }: { limit: number }) {
      */
     updatePage,
 
-    filter: {
-      /**
-       * Updates query params with the filters.
-       */
-      apply: applyFilter,
+    /**
+     * Updates query params with the filters.
+     */
+    applyFilter,
 
-      /**
-       * Removes the filter from query param
-       * @param param is the key of the filter to be removed.
-       */
-      remove: removeFilter,
-    },
+    /**
+     * Removes the filter from query param
+     * @param param is the key of the filter to be removed.
+     */
+    removeFilter,
+
+    /**
+     * Removes multiple filters from query param
+     * @param params is the list of keys to be removed.
+     */
+    removeFilters,
 
     FilterBadge,
   };
