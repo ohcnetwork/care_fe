@@ -40,6 +40,7 @@ import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
 import SearchInput from "../Form/SearchInput";
+import usePaginatedQueryParams from "../../Common/hooks/usePaginatedQueryParams";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -56,8 +57,13 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
+const limit = 14;
+
 export const HospitalList = (props: any) => {
-  const [qParams, setQueryParams] = useQueryParams();
+  const { qParams, updateQuery, updatePage, filter, FilterBadge } =
+    usePaginatedQueryParams({
+      limit,
+    });
   const dispatchAction: any = useDispatch();
   const [data, setData] = useState<Array<FacilityModel>>([]);
   let manageFacilities: any = null;
@@ -81,7 +87,6 @@ export const HospitalList = (props: any) => {
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
-  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -188,10 +193,6 @@ export const HospitalList = (props: any) => {
     return facility_type?.text;
   };
 
-  const onSearchSuspects = (value: string) => {
-    updateQuery({ search: value });
-  };
-
   const handleDownload = async () => {
     // while is getting ready
     setDownloadLoading(true);
@@ -232,24 +233,6 @@ export const HospitalList = (props: any) => {
     document.getElementById("triageDownloader")?.click();
   };
 
-  const updateQuery = (params: any) => {
-    const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
-  };
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
-
-  const removeFilter = (paramKey: any) => {
-    updateQuery({
-      ...qParams,
-      [paramKey]: "",
-    });
-  };
-
   const hasFiltersApplied = (qParams: any) => {
     return (
       qParams.state ||
@@ -258,22 +241,6 @@ export const HospitalList = (props: any) => {
       qParams.facility_type ||
       qParams.kasp_empanelled ||
       qParams?.search
-    );
-  };
-
-  const badge = (key: string, value: any, paramKey: string) => {
-    return (
-      value && (
-        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {t(key)}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
     );
   };
 
@@ -292,10 +259,6 @@ export const HospitalList = (props: any) => {
         handleTriageDownload();
         break;
     }
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page, limit });
   };
 
   const handleNotifySubmit = async (id: any) => {
@@ -524,7 +487,7 @@ export const HospitalList = (props: any) => {
               cPage={qParams.page}
               defaultPerPage={limit}
               data={{ totalCount }}
-              onChange={handlePagination}
+              onChange={(page) => updatePage(page)}
             />
           </div>
         )}
@@ -659,7 +622,7 @@ export const HospitalList = (props: any) => {
           <SearchInput
             name="search"
             value={qParams.search}
-            onChange={({ value }) => onSearchSuspects(value)}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder={t("facility_search_placeholder")}
           />
 
@@ -708,30 +671,39 @@ export const HospitalList = (props: any) => {
           <div className="bg-white min-h-screen p-4">
             <FacillityFilter
               filter={qParams}
-              onChange={applyFilter}
+              onChange={(data: any) => {
+                filter.apply(data);
+                setShowFilters(false);
+              }}
               closeFilter={() => setShowFilters(false)}
             />
           </div>
         </SlideOver>
       </div>
       <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
-        {badge("Facility/District Name", qParams.search, "search")}
-        {badge("State", stateName, "state")}
-        {badge("District", districtName, "district")}
-        {badge("Local Body", localbodyName, "local_body")}
-        {badge(
-          "Facility Type",
-          findFacilityTypeById(qParams.facility_type),
-          "facility_type"
+        {[
+          { name: "Facility/District Name", paramKey: "search" },
+          { name: "State", value: stateName, paramKey: "state" },
+          { name: "District", value: districtName, paramKey: "district" },
+          { name: "Local Body", value: localbodyName, paramKey: "local_body" },
+          {
+            name: "Facility type",
+            value: findFacilityTypeById(qParams.facility_type),
+            paramKey: "facility_type",
+          },
+          qParams.kasp_empanelled
+            ? {
+                name: `${KASP_STRING} Empanelled`,
+                value:
+                  qParams.kasp_empanelled === "true"
+                    ? KASP_STRING
+                    : `Non ${KASP_STRING}`,
+                paramKey: "kasp_empanelled",
+              }
+            : undefined,
+        ].map(
+          (props) => props && <FilterBadge {...props} name={t(props.name)} />
         )}
-        {qParams.kasp_empanelled &&
-          badge(
-            `${KASP_STRING} Empanelled`,
-            qParams.kasp_empanelled === "true"
-              ? KASP_STRING
-              : `Non ${KASP_STRING}`,
-            "kasp_empanelled"
-          )}
       </div>
       <div className="mt-4 pb-4">
         <div>{manageFacilities}</div>
