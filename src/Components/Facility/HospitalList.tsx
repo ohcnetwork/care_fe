@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -28,7 +27,6 @@ import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { CSVLink } from "react-csv";
 import moment from "moment";
-import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import GetAppIcon from "@material-ui/icons/GetApp";
@@ -44,22 +42,11 @@ import usePaginatedQueryParams from "../../Common/hooks/usePaginatedQueryParams"
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: "100%",
-      // "grid-column": "span 4 / span 4",
-    },
-    heading: {
-      fontSize: theme.typography.pxToRem(15),
-    },
-  })
-);
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 const limit = 14;
 
-export const HospitalList = (props: any) => {
+export const HospitalList = () => {
   const { qParams, updateQuery, updatePage, filter, FilterBadge } =
     usePaginatedQueryParams({
       limit,
