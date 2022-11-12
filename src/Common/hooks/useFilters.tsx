@@ -1,4 +1,6 @@
 import { useQueryParams } from "raviger";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 
 interface FilterBadgeProps {
@@ -7,11 +9,16 @@ interface FilterBadgeProps {
   paramKey: string;
 }
 
+interface FilterBadgesProps {
+  badges: (FilterBadgeProps | undefined)[];
+}
+
 /**
  * A custom hook wrapped around raviger's `useQueryParams` hook to ease handling
  * of pagination and filters.
  */
-export default function usePaginatedQueryParams({ limit }: { limit: number }) {
+export default function useFilters({ limit }: { limit: number }) {
+  const [showFilters, setShowFilters] = useState(false);
   const [qParams, setQueryParams] = useQueryParams();
 
   const updateQuery = (params: Record<string, unknown>) => {
@@ -50,6 +57,17 @@ export default function usePaginatedQueryParams({ limit }: { limit: number }) {
     );
   };
 
+  const FilterBadges = ({ badges }: FilterBadgesProps) => {
+    const { t } = useTranslation();
+    return (
+      <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
+        {badges.map(
+          (props) => props && <FilterBadge {...props} name={t(props.name)} />
+        )}
+      </div>
+    );
+  };
+
   return {
     qParams,
 
@@ -82,5 +100,18 @@ export default function usePaginatedQueryParams({ limit }: { limit: number }) {
     removeFilters,
 
     FilterBadge,
+    FilterBadges,
+
+    // TODO: update this props to be compliant with new FiltersSlideOver when #3996 is merged.
+    advancedFilter: {
+      show: showFilters,
+      setShow: setShowFilters,
+      filter: qParams,
+      onChange: (data: Record<string, unknown>) => {
+        applyFilter(data);
+        setShowFilters(false);
+      },
+      closeFilter: () => setShowFilters(false),
+    },
   };
 }
