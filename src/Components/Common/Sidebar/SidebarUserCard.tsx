@@ -15,7 +15,7 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
   return (
     <div
       className={`flex ${
-        shrinked ? "mx-auto" : "mx-10"
+        shrinked ? "mx-auto" : "mx-5"
       } transition-all duration-200 ease-in-out`}
     >
       <Link href="/user/profile" className="flex-none">
