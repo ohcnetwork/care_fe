@@ -32,7 +32,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [patientDischarged, setPatientDischarged] = useState(false);
+  const [patientActive, setPatientActive] = useState(false);
 
   const fetchData = useCallback(
     async (page = 1, status: statusType = { aborted: false }) => {
@@ -69,7 +69,7 @@ const PatientNotes = (props: PatientNotesProps) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
-          setPatientDischarged(res.data.is_active);
+          setPatientActive(res.data.is_active);
         }
       } else {
         setPatientName("");
@@ -93,7 +93,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       });
       return;
     }
-    if (patientDischarged) {
+    if (!patientActive) {
       return;
     }
     dispatch(addPatientNote(props.patientId, payload)).then(() => {
