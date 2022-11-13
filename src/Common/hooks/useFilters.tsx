@@ -104,13 +104,18 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
       return badgeConstructorUtils.range(name, paramKey, "after", "before");
     },
 
-    kasp(nameSuffix = "", paramKey = "is_kasp") {
+    boolean(name: string, paramKey: string, trueVal = "Yes", falseVal = "No") {
       const value =
-        (qParams[paramKey] === "true" && KASP_STRING) ||
-        (qParams[paramKey] === "false" && "Non " + KASP_STRING) ||
+        (qParams[paramKey] === "true" && trueVal) ||
+        (qParams[paramKey] === "false" && falseVal) ||
         "";
-      const name = nameSuffix ? KASP_STRING + " " + nameSuffix : KASP_STRING;
       return { name, value, paramKey };
+    },
+
+    kasp(nameSuffix = "", paramKey = "is_kasp") {
+      const name = nameSuffix ? KASP_STRING + " " + nameSuffix : KASP_STRING;
+      const [trueVal, falseVal] = [KASP_STRING, "Non " + KASP_STRING];
+      return badgeConstructorUtils.boolean(name, paramKey, trueVal, falseVal);
     },
   };
 
