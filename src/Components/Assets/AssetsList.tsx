@@ -11,7 +11,7 @@ import {
 import { assetClassProps, AssetData } from "./AssetTypes";
 import { getAsset } from "../../Redux/actions";
 import React, { useState, useCallback, useEffect } from "react";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -21,28 +21,23 @@ import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
+import useFilters from "../../Common/hooks/useFilters";
 
 const Loading = loadable(() => import("../Common/Loading"));
-
-interface qParamModel {
-  search?: string;
-  facility?: string;
-  asset_type?: string;
-  location?: string;
-  status?: string;
-}
+const limit = 21;
 
 const AssetsList = () => {
-  const [qParams, setQueryParams] = useQueryParams();
-  const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const { qParams, updateQuery, updatePage, FilterBadges, advancedFilter } =
+    useFilters({
+      limit,
+    });
+  const [assets, setAssets] = useState([{} as AssetData]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isScannerActive, setIsScannerActive] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const [facilityName, setFacilityName] = useState<string>();
   const [asset_type, setAssetType] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
-  const limit = 21;
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const fetchData = useCallback(
@@ -135,51 +130,6 @@ const AssetsList = () => {
     },
     [fetchFacilityName, fetchLocationName]
   );
-
-  const badge = (key: string, value: any, paramKey: string[]) => {
-    return (
-      value && (
-        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={() => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
-  };
-
-  const removeFilter = (paramKey: string[]) => {
-    const emptyObj: qParamModel = { ...qParams };
-    paramKey.forEach((p) => ((emptyObj as any)[p] = ""));
-    updateQuery({
-      ...emptyObj,
-    });
-  };
-
-  const onSearchSuspects = (search: string) => {
-    if (search !== "")
-      setQueryParams({ ...qParams, search }, { replace: true });
-    else setQueryParams({ ...qParams, search: "" }, { replace: true });
-  };
-
-  const updateQuery = (params: any) => {
-    const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page, limit });
-  };
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
 
   const getAssetIdFromQR = async (assetUrl: string) => {
     try {
@@ -324,13 +274,15 @@ const AssetsList = () => {
           <SearchInput
             name="search"
             value={qParams.search}
-            onChange={({ value }) => onSearchSuspects(value)}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder="Search assets"
           />
         </div>
         <div className="flex flex-col md:flex-row lg:ml-2 justify-start items-start gap-2">
           <div className="w-full">
-            <AdvancedFilterButton setShowFilters={setShowFilters} />
+            <AdvancedFilterButton
+              setShowFilters={() => advancedFilter.setShow(true)}
+            />
           </div>
           <button
             className="btn btn-primary w-full"
@@ -341,13 +293,9 @@ const AssetsList = () => {
         </div>
       </div>
       <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
+        <SlideOver {...advancedFilter}>
           <div className="bg-white min-h-screen p-4">
-            <AssetFilter
-              filter={qParams}
-              onChange={applyFilter}
-              closeFilter={() => setShowFilters(false)}
-            />
+            <AssetFilter {...advancedFilter} />
           </div>
         </SlideOver>
       </div>
@@ -355,13 +303,15 @@ const AssetsList = () => {
         <Loading />
       ) : (
         <>
-          <div className="flex mt-2 flex-wrap w-full col-span-3">
-            {badge("Facility", facilityName, ["facility", "location"])}
-            {badge("Asset Name", qParams.search, ["search"])}
-            {badge("Location", locationName, ["location"])}
-            {badge("Asset Type", asset_type, ["asset_type"])}
-            {badge("Status", qParams.status, ["status"])}
-          </div>
+          <FilterBadges
+            badges={({ badge, value }) => [
+              value("Facility", ["facility", "location"], facilityName || ""),
+              badge("Name", "search"),
+              value("Asset Type", "asset_type", asset_type || ""),
+              badge("Status", "status"),
+              value("Location", "location", locationName || ""),
+            ]}
+          />
           <div className="grow">
             <div className="py-8 md:px-5">
               {manageAssets}
@@ -371,7 +321,7 @@ const AssetsList = () => {
                     cPage={qParams.page}
                     defaultPerPage={limit}
                     data={{ totalCount }}
-                    onChange={handlePagination}
+                    onChange={(page) => updatePage(page)}
                   />
                 </div>
               )}
