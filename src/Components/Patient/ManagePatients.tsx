@@ -80,11 +80,10 @@ export const PatientManager = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
-  const { qParams, updateQuery, updatePage, applyFilter, FilterBadges } =
+  const { qParams, updateQuery, updatePage, advancedFilter, FilterBadges } =
     useFilters({
       limit,
     });
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
@@ -687,7 +686,7 @@ export const PatientManager = (props: any) => {
         <div>
           <button
             className="btn btn-primary-ghost w-full md:w-fit"
-            onClick={(_) => setShowFilters((show) => !show)}
+            onClick={() => advancedFilter.setShow(true)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -864,16 +863,9 @@ export const PatientManager = (props: any) => {
           LastAdmittedToTypeBadges()}
       </div>
       <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
+        <SlideOver {...advancedFilter}>
           <div className="bg-white min-h-screen p-4">
-            <PatientFilterV2
-              filter={qParams}
-              onChange={(data: any) => {
-                applyFilter(data);
-                setShowFilters(false);
-              }}
-              closeFilter={() => setShowFilters(false)}
-            />
+            <PatientFilterV2 {...advancedFilter} />
           </div>
         </SlideOver>
         <NavTabs

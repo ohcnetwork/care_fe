@@ -5,11 +5,12 @@ import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import { KASP_STRING } from "../constants";
 
 export type FilterState = Record<string, unknown>;
+export type FilterParamKeys = string | string[];
 
 interface FilterBadgeProps {
   name: string;
   value?: string | undefined;
-  paramKey: string | string[];
+  paramKey: FilterParamKeys;
 }
 
 /**
@@ -71,11 +72,11 @@ export default function useFilters({ limit }: { limit: number }) {
   };
 
   const badgeConstructorUtils = {
-    badge(name: string, paramKey: string) {
+    badge(name: string, paramKey: FilterParamKeys) {
       return { name, paramKey };
     },
 
-    value(name: string, paramKey: string, value: string) {
+    value(name: string, paramKey: FilterParamKeys, value: string) {
       return { name, value, paramKey };
     },
 
