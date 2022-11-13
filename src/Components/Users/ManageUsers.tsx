@@ -13,8 +13,8 @@ import {
   partialUpdateUser,
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import { navigate, useQueryParams } from "raviger";
-import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+import { navigate } from "raviger";
+import { USER_TYPES } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
 
 import { IconButton, CircularProgress } from "@material-ui/core";
@@ -30,14 +30,22 @@ import clsx from "clsx";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import SearchInput from "../Form/SearchInput";
+import useFilters from "../../Common/hooks/useFilters";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ManageUsers() {
   const { width } = useWindowDimensions();
+  const {
+    qParams,
+    updateQuery,
+    updatePage,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({});
 
-  const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageUsers: any = null;
@@ -45,10 +53,7 @@ export default function ManageUsers() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFacilityLoading, setIsFacilityLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [showFilters, setShowFilters] = useState(false);
-  const [districtName, setDistrictName] = useState<string | undefined>(
-    undefined
-  );
+  const [districtName, setDistrictName] = useState<string>();
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const isSuperuser = currentUser.data.is_superuser;
@@ -74,29 +79,16 @@ export default function ManageUsers() {
     facility?: FacilityModel;
   }>({ show: false, userName: "", facility: undefined });
 
-  const limit =
-    width >= 1280 ? RESULTS_PER_PAGE_LIMIT + 1 : RESULTS_PER_PAGE_LIMIT;
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
-
-  const updateQuery = (params: any) => {
-    const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
-  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const params = {
-        limit,
-        offset: (qParams.page ? qParams.page - 1 : 0) * limit,
+        limit: resultsPerPage,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
         username: qParams.username,
         first_name: qParams.first_name,
         last_name: qParams.last_name,
@@ -123,7 +115,7 @@ export default function ManageUsers() {
       }
     },
     [
-      limit,
+      resultsPerPage,
       qParams.page,
       qParams.username,
       qParams.first_name,
@@ -142,14 +134,6 @@ export default function ManageUsers() {
     },
     [fetchData]
   );
-
-  const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page, limit });
-  };
-
-  const onUserNameChange = (value: string) => {
-    setQueryParams({ ...qParams, username: value });
-  };
 
   const addUser = (
     <button
@@ -186,29 +170,6 @@ export default function ManageUsers() {
       show: true,
       username,
     });
-  };
-
-  const removeFilter = (paramKey: any) => {
-    updateQuery({
-      ...qParams,
-      [paramKey]: "",
-    });
-  };
-
-  const badge = (key: string, value: any, paramKey: string) => {
-    return (
-      value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={() => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
   };
 
   const hideUnlinkFacilityModal = () => {
@@ -548,13 +509,13 @@ export default function ManageUsers() {
       <div>
         {userTypes.length && addUser}
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
-        {totalCount > limit && (
+        {totalCount > resultsPerPage && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={qParams.page}
-              defaultPerPage={limit}
+              defaultPerPage={resultsPerPage}
               data={{ totalCount }}
-              onChange={handlePagination}
+              onChange={(page) => updatePage(page)}
             />
           </div>
         )}
@@ -610,8 +571,8 @@ export default function ManageUsers() {
         <div className="flex flex-col lg:flex-row justify-between col-span-2 lg:px-3 space-y-3 lg:space-y-0 lg:space-x-4 my-2">
           <div className="w-full">
             <SearchInput
-              name="search"
-              onChange={({ value }) => onUserNameChange(value)}
+              name="username"
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
               value={qParams.username}
               placeholder="Search by username"
             />
@@ -621,7 +582,7 @@ export default function ManageUsers() {
             <div className="flex items-start mb-2">
               <button
                 className="btn btn-primary-ghost w-full"
-                onClick={() => setShowFilters((show) => !show)}
+                onClick={() => advancedFilter.setShow(true)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -657,39 +618,25 @@ export default function ManageUsers() {
             </div>
           </div>
 
-          <SlideOver show={showFilters} setShow={setShowFilters}>
+          <SlideOver {...advancedFilter}>
             <div className="bg-white min-h-screen p-4">
-              <UserFilter
-                filter={qParams}
-                onChange={applyFilter}
-                closeFilter={() => setShowFilters(false)}
-              />
+              <UserFilter {...advancedFilter} />
             </div>
           </SlideOver>
         </div>
       </div>
 
-      <div className="flex my-2 mx-6 flex-wrap gap-2 items-center">
-        {badge("Username", qParams.username, "username")}
-        {badge("First Name", qParams.first_name, "first_name")}
-        {badge("Last Name", qParams.last_name, "last_name")}
-        {qParams.phone_number?.trim()
-          ? badge("Phone Number", qParams.phone_number, "phone_number")
-          : null}
-        {qParams.alt_phone_number?.trim()
-          ? badge(
-              "WhatsApp Phone Number",
-              qParams.alt_phone_number,
-              "alt_phone_number"
-            )
-          : null}
-        {qParams.user_type
-          ? badge("Role", qParams.user_type, "user_type")
-          : null}
-        {qParams.district_id
-          ? badge("District", districtName, "district_id")
-          : null}
-      </div>
+      <FilterBadges
+        badges={({ badge, value, phoneNumber }) => [
+          badge("Username", "username"),
+          badge("First Name", "first_name"),
+          badge("Last Name", "last_name"),
+          phoneNumber(),
+          phoneNumber("WhatsApp no.", "alt_phone_number"),
+          badge("Role", "user_type"),
+          value("District", "district_id", districtName || ""),
+        ]}
+      />
 
       <div className="px-3 md:px-6">
         <div>{manageUsers}</div>

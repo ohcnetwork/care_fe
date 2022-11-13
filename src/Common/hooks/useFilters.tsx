@@ -17,7 +17,7 @@ interface FilterBadgeProps {
  * A custom hook wrapped around raviger's `useQueryParams` hook to ease handling
  * of pagination and filters.
  */
-export default function useFilters({ limit }: { limit: number }) {
+export default function useFilters({ limit = 14 }: { limit?: number }) {
   const [showFilters, setShowFilters] = useState(false);
   const [qParams, setQueryParams] = useQueryParams();
 
@@ -175,5 +175,7 @@ export default function useFilters({ limit }: { limit: number }) {
       },
       closeFilter: () => setShowFilters(false),
     },
+
+    resultsPerPage: limit,
   };
 }
