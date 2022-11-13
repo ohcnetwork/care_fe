@@ -38,12 +38,12 @@ export default function FilterSlideOver(
           <TextFormField
             disabled={disabled}
             type={filter.type}
-            value={filter.value}
+            value={filter.value || ""}
             name={filter.name}
             onChange={(e: any) => {
               setFilters(
                 filters.map((f) =>
-                  f.name === filter.name ? { ...f, value: e.target.value } : f
+                  f.name === filter.name ? { ...f, value: e.value } : f
                 )
               );
             }}
