@@ -660,26 +660,17 @@ export const HospitalList = () => {
         </SlideOver>
       </div>
       <FilterBadges
-        badges={[
-          { name: "Facility/District Name", paramKey: "search" },
-          { name: "State", value: stateName, paramKey: "state" },
-          { name: "District", value: districtName, paramKey: "district" },
-          { name: "Local Body", value: localbodyName, paramKey: "local_body" },
-          {
-            name: "Facility type",
-            value: findFacilityTypeById(qParams.facility_type),
-            paramKey: "facility_type",
-          },
-          qParams.kasp_empanelled
-            ? {
-                name: `${KASP_STRING} Empanelled`,
-                value:
-                  qParams.kasp_empanelled === "true"
-                    ? KASP_STRING
-                    : `Non ${KASP_STRING}`,
-                paramKey: "kasp_empanelled",
-              }
-            : undefined,
+        badges={({ badge, value, kasp }) => [
+          badge("Facility/District Name", "search"),
+          value("State", "state", stateName),
+          value("District", "district", districtName),
+          value("Local Body", "local_body", localbodyName),
+          value(
+            "Facility type",
+            "facility_type",
+            findFacilityTypeById(qParams.facility_type) || ""
+          ),
+          kasp("Empanelled", "kasp_empanelled"),
         ]}
       />
       <div className="mt-4 pb-4">
