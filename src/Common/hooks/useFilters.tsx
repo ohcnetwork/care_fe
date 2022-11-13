@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 
+type FilterState = Record<string, unknown>;
+
 interface FilterBadgeProps {
   name: string;
   value?: string | undefined;
@@ -21,8 +23,8 @@ export default function useFilters({ limit }: { limit: number }) {
   const [showFilters, setShowFilters] = useState(false);
   const [qParams, setQueryParams] = useQueryParams();
 
-  const updateQuery = (params: Record<string, unknown>) => {
-    setQueryParams(Object.assign({}, qParams, { page: 1, limit, ...params }), {
+  const updateQuery = (filter: FilterState) => {
+    setQueryParams(Object.assign({}, qParams, { page: 1, limit, ...filter }), {
       replace: true,
     });
   };
@@ -31,20 +33,16 @@ export default function useFilters({ limit }: { limit: number }) {
     setQueryParams(Object.assign({}, qParams, { page }), { replace: true });
   };
 
-  const applyFilter = (filters: Record<string, unknown>) => {
-    updateQuery({ ...qParams, ...filters });
+  const applyFilter = (filter: FilterState) => {
+    updateQuery({ ...qParams, ...filter });
   };
 
   const removeFilter = (param: string) => {
     updateQuery({ ...qParams, [param]: "" });
   };
 
-  const removeFilters = (params: string[]) => {
-    const filter = { ...qParams };
-    params.forEach((key) => {
-      filter[key] = "";
-    });
-    updateQuery(filter);
+  const removeFilters = (keys: string[]) => {
+    updateQuery(keys.reduce((acc, key) => ({ ...acc, [key]: "" }), qParams));
   };
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
@@ -107,8 +105,8 @@ export default function useFilters({ limit }: { limit: number }) {
       show: showFilters,
       setShow: setShowFilters,
       filter: qParams,
-      onChange: (data: Record<string, unknown>) => {
-        applyFilter(data);
+      onChange: (filter: FilterState) => {
+        applyFilter(filter);
         setShowFilters(false);
       },
       closeFilter: () => setShowFilters(false),
