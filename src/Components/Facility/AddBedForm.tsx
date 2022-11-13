@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useState, useEffect } from "react";
@@ -18,6 +18,7 @@ import {
 } from "../Common/HelperInputFields";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -201,10 +202,8 @@ export const AddBedForm = (props: BedFormProps) => {
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                  <Button
-                    color="default"
-                    variant="contained"
-                    type="button"
+                  <ButtonV2
+                    variant="secondary"
                     onClick={() =>
                       navigate(
                         `/facility/${facilityId}/location/${locationId}/beds`
@@ -212,18 +211,11 @@ export const AddBedForm = (props: BedFormProps) => {
                     }
                   >
                     Cancel
-                  </Button>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    type="submit"
-                    startIcon={
-                      <CheckCircleOutlineIcon></CheckCircleOutlineIcon>
-                    }
-                    onClick={(e) => handleSubmit(e)}
-                  >
+                  </ButtonV2>
+                  <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
+                    <CheckCircleOutlineIcon></CheckCircleOutlineIcon>
                     {buttonText}
-                  </Button>
+                  </ButtonV2>
                 </div>
               </div>
             </CardContent>
