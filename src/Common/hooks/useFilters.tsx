@@ -129,7 +129,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     return (
       <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
         {compiledBadges.map((props) => (
-          <FilterBadge {...props} name={t(props.name)} />
+          <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
       </div>
     );
