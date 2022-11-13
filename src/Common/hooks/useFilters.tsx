@@ -50,7 +50,10 @@ export default function useFilters({ limit }: { limit: number }) {
           name={name}
           value={
             value === undefined
-              ? paramKey.map((k) => qParams[k]).join(", ")
+              ? paramKey
+                  .map((k) => qParams[k])
+                  .filter(Boolean)
+                  .join(", ")
               : value
           }
           onRemove={() => removeFilters(paramKey)}
