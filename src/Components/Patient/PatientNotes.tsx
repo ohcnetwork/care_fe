@@ -94,6 +94,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       return;
     }
     if (!patientActive) {
+      Notification.Error({ msg: "Only active patients data can be updated" });
       return;
     }
     dispatch(addPatientNote(props.patientId, payload)).then(() => {
