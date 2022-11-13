@@ -2,17 +2,14 @@ import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
+import { KASP_STRING } from "../constants";
 
-type FilterState = Record<string, unknown>;
+export type FilterState = Record<string, unknown>;
 
 interface FilterBadgeProps {
   name: string;
   value?: string | undefined;
   paramKey: string | string[];
-}
-
-interface FilterBadgesProps {
-  badges: (FilterBadgeProps | undefined)[];
 }
 
 /**
@@ -70,13 +67,61 @@ export default function useFilters({ limit }: { limit: number }) {
     );
   };
 
-  const FilterBadges = ({ badges }: FilterBadgesProps) => {
+  const badgeConstructorUtils = {
+    badge(name: string, paramKey: string) {
+      return { name, paramKey };
+    },
+
+    value(name: string, paramKey: string, value: string) {
+      return { name, value, paramKey };
+    },
+
+    phoneNumber(name = "Phone Number", paramKey = "phone_number") {
+      return {
+        name: name,
+        value: qParams[paramKey] as string,
+        paramKey: paramKey,
+      };
+    },
+
+    range(name: string, paramKey: string, minKey = "min", maxKey = "max") {
+      const paramKeys = [paramKey + "_" + minKey, paramKey + "_" + maxKey];
+      const values = [qParams[paramKeys[0]], qParams[paramKeys[1]]];
+
+      if (values[0] === values[1])
+        return [{ name, value: values[0], paramKey: paramKeys }];
+
+      return [name + " " + minKey, name + " " + maxKey].map((name, i) => {
+        return { name, value: values[i], paramKey: paramKeys[i] };
+      });
+    },
+
+    dateRange(name = "Date", paramKey = "date") {
+      return badgeConstructorUtils.range(name, paramKey, "after", "before");
+    },
+
+    kasp(nameSuffix = "", paramKey = "is_kasp") {
+      const value =
+        (qParams[paramKey] === "true" && KASP_STRING) ||
+        (qParams[paramKey] === "false" && "Non " + KASP_STRING) ||
+        "";
+      const name = nameSuffix ? KASP_STRING + " " + nameSuffix : KASP_STRING;
+      return { name, value, paramKey };
+    },
+  };
+
+  const FilterBadges = ({
+    badges,
+  }: {
+    badges: (utils: typeof badgeConstructorUtils) => FilterBadgeProps[];
+  }) => {
+    const compiledBadges = badges(badgeConstructorUtils);
     const { t } = useTranslation();
     return (
       <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
-        {badges.map(
-          (props) => props && <FilterBadge {...props} name={t(props.name)} />
-        )}
+        {compiledBadges.map((props) => (
+          <FilterBadge {...props} name={t(props.name)} />
+        ))}
       </div>
     );
   };
