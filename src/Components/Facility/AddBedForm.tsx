@@ -1,6 +1,5 @@
 import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -213,7 +212,7 @@ export const AddBedForm = (props: BedFormProps) => {
                     Cancel
                   </ButtonV2>
                   <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
-                    <CheckCircleOutlineIcon></CheckCircleOutlineIcon>
+                    <i className="uil uil-check-circle text-xl"></i>
                     {buttonText}
                   </ButtonV2>
                 </div>
