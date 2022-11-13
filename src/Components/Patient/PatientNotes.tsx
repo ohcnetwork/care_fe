@@ -69,6 +69,7 @@ const PatientNotes = (props: PatientNotesProps) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          console.log(res.data);
           setPatientDischarged(res.data.discharged);
         }
       } else {
