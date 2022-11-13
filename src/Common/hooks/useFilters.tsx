@@ -8,7 +8,7 @@ type FilterState = Record<string, unknown>;
 interface FilterBadgeProps {
   name: string;
   value?: string | undefined;
-  paramKey: string;
+  paramKey: string | string[];
 }
 
 interface FilterBadgesProps {
@@ -46,6 +46,21 @@ export default function useFilters({ limit }: { limit: number }) {
   };
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
+    if (Array.isArray(paramKey)) {
+      return (
+        <GenericFilterBadge
+          key={name}
+          name={name}
+          value={
+            value === undefined
+              ? paramKey.map((k) => qParams[k]).join(", ")
+              : value
+          }
+          onRemove={() => removeFilters(paramKey)}
+        />
+      );
+    }
+
     return (
       <GenericFilterBadge
         name={name}
