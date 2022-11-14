@@ -84,7 +84,7 @@
     "react-dnd-scrolling": "^1.2.4",
     "react-dom": "18.2.0",
     "react-google-recaptcha": "^2.1.0",
-    "react-i18next": "^11.18.6",
+    "react-i18next": "^12.0.0",
     "react-phone-input-2": "^2.15.1",
     "react-player": "^2.11.0",
     "react-qr-reader": "^2.2.1",
