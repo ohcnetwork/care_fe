@@ -65,13 +65,9 @@ export default function SampleViewAdmin() {
 
   useEffect(() => {
     async function fetchData() {
-      if (qParams.facility) {
-        const res = await dispatch(getAnyFacility(qParams.facility));
-
-        setFacilityName(res?.data?.name);
-      } else {
-        setFacilityName("");
-      }
+      if (!qParams.facility) return setFacilityName("");
+      const res = await dispatch(getAnyFacility(qParams.facility));
+      setFacilityName(res?.data?.name);
     }
     fetchData();
   }, [dispatch, qParams.facility]);
