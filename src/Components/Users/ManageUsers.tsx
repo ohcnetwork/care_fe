@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -15,7 +15,6 @@ import {
 import Pagination from "../Common/Pagination";
 import { navigate, useQueryParams } from "raviger";
 import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import { InputSearchBox } from "../Common/SearchBox";
 import { FacilityModel } from "../Facility/models";
 
 import { IconButton, CircularProgress } from "@material-ui/core";
@@ -30,6 +29,7 @@ import UserDetails from "../Common/UserDetails";
 import clsx from "clsx";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import SearchInput from "../Form/SearchInput";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -78,7 +78,7 @@ export default function ManageUsers() {
 
   const limit =
     width >= 1280 ? RESULTS_PER_PAGE_LIMIT + 1 : RESULTS_PER_PAGE_LIMIT;
-  const extremeSmallScreenBreakpoint: number = 320;
+  const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
 
@@ -158,7 +158,7 @@ export default function ManageUsers() {
   const addUser = (
     <button
       className="px-4 py-1 w-full md:w-auto rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
-      onClick={() => navigate("/user/add")}
+      onClick={() => navigate("/users/add")}
     >
       <i className="fas fa-plus mr-2"></i>
       Add New User
@@ -613,11 +613,11 @@ export default function ManageUsers() {
         </div>
         <div className="flex flex-col lg:flex-row justify-between col-span-2 lg:px-3 space-y-3 lg:space-y-0 lg:space-x-4 my-2">
           <div className="w-full">
-            <InputSearchBox
-              search={onUserNameChange}
+            <SearchInput
+              name="search"
+              onChange={({ value }) => onUserNameChange(value)}
               value={qParams.username}
-              placeholder="Search by User Name"
-              errors=""
+              placeholder="Search by username"
             />
           </div>
 

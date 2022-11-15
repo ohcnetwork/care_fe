@@ -16,6 +16,7 @@ import React, {
   useCallback,
   useEffect,
   useReducer,
+  useRef,
   useState,
 } from "react";
 import { useDispatch } from "react-redux";
@@ -63,6 +64,9 @@ import { goBack } from "../../Utils/utils";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
+import ProcedureBuilder, {
+  ProcedureType,
+} from "../Common/prescription-builder/ProcedureBuilder";
 import { ICD11DiagnosisModel } from "./models";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -150,7 +154,7 @@ const initForm: FormDetails = {
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
-  review_interval: 0,
+  review_interval: -1,
   weight: "",
   height: "",
   bed: null,
@@ -210,6 +214,7 @@ export const ConsultationForm = (props: any) => {
   const [InvestigationAdvice, setInvestigationAdvice] = useState<
     InvestigationType[]
   >([]);
+  const [procedures, setProcedures] = useState<ProcedureType[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -219,6 +224,14 @@ export const ConsultationForm = (props: any) => {
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
+
+  const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      topRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }, []);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -249,6 +262,9 @@ export const ConsultationForm = (props: any) => {
       setInvestigationAdvice(
         !Array.isArray(res.data.investigation) ? [] : res.data.investigation
       );
+      setProcedures(
+        !Array.isArray(res.data.procedure) ? [] : res.data.procedure
+      );
 
       if (!status.aborted) {
         if (res && res.data) {
@@ -265,7 +281,8 @@ export const ConsultationForm = (props: any) => {
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)?.id || "Comfort"
+              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
+                  ?.id || "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
@@ -507,6 +524,7 @@ export const ConsultationForm = (props: any) => {
         discharge_advice: dischargeAdvice,
         prn_prescription: PRNAdvice,
         investigation: InvestigationAdvice,
+        procedure: procedures,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -652,7 +670,7 @@ export const ConsultationForm = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
+    <div className="px-2 pb-2 max-w-3xl mx-auto" ref={topRef}>
       <PageTitle
         title={headerText}
         crumbsReplacements={{
@@ -856,10 +874,17 @@ export const ConsultationForm = (props: any) => {
                         errors=""
                         multiple={false}
                         margin="dense"
-                        disabled={true}
+                        unoccupiedOnly={true}
+                        disabled={!!id} // disabled while editing
                         // location={state.form.}
                         facility={facilityId}
                       />
+                      {!!id && (
+                        <p className="text-gray-500 text-sm -mt-5 mb-1">
+                          Can't be edited while Consultation update. To change
+                          bed use the form bellow
+                        </p>
+                      )}
                     </div>
                   </>
                 )}
@@ -891,6 +916,15 @@ export const ConsultationForm = (props: any) => {
                 />
                 <br />
                 <ErrorHelperText error={state.errors.investigation} />
+              </div>
+              <div id="procedures-div" className="mt-4">
+                <InputLabel>Procedures</InputLabel>
+                <ProcedureBuilder
+                  procedures={procedures}
+                  setProcedures={setProcedures}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.procedures} />
               </div>
               <div id="discharge_advice-div" className="mt-4">
                 <InputLabel>Prescription Medication</InputLabel>
@@ -1050,7 +1084,7 @@ export const ConsultationForm = (props: any) => {
                       variant="standard"
                       value={state.form.review_interval}
                       options={[
-                        { id: "", text: "select" },
+                        { id: -1, text: "select" },
                         ...REVIEW_AT_CHOICES,
                       ]}
                       onChange={handleChange}
@@ -1066,7 +1100,7 @@ export const ConsultationForm = (props: any) => {
                     selectedUser={state.form.assigned_to_object}
                     onSelect={handleDoctorSelect}
                     user_type={"Doctor"}
-                    outline={false}
+                    outline={true}
                   />
                 </div>
               )}
@@ -1182,6 +1216,7 @@ export const ConsultationForm = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
               consultationId={id}
+              fetchPatientData={fetchData}
             ></Beds>
           </CardContent>
         </div>

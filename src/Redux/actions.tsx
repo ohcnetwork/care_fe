@@ -47,6 +47,9 @@ export const updateFacility = (id: number, params: object) => {
 export const deleteFacility = (id: number) => {
   return fireRequest("deleteFacility", [id], {});
 };
+export const deleteFacilityCoverImage = (id: string) => {
+  return fireRequest("deleteFacilityCoverImage", [], {}, { id });
+};
 export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
@@ -550,6 +553,11 @@ export const dischargePatient = (params: object, pathParams: object) => {
 };
 
 //Profile
+
+export const checkUsername = (params: object) => {
+  return fireRequest("checkUsername", [], {}, params, undefined, true);
+};
+
 export const getUserDetails = (username: string, suppress?: boolean) => {
   return fireRequest(
     "getUserDetails",

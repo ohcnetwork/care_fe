@@ -16,10 +16,13 @@ import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
-import { useTranslation } from "react-i18next";
 
 import * as Sentry from "@sentry/browser";
 import { formatDate } from "../../Utils/utils";
+import {
+  ShrinkedSidebarItem,
+  SidebarItem,
+} from "../Common/Sidebar/SidebarItem";
 
 const RESULT_LIMIT = 14;
 
@@ -85,35 +88,26 @@ const NotificationTile = ({
         result.read_at && "text-gray-500"
       )}
     >
-      <div className="text-lg font-bold">
-        {getNotificationTitle(result.event)}
+      <div className="flex justify-between">
+        <div className="text-lg font-bold">
+          {getNotificationTitle(result.event)}
+        </div>
+        <div className="">
+          <i className={`${getNotificationIcon(result.event)} fa-2x `} />
+        </div>
       </div>
       <div className="text-sm py-1">{result.message}</div>
-      <div className="grid grid-cols-2 ">
-        <div>
-          <i className={`${getNotificationIcon(result.event)} fa-2x py-4`}></i>
-        </div>
-        <div>
-          <div className="text-xs text-right py-1">
-            {formatDate(result.created_date)}
-          </div>
-          <div className="mt-2 text-right">
-            <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
-              <i className="fas fa-eye mr-2 text-primary-500" /> Visit Link
-            </button>
-          </div>
-        </div>
-      </div>
-      {!result.read_at && (
+      <div className="flex justify-between items-end">
         <button
-          className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+          className={`${
+            result.read_at && "invisible"
+          } h-min inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0`}
           disabled={isMarkingAsRead}
           onClick={(event) => {
             event.stopPropagation();
             handleMarkAsRead();
           }}
         >
-          {" "}
           {isMarkingAsRead ? (
             <Spinner />
           ) : (
@@ -121,23 +115,32 @@ const NotificationTile = ({
           )}
           Mark as Read
         </button>
-      )}
+        <div>
+          <div className="text-xs text-right py-1">
+            {formatDate(result.created_date)}
+          </div>
+          <div className="mt-2 text-right min-h-min">
+            <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
+              <i className="fas fa-eye mr-2 text-primary-500" /> Visit Link
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
 interface NotificationsListProps {
-  expanded: boolean;
+  shrinked: boolean;
   onClickCB?: () => void;
 }
 
 export default function NotificationsList({
-  expanded = false,
+  shrinked,
   onClickCB,
 }: NotificationsListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
-  const { t } = useTranslation();
   const username = currentUser.data.username;
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
@@ -378,37 +381,16 @@ export default function NotificationsList({
     );
   }
 
+  const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
+
   return (
-    <div className={clsx("cursor-pointer", unreadCount && "-mt-5")}>
-      {!!unreadCount && (
-        <span className="relative top-5 left-5 w-5 h-5 flex items-center justify-center text-xs text-white bg-red-400 rounded-full">
-          {unreadCount}
-        </span>
-      )}
-      <button
-        onClick={() => setShowNotifications(!showNotifications)}
-        className={clsx(
-          "flex justify-items-start items-center overflow-hidden w-10 text-primary-300 hover:text-white hover:bg-primary-700 rounded transition-all duration-300",
-          showNotifications
-            ? "bg-primary-900 hover:bg-primary-900 text-white"
-            : "bg-primary-800",
-          expanded && "w-60"
-        )}
-      >
-        <div className="shrink-0 flex items-center justify-center w-10 h-9">
-          <i className={clsx("fas fa-bell", "text-lg")}></i>
-        </div>
-
-        <div
-          className={clsx(
-            "transition-all text-left duration-300 whitespace-nowrap",
-            expanded ? "w-60" : "w-0"
-          )}
-        >
-          {t("Notifications")}
-        </div>
-      </button>
-
+    <>
+      <Item
+        text="Notifications"
+        do={() => setShowNotifications(!showNotifications)}
+        icon={<i className="uil uil-bell" />}
+        badgeCount={unreadCount}
+      />
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
         <div className="bg-white h-full">
           <div className="w-full bg-gray-100 border-b sticky top-0 z-30 px-4 pb-1 lg:px-8">
@@ -491,6 +473,6 @@ export default function NotificationsList({
           <div>{manageResults}</div>
         </div>
       </SlideOver>
-    </div>
+    </>
   );
 }

@@ -26,7 +26,7 @@ export interface FacilityModel {
   id?: number;
   name?: string;
   district?: number;
-  cover_image_url?: string;
+  read_cover_image_url?: string;
   facility_type?: string;
   address?: string;
   features?: number[];
@@ -86,6 +86,7 @@ export interface ConsultationModel {
   category?: PatientCategory;
   created_date?: string;
   discharge_date?: string;
+  discharge_reason?: string;
   examination_details?: string;
   history_of_present_illness?: string;
   facility?: number;
@@ -126,6 +127,7 @@ export interface ConsultationModel {
   lines?: any;
   last_daily_round?: any;
   current_bed?: CurrentBed;
+  review_interval?: number;
 }
 export interface PatientStatsModel {
   id?: number;
@@ -184,6 +186,7 @@ export interface BedModel {
     name: string;
   };
   location?: string;
+  is_occupied?: boolean;
 }
 
 export interface CurrentBed {

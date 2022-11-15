@@ -139,6 +139,11 @@ const routes: Routes = {
     method: "PATCH",
   },
 
+  deleteFacilityCoverImage: {
+    path: "/api/v1/facility/{id}/cover_image/",
+    method: "DELETE",
+  },
+
   getFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/get_users/",
   },
@@ -552,6 +557,12 @@ const routes: Routes = {
     method: "POST",
   },
   //Profile
+
+  checkUsername: {
+    path: "/api/v1/users/{username}/check_availability/",
+    method: "GET",
+  },
+
   getUserDetails: {
     path: "/api/v1/users/{username}/",
     method: "GET",

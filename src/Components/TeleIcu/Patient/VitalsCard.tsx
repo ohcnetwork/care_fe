@@ -117,6 +117,7 @@ export default function TeleICUPatientVitalsCard({
     waveformColor?: string;
     waveformName?: string;
     waveformDefaultSpace?: boolean;
+    wavetype?: "STREAM" | "REFRESH";
   };
 
   const vitals: VitalType[] = [
@@ -125,8 +126,9 @@ export default function TeleICUPatientVitalsCard({
       liveKey: "pulse-rate",
       vitalKey: "pulse",
       waveformKey: "II",
-      waveformColor: "blue",
+      waveformColor: "limegreen",
       waveformName: "ECG",
+      wavetype: "REFRESH",
     },
     {
       label: <>Blood Pressure</>,
@@ -142,15 +144,15 @@ export default function TeleICUPatientVitalsCard({
       liveKey: "SpO2",
       vitalKey: "ventilator_spo2",
       waveformKey: "Pleth",
-      waveformColor: "red",
+      waveformColor: "yellow",
     },
     {
       label: <>R. Rate</>,
       liveKey: "respiratory-rate",
       vitalKey: "resp",
       waveformKey: "Respiration",
-      waveformColor: "green",
-      waveformDefaultSpace: true,
+      waveformColor: "cyan",
+      //waveformDefaultSpace: true
     },
     {
       label: <>Temperature (F)</>,
@@ -184,6 +186,7 @@ export default function TeleICUPatientVitalsCard({
                     metrics={stats}
                     classes={"h-[150px]"}
                     defaultSpace={v.waveformDefaultSpace}
+                    wavetype={v.wavetype || "STREAM"}
                   />
                 ) : (
                   <div className="flex items-center justify-center text-gray-900"></div>
@@ -214,23 +217,20 @@ export default function TeleICUPatientVitalsCard({
                 <h2 className="font-bold text-xl md:text-3xl">
                   {liveReading ||
                     (vital.vitalKey === "bp"
-                      ? `${
-                          patient.last_consultation?.last_daily_round?.bp
-                            .systolic || "--"
-                        }/${
-                          patient.last_consultation?.last_daily_round?.bp
-                            .diastolic || "--"
-                        }`
+                      ? `${patient.last_consultation?.last_daily_round?.bp
+                        .systolic || "--"
+                      }/${patient.last_consultation?.last_daily_round?.bp
+                        .diastolic || "--"
+                      }`
                       : patient.last_consultation?.last_daily_round?.[
-                          vital.vitalKey || ""
-                        ]) ||
+                      vital.vitalKey || ""
+                      ]) ||
                     "--"}
                 </h2>
                 <div className="text-xs md:text-base">
                   <i
-                    className={`fas fa-circle text-xs mr-2 ${
-                      liveReading ? "text-green-600" : "text-gray-400"
-                    }`}
+                    className={`fas fa-circle text-xs mr-2 ${liveReading ? "text-green-600" : "text-gray-400"
+                      }`}
                   />
                   {vital.label}
                 </div>

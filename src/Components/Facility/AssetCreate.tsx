@@ -25,12 +25,12 @@ import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
-import SelectMenu from "../Common/components/SelectMenu";
 import moment from "moment";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError = {
@@ -80,6 +80,9 @@ type AssetFormSection =
 
 const AssetCreate = (props: AssetProps) => {
   const { facilityId, assetId } = props;
+
+  let assetTypeInitial: AssetType;
+  let assetClassInitial: AssetClass;
 
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState("");
@@ -161,7 +164,7 @@ const AssetCreate = (props: AssetProps) => {
         setIsLoading(false);
       });
     }
-  }, [assetId]);
+  }, [assetId, dispatchAction, facilityId]);
 
   useEffect(() => {
     if (asset) {
@@ -213,7 +216,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "asset_type":
-          if (!asset_type) {
+          if (!asset_type || asset_type == "NONE") {
             errors[field] = "Select an asset type";
             invalidForm = true;
           }
@@ -248,7 +251,29 @@ const AssetCreate = (props: AssetProps) => {
     return true;
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
+  const resetFilters = () => {
+    setName("");
+    setDescription("");
+    setLocation("");
+    setAssetType(assetTypeInitial);
+    setAssetClass(assetClassInitial);
+    setIsWorking("");
+    setNotWorkingReason("");
+    setSerialNumber("");
+    setVendorName("");
+    setSupportName("");
+    setSupportEmail("");
+    setSupportPhone("");
+    setQrCodeId("");
+    setManufacturer("");
+    setWarrantyAmcEndOfValidity("");
+    setLastServicedOn("");
+    setNotes("");
+    setWarrantyAmcEndOfValidity(null);
+    setLastServicedOn(null);
+  };
+
+  const handleSubmit = async (e: React.SyntheticEvent, addMore: boolean) => {
     e.preventDefault();
     const validated = validateForm();
     if (validated) {
@@ -279,7 +304,13 @@ const AssetCreate = (props: AssetProps) => {
           Notification.Success({
             msg: "Asset created successfully",
           });
-          goBack();
+          if (!addMore) {
+            goBack();
+          } else {
+            resetFilters();
+            const pageContainer = window.document.getElementById("pages");
+            pageContainer?.scroll(0, 0);
+          }
         }
         setIsLoading(false);
       } else {
@@ -428,7 +459,7 @@ const AssetCreate = (props: AssetProps) => {
         <div className="w-full h-full flex overflow-auto xl:ml-72">
           <div className="w-full max-w-3xl 2xl:max-w-4xl">
             <form
-              onSubmit={handleSubmit}
+              onSubmit={(e) => handleSubmit(e, false)}
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
             >
               <div className="grid grid-cols-1 gap-x-12 items-start">
@@ -451,15 +482,15 @@ const AssetCreate = (props: AssetProps) => {
                   <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
                     {/* Location */}
                     <div>
-                      <label htmlFor="asset-location">Location * </label>
+                      <label htmlFor="asset-location">Location *</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
+                          required
                           options={[
                             {
                               title: "Select",
-                              description:
-                                "Select an Asset Location from the following",
-                              value: "",
+                              description: "Select the location",
+                              value: "0",
                             },
                             ...locations.map((location: any) => ({
                               title: location.name,
@@ -467,8 +498,10 @@ const AssetCreate = (props: AssetProps) => {
                               value: location.id,
                             })),
                           ]}
-                          selected={location}
-                          onSelect={setLocation}
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) => o.value}
+                          value={location}
+                          onChange={(e) => setLocation(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.location} />
@@ -476,16 +509,11 @@ const AssetCreate = (props: AssetProps) => {
 
                     {/* Asset Type */}
                     <div>
-                      <label htmlFor="asset-type">Asset Type * </label>
+                      <label htmlFor="asset-type">Asset Type *</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
+                          required
                           options={[
-                            {
-                              title: "Select",
-                              description:
-                                "Select an Asset Type from the following",
-                              value: undefined,
-                            },
                             {
                               title: "Internal",
                               description:
@@ -499,8 +527,15 @@ const AssetCreate = (props: AssetProps) => {
                               value: "EXTERNAL",
                             },
                           ]}
-                          selected={asset_type}
-                          onSelect={setAssetType}
+                          value={asset_type}
+                          placeholder="Select"
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) =>
+                            o.value === "INTERNAL"
+                              ? AssetType.INTERNAL
+                              : AssetType.EXTERNAL
+                          }
+                          onChange={(e) => setAssetType(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.asset_type} />
@@ -510,17 +545,23 @@ const AssetCreate = (props: AssetProps) => {
                     <div>
                       <label htmlFor="asset-class">Asset Class</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
                           options={[
-                            { title: "Not Applicable", value: undefined },
                             { title: "ONVIF Camera", value: "ONVIF" },
                             {
                               title: "HL7 Vitals Monitor",
                               value: "HL7MONITOR",
                             },
                           ]}
-                          selected={asset_class}
-                          onSelect={setAssetClass}
+                          value={asset_class}
+                          placeholder="Select"
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) =>
+                            o.value === "ONVIF"
+                              ? AssetClass.ONVIF
+                              : AssetClass.HL7MONITOR
+                          }
+                          onChange={(e) => setAssetClass(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.asset_class} />
@@ -785,15 +826,30 @@ const AssetCreate = (props: AssetProps) => {
                     className="primary-button w-full md:w-auto flex justify-center"
                     id="asset-create"
                     type="submit"
-                    onClick={handleSubmit}
+                    onClick={(e) => handleSubmit(e, false)}
                   >
                     <div className="flex items-center justify-start gap-2">
                       <CheckCircleOutlineIcon className="text-base">
                         save
                       </CheckCircleOutlineIcon>
-                      {assetId ? "Update" : "Create"}
+                      {assetId ? "Update" : "Create Asset"}
                     </div>
                   </button>
+                  {!assetId && (
+                    <button
+                      className="primary-button w-full md:w-auto flex justify-center"
+                      id="asset-create"
+                      type="submit"
+                      onClick={(e) => handleSubmit(e, true)}
+                    >
+                      <div className="flex items-center justify-start gap-2">
+                        <CheckCircleOutlineIcon className="text-base">
+                          save
+                        </CheckCircleOutlineIcon>
+                        Create & Add More
+                      </div>
+                    </button>
+                  )}
                   <button
                     id="asset-cancel"
                     className="secondary-button w-full md:w-auto flex justify-center"

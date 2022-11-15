@@ -50,7 +50,9 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   );
   const { assetId, asset } = props;
   const [isLoading, setIsLoading] = React.useState(true);
-  const dispatch = useDispatch();
+  const [localipAddress, setLocalIPAddress] = React.useState("");
+  const [ipadrdress_error, setIpAddress_error] = React.useState("");
+  const dispatch = useDispatch<any>();
   useEffect(() => {
     initializeForm(
       asset?.asset_class,
