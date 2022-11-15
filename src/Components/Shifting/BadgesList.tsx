@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { getUserList, getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 
