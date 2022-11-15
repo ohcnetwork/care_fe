@@ -42,7 +42,6 @@ const GSearch = ({
   //   searchables,
   //   selectables,
   // });
-  console.log();
 
   useKeyboardShortcut(["Control", "G"], () => setIsOpen(true), {
     ignoreInputFields: false,
@@ -63,6 +62,15 @@ const GSearch = ({
     [selectables]
   );
 
+  const isDisabled = useCallback(
+    (tag: string) =>
+      selectables[tag]?.dependsOn?.every(
+        (dependency) =>
+          !dependency.required || !(selectedFilters[dependency.tag]?.size > 0)
+      ) ?? false,
+    [selectables, selectedFilters]
+  );
+
   useEffect(() => {
     const onInit = async () => {
       const results = await Object.keys(selectables).reduce(
@@ -78,7 +86,9 @@ const GSearch = ({
 
       setData(results);
       setSearchText("");
-      setSelectedTags([]);
+      setSelectedTags(
+        Object.keys(selectables) // .filter((tag) => !isDisabled(tag))
+      );
       setSearchResults([]);
       setSelectedFilters({});
     };
@@ -90,9 +100,11 @@ const GSearch = ({
       const $searchables = Object.keys(searchables).reduce((acc: any, tag) => {
         if (searchables[tag]?.match(query)) {
           acc.push({
-            item: { id: query, name: query },
+            item: { id: tag, name: query },
             tag,
             type: "searchable",
+            label: searchables[tag]?.label, // TODO: Possibly could send only the string instead of the function
+            render: searchables[tag]?.render,
           });
         }
         return acc;
@@ -311,9 +323,11 @@ const GSearch = ({
                 list="row"
                 onSelect={selectFilter}
                 filter={(item, tag, _type) =>
-                  Array.from(selectedFilters[tag] ?? []).some(
+                  (Array.from(selectedFilters[tag] ?? []).some(
                     (filter) => !selectables[tag]?.compare?.(filter, item)
-                  ) || !selectedFilters[tag]?.has(item)
+                  ) ||
+                    !selectedFilters[tag]?.has(item)) &&
+                  !isDisabled(tag)
                 }
               />
             </div>

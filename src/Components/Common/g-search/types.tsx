@@ -3,6 +3,8 @@ export interface Searchable {
     match: (query: string) => boolean;
     onSelect?: (item: any) => void;
     onDeSelect?: (item: any) => void;
+    label?: (item: any) => string; // returns label for item
+    render?: (item: any) => React.ReactNode; // returns react node for item
   };
 }
 

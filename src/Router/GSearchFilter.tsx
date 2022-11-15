@@ -45,7 +45,6 @@ export default function GSearchFilter() {
               data: any[],
               action: string
             ) => {
-              console.log("dependency changed");
               if (action === "select") return await fetchDistrictsByState(item);
               return [];
             },
@@ -75,7 +74,6 @@ export default function GSearchFilter() {
             badge: "Facility Type",
             data: FACILITY_TYPES,
             match: (query: string, item: any) => {
-              console.log(item, query);
               return item.text.toLowerCase().includes(query.toLowerCase());
             },
             label: (item: any) => item.text,
@@ -111,6 +109,7 @@ export default function GSearchFilter() {
         setSearchables({
           date_of_result_before: {
             match: isValidDate,
+            label: (item: any) => new Date(item.name).toDateString(),
           },
         });
 
