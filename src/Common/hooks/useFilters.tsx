@@ -18,25 +18,35 @@ interface FilterBadgeProps {
  * of pagination and filters.
  */
 export default function useFilters({ limit = 14 }: { limit?: number }) {
+  const hasPagination = limit > 0;
+
   const [showFilters, setShowFilters] = useState(false);
   const [qParams, setQueryParams] = useQueryParams();
 
   const updateQuery = (filter: FilterState) => {
-    setQueryParams(Object.assign({}, qParams, { page: 1, limit, ...filter }), {
-      replace: true,
-    });
+    setQueryParams(
+      Object.assign(
+        {},
+        qParams,
+        hasPagination ? { page: 1, limit, ...filter } : filter
+      ),
+      {
+        replace: true,
+      }
+    );
   };
 
   const updatePage = (page: number) => {
+    if (!hasPagination) return;
     setQueryParams(Object.assign({}, qParams, { page }), { replace: true });
   };
 
   const applyFilter = (filter: FilterState) => {
-    updateQuery({ ...qParams, ...filter });
+    updateQuery(filter);
   };
 
   const removeFilter = (param: string) => {
-    updateQuery({ ...qParams, [param]: "" });
+    updateQuery({ [param]: "" });
   };
 
   const removeFilters = (keys: string[]) => {
@@ -104,18 +114,37 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
       return badgeConstructorUtils.range(name, paramKey, "after", "before");
     },
 
-    boolean(name: string, paramKey: string, trueVal = "Yes", falseVal = "No") {
+    boolean(
+      name: string,
+      paramKey: string,
+      options?: {
+        trueLabel?: string;
+        falseLabel?: string;
+        trueValue?: string;
+        falseValue?: string;
+      }
+    ) {
+      const {
+        trueLabel = "Yes",
+        falseLabel = "No",
+        trueValue = "true",
+        falseValue = "false",
+      } = options || {};
+
       const value =
-        (qParams[paramKey] === "true" && trueVal) ||
-        (qParams[paramKey] === "false" && falseVal) ||
+        (qParams[paramKey] === trueValue && trueLabel) ||
+        (qParams[paramKey] === falseValue && falseLabel) ||
         "";
       return { name, value, paramKey };
     },
 
     kasp(nameSuffix = "", paramKey = "is_kasp") {
       const name = nameSuffix ? KASP_STRING + " " + nameSuffix : KASP_STRING;
-      const [trueVal, falseVal] = [KASP_STRING, "Non " + KASP_STRING];
-      return badgeConstructorUtils.boolean(name, paramKey, trueVal, falseVal);
+      const [trueValue, falseValue] = [KASP_STRING, "Non " + KASP_STRING];
+      return badgeConstructorUtils.boolean(name, paramKey, {
+        trueValue,
+        falseValue,
+      });
     },
   };
 
