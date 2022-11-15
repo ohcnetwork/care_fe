@@ -625,7 +625,7 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Working Status */}
-                  <div ref={fieldRef["is_working"]}>
+                  <div ref={fieldRef["is_working"]} className="col-span-6">
                     <SwitchV2
                       className="col-span-6"
                       required
