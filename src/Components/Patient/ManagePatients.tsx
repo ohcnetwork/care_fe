@@ -17,7 +17,6 @@ import {
 } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
-import Pagination from "../Common/Pagination";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
@@ -62,8 +61,6 @@ function TabPanel(props: TabPanelProps) {
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const limit = 12;
-
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
   Stable: "STABLE",
@@ -80,10 +77,16 @@ export const PatientManager = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
-  const { qParams, updateQuery, updatePage, advancedFilter, FilterBadges } =
-    useFilters({
-      limit,
-    });
+  const {
+    qParams,
+    updateQuery,
+    advancedFilter,
+    Pagination,
+    FilterBadges,
+    resultsPerPage,
+  } = useFilters({
+    limit: 12,
+  });
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
@@ -97,7 +100,7 @@ export const PatientManager = (props: any) => {
 
   const params = {
     page: qParams.page || 1,
-    limit,
+    limit: resultsPerPage,
     name: qParams.name || undefined,
     ip_no: qParams.ip_no || undefined,
     is_active: qParams.is_active || "True",
@@ -114,7 +117,7 @@ export const PatientManager = (props: any) => {
     facility: facilityId || qParams.facility,
     facility_type: qParams.facility_type || undefined,
     district: qParams.district || undefined,
-    offset: (qParams.page ? qParams.page - 1 : 0) * limit,
+    offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     created_date_before: qParams.created_date_before || undefined,
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
@@ -566,16 +569,7 @@ export const PatientManager = (props: any) => {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mt-4">
           {patientList}
         </div>
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={qParams.page}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={(page) => updatePage(page)}
-            />
-          </div>
-        )}
+        <Pagination totalCount={totalCount} />
       </>
     );
   } else if (data && data.length === 0) {

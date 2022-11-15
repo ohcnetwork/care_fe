@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
@@ -12,7 +12,6 @@ import {
 } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
-import Pagination from "../Common/Pagination";
 import { Modal, Button, CircularProgress } from "@material-ui/core";
 
 import { formatFilter } from "./Commons";
@@ -31,7 +30,7 @@ export default function ListView() {
   const {
     qParams,
     updateQuery,
-    updatePage,
+    Pagination,
     FilterBadges,
     advancedFilter,
     resultsPerPage,
@@ -387,16 +386,7 @@ export default function ListView() {
               {showShiftingCardList(data)}
             </div>
             <div>
-              {totalCount > resultsPerPage && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Pagination
-                    cPage={qParams.page}
-                    defaultPerPage={resultsPerPage}
-                    data={{ totalCount }}
-                    onChange={(page) => updatePage(page)}
-                  />
-                </div>
-              )}
+              <Pagination totalCount={totalCount} />
             </div>
           </div>
         )}

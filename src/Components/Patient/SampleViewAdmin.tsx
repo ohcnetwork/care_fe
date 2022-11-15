@@ -5,7 +5,7 @@ import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
-import React, { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
@@ -21,7 +21,6 @@ import {
   getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import { CSVLink } from "react-csv";
@@ -32,13 +31,18 @@ import useFilters from "../../Common/hooks/useFilters";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
-const limit = 10;
 
 export default function SampleViewAdmin() {
-  const { qParams, updateQuery, updatePage, FilterBadges, advancedFilter } =
-    useFilters({
-      limit,
-    });
+  const {
+    qParams,
+    updateQuery,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({
+    limit: 10,
+  });
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageSamples: any = null;
@@ -77,8 +81,8 @@ export default function SampleViewAdmin() {
       setIsLoading(true);
       const res = await dispatch(
         getTestList({
-          limit,
-          offset: (qParams.page ? qParams.page - 1 : 0) * limit,
+          limit: resultsPerPage,
+          offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
           patient_name: qParams.patient_name || undefined,
           district_name: qParams.district_name || undefined,
           status: qParams.status || undefined,
@@ -310,16 +314,7 @@ export default function SampleViewAdmin() {
     manageSamples = (
       <>
         {sampleList}
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={qParams.page}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={(page) => updatePage(page)}
-            />
-          </div>
-        )}
+        <Pagination totalCount={totalCount} />
       </>
     );
   } else if (sample && sample.length === 0) {

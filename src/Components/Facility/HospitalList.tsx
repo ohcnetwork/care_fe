@@ -23,7 +23,6 @@ import {
 import loadable from "@loadable/component";
 
 import { InputLabel, TextField } from "@material-ui/core";
-import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { CSVLink } from "react-csv";
 import moment from "moment";
@@ -44,13 +43,17 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const limit = 14;
-
 export const HospitalList = () => {
-  const { qParams, updateQuery, updatePage, FilterBadges, advancedFilter } =
-    useFilters({
-      limit,
-    });
+  const {
+    qParams,
+    updateQuery,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({
+    limit: 14,
+  });
   const dispatchAction: any = useDispatch();
   const [data, setData] = useState<Array<FacilityModel>>([]);
   let manageFacilities: any = null;
@@ -78,9 +81,9 @@ export const HospitalList = () => {
     async (status: statusType) => {
       setIsLoading(true);
       const params = {
-        limit,
+        limit: resultsPerPage,
         page: qParams.page || 1,
-        offset: (qParams.page ? qParams.page - 1 : 0) * limit,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
         search_text: qParams.search || undefined,
         state: qParams.state,
         district: qParams.district,
@@ -467,16 +470,7 @@ export const HospitalList = () => {
         <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-4">
           {facilityList}
         </div>
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={qParams.page}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={(page) => updatePage(page)}
-            />
-          </div>
-        )}
+        <Pagination totalCount={totalCount} />
       </>
     );
   } else if (data && data.length === 0) {

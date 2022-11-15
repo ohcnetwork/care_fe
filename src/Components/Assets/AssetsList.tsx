@@ -10,10 +10,9 @@ import {
 } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
 import { getAsset } from "../../Redux/actions";
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
@@ -24,13 +23,18 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const limit = 21;
 
 const AssetsList = () => {
-  const { qParams, updateQuery, updatePage, FilterBadges, advancedFilter } =
-    useFilters({
-      limit,
-    });
+  const {
+    qParams,
+    updateQuery,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({
+    limit: 21,
+  });
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
@@ -44,9 +48,9 @@ const AssetsList = () => {
     async (status: statusType) => {
       setIsLoading(true);
       const params = {
-        limit,
+        limit: resultsPerPage,
         page: qParams.page,
-        offset: (qParams.page ? qParams.page - 1 : 0) * limit,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
         search_text: qParams.search || "",
         facility: qParams.facility,
         asset_type: qParams.asset_type,
@@ -315,16 +319,7 @@ const AssetsList = () => {
           <div className="grow">
             <div className="py-8 md:px-5">
               {manageAssets}
-              {totalCount > limit && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Pagination
-                    cPage={qParams.page}
-                    defaultPerPage={limit}
-                    data={{ totalCount }}
-                    onChange={(page) => updatePage(page)}
-                  />
-                </div>
-              )}
+              <Pagination totalCount={totalCount} />
             </div>
           </div>
         </>
