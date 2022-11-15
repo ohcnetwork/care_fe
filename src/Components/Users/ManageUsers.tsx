@@ -44,7 +44,6 @@ export default function ManageUsers() {
     advancedFilter,
     resultsPerPage,
   } = useFilters({ limit: 15 });
-
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageUsers: any = null;
