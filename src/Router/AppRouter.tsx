@@ -71,6 +71,7 @@ import {
   MobileSidebar,
 } from "../Components/Common/Sidebar/Sidebar";
 import { BLACKLISTED_PATHS } from "../Common/constants";
+import GSearchFilter from "./GSearchFilter";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -445,6 +446,8 @@ export default function AppRouter() {
           <DesktopSidebar />
         </div>
       </>
+
+      <GSearchFilter />
 
       <div className="flex flex-col w-full flex-1 overflow-hidden">
         <div className="flex md:hidden relative z-10 shrink-0 h-16 bg-white shadow">
