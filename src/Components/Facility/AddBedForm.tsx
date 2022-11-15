@@ -209,6 +209,7 @@ export const AddBedForm = (props: BedFormProps) => {
                       )
                     }
                   >
+                    <i className="uil uil-times-circle text-xl"></i>
                     Cancel
                   </ButtonV2>
                   <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>

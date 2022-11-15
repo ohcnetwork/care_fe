@@ -136,6 +136,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-between mt-4">
                 <ButtonV2 onClick={() => goBack()} variant="secondary">
+                  <i className="uil uil-times-circle text-xl"></i>
                   Cancel
                 </ButtonV2>
                 <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
