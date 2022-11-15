@@ -66,7 +66,7 @@
     "echarts": "^5.4.0",
     "echarts-for-react": "^3.0.1",
     "i18next": "^20.3.1",
-    "i18next-browser-languagedetector": "^7.0.0",
+    "i18next-browser-languagedetector": "^7.0.1",
     "postcss-loader": "^7.0.1",
     "libphonenumber-js": "^1.10.13",
     "lodash": "^4.17.21",
