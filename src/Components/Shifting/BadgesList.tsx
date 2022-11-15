@@ -9,7 +9,6 @@ const booleanFilterOptions = {
 
 export default function BadgesList(props: any) {
   const { qParams, FilterBadges } = props;
-
   const [assignedUsername, setAssignedUsername] = useState("");
   const [assignedFacilityName, setAssignedFacilityName] = useState("");
   const [originFacilityName, setOirginFacilityName] = useState("");
@@ -18,62 +17,47 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (qParams.assigned_to) {
-        const res = await dispatch(getUserList({ id: qParams.assigned_to }));
-
-        const { first_name, last_name } = res?.data?.results[0];
-        setAssignedUsername(`${first_name} ${last_name}`);
-      } else {
-        setAssignedUsername("");
-      }
+      if (!qParams.assigned_to) return setAssignedUsername("");
+      const res = await dispatch(getUserList({ id: qParams.assigned_to }));
+      const { first_name, last_name } = res?.data?.results[0];
+      setAssignedUsername(`${first_name} ${last_name}`);
     }
     fetchData();
   }, [dispatch, qParams.assigned_to]);
 
   useEffect(() => {
     async function fetchData() {
-      if (qParams.orgin_facility) {
-        const res = await dispatch(
-          getAnyFacility(qParams.orgin_facility, "orgin_facility")
-        );
-
-        setOirginFacilityName(res?.data?.name);
-      } else {
-        setOirginFacilityName("");
-      }
+      if (!qParams.orgin_facility) return setOirginFacilityName("");
+      const res = await dispatch(
+        getAnyFacility(qParams.orgin_facility, "orgin_facility")
+      );
+      setOirginFacilityName(res?.data?.name);
     }
     fetchData();
   }, [dispatch, qParams.orgin_facility]);
 
   useEffect(() => {
     async function fetchData() {
-      if (qParams.shifting_approving_facility) {
-        const res = await dispatch(
-          getAnyFacility(
-            qParams.shifting_approving_facility,
-            "shifting_approving_facility"
-          )
-        );
-
-        setApprovingFacilityName(res?.data?.name);
-      } else {
-        setApprovingFacilityName("");
-      }
+      if (!qParams.shifting_approving_facility)
+        return setApprovingFacilityName("");
+      const res = await dispatch(
+        getAnyFacility(
+          qParams.shifting_approving_facility,
+          "shifting_approving_facility"
+        )
+      );
+      setApprovingFacilityName(res?.data?.name);
     }
     fetchData();
   }, [dispatch, qParams.shifting_approving_facility]);
 
   useEffect(() => {
     async function fetchData() {
-      if (qParams.assigned_facility) {
-        const res = await dispatch(
-          getAnyFacility(qParams.assigned_facility, "assigned_facility")
-        );
-
-        setAssignedFacilityName(res?.data?.name);
-      } else {
-        setAssignedFacilityName("");
-      }
+      if (!qParams.assigned_facility) return setAssignedFacilityName("");
+      const res = await dispatch(
+        getAnyFacility(qParams.assigned_facility, "assigned_facility")
+      );
+      setAssignedFacilityName(res?.data?.name);
     }
     fetchData();
   }, [dispatch, qParams.assigned_facility]);
