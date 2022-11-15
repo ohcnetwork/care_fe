@@ -32,6 +32,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [patientActive, setPatientActive] = useState(true);
 
   const fetchData = useCallback(
     async (page = 1, status: statusType = { aborted: false }) => {
@@ -68,6 +69,7 @@ const PatientNotes = (props: PatientNotesProps) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setPatientActive(res.data.is_active);
         }
       } else {
         setPatientName("");
@@ -124,6 +126,7 @@ const PatientNotes = (props: PatientNotesProps) => {
           handleClickCB={onAddNote}
           className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
           disableFor="readOnly"
+          disabled={!patientActive}
           buttonType="materialUI"
         >
           Post Your Note
