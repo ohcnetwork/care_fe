@@ -12,7 +12,6 @@ import {
   getDistrict,
   partialUpdateUser,
 } from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import { USER_TYPES } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
@@ -40,11 +39,11 @@ export default function ManageUsers() {
   const {
     qParams,
     updateQuery,
-    updatePage,
+    Pagination,
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({});
+  } = useFilters({ limit: 15 });
 
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
@@ -509,16 +508,7 @@ export default function ManageUsers() {
       <div>
         {userTypes.length && addUser}
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
-        {totalCount > resultsPerPage && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={qParams.page}
-              defaultPerPage={resultsPerPage}
-              data={{ totalCount }}
-              onChange={(page) => updatePage(page)}
-            />
-          </div>
-        )}
+        <Pagination totalCount={totalCount} />
       </div>
     );
   } else if (users && users.length === 0) {
