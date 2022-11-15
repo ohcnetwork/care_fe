@@ -2,6 +2,7 @@ import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
+import PaginationComponent from "../../Components/Common/Pagination";
 import { KASP_STRING } from "../constants";
 
 export type FilterState = Record<string, unknown>;
@@ -164,6 +165,29 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     );
   };
 
+  const Pagination = ({ totalCount }: { totalCount: number }) => {
+    if (!hasPagination) {
+      const errorMsg =
+        "Do not attempt to render Pagination component, when limit is <= 0 with the useFilters";
+      return <span className="bg-red-500 text-white">{errorMsg}</span>;
+    }
+
+    return (
+      <div
+        className={`mt-4 flex w-full justify-center ${
+          totalCount > limit ? "visible" : "invisible"
+        }`}
+      >
+        <PaginationComponent
+          cPage={qParams.page}
+          defaultPerPage={limit}
+          data={{ totalCount }}
+          onChange={(page) => updatePage(page)}
+        />
+      </div>
+    );
+  };
+
   return {
     qParams,
 
@@ -197,6 +221,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
 
     FilterBadge,
     FilterBadges,
+    Pagination,
 
     // TODO: update this props to be compliant with new FiltersSlideOver when #3996 is merged.
     advancedFilter: {
