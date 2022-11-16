@@ -26,14 +26,17 @@ const SearchInput = ({
   ...props
 }: SearchInputProps) => {
   // Debounce related
-  const [value, setValue] = useState(() => props.value || "");
+  const [value, setValue] = useState(() => props.value);
+  useEffect(() => setValue(props.value), [props.value]);
   useEffect(() => {
-    const timeoutId = setTimeout(
-      () => onChange && onChange({ name, value: value || "" }),
-      debouncePeriod
-    );
-    return () => clearTimeout(timeoutId);
-  }, [value, debouncePeriod, name, onChange]);
+    if (value !== props.value) {
+      const timeoutId = setTimeout(
+        () => onChange && onChange({ name, value: value || "" }),
+        debouncePeriod
+      );
+      return () => clearTimeout(timeoutId);
+    }
+  }, [value, debouncePeriod, name, onChange, props.value]);
 
   // Focus hotkey related
   const ref = createRef<HTMLInputElement>();
@@ -92,7 +95,7 @@ const SearchInput = ({
           </kbd>
         </div>
       }
-      value={value}
+      value={value || ""}
       onChange={({ value }) => setValue(value)}
     />
   );
