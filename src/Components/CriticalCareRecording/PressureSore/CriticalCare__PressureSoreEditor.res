@@ -233,6 +233,16 @@ let renderBody = (state, send, title, partPaths, substr) => {
   
   let show = state.selectedRegion !== PressureSore.Other && partPaths->Belt.Array.some(p => PressureSore.regionForPath(p) === state.selectedRegion)
 
+  let inputModal = React.useRef(Js.Nullable.null)
+  let isMouseOverInputModal = %raw(`
+    function (event, ref) {
+      if (ref.current) {
+        let rect = ref.current.getBoundingClientRect()
+        return event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+      }
+      return false;
+    }
+  `)
 
   <div className=" w-full text-center mx-2">
     <div className="text-2xl font-bold mt-8"> {str(title)} </div>
@@ -279,19 +289,22 @@ let renderBody = (state, send, title, partPaths, substr) => {
     </div>
     // Diagram
     <div className="flex justify-center mx-auto border-2">
-      <CriticalCare__PressureSoreInputModal
-        show={show}
-        hideModal={_ => send(SetSelectedRegion(PressureSore.Other))}
-        position={state.modalPosition}
-        part={
-          Belt.Option.getWithDefault(
-            Js.Array.find(p => PressureSore.region(p) === state.selectedRegion, state.parts), 
-            PressureSore.makeDefault(state.selectedRegion)
-          )
-        }
-        updatePart={part => send(UpdateSelectedPart(part))}
-        previewMode={state.previewMode}
-      />
+      <div>
+        <CriticalCare__PressureSoreInputModal
+          show={show}
+          modalRef={ReactDOM.Ref.domRef(inputModal)}
+          hideModal={_ => send(SetSelectedRegion(PressureSore.Other))}
+          position={state.modalPosition}
+          part={
+            Belt.Option.getWithDefault(
+              Js.Array.find(p => PressureSore.region(p) === state.selectedRegion, state.parts), 
+              PressureSore.makeDefault(state.selectedRegion)
+            )
+          }
+          updatePart={part => send(UpdateSelectedPart(part))}
+          previewMode={state.previewMode}
+        />
+      </div>
       <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
         {Js.Array.mapi((part, renderIndex) => {
           let regionType = PressureSore.regionForPath(part)
@@ -306,13 +319,13 @@ let renderBody = (state, send, title, partPaths, substr) => {
             onClick={e => {
               send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
             }}
-            onMouseEnter={e => {
+            onMouseOver={e => {
               if state.previewMode && innerWidth > 720 {
                 send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
               }
             }}
-            onMouseLeave={_ => {
-              if state.previewMode && innerWidth > 720 {
+            onMouseLeave={e => {
+              if state.previewMode && innerWidth > 720 && !isMouseOverInputModal(e, inputModal) {
                 send(SetSelectedRegion(PressureSore.Other))
               }
             }}

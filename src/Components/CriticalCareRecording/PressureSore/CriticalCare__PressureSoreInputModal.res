@@ -11,6 +11,7 @@ type part = PressureSore.part
 @react.component
 let make = (
   ~show: bool,
+  ~modalRef: ReactDOM.domRef,
   ~previewMode: bool,
   ~hideModal: ReactEvent.Mouse.t => unit,
   ~position: position,
@@ -36,7 +37,6 @@ let make = (
     None
   }, [state])
 
-  let ref = React.useRef(Js.Nullable.null)
   let handleClickOutside = %raw(`
     function (event, ref, hideModal) {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -63,13 +63,18 @@ let make = (
 
   <div
     hidden={!show}
-    onClick={e => handleClickOutside(e, ref, hideModal)}
+    onClick={e => handleClickOutside(e, modalRef, hideModal)}
     className={previewMode && innerWidth > 720 ? "" : "fixed w-full inset-0 z-40 overflow-y-auto"}>
     <div
       hidden={!show}
       className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
       <div
-        ref={ReactDOM.Ref.domRef(ref)}
+        ref={modalRef}
+        onMouseLeave={e => {
+          if (previewMode && innerWidth > 720) {
+            hideModal(e)
+          }
+        }}
         style={ReactDOMStyle.make(
           ~position={innerWidth >= 720 ? "absolute" : ""},
           ~left=getModalPosition()["left"],
