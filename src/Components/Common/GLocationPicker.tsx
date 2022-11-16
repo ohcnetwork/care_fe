@@ -63,7 +63,7 @@ const GLocationPicker = ({
   };
 
   return (
-    <div className="flex w-96 h-96">
+    <div className="flex w-80 h-80 sm:w-96 sm:h-96">
       <Wrapper libraries={["places"]} apiKey={GMAPS_API_KEY} render={render}>
         <Map
           center={center}
