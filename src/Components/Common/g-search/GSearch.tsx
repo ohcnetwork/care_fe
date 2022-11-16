@@ -279,7 +279,9 @@ const GSearch = ({
                   ...Array.from(selectedFilters[tag]).map(
                     (filter) =>
                       ({
-                        label: `${tag} : ${filter.name}`,
+                        label: `${tag} : ${
+                          selectables[tag]?.label?.(filter) ?? filter.name
+                        }`,
                         selected: true,
                         trailingIcon: <button>x</button>,
                         trailingIconOnClick: () =>

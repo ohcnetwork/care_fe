@@ -170,7 +170,7 @@ export default function GSearchFilter() {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
+    setQueryParams(nParams);
   };
 
   const applyFilter = (data: any) => {
