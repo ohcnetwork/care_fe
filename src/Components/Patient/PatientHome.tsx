@@ -478,16 +478,79 @@ export const PatientHome = (props: any) => {
         <section className="lg:flex" data-testid="patient-dashboard">
           <div className="lg:w-2/3 mx-2 h-full">
             <div className="bg-white rounded-lg shadow pt-11 pb-5 pl-9 h-full">
-              <h1 className="font-bold text-2xl pb-3">
-                {" "}
-                {patientData.name} - {patientData.age}
-              </h1>
+              <div className="flex flex-row">
+                <h1 className="font-bold text-2xl pb-3 flex flex-row">
+                  {" "}
+                  {patientData.name} - {patientData.age}
+                </h1>
+                <div className="flex flex-wrap gap-2 ml-auto mr-9">
+                  {patientData.is_vaccinated ? (
+                    <Chip color="blue" startIcon="syringe" text="Vaccinated" />
+                  ) : (
+                    <Chip
+                      color="yellow"
+                      startIcon="exclamation-triangle"
+                      text="Not Vaccinated"
+                    />
+                  )}
+                  {patientData.allow_transfer ? (
+                    <Chip
+                      color="yellow"
+                      startIcon="unlock"
+                      text="Transfer Allowed"
+                    />
+                  ) : (
+                    <Chip
+                      color="primary"
+                      startIcon="lock"
+                      text="Transfer Blocked"
+                    />
+                  )}
+                  {patientData.gender === 2 &&
+                    patientData.is_antenatal &&
+                    patientData.is_active && (
+                      <Chip
+                        color="blue"
+                        startIcon="baby-carriage"
+                        text="Antenatal"
+                      />
+                    )}
+                  {patientData.contact_with_confirmed_carrier && (
+                    <Chip
+                      color="red"
+                      startIcon="exclamation-triangle"
+                      text="Contact with confirmed carrier"
+                    />
+                  )}
+                  {patientData.contact_with_suspected_carrier && (
+                    <Chip
+                      color="yellow"
+                      startIcon="exclamation-triangle"
+                      text="Contact with suspected carrier"
+                    />
+                  )}
+                  {patientData.past_travel && (
+                    <Chip
+                      color="yellow"
+                      startIcon="exclamation-triangle"
+                      text="Travel (within last 28 days)"
+                    />
+                  )}
+                  {patientData.last_consultation?.is_telemedicine && (
+                    <Chip
+                      color="purple"
+                      startIcon="phone"
+                      text="Telemedicine"
+                    />
+                  )}
+                </div>
+              </div>
               <h3 className="text-base font-medium">
                 <i className="fa-regular fa-hospital mr-2 text-emerald-900"></i>
                 {patientData.facility_object?.name || "-"}
               </h3>
               <p className="text-sm text-zinc-500 mt-4 mb-7 font-medium">
-                {patientData.age} | {patientGender}
+                {patientGender} | {patientData.blood_group || "-"}
               </p>
               <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 md:grid-cols-2 lg:grid-cols-3 mt-2 mb-8">
                 <div className="sm:col-span-1">
@@ -548,14 +611,6 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 </div>
-                <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-semibold text-zinc-400">
-                    Blood Group
-                  </div>
-                  <div className="mt-1 text-sm leading-5 font-medium">
-                    {patientData.blood_group || "-"}
-                  </div>
-                </div>
                 {patientData.date_of_return && (
                   <div className="sm:col-span-1">
                     <div className="text-sm leading-5 font-semibold text-zinc-400">
@@ -611,63 +666,6 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   )}
-              </div>
-              <div className="flex flex-wrap mt-2 gap-2">
-                {patientData.is_vaccinated ? (
-                  <Chip color="blue" startIcon="syringe" text="Vaccinated" />
-                ) : (
-                  <Chip
-                    color="yellow"
-                    startIcon="exclamation-triangle"
-                    text="Not Vaccinated"
-                  />
-                )}
-                {patientData.allow_transfer ? (
-                  <Chip
-                    color="yellow"
-                    startIcon="unlock"
-                    text="Transfer Allowed"
-                  />
-                ) : (
-                  <Chip
-                    color="primary"
-                    startIcon="lock"
-                    text="Transfer Blocked"
-                  />
-                )}
-                {patientData.gender === 2 &&
-                  patientData.is_antenatal &&
-                  patientData.is_active && (
-                    <Chip
-                      color="blue"
-                      startIcon="baby-carriage"
-                      text="Antenatal"
-                    />
-                  )}
-                {patientData.contact_with_confirmed_carrier && (
-                  <Chip
-                    color="red"
-                    startIcon="exclamation-triangle"
-                    text="Contact with confirmed carrier"
-                  />
-                )}
-                {patientData.contact_with_suspected_carrier && (
-                  <Chip
-                    color="yellow"
-                    startIcon="exclamation-triangle"
-                    text="Contact with suspected carrier"
-                  />
-                )}
-                {patientData.past_travel && (
-                  <Chip
-                    color="yellow"
-                    startIcon="exclamation-triangle"
-                    text="Travel (within last 28 days)"
-                  />
-                )}
-                {patientData.last_consultation?.is_telemedicine && (
-                  <Chip color="purple" startIcon="phone" text="Telemedicine" />
-                )}
               </div>
             </div>
           </div>
@@ -731,9 +729,16 @@ export const PatientHome = (props: any) => {
                               <p>{formatDate(patientData.created_date)}</p>
                               <div className="tooltip">
                                 <span className="tooltip-text tooltip-top">
-                                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold w-fit">
-                                    {patientData?.created_by?.first_name}{" "}
-                                    {patientData?.created_by?.last_name}
+                                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold md:w-max">
+                                    <div>
+                                      <p className="flex flex-row justify-center">
+                                        {patientData?.created_by?.first_name}{" "}
+                                        {patientData?.created_by?.last_name}
+                                      </p>
+                                      <p className="flex flex-row justify-center">
+                                        {patientData?.created_by?.username}
+                                      </p>
+                                    </div>
                                   </div>
                                 </span>
                                 <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
@@ -755,10 +760,17 @@ export const PatientHome = (props: any) => {
                             <div className="flex flex-col md:flex-row items-center">
                               <p>{formatDate(patientData.modified_date)}</p>
                               <div className="tooltip">
-                                <span className="tooltip-text tooltip-top">
-                                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
-                                    {patientData?.created_by?.first_name}{" "}
-                                    {patientData?.created_by?.last_name}
+                                <span className="tooltip-text tooltip-left">
+                                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold md:w-max">
+                                    <div className="flex flex-col">
+                                      <p className="flex flex-row justify-center">
+                                        {patientData?.last_edited?.first_name}{" "}
+                                        {patientData?.last_edited?.last_name}
+                                      </p>
+                                      <p className="flex flex-row justify-center">
+                                        {patientData?.last_edited?.username}
+                                      </p>
+                                    </div>
                                   </div>
                                 </span>
                                 <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>

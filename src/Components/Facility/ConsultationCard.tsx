@@ -67,7 +67,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </Typography>
             </div>
           )}
-          {itemData.admission_date && (
+          {itemData.admitted && itemData.admission_date && (
             <div className="sm:col-span-1">
               <Typography>
                 <div className="sm:col-span-1">
@@ -81,18 +81,20 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </Typography>
             </div>
           )}
-          <div className="sm:col-span-1">
-            <Typography>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-semibold text-zinc-400">
-                  Admitted{" "}
+          {!itemData.admitted && (
+            <div className="sm:col-span-1">
+              <Typography>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    Admitted{" "}
+                  </div>
+                  <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                    No
+                  </div>
                 </div>
-                <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
-                  {itemData.admitted ? "Yes" : "No"}
-                </div>
-              </div>
-            </Typography>
-          </div>
+              </Typography>
+            </div>
+          )}
           {itemData.discharge_date && (
             <div className="sm:col-span-1">
               <Typography>
@@ -120,8 +122,12 @@ export const ConsultationCard = (props: ConsultationProps) => {
               {itemData.created_by && (
                 <div className="tooltip">
                   <span className="tooltip-text tooltip-top">
-                    <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
-                      {`${itemData.created_by?.first_name} ${itemData.created_by?.last_name} @${itemData.created_by?.username} (${itemData.created_by?.user_type})`}
+                    <div className="text-sm leading-5 text-white whitespace-normal font-semibold flex flex-col md:w-max">
+                      <p className="flex justify-center">{`${itemData.created_by?.first_name} ${itemData.created_by?.last_name}`}</p>
+                      <p className="flex justify-center">{`@${itemData.created_by?.username}`}</p>
+                      <p className="flex justify-center">
+                        {itemData.created_by?.user_type}
+                      </p>
                     </div>
                   </span>
                   <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
@@ -139,8 +145,12 @@ export const ConsultationCard = (props: ConsultationProps) => {
             {itemData.last_edited_by && (
               <div className="tooltip">
                 <span className="tooltip-text tooltip-top">
-                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold">
-                    {`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name} @${itemData.last_edited_by?.username} (${itemData.last_edited_by?.user_type})`}
+                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold flex flex-col md:w-max">
+                    <p className="flex justify-center">{`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name}`}</p>
+                    <p className="flex justify-center">{`@${itemData.last_edited_by?.username}`}</p>
+                    <p className="flex justify-center">
+                      {itemData.last_edited_by?.user_type}
+                    </p>
                   </div>
                 </span>
                 <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
