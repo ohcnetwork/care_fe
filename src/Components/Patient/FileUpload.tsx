@@ -164,6 +164,7 @@ export const FileUpload = (props: FileUploadProps) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setIsActive(res.data.is_active);
         }
       } else {
         setPatientName("");
@@ -249,10 +250,6 @@ export const FileUpload = (props: FileUploadProps) => {
         limit: limit,
         offset: offset,
       };
-      const patientDetails = await dispatch(getPatient({ id: patientId }));
-      if (patientDetails.data) {
-        setIsActive(patientDetails.data.is_active);
-      }
       const res = await dispatch(viewUpload(data));
       if (!status.aborted) {
         if (res && res.data) {
