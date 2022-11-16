@@ -365,7 +365,7 @@ export default function ResultList() {
         <div className="mt-2">
           <SearchInput
             label="Search by name"
-            name="name"
+            name="patient_name_search"
             onChange={({ value }) => searchByName(value)}
             value={qParams.name}
             placeholder="Search patient"
