@@ -27,6 +27,7 @@ import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
 import { formatDate } from "../../Utils/utils";
+import { isCallChain } from "typescript";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -154,6 +155,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const limit = RESULTS_PER_PAGE_LIMIT;
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -247,6 +249,10 @@ export const FileUpload = (props: FileUploadProps) => {
         limit: limit,
         offset: offset,
       };
+      const patientDetails = await dispatch(getPatient({ id: patientId }));
+      if (patientDetails.data) {
+        setIsActive(patientDetails.data.is_active);
+      }
       const res = await dispatch(viewUpload(data));
       if (!status.aborted) {
         if (res && res.data) {
@@ -784,7 +790,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     </label>
                     <button
                       className="btn btn-primary"
-                      disabled={!file || !uploadFileName}
+                      disabled={!file || !uploadFileName || !isActive}
                       onClick={() => {
                         handleUpload({ status });
                       }}
