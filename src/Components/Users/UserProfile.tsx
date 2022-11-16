@@ -1,18 +1,18 @@
 import loadable from "@loadable/component";
 import React, { useState, useCallback, useReducer } from "react";
-import { InputLabel, Button } from "@material-ui/core";
+import { Button } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserDetails,
-  updateUserDetails,
+  partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
 import {
+  ErrorHelperText,
   PhoneNumberField,
-  SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
@@ -20,6 +20,9 @@ import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
+import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import { FieldLabel } from "../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -39,14 +42,6 @@ type State = {
 type Action =
   | { type: "set_form"; form: EditForm }
   | { type: "set_error"; errors: EditForm };
-
-const genderTypes = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...GENDER_TYPES,
-];
 
 const initForm: EditForm = {
   firstName: "",
@@ -132,11 +127,7 @@ export default function UserProfile() {
             firstName: res.data.first_name,
             lastName: res.data.last_name,
             age: res.data.age,
-            gender: genderTypes
-              .filter((el) => {
-                return el.text === res.data.gender;
-              })[0]
-              .id.toString(),
+            gender: res.data.gender,
             email: res.data.email,
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
@@ -166,7 +157,7 @@ export default function UserProfile() {
         case "firstName":
         case "lastName":
         case "gender":
-          if (!states.form[field] || states.form[field] === "0") {
+          if (!states.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -236,16 +227,13 @@ export default function UserProfile() {
   };
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const form: EditForm = { ...states.form, [e.target.name]: e.target.value };
-    dispatch({ type: "set_form", form });
+    dispatch({
+      type: "set_form",
+      form: { ...states.form, [e.target.name]: e.target.value },
+    });
   };
 
   const handleValueChange = (phoneNo: string, name: string) => {
-    const form: EditForm = { ...states.form, [name]: phoneNo };
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleWhatsappNumChange = (phoneNo: string, name: string) => {
     const form: EditForm = { ...states.form, [name]: phoneNo };
     dispatch({ type: "set_form", form });
   };
@@ -267,10 +255,10 @@ export default function UserProfile() {
           parsePhoneNumberFromString(states.form.altPhoneNumber)?.format(
             "E.164"
           ) || "",
-        gender: Number(states.form.gender),
+        gender: states.form.gender,
         age: states.form.age,
       };
-      const res = await dispatchAction(updateUserDetails(username, data));
+      const res = await dispatchAction(partialUpdateUser(username, data));
       setIsLoading(false);
       if (res && res.data) {
         Notification.Success({
@@ -281,9 +269,7 @@ export default function UserProfile() {
           first_name: states.form.firstName,
           last_name: states.form.lastName,
           age: states.form.age,
-          gender: genderTypes.filter((el) => {
-            return el.id === Number(states.form.gender);
-          })[0].text,
+          gender: states.form.gender,
           email: states.form.email,
           phone_number: states.form.phoneNumber,
           alt_phone_number: states.form.altPhoneNumber,
@@ -491,77 +477,60 @@ export default function UserProfile() {
                     <div className="px-4 py-5 bg-white sm:p-6">
                       <div className="grid grid-cols-6 gap-6">
                         <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="firstName"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            First name*
-                          </label>
-                          <TextInputField
+                          <TextInputFieldV2
                             name="firstName"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            className="mt-1 form-input sm:leading-5"
+                            label="First Name"
                             value={states.form.firstName}
                             onChange={handleChangeInput}
-                            errors={states.errors.firstName}
+                            error={states.errors.firstName}
+                            required
                           />
                         </div>
 
                         <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="lastName"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            Last name*
-                          </label>
-                          <TextInputField
+                          <TextInputFieldV2
                             name="lastName"
-                            variant="outlined"
-                            margin="dense"
-                            className="mt-1 form-input sm:leading-5"
-                            type="text"
+                            label="Last name"
                             value={states.form.lastName}
                             onChange={handleChangeInput}
-                            errors={states.errors.lastName}
+                            error={states.errors.lastName}
+                            required
                           />
                         </div>
-
                         <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="age"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            Age*
-                          </label>
-                          <TextInputField
+                          <TextInputFieldV2
                             name="age"
-                            className="mt-1 form-input sm:leading-5"
-                            variant="outlined"
-                            margin="dense"
+                            label="Age"
                             value={states.form.age}
                             onChange={handleChangeInput}
-                            errors={states.errors.age}
+                            error={states.errors.age}
+                            required
                           />
                         </div>
 
                         <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="gender"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            Gender*
-                          </label>
-                          <SelectField
-                            name="gender"
-                            variant="outlined"
-                            margin="dense"
+                          <FieldLabel className="text-sm">Gender</FieldLabel>
+                          <SelectMenuV2
+                            required
+                            placeholder="Select"
+                            optionLabel={(o) => o.text}
+                            optionValue={(o) => o.text}
+                            optionIcon={(o) => (
+                              <i className="text-base">{o.icon}</i>
+                            )}
                             value={states.form.gender}
-                            options={genderTypes}
-                            onChange={handleChangeInput}
-                            errors={states.errors.gender}
+                            options={GENDER_TYPES}
+                            onChange={(v) => {
+                              dispatch({
+                                type: "set_form",
+                                form: {
+                                  ...states.form,
+                                  gender: v,
+                                },
+                              });
+                            }}
                           />
+                          <ErrorHelperText error={states.errors.gender} />
                         </div>
 
                         <div className="col-span-6 sm:col-span-3">
@@ -583,21 +552,19 @@ export default function UserProfile() {
                             placeholder="WhatsApp Number"
                             value={states.form.altPhoneNumber}
                             onChange={(value: string) =>
-                              handleWhatsappNumChange(value, "altPhoneNumber")
+                              handleValueChange(value, "altPhoneNumber")
                             }
                             errors={states.errors.altPhoneNumber}
                           />
                         </div>
                         <div className="col-span-6 sm:col-span-3">
-                          <InputLabel id="email-label">Email</InputLabel>
-                          <TextInputField
+                          <TextInputFieldV2
                             name="email"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
+                            label="Email"
                             value={states.form.email}
                             onChange={handleChangeInput}
-                            errors={states.errors.email}
+                            error={states.errors.email}
+                            required
                           />
                         </div>
                       </div>
