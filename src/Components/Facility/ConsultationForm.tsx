@@ -75,7 +75,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 type BooleanStrings = "true" | "false";
 
 type FormDetails = {
-  hasSymptom: boolean;
+  is_asymptomatic: boolean;
   otherSymptom: boolean;
   symptoms: number[];
   other_symptoms: string;
@@ -120,7 +120,7 @@ type Action =
   | { type: "set_error"; errors: FormDetails };
 
 const initForm: FormDetails = {
-  hasSymptom: false,
+  is_asymptomatic: false,
   otherSymptom: false,
   symptoms: [],
   other_symptoms: "",
@@ -270,14 +270,14 @@ export const ConsultationForm = (props: any) => {
         if (res && res.data) {
           const formData = {
             ...res.data,
-            hasSymptom:
+            is_asymptomatic:
               !!res.data.symptoms &&
               !!res.data.symptoms.length &&
-              !!res.data.symptoms.filter((i: number) => i !== 1).length,
+              !!res.data.symptoms.includes(1),
             otherSymptom:
               !!res.data.symptoms &&
               !!res.data.symptoms.length &&
-              !!res.data.symptoms.filter((i: number) => i === 9).length,
+              !!res.data.symptoms.includes(9),
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
@@ -368,13 +368,12 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "symptoms_onset_date":
-          if (state.form.hasSymptom && !state.form[field]) {
+          if (state.form.is_asymptomatic && !state.form[field]) {
             errors[field] = "Please enter date of onset of the above symptoms";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        // case "admitted_to":
         case "admission_date":
           if (state.form.suggestion === "A" && !state.form[field]) {
             errors[field] = "Field is required as person is admitted";
@@ -500,7 +499,7 @@ export const ConsultationForm = (props: any) => {
         other_symptoms: state.form.otherSymptom
           ? state.form.other_symptoms
           : undefined,
-        symptoms_onset_date: state.form.hasSymptom
+        symptoms_onset_date: !state.form.is_asymptomatic
           ? state.form.symptoms_onset_date
           : undefined,
         suggestion: state.form.suggestion,
@@ -603,10 +602,20 @@ export const ConsultationForm = (props: any) => {
       });
   };
 
-  const handleValueChange = (value: any, field: string) => {
+  const handleSymptomChange = (value: any, field: string) => {
+    if (state.form.is_asymptomatic) {
+      dispatch({
+        type: "set_form",
+        form: { ...state.form, [field]: [1], symptoms_onset_date: null },
+      });
+    }
     dispatch({
       type: "set_form",
-      form: { ...state.form, [field]: value },
+      form: {
+        ...state.form,
+        [field]: value,
+        ["otherSymptom"]: value.includes(9),
+      },
     });
   };
 
@@ -666,15 +675,37 @@ export const ConsultationForm = (props: any) => {
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
                 <div id="symptoms-div">
-                  <FieldLabel className="text-sm">Symptoms</FieldLabel>
+                  <div className="flex gap-10 items-start">
+                    <FieldLabel className="text-sm">Symptoms</FieldLabel>
+                    <div className="flex gap-2">
+                      <input
+                        type={"checkbox"}
+                        className="mt-[0.7]"
+                        name={"is_asymptomatic"}
+                        checked={state.form.is_asymptomatic}
+                        onChange={(e) => {
+                          dispatch({
+                            type: "set_form",
+                            form: {
+                              ...state.form,
+                              is_asymptomatic: e.target.checked,
+                              symptoms: e.target.checked ? [1] : [],
+                            },
+                          });
+                        }}
+                      />
+                      <FieldLabel className="text-sm">Asymptomatic</FieldLabel>
+                    </div>
+                  </div>
                   <MultiSelectMenuV2
                     id="symptoms"
                     placeholder="Symptoms"
                     value={state.form.symptoms}
+                    disabled={state.form.is_asymptomatic}
                     options={symptomChoices}
                     optionLabel={(o) => o.text}
                     optionValue={(o) => o.id}
-                    onChange={(o) => handleValueChange(o, "symptoms")}
+                    onChange={(o) => handleSymptomChange(o, "symptoms")}
                   />
                   <ErrorHelperText error={state.errors.symptoms} />
                 </div>
@@ -699,7 +730,7 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 )}
 
-                {state.form.hasSymptom && (
+                {!state.form.is_asymptomatic && (
                   <div id="symptoms_onset_date-div">
                     <DateInputField
                       label="Date of onset of the symptoms*"
@@ -860,7 +891,6 @@ export const ConsultationForm = (props: any) => {
                         margin="dense"
                         unoccupiedOnly={true}
                         disabled={!!id} // disabled while editing
-                        // location={state.form.}
                         facility={facilityId}
                       />
                       {!!id && (

@@ -201,7 +201,6 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
 ];
 
 export const SYMPTOM_CHOICES: Array<OptionsType> = [
-  { id: 1, text: "ASYMPTOMATIC" },
   { id: 2, text: "FEVER" },
   { id: 3, text: "SORE THROAT" },
   { id: 4, text: "COUGH" },
