@@ -582,18 +582,17 @@ export const PatientManager = (props: any) => {
 
   return (
     <div>
-      {showDialog && (
-        <FacilitiesSelectDialogue
-          setSelected={(e) => setSelectedFacility(e)}
-          selectedFacility={selectedFacility}
-          handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
-          handleCancel={() => {
-            setShowDialog(false);
-            setSelectedFacility({ name: "" });
-          }}
-        />
-      )}
-      <div className="flex flex-wrap flex-col right-3 gap-2 mr-3 sm:flex-row-reverse ml-auto">
+      <FacilitiesSelectDialogue
+        show={showDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+        handleCancel={() => {
+          setShowDialog(false);
+          setSelectedFacility({ name: "" });
+        }}
+      />
+      <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-max">
         <Tooltip
           title={
             !isDownloadAllowed ? (
