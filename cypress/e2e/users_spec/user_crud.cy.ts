@@ -43,7 +43,7 @@ describe("User management", () => {
     cy.get("[name='facilities']").type("{downarrow}{enter}");
     cy.intercept(/users/).as("checkUsername");
     cy.get("[name='username']").type(username, { force: true });
-    cy.wait("@checkUsername").its("response.statusCode").should("eq", 404);
+    cy.wait("@checkUsername").its("response.statusCode").should("eq", 200);
     cy.get("[name='dob']").type("02/03/2001");
     cy.get("[name='password']").type("#@Cypress_test123");
     cy.get("[name='c_password']").type("#@Cypress_test123");
