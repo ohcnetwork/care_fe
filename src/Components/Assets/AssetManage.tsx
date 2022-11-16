@@ -10,6 +10,7 @@ import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
 import { formatDate } from "../../Utils/utils";
+import Chip from "../../CAREUI/display/Chip";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -29,7 +30,7 @@ const AssetManage = (props: AssetManageProps) => {
     ReactElement | ReactElement[]
   >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const limit = 14;
 
   const fetchData = useCallback(
@@ -88,27 +89,6 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
     </div>
   );
-
-  const badge = (label: string, className: string) => {
-    return (
-      <span
-        className={`font-medium tracking-wider py-1 px-3 uppercase rounded-full text-sm ${className}`}
-      >
-        {label}
-      </span>
-    );
-  };
-
-  const workingStatus = (is_working: boolean | undefined) =>
-    is_working
-      ? badge("Working", "border border-green-500 text-primary-500 bg-white")
-      : badge("Not Working", "animate-pulse bg-red-500 text-white");
-
-  const status = (status: "ACTIVE" | "TRANSFER_IN_PROGRESS" | undefined) =>
-    status === "ACTIVE"
-      ? badge("Active", "border border-green-500 text-primary-500 bg-white")
-      : badge("Transfer in progress", "animate-pulse bg-yellow-500 text-white");
-
   const populateTableRows = (txns: AssetTransaction[]) => {
     if (txns.length > 0) {
       setTransactionDetails(
@@ -161,7 +141,22 @@ const AssetManage = (props: AssetManageProps) => {
 
   const assetClassProp =
     (asset?.asset_class && assetClassProps[asset.asset_class]) ||
-    assetClassProps.None;
+    assetClassProps.NONE;
+
+  const detailBlock = (item: any) =>
+    item.hide ? null : (
+      <div className="flex flex-col">
+        <div className="flex flex-start items-center">
+          <div className="w-8">
+            <i className={`uil uil-${item.icon} text-gray-700 text-lg`}></i>
+          </div>
+          <div className="text-gray-700 break-words">{item.label}</div>
+        </div>
+        <div className="font-semibold text-lg ml-8 break-words">
+          {item.content || "--"}
+        </div>
+      </div>
+    );
 
   return (
     <div className="px-2 pb-2">
@@ -169,183 +164,156 @@ const AssetManage = (props: AssetManageProps) => {
         title="Asset Details"
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
-      <div className="my-8 bg-white rounded-lg md:rounded-xl md:p-8 p-6 max-w-6xl mx-auto">
-        <div className="mb-4 flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2 justify-between w-full">
-            <span className="text-2xl md:text-3xl font-semibold break-words">
-              {asset?.name}
-            </span>
-            <div className=" flex flex-wrap gap-2">
-              {status(asset?.status)}
-              {workingStatus(asset?.is_working)}
-            </div>
-          </div>
-          <span className="text-gray-700">{asset?.description}</span>
-        </div>
-
-        <div className="flex flex-col justify-between">
-          <div className="m-2 sm:m-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 md:gap-x-16 w-full mb-12">
-            {/* Location Detail */}
-            <div className="flex flex-row items-center gap-4 mb-6 md:mb-8">
-              <i className="fas fa-map-marker-alt text-xl text-gray-600" />
-              <div className="flex flex-col">
-                <span className="text-gray-700">
-                  {asset?.location_object.facility.name}
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
+          <div className="w-full md:p-8 p-6 flex flex-col justify-between gap-6">
+            <div>
+              <div className="flex flex-wrap items-center gap-2 justify-between w-full">
+                <span className="text-2xl md:text-3xl font-bold break-words">
+                  {asset?.name}
                 </span>
-                <span className="font-medium text-lg text-gray-900">
-                  {asset?.location_object.name}
-                </span>
-              </div>
-            </div>
-
-            {/* Asset Type */}
-            <div className="flex flex-row items-center gap-4 mb-6 md:mb-8">
-              <i className="fas fa-cubes text-xl text-gray-600" />
-              <div className="flex flex-col">
-                <span className="text-gray-700">Asset Type</span>
-                <span className="font-medium text-lg text-gray-900">
-                  {asset?.asset_type === "INTERNAL"
-                    ? "Internal Asset"
-                    : "External Asset"}
-                </span>
-              </div>
-            </div>
-
-            {/* Asset Class */}
-            <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
-              <span className="text-gray-600 text-xl">
-                {assetClassProp.icon}
-              </span>
-              <div className="flex flex-col">
-                <span className="text-gray-700">Asset Class</span>
-                <span className="font-medium text-lg text-gray-900">
-                  {assetClassProp.name}
-                </span>
-              </div>
-            </div>
-
-            {/* Not working reason */}
-            {asset?.is_working === false && (
-              <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
-                {/* description icon */}
-                <i className="fas fa-exclamation-circle text-xl text-gray-600" />
-                <div className="flex flex-col">
-                  <span className="text-gray-700">Not working reason</span>
-                  <span className="text-gray-900">
-                    {asset?.not_working_reason || "--"}
-                  </span>
+                <div className=" flex flex-wrap gap-2">
+                  {asset?.status === "ACTIVE" ? (
+                    <Chip color="green" text="Active" startIcon="check" />
+                  ) : (
+                    <Chip
+                      color="yellow"
+                      text="Transfer in progress"
+                      startIcon="exclamation"
+                    />
+                  )}
+                  {asset?.is_working ? (
+                    <Chip color="green" text="Working" startIcon="check" />
+                  ) : (
+                    <Chip color="red" text="Not Working" startIcon="times" />
+                  )}
                 </div>
               </div>
-            )}
-
-            <span className="font-medium text-gray-800 mb-4 col-span-1 md:col-span-2 xl:col-span-3">
-              Service Details
-            </span>
-
-            {/* Last Serviced On */}
-            <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
-              <i className="fas fa-tools text-xl text-gray-600" />
-              <div className="flex flex-col">
-                <span className="text-gray-700">Last serviced on</span>
-                <span className="font-medium text-lg text-gray-900">
-                  {asset?.last_serviced_on
-                    ? formatDate(asset?.last_serviced_on)
-                    : "--"}
-                </span>
-              </div>
+              <span className="text-gray-700">{asset?.description}</span>
             </div>
-
-            {/* Notes */}
-            <div className="flex flex-row items-center gap-4 mb-6 md:mb-12">
-              <i className="fas fa-sticky-note text-xl text-gray-600" />
-              <div className="flex flex-col">
-                <span className="text-gray-700">Notes</span>
-                <span className="text-gray-900">{asset?.notes || "--"}</span>
-              </div>
+            <div className="flex flex-col gap-6">
+              {[
+                {
+                  label: asset?.location_object.facility.name,
+                  icon: "location-pin-alt",
+                  content: asset?.location_object.name,
+                },
+                {
+                  label: "Asset Type",
+                  icon: "apps",
+                  content:
+                    asset?.asset_type === "INTERNAL"
+                      ? "Internal Asset"
+                      : "External Asset",
+                },
+                {
+                  label: "Asset Class",
+                  icon: assetClassProp.uicon,
+                  content: assetClassProp.name,
+                },
+                {
+                  label: "Not working reason",
+                  icon: "exclamation-circle",
+                  content: asset?.not_working_reason,
+                  hide: asset?.is_working,
+                },
+              ].map(detailBlock)}
+            </div>
+            <div className="flex flex-col md:flex-row gap-1">
+              <button
+                onClick={() =>
+                  navigate(
+                    `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
+                  )
+                }
+                id="update-asset"
+                className="primary-button"
+              >
+                <i className="uil uil-pen text-white mr-4" />
+                Update
+              </button>
+              {asset?.asset_class && (
+                <button
+                  onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+                  id="configure-asset"
+                  className="primary-button"
+                >
+                  <i className="uil uil-setting text-white mr-4"></i>
+                  Configure
+                </button>
+              )}
             </div>
           </div>
-          {asset && (
-            <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col lg:flex-row transition-all duration-200 ease-in">
-              <AssetWarrantyCard asset={asset} view="front" />
-              <AssetWarrantyCard asset={asset} view="back" />
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col md:flex-row mt-8 gap-1">
-          <button
-            onClick={() =>
-              navigate(
-                `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
-              )
-            }
-            id="update-asset"
-            className="primary-button"
-          >
-            <i className="fas fa-pencil-alt text-white mr-4" />
-            Update
-          </button>
-          {asset?.asset_class && (
-            <button
-              onClick={() => navigate(`/assets/${asset?.id}/configure`)}
-              id="configure-asset"
-              className="primary-button"
-            >
-              <i className="fas fa-cog text-white mr-4"></i>
-              Configure
-            </button>
-          )}
-        </div>
-        <div className="flex md:flex-row flex-col gap-2 justify-between pt-4 -mb-4">
-          <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
+          <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 flex-shrink-0">
             <div>
-              <span className="text-gray-900">Created: </span>
+              <div className="font-bold text-lg mb-5">Service Details</div>
+              <div className="flex flex-col gap-6">
+                {[
+                  {
+                    label: "Last serviced on",
+                    icon: "wrench",
+                    content:
+                      asset?.last_serviced_on &&
+                      formatDate(asset?.last_serviced_on),
+                  },
+                  {
+                    label: "Notes",
+                    icon: "notes",
+                    content: asset?.notes,
+                  },
+                ].map(detailBlock)}
+              </div>
+            </div>
+
+            <div className="text-xs text-gray-900 break-words">
+              <i className="text-gray-700">Created: </i>
               {asset?.created_date && formatDate(asset?.created_date)}
-            </div>
-          </div>
-          <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
-            <div>
-              <span className="text-gray-900">Last Modified: </span>
+              <br />
+              <i className="text-gray-700">Last Modified: </i>
               {asset?.modified_date && formatDate(asset?.modified_date)}
             </div>
           </div>
         </div>
-      </div>
-      <div className="bg-white rounded-lg md:p-6 p-3 mt-2 max-w-6xl mx-auto">
-        <div className="text-xl font-semibold">Transaction History</div>
-        <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved from
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved to
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved By
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                  Moved On
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {transactionDetails}
-            </tbody>
-          </table>
-        </div>
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
+        {asset && (
+          <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col md:flex-row lg:flex-col transition-all duration-200 ease-in">
+            <AssetWarrantyCard asset={asset} />
           </div>
         )}
       </div>
+      <div className="text-xl font-semibold mt-8 mb-4">Transaction History</div>
+      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved from
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved to
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved By
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Moved On
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {transactionDetails}
+          </tbody>
+        </table>
+      </div>
+      {totalCount > limit && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };

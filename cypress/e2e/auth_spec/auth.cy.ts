@@ -18,8 +18,8 @@ describe("Authorisation/Authentication", () => {
     cy.log("Logging in the user: devdistrictadmin:Coronasafe@123");
 
     cy.awaitUrl("/", true);
-    cy.get("input[name='username']").type("devdistrictadmin");
-    cy.get("input[name='password']").type("coronasafe@123");
+    cy.get("input[id='username']").type("devdistrictadmin");
+    cy.get("input[id='password']").type("coronasafe@123");
     cy.get("button").contains("Login").click();
     cy.contains("No active account").should("exist");
   });

@@ -15,7 +15,10 @@ const Pagination = (props: PaginationProps) => {
   useEffect(() => {
     const overflowDiv = document.querySelector("#pages");
     if (overflowDiv) {
-      overflowDiv.scrollTo(0, 0);
+      overflowDiv.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     }
   }, [currentPage]);
 

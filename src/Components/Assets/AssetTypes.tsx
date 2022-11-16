@@ -10,23 +10,35 @@ export interface AssetLocationObject {
   };
 }
 
-export type AssetType = "INTERNAL" | "EXTERNAL";
-export type AssetClass = "ONVIF" | "HL7MONITOR";
+export enum AssetType {
+  NONE = "NONE",
+  INTERNAL = "INTERNAL",
+  EXTERNAL = "EXTERNAL",
+}
+
+export enum AssetClass {
+  NONE = "NONE",
+  ONVIF = "ONVIF",
+  HL7MONITOR = "HL7MONITOR",
+}
 
 export const assetClassProps = {
   ONVIF: {
     name: "ONVIF Camera",
     description: "",
-    icon: <i className="fa-solid fa-camera" />,
+    icon: "camera",
+    uicon: "camera",
   },
   HL7MONITOR: {
     name: "HL7 Vitals Monitor",
     description: "",
-    icon: <i className="fa-solid fa-tv" />,
+    icon: "tv",
+    uicon: "tv-retro",
   },
-  None: {
+  NONE: {
     name: "N/A",
-    icon: <i className="fa-solid fa-cart-plus" />,
+    icon: "cart-plus",
+    uicon: "shopping-cart",
   },
 };
 

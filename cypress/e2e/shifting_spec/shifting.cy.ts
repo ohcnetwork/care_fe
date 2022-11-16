@@ -13,7 +13,9 @@ describe("Shifting Page", () => {
 
   it("checks if all download button works", () => {
     cy.get("svg.MuiSvgIcon-root.cursor-pointer").each(($button) => {
+      cy.intercept(/\/api\/v1\/shift/).as("shifting_download");
       cy.wrap($button).click({ force: true });
+      cy.wait("@shifting_download");
     });
   });
 
@@ -28,11 +30,12 @@ describe("Shifting Page", () => {
   });
 
   it("switch between active/completed", () => {
-    cy.contains("Completed").click().wait(2000);
+    cy.intercept(/\/api\/v1\/shift/).as("shifting");
+    cy.contains("Completed").click().wait("@shifting");
     cy.contains("Active").should("have.class", "bg-gray-200");
     cy.contains("Completed").should("have.class", "bg-white");
-
-    cy.contains("Active").click().wait(2000);
+    cy.intercept(/\/api\/v1\/shift/).as("shifting");
+    cy.contains("Active").click().wait("@shifting");
     cy.contains("Active").should("have.class", "bg-white");
     cy.contains("Completed").should("have.class", "bg-gray-200");
   });

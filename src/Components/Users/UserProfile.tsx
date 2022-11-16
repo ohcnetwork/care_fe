@@ -3,11 +3,7 @@ import React, { useState, useCallback, useReducer } from "react";
 import { InputLabel, Button } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  GENDER_TYPES,
-  PREFERENCE_SIDEBAR_KEY,
-  SIDEBAR,
-} from "../../Common/constants";
+import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserDetails,
@@ -24,7 +20,6 @@ import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
-import Switch from "@material-ui/core/Switch";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -507,7 +502,7 @@ export default function UserProfile() {
                             variant="outlined"
                             margin="dense"
                             type="text"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             value={states.form.firstName}
                             onChange={handleChangeInput}
                             errors={states.errors.firstName}
@@ -525,7 +520,7 @@ export default function UserProfile() {
                             name="lastName"
                             variant="outlined"
                             margin="dense"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             type="text"
                             value={states.form.lastName}
                             onChange={handleChangeInput}
@@ -542,7 +537,7 @@ export default function UserProfile() {
                           </label>
                           <TextInputField
                             name="age"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             variant="outlined"
                             margin="dense"
                             value={states.form.age}
@@ -640,7 +635,7 @@ export default function UserProfile() {
                             variant="outlined"
                             margin="dense"
                             type="password"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             value={changePasswordForm.old_password}
                             onChange={(e) =>
                               setChangePasswordForm({
@@ -663,7 +658,7 @@ export default function UserProfile() {
                             variant="outlined"
                             margin="dense"
                             type="password"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             value={changePasswordForm.new_password_1}
                             onChange={(e) =>
                               setChangePasswordForm({
@@ -686,7 +681,7 @@ export default function UserProfile() {
                             variant="outlined"
                             margin="dense"
                             type="password"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                            className="mt-1 form-input sm:leading-5"
                             value={changePasswordForm.new_password_2}
                             onChange={(e) =>
                               setChangePasswordForm({
@@ -734,34 +729,6 @@ export default function UserProfile() {
           </div>
           <div className="mt-5 md:mt-0 md:col-span-2">
             <LanguageSelector className="bg-white w-full" />
-          </div>
-        </div>
-        <div>
-          <h1 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-            Preferences
-          </h1>
-          <div className="flex items-center gap-8">
-            <h1 className="text-base font-normal leading-6 text-gray-900">
-              Auto Collapse Sidebar
-            </h1>
-            <Switch
-              color="primary"
-              value={
-                localStorage.getItem(PREFERENCE_SIDEBAR_KEY) ===
-                SIDEBAR.COLLAPSED
-              }
-              onChange={(e) => {
-                localStorage.setItem(
-                  PREFERENCE_SIDEBAR_KEY,
-                  e.target.checked ? SIDEBAR.COLLAPSED : SIDEBAR.FULL
-                );
-                window.dispatchEvent(new Event("storage"));
-              }}
-              defaultChecked={
-                localStorage.getItem(PREFERENCE_SIDEBAR_KEY) ===
-                SIDEBAR.COLLAPSED
-              }
-            />
           </div>
         </div>
 
