@@ -113,7 +113,7 @@ export default function BoardView() {
         </div>
         <div className="w-full flex pt-2 lg:space-x-4 items-center flex-col lg:flex-row justify-between">
           <SearchInput
-            name="patient_name"
+            name="patient_name_search"
             value={qParams.patient_name}
             onChange={({ value }) => searchByName(value)}
             placeholder="Search patient"
