@@ -13,7 +13,7 @@ describe("Sample List", () => {
 
   it("Search by District name", () => {
     cy.intercept(/\/api\/v1\/test_sample/).as("test_sample");
-    cy.get("[placeholder='District Name']").type("TEst");
+    cy.get("[name='district_name_search']").type("TEst");
     cy.wait("@test_sample").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
       expect(interception.request.url).to.include("district_name=TEst");
@@ -23,7 +23,7 @@ describe("Sample List", () => {
 
   it("Search by Patient Name", () => {
     cy.intercept(/\/api\/v1\/test_sample/).as("test_sample");
-    cy.get("[placeholder='Search by Patient Name']").type("Test");
+    cy.get("[name='patient_name_search']").type("Test");
     cy.wait("@test_sample").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
       expect(interception.request.url).to.include("patient_name=Test");
