@@ -653,7 +653,7 @@ export const PatientManager = (props: any) => {
   } else if (data && data.length) {
     managePatients = (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           {patientList}
         </div>
         {totalCount > RESULT_LIMIT && (
@@ -689,7 +689,7 @@ export const PatientManager = (props: any) => {
           }}
         />
       )}
-      <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-max">
+      <div className="flex flex-wrap flex-col right-3 gap-2 mr-3 sm:flex-row-reverse ml-auto">
         <Tooltip
           title={
             !isDownloadAllowed ? (
