@@ -71,8 +71,7 @@ const ButtonV2 = ({
         `button-size-${size}`,
         `button-shape-${circle ? "circle" : "square"}`,
         `button-${variant}-${ghost ? "ghost" : "default"}`,
-        shadow &&
-          "shadow enabled:hover:shadow-lg enabled:hover:-translate-y-0.5",
+        shadow && "shadow enabled:hover:shadow-lg",
         className,
       ].join(" ")}
     >
