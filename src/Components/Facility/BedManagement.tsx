@@ -255,7 +255,8 @@ export const BedManagement = (props: BedManagementProps) => {
             className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
             onClick={() =>
               navigate(
-                `/facility/${facilityId}/location/${locationId}/beds/add`
+                `/facility/${facilityId}/location/${locationId}/beds/add`,
+                { replace: true }
               )
             }
           >
