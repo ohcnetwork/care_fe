@@ -52,8 +52,6 @@ import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const DEFAULT_MAP_LOCATION = [10.038394700000001, 76.5074145180173]; // Ernakulam
-
 interface FacilityProps {
   facilityId?: number;
 }
@@ -242,8 +240,8 @@ export const FacilityCreate = (props: FacilityProps) => {
               res.data.phone_number.length == 10
                 ? "+91" + res.data.phone_number
                 : res.data.phone_number,
-            latitude: res.data.location ? res.data.location.latitude : "",
-            longitude: res.data.location ? res.data.location.longitude : "",
+            latitude: res.data.latitude || "",
+            longitude: res.data.longitude || "",
             type_b_cylinders: res.data.type_b_cylinders,
             type_c_cylinders: res.data.type_c_cylinders,
             type_d_cylinders: res.data.type_d_cylinders,
@@ -319,14 +317,8 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
   };
 
-  const handleClickLocationPicker = (event: React.MouseEvent) => {
-    event.preventDefault();
-
-    if (
-      navigator.geolocation &&
-      !state.form.latitude &&
-      !state.form.longitude
-    ) {
+  const handleSelectCurrentLocation = () => {
+    if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         dispatch({
           type: "set_form",
@@ -337,9 +329,9 @@ export const FacilityCreate = (props: FacilityProps) => {
           },
         });
       });
-    }
 
-    setAnchorEl(event.currentTarget);
+      // setAnchorEl(null);
+    }
   };
 
   const handleClose = () => {
@@ -429,13 +421,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         features: state.form.features,
         ward: state.form.ward,
         kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
-        location:
-          state.form.latitude && state.form.longitude
-            ? {
-                latitude: Number(state.form.latitude),
-                longitude: Number(state.form.longitude),
-              }
-            : undefined,
+        latitude: state.form.latitude,
+        longitude: state.form.longitude,
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
         )?.format("E.164"),
@@ -948,7 +935,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div className="pt-4">
                 <IconButton
                   id="facility-location-button"
-                  onClick={handleClickLocationPicker}
+                  onClick={(event) => setAnchorEl(event.currentTarget)}
                 >
                   <MyLocationIcon />
                 </IconButton>
@@ -967,11 +954,11 @@ export const FacilityCreate = (props: FacilityProps) => {
                   }}
                 >
                   <GLocationPicker
-                    lat={Number(state.form.latitude || DEFAULT_MAP_LOCATION[0])}
-                    lng={Number(
-                      state.form.longitude || DEFAULT_MAP_LOCATION[1]
-                    )}
+                    lat={Number(state.form.latitude)}
+                    lng={Number(state.form.longitude)}
                     handleOnChange={handleLocationChange}
+                    handleOnClose={handleClose}
+                    handleOnSelectCurrentLocation={handleSelectCurrentLocation}
                   />
                 </Popover>
               </div>
