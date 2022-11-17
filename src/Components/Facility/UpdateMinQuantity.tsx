@@ -47,7 +47,7 @@ export const UpdateMinQuantity = (props: any) => {
   const { facilityId, inventoryId, itemId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
+  // const [offset, setOffset] = useState(0);
   const [data, setData] = useState(" ");
   const [facilityName, setFacilityName] = useState("");
 
@@ -66,7 +66,7 @@ export const UpdateMinQuantity = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset]
+    [dispatchAction, facilityId, inventoryId, state.form]
   );
   useAbortableEffect(
     (status: statusType) => {
