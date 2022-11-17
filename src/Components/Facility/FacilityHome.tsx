@@ -41,6 +41,16 @@ import ContactLink from "../Common/components/ContactLink";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
+export const getFacilityFeatureIcon = (featureId: number) => {
+  const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
+  if (!feature?.icon) return null;
+  return typeof feature.icon === "string" ? (
+    <i className={`text-lg font-extrabold ${feature.icon}`} />
+  ) : (
+    feature.icon
+  );
+};
+
 export const FacilityHome = (props: any) => {
   const { facilityId } = props;
   const dispatch: any = useDispatch();
@@ -403,21 +413,7 @@ export const FacilityHome = (props: any) => {
                           key={i}
                           className="flex items-center gap-1 bg-[#F0FFF9] text-primary-500 font-medium px-3.5 py-2.5 rounded border border-primary-500 text-sm"
                         >
-                          {typeof FACILITY_FEATURE_TYPES.filter(
-                            (f) => f.id === feature
-                          )[0]?.icon === "string" ? (
-                            <i
-                              className={`text-lg font-extrabold ${
-                                FACILITY_FEATURE_TYPES.filter(
-                                  (f) => f.id === feature
-                                )[0]?.icon
-                              }`}
-                            />
-                          ) : (
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0]?.icon
-                          )}{" "}
+                          {getFacilityFeatureIcon(feature)}
                           &nbsp;
                           {
                             FACILITY_FEATURE_TYPES.filter(

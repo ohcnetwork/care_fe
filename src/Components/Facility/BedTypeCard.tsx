@@ -1,4 +1,4 @@
-import React, { LegacyRef, useEffect, useState } from "react";
+import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import { CapacityModal } from "./models";
 import { navigate } from "raviger";
 import { BED_TYPES } from "../../Common/constants";
@@ -27,8 +27,8 @@ const BedTypeCard = (props: BedTypeProps) => {
   const [percentage, setPercentage] = useState(0);
   const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [isVisible, elementRef] = useVisibility(1070);
-
+  const [isVisible, elementRef] = useVisibility();
+  const firstUpdate = useRef(true);
   const handleDeleteSubmit = async () => {
     if (props.room_type) {
       const res = await dispatchAction(
@@ -51,11 +51,16 @@ const BedTypeCard = (props: BedTypeProps) => {
   };
 
   useEffect(() => {
+    if (firstUpdate.current) {
+      firstUpdate.current = false;
+      return;
+    }
+    console.log("Im isVisible");
     setTimeout(() => {
       if (props.current_capacity && props.total_capacity)
         setPercentage((props.current_capacity * 100) / props.total_capacity);
-    }, 1000);
-  }, [isVisible, percentage, props.current_capacity, props.total_capacity]);
+    }, 800);
+  }, [isVisible, props.current_capacity, props.total_capacity]);
 
   return (
     <div className="w-full" ref={elementRef as LegacyRef<HTMLDivElement>}>
