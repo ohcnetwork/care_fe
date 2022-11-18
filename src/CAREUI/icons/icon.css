@@ -1,0 +1,51 @@
+/*  Pulling the svg icon down by -0.125em places the icon onto the proper baseline of the text. */
+
+.care-svg-icon__baseline {
+  display: inline-block;
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+}
+
+/* svg viewBox width: 320px */
+
+.care-svg-icon__baseline.care-w-10 {
+  width: 0.625em;
+}
+
+/* svg viewBox width: 384px */
+
+.care-svg-icon__baseline.care-w-12 {
+  width: 0.75em;
+}
+
+/* svg viewBox width: 448px */
+
+.care-svg-icon__baseline.care-w-14 {
+  width: 0.875em;
+}
+
+/* svg viewBox width: 512px */
+
+.care-svg-icon__baseline.care-w-16 {
+  width: 1em;
+}
+
+/* svg viewBox width: 576px */
+
+.care-svg-icon__baseline.care-w-18 {
+  width: 1.125em;
+}
+
+/* svg viewBox width: 640px */
+
+.care-svg-icon__baseline.care-w-20 {
+  width: 1.25em;
+}
+
+/* svg viewBox Fixed Width */
+
+.care-svg-icon__baseline.care-fw {
+  text-align: center;
+  width: 1.25em;
+}
