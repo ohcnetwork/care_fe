@@ -1,4 +1,4 @@
-import "./iconFirst.css";
+import "./icon.css";
 
 import iconData from "./data/paths.json";
 
