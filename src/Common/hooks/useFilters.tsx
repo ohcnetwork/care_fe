@@ -107,8 +107,8 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     },
     kasp(nameSuffix = "", paramKey = "is_kasp") {
       const name = nameSuffix ? KASP_STRING + " " + nameSuffix : KASP_STRING;
-      const [trueValue, falseValue] = [KASP_STRING, "Non " + KASP_STRING];
-      return badgeUtils.boolean(name, paramKey, { trueValue, falseValue });
+      const [trueLabel, falseLabel] = [KASP_STRING, "Non " + KASP_STRING];
+      return badgeUtils.boolean(name, paramKey, { trueLabel, falseLabel });
     },
   };
 
