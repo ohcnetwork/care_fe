@@ -1,6 +1,5 @@
 import "./icon.css";
-
-import iconData from "./data/paths.json";
+import iconData from "./paths.json";
 
 const xmlns = "http://www.w3.org/2000/svg";
 
@@ -14,31 +13,12 @@ const getIconData = (className) => {
   return typeof data === "undefined" ? iconData["default"] : data;
 };
 
-const viewboxClass = (width) => {
-  switch (width) {
-    case 320:
-      return " care-w-10";
-    case 384:
-      return " care-w-12";
-    case 448:
-      return " care-w-14";
-    case 576:
-      return " care-w-18";
-    case 640:
-      return " care-w-20";
-    default:
-      return " care-w-16";
-  }
-};
-
 const createSvg = (className) => {
   const icon = getIconData(className);
   const el = document.createElementNS(xmlns, "svg");
   el.setAttribute(
     "class",
-    className
-      .replace("care", "care-svg-icon__baseline")
-      .concat(viewboxClass(icon[0]))
+    className.replace("care", "care-svg-icon__baseline")
   );
   el.setAttribute("role", "img");
   el.setAttribute("xmlns", xmlns);
