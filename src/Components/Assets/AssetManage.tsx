@@ -11,6 +11,7 @@ import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
 import { formatDate } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -148,7 +149,7 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="flex flex-col">
         <div className="flex flex-start items-center">
           <div className="w-8">
-            <i className={`uil uil-${item.icon} text-gray-700 text-lg`}></i>
+            <CareIcon className={`care-l-${item.icon} h-5 fill-gray-700`} />
           </div>
           <div className="text-gray-700 break-words">{item.label}</div>
         </div>
@@ -229,7 +230,7 @@ const AssetManage = (props: AssetManageProps) => {
                 id="update-asset"
                 className="primary-button"
               >
-                <i className="uil uil-pen text-white mr-4" />
+                <CareIcon className="care-l-pen h-5 mr-4" />
                 Update
               </button>
               {asset?.asset_class && (
@@ -238,7 +239,7 @@ const AssetManage = (props: AssetManageProps) => {
                   id="configure-asset"
                   className="primary-button"
                 >
-                  <i className="uil uil-setting text-white mr-4"></i>
+                  <CareIcon className="care-l-setting h-5 mr-4" />
                   Configure
                 </button>
               )}

@@ -32,6 +32,7 @@ import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import { DateRange } from "../Common/DateRangeInputV2";
 import FilterButtons from "../Common/FilterButtons";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -368,7 +369,7 @@ export default function PatientFilterV2(props: any) {
       />
       <div className="w-full flex-none pt-20">
         <div className="mb-3 text-md flex items-center text-gray-700 gap-2">
-          <i className="text-lg uil uil-sort" />
+          <CareIcon className="care-l-sort h-5" />
           <p>Ordering</p>
         </div>
         <SelectMenuV2
@@ -377,11 +378,11 @@ export default function PatientFilterV2(props: any) {
           optionSelectedLabel={(option) => `${option.desc} (${option.order})`}
           optionDescription={(o) => o.order}
           optionIcon={(option) => (
-            <i
-              className={`text-lg uil ${
+            <CareIcon
+              className={`${
                 option.order === "Ascending"
-                  ? "uil-sort-amount-up"
-                  : "uil-sort-amount-down"
+                  ? "care-l-amount-up"
+                  : "care-l-amount-down"
               }`}
             />
           )}
@@ -391,7 +392,7 @@ export default function PatientFilterV2(props: any) {
         />
       </div>
       <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-        <i className="text-lg uil uil-filter" />
+        <CareIcon className="care-l-filter h-5" />
         <p>Filter by</p>
       </div>
       <div className="flex flex-wrap gap-4">
@@ -450,7 +451,7 @@ export default function PatientFilterV2(props: any) {
             onChange={(v) =>
               setFilterState({ ...filterState, facility_type: v })
             }
-            optionIcon={() => <i className="uil uil-hospital" />}
+            optionIcon={() => <CareIcon className="care-l-hospital h-5" />}
           />
         </div>
 
@@ -527,7 +528,7 @@ export default function PatientFilterV2(props: any) {
             optionValue={({ id }) => id}
             optionIcon={({ id }) => (
               <>
-                <i className="uil uil-syringe mr-2" />
+                <CareIcon className="care-l-syringe w-5 mr-2" />
                 <span className="font-bold">{id}</span>
               </>
             )}

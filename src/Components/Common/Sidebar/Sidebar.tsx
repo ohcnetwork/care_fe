@@ -27,16 +27,16 @@ type StatelessSidebarProps =
     };
 
 // Sidebar item icons.
-const Facility = () => <CareIcon className="care-l-hospital w-5" />;
-const Patient = () => <CareIcon className="care-l-wheelchair w-5" />;
-const Asset = () => <CareIcon className="care-l-shopping-cart-alt w-5" />;
-const SampleTest = () => <CareIcon className="care-l-medkit w-5" />;
-const Shifting = () => <CareIcon className="care-l-ambulance w-5" />;
-const Resource = () => <CareIcon className="care-l-heart-medical w-5" />;
-const Result = () => <CareIcon className="care-l-clipboard-notes w-5" />;
-const Users = () => <CareIcon className="care-l-users-alt w-5" />;
-const NoticeBoard = () => <CareIcon className="care-l-meeting-board w-5" />;
-const Dashboard = () => <CareIcon className="care-l-dashboard w-5" />;
+const Facility = () => <CareIcon className="care-l-hospital h-5" />;
+const Patient = () => <CareIcon className="care-l-wheelchair h-5" />;
+const Asset = () => <CareIcon className="care-l-shopping-cart-alt h-5" />;
+const SampleTest = () => <CareIcon className="care-l-medkit h-5" />;
+const Shifting = () => <CareIcon className="care-l-ambulance h-5" />;
+const Resource = () => <CareIcon className="care-l-heart-medical h-5" />;
+const Result = () => <CareIcon className="care-l-clipboard-notes h-5" />;
+const Users = () => <CareIcon className="care-l-users-alt h-5" />;
+const NoticeBoard = () => <CareIcon className="care-l-meeting-board h-5" />;
+const Dashboard = () => <CareIcon className="care-l-dashboard h-5" />;
 
 const NavItems = [
   { text: "Facilities", to: "/facility", icon: <Facility /> },

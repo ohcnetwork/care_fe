@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { RefObject, useRef, useState } from "react";
+import CareIcon from "../icons/CareIcon";
 
 type InputProps = {
   id?: string;
@@ -113,7 +114,9 @@ export default function LegendInput(props: InputProps) {
             className="absolute right-0 top-0 h-full flex items-center px-3 z-10 text-xl"
             onClick={() => setShowPassword(!showPassword)}
           >
-            <i className={`uil uil-eye${showPassword ? "" : "-slash"}`} />
+            <CareIcon
+              className={`care-l-eye${showPassword ? "" : "-slash"} h-5`}
+            />
           </button>
         )}
       </div>

@@ -67,6 +67,7 @@ import ProcedureBuilder, {
 } from "../Common/prescription-builder/ProcedureBuilder";
 import { ICD11DiagnosisModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -1195,7 +1196,7 @@ export const ConsultationForm = (props: any) => {
                   type="submit"
                   onClick={(e) => handleSubmit(e)}
                 >
-                  <i className="uil uil-check-circle" />
+                  <CareIcon className="care-l-check-circle h-5" />
                   {buttonText}
                 </ButtonV2>
               </div>
