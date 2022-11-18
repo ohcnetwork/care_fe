@@ -20,7 +20,7 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
       } transition-all duration-200 ease-in-out`}
     >
       <Link href="/user/profile" className="flex-none">
-        <CareIcon className="care-l-user-circle h-8 fill-white" />
+        <CareIcon className="care-l-user-circle h-8 text-white" />
       </Link>
       <div
         className={`${shrinked ? "hidden" : "grow"} pl-3 flex flex-col min-w-0`}

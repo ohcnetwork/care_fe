@@ -13,7 +13,7 @@ export default function ContactLink(props: ContactLinkProps) {
       >
         <CareIcon
           className={`care-l-${
-            props.tel ? "uil-outgoing-call" : "uil-envelope-alt"
+            props.tel ? "outgoing-call" : "envelope-alt"
           } h-5 fill-gray-700`}
         />
         {props.tel ? props.tel : props.mailto}
