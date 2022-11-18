@@ -4,7 +4,7 @@ import iconData from "./paths.json";
 const xmlns = "http://www.w3.org/2000/svg";
 
 const findIconName = (className) => {
-  const iconName = className.match(/care-([a-zA-z0-9-]+)/);
+  const iconName = className.match(/care-([a-zA-Z0-9-]+)/);
   return iconName ? iconName[1] : "default";
 };
 
