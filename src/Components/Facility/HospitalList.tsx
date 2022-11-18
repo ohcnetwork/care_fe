@@ -41,6 +41,7 @@ import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
 import ButtonV2 from "../Common/components/ButtonV2";
 import SearchInput from "../Form/SearchInput";
+import { getFacilityFeatureIcon } from "./FacilityHome";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -365,43 +366,37 @@ export const HospitalList = (props: any) => {
                       {facility.name}
                     </div>
                   </div>
-
+                  
                   <div className="flex gap-1 flex-wrap mt-2">
-                    <div className="px-2.5 py-0.5 rounded-full text-sm leading-5 bg-blue-100 text-blue-800">
-                      {facility.facility_type}
-                    </div>
-                    {facility.features?.map(
-                      (feature: number, i: number) =>
-                        FACILITY_FEATURE_TYPES.some(
-                          (f) => f.id === feature
-                        ) && (
-                          <div
-                            key={i}
-                            className="bg-primary-100 text-primary-600 px-2.5 py-0.5 rounded-full text-sm leading-5"
-                            title={
-                              FACILITY_FEATURE_TYPES.filter(
-                                (f) => f.id === feature
-                              )[0]?.name
-                            }
-                          >
-                            <i
-                              className={`fas fa-${
+                      <div className="px-2.5 py-0.5 flex items-center rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                        {facility.facility_type}
+                      </div>
+                      {facility.features?.map(
+                        (feature: number, i: number) =>
+                          FACILITY_FEATURE_TYPES.some(
+                            (f) => f.id === feature
+                          ) && (
+                            <div
+                              key={i}
+                              className="flex gap-1 items-center bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                              title={
                                 FACILITY_FEATURE_TYPES.filter(
                                   (f) => f.id === feature
-                                )[0]?.icon
-                              }`}
-                            />{" "}
-                            &nbsp;
-                            {
-                              FACILITY_FEATURE_TYPES.filter(
-                                (f) => f.id === feature
-                              )[0]?.name
-                            }
-                          </div>
-                        )
-                    )}
+                                )[0]?.name
+                              }
+                            >
+                              {getFacilityFeatureIcon(feature)} &nbsp;
+                              {
+                                FACILITY_FEATURE_TYPES.filter(
+                                  (f) => f.id === feature
+                                )[0]?.name
+                              }
+                            </div>
+                          )
+                      )}
+                    </div>
                   </div>
-
+                  
                   <div className="mt-2 flex justify-between">
                     <div className="flex flex-col">
                       <div className="font-semibold">

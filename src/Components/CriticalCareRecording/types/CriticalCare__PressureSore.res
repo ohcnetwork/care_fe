@@ -285,6 +285,35 @@ let makeDefault = (region) => {
   description: ""
 }
 
+let calculatePushScore = (length, width, exudate_amount, tissue_type) => {
+  let areaIntervalPoints = [0.0, 0.3, 0.6, 1.0, 2.2, 3.0, 4.0, 8.0, 12.0, 24.0]
+    let exudateAmounts = ["None", "Light", "Moderate", "Heavy"]
+    let tissueTypes = ["Closed", "Epithelial", "Granulation", "Slough", "Necrotic"]
+
+    let area = length *. width
+    let areaScore =
+      areaIntervalPoints
+      ->Belt.Array.getIndexBy(interval => interval >= area)
+      ->Belt.Option.getWithDefault(10)
+      ->float_of_int
+    let exudateScore =
+      exudateAmounts
+      ->Belt.Array.getIndexBy(amount =>
+        amount == exudate_amount->extrudateAmountToString
+      )
+      ->Belt.Option.getWithDefault(0)
+      ->float_of_int
+    let tissueScore =
+      tissueTypes
+      ->Belt.Array.getIndexBy(tissue =>
+        tissue == tissue_type->tissueTypeToString
+      )
+      ->Belt.Option.getWithDefault(0)
+      ->float_of_int
+
+    areaScore +. exudateScore +. tissueScore
+}
+
 let autoScale = part => {
   {...part, scale: mod(part.scale + 1, 6)}
 }

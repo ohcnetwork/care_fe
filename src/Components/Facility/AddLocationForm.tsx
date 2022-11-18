@@ -1,6 +1,5 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -16,6 +15,7 @@ import {
 } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { goBack } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -135,23 +135,14 @@ export const AddLocationForm = (props: LocationFormProps) => {
                 </div>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={() => goBack()}
-                >
+                <ButtonV2 onClick={() => goBack()} variant="secondary">
+                  <i className="uil uil-times-circle text-xl"></i>
                   Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-                  onClick={(e) => handleSubmit(e)}
-                >
+                </ButtonV2>
+                <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
+                  <i className="uil uil-check-circle text-xl"></i>
                   {buttonText}
-                </Button>
+                </ButtonV2>
               </div>
             </CardContent>
           </form>
