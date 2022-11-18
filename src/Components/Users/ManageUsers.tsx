@@ -414,7 +414,9 @@ export default function ManageUsers() {
                   {user.user_type && (
                     <div className="col-span-2">
                       <UserDetails title="Role">
-                        <div className="font-semibold">{user.user_type}</div>
+                        <div className="font-semibold break-all">
+                          {user.user_type}
+                        </div>
                       </UserDetails>
                     </div>
                   )}
@@ -445,7 +447,9 @@ export default function ManageUsers() {
                   {user.created_by && (
                     <div className="col-span-2">
                       <UserDetails title="Created by">
-                        <div className="font-semibold">{user.created_by}</div>
+                        <div className="font-semibold break-all">
+                          {user.created_by}
+                        </div>
                       </UserDetails>
                     </div>
                   )}
