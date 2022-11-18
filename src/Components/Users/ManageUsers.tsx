@@ -621,17 +621,19 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <FilterBadges
-        badges={({ badge, value, phoneNumber }) => [
-          badge("Username", "username"),
-          badge("First Name", "first_name"),
-          badge("Last Name", "last_name"),
-          phoneNumber(),
-          phoneNumber("WhatsApp no.", "alt_phone_number"),
-          badge("Role", "user_type"),
-          value("District", "district_id", districtName || ""),
-        ]}
-      />
+      <div className="pl-6 pb-2">
+        <FilterBadges
+          badges={({ badge, value, phoneNumber }) => [
+            badge("Username", "username"),
+            badge("First Name", "first_name"),
+            badge("Last Name", "last_name"),
+            phoneNumber(),
+            phoneNumber("WhatsApp no.", "alt_phone_number"),
+            badge("Role", "user_type"),
+            value("District", "district_id", districtName || ""),
+          ]}
+        />
+      </div>
 
       <div className="px-3 md:px-6">
         <div>{manageUsers}</div>
