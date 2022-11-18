@@ -4,7 +4,7 @@ import iconData from "./paths.json";
 const xmlns = "http://www.w3.org/2000/svg";
 
 const findIconName = (className) => {
-  const iconName = className.match(/i-([a-zA-z0-9-]+)/);
+  const iconName = className.match(/care-([a-zA-z0-9-]+)/);
   return iconName ? iconName[1] : "default";
 };
 
@@ -22,7 +22,7 @@ const createSvg = (className) => {
   );
   el.setAttribute("role", "img");
   el.setAttribute("xmlns", xmlns);
-  el.setAttribute("viewBox", "0 0 ".concat(icon[0]).concat(" 512"));
+  el.setAttribute("viewBox", `0 0 ${icon[0]} ${icon[0]}`);
 
   const path = document.createElementNS(xmlns, "path");
   path.setAttribute("fill", "currentColor");
