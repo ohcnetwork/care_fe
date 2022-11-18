@@ -102,6 +102,8 @@ export default function ManageUsers() {
             setDistrictName(dis.data.name);
           }
         }
+      } else {
+        setDistrictName(undefined);
       }
       const res = await dispatch(getUserList(params));
       if (!status.aborted) {
