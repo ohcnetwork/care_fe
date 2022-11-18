@@ -4,6 +4,7 @@ import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
 import { Dialog, Transition } from "@headlessui/react";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -26,16 +27,16 @@ type StatelessSidebarProps =
     };
 
 // Sidebar item icons.
-const Facility = () => <i className="uil uil-hospital" />;
-const Patient = () => <i className="uil uil-wheelchair" />;
-const Asset = () => <i className="uil uil-shopping-cart-alt" />;
-const SampleTest = () => <i className="uil uil-medkit" />;
-const Shifting = () => <i className="uil uil-ambulance" />;
-const Resource = () => <i className="uil uil-heart-medical" />;
-const Result = () => <i className="uil uil-clipboard-notes" />;
-const Users = () => <i className="uil uil-users-alt" />;
-const NoticeBoard = () => <i className="uil uil-meeting-board" />;
-const Dashboard = () => <i className="uil uil-dashboard" />;
+const Facility = () => <CareIcon className="care-l-hospital w-5" />;
+const Patient = () => <CareIcon className="care-l-wheelchair w-5" />;
+const Asset = () => <CareIcon className="care-l-shopping-cart-alt w-5" />;
+const SampleTest = () => <CareIcon className="care-l-medkit w-5" />;
+const Shifting = () => <CareIcon className="care-l-ambulance w-5" />;
+const Resource = () => <CareIcon className="care-l-heart-medical w-5" />;
+const Result = () => <CareIcon className="care-l-clipboard-notes w-5" />;
+const Users = () => <CareIcon className="care-l-users-alt w-5" />;
+const NoticeBoard = () => <CareIcon className="care-l-meeting-board w-5" />;
+const Dashboard = () => <CareIcon className="care-l-dashboard w-5" />;
 
 const NavItems = [
   { text: "Facilities", to: "/facility", icon: <Facility /> },
