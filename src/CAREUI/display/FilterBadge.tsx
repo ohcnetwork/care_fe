@@ -13,7 +13,7 @@ const FilterBadge = ({ name, value, onRemove }: FilterBadgeProps) => {
     <span
       className={`${
         !value && "hidden"
-      } inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border`}
+      } flex flex-row items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border w-full sm:w-auto`}
     >
       {`${name}: ${value}`}
       <i
