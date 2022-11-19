@@ -26,28 +26,20 @@ type StatelessSidebarProps =
       setShrinked?: undefined;
     };
 
-// Sidebar item icons.
-const Facility = () => <CareIcon className="care-l-hospital h-5" />;
-const Patient = () => <CareIcon className="care-l-wheelchair h-5" />;
-const Asset = () => <CareIcon className="care-l-shopping-cart-alt h-5" />;
-const SampleTest = () => <CareIcon className="care-l-medkit h-5" />;
-const Shifting = () => <CareIcon className="care-l-ambulance h-5" />;
-const Resource = () => <CareIcon className="care-l-heart-medical h-5" />;
-const Result = () => <CareIcon className="care-l-clipboard-notes h-5" />;
-const Users = () => <CareIcon className="care-l-users-alt h-5" />;
-const NoticeBoard = () => <CareIcon className="care-l-meeting-board h-5" />;
-const Dashboard = () => <CareIcon className="care-l-dashboard h-5" />;
-
 const NavItems = [
-  { text: "Facilities", to: "/facility", icon: <Facility /> },
-  { text: "Patients", to: "/patients", icon: <Patient /> },
-  { text: "Assets", to: "/assets", icon: <Asset /> },
-  { text: "Sample Test", to: "/sample", icon: <SampleTest /> },
-  { text: "Shifting", to: "/shifting", icon: <Shifting /> },
-  { text: "Resource", to: "/resource", icon: <Resource /> },
-  { text: "External Results", to: "/external_results", icon: <Result /> },
-  { text: "Users", to: "/users", icon: <Users /> },
-  { text: "Notice Board", to: "/notice_board", icon: <NoticeBoard /> },
+  { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
+  { text: "Patients", to: "/patients", icon: "care-l-wheelchair" },
+  { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
+  { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
+  { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
+  { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
+  {
+    text: "External Results",
+    to: "/external_results",
+    icon: "care-l-clipboard-notes",
+  },
+  { text: "Users", to: "/users", icon: "care-l-users-alt" },
+  { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
 ];
 
 const StatelessSidebar = ({
@@ -130,11 +122,23 @@ const StatelessSidebar = ({
             bg-primary-400 rounded z-10 transition-all`}
         />
         {NavItems.map((i) => {
-          return <Item key={i.text} {...i} selected={i.to === activeLink} />;
+          return (
+            <Item
+              key={i.text}
+              {...i}
+              icon={<CareIcon className={`${i.icon} h-5`} />}
+              selected={i.to === activeLink}
+            />
+          );
         })}
 
         <NotificationItem shrinked={shrinked} />
-        <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
+        <Item
+          text="Dashboard"
+          to={DASHBOARD}
+          icon={<CareIcon className="care-l-dashboard h-5" />}
+          external
+        />
       </div>
       <div className="flex-1" />
       <div className="relative flex justify-end">
