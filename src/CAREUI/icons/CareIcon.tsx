@@ -7,5 +7,9 @@ export interface CareIconProps {
 
 export default function CareIcon({ className }: CareIconProps) {
   useEffect(() => transformIcons(), [className]);
-  return <i className={`care ${className}`} />;
+  return (
+    <span key={className}>
+      <i className={`care ${className}`} />
+    </span>
+  );
 }
