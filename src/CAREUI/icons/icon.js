@@ -1,5 +1,5 @@
 import "./icon.css";
-import iconData from "./paths.json";
+import iconData from "./UniconPaths.json";
 
 const xmlns = "http://www.w3.org/2000/svg";
 
