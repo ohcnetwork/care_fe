@@ -421,8 +421,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         features: state.form.features,
         ward: state.form.ward,
         kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
-        latitude: state.form.latitude,
-        longitude: state.form.longitude,
+        latitude: state.form.latitude || null,
+        longitude: state.form.longitude || null,
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
         )?.format("E.164"),
