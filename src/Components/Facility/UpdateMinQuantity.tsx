@@ -66,7 +66,7 @@ export const UpdateMinQuantity = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, facilityId, inventoryId, state.form]
+    [dispatchAction, facilityId, inventoryId]
   );
   useAbortableEffect(
     (status: statusType) => {

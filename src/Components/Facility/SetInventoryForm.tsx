@@ -67,7 +67,7 @@ export const SetInventoryForm = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, state.form] // offset]
+    [dispatchAction]
   );
   useAbortableEffect(
     (status: statusType) => {
