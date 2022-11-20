@@ -40,6 +40,7 @@ import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
 import SearchInput from "../Form/SearchInput";
+import { getFacilityFeatureIcon } from "./FacilityHome";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -368,7 +369,7 @@ export const HospitalList = (props: any) => {
                     </div>
 
                     <div className="flex gap-1 flex-wrap mt-2">
-                      <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                      <div className="px-2.5 py-0.5 flex items-center rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
                       {facility.features?.map(
@@ -378,21 +379,14 @@ export const HospitalList = (props: any) => {
                           ) && (
                             <div
                               key={i}
-                              className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                              className="flex gap-1 items-center bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
                               title={
                                 FACILITY_FEATURE_TYPES.filter(
                                   (f) => f.id === feature
                                 )[0]?.name
                               }
                             >
-                              <i
-                                className={`fas fa-${
-                                  FACILITY_FEATURE_TYPES.filter(
-                                    (f) => f.id === feature
-                                  )[0]?.icon
-                                }`}
-                              />{" "}
-                              &nbsp;
+                              {getFacilityFeatureIcon(feature)} &nbsp;
                               {
                                 FACILITY_FEATURE_TYPES.filter(
                                   (f) => f.id === feature

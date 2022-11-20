@@ -202,12 +202,12 @@ export default function ManageUsers() {
   const badge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        <span className="flex flex-row items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border w-full sm:w-auto">
           {key}
           {": "}
           {value}
           <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            className="fas fa-times rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5 w-auto ml-auto mr-0 sm:mx-auto sm:ml-2"
             onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
@@ -459,7 +459,9 @@ export default function ManageUsers() {
                   {user.user_type && (
                     <div className="col-span-2">
                       <UserDetails title="Role">
-                        <div className="font-semibold">{user.user_type}</div>
+                        <div className="font-semibold break-all">
+                          {user.user_type}
+                        </div>
                       </UserDetails>
                     </div>
                   )}
@@ -490,7 +492,9 @@ export default function ManageUsers() {
                   {user.created_by && (
                     <div className="col-span-2">
                       <UserDetails title="Created by">
-                        <div className="font-semibold">{user.created_by}</div>
+                        <div className="font-semibold break-all">
+                          {user.created_by}
+                        </div>
                       </UserDetails>
                     </div>
                   )}
