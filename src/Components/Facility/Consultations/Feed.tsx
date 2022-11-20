@@ -299,9 +299,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         onError: () => setStreamStatus(StreamStatus.Offline),
       });
     },
-    stop: () => {
-      // NEED ID TO STOP STREAM
-    },
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       !screenfull.isFullscreen
