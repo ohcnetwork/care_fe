@@ -735,8 +735,9 @@ export const PatientHome = (props: any) => {
                                         {patientData?.created_by?.first_name}{" "}
                                         {patientData?.created_by?.last_name}
                                       </p>
+                                      <p className="flex flex-row justify-center">{`@${patientData.created_by?.username}`}</p>
                                       <p className="flex flex-row justify-center">
-                                        {patientData?.created_by?.username}
+                                        {patientData.created_by?.user_type}
                                       </p>
                                     </div>
                                   </div>
@@ -767,8 +768,9 @@ export const PatientHome = (props: any) => {
                                         {patientData?.last_edited?.first_name}{" "}
                                         {patientData?.last_edited?.last_name}
                                       </p>
+                                      <p className="flex flex-row justify-center">{`@${patientData.last_edited?.username}`}</p>
                                       <p className="flex flex-row justify-center">
-                                        {patientData?.last_edited?.username}
+                                        {patientData.last_edited?.user_type}
                                       </p>
                                     </div>
                                   </div>
@@ -1382,10 +1384,10 @@ export const PatientHome = (props: any) => {
           </div>
           <div className="w-full mx-2 lg:hidden">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg space-y-2">
+              <div className="border-b border-dashed text-gray-900 font-semibold text-left text-lg space-y-2">
                 <div>
                   <ButtonV2
-                    className="w-full"
+                    className="w-full justify-start"
                     disabled={
                       !(
                         patientData.is_active &&
@@ -1405,7 +1407,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full"
+                    className="w-full justify-start"
                     onClick={() =>
                       navigate(`/patient/${id}/investigation_reports`)
                     }
@@ -1416,7 +1418,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full"
+                    className="w-full justify-start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/files`
@@ -1429,7 +1431,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full"
+                    className="w-full justify-start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1444,7 +1446,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full"
+                    className="w-full justify-start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1459,7 +1461,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full"
+                    className="w-full justify-start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/notes`
@@ -1472,7 +1474,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="btn btn-primary w-full"
+                    className="w-full justify-start"
                     onClick={() => setOpenAssignVolunteerDialog(true)}
                     disabled={false}
                     authorizeFor={NonReadOnlyUsers}
