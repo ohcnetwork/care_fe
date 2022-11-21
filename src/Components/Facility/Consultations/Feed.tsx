@@ -103,7 +103,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               ),
             },
           };
-          console.log("Found " + bedAssets.data.results.length + "bedAssets:");
+
           if (bedAssets?.data?.results?.length) {
             const { camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;

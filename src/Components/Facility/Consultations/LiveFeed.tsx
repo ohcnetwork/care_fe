@@ -598,7 +598,7 @@ const LiveFeed = (props: any) => {
                   </button>
                   <button
                     className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                    disabled={presetsPage >= presets.length}
+                    disabled={presetsPage >= presets?.length}
                     onClick={() => {
                       setPresetsPage(presetsPage + 10);
                     }}
