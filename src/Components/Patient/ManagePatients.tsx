@@ -35,6 +35,7 @@ import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import SearchInput from "../Form/SearchInput";
+import clsx from "clsx";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -74,6 +75,14 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Slightly Abnormal": "ABNORMAL",
   Critical: "CRITICAL",
   unknown: "UNKNOWN",
+};
+
+export const CONSULTATION_SUGGESTION_TEXT: Record<string, string> = {
+  HI: "Home Isolation",
+  A: "Admission",
+  R: "Referred",
+  OP: "OP",
+  DC: "Domiciliary Care",
 };
 
 export const PatientManager = (props: any) => {
@@ -486,6 +495,11 @@ export const PatientManager = (props: any) => {
         patient?.last_consultation?.category || "unknown";
       const categoryClass = PatientCategoryTailwindClass[category];
 
+      const isConsultationFiled = !(
+        !patient.last_consultation ||
+        patient.last_consultation?.facility !== patient.facility
+      );
+
       return (
         <Link
           key={`usr_${patient.id}`}
@@ -500,7 +514,14 @@ export const PatientManager = (props: any) => {
             </span>
           </div>
           <div className="flex gap-4 items-start">
-            <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
+            <div
+              className={clsx(
+                "w-20 h-20 min-w-[5rem]  rounded-lg border",
+                isConsultationFiled
+                  ? "bg-gray-50 border-gray-300"
+                  : "bg-red-50 border-red-300"
+              )}
+            >
               {patient?.last_consultation &&
               patient?.last_consultation?.current_bed ? (
                 <div className="flex flex-col items-center justify-center h-full">
@@ -529,7 +550,25 @@ export const PatientManager = (props: any) => {
                 </div>
               ) : (
                 <div className="flex items-center justify-center min-h-[5rem]">
-                  <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+                  {isConsultationFiled ? (
+                    CONSULTATION_SUGGESTION_TEXT[
+                      patient?.last_consultation?.suggestion as string
+                    ] ? (
+                      <p className="text-gray-800 text-xs font-bold text-center px-1 w-full">
+                        {
+                          CONSULTATION_SUGGESTION_TEXT[
+                            patient?.last_consultation?.suggestion
+                          ]
+                        }
+                      </p>
+                    ) : (
+                      <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+                    )
+                  ) : (
+                    <p className="text-red-900 text-xs font-medium text-center px-1 w-full">
+                      No Consultation Filed
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -619,7 +658,7 @@ export const PatientManager = (props: any) => {
                         text="Patient Expired"
                       />
                     )}
-                    {(!patient.last_consultation ||
+                    {/* {(!patient.last_consultation ||
                       patient.last_consultation?.facility !==
                         patient.facility) && (
                       <span className="relative inline-flex">
@@ -633,7 +672,7 @@ export const PatientManager = (props: any) => {
                           <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
                         </span>
                       </span>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
