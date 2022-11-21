@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getNotifications } from "../../Redux/actions";
 import PageTitle from "../Common/PageTitle";
 import { Card, CardContent } from "@material-ui/core";
@@ -7,24 +7,30 @@ import Loading from "../Common/Loading";
 import { formatDate } from "../../Utils/utils";
 
 export const NoticeBoard: any = () => {
+  const { getNotifications: notifications } = useSelector(
+    (state: any) => state
+  );
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
+    const fetchNotifications = async () => {
+      const res = await dispatch(
+        getNotifications({ offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" })
+      );
+      setData(
+        res?.data?.results ||
+          notifications?.data?.results?.filter?.(
+            (notification: any) => notification.event === "MESSAGE"
+          ) ||
+          []
+      );
+    };
+
     setIsLoading(true);
-    dispatch(
-      getNotifications({ offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" })
-    )
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-        }
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+    fetchNotifications();
+    setIsLoading(false);
   }, [dispatch]);
 
   let notices: any[] = [];

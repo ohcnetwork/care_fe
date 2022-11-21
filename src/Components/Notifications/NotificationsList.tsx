@@ -23,6 +23,7 @@ import {
   ShrinkedSidebarItem,
   SidebarItem,
 } from "../Common/Sidebar/SidebarItem";
+import { useIsInitialRender } from "../../Common/hooks/useIsInitialRender";
 
 const RESULT_LIMIT = 14;
 
@@ -154,6 +155,7 @@ export default function NotificationsList({
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const isInitialRender = useIsInitialRender();
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -312,7 +314,11 @@ export default function NotificationsList({
   useEffect(() => {
     setIsLoading(true);
     dispatch(
-      getNotifications({ offset, event: eventFilter, medium_sent: "SYSTEM" })
+      getNotifications({
+        offset,
+        event: isInitialRender ? "MESSAGE" : eventFilter, // this is a hack to fetch data for notice board on initial render
+        medium_sent: "SYSTEM",
+      })
     )
       .then((res: any) => {
         if (res && res.data) {
