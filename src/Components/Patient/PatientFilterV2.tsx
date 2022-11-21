@@ -716,7 +716,12 @@ export default function PatientFilterV2(props: any) {
               name="age_min"
               placeholder="Min. age"
               label={null}
-              value={filterState.age_min}
+              value={
+                filterState.age_min &&
+                (filterState.age_min > 0 ? filterState.age_min : 0)
+              }
+              type="number"
+              min={0}
               onChange={handleFormFieldChange}
               errorClassName="hidden"
             />
@@ -724,7 +729,12 @@ export default function PatientFilterV2(props: any) {
               name="age_max"
               placeholder="Max. age"
               label={null}
-              value={filterState.age_max}
+              type="number"
+              min={0}
+              value={
+                filterState.age_max &&
+                (filterState.age_max > 0 ? filterState.age_max : 0)
+              }
               onChange={handleFormFieldChange}
               errorClassName="hidden"
             />
