@@ -88,6 +88,9 @@ export const fireRequest = (
       config.headers["Authorization"] =
         "Bearer " + localStorage.getItem("care_access_token");
     }
+
+    config.headers["ngrok-skip-browser-warning"] = "true";
+
     const axiosApiCall: any = axios.create(config);
 
     dispatch(fetchDataRequest(key));
