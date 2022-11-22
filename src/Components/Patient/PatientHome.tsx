@@ -1512,6 +1512,7 @@ export const PatientHome = (props: any) => {
 
           <DialogActions>
             <ButtonV2
+              variant="secondary"
               onClick={() => {
                 handleVolunteerSelect(patientData.assigned_to_object);
                 setOpenAssignVolunteerDialog(false);
