@@ -15,7 +15,7 @@
     "coronasafe Contributors"
   ],
   "homepage": "https://care.coronasafe.in",
-  "proxy": "https://careapi.coronasafe.in",
+  "proxy": "https://5ae0-2401-4900-607a-f18d-4fa8-1a95-69f4-c8fb.in.ngrok.io",
   "main": "./src/index.tsx",
   "keywords": [
     "Coronasafe",
