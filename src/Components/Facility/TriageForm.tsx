@@ -125,6 +125,12 @@ export const TriageForm = (props: triageFormProps) => {
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
+          } else if (
+            moment(state.form.entry_date).format("YYYY-MM-DD") >
+            new Date().toLocaleDateString("en-ca")
+          ) {
+            errors[field] = "Date cannot be in future";
+            invalidForm = true;
           }
           return;
         default:
