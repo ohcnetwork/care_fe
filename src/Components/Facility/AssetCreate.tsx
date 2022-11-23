@@ -642,13 +642,14 @@ const AssetCreate = (props: AssetProps) => {
                       }}
                       optionClassName={(option) =>
                         option === "false" &&
-                        "bg-error text-white border-error focus:ring-error"
+                        "bg-danger-500 text-white border-danger-500 focus:ring-danger-500"
                       }
                       value={is_working}
                       onChange={setIsWorking}
                       error={state.errors.is_working}
                     />
                   </div>
+
                   {/* Not Working Reason */}
                   <div
                     className={
