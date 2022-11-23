@@ -299,9 +299,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         onError: () => setStreamStatus(StreamStatus.Offline),
       });
     },
-    stop: () => {
-      // NEED ID TO STOP STREAM
-    },
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       !screenfull.isFullscreen
@@ -490,17 +487,21 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           )}
         </div>
         <div className="absolute top-8 right-8 z-20 flex flex-col gap-4">
-          {[10, 9, 7, 5, 6].map((button, index) => {
-            const option = cameraPTZ[button];
-            return (
-              <FeedButton
-                key={index}
-                camProp={option}
-                styleType="CHHOTUBUTTON"
-                clickAction={() => cameraPTZ[button].callback()}
-              />
-            );
-          })}
+          {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
+            (button, index) => {
+              const option = cameraPTZ.find(
+                (option) => option.action === button
+              );
+              return (
+                <FeedButton
+                  key={index}
+                  camProp={option}
+                  styleType="CHHOTUBUTTON"
+                  clickAction={() => option?.callback()}
+                />
+              );
+            }
+          )}
           <div className="pl-3 hideonmobilescreen">
             <FeedCameraPTZHelpButton
               cameraPTZ={cameraPTZ}

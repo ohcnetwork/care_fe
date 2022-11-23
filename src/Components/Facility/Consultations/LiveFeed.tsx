@@ -229,9 +229,6 @@ const LiveFeed = (props: any) => {
         onError: () => setStreamStatus(StreamStatus.Offline),
       });
     },
-    stop: () => {
-      // NEED ID TO STOP STREAM
-    },
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       screenfull.request(liveFeedPlayerRef.current);
