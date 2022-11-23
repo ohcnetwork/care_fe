@@ -784,6 +784,8 @@ export const updateAsset = (id: string, params: object) =>
   fireRequest("updateAsset", [], params, { external_id: id });
 export const partialUpdateAsset = (id: string, params: object) =>
   fireRequest("partialUpdateAsset", [], params, { external_id: id });
+export const operateAsset = (id: string, params: object) =>
+  fireRequest("operateAsset", [], params, { external_id: id });
 
 export const listAssetTransaction = (params: object) =>
   fireRequest("listAssetTransaction", [], params);

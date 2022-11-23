@@ -194,6 +194,10 @@ const routes: Routes = {
     path: "/api/v1/assetbed/{external_id}/",
     method: "DELETE",
   },
+  operateAsset: {
+    path: "/api/v1/asset/{external_id}/operate_assets/",
+    method: "POST",
+  },
 
   // Facility Beds
   listFacilityBeds: {

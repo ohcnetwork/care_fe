@@ -25,7 +25,6 @@ import * as Notification from "../../../Utils/Notifications.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
-import { AxiosError } from "axios";
 import ReactPlayer from "react-player";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import { findDOMNode } from "react-dom";
@@ -43,15 +42,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const videoWrapper = useRef<HTMLDivElement>(null);
 
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
-    hostname: "",
     id: "",
-    password: "",
-    port: 123,
-    username: "",
     accessKey: "",
   });
   const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
@@ -109,17 +103,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               ),
             },
           };
-          console.log("Found " + bedAssets.data.results.length + "bedAssets:");
+
           if (bedAssets?.data?.results?.length) {
-            const { local_ip_address, camera_access_key, middleware_hostname } =
+            const { camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
             const config = camera_access_key.split(":");
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
-              hostname: local_ip_address,
-              username: config[0] || "",
-              password: config[1] || "",
-              port: 80,
               accessKey: config[2] || "",
             });
             setCameraMiddlewareHostname(middleware_hostname);
@@ -188,10 +178,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     getPresets,
     relativeMove,
   } = useFeedPTZ({
-    config: {
-      middlewareHostname: cameraMiddlewareHostname,
-      ...cameraAsset,
-    },
+    config: cameraAsset,
+    dispatch,
   });
 
   const getBedPresets = async (asset: any) => {
@@ -202,14 +190,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   };
 
   useEffect(() => {
-    if (cameraAsset.hostname && cameraMiddlewareHostname) {
+    if (cameraAsset.id) {
       getPresets({
-        onSuccess: (resp) => setPresets(resp.data),
-        onError: (resp) => {
-          resp instanceof AxiosError &&
-            Notification.Error({
-              msg: "Camera is offline",
-            });
+        onSuccess: (resp) => setPresets(resp),
+        onError: (_) => {
+          Notification.Error({
+            msg: "Fetching presets failed",
+          });
         },
       });
       getBedPresets(cameraAsset);
@@ -253,9 +240,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             setLoading(CAMERA_STATES.IDLE);
             setCurrentPreset(preset);
           },
-          onError: (err: AxiosError<any>) => {
+          onError: (err: Record<any, any>) => {
             setLoading(CAMERA_STATES.IDLE);
-            const responseData = err.response?.data;
+            const responseData = err.data.result;
             if (responseData.status) {
               switch (responseData.status) {
                 case "error":
