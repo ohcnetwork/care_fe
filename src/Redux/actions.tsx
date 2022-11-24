@@ -17,6 +17,10 @@ export const deleteUser = (username: string) => {
   return fireRequest("deleteUser", [username], {});
 };
 
+export const checkResetToken = (params: object) => {
+  return fireRequest("checkResetToken", [], params);
+};
+
 export const postResetPassword = (form: object) => {
   return fireRequest("resetPassword", [], form);
 };
