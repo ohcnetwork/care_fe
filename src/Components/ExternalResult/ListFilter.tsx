@@ -17,7 +17,7 @@ function useMergeState(initialState: any) {
 }
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter, dataList, local } = props;
+  const { filter, onChange, closeFilter, dataList } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,23 +28,13 @@ export default function ListFilter(props: any) {
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const [filterState, setFilterState] = useMergeState({
-    created_date_before:
-      filter.created_date_before || local.created_date_before || null,
-    created_date_after:
-      filter.created_date_after || local.created_date_after || null,
-    result_date_before:
-      filter.result_date_before || local.result_date_before || null,
-    result_date_after:
-      filter.result_date_after || local.result_date_after || null,
-    sample_collection_date_before:
-      filter.sample_collection_date_before ||
-      local.sample_collection_date_before ||
-      null,
-    sample_collection_date_after:
-      filter.sample_collection_date_after ||
-      local.sample_collection_date_after ||
-      null,
-    srf_id: filter.srf_id || local.srf_id || null,
+    created_date_before: filter.created_date_before || null,
+    created_date_after: filter.created_date_after || null,
+    result_date_before: filter.result_date_before || null,
+    result_date_after: filter.result_date_after || null,
+    sample_collection_date_before: filter.sample_collection_date_before || null,
+    sample_collection_date_after: filter.sample_collection_date_after || null,
+    srf_id: filter.srf_id || null,
   });
 
   const handleDateRangeChange = (
@@ -73,11 +63,11 @@ export default function ListFilter(props: any) {
   };
 
   const applyFilter = () => {
-    let selectedWardIds = wards.map(function (obj) {
+    const selectedWardIds = wards.map(function (obj) {
       return obj.id;
     });
 
-    let selectedLsgIds = selectedLsgs.map(function (obj) {
+    const selectedLsgIds = selectedLsgs.map(function (obj) {
       return obj.id;
     });
 
@@ -106,11 +96,6 @@ export default function ListFilter(props: any) {
       ),
       srf_id: srf_id,
     };
-    localStorage.setItem("external-filters", JSON.stringify(data));
-    localStorage.setItem(
-      "lsg-ward-data",
-      JSON.stringify({ lsgList: selectedLsgs, wardList: wards })
-    );
     onChange(data);
     dataList(selectedLsgs, wards);
   };
@@ -149,7 +134,7 @@ export default function ListFilter(props: any) {
       setWardList(allWards || []);
       setLsgList(allLsgs || []);
       const filteredWard = filter?.wards?.split(",").map(Number);
-      let selectedWards: any =
+      const selectedWards: any =
         filteredWard && allWards
           ? allWards.filter(({ id }: { id: number }) => {
               return filteredWard.includes(id);
@@ -158,7 +143,7 @@ export default function ListFilter(props: any) {
       setWards(selectedWards);
 
       const filteredLsgs = filter?.local_bodies?.split(",").map(Number);
-      let selectedLsgs: any =
+      const selectedLsgs: any =
         filteredLsgs && allLsgs
           ? allLsgs.filter(({ id }: { id: number }) => {
               return filteredLsgs.includes(id);
@@ -171,11 +156,11 @@ export default function ListFilter(props: any) {
   }, []);
 
   const filterWards = () => {
-    let selectedLsgIds: any = selectedLsgs.map((e) => {
+    const selectedLsgIds: any = selectedLsgs.map((e) => {
       return e.id;
     });
 
-    let selectedwards: any =
+    const selectedwards: any =
       selectedLsgIds.length === 0
         ? wardList
         : wardList.filter(({ local_body_id }: { local_body_id: number }) => {
@@ -195,8 +180,6 @@ export default function ListFilter(props: any) {
   };
 
   const clearFilters = () => {
-    localStorage.removeItem("external-filters");
-    localStorage.removeItem("lsg-ward-data");
     dataList([], []);
     closeFilter();
   };
