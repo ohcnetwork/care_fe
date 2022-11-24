@@ -11,7 +11,7 @@ export default function BadgesList(props: any) {
   const { qParams, FilterBadges } = props;
   const [assignedUsername, setAssignedUsername] = useState("");
   const [assignedFacilityName, setAssignedFacilityName] = useState("");
-  const [originFacilityName, setOirginFacilityName] = useState("");
+  const [originFacilityName, setOriginFacilityName] = useState("");
   const [approvingFacilityName, setApprovingFacilityName] = useState("");
   const dispatch: any = useDispatch();
 
@@ -27,11 +27,11 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (!qParams.orgin_facility) return setOirginFacilityName("");
+      if (!qParams.orgin_facility) return setOriginFacilityName("");
       const res = await dispatch(
         getAnyFacility(qParams.orgin_facility, "orgin_facility")
       );
-      setOirginFacilityName(res?.data?.name);
+      setOriginFacilityName(res?.data?.name);
     }
     fetchData();
   }, [dispatch, qParams.orgin_facility]);
@@ -84,7 +84,7 @@ export default function BadgesList(props: any) {
         badge("Breathlessness level", "breathlessness_level"),
         value("Assigned to", "assigned_to", assignedUsername),
         value("Facility assigned", "assigned_facility", assignedFacilityName),
-        value("Origin facility", "origin_facility", originFacilityName),
+        value("Origin facility", "orgin_facility", originFacilityName),
         value(
           "Shifting approval facility",
           "shifting_approving_facility",
