@@ -610,7 +610,11 @@ export const UserAdd = (props: UserProps) => {
                   name="facilities"
                   selected={selectedFacility}
                   setSelected={setFacility}
-                  district={currentUser.data.district}
+                  district={
+                    currentUser?.data?.user_type.toLowerCase().includes("state")
+                      ? undefined
+                      : currentUser.data.district
+                  }
                   errors={state.errors.facilities}
                   showAll={false}
                 />
