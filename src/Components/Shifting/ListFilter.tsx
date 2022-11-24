@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { UserSelect } from "../Common/UserSelect2";
-import {
-  SelectField,
-  DateInputField,
-  TextInputField,
-  PhoneNumberField,
-} from "../Common/HelperInputFields";
+import { SelectField, PhoneNumberField } from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
@@ -33,44 +28,34 @@ function useMergeState(initialState: any) {
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
-  const { filter, onChange, closeFilter, local } = props;
+  const { filter, onChange, closeFilter } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
 
   const [filterState, setFilterState] = useMergeState({
-    orgin_facility: filter.orgin_facility || local.orgin_facility || "",
+    orgin_facility: filter.orgin_facility || "",
     orgin_facility_ref: null,
-    shifting_approving_facility:
-      filter.shifting_approving_facility ||
-      local.shifting_approving_facility ||
-      "",
+    shifting_approving_facility: filter.shifting_approving_facility || "",
     shifting_approving_facility_ref: null,
-    assigned_facility:
-      filter.assigned_facility || local.assigned_facility || "",
+    assigned_facility: filter.assigned_facility || "",
     assigned_facility_ref: null,
-    emergency: filter.emergency || local.emergency || "--",
-    is_up_shift: filter.is_up_shift || local.is_up_shift || "--",
-    created_date_before:
-      filter.created_date_before || local.created_date_before || null,
-    created_date_after:
-      filter.created_date_after || local.created_date_after || null,
-    modified_date_before:
-      filter.modified_date_before || local.modified_date_before || null,
-    modified_date_after:
-      filter.modified_date_after || local.modified_date_after || null,
-    patient_phone_number:
-      filter.patient_phone_number || local.patient_phone_number || "",
-    ordering: filter.ordering || local.ordering || null,
-    is_kasp: filter.is_kasp || local.is_kasp || "--",
-    status: filter.status || local.status || null,
+    emergency: filter.emergency || "--",
+    is_up_shift: filter.is_up_shift || "--",
+    created_date_before: filter.created_date_before || null,
+    created_date_after: filter.created_date_after || null,
+    modified_date_before: filter.modified_date_before || null,
+    modified_date_after: filter.modified_date_after || null,
+    patient_phone_number: filter.patient_phone_number || "",
+    ordering: filter.ordering || null,
+    is_kasp: filter.is_kasp || "--",
+    status: filter.status || null,
     assigned_user_ref: null,
-    assigned_to: filter.assigned_to || local.assigned_to || "",
-    disease_status: filter.disease_status || local.disease_status || "",
-    is_antenatal: filter.is_antenatal || local.is_antenatal || "--",
-    breathlessness_level:
-      filter.breathlessness_level || local.breathlessness_level || "",
+    assigned_to: filter.assigned_to || "",
+    disease_status: filter.disease_status || "",
+    is_antenatal: filter.is_antenatal || "--",
+    breathlessness_level: filter.breathlessness_level || "",
   });
   const dispatch: any = useDispatch();
 
@@ -173,7 +158,6 @@ export default function ListFilter(props: any) {
   };
 
   const clearFilters = () => {
-    localStorage.removeItem("shift-filters");
     closeFilter();
   };
 
@@ -230,7 +214,6 @@ export default function ListFilter(props: any) {
       is_antenatal: is_antenatal || "",
       breathlessness_level: breathlessness_level || "",
     };
-    localStorage.setItem("shift-filters", JSON.stringify({ ...data }));
     onChange(data);
   };
 
@@ -358,19 +341,6 @@ export default function ListFilter(props: any) {
             )}
           </div>
         </div>
-
-        {/* <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Status</span>
-          <SelectField
-                name="status"
-                variant="outlined"
-                margin="dense"
-                optionArray={true}
-                value={filterState.status}
-                options={shiftStatusOptions}
-                onChange={handleChange}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div> */}
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Ordering</span>
@@ -517,17 +487,6 @@ export default function ListFilter(props: any) {
             size="small"
           />
         </div>
-        {/* <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Is upshift case</span>
-          <DateTimeFiled
-                name="X_before"
-                inputVariant="outlined"
-                margin="dense"
-                errors=""
-                value={filter.X_before}
-                onChange={date => handleChange({target: {name: "X_before", value: date}})}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div>         */}
       </div>
     </div>
   );

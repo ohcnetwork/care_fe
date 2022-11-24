@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -24,11 +23,9 @@ import {
 import loadable from "@loadable/component";
 
 import { InputLabel, TextField } from "@material-ui/core";
-import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { CSVLink } from "react-csv";
 import moment from "moment";
-import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import GetAppIcon from "@material-ui/icons/GetApp";
@@ -40,38 +37,35 @@ import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
 import SearchInput from "../Form/SearchInput";
+import { getFacilityFeatureIcon } from "./FacilityHome";
+import useFilters from "../../Common/hooks/useFilters";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: "100%",
-      // "grid-column": "span 4 / span 4",
-    },
-    heading: {
-      fontSize: theme.typography.pxToRem(15),
-    },
-  })
-);
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-export const HospitalList = (props: any) => {
-  const [qParams, setQueryParams] = useQueryParams();
+export const HospitalList = () => {
+  const {
+    qParams,
+    updateQuery,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({
+    limit: 14,
+  });
   const dispatchAction: any = useDispatch();
   const [data, setData] = useState<Array<FacilityModel>>([]);
   let manageFacilities: any = null;
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
   const [capacityDownloadFile, setCapacityDownloadFile] = useState("");
   const [doctorsDownloadFile, setDoctorsDownloadFile] = useState("");
   const [triageDownloadFile, setTriageDownloadFile] = useState("");
   const downloadTypes = [...DOWNLOAD_TYPES];
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
-  const [showFilters, setShowFilters] = useState(false);
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
@@ -83,14 +77,14 @@ export const HospitalList = (props: any) => {
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
-  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const params = {
-        limit,
-        offset,
+        limit: resultsPerPage,
+        page: qParams.page || 1,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
         search_text: qParams.search || undefined,
         state: qParams.state,
         district: qParams.district,
@@ -109,14 +103,14 @@ export const HospitalList = (props: any) => {
       }
     },
     [
-      dispatchAction,
-      offset,
+      qParams.page,
       qParams.search,
-      qParams.kasp_empanelled,
       qParams.state,
       qParams.district,
       qParams.local_body,
       qParams.facility_type,
+      qParams.kasp_empanelled,
+      dispatchAction,
     ]
   );
 
@@ -189,10 +183,6 @@ export const HospitalList = (props: any) => {
     return facility_type?.text;
   };
 
-  const onSearchSuspects = (value: string) => {
-    updateQuery({ search: value });
-  };
-
   const handleDownload = async () => {
     // while is getting ready
     setDownloadLoading(true);
@@ -233,24 +223,6 @@ export const HospitalList = (props: any) => {
     document.getElementById("triageDownloader")?.click();
   };
 
-  const updateQuery = (params: any) => {
-    const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
-  };
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
-
-  const removeFilter = (paramKey: any) => {
-    updateQuery({
-      ...qParams,
-      [paramKey]: "",
-    });
-  };
-
   const hasFiltersApplied = (qParams: any) => {
     return (
       qParams.state ||
@@ -259,22 +231,6 @@ export const HospitalList = (props: any) => {
       qParams.facility_type ||
       qParams.kasp_empanelled ||
       qParams?.search
-    );
-  };
-
-  const badge = (key: string, value: any, paramKey: string) => {
-    return (
-      value && (
-        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {t(key)}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
     );
   };
 
@@ -293,12 +249,6 @@ export const HospitalList = (props: any) => {
         handleTriageDownload();
         break;
     }
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
   };
 
   const handleNotifySubmit = async (id: any) => {
@@ -368,7 +318,7 @@ export const HospitalList = (props: any) => {
                     </div>
 
                     <div className="flex gap-1 flex-wrap mt-2">
-                      <div className="px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                      <div className="px-2.5 py-0.5 flex items-center rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                         {facility.facility_type}
                       </div>
                       {facility.features?.map(
@@ -378,21 +328,14 @@ export const HospitalList = (props: any) => {
                           ) && (
                             <div
                               key={i}
-                              className="bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
+                              className="flex gap-1 items-center bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
                               title={
                                 FACILITY_FEATURE_TYPES.filter(
                                   (f) => f.id === feature
                                 )[0]?.name
                               }
                             >
-                              <i
-                                className={`fas fa-${
-                                  FACILITY_FEATURE_TYPES.filter(
-                                    (f) => f.id === feature
-                                  )[0]?.icon
-                                }`}
-                              />{" "}
-                              &nbsp;
+                              {getFacilityFeatureIcon(feature)} &nbsp;
                               {
                                 FACILITY_FEATURE_TYPES.filter(
                                   (f) => f.id === feature
@@ -521,16 +464,7 @@ export const HospitalList = (props: any) => {
         <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-4">
           {facilityList}
         </div>
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
-        )}
+        <Pagination totalCount={totalCount} />
       </>
     );
   } else if (data && data.length === 0) {
@@ -662,14 +596,14 @@ export const HospitalList = (props: any) => {
           <SearchInput
             name="search"
             value={qParams.search}
-            onChange={({ value }) => onSearchSuspects(value)}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder={t("facility_search_placeholder")}
           />
 
           <div className="flex items-start mb-2 w-full md:w-auto">
             <button
               className="btn btn-primary-ghost w-full md:w-auto"
-              onClick={() => setShowFilters(true)}
+              onClick={() => advancedFilter.setShow(true)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -707,35 +641,26 @@ export const HospitalList = (props: any) => {
       </div>
 
       <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
+        <SlideOver {...advancedFilter}>
           <div className="bg-white min-h-screen p-4">
-            <FacillityFilter
-              filter={qParams}
-              onChange={applyFilter}
-              closeFilter={() => setShowFilters(false)}
-            />
+            <FacillityFilter {...advancedFilter} />
           </div>
         </SlideOver>
       </div>
-      <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
-        {badge("Facility/District Name", qParams.search, "search")}
-        {badge("State", stateName, "state")}
-        {badge("District", districtName, "district")}
-        {badge("Local Body", localbodyName, "local_body")}
-        {badge(
-          "Facility Type",
-          findFacilityTypeById(qParams.facility_type),
-          "facility_type"
-        )}
-        {qParams.kasp_empanelled &&
-          badge(
-            `${KASP_STRING} Empanelled`,
-            qParams.kasp_empanelled === "true"
-              ? KASP_STRING
-              : `Non ${KASP_STRING}`,
-            "kasp_empanelled"
-          )}
-      </div>
+      <FilterBadges
+        badges={({ badge, value, kasp }) => [
+          badge("Facility/District Name", "search"),
+          value("State", "state", stateName),
+          value("District", "district", districtName),
+          value("Local Body", "local_body", localbodyName),
+          value(
+            "Facility type",
+            "facility_type",
+            findFacilityTypeById(qParams.facility_type) || ""
+          ),
+          kasp("Empanelled", "kasp_empanelled"),
+        ]}
+      />
       <div className="mt-4 pb-4">
         <div>{manageFacilities}</div>
       </div>
