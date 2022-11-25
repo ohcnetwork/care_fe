@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
@@ -218,6 +218,7 @@ export const TriageForm = (props: triageFormProps) => {
                 <DateInputField
                   label="Entry Date"
                   value={state.form.entry_date}
+                  max={new Date().toLocaleDateString("en-ca")}
                   onChange={(date) => handleDateChange(date, "entry_date")}
                   errors={state.errors.entry_date}
                 />
@@ -310,30 +311,21 @@ export const TriageForm = (props: triageFormProps) => {
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  fullWidth
-                  className="w-full md:w-auto"
+                <button
+                  className="btn btn-default bg-gray-300 hover:bg-gray-400 btn-large mr-4 w-full md:w-auto"
                   type="button"
                   onClick={() => goBack()}
                 >
                   Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  fullWidth
-                  className="w-full md:w-auto"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
+                </button>
+                <button
+                  className="btn btn-large btn-primary mr-4 w-full md:w-auto flex gap-2"
                   onClick={(e) => handleSubmit(e)}
+                  data-testid="add-patient-button"
                 >
+                  <CheckCircleOutlineIcon />
                   {buttonText}
-                </Button>
+                </button>
               </div>
             </CardContent>
           </form>
