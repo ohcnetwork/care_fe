@@ -34,7 +34,7 @@ export default function LegendInput(props: InputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const ref = props.ref || inputRef;
   const legendRef = useRef<HTMLLabelElement>(null);
-  const [focused, setFocused] = useState(false);
+  const [focused, setFocused] = useState(true);
 
   return (
     <div className={props.outerClassName}>
