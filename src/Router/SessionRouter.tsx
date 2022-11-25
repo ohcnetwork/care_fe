@@ -2,6 +2,7 @@ import loadable from "@loadable/component";
 import { Login, ResetPassword } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
+import InvalidReset from "../Components/ErrorPages/InvalidReset";
 const TopBar = loadable(() => import("../Components/Common/TopBar"));
 
 const routes = {
@@ -10,6 +11,7 @@ const routes = {
   "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
   "/session-expired": () => <SessionExpired />,
+  "/invalid-reset": () => <InvalidReset />,
 };
 
 export default function SessionRouter() {
