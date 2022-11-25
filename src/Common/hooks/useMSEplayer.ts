@@ -2,11 +2,7 @@ import { useEffect, useRef } from "react";
 import axios from "axios";
 
 export interface IAsset {
-  username: string;
-  password: string;
-  hostname: string;
   middlewareHostname: string;
-  port: number;
 }
 
 interface PTZPayload {
@@ -23,10 +19,6 @@ interface UseMSEMediaPlayerOption {
 
 export interface ICameraAssetState {
   id: string;
-  username: string;
-  password: string;
-  hostname: string;
-  port: number;
   accessKey: string;
 }
 

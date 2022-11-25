@@ -10,13 +10,15 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
   value?: string | number;
   autoComplete?: string;
-  type?: "email" | "password" | "search" | "text";
+  type?: "email" | "password" | "search" | "text" | "number";
   className?: string | undefined;
   removeDefaultClasses?: true | undefined;
   leading?: React.ReactNode | undefined;
   trailing?: React.ReactNode | undefined;
   leadingFocused?: React.ReactNode | undefined;
   trailingFocused?: React.ReactNode | undefined;
+  min?: string | number;
+  max?: string | number;
 };
 
 const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
@@ -44,6 +46,8 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
       placeholder={props.placeholder}
       name={props.name}
       value={props.value}
+      min={props.min}
+      max={props.max}
       autoComplete={props.autoComplete}
       required={props.required}
       onChange={(event) => {
