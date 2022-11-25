@@ -5,17 +5,16 @@ import React, {
   useRef,
 } from "react";
 
-const ImageCam = forwardRef((props, ref) => {
+const ImageCam = forwardRef((props: any, ref) => {
   const videoRef = useRef<any>(null);
   const photoRef = useRef<any>(null);
-
   useEffect(() => {
     getVideo();
   }, [videoRef]);
 
   const getVideo = () => {
     navigator.mediaDevices
-      .getUserMedia({ video: { width: 300, facingMode: "environment" } })
+      .getUserMedia({ video: { facingMode: { exact: props.facingMode } } })
       .then((stream) => {
         const video = videoRef.current;
         video.srcObject = stream;

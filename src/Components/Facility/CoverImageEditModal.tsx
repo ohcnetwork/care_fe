@@ -2,6 +2,7 @@ import { Modal } from "@material-ui/core";
 import axios from "axios";
 import { ChangeEventHandler, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import { deleteFacilityCoverImage } from "../../Redux/actions";
 import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
@@ -31,6 +32,9 @@ const CoverImageEditModal = ({
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const webRef = useRef<any>(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const { width } = useWindowDimensions();
+  const mobilebreakpoint = 740;
+  const isMobile = width <= mobilebreakpoint ? true : false;
 
   const captureImage = () => {
     console.log(webRef.current.getScreenshot());
@@ -260,7 +264,10 @@ const CoverImageEditModal = ({
             <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
               {!previewImage ? (
                 <>
-                  <ImageCam ref={webRef} />
+                  <ImageCam
+                    ref={webRef}
+                    facingMode={isMobile ? "environment" : "user"}
+                  />
                 </>
               ) : (
                 <>
