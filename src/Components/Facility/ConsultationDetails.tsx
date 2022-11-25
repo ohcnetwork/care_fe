@@ -167,6 +167,18 @@ export const ConsultationDetails = (props: any) => {
       return;
     }
 
+    if (
+      preDischargeForm.discharge_reason == "EXP" &&
+      !preDischargeForm.discharge_notes.trim()
+    ) {
+      setErrors({
+        ...errors,
+        discharge_notes: "Please enter the cause of death",
+      });
+      setIsSendingDischargeApi(false);
+      return;
+    }
+
     const dischargeResponse = await dispatch(
       dischargePatient(
         { discharge: value, ...preDischargeForm },
@@ -404,7 +416,7 @@ export const ConsultationDetails = (props: any) => {
             <div id="discharge-notes-div">
               <InputLabel id="refered-label">
                 {preDischargeForm.discharge_reason == "EXP"
-                  ? "Cause of death"
+                  ? "Cause of death *"
                   : "Discharge notes"}
               </InputLabel>
               <MultilineInputField
