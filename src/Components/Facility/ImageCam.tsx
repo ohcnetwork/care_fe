@@ -5,7 +5,7 @@ import React, {
   useRef,
 } from "react";
 
-const CoverImageCam = forwardRef((props, ref) => {
+const ImageCam = forwardRef((props, ref) => {
   const videoRef = useRef<any>(null);
   const photoRef = useRef<any>(null);
 
@@ -15,7 +15,7 @@ const CoverImageCam = forwardRef((props, ref) => {
 
   const getVideo = () => {
     navigator.mediaDevices
-      .getUserMedia({ video: { width: 300 } })
+      .getUserMedia({ video: { width: 300, facingMode: "environment" } })
       .then((stream) => {
         const video = videoRef.current;
         video.srcObject = stream;
@@ -63,4 +63,4 @@ const CoverImageCam = forwardRef((props, ref) => {
   );
 });
 
-export default CoverImageCam;
+export default ImageCam;

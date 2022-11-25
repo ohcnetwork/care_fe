@@ -6,7 +6,7 @@ import { deleteFacilityCoverImage } from "../../Redux/actions";
 import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
-import CoverImageCam from "./CoverImageCam";
+import ImageCam from "./ImageCam";
 import { FacilityModel } from "./models";
 
 interface Props {
@@ -260,7 +260,7 @@ const CoverImageEditModal = ({
             <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
               {!previewImage ? (
                 <>
-                  <CoverImageCam ref={webRef} />
+                  <ImageCam ref={webRef} />
                 </>
               ) : (
                 <>
