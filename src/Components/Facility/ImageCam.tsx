@@ -3,11 +3,16 @@ import React, {
   useEffect,
   useImperativeHandle,
   useRef,
+  useState,
 } from "react";
 
-const ImageCam = forwardRef((props: any, ref) => {
+interface ImageCamProps {
+  facingMode?: string;
+}
+const ImageCam = forwardRef((props: ImageCamProps, ref) => {
   const videoRef = useRef<any>(null);
   const photoRef = useRef<any>(null);
+  const [camStream, setCamStream] = useState<any>();
   useEffect(() => {
     getVideo();
   }, [videoRef]);
@@ -16,6 +21,8 @@ const ImageCam = forwardRef((props: any, ref) => {
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: { exact: props.facingMode } } })
       .then((stream) => {
+        console.log(stream);
+        setCamStream(stream);
         const video = videoRef.current;
         video.srcObject = stream;
         video.play();
@@ -30,8 +37,8 @@ const ImageCam = forwardRef((props: any, ref) => {
     const photo = photoRef.current;
     const ctx = photo.getContext("2d");
 
-    const width = 320;
-    const height = 240;
+    const width = 640;
+    const height = 480;
     photo.width = width;
     photo.height = height;
 
@@ -44,16 +51,18 @@ const ImageCam = forwardRef((props: any, ref) => {
     getScreenshot() {
       const photo = photoRef.current;
       const data = photo.toDataURL("image/png");
-      console.log(data);
       return data;
+    },
+    stopCamera() {
+      const tracks = camStream.getTracks();
+      tracks.forEach((track: { stop: () => any }) => track.stop());
     },
   }));
 
   return (
     <div>
-      {/* <button onClick={() => takePhoto()}>Take a photo</button> */}
       <video
-        style={{ display: "none" }}
+        className="hidden"
         onCanPlay={() => paintToCanvas()}
         ref={videoRef}
       />

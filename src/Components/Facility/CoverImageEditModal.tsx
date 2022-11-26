@@ -7,6 +7,7 @@ import { deleteFacilityCoverImage } from "../../Redux/actions";
 import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
 import ImageCam from "./ImageCam";
 import { FacilityModel } from "./models";
 
@@ -32,22 +33,20 @@ const CoverImageEditModal = ({
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const webRef = useRef<any>(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
+    useState(false);
   const { width } = useWindowDimensions();
-  const mobilebreakpoint = 740;
-  const isMobile = width <= mobilebreakpoint ? true : false;
+  const backCamerabreakpoint = 820;
+  const enableBackCamera = width <= backCamerabreakpoint ? true : false;
 
   const captureImage = () => {
-    console.log(webRef.current.getScreenshot());
     setPreviewImage(webRef.current.getScreenshot());
     fetch(webRef.current.getScreenshot())
       .then((res) => res.blob())
       .then((blob) => {
-        console.log(blob, "jjjjj");
         const myFile = new File([blob], "image.png", {
           type: blob.type,
         });
-
-        console.log(myFile);
         setSelectedFile(myFile);
       });
   };
@@ -74,7 +73,9 @@ const CoverImageEditModal = ({
   };
 
   const handleUpload = async () => {
+    setIsCaptureImgBeingUploaded(true);
     if (!selectedFile) {
+      setIsCaptureImgBeingUploaded(false);
       closeModal();
       return;
     }
@@ -95,11 +96,12 @@ const CoverImageEditModal = ({
     );
 
     if (response.status === 200) {
+      setIsCaptureImgBeingUploaded(false);
       Success({ msg: "Cover image updated." });
     }
     await sleep(1000);
     setIsUploading(false);
-
+    setIsCaptureImgBeingUploaded(false);
     onSave && onSave();
     closeModal();
   };
@@ -266,7 +268,7 @@ const CoverImageEditModal = ({
                 <>
                   <ImageCam
                     ref={webRef}
-                    facingMode={isMobile ? "environment" : "user"}
+                    facingMode={enableBackCamera ? "environment" : "user"}
                   />
                 </>
               ) : (
@@ -280,48 +282,69 @@ const CoverImageEditModal = ({
                 {!previewImage ? (
                   <>
                     <div>
-                      <button
-                        className="btn btn-primary m-3"
+                      <ButtonV2
+                        variant="primary"
                         onClick={() => {
                           captureImage();
                         }}
                       >
-                        Capture
-                      </button>
+                        <i className="fa-solid fa-camera" /> Capture
+                      </ButtonV2>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div>
-                      <button
-                        className="btn btn-danger m-3"
+                    <div className="flex space-x-2">
+                      <ButtonV2
+                        variant="primary"
                         onClick={() => {
                           setPreviewImage(null);
                         }}
                       >
                         Retake
-                      </button>
-                      <button
-                        onClick={handleUpload}
-                        className="btn btn-primary m-3"
-                      >
+                      </ButtonV2>
+                      <ButtonV2 variant="primary" onClick={handleUpload}>
+                        {isCaptureImgBeingUploaded ? (
+                          <svg
+                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              stroke-width="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                        ) : (
+                          <></>
+                        )}{" "}
                         Submit
-                      </button>
+                      </ButtonV2>
                     </div>
                   </>
                 )}
               </div>
               <div className="sm:flex-1" />
-
-              <button
-                className="btn btn-danger m-3"
+              <ButtonV2
+                variant="danger"
                 onClick={() => {
                   setPreviewImage(null);
                   setIsCameraOpen(false);
+                  webRef.current.stopCamera();
                 }}
               >
                 Close Camera
-              </button>
+              </ButtonV2>
             </div>
           </div>
         )}
