@@ -67,7 +67,6 @@ import ProcedureBuilder, {
 import { ICD11DiagnosisModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
-import { FieldLabel } from "../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -602,19 +601,15 @@ export const ConsultationForm = (props: any) => {
       });
   };
 
-  const handleSymptomChange = (value: any, field: string) => {
-    if (state.form.is_asymptomatic) {
-      dispatch({
-        type: "set_form",
-        form: { ...state.form, [field]: [1], symptoms_onset_date: null },
-      });
-    }
+  const handleSymptomChange = (value: any) => {
+    const checkSymptoms = value.includes(1);
     dispatch({
       type: "set_form",
       form: {
         ...state.form,
-        [field]: value,
-        ["otherSymptom"]: value.includes(9),
+        is_asymptomatic: checkSymptoms,
+        symptoms: checkSymptoms ? [1] : value,
+        otherSymptom: checkSymptoms ? false : value.includes(9),
       },
     });
   };
@@ -675,37 +670,14 @@ export const ConsultationForm = (props: any) => {
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
                 <div id="symptoms-div">
-                  <div className="flex gap-10 items-start">
-                    <FieldLabel className="text-sm">Symptoms</FieldLabel>
-                    <div className="flex gap-2">
-                      <input
-                        type={"checkbox"}
-                        className="mt-[0.7]"
-                        name={"is_asymptomatic"}
-                        checked={state.form.is_asymptomatic}
-                        onChange={(e) => {
-                          dispatch({
-                            type: "set_form",
-                            form: {
-                              ...state.form,
-                              is_asymptomatic: e.target.checked,
-                              symptoms: e.target.checked ? [1] : [],
-                            },
-                          });
-                        }}
-                      />
-                      <FieldLabel className="text-sm">Asymptomatic</FieldLabel>
-                    </div>
-                  </div>
                   <MultiSelectMenuV2
                     id="symptoms"
                     placeholder="Symptoms"
                     value={state.form.symptoms}
-                    disabled={state.form.is_asymptomatic}
                     options={symptomChoices}
                     optionLabel={(o) => o.text}
                     optionValue={(o) => o.id}
-                    onChange={(o) => handleSymptomChange(o, "symptoms")}
+                    onChange={(o) => handleSymptomChange(o)}
                   />
                   <ErrorHelperText error={state.errors.symptoms} />
                 </div>
