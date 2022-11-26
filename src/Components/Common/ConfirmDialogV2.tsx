@@ -37,7 +37,7 @@ const ConfirmDialogV2 = (props: ConfirmDialogV2Props) => {
     >
       {children}
       <div className="mt-4 flex justify-between">
-        <ButtonV2 onClick={onClose} variant="danger">
+        <ButtonV2 onClick={onClose} variant="secondary">
           {cancelText || "Cancel"}
         </ButtonV2>
         <ButtonV2

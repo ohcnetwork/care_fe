@@ -1,5 +1,6 @@
 import React from "react";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ButtonV2 from "../Common/components/ButtonV2";
+import DialogModal from "../Common/Dialog";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -16,14 +17,10 @@ const FacilitiesSelectDialog = (props: Props) => {
   const { show, handleOk, handleCancel, selectedFacility, setSelected } = props;
 
   return (
-    <ConfirmDialogV2
-      action={"Continue"}
+    <DialogModal
       title={<FieldLabel className="text-lg">Search for Facility</FieldLabel>}
       show={show}
-      variant={"primary"}
-      disabled={!selectedFacility}
       onClose={handleCancel}
-      onConfirm={handleOk}
     >
       <FacilitySelect
         name="facilities"
@@ -33,7 +30,19 @@ const FacilitiesSelectDialog = (props: Props) => {
         showAll={false}
         multiple={false}
       />
-    </ConfirmDialogV2>
+      <div className="mt-4 flex justify-between">
+        <ButtonV2 onClick={handleCancel} variant="secondary">
+          Cancel
+        </ButtonV2>
+        <ButtonV2
+          onClick={handleOk}
+          variant="primary"
+          disabled={!selectedFacility.id}
+        >
+          Continue
+        </ButtonV2>
+      </div>
+    </DialogModal>
   );
 };
 
