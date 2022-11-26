@@ -260,9 +260,6 @@ export const CONSULTATION_SUGGESTION = [
 export const ADMITTED_TO = [
   { id: "1", text: "Isolation" },
   { id: "2", text: "ICU" },
-  { id: "3", text: "ICU with non-invasive ventilator" },
-  { id: "4", text: "ICU with oxygen support" },
-  { id: "5", text: "ICU with invasive ventilator" },
   { id: "6", text: "Bed with oxygen support" },
   { id: "7", text: "Regular" },
 ];
