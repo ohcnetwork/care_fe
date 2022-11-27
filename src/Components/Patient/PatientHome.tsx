@@ -691,8 +691,9 @@ export const PatientHome = (props: any) => {
                       <p className="p-1">
                         {(moment().isBefore(patientData.review_time)
                           ? "Review before: "
-                          : "Review Missed: ") +
-                          formatDate(patientData.review_time)}
+                          : // TODO: Re-enable Review Missed | Temporary Hack for Launch
+                            // : "Review Missed: ") +
+                            "") + formatDate(patientData.review_time)}
                       </p>
                     </div>
                   )}
