@@ -10,11 +10,7 @@ import {
   partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
-import {
-  ErrorHelperText,
-  PhoneNumberField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
@@ -345,9 +341,9 @@ export default function UserProfile() {
   };
   return (
     <div>
-      <div className="md:p-20 p-10">
-        <div className="md:grid md:grid-cols-3 md:gap-6">
-          <div className="md:col-span-1">
+      <div className="lg:p-20 p-10">
+        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+          <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
                 Personal Information
@@ -364,7 +360,7 @@ export default function UserProfile() {
               </button>
             </div>
           </div>
-          <div className="mt-5 md:mt-0 md:col-span-2">
+          <div className="mt-5 lg:mt-0 lg:col-span-2">
             {!showEdit && (
               <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
                 <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
@@ -474,8 +470,8 @@ export default function UserProfile() {
               <div>
                 <form action="#" method="POST">
                   <div className="shadow overflow-hidden sm:rounded-md">
-                    <div className="px-4 py-5 bg-white sm:p-6">
-                      <div className="grid grid-cols-6 gap-6">
+                    <div className="px-4 pt-5 bg-white">
+                      <div className="grid grid-cols-6 gap-4">
                         <div className="col-span-6 sm:col-span-3">
                           <TextInputFieldV2
                             name="firstName"
@@ -564,12 +560,11 @@ export default function UserProfile() {
                             value={states.form.email}
                             onChange={handleChangeInput}
                             error={states.errors.email}
-                            required
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                    <div className="px-4 pb-3 bg-gray-50 text-right sm:px-6">
                       <Button
                         color="primary"
                         variant="contained"
@@ -588,21 +583,13 @@ export default function UserProfile() {
                 </form>
                 <form action="#" method="POST">
                   <div className="shadow overflow-hidden sm:rounded-md">
-                    <div className="px-4 py-5 bg-white sm:p-6">
-                      <div className="grid grid-cols-6 gap-6">
+                    <div className="px-4 pt-5 bg-white">
+                      <div className="grid grid-cols-6 gap-4">
                         <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="old_password"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            Current Password*
-                          </label>
-                          <TextInputField
+                          <TextInputFieldV2
                             name="old_password"
-                            variant="outlined"
-                            margin="dense"
+                            label="Current Password"
                             type="password"
-                            className="mt-1 form-input sm:leading-5"
                             value={changePasswordForm.old_password}
                             onChange={(e) =>
                               setChangePasswordForm({
@@ -610,22 +597,15 @@ export default function UserProfile() {
                                 old_password: e.target.value,
                               })
                             }
-                            errors={changePasswordErrors.old_password}
+                            error={changePasswordErrors.old_password}
+                            required
                           />
                         </div>
                         <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="new_password_1"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            New Password*
-                          </label>
-                          <TextInputField
+                          <TextInputFieldV2
                             name="new_password_1"
-                            variant="outlined"
-                            margin="dense"
+                            label="New Password"
                             type="password"
-                            className="mt-1 form-input sm:leading-5"
                             value={changePasswordForm.new_password_1}
                             onChange={(e) =>
                               setChangePasswordForm({
@@ -633,22 +613,15 @@ export default function UserProfile() {
                                 new_password_1: e.target.value,
                               })
                             }
-                            errors=""
+                            error=""
+                            required
                           />
                         </div>
                         <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="new_password_2"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            New Password Confirmation*
-                          </label>
-                          <TextInputField
+                          <TextInputFieldV2
                             name="new_password_2"
-                            variant="outlined"
-                            margin="dense"
+                            label="New Password Confirmation"
                             type="password"
-                            className="mt-1 form-input sm:leading-5"
                             value={changePasswordForm.new_password_2}
                             onChange={(e) =>
                               setChangePasswordForm({
@@ -656,12 +629,12 @@ export default function UserProfile() {
                                 new_password_2: e.target.value,
                               })
                             }
-                            errors={changePasswordErrors.password_confirmation}
+                            error={changePasswordErrors.password_confirmation}
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                    <div className="px-4 pb-3 bg-gray-50 text-right sm:px-6">
                       <Button
                         color="primary"
                         variant="contained"
