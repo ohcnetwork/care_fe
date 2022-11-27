@@ -710,6 +710,7 @@ export const UserAdd = (props: UserProps) => {
                             </span>
                           ) : (
                             <>
+                              " "
                               {usernameExists === userExistsEnums.exists ? (
                                 <div>
                                   <i className="fas fa-circle-xmark text-red-500" />
