@@ -738,12 +738,6 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
     shortcutKey: ["Shift", "S"],
   },
   {
-    icon: "stop",
-    label: "Stop",
-    action: "stop",
-    shortcutKey: ["Shift", "X"],
-  },
-  {
     icon: "undo",
     label: "Reset",
     action: "reset",

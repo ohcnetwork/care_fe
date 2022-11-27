@@ -1,11 +1,10 @@
 import loadable from "@loadable/component";
 import { Button } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { navigate, useQueryParams } from "raviger";
-import React, { useEffect, useState } from "react";
+import { navigate } from "raviger";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import moment from "moment";
@@ -17,10 +16,9 @@ import clsx from "clsx";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import parsePhoneNumberFromString from "libphonenumber-js";
 import SearchInput from "../Form/SearchInput";
+import useFilters from "../../Common/hooks/useFilters";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {
@@ -29,8 +27,14 @@ export default function ResultList() {
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [downloadFile, setDownloadFile] = useState("");
-  const [qParams, setQueryParams] = useQueryParams();
-  const [showFilters, setShowFilters] = useState(false);
+  const {
+    qParams,
+    updateQuery,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({ limit: 14 });
   const [showDialog, setShowDialog] = useState(false);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
@@ -38,18 +42,8 @@ export default function ResultList() {
     name: "",
   });
   const [resultId, setResultId] = useState(-1);
-  const [dataList, setDataList] = useState({
-    lsgList: [],
-    wardList: [],
-  });
-
+  const [dataList, setDataList] = useState({ lsgList: [], wardList: [] });
   let manageResults: any = null;
-  const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
-  const localLsgWard = JSON.parse(
-    localStorage.getItem("lsg-ward-data") ||
-      JSON.stringify({ lsgList: [], wardList: [] })
-  );
-
   useEffect(() => {
     setIsLoading(true);
     const params = {
@@ -68,7 +62,7 @@ export default function ResultList() {
         qParams.sample_collection_date_after || undefined,
       sample_collection_date_before:
         qParams.sample_collection_date_before || undefined,
-      offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
+      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
       srf_id: qParams.srf_id || undefined,
     };
 
@@ -100,100 +94,26 @@ export default function ResultList() {
     dataList,
   ]);
 
-  const updateQuery = (filter: any) => {
-    const nParams = Object.keys(filter).reduce(
-      (a, k) =>
-        filter[k] && filter[k] !== "--"
-          ? Object.assign(a, { [k]: filter[k] })
-          : a,
-      {}
-    );
-    setQueryParams(nParams, { replace: true });
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    updateQuery({ ...qParams, page, limit });
-  };
-
-  const searchByName = (value: string) => {
-    updateQuery({ ...qParams, name: value, page: 1 });
-  };
-
-  const searchByPhone = (value: string) => {
-    updateQuery({ ...qParams, mobile_number: value, page: 1 });
-  };
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
-
-  useEffect(() => {
-    applyFilter(local);
-    setDataList({ ...localLsgWard });
-  }, []);
-
-  const removeFilter = (paramKey: any) => {
-    const localData: any = { ...local };
-
-    updateQuery({
-      ...qParams,
-      [paramKey]: "",
-    });
-    localData[paramKey] = "";
-
-    localStorage.setItem("external-filters", JSON.stringify(localData));
-  };
-
   const removeLSGFilter = (paramKey: any, id: any) => {
     const updatedLsgList = dataList.lsgList.filter((x: any) => x.id !== id);
     const lsgParams = updatedLsgList.map((x: any) => x.id);
-    const localData: any = { ...local };
-
     const updatedWardList = dataList.wardList.filter(
       (x: any) => x.local_body_id !== id
     );
     const wardParams = updatedWardList.map((x: any) => x.id);
-
-    updateQuery({
-      ...qParams,
-      [paramKey]: lsgParams,
-      ["wards"]: wardParams,
-    });
-    localData[paramKey] = lsgParams.length ? lsgParams : "";
-    localData["wards"] = wardParams.length ? wardParams : "";
-
-    localStorage.setItem("external-filters", JSON.stringify(localData));
-    localStorage.setItem(
-      "lsg-ward-data",
-      JSON.stringify({ lsgList: updatedLsgList, wardList: updatedWardList })
-    );
+    updateQuery({ [paramKey]: lsgParams, ["wards"]: wardParams });
     setDataList({ lsgList: updatedLsgList, wardList: updatedWardList });
   };
 
   const removeWardFilter = (paramKey: any, id: any) => {
     const updatedList = dataList.wardList.filter((x: any) => x.id !== id);
     const params = updatedList.map((x: any) => x.id);
-    const localData: any = { ...local };
-
-    updateQuery({
-      ...qParams,
-      [paramKey]: params,
-    });
-    localData[paramKey] = params.length ? params : "";
-
-    localStorage.setItem("external-filters", JSON.stringify(localData));
-    localStorage.setItem(
-      "lsg-ward-data",
-      JSON.stringify({ ...dataList, wardList: updatedList })
-    );
+    updateQuery({ [paramKey]: params });
     setDataList({ ...dataList, wardList: updatedList });
   };
 
-  const lsgWardData = (lsgs: any, wards: any) => {
+  const lsgWardData = (lsgs: any, wards: any) =>
     setDataList({ lsgList: lsgs, wardList: wards });
-  };
 
   const triggerDownload = async () => {
     // while is getting ready
@@ -207,22 +127,6 @@ export default function ResultList() {
     document.getElementById("downloadCSV")?.click();
   };
 
-  const badge = (key: string, value: any, paramKey: string) => {
-    return (
-      value && (
-        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={() => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
-  };
-
   const lsgWardBadge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
@@ -230,9 +134,7 @@ export default function ResultList() {
           key={`${key}-${value.id}`}
           className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border"
         >
-          {key}
-          {": "}
-          {value.name}
+          {`${key}: ${value.name}`}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
             onClick={() =>
@@ -366,7 +268,7 @@ export default function ResultList() {
           <SearchInput
             label="Search by name"
             name="name"
-            onChange={({ value }) => searchByName(value)}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
             value={qParams.name}
             placeholder="Search patient"
           />
@@ -374,7 +276,7 @@ export default function ResultList() {
           <div className="w-full max-w-sm">
             <PhoneNumberField
               value={qParams.mobile_number || "+91"}
-              onChange={(value: string) => searchByPhone(value)}
+              onChange={(value: any) => updateQuery({ mobile_number: value })}
               placeholder="Search by Phone Number"
               turnOffAutoFormat={false}
               errors=""
@@ -409,7 +311,7 @@ export default function ResultList() {
           <div className="flex ml-auto gap-2 md:pt-0 pt-2">
             <button
               className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-              onClick={(_) => setShowFilters((show) => !show)}
+              onClick={() => advancedFilter.setShow(true)}
             >
               <i className="fa fa-filter mr-1" aria-hidden="true"></i>
               <span>Filters</span>
@@ -417,48 +319,19 @@ export default function ResultList() {
           </div>
         </div>
       </div>
+      <FilterBadges
+        badges={({ badge, phoneNumber, dateRange }) => [
+          badge("Name", "name"),
+          phoneNumber("Phone no.", "mobile_number"),
+          ...dateRange("Created", "created_date"),
+          ...dateRange("Result", "result_date"),
+          ...dateRange("Sample created", "sample_collection_date"),
+          badge("SRF ID", "srf_id"),
+        ]}
+      />
       <div className="flex items-center flex-wrap gap-2 mb-4">
         {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
         {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
-        {badge("Name", qParams.name || local.name, "name")}
-        {badge(
-          "Phone Number",
-          qParams.mobile_number || local.mobile_number,
-          "mobile_number"
-        )}
-        {badge(
-          "Created before",
-          qParams.created_date_before || local.created_date_before,
-          "created_date_before"
-        )}
-        {badge(
-          "Created after",
-          qParams.created_date_after || local.created_date_after,
-          "created_date_after"
-        )}
-        {badge(
-          "Result before",
-          qParams.result_date_before || local.result_date_before,
-          "result_date_before"
-        )}
-        {badge(
-          "Result after",
-          qParams.result_date_after || local.result_date_after,
-          "result_date_after"
-        )}
-        {badge(
-          "Sample created before",
-          qParams.sample_collection_date_before ||
-            local.sample_collection_date_before,
-          "sample_collection_date_before"
-        )}
-        {badge(
-          "Sample created after",
-          qParams.sample_collection_date_after ||
-            local.sample_collection_date_after,
-          "sample_collection_date_after"
-        )}
-        {badge("SRF ID", qParams.srf_id, "srf_id")}
       </div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-t-lg">
         <table className="min-w-full divide-y divide-gray-200">
@@ -486,16 +359,7 @@ export default function ResultList() {
           </tbody>
         </table>
       </div>
-      {totalCount > RESULT_LIMIT && (
-        <div className="flex w-full pt-5 pb-1 items-center justify-center shadow sm:rounded-b-lg min-w-full bg-gray-50 border-t border-gray-200">
-          <Pagination
-            cPage={qParams.page}
-            defaultPerPage={RESULT_LIMIT}
-            data={{ totalCount }}
-            onChange={handlePagination}
-          />
-        </div>
-      )}
+      <Pagination totalCount={totalCount} />
       <CSVLink
         data={downloadFile}
         filename={`external-result--${now}.csv`}
@@ -503,15 +367,9 @@ export default function ResultList() {
         className="hidden"
         id={"downloadCSV"}
       />
-      <SlideOver show={showFilters} setShow={setShowFilters}>
+      <SlideOver {...advancedFilter}>
         <div className="bg-white min-h-screen p-4">
-          <ListFilter
-            filter={qParams}
-            onChange={applyFilter}
-            closeFilter={() => setShowFilters(false)}
-            dataList={lsgWardData}
-            local={local}
-          />
+          <ListFilter {...advancedFilter} dataList={lsgWardData} />
         </div>
       </SlideOver>
     </div>
