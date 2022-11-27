@@ -533,13 +533,12 @@ export default function ManageUsers() {
                     </div>
                   )}
                   {user.username && !user.facilities && (
-                    <a
+                    <p
                       onClick={() => loadFacilities(user.username)}
                       className={`col-span-4 mt-2 ${facilityClassname}`}
-                      href="#"
                     >
                       Click here to show linked facilities
-                    </a>
+                    </p>
                   )}
                 </div>
               </div>
