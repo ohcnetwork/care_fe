@@ -17,12 +17,10 @@ import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import { GetApp, Visibility } from "@material-ui/icons";
+import { Visibility } from "@material-ui/icons";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Modal from "@material-ui/core/Modal";
-import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
-
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
@@ -101,6 +99,7 @@ interface StateInterface {
   zoom: number;
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
+  rotation: number;
 }
 
 export const FileUpload = (props: FileUploadProps) => {
@@ -145,6 +144,7 @@ export const FileUpload = (props: FileUploadProps) => {
     zoom: 3,
     isZoomInDisabled: false,
     isZoomOutDisabled: false,
+    rotation: 0,
   };
   const [file_state, setFileState] = useState<StateInterface>(initialState);
 
@@ -202,6 +202,13 @@ export const FileUpload = (props: FileUploadProps) => {
       ...file_state,
       zoom: !checkFull ? file_state.zoom - 1 : file_state.zoom,
     });
+  };
+
+  const handleRotate = (rotation: number) => {
+    setFileState((prev) => ({
+      ...prev,
+      rotation: prev.rotation + rotation,
+    }));
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
@@ -565,7 +572,6 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const validateAudioUpload = () => {
-    const filenameLength = audioName.trim().length;
     const f = audioBlob;
     if (f === undefined) {
       return false;
@@ -606,6 +612,8 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
+  console.log(file_state);
+
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
       <Modal
@@ -633,11 +641,23 @@ export const FileUpload = (props: FileUploadProps) => {
                         handleZoomOut,
                         file_state.zoom === 1,
                       ],
+                      [
+                        "Rotate Left",
+                        "rotate-left",
+                        () => handleRotate(90),
+                        false,
+                      ],
+                      [
+                        "Rotate Right",
+                        "rotate-right",
+                        () => handleRotate(-90),
+                        false,
+                      ],
                     ].map((button, index) => (
                       <button
                         key={index}
                         onClick={button[2] as () => void}
-                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70 z-50"
                         disabled={button[3] as boolean}
                       >
                         <i className={`fas fa-${button[1]} mr-2`} />
@@ -674,6 +694,9 @@ export const FileUpload = (props: FileUploadProps) => {
                 className={
                   "object-contain mx-auto " + zoom_values[file_state.zoom]
                 }
+                style={{
+                  transform: `rotate(${file_state.rotation}deg)`,
+                }}
               />
             ) : (
               <iframe
