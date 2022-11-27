@@ -141,7 +141,7 @@ export const UserAdd = (props: UserProps) => {
     idle: 0,
     checking: 1,
     exists: 2,
-    avaliable: 3,
+    available: 3,
   };
 
   const [usernameExists, setUsernameExists] = useState<number>(0);
@@ -154,7 +154,7 @@ export const UserAdd = (props: UserProps) => {
     if (usernameCheck === undefined || usernameCheck.status === 409)
       setUsernameExists(userExistsEnums.exists);
     else if (usernameCheck.status === 200)
-      setUsernameExists(userExistsEnums.avaliable);
+      setUsernameExists(userExistsEnums.available);
     else
       Notification.Error({
         msg: "Some error checking username availabality. Please try again later.",
@@ -408,7 +408,7 @@ export const UserAdd = (props: UserProps) => {
             errors[field] =
               "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
-          } else if (usernameExists !== userExistsEnums.avaliable) {
+          } else if (usernameExists !== userExistsEnums.available) {
             errors[field] = "This username already exists";
             invalidForm = true;
           }
@@ -709,10 +709,23 @@ export const UserAdd = (props: UserProps) => {
                               <i className="fas fa-circle-dot" /> checking...
                             </span>
                           ) : (
-                            validateRule(
-                              usernameExists !== userExistsEnums.exists,
-                              "Username is available"
-                            )
+                            <>
+                              {usernameExists === userExistsEnums.exists ? (
+                                <div>
+                                  <i className="fas fa-circle-xmark text-red-500" />
+                                  <span className="text-red-500">
+                                    "Username is not available"
+                                  </span>
+                                </div>
+                              ) : (
+                                <div>
+                                  <i className="fas fa-circle-check text-green-500" />
+                                  <span className="text-primary-500">
+                                    "Username is available"
+                                  </span>
+                                </div>
+                              )}
+                            </>
                           )}
                         </>
                       )}
