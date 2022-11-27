@@ -59,12 +59,25 @@ export default function DoctorVideoSlideover(props: {
           </button>
         </div>
         {[
-          ["Doctors", "Doctor"],
-          ["Staff", "Staff"],
+          {
+            title: "Doctors",
+            user_type: "Doctor",
+            home: true,
+          },
+          {
+            title: "Staff",
+            user_type: "Staff",
+            home: true,
+          },
+          {
+            title: "TeleICU Hub",
+            user_type: "Doctor",
+            home: false,
+          },
         ].map((type, i) => (
           <div key={i} className="mb-4">
             <div>
-              <span className="text-lg font-semibold">{type[0]}</span>
+              <span className="text-lg font-semibold">{type.title}</span>
             </div>
 
             <ul
@@ -73,7 +86,13 @@ export default function DoctorVideoSlideover(props: {
               role="listbox"
             >
               {doctors
-                .filter((doc) => doc.user_type === type[1])
+                .filter(
+                  (doc) =>
+                    doc.user_type === type.user_type &&
+                    (type.home
+                      ? doc.home_facility_object?.id === facilityId
+                      : true)
+                )
                 .map((doctor) => {
                   return <UserListItem user={doctor} />;
                 })}
