@@ -44,12 +44,13 @@ export const SetInventoryForm = (props: any) => {
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
+  // const [offset, setOffset] = useState(0);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
   const [facilityName, setFacilityName] = useState("");
 
   const limit = 14;
+  const offset = 0;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -66,7 +67,7 @@ export const SetInventoryForm = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset]
+    [dispatchAction]
   );
   useAbortableEffect(
     (status: statusType) => {

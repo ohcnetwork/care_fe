@@ -25,8 +25,8 @@ import {
   getDistrictByState,
   getLocalbodyByDistrict,
   getStates,
-  getUserDetails,
   getUserListFacility,
+  checkUsername,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -39,9 +39,8 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import clsx from "clsx";
-import { goBack } from "../../Utils/utils";
-import { Cancel, CheckCircle, InfoOutlined } from "@material-ui/icons";
 
+import { goBack } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -122,7 +121,7 @@ export const UserAdd = (props: UserProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
-  const [current_user_facilities, setFacilities] = useState<
+  const [_current_user_facilities, setFacilities] = useState<
     Array<FacilityModel>
   >([]);
   const [states, setStates] = useState(initialStates);
@@ -133,6 +132,9 @@ export const UserAdd = (props: UserProps) => {
   >([]);
   const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
+  const [passwordInputInFocus, setPasswordInputInFocus] = useState(false);
+  const [confirmPasswordInputInFocus, setConfirmPasswordInputInFocus] =
+    useState(false);
   const [usernameInput, setUsernameInput] = useState("");
 
   const userExistsEnums = {
@@ -144,14 +146,19 @@ export const UserAdd = (props: UserProps) => {
 
   const [usernameExists, setUsernameExists] = useState<number>(0);
 
-  const checkUsername = async (username: string) => {
+  const check_username = async (username: string) => {
     setUsernameExists(userExistsEnums.checking);
-    const userDetails = await dispatchAction(getUserDetails(username), true);
-    setUsernameExists(
-      userDetails.status === 404
-        ? userExistsEnums.avaliable
-        : userExistsEnums.exists
+    const usernameCheck = await dispatchAction(
+      checkUsername({ username: username })
     );
+    if (usernameCheck === undefined || usernameCheck.status === 409)
+      setUsernameExists(userExistsEnums.exists);
+    else if (usernameCheck.status === 200)
+      setUsernameExists(userExistsEnums.avaliable);
+    else
+      Notification.Error({
+        msg: "Some error checking username availabality. Please try again later.",
+      });
   };
 
   useEffect(() => {
@@ -161,8 +168,8 @@ export const UserAdd = (props: UserProps) => {
       !(state.form.username?.length < 2) &&
       /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
     ) {
-      let timeout = setTimeout(() => {
-        checkUsername(usernameInput);
+      const timeout = setTimeout(() => {
+        check_username(usernameInput);
       }, 500);
       return () => clearTimeout(timeout);
     }
@@ -418,7 +425,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "c_password":
           if (!state.form.password) {
-            errors.password = "Confirm password is required";
+            errors.c_password = "Confirm password is required";
             invalidForm = true;
           } else if (state.form.password !== state.form.c_password) {
             errors.c_password = "Passwords not matching";
@@ -501,6 +508,21 @@ export const UserAdd = (props: UserProps) => {
     }
     dispatch({ type: "set_error", errors });
     return true;
+  };
+
+  const validateRule = (condition: boolean, content: JSX.Element | string) => {
+    return (
+      <div>
+        {condition ? (
+          <i className="fas fa-circle-check text-green-500" />
+        ) : (
+          <i className="fas fa-circle-xmark text-red-500" />
+        )}{" "}
+        <span className={clsx(condition ? "text-primary-500" : "text-red-500")}>
+          {content}
+        </span>
+      </div>
+    );
   };
 
   const handleSubmit = async (e: any) => {
@@ -588,7 +610,6 @@ export const UserAdd = (props: UserProps) => {
                   name="facilities"
                   selected={selectedFacility}
                   setSelected={setFacility}
-                  district={currentUser.data.district}
                   errors={state.errors.facilities}
                   showAll={false}
                 />
@@ -687,57 +708,28 @@ export const UserAdd = (props: UserProps) => {
                             <span>
                               <i className="fas fa-circle-dot" /> checking...
                             </span>
-                          ) : usernameExists === userExistsEnums.exists ? (
-                            <span className="text-red-500">
-                              <i className="fas fa-circle-xmark text-red-500" />{" "}
-                              User already exists
-                            </span>
                           ) : (
-                            usernameExists === userExistsEnums.avaliable && (
-                              <span className="text-primary-500">
-                                <i className="fas fa-circle-check text-green-500" />{" "}
-                                Available!
-                              </span>
+                            validateRule(
+                              usernameExists !== userExistsEnums.exists,
+                              "Username is available"
                             )
                           )}
                         </>
                       )}
                     </div>
                     <div>
-                      {state.form.username?.length < 2 ? (
-                        <i className="fas fa-circle-xmark text-red-500" />
-                      ) : (
-                        <i className="fas fa-circle-check text-green-500" />
-                      )}{" "}
-                      <span
-                        className={clsx(
-                          state.form.username?.length < 2
-                            ? "text-red-500"
-                            : "text-primary-500"
-                        )}
-                      >
-                        Username should be atleast 2 characters long
-                      </span>
+                      {validateRule(
+                        state.form.username?.length >= 2,
+                        "Username should be atleast 2 characters long"
+                      )}
                     </div>
                     <div>
-                      {!/[^.@+_-]/.test(
-                        state.form.username[state.form.username?.length - 1]
-                      ) ? (
-                        <i className="fas fa-circle-xmark text-red-500" />
-                      ) : (
-                        <i className="fas fa-circle-check text-green-500" />
-                      )}{" "}
-                      <span
-                        className={clsx(
-                          !/[^.@+_-]/.test(
-                            state.form.username[state.form.username?.length - 1]
-                          )
-                            ? "text-red-500"
-                            : "text-primary-500"
-                        )}
-                      >
-                        Username can't end with ^ . @ + _ -
-                      </span>
+                      {validateRule(
+                        /[^.@+_-]/.test(
+                          state.form.username[state.form.username?.length - 1]
+                        ),
+                        "Username can't end with ^ . @ + _ -"
+                      )}
                     </div>
                   </div>
                 )}
@@ -770,9 +762,30 @@ export const UserAdd = (props: UserProps) => {
                   value={state.form.password}
                   onChange={handleChange}
                   errors={state.errors.password}
+                  onFocus={() => setPasswordInputInFocus(true)}
+                  onBlur={() => setPasswordInputInFocus(false)}
                 />
+                {passwordInputInFocus && (
+                  <div className="pl-2 text-small text-gray-500">
+                    {validateRule(
+                      state.form.password?.length >= 8,
+                      "Password should be atleast 8 characters long"
+                    )}
+                    {validateRule(
+                      state.form.password !== state.form.password.toUpperCase(),
+                      "Password should contain at least 1 lowercase letter"
+                    )}
+                    {validateRule(
+                      state.form.password !== state.form.password.toLowerCase(),
+                      "Password should contain at least 1 uppercase letter"
+                    )}
+                    {validateRule(
+                      /\d/.test(state.form.password),
+                      "Password should contain at least 1 number"
+                    )}
+                  </div>
+                )}
               </div>
-
               <div>
                 <InputLabel>Confirm Password*</InputLabel>
                 <TextInputField
@@ -785,9 +798,16 @@ export const UserAdd = (props: UserProps) => {
                   value={state.form.c_password}
                   onChange={handleChange}
                   errors={state.errors.c_password}
+                  onFocus={() => setConfirmPasswordInputInFocus(true)}
+                  onBlur={() => setConfirmPasswordInputInFocus(false)}
                 />
+                {confirmPasswordInputInFocus &&
+                  state.form.c_password.length > 0 &&
+                  validateRule(
+                    state.form.c_password === state.form.password,
+                    "Confirm password should match the entered password"
+                  )}
               </div>
-
               <div>
                 <InputLabel>First name*</InputLabel>
                 <TextInputField

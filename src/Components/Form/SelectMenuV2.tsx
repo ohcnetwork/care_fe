@@ -14,6 +14,8 @@ type SelectMenuProps<T, V = T> = {
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  showIconWhenSelected?: boolean;
+  showChevronIcon?: boolean;
   className?: string;
 } & (
   | {
@@ -41,6 +43,8 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
     };
   });
 
+  const showChevronIcon = props.showChevronIcon ?? true;
+
   const placeholder = props.placeholder ?? "Select";
   const defaultOption = {
     label: placeholder,
@@ -64,21 +68,25 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
       >
         {({ open }) => (
           <>
-            <Listbox.Label className="sr-only">
+            <Listbox.Label className="sr-only !relative">
               {props.placeholder}
             </Listbox.Label>
             <div className="relative">
               <Listbox.Button className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
                 <div className="relative z-0 flex items-center w-full">
                   <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
-                    <div className="ml-2 text-sm text-gray-700">
-                      {value.icon}
-                    </div>
+                    {props.showIconWhenSelected && value?.icon && (
+                      <div className="ml-2 text-sm text-gray-700">
+                        {value.icon}
+                      </div>
+                    )}
                     <p className="ml-2.5 text-sm font-medium">
                       {value.selectedLabel}
                     </p>
                   </div>
-                  <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
+                  {showChevronIcon && (
+                    <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
+                  )}
                 </div>
               </Listbox.Button>
               <DropdownTransition show={open}>

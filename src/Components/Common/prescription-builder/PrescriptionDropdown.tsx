@@ -10,6 +10,7 @@ export function PrescriptionDropdown(props: {
   placeholder?: string;
   type?: "string" | "number";
   min?: number;
+  className?: string;
 }) {
   const { options, tips, value, setValue } = props;
   const [open, setOpen] = useState(false);
@@ -36,7 +37,10 @@ export function PrescriptionDropdown(props: {
       <input
         type={props.type}
         placeholder={props.placeholder}
-        className="w-full relative focus:ring-primary-500 focus:border-primary-500 border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+        className={
+          "w-full relative focus:ring-primary-500 focus:border-primary-500 border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white " +
+          (props.className || "")
+        }
         onClick={() => setOpen(!open)}
         value={value}
         onChange={(e) => setValue(e.target.value)}

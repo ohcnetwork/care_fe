@@ -26,6 +26,11 @@ const routes: Routes = {
     method: "POST",
   },
 
+  checkResetToken: {
+    path: "/api/v1/password_reset/check/",
+    method: "POST",
+  },
+
   resetPassword: {
     path: "/api/v1/password_reset/confirm/",
     method: "POST",
@@ -193,6 +198,10 @@ const routes: Routes = {
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "DELETE",
+  },
+  operateAsset: {
+    path: "/api/v1/asset/{external_id}/operate_assets/",
+    method: "POST",
   },
 
   // Facility Beds
@@ -557,6 +566,12 @@ const routes: Routes = {
     method: "POST",
   },
   //Profile
+
+  checkUsername: {
+    path: "/api/v1/users/{username}/check_availability/",
+    method: "GET",
+  },
+
   getUserDetails: {
     path: "/api/v1/users/{username}/",
     method: "GET",

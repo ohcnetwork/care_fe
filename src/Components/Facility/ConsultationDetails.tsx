@@ -450,6 +450,17 @@ export const ConsultationDetails = (props: any) => {
           <PageTitle
             title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
+            crumbsReplacements={{
+              [facilityId]: { name: patientData?.facility_object?.name },
+              [patientId]: { name: patientData?.name },
+              [consultationId]: {
+                name: `Admitted on ${formatDate(
+                  consultationData.admission_date
+                    ? consultationData.admission_date
+                    : "00:00"
+                )}`,
+              },
+            }}
             breadcrumbs={true}
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
@@ -649,8 +660,8 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>
         {tab === "UPDATES" && (
-          <div className="flex md:flex-row flex-col">
-            <div className="md:w-2/3">
+          <div className="flex xl:flex-row flex-col">
+            <div className="xl:w-2/3 w-full">
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
               {!consultationData.discharge_date && (
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
@@ -905,7 +916,7 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               </div>
             </div>
-            <div className="md:w-1/3 pl-4">
+            <div className="xl:w-1/3 w-full pl-4">
               <PageTitle
                 title="Update Log"
                 hideBack={true}

@@ -92,7 +92,7 @@ class facility {
   }
 }
 
-let current_url = "http://localhost:4000";
+let current_url = "/";
 
 describe("Facility", () => {
   before(() => {

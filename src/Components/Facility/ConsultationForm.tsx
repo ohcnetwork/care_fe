@@ -1,14 +1,12 @@
 import loadable from "@loadable/component";
 import {
   Box,
-  Button,
   CardContent,
   FormControlLabel,
   InputLabel,
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, {
@@ -64,7 +62,11 @@ import { goBack } from "../../Utils/utils";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
+import ProcedureBuilder, {
+  ProcedureType,
+} from "../Common/prescription-builder/ProcedureBuilder";
 import { ICD11DiagnosisModel } from "./models";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -211,6 +213,7 @@ export const ConsultationForm = (props: any) => {
   const [InvestigationAdvice, setInvestigationAdvice] = useState<
     InvestigationType[]
   >([]);
+  const [procedures, setProcedures] = useState<ProcedureType[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -257,6 +260,9 @@ export const ConsultationForm = (props: any) => {
       );
       setInvestigationAdvice(
         !Array.isArray(res.data.investigation) ? [] : res.data.investigation
+      );
+      setProcedures(
+        !Array.isArray(res.data.procedure) ? [] : res.data.procedure
       );
 
       if (!status.aborted) {
@@ -517,6 +523,7 @@ export const ConsultationForm = (props: any) => {
         discharge_advice: dischargeAdvice,
         prn_prescription: PRNAdvice,
         investigation: InvestigationAdvice,
+        procedure: procedures,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -909,6 +916,15 @@ export const ConsultationForm = (props: any) => {
                 <br />
                 <ErrorHelperText error={state.errors.investigation} />
               </div>
+              <div id="procedures-div" className="mt-4">
+                <InputLabel>Procedures</InputLabel>
+                <ProcedureBuilder
+                  procedures={procedures}
+                  setProcedures={setProcedures}
+                />
+                <br />
+                <ErrorHelperText error={state.errors.procedures} />
+              </div>
               <div id="discharge_advice-div" className="mt-4">
                 <InputLabel>Prescription Medication</InputLabel>
                 {/*<PrescriptionBuilderOld
@@ -1083,7 +1099,7 @@ export const ConsultationForm = (props: any) => {
                     selectedUser={state.form.assigned_to_object}
                     onSelect={handleDoctorSelect}
                     user_type={"Doctor"}
-                    outline={false}
+                    outline={true}
                   />
                 </div>
               )}
@@ -1163,29 +1179,25 @@ export const ConsultationForm = (props: any) => {
                 m<sup>2</sup>
               </div>
               {/* End of Telemedicine fields */}
-              <div className="mt-4 flex justify-between">
-                <Button
-                  color="default"
-                  variant="contained"
+              <div className="mt-4 sm:flex grid sm:justify-between">
+                <ButtonV2
+                  variant="secondary"
                   type="button"
+                  className="mb-2 sm:mb-0"
                   onClick={() =>
                     navigate(`/facility/${facilityId}/patient/${patientId}`)
                   }
                 >
-                  Cancel{" "}
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
+                  Cancel
+                </ButtonV2>
+                <ButtonV2
+                  variant="primary"
                   type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
                   onClick={(e) => handleSubmit(e)}
                 >
+                  <i className="uil uil-check-circle" />
                   {buttonText}
-                </Button>
+                </ButtonV2>
               </div>
             </CardContent>
           </form>
@@ -1199,6 +1211,7 @@ export const ConsultationForm = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
               consultationId={id}
+              fetchPatientData={fetchData}
             ></Beds>
           </CardContent>
         </div>
