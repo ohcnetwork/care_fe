@@ -154,6 +154,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const limit = RESULTS_PER_PAGE_LIMIT;
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -162,6 +163,7 @@ export const FileUpload = (props: FileUploadProps) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setIsActive(res.data.is_active);
         }
       } else {
         setPatientName("");
@@ -784,7 +786,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     </label>
                     <button
                       className="btn btn-primary"
-                      disabled={!file || !uploadFileName}
+                      disabled={!file || !uploadFileName || !isActive}
                       onClick={() => {
                         handleUpload({ status });
                       }}
