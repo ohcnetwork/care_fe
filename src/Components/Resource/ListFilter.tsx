@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  SelectField,
-  DateInputField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { SelectField } from "../Common/HelperInputFields";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
 import { getAnyFacility } from "../../Redux/actions";
@@ -24,30 +20,24 @@ function useMergeState(initialState: any) {
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter, local } = props;
+  const { filter, onChange, closeFilter } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isResourceLoading, setResourceLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [filterState, setFilterState] = useMergeState({
-    orgin_facility: filter.orgin_facility || local.origin_facility || "",
+    orgin_facility: filter.orgin_facility || "",
     orgin_facility_ref: null,
-    approving_facility:
-      filter.approving_facility || local.approving_facility || "",
+    approving_facility: filter.approving_facility || "",
     approving_facility_ref: null,
-    assigned_facility:
-      filter.assigned_facility || local.assigned_facility || "",
+    assigned_facility: filter.assigned_facility || "",
     assigned_facility_ref: null,
-    emergency: filter.emergency || local.emergency || "--",
-    created_date_before:
-      filter.created_date_before || local.created_date_before || null,
-    created_date_after:
-      filter.created_date_after || local.created_date_after || null,
-    modified_date_before:
-      filter.modified_date_before || local.modified_date_before || null,
-    modified_date_after:
-      filter.modified_date_after || local.modified_date_after || null,
-    ordering: filter.ordering || local.ordering || null,
-    status: filter.status || local.status || null,
+    emergency: filter.emergency || "--",
+    created_date_before: filter.created_date_before || null,
+    created_date_after: filter.created_date_after || null,
+    modified_date_before: filter.modified_date_before || null,
+    modified_date_after: filter.modified_date_after || null,
+    ordering: filter.ordering || null,
+    status: filter.status || null,
   });
   const dispatch: any = useDispatch();
 
@@ -100,20 +90,16 @@ export default function ListFilter(props: any) {
   }, [dispatch]);
 
   const setFacility = (selected: any, name: string) => {
-    const filterData: any = { ...filterState };
-    filterData[`${name}_ref`] = selected;
-    filterData[name] = (selected || {}).id;
-
-    setFilterState(filterData);
+    setFilterState({
+      ...filterState,
+      [`${name}_ref`]: selected,
+      [name]: (selected || {}).id,
+    });
   };
 
   const handleChange = (event: any) => {
-    let { name, value } = event.target;
-
-    const filterData: any = { ...filterState };
-    filterData[name] = value;
-
-    setFilterState(filterData);
+    const { name, value } = event.target;
+    setFilterState({ ...filterState, [name]: value });
   };
 
   const applyFilter = () => {
@@ -153,13 +139,7 @@ export default function ListFilter(props: any) {
       ordering: ordering || "",
       status: status || "",
     };
-    localStorage.setItem("resource-filters", JSON.stringify({ ...data }));
     onChange(data);
-  };
-
-  const clearFilters = () => {
-    localStorage.removeItem("resource-filters");
-    closeFilter();
   };
 
   const handleDateRangeChange = (
@@ -180,11 +160,7 @@ export default function ListFilter(props: any) {
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
-        <Link
-          href="/resource"
-          className="btn btn-default hover:text-gray-900"
-          onClick={clearFilters}
-        >
+        <Link href="/resource" className="btn btn-default hover:text-gray-900">
           <i className="fas fa-times mr-2" />
           Clear Filters
         </Link>
@@ -265,20 +241,6 @@ export default function ListFilter(props: any) {
             )}
           </div>
         </div>
-
-        {/* <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Status</span>
-          <SelectField
-                name="status"
-                variant="outlined"
-                margin="dense"
-                optionArray={true}
-                value={filterState.status}
-                options={resourceStatusOptions}
-                onChange={handleChange}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div> */}
-
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Ordering</span>
           <SelectField
@@ -340,17 +302,6 @@ export default function ListFilter(props: any) {
             size="small"
           />
         </div>
-        {/* <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Is upresource case</span>
-          <DateTimeFiled
-                name="X_before"
-                inputVariant="outlined"
-                margin="dense"
-                errors=""
-                value={filter.X_before}
-                onChange={date => handleChange({target: {name: "X_before", value: date}})}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div>         */}
       </div>
     </div>
   );
