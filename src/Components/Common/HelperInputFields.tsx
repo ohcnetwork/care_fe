@@ -638,6 +638,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
 
 export const PhoneNumberField = (props: any) => {
   const {
+    id,
     label,
     placeholder,
     errors,
@@ -660,8 +661,9 @@ export const PhoneNumberField = (props: any) => {
   return (
     <>
       {label && <InputLabel>{label}</InputLabel>}
-      <div className="flex items-center">
+      <div className="flex items-center" data-cy={id}>
         <PhoneInput
+          data-cy={id}
           inputClass="bg-gray-200 py-3 text-sm border-gray-200 shadow-none focus:border-primary-400"
           countryCodeEditable={false}
           value={value}

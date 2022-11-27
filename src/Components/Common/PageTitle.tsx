@@ -59,7 +59,7 @@ export default function PageTitle(props: PageTitleProps) {
       >
         <div className="flex items-center">
           {!hideBack && (
-            <button onClick={onBackButtonClick}>
+            <button onClick={onBackButtonClick} data-cy="back-button">
               <i className="fas fa-chevron-left text-2xl rounded-md p-2 hover:bg-gray-200 mr-1">
                 {" "}
               </i>

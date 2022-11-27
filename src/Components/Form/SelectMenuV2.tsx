@@ -61,7 +61,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const value = options.find((o) => props.value == o.value) || defaultOption;
 
   return (
-    <div className={props.className}>
+    <div className={props.className} data-cy={props.id}>
       <Listbox
         value={value}
         onChange={(selection: any) => props.onChange(selection.value)}
@@ -93,6 +93,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                 <Listbox.Options className="origin-top-right absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
                   {options.map((option, index) => (
                     <Listbox.Option
+                      data-cy={`${props.id}-${index}`}
                       id={`${props.id}-option-${option.value}`}
                       key={index}
                       className={({ active }) =>

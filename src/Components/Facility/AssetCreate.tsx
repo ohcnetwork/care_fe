@@ -242,8 +242,10 @@ const AssetCreate = (props: AssetProps) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
+          console.log("Phone String: ", support_phone);
           // eslint-disable-next-line no-case-declarations
           const phoneNumber = parsePhoneNumberFromString(support_phone);
+          console.log("This is the phone nubmer: ", phoneNumber);
           if (!phoneNumber?.isPossible()) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
@@ -508,6 +510,7 @@ const AssetCreate = (props: AssetProps) => {
                       <label htmlFor="asset-location">Location *</label>
                       <div className="mt-2">
                         <SelectMenuV2
+                          id="asset-location"
                           required
                           options={[
                             {
@@ -535,6 +538,7 @@ const AssetCreate = (props: AssetProps) => {
                       <label htmlFor="asset-type">Asset Type *</label>
                       <div className="mt-2">
                         <SelectMenuV2
+                          id="asset-type"
                           required
                           options={[
                             {
@@ -567,8 +571,9 @@ const AssetCreate = (props: AssetProps) => {
                     {/* Asset Class */}
                     <div ref={fieldRef["asset_class"]}>
                       <label htmlFor="asset-class">Asset Class</label>
-                      <div className="mt-2">
+                      <div className="mt-2" data-test="asset-class">
                         <SelectMenuV2
+                          id="asset-class"
                           options={[
                             { title: "ONVIF Camera", value: "ONVIF" },
                             {
@@ -735,17 +740,19 @@ const AssetCreate = (props: AssetProps) => {
                     <label htmlFor="warranty-expiry">
                       Warranty / AMC Expiry
                     </label>
-                    <DateInputField
-                      className="w-56"
-                      value={warranty_amc_end_of_validity}
-                      onChange={(date) =>
-                        setWarrantyAmcEndOfValidity(
-                          moment(date).format("YYYY-MM-DD")
-                        )
-                      }
-                      errors={state.errors.warranty_amc_end_of_validity}
-                      InputLabelProps={{ shrink: true }}
-                    />
+                    <div id="warranty-expiry">
+                      <DateInputField
+                        className="w-56"
+                        value={warranty_amc_end_of_validity}
+                        onChange={(date) =>
+                          setWarrantyAmcEndOfValidity(
+                            moment(date).format("YYYY-MM-DD")
+                          )
+                        }
+                        errors={state.errors.warranty_amc_end_of_validity}
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    </div>
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
                     />
@@ -771,10 +778,12 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["support_phone"]}
                   >
-                    <label htmlFor="support-name">
+                    <label htmlFor="support-phone">
                       Customer Support Number *{" "}
                     </label>
+
                     <PhoneNumberField
+                      id="support_phone"
                       value={support_phone}
                       onChange={setSupportPhone}
                       errors={state.errors.support_phone}
@@ -836,16 +845,18 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["last_serviced_on"]}
                   >
                     <label htmlFor="last-serviced-on">Last Serviced On</label>
-                    <DateInputField
-                      className="w-56"
-                      value={last_serviced_on}
-                      onChange={(date) =>
-                        setLastServicedOn(moment(date).format("YYYY-MM-DD"))
-                      }
-                      disableFuture={true}
-                      errors={state.errors.last_serviced_on}
-                      InputLabelProps={{ shrink: true }}
-                    />
+                    <div id="last-serviced-on">
+                      <DateInputField
+                        className="w-56"
+                        value={last_serviced_on}
+                        onChange={(date) =>
+                          setLastServicedOn(moment(date).format("YYYY-MM-DD"))
+                        }
+                        disableFuture={true}
+                        errors={state.errors.last_serviced_on}
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    </div>
                     <ErrorHelperText error={state.errors.last_serviced_on} />
                   </div>
 
@@ -888,7 +899,7 @@ const AssetCreate = (props: AssetProps) => {
                   {!assetId && (
                     <button
                       className="primary-button w-full md:w-auto flex justify-center"
-                      id="asset-create"
+                      id="asset-create-more"
                       type="submit"
                       onClick={(e) => handleSubmit(e, true)}
                     >

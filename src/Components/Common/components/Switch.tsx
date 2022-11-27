@@ -17,12 +17,12 @@ export default function SwitchV2<T>(props: SwitchProps<T>) {
   return (
     <div className={props.className}>
       {props.label && (
-        <label htmlFor="is_working" className="mb-3">
+        <label htmlFor={props.name} className="mb-3">
           {props.label}
           {props.required && " *"}
         </label>
       )}
-      <ul role="list" className="flex">
+      <ul role="list" className="flex" id={props.name}>
         {props.options.map((option, index) => {
           const selected = option === props.value;
           const additionalClassNames = selected
@@ -32,6 +32,7 @@ export default function SwitchV2<T>(props: SwitchProps<T>) {
 
           return (
             <li
+              data-cy={`${props.name}-${index}`}
               tabIndex={0}
               className={`cursor-pointer px-4 p-2 first:rounded-l-lg last:rounded-r-lg shadow-sm focus:ring-1 border transition-all duration-200 ease-in-out outline-none ${additionalClassNames}`}
               key={index}
