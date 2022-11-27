@@ -234,7 +234,7 @@ const AssetManage = (props: AssetManageProps) => {
                 },
               ].map(detailBlock)}
             </div>
-            <div className="flex flex-col md:flex-row gap-1">
+            <div className="flex flex-col lg:flex-row gap-1">
               <ButtonV2
                 onClick={() =>
                   navigate(
@@ -257,7 +257,7 @@ const AssetManage = (props: AssetManageProps) => {
               )}
               <ButtonV2 onClick={handleDownload}>
                 <span>
-                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
+                  <i className="fa-solid fa-arrow-down-long mr-4"></i>
                   Export Asset
                 </span>
               </ButtonV2>
