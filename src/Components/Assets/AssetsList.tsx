@@ -21,6 +21,7 @@ import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -160,6 +161,28 @@ const AssetsList = () => {
     }
   };
 
+  const downloadJSON = (data: JSON) => {
+    const a = document.createElement("a");
+    const blob = new Blob([JSON.stringify(data)], {
+      type: "application/json",
+    });
+    a.href = URL.createObjectURL(blob);
+    a.download = `assets_${facilityName}_${new Date().toISOString()}.json`;
+    a.click();
+  };
+
+  const handleDownload = async () => {
+    const filters = {
+      ...qParams,
+      json: true,
+      limit: totalCount,
+    };
+    const res = await dispatch(listAssets(filters));
+    if (res && res.data && res.status === 200) {
+      downloadJSON(res.data.results);
+    }
+  };
+
   if (isScannerActive)
     return (
       <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
@@ -274,18 +297,43 @@ const AssetsList = () => {
             placeholder="Search assets"
           />
         </div>
-        <div className="flex flex-col md:flex-row lg:ml-2 justify-start items-start gap-2">
-          <div className="w-full">
-            <AdvancedFilterButton
-              setShowFilters={() => advancedFilter.setShow(true)}
-            />
+        <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
+          <div className="flex flex-col md:flex-row gap-2">
+            <div className="w-full">
+              <AdvancedFilterButton
+                setShowFilters={() => advancedFilter.setShow(true)}
+              />
+            </div>
+            <button
+              className="btn btn-primary w-full"
+              onClick={() => setIsScannerActive(true)}
+            >
+              <i className="fas fa-search mr-1"></i> Scan Asset QR
+            </button>
           </div>
-          <button
-            className="btn btn-primary w-full"
-            onClick={() => setIsScannerActive(true)}
-          >
-            <i className="fas fa-search mr-1"></i> Scan Asset QR
-          </button>
+          <div className="flex gap-2 w-full">
+            <div className="w-full tooltip">
+              {facilityName === "" || totalCount === 0 ? (
+                <span className="tooltip-text tooltip-left">
+                  <p className="self-end text-sm italic ">
+                    * Select a facility with assets
+                  </p>
+                </span>
+              ) : (
+                ""
+              )}
+              <ButtonV2
+                className="w-full"
+                disabled={facilityName === "" || totalCount === 0}
+                onClick={handleDownload}
+              >
+                <span>
+                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
+                  Export Assets
+                </span>
+              </ButtonV2>
+            </div>
+          </div>
         </div>
       </div>
       <div>
