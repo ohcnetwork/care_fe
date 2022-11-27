@@ -714,14 +714,14 @@ export const UserAdd = (props: UserProps) => {
                                 <div>
                                   <i className="fas fa-circle-xmark text-red-500" />
                                   <span className="text-red-500">
-                                    "Username is not available"
+                                    Username is not available
                                   </span>
                                 </div>
                               ) : (
                                 <div>
                                   <i className="fas fa-circle-check text-green-500" />
                                   <span className="text-primary-500">
-                                    "Username is available"
+                                    Username is available
                                   </span>
                                 </div>
                               )}
