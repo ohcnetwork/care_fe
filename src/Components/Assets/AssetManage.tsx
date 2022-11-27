@@ -161,7 +161,7 @@ const AssetManage = (props: AssetManageProps) => {
 
   const downloadJSON = (data: AssetData) => {
     const a = document.createElement("a");
-    const blob = new Blob([JSON.stringify(data)], {
+    const blob = new Blob([JSON.stringify([data])], {
       type: "application/json",
     });
     a.href = URL.createObjectURL(blob);

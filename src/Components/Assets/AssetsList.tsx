@@ -22,6 +22,8 @@ import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import ButtonV2 from "../Common/components/ButtonV2";
+import AssetImportModal from "./AssetImportModal";
+import { FacilityModel } from "../Facility/models";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -40,9 +42,10 @@ const AssetsList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [facilityName, setFacilityName] = useState<string>();
+  const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
+  const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const fetchData = useCallback(
@@ -93,13 +96,13 @@ const AssetsList = () => {
     [dispatch, fetchData]
   );
 
-  const fetchFacilityName = useCallback(
+  const fetchFacility = useCallback(
     async (status: statusType) => {
-      if (!qParams.facility) return setFacilityName("");
+      if (!qParams.facility) return setFacility(undefined);
       setIsLoading(true);
       const res = await dispatch(getAnyFacility(qParams.facility));
       if (!status.aborted) {
-        setFacilityName(res?.data?.name);
+        setFacility(res?.data);
         setIsLoading(false);
       }
     },
@@ -122,10 +125,10 @@ const AssetsList = () => {
 
   useAbortableEffect(
     (status: statusType) => {
-      fetchFacilityName(status);
+      fetchFacility(status);
       fetchLocationName(status);
     },
-    [fetchFacilityName, fetchLocationName]
+    [fetchFacility, fetchLocationName]
   );
 
   const getAssetIdFromQR = async (assetUrl: string) => {
@@ -167,11 +170,16 @@ const AssetsList = () => {
       type: "application/json",
     });
     a.href = URL.createObjectURL(blob);
-    a.download = `assets_${facilityName}_${new Date().toISOString()}.json`;
+    a.download = `assets_${facility?.name}_${new Date().toISOString()}.json`;
     a.click();
   };
 
   const handleDownload = async () => {
+    if (totalCount == 0) {
+      Notification.Error({
+        msg: "No assets to export",
+      });
+    }
     const filters = {
       ...qParams,
       json: true,
@@ -311,28 +319,36 @@ const AssetsList = () => {
               <i className="fas fa-search mr-1"></i> Scan Asset QR
             </button>
           </div>
-          <div className="flex gap-2 w-full">
-            <div className="w-full tooltip">
-              {facilityName === "" || totalCount === 0 ? (
-                <span className="tooltip-text tooltip-left">
-                  <p className="self-end text-sm italic ">
-                    * Select a facility with assets
-                  </p>
-                </span>
-              ) : (
-                ""
-              )}
-              <ButtonV2
-                className="w-full"
-                disabled={facilityName === "" || totalCount === 0}
-                onClick={handleDownload}
-              >
-                <span>
-                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
-                  Export Assets
-                </span>
-              </ButtonV2>
-            </div>
+          <div className="w-full tooltip flex flex-col md:flex-row gap-2">
+            {!facility ? (
+              <span className="tooltip-text tooltip-left">
+                <p className="self-end text-sm italic ">* Select a facility</p>
+              </span>
+            ) : (
+              ""
+            )}
+            <ButtonV2
+              className="w-1/2"
+              disabled={!facility}
+              onClick={() => {
+                setImportAssetModalOpen(true);
+              }}
+            >
+              <span>
+                <i className="fa-solid fa-arrow-up-long mr-2"></i>
+                Import Assets
+              </span>
+            </ButtonV2>
+            <ButtonV2
+              className="w-1/2"
+              disabled={!facility}
+              onClick={handleDownload}
+            >
+              <span>
+                <i className="fa-solid fa-arrow-down-long mr-2"></i>
+                Export Assets
+              </span>
+            </ButtonV2>
           </div>
         </div>
       </div>
@@ -349,7 +365,7 @@ const AssetsList = () => {
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", ["facility", "location"], facilityName || ""),
+              value("Facility", ["facility", "location"], facility?.name || ""),
               badge("Name", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
               badge("Status", "status"),
@@ -363,6 +379,13 @@ const AssetsList = () => {
             </div>
           </div>
         </>
+      )}
+      {facility && (
+        <AssetImportModal
+          open={importAssetModalOpen}
+          onClose={() => setImportAssetModalOpen(false)}
+          facility={facility}
+        />
       )}
     </div>
   );
