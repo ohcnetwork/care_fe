@@ -6,7 +6,7 @@ import {
   Button,
   Tooltip,
 } from "@material-ui/core";
-import { TextInputField } from "../../Common/HelperInputFields";
+import { ErrorHelperText } from "../../Common/HelperInputFields";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { AssetData } from "../AssetTypes";
 import { useDispatch } from "react-redux";
@@ -18,6 +18,7 @@ import { getCameraConfig } from "../../../Utils/transformUtils";
 import CameraConfigure from "../configure/CameraConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
+import LegendInput from "../../../CAREUI/interactive/LegendInput";
 
 interface ONVIFCameraProps {
   assetId: string;
@@ -126,29 +127,27 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                   <InputLabel id="middleware-hostname">
                     Hospital Middleware Hostname
                   </InputLabel>
-                  <TextInputField
-                    name="name"
+                  <LegendInput
+                    type="TEXT"
+                    name="middleware-hostname"
                     id="middleware-hostname"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
                     value={middlewareHostname}
                     onChange={(e) => setMiddlewareHostname(e.target.value)}
-                    errors=""
+                    className="mt-2"
                   />
                 </div>
                 <div>
                   <InputLabel id="camera-addess">Local IP Address</InputLabel>
-                  <TextInputField
-                    name="name"
-                    id="camera-addess"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
+                  <LegendInput
+                    type="TEXT"
+                    name="camera-access-addess"
+                    id="camera-access-addess"
                     value={cameraAddress}
                     onChange={(e) => setCameraAddress(e.target.value)}
-                    errors={ipadrdress_error}
+                    error={ipadrdress_error !== ""}
+                    className="mt-2"
                   />
+                  <ErrorHelperText error={ipadrdress_error} />
                 </div>
                 <div>
                   <InputLabel id="camera-access-key">
@@ -167,15 +166,13 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                       </button>
                     </Tooltip>
                   </InputLabel>
-                  <TextInputField
-                    name="name"
+                  <LegendInput
+                    type="PASSWORD"
+                    name="camera-access-key"
                     id="camera-access-key"
-                    variant="outlined"
-                    margin="dense"
-                    type="password"
                     value={cameraAccessKey}
                     onChange={(e) => setCameraAccessKey(e.target.value)}
-                    errors=""
+                    className="mt-2"
                   />
                 </div>
               </div>
