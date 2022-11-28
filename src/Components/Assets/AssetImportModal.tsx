@@ -5,6 +5,7 @@ import { sleep } from "../../Utils/utils";
 import { FacilityModel } from "../Facility/models";
 import { AssetData } from "./AssetTypes";
 import * as Notification from "../../Utils/Notifications.js";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 interface Props {
   open: boolean;
@@ -211,9 +212,8 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               </label>
             </div>
             <div className="sm:flex-1" />
-            <button
-              type="button"
-              className="rounded-lg bg-gray-100 hover:bg-gray-300 py-2 px-4 text-slate-600 hover:text-slate-800 font-medium text-sm flex gap-1 items-center justify-center  transition-all"
+            <ButtonV2
+              variant="secondary"
               onClick={(e) => {
                 e.stopPropagation();
                 closeModal();
@@ -222,20 +222,15 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               disabled={isImporting}
             >
               Cancel
-            </button>
-            <button
-              type="button"
-              className="rounded-lg bg-primary-500 py-2 px-4 text-white font-medium hover:bg-primary-400 text-sm flex gap-3 items-center justify-center transition-all"
-              onClick={handleUpload}
-              disabled={isImporting}
-            >
+            </ButtonV2>
+            <ButtonV2 onClick={handleUpload} disabled={isImporting}>
               {isImporting ? (
                 <i className="fa-solid fa-spinner animate-spin" />
               ) : (
                 <i className="fa-solid fa-file-import" />
               )}
               <span>{isImporting ? "Importing..." : "Import"}</span>
-            </button>
+            </ButtonV2>
           </div>
         </form>
       </div>
