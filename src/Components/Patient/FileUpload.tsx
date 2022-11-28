@@ -25,6 +25,7 @@ import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
 import { formatDate } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -103,6 +104,7 @@ interface StateInterface {
 }
 
 export const FileUpload = (props: FileUploadProps) => {
+  const { t } = useTranslation();
   const [audioBlob, setAudioBlob] = useState<Blob>();
   const [file, setFile] = useState<File | null>();
   const {
@@ -630,25 +632,25 @@ export const FileUpload = (props: FileUploadProps) => {
                   <>
                     {[
                       [
-                        "Zoom In",
+                        t("Zoom In"),
                         "magnifying-glass-plus",
                         handleZoomIn,
                         file_state.zoom === zoom_values.length,
                       ],
                       [
-                        "Zoom Out",
+                        t("Zoom Out"),
                         "magnifying-glass-minus",
                         handleZoomOut,
                         file_state.zoom === 1,
                       ],
                       [
-                        "Rotate Left",
+                        t("Rotate Left"),
                         "rotate-left",
                         () => handleRotate(90),
                         false,
                       ],
                       [
-                        "Rotate Right",
+                        t("Rotate Right"),
                         "rotate-right",
                         () => handleRotate(-90),
                         false,
