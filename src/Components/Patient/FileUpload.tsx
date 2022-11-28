@@ -17,11 +17,10 @@ import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import { GetApp, Visibility } from "@material-ui/icons";
+import { Visibility } from "@material-ui/icons";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Modal from "@material-ui/core/Modal";
-import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
@@ -154,6 +153,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const limit = RESULTS_PER_PAGE_LIMIT;
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -162,6 +162,7 @@ export const FileUpload = (props: FileUploadProps) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setIsActive(res.data.is_active);
         }
       } else {
         setPatientName("");
@@ -563,7 +564,6 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const validateAudioUpload = () => {
-    const filenameLength = audioName.trim().length;
     const f = audioBlob;
     if (f === undefined) {
       return false;
@@ -784,7 +784,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     </label>
                     <button
                       className="btn btn-primary"
-                      disabled={!file || !uploadFileName}
+                      disabled={!file || !uploadFileName || !isActive}
                       onClick={() => {
                         handleUpload({ status });
                       }}
