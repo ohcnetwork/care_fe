@@ -5,6 +5,7 @@ import { DropdownTransition } from "../Common/components/HelperComponents";
 type OptionCallback<T, R> = (option: T) => R;
 
 type SelectMenuProps<T, V = T> = {
+  disabled?: boolean;
   id?: string;
   options: T[];
   value: V | undefined;
@@ -63,6 +64,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   return (
     <div className={props.className}>
       <Listbox
+        disabled={props.disabled}
         value={value}
         onChange={(selection: any) => props.onChange(selection.value)}
       >
@@ -96,7 +98,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                       id={`${props.id}-option-${option.value}`}
                       key={index}
                       className={({ active }) =>
-                        `cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
+                        `cursor-pointer select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
                           active ? "text-white bg-primary-500" : "text-gray-900"
                         }`
                       }

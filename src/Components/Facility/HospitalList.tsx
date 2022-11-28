@@ -19,6 +19,7 @@ import {
   getDistrict,
   getLocalBody,
   sendNotificationMessages,
+  getStates,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 
@@ -38,6 +39,10 @@ import AccordionV2 from "../Common/components/AccordionV2";
 import SearchInput from "../Form/SearchInput";
 import { getFacilityFeatureIcon } from "./FacilityHome";
 import useFilters from "../../Common/hooks/useFilters";
+import FilterSlideOver, {
+  FilterOptionType,
+  FilterType,
+} from "../../CAREUI/shared/FilterSlideOver";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -73,6 +78,61 @@ export const HospitalList = () => {
   const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
+
+  const [filterStates, setFilterStates] = useState<FilterOptionType[]>([
+    { name: "Gujarat", value: "Gujarat" },
+  ]);
+  const [filterDistricts, setFilterDistricts] = useState<FilterOptionType[]>([
+    { name: "Vadodara", value: "Vadodara" },
+  ]);
+  const [filterLocalBodies, setFilterLocalBodies] = useState<
+    FilterOptionType[]
+  >([{ name: "Sama", value: "Sama" }]);
+
+  const [filters, setFilters] = useState<FilterType[]>([
+    {
+      name: "state",
+      label: "State",
+      type: "select",
+      options: filterStates,
+    },
+    {
+      name: "district",
+      label: "District",
+      type: "select",
+      options: filterDistricts,
+      dependsOn: "state",
+    },
+    {
+      name: "local_body",
+      label: "Local Body",
+      type: "select",
+      options: filterLocalBodies,
+      dependsOn: "district",
+    },
+    {
+      name: "facility_type",
+      label: "Facility Type",
+      type: "select",
+      options: FACILITY_TYPES.map((f) => {
+        return {
+          name: f.text,
+          value: f.id,
+        };
+      }),
+    },
+    {
+      name: "kasp",
+      label: "KASP Empanelled",
+      type: "select",
+      options: [
+        { name: "Yes", value: "true" },
+        { name: "No", value: "false" },
+      ],
+    },
+  ]);
+
+  const [filterSlideOver, setFilterSlideOver] = useState(false);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
@@ -303,7 +363,7 @@ export const HospitalList = () => {
                   )}
                 </div>
 
-                <div className="h-full flex flex-col justify-between w-full h-fit">
+                <div className="flex flex-col justify-between w-full h-fit">
                   <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
                     <div className="flow-root">
                       {facility.kasp_empanelled && (
@@ -491,6 +551,15 @@ export const HospitalList = () => {
 
   return (
     <div className="px-6">
+      <FilterSlideOver
+        open={filterSlideOver}
+        setOpen={setFilterSlideOver}
+        filters={filters}
+        setFilters={setFilters}
+        onApply={() => {
+          console.log(filters);
+        }}
+      />
       <div className="grid md:grid-cols-2">
         <PageTitle
           title={t("Facilities")}
@@ -620,6 +689,8 @@ export const HospitalList = () => {
           kasp("Empanelled", "kasp_empanelled"),
         ]}
       />
+      <button onClick={() => setFilterSlideOver(true)}>Open Flilttleer</button>
+      <FacillityFilter {...AdvancedFilters.props} />
       <div className="mt-4 pb-4">
         <div>{manageFacilities}</div>
       </div>

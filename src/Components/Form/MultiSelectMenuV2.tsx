@@ -5,6 +5,7 @@ import { DropdownTransition } from "../Common/components/HelperComponents";
 type OptionCallback<T, R = void> = (option: T) => R;
 
 type Props<T, V = T> = {
+  disabled?: boolean;
   id?: string;
   options: T[];
   value: V[] | undefined;
@@ -59,6 +60,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
   return (
     <div className={props.className}>
       <Listbox
+        disabled={props.disabled}
         value={selectedOptions}
         onChange={(opts: typeof options) =>
           props.onChange(opts.map((o) => o.value) as any)
@@ -85,9 +87,20 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                 {selectedOptions.length !== 0 && (
                   <div className="p-2 flex flex-wrap gap-2">
                     {selectedOptions.map((option) => (
-                      <span className="bg-gray-200 border border-gray-400 text-gray-800 rounded-full text-xs px-2 py-1">
+                      <div className="bg-gray-200 border border-gray-400 text-gray-800 rounded-full text-xs px-2 py-1 inline-flex items-center justify-between gap-1">
                         {option.selectedLabel}
-                      </span>
+                        <button
+                          className="text-base"
+                          onClick={() =>
+                            props.onChange(
+                              props.value?.filter((v) => option.value !== v) ||
+                                []
+                            )
+                          }
+                        >
+                          <i className="uil uil-times" />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 )}
