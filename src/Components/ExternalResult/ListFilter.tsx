@@ -11,7 +11,7 @@ import moment from "moment";
 import useMergeState from "../../Common/hooks/useMergeState";
 
 export default function ListFilter(props: any) {
-  const { filter, onChange, closeFilter, dataList, local } = props;
+  const { filter, onChange, closeFilter, dataList } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,23 +22,13 @@ export default function ListFilter(props: any) {
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const [filterState, setFilterState] = useMergeState({
-    created_date_before:
-      filter.created_date_before || local.created_date_before || null,
-    created_date_after:
-      filter.created_date_after || local.created_date_after || null,
-    result_date_before:
-      filter.result_date_before || local.result_date_before || null,
-    result_date_after:
-      filter.result_date_after || local.result_date_after || null,
-    sample_collection_date_before:
-      filter.sample_collection_date_before ||
-      local.sample_collection_date_before ||
-      null,
-    sample_collection_date_after:
-      filter.sample_collection_date_after ||
-      local.sample_collection_date_after ||
-      null,
-    srf_id: filter.srf_id || local.srf_id || null,
+    created_date_before: filter.created_date_before || null,
+    created_date_after: filter.created_date_after || null,
+    result_date_before: filter.result_date_before || null,
+    result_date_after: filter.result_date_after || null,
+    sample_collection_date_before: filter.sample_collection_date_before || null,
+    sample_collection_date_after: filter.sample_collection_date_after || null,
+    srf_id: filter.srf_id || null,
   });
 
   const handleDateRangeChange = (
@@ -100,11 +90,6 @@ export default function ListFilter(props: any) {
       ),
       srf_id: srf_id,
     };
-    localStorage.setItem("external-filters", JSON.stringify(data));
-    localStorage.setItem(
-      "lsg-ward-data",
-      JSON.stringify({ lsgList: selectedLsgs, wardList: wards })
-    );
     onChange(data);
     dataList(selectedLsgs, wards);
   };
@@ -189,8 +174,6 @@ export default function ListFilter(props: any) {
   };
 
   const clearFilters = () => {
-    localStorage.removeItem("external-filters");
-    localStorage.removeItem("lsg-ward-data");
     dataList([], []);
     closeFilter();
   };

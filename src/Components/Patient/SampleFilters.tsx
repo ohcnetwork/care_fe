@@ -150,11 +150,9 @@ export default function UserFilter(props: any) {
                 selected={filterState.facility_ref}
                 showAll={true}
                 setSelected={(obj) =>
-                  handleChange({
-                    target: {
-                      name: "facility",
-                      value: (obj as FacilityModel)?.id,
-                    },
+                  setFilterState({
+                    facility: (obj as FacilityModel)?.id,
+                    facility_ref: obj,
                   })
                 }
                 className="shifting-page-filter-dropdown"

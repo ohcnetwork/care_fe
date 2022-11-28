@@ -17,7 +17,6 @@ import {
   getDistrict,
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -35,6 +34,9 @@ import FiltersSlideOver, {
 } from "../../CAREUI/shared/FiltersSlideOver";
 import { navigate } from "raviger";
 
+const getDate = (value: any) =>
+  value && moment(value).isValid() && moment(value).toDate();
+
 export default function PatientFilter({
   filter,
   onChange,
@@ -48,48 +50,38 @@ export default function PatientFilter({
     facility_ref: null,
     lsgBody_ref: null,
     district_ref: null,
-    date_declared_positive_before: filter.date_declared_positive_before || null,
-    date_declared_positive_after: filter.date_declared_positive_after || null,
-    date_of_result_before: filter.date_of_result_before || null,
-    date_of_result_after: filter.date_of_result_after || null,
-    created_date_before: filter.created_date_before || null,
-    created_date_after: filter.created_date_after || null,
-    modified_date_before: filter.modified_date_before || null,
-    modified_date_after: filter.modified_date_after || null,
+    date_declared_positive_before: "",
+    date_declared_positive_after: "",
+    date_of_result_before: "",
+    date_of_result_after: "",
+    created_date_before: "",
+    created_date_after: "",
+    modified_date_before: "",
+    modified_date_after: "",
     ordering: filter.ordering,
     category: filter.category || null,
     gender: filter.gender || null,
     disease_status: filter.disease_status || null,
-    age_min: filter.age_min || null,
-    age_max: filter.age_max || null,
-    date_of_result: filter.date_of_result || null,
-    date_declared_positive: filter.date_declared_positive || null,
-    last_consultation_admission_date_before:
-      filter.last_consultation_admission_date_before || null,
-    last_consultation_admission_date_after:
-      filter.last_consultation_admission_date_after || null,
-    last_consultation_discharge_date_before:
-      filter.last_consultation_discharge_date_before || null,
-    last_consultation_discharge_date_after:
-      filter.last_consultation_discharge_date_after || null,
-    last_consultation_admitted_to_list:
-      filter.last_consultation_admitted_to_list
-        ? filter.last_consultation_admitted_to_list.split(",")
-        : [],
-    srf_id: filter.srf_id || null,
-    number_of_doses: filter.number_of_doses || null,
-    covin_id: filter.covin_id || null,
-    is_kasp: filter.is_kasp || null,
-    is_declared_positive: filter.is_declared_positive || null,
-    last_consultation_symptoms_onset_date_before:
-      filter.last_consultation_symptoms_onset_date_before || null,
-    last_consultation_symptoms_onset_date_after:
-      filter.last_consultation_symptoms_onset_date_after || null,
-    last_vaccinated_date_before: filter.last_vaccinated_date_before || null,
-    last_vaccinated_date_after: filter.last_vaccinated_date_after || null,
-    last_consultation_is_telemedicine:
-      filter.last_consultation_is_telemedicine || null,
-    is_antenatal: filter.is_antenatal || null,
+    age_min: "",
+    age_max: "",
+    date_of_result: null,
+    date_declared_positive: null,
+    last_consultation_admission_date_before: "",
+    last_consultation_admission_date_after: "",
+    last_consultation_discharge_date_before: "",
+    last_consultation_discharge_date_after: "",
+    last_consultation_admitted_to_list: [],
+    srf_id: "",
+    number_of_doses: null,
+    covin_id: "",
+    is_kasp: null,
+    is_declared_positive: null,
+    last_consultation_symptoms_onset_date_before: "",
+    last_consultation_symptoms_onset_date_after: "",
+    last_vaccinated_date_before: "",
+    last_vaccinated_date_after: "",
+    last_consultation_is_telemedicine: null,
+    is_antenatal: null,
   });
   const dispatch: any = useDispatch();
 
@@ -572,8 +564,8 @@ export default function PatientFilter({
         name="date_of_result"
         label="Date of result"
         value={{
-          start: getDate(filterState.date_of_result_after)?.toDate(),
-          end: getDate(filterState.date_of_result_before)?.toDate(),
+          start: getDate(filterState.date_of_result_after),
+          end: getDate(filterState.date_of_result_before),
         }}
         onChange={handleDateRangeChange}
         errorClassName="hidden"
@@ -583,8 +575,8 @@ export default function PatientFilter({
         name="date_declared_positive"
         label="Date Declared Positive"
         value={{
-          start: getDate(filterState.date_declared_positive_after)?.toDate(),
-          end: getDate(filterState.date_declared_positive_before)?.toDate(),
+          start: getDate(filterState.date_declared_positive_after),
+          end: getDate(filterState.date_declared_positive_before),
         }}
         onChange={handleDateRangeChange}
         errorClassName="hidden"
@@ -594,8 +586,8 @@ export default function PatientFilter({
         name="created_date"
         label="Created Date"
         value={{
-          start: getDate(filterState.created_date_after)?.toDate(),
-          end: getDate(filterState.created_date_before)?.toDate(),
+          start: getDate(filterState.created_date_after),
+          end: getDate(filterState.created_date_before),
         }}
         onChange={handleDateRangeChange}
         errorClassName="hidden"
@@ -605,8 +597,8 @@ export default function PatientFilter({
         name="modified_date"
         label="Modified Date"
         value={{
-          start: getDate(filterState.modified_date_after)?.toDate(),
-          end: getDate(filterState.modified_date_before)?.toDate(),
+          start: getDate(filterState.modified_date_after),
+          end: getDate(filterState.modified_date_before),
         }}
         onChange={handleDateRangeChange}
         errorClassName="hidden"
@@ -616,12 +608,8 @@ export default function PatientFilter({
         name="last_consultation_admission_date"
         label="Admit Date"
         value={{
-          start: getDate(
-            filterState.last_consultation_admission_date_after
-          )?.toDate(),
-          end: getDate(
-            filterState.last_consultation_admission_date_before
-          )?.toDate(),
+          start: getDate(filterState.last_consultation_discharge_date_after),
+          end: getDate(filterState.last_consultation_discharge_date_before),
         }}
         onChange={handleDateRangeChange}
         errorClassName="hidden"
@@ -631,12 +619,8 @@ export default function PatientFilter({
         name="last_consultation_discharge_date"
         label="Discharge Date"
         value={{
-          start: getDate(
-            filterState.last_consultation_discharge_date_after
-          )?.toDate(),
-          end: getDate(
-            filterState.last_consultation_discharge_date_before
-          )?.toDate(),
+          start: getDate(filterState.last_consultation_discharge_date_after),
+          end: getDate(filterState.last_consultation_discharge_date_before),
         }}
         onChange={handleDateRangeChange}
         errorClassName="hidden"
@@ -648,10 +632,10 @@ export default function PatientFilter({
         value={{
           start: getDate(
             filterState.last_consultation_symptoms_onset_date_after
-          )?.toDate(),
+          ),
           end: getDate(
             filterState.last_consultation_symptoms_onset_date_before
-          )?.toDate(),
+          ),
         }}
         onChange={handleDateRangeChange}
         errorClassName="hidden"
@@ -661,8 +645,8 @@ export default function PatientFilter({
         name="last_vaccinated_date"
         label="Vaccination Date"
         value={{
-          start: getDate(filterState.last_vaccinated_date_after)?.toDate(),
-          end: getDate(filterState.last_vaccinated_date_before)?.toDate(),
+          start: getDate(filterState.last_vaccinated_date_after),
+          end: getDate(filterState.last_vaccinated_date_before),
         }}
         onChange={handleDateRangeChange}
         errorClassName="hidden"
@@ -675,7 +659,12 @@ export default function PatientFilter({
             name="age_min"
             placeholder="Min. age"
             label={null}
-            value={filterState.age_min}
+            value={
+              filterState.age_min &&
+              (filterState.age_min > 0 ? filterState.age_min : 0)
+            }
+            type="number"
+            min={0}
             onChange={handleFormFieldChange}
             errorClassName="hidden"
           />
@@ -683,7 +672,12 @@ export default function PatientFilter({
             name="age_max"
             placeholder="Max. age"
             label={null}
-            value={filterState.age_max}
+            type="number"
+            min={0}
+            value={
+              filterState.age_max &&
+              (filterState.age_max > 0 ? filterState.age_max : 0)
+            }
             onChange={handleFormFieldChange}
             errorClassName="hidden"
           />

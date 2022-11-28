@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { Link } from "raviger";
 
 export default function BadgesList(props: any) {
-  const { appliedFilters, updateFilter } = props;
+  const { appliedFilters, FilterBadges } = props;
   const [orginFacilityName, setOrginFacilityName] = useState("");
   const [approvingFacilityName, setApprovingFacilityName] = useState("");
   const [assignedFacilityName, setAssignedFacilityName] = useState("");
@@ -12,127 +11,57 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.orgin_facility) {
-        const res = await dispatch(
-          getAnyFacility(appliedFilters.orgin_facility, "orgin_facility")
-        );
-
-        setOrginFacilityName(res?.data?.name);
-      } else {
-        setOrginFacilityName("");
-      }
+      if (!appliedFilters.orgin_facility) return setOrginFacilityName("");
+      const res = await dispatch(
+        getAnyFacility(appliedFilters.orgin_facility, "orgin_facility")
+      );
+      setOrginFacilityName(res?.data?.name);
     }
     fetchData();
   }, [dispatch, appliedFilters.orgin_facility]);
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.approving_facility) {
-        const res = await dispatch(
-          getAnyFacility(
-            appliedFilters.approving_facility,
-            "approving_facility"
-          )
-        );
-
-        setApprovingFacilityName(res?.data?.name);
-      } else {
-        setApprovingFacilityName("");
-      }
+      if (!appliedFilters.approving_facility)
+        return setApprovingFacilityName("");
+      const res = await dispatch(
+        getAnyFacility(appliedFilters.approving_facility, "approving_facility")
+      );
+      setApprovingFacilityName(res?.data?.name);
     }
     fetchData();
   }, [dispatch, appliedFilters.approving_facility]);
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.assigned_facility) {
-        const res = await dispatch(
-          getAnyFacility(appliedFilters.assigned_facility, "assigned_facility")
-        );
-
-        setAssignedFacilityName(res?.data?.name);
-      } else {
-        setAssignedFacilityName("");
-      }
+      if (!appliedFilters.assigned_facility) return setAssignedFacilityName("");
+      const res = await dispatch(
+        getAnyFacility(appliedFilters.assigned_facility, "assigned_facility")
+      );
+      setAssignedFacilityName(res?.data?.name);
     }
     fetchData();
   }, [dispatch, appliedFilters.assigned_facility]);
 
-  const filtersExists = () => {
-    const { limit: _, offset: __, ...rest } = appliedFilters;
-    return Object.values(rest).some((value) => value);
-  };
-
-  const removeFilter = (key: string) => {
-    updateFilter({ ...appliedFilters, [key]: "" });
-  };
-
-  const badge = (key: string, value: any, paramKey: string) => {
-    return (
-      value && (
-        <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={() => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
-  };
-
   return (
-    <div className="flex flex-wrap mt-4 ml-2">
-      {badge("Ordering", appliedFilters.ordering, "ordering")}
-      {badge(
-        "status",
-        appliedFilters.status != "--" && appliedFilters.status,
-        "status"
-      )}
-      {badge(
-        "Emergency",
-        appliedFilters.emergency === "true"
-          ? "yes"
-          : appliedFilters.emergency === "false"
-          ? "no"
-          : undefined,
-        "emergency"
-      )}
-      {badge(
-        "Modified After",
-        appliedFilters.modified_date_after,
-        "modified_date_after"
-      )}
-      {badge(
-        "Modified Before",
-        appliedFilters.modified_date_before,
-        "modified_date_before"
-      )}
-      {badge(
-        "Created Before",
-        appliedFilters.created_date_before,
-        "created_date_before"
-      )}
-      {badge(
-        "Created After",
-        appliedFilters.created_date_after,
-        "created_date_after"
-      )}
-      {badge("Origin Facility", orginFacilityName, "orgin_facility")}
-      {badge("Approving Facility", approvingFacilityName, "approving_facility")}
-      {badge("Assigned Facility", assignedFacilityName, "assigned_facility")}
-
-      {filtersExists() && (
-        <Link
-          href="/resource"
-          className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border cursor-pointer hover:border-gray-700 hover:text-gray-900"
-        >
-          <i className="fas fa-minus-circle fa-lg mr-1.5"></i>
-          <span>Clear All Filters</span>
-        </Link>
-      )}
-    </div>
+    <FilterBadges
+      badges={({ badge, value, boolean, dateRange }: any) => [
+        badge("Ordering", "ordering"),
+        badge("Status", "status"),
+        boolean("Emergency", "emergency", {
+          trueValue: "yes",
+          falseValue: "no",
+        }),
+        ...dateRange("Modified", "modified_date"),
+        ...dateRange("Created", "created_date"),
+        value("Origin facility", "orgin_facility", orginFacilityName),
+        value(
+          "Approving facility",
+          "approving_facility",
+          approvingFacilityName
+        ),
+        value("Assigned facility", "assigned_facility", assignedFacilityName),
+      ]}
+    />
   );
 }

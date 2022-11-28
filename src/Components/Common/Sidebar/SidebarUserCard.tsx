@@ -21,11 +21,13 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
       <Link href="/user/profile" className="flex-none">
         <i className="text-white text-3xl uil uil-user-circle" />
       </Link>
-      <div className={`${shrinked ? "hidden" : "grow"} pl-3 flex flex-col`}>
-        <div className="h-6 flex items-center">
+      <div
+        className={`${shrinked ? "hidden" : "grow"} pl-3 flex flex-col min-w-0`}
+      >
+        <div className="min-h-6 flex items-center">
           <Link
             href="/user/profile"
-            className="font-semibold text-white flex-nowrap overflow-hidden truncate"
+            className="font-semibold text-white flex-nowrap overflow-hidden break-words"
           >
             {profileName}
           </Link>

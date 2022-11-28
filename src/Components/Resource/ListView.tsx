@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import loadable from "@loadable/component";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import moment from "moment";
 import GetAppIcon from "@material-ui/icons/GetApp";
@@ -10,12 +10,12 @@ import {
   downloadResourceRequests,
 } from "../../Redux/actions";
 import ResourceFilter from "./ResourceFilter";
-import Pagination from "../Common/Pagination";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-import { limit, formatFilter } from "./Commons";
+import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
 import { formatDate } from "../../Utils/utils";
+import useFilters from "../../Common/hooks/useFilters";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -24,22 +24,14 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ListView() {
   const dispatch: any = useDispatch();
-  const [qParams, setQueryParams] = useQueryParams();
+  const { qParams, Pagination, FilterBadges, AdvancedFilters, resultsPerPage } =
+    useFilters({});
   const [downloadFile, setDownloadFile] = useState("");
   const [data, setData] = useState<any[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
 
   const triggerDownload = async () => {
     // while is getting ready
@@ -52,31 +44,9 @@ export default function ListView() {
     setDownloadFile(res.data);
     document.getElementById("resourceRequests-ALL")?.click();
   };
-
-  const updateQuery = (filter: any) => {
-    // prevent empty filters from cluttering the url
-    const nParams = Object.keys(filter).reduce(
-      (a, k) =>
-        filter[k] && filter[k] !== "--"
-          ? Object.assign(a, { [k]: filter[k] })
-          : a,
-      {}
-    );
-    setQueryParams(nParams, { replace: true });
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
-
-  const onBoardViewBtnClick = () => navigate("/resource/board-view", qParams);
-
+  const onBoardViewBtnClick = () =>
+    navigate("/resource/board-view", { query: qParams });
   const appliedFilters = formatFilter(qParams);
-  const updateFilter = (params: any) => {
-    updateQuery(params);
-  };
 
   const refreshList = () => {
     fetchData();
@@ -86,7 +56,10 @@ export default function ListView() {
     setIsLoading(true);
     dispatch(
       listResourceRequests(
-        formatFilter({ ...qParams, offset }),
+        formatFilter({
+          ...qParams,
+          offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+        }),
         "resource-list-call"
       )
     ).then((res: any) => {
@@ -112,7 +85,7 @@ export default function ListView() {
     qParams.modified_date_before,
     qParams.modified_date_after,
     qParams.ordering,
-    offset,
+    qParams.page,
   ]);
 
   const showResourceCardList = (data: any) => {
@@ -246,9 +219,7 @@ export default function ListView() {
           breadcrumbs={false}
         />
 
-        <div className="w-32">
-          {/* dummy div to align space as per board view */}
-        </div>
+        <div className="w-32" />
         <div className="my-2 md:my-0">
           <button
             className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
@@ -262,17 +233,11 @@ export default function ListView() {
           </button>
         </div>
         <div className="flex items-start gap-2">
-          <button
-            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={(_) => setShowFilters((show) => !show)}
-          >
-            <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-            <span>Filters</span>
-          </button>
+          <AdvancedFilters.Button />
         </div>
       </div>
 
-      <BadgesList appliedFilters={appliedFilters} updateFilter={updateFilter} />
+      <BadgesList {...{ appliedFilters, FilterBadges }} />
 
       <div className="px-1">
         {isLoading ? (
@@ -292,18 +257,7 @@ export default function ListView() {
             <div className="flex flex-wrap md:-mx-4 mb-5">
               {showResourceCardList(data)}
             </div>
-            <div>
-              {totalCount > limit && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Pagination
-                    cPage={currentPage}
-                    defaultPerPage={limit}
-                    data={{ totalCount }}
-                    onChange={handlePagination}
-                  />
-                </div>
-              )}
-            </div>
+            <Pagination totalCount={totalCount} />
           </div>
         )}
       </div>
@@ -315,12 +269,7 @@ export default function ListView() {
         className="hidden"
         id={"resourceRequests-ALL"}
       />
-      <ResourceFilter
-        filter={qParams}
-        onChange={applyFilter}
-        open={showFilters}
-        setOpen={setShowFilters}
-      />
+      <ResourceFilter {...AdvancedFilters.props} />
     </div>
   );
 }

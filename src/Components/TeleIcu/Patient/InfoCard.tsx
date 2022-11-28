@@ -4,7 +4,7 @@ import { PatientModel } from "../../Patient/models";
 import { Modal } from "@material-ui/core";
 import Beds from "../../Facility/Consultations/Beds";
 import { useState } from "react";
-import moment from "moment";
+// import moment from "moment";
 import { PatientCategoryTailwindClass } from "../../../Common/constants";
 import { PatientCategory } from "../../Facility/models";
 
@@ -108,7 +108,8 @@ export default function TeleICUPatientInfoCard(props: {
             {patient.name}
           </div>
           <div>
-            {patient.review_time &&
+            {/* TODO: Re-enable Review Missed | Temporary Hack for Launch */}
+            {/* {patient.review_time &&
               !patient.last_consultation?.discharge_date &&
               Number(patient.last_consultation?.review_interval) > 0 && (
                 <div
@@ -125,7 +126,7 @@ export default function TeleICUPatientInfoCard(props: {
                     : "Review Missed: ") +
                     moment(patient.review_time).format("lll")}
                 </div>
-              )}
+              )} */}
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-1 lg:mb-2">
             <Link
