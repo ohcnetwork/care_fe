@@ -780,6 +780,7 @@ export const PatientManager = (props: any) => {
                   Search by Primary Number
                 </div>
                 <PhoneNumberField
+                  bgColor="bg-white"
                   value={qParams.phone_number || "+91"}
                   onChange={(value: string) =>
                     updateQuery({ phone_number: value })
@@ -793,6 +794,7 @@ export const PatientManager = (props: any) => {
                   Search by Emergency Number
                 </div>
                 <PhoneNumberField
+                  bgColor="bg-white"
                   value={qParams.emergency_phone_number || "+91"}
                   onChange={(value: string) =>
                     updateQuery({ emergency_phone_number: value })
