@@ -1,13 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  InputLabel,
-  Button,
-  Tooltip,
-} from "@material-ui/core";
-import { ErrorHelperText } from "../../Common/HelperInputFields";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import { Card, CardContent } from "@material-ui/core";
 import { AssetData } from "../AssetTypes";
 import { useDispatch } from "react-redux";
 import { partialUpdateAsset, createAssetBed } from "../../../Redux/actions";
@@ -18,7 +10,8 @@ import { getCameraConfig } from "../../../Utils/transformUtils";
 import CameraConfigure from "../configure/CameraConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
-import LegendInput from "../../../CAREUI/interactive/LegendInput";
+import TextFormField from "../../Form/FormFields/TextFormField";
+import ButtonV2 from "../../Common/components/ButtonV2";
 
 interface ONVIFCameraProps {
   assetId: string;
@@ -124,72 +117,67 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1 lg:grid-cols-2 col-span-1">
                 <div>
-                  <InputLabel id="middleware-hostname">
+                  <label id="middleware-hostname">
                     Hospital Middleware Hostname
-                  </InputLabel>
-                  <LegendInput
-                    type="TEXT"
+                  </label>
+                  <TextFormField
                     name="middleware-hostname"
                     id="middleware-hostname"
+                    type="text"
+                    autoComplete="off"
                     value={middlewareHostname}
-                    onChange={(e) => setMiddlewareHostname(e.target.value)}
+                    onChange={(e) => setMiddlewareHostname(e.value)}
                     className="mt-2"
                   />
                 </div>
                 <div>
-                  <InputLabel id="camera-addess">Local IP Address</InputLabel>
-                  <LegendInput
-                    type="TEXT"
+                  <label id="camera-addess">Local IP Address</label>
+                  <TextFormField
                     name="camera-access-addess"
                     id="camera-access-addess"
+                    type="text"
+                    autoComplete="new-addess"
                     value={cameraAddress}
-                    onChange={(e) => setCameraAddress(e.target.value)}
-                    error={ipadrdress_error !== ""}
+                    onChange={(e) => setCameraAddress(e.value)}
                     className="mt-2"
+                    error={ipadrdress_error}
                   />
-                  <ErrorHelperText error={ipadrdress_error} />
                 </div>
                 <div>
-                  <InputLabel id="camera-access-key">
+                  <label id="camera-access-key">
                     Camera Access Key{" "}
-                    <Tooltip
-                      title={
+                    <button className="tooltip">
+                      <span className="tooltip-text tooltip-right">
                         <span className="text-sm font-semibold">
                           Camera Access Key format: username:password:uuid
                         </span>
-                      }
-                      placement="right-start"
-                      arrow
-                    >
+                      </span>
                       <button className="rounded">
                         <i className="fa-solid fa-circle-question"></i>
                       </button>
-                    </Tooltip>
-                  </InputLabel>
-                  <LegendInput
-                    type="PASSWORD"
+                    </button>
+                  </label>
+                  <TextFormField
                     name="camera-access-key"
                     id="camera-access-key"
+                    type="password"
+                    autoComplete="new-password" // Chrome ignores autocomplete=off for password fields
                     value={cameraAccessKey}
-                    onChange={(e) => setCameraAccessKey(e.target.value)}
+                    onChange={(e) => setCameraAccessKey(e.value)}
                     className="mt-2"
                   />
                 </div>
               </div>
 
               <div className="flex justify-between mt-4">
-                <Button
-                  color="primary"
-                  variant="contained"
+                <ButtonV2
                   type="submit"
-                  style={{ marginLeft: "auto" }}
-                  fullWidth
-                  className="w-full md:w-auto"
-                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
+                  className="w-full md:w-auto ml-auto"
                   onClick={handleSubmit}
                 >
-                  Set Configuration
-                </Button>
+                  <i className="uil uil-check-circle text-lg"></i> Set
+                  Configuration
+                </ButtonV2>
               </div>
             </CardContent>
           </form>
