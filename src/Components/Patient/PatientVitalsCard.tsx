@@ -1,12 +1,12 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { listAssetBeds } from "../../../Redux/actions";
-import { AssetData } from "../../Assets/AssetTypes";
-import ToolTip from "../../Common/utils/Tooltip";
-import { PatientModel } from "../../Patient/models";
+import { listAssetBeds } from "../../Redux/actions";
+import { AssetData } from "../Assets/AssetTypes";
+import ToolTip from "../Common/utils/Tooltip";
+import { PatientModel } from "./models";
 import Waveform, { WaveformType } from "./Waveform";
 
-export interface ITeleICUPatientVitalsCardProps {
+export interface IPatientVitalsCardProps {
   patient: PatientModel;
 }
 
@@ -31,9 +31,9 @@ const getVital = (
   return "";
 };
 
-export default function TeleICUPatientVitalsCard({
+export default function PatientVitalsCard({
   patient,
-}: ITeleICUPatientVitalsCardProps) {
+}: IPatientVitalsCardProps) {
   const wsClient = useRef<WebSocket>();
 
   const [waveforms, setWaveForms] = useState<WaveformType[] | null>(null);

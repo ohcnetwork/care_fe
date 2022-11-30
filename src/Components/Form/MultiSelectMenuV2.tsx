@@ -16,6 +16,7 @@ type Props<T, V = T> = {
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
   className?: string;
+  disabled?: boolean;
   renderSelectedOptions?: OptionCallback<T[], React.ReactNode>;
   onChange: OptionCallback<V[]>;
 };

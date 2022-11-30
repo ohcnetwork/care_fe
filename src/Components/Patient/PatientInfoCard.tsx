@@ -1,12 +1,11 @@
 import { Link } from "raviger";
-import { getDimensionOrDash } from "../../../Common/utils";
-import { PatientModel } from "../../Patient/models";
+import { getDimensionOrDash } from "../../Common/utils";
+import { PatientModel } from "./models";
 import { Modal } from "@material-ui/core";
-import Beds from "../../Facility/Consultations/Beds";
+import Beds from "../Facility/Consultations/Beds";
 import { useState } from "react";
-// import moment from "moment";
-import { PatientCategoryTailwindClass } from "../../../Common/constants";
-import { PatientCategory } from "../../Facility/models";
+import { PatientCategoryTailwindClass } from "../../Common/constants";
+import { PatientCategory } from "../Facility/models";
 
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
@@ -16,7 +15,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   unknown: "UNKNOWN",
 };
 
-export default function TeleICUPatientInfoCard(props: {
+export default function PatientInfoCard(props: {
   patient: PatientModel;
   ip_no?: string | undefined;
   fetchPatientData?: (state: { aborted: boolean }) => void;
