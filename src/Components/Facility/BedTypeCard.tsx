@@ -67,9 +67,6 @@ const BedTypeCard = (props: BedTypeProps) => {
       <div className="flex flex-col shadow-sm border-[0.5px] border-[#D2D6DC] rounded-sm p-4 h-full">
         <div className="flex justify-between">
           <div className="font-medium text-sm">{roomType}</div>
-          <div className="bg-[#84E1BC40] w-6 h-6 rounded-sm flex justify-center items-center">
-            <i className="fas fa-arrows-rotate  text-primary-500"></i>
-          </div>
         </div>
         <div className="font-bold text-xl mt-4">
           {props.current_capacity} / {props.total_capacity}
