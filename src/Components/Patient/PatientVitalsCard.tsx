@@ -6,7 +6,7 @@ import ToolTip from "../Common/utils/Tooltip";
 import { PatientModel } from "./models";
 import Waveform, { WaveformType } from "./Waveform";
 
-export interface PatientVitalsCardProps {
+export interface IPatientVitalsCardProps {
   patient: PatientModel;
 }
 
@@ -31,7 +31,9 @@ const getVital = (
   return "";
 };
 
-export default function PatientVitalsCard({ patient }: PatientVitalsCardProps) {
+export default function PatientVitalsCard({
+  patient,
+}: IPatientVitalsCardProps) {
   const wsClient = useRef<WebSocket>();
 
   const [waveforms, setWaveForms] = useState<WaveformType[] | null>(null);
