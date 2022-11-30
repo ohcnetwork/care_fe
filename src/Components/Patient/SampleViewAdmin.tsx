@@ -1,6 +1,5 @@
 import { CircularProgress } from "@material-ui/core";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
 import moment from "moment";
@@ -38,7 +37,7 @@ export default function SampleViewAdmin() {
     updateQuery,
     Pagination,
     FilterBadges,
-    advancedFilter,
+    AdvancedFilters,
     resultsPerPage,
   } = useFilters({
     limit: 10,
@@ -386,47 +385,9 @@ export default function SampleViewAdmin() {
 
           <div>
             <div className="flex items-start mt-2 mb-2 ">
-              <button
-                className="btn btn-primary-ghost md:mt-7 w-full"
-                onClick={() => advancedFilter.setShow(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
+              <AdvancedFilters.Button />
             </div>
-            <SlideOver {...advancedFilter}>
-              <div className="bg-white min-h-screen p-4">
-                <SampleFilter {...advancedFilter} />
-              </div>
-            </SlideOver>
+            <SampleFilter {...AdvancedFilters.props} />
           </div>
         </div>
         <FilterBadges

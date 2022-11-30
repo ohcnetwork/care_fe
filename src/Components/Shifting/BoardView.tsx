@@ -4,7 +4,6 @@ import ListFilter from "./ListFilter";
 import ShiftingBoard from "./ShiftingBoard";
 import BadgesList from "./BadgesList";
 import { SHIFTING_CHOICES } from "../../Common/constants";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import { downloadShiftRequests } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
@@ -30,7 +29,7 @@ const ACTIVE = shiftStatusOptions.filter(
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function BoardView() {
-  const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
+  const { qParams, updateQuery, FilterBadges, AdvancedFilters } = useFilters({
     limit: -1,
   });
   const dispatch: any = useDispatch();
@@ -112,13 +111,7 @@ export default function BoardView() {
               <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
               List View
             </button>
-            <button
-              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-28 md:w-36 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-              onClick={() => advancedFilter.setShow(true)}
-            >
-              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-              <span>Filters</span>
-            </button>
+            <AdvancedFilters.Button />
           </div>
         </div>
       </div>
@@ -146,11 +139,7 @@ export default function BoardView() {
         className="hidden"
         id={"shiftRequests-ALL"}
       />
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter {...advancedFilter} />
-        </div>
-      </SlideOver>
+      <ListFilter {...AdvancedFilters.props} />
     </div>
   );
 }

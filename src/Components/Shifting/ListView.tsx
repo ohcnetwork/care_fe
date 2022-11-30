@@ -10,7 +10,6 @@ import {
   completeTransfer,
   downloadShiftRequests,
 } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import { Modal, Button, CircularProgress } from "@material-ui/core";
 
@@ -32,7 +31,7 @@ export default function ListView() {
     updateQuery,
     Pagination,
     FilterBadges,
-    advancedFilter,
+    AdvancedFilters,
     resultsPerPage,
   } = useFilters({});
   const [downloadFile, setDownloadFile] = useState("");
@@ -357,13 +356,7 @@ export default function ListView() {
           </button>
         </div>
         <div className="flex items-start gap-2">
-          <button
-            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={() => advancedFilter.setShow(true)}
-          >
-            <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-            <span>Filters</span>
-          </button>
+          <AdvancedFilters.Button />
         </div>
       </div>
       <BadgesList {...{ qParams, FilterBadges }} />
@@ -399,11 +392,7 @@ export default function ListView() {
         className="hidden"
         id={"shiftRequests-ALL"}
       />
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter showShiftingStatus={true} {...advancedFilter} />
-        </div>
-      </SlideOver>
+      <ListFilter showShiftingStatus={true} {...AdvancedFilters.props} />
     </div>
   );
 }

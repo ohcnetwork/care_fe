@@ -5,7 +5,6 @@ import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import moment from "moment";
 import { CSVLink } from "react-csv";
@@ -32,7 +31,7 @@ export default function ResultList() {
     updateQuery,
     Pagination,
     FilterBadges,
-    advancedFilter,
+    AdvancedFilters,
     resultsPerPage,
   } = useFilters({ limit: 14 });
   const [showDialog, setShowDialog] = useState(false);
@@ -309,13 +308,7 @@ export default function ResultList() {
             </button>
           </div>
           <div className="flex ml-auto gap-2 md:pt-0 pt-2">
-            <button
-              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-              onClick={() => advancedFilter.setShow(true)}
-            >
-              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-              <span>Filters</span>
-            </button>
+            <AdvancedFilters.Button />
           </div>
         </div>
       </div>
@@ -367,11 +360,7 @@ export default function ResultList() {
         className="hidden"
         id={"downloadCSV"}
       />
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter {...advancedFilter} dataList={lsgWardData} />
-        </div>
-      </SlideOver>
+      <ListFilter {...AdvancedFilters.props} dataList={lsgWardData} />
     </div>
   );
 }
