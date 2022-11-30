@@ -710,9 +710,9 @@ export const UserAdd = (props: UserProps) => {
                             </span>
                           ) : (
                             <>
-                              " "
                               {usernameExists === userExistsEnums.exists ? (
                                 <div>
+                                  {" "}
                                   <i className="fas fa-circle-xmark text-red-500" />
                                   <span className="text-red-500">
                                     Username is not available
@@ -720,6 +720,7 @@ export const UserAdd = (props: UserProps) => {
                                 </div>
                               ) : (
                                 <div>
+                                  {" "}
                                   <i className="fas fa-circle-check text-green-500" />
                                   <span className="text-primary-500">
                                     Username is available
