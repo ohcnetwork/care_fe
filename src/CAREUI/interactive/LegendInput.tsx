@@ -73,9 +73,7 @@ export default function LegendInput(props: InputProps) {
 
         <input
           ref={ref}
-          type={
-            props.type === "PASSWORD" && !showPassword ? "password" : "text"
-          }
+          type={props.type === "PASSWORD" && showPassword ? "text" : props.type}
           name={props.name}
           id={props.id || props.name}
           placeholder={props.placeholder}

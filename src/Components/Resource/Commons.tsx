@@ -1,5 +1,3 @@
-export const limit = 14;
-
 export const initialFilterData = {
   status: "--",
   facility: "",
@@ -7,7 +5,7 @@ export const initialFilterData = {
   approving_facility: "",
   assigned_facility: "",
   emergency: "--",
-  limit: limit,
+  limit: 14,
   created_date_before: null,
   created_date_after: null,
   modified_date_before: null,
@@ -30,7 +28,7 @@ export const formatFilter = (params: any) => {
         : filter.emergency === "yes"
         ? "true"
         : "false",
-    limit: limit,
+    limit: 14,
     offset: filter.offset,
     created_date_before: filter.created_date_before || undefined,
     created_date_after: filter.created_date_after || undefined,

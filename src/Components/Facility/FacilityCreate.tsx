@@ -40,8 +40,8 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import {
+  ErrorHelperText,
   MultilineInputField,
-  MultiSelectField,
   PhoneNumberField,
   SelectField,
   TextInputField,
@@ -49,6 +49,7 @@ import {
 import GLocationPicker from "../Common/GLocationPicker";
 import { goBack } from "../../Utils/utils";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -73,7 +74,7 @@ type FacilityForm = {
   state: string;
   district: string;
   local_body: string;
-  features: string[];
+  features: number[];
   ward: string;
   kasp_empanelled: string;
   address: string;
@@ -421,8 +422,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         features: state.form.features,
         ward: state.form.ward,
         kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
-        latitude: state.form.latitude,
-        longitude: state.form.longitude,
+        latitude: state.form.latitude || null,
+        longitude: state.form.longitude || null,
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
         )?.format("E.164"),
@@ -572,17 +573,16 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
               <div className="">
                 <InputLabel id="features-label">Features</InputLabel>
-                <MultiSelectField
-                  data-test="facility-features"
-                  name="features"
-                  variant="outlined"
-                  margin="dense"
+                <MultiSelectMenuV2
+                  id="features"
+                  placeholder="Features"
                   value={state.form.features}
                   options={FACILITY_FEATURE_TYPES}
-                  onChange={(e) => handleChange(e)}
-                  optionValue="name"
-                  errors={state.errors.features}
+                  optionLabel={(o) => o.name}
+                  optionValue={(o) => o.id}
+                  onChange={(o) => handleValueChange(o, "features")}
                 />
+                <ErrorHelperText error={state.errors.features} />
               </div>
               <div>
                 <InputLabel id="gender-label">State*</InputLabel>
