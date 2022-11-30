@@ -1,11 +1,7 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
+import { operateAsset } from "../../Redux/actions";
 
 export interface IAsset {
-  username: string;
-  password: string;
-  hostname: string;
-  middlewareHostname: string;
-  port: number;
+  id: string;
 }
 
 interface PTZPayload {
@@ -23,6 +19,7 @@ export interface PTZState {
 
 interface UseMSEMediaPlayerOption {
   config: IAsset;
+  dispatch: any;
 }
 
 export interface ICameraAssetState {
@@ -54,8 +51,8 @@ interface UseMSEMediaPlayerReturnType {
 }
 
 interface IOptions {
-  onSuccess?: (resp: AxiosResponse) => void;
-  onError?: (err: AxiosError) => void;
+  onSuccess?: (resp: Record<any, any>) => void;
+  onError?: (resp: Record<any, any>) => void;
 }
 
 export enum PTZ {
@@ -68,27 +65,35 @@ export enum PTZ {
 }
 
 const getCameraStatus =
-  (config: IAsset) =>
-  (options: IOptions = {}) => {
-    const { hostname, middlewareHostname, password, port, username } = config;
-    axios
-      .get(
-        `https://${middlewareHostname}/status?hostname=${hostname}&port=${port}&username=${username}&password=${password}`
-      )
-      .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
-      .catch((err: any) => options?.onError && options.onError(err));
+  (config: IAsset, dispatch: any) =>
+  async (options: IOptions = {}) => {
+    const resp = await dispatch(
+      operateAsset(config.id, {
+        action: {
+          type: "get_status",
+        },
+      })
+    );
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
   };
 
 const getPresets =
-  (config: IAsset) =>
-  (options: IOptions = {}) => {
-    const { hostname, middlewareHostname, password, port, username } = config;
-    axios
-      .get(
-        `https://${middlewareHostname}/presets?hostname=${hostname}&port=${port}&username=${username}&password=${password}`
-      )
-      .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
-      .catch((err: any) => options?.onError && options.onError(err));
+  (config: IAsset, dispatch: any) =>
+  async (options: IOptions = {}) => {
+    const resp = await dispatch(
+      operateAsset(config.id, {
+        action: {
+          type: "get_presets",
+        },
+      })
+    );
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
   };
 
 interface IGotoPresetPayload {
@@ -96,44 +101,54 @@ interface IGotoPresetPayload {
 }
 
 const gotoPreset =
-  (config: IAsset) =>
-  (payload: IGotoPresetPayload, options: IOptions = {}) => {
-    const { middlewareHostname } = config;
-    axios
-      .post(`https://${middlewareHostname}/gotoPreset`, {
-        ...payload,
-        ...config,
+  (config: IAsset, dispatch: any) =>
+  async (payload: IGotoPresetPayload, options: IOptions = {}) => {
+    const resp = await dispatch(
+      operateAsset(config.id, {
+        action: {
+          type: "goto_preset",
+          data: payload,
+        },
       })
-      .then(
-        (resp: AxiosResponse) => options?.onSuccess && options.onSuccess(resp)
-      )
-      .catch((err: AxiosError) => options?.onError && options.onError(err));
+    );
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
   };
 
 const absoluteMove =
-  (config: IAsset) =>
-  (payload: PTZPayload, options: IOptions = {}) => {
-    const { middlewareHostname } = config;
-    axios
-      .post(`https://${middlewareHostname}/absoluteMove`, {
-        ...config,
-        ...payload,
+  (config: IAsset, dispatch: any) =>
+  async (payload: PTZPayload, options: IOptions = {}) => {
+    const resp = await dispatch(
+      operateAsset(config.id, {
+        action: {
+          type: "absolute_move",
+          data: payload,
+        },
       })
-      .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
-      .catch((err: any) => options?.onError && options.onError(err));
+    );
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
   };
 
 const relativeMove =
-  (config: IAsset) =>
-  (payload: PTZPayload, options: IOptions = {}) => {
-    const { middlewareHostname } = config;
-    axios
-      .post(`https://${middlewareHostname}/relativeMove`, {
-        ...payload,
-        ...config,
+  (config: IAsset, dispatch: any) =>
+  async (payload: PTZPayload, options: IOptions = {}) => {
+    const resp = await dispatch(
+      operateAsset(config.id, {
+        action: {
+          type: "relative_move",
+          data: payload,
+        },
       })
-      .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
-      .catch((err: any) => options?.onError && options.onError(err));
+    );
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
   };
 
 export const getPTZPayload = (
@@ -171,13 +186,14 @@ export const getPTZPayload = (
 
 export const useFeedPTZ = ({
   config,
+  dispatch,
 }: UseMSEMediaPlayerOption): UseMSEMediaPlayerReturnType => {
   return {
-    absoluteMove: absoluteMove(config),
-    relativeMove: relativeMove(config),
+    absoluteMove: absoluteMove(config, dispatch),
+    relativeMove: relativeMove(config, dispatch),
     getPTZPayload,
-    getCameraStatus: getCameraStatus(config),
-    getPresets: getPresets(config),
-    gotoPreset: gotoPreset(config),
+    getCameraStatus: getCameraStatus(config, dispatch),
+    getPresets: getPresets(config, dispatch),
+    gotoPreset: gotoPreset(config, dispatch),
   };
 };

@@ -1,247 +1,96 @@
-import React, { useState, useEffect } from "react";
-import { KASP_STRING } from "../../Common/constants";
+import { useState, useEffect } from "react";
 import { getUserList, getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { Link } from "raviger";
+
+const booleanFilterOptions = {
+  trueValue: "yes",
+  falseValue: "no",
+};
 
 export default function BadgesList(props: any) {
-  const { filterParams, appliedFilters, local, updateFilter } = props;
-
+  const { qParams, FilterBadges } = props;
   const [assignedUsername, setAssignedUsername] = useState("");
   const [assignedFacilityName, setAssignedFacilityName] = useState("");
-  const [orginFacilityName, setOrginFacilityName] = useState("");
+  const [originFacilityName, setOriginFacilityName] = useState("");
   const [approvingFacilityName, setApprovingFacilityName] = useState("");
   const dispatch: any = useDispatch();
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.assigned_to || local.assigned_to) {
-        const res = await dispatch(
-          getUserList({ id: appliedFilters.assigned_to || local.assigned_to })
-        );
-
-        const { first_name, last_name } = res?.data?.results[0];
-        setAssignedUsername(`${first_name} ${last_name}`);
-      } else {
-        setAssignedUsername("");
-      }
+      if (!qParams.assigned_to) return setAssignedUsername("");
+      const res = await dispatch(getUserList({ id: qParams.assigned_to }));
+      const { first_name, last_name } = res?.data?.results[0];
+      setAssignedUsername(`${first_name} ${last_name}`);
     }
     fetchData();
-  }, [dispatch, appliedFilters.assigned_to]);
+  }, [dispatch, qParams.assigned_to]);
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.orgin_facility || local.orgin_facility) {
-        const res = await dispatch(
-          getAnyFacility(
-            appliedFilters.orgin_facility || local.orgin_facility,
-            "orgin_facility"
-          )
-        );
-
-        setOrginFacilityName(res?.data?.name);
-      } else {
-        setOrginFacilityName("");
-      }
+      if (!qParams.orgin_facility) return setOriginFacilityName("");
+      const res = await dispatch(
+        getAnyFacility(qParams.orgin_facility, "orgin_facility")
+      );
+      setOriginFacilityName(res?.data?.name);
     }
     fetchData();
-  }, [dispatch, appliedFilters.orgin_facility]);
+  }, [dispatch, qParams.orgin_facility]);
 
   useEffect(() => {
     async function fetchData() {
-      if (
-        appliedFilters.shifting_approving_facility ||
-        local.shifting_approving_facility
-      ) {
-        const res = await dispatch(
-          getAnyFacility(
-            appliedFilters.shifting_approving_facility ||
-              local.shifting_approving_facility,
-            "shifting_approving_facility"
-          )
-        );
-
-        setApprovingFacilityName(res?.data?.name);
-      } else {
-        setApprovingFacilityName("");
-      }
+      if (!qParams.shifting_approving_facility)
+        return setApprovingFacilityName("");
+      const res = await dispatch(
+        getAnyFacility(
+          qParams.shifting_approving_facility,
+          "shifting_approving_facility"
+        )
+      );
+      setApprovingFacilityName(res?.data?.name);
     }
     fetchData();
-  }, [dispatch, appliedFilters.shifting_approving_facility]);
+  }, [dispatch, qParams.shifting_approving_facility]);
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.assigned_facility || local.assigned_facility) {
-        const res = await dispatch(
-          getAnyFacility(
-            appliedFilters.assigned_facility || local.assigned_facility,
-            "assigned_facility"
-          )
-        );
-
-        setAssignedFacilityName(res?.data?.name);
-      } else {
-        setAssignedFacilityName("");
-      }
+      if (!qParams.assigned_facility) return setAssignedFacilityName("");
+      const res = await dispatch(
+        getAnyFacility(qParams.assigned_facility, "assigned_facility")
+      );
+      setAssignedFacilityName(res?.data?.name);
     }
     fetchData();
-  }, [dispatch, appliedFilters.assigned_facility]);
+  }, [dispatch, qParams.assigned_facility]);
 
-  const filtersExists = () => {
-    let { limit, offset, ...rest } = filterParams;
-
-    return Object.values(rest).some((value) => value);
-  };
-
-  const clearFilters = () => {
-    localStorage.removeItem("shift-filters");
-  };
-
-  const removeFilter = (paramKey: any) => {
-    const localData: any = { ...local };
-    const params = { ...filterParams };
-
-    localData[paramKey] = "";
-    params[paramKey] = "";
-
-    if (paramKey === "assigned_to") {
-      localData["assigned_user"] = "";
-      localData["assigned_user_ref"] = "";
-
-      params["assigned_user"] = "";
-      // params["assigned_user_ref"] = "";
-    } else if (
-      paramKey === "assigned_facility" ||
-      paramKey === "orgin_facility" ||
-      paramKey === "shifting_approving_facility"
-    ) {
-      localData[`${paramKey}_ref`] = "";
-      // params[`${paramKey}_ref`] = "";
-    }
-    updateFilter(params, localData);
-  };
-  const badge = (key: string, value: any, paramKey: any) => {
-    return (
-      value && (
-        <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
-  };
   return (
-    <div className="flex items-center flex-wrap mt-4 ml-2">
-      {badge(
-        "status",
-        (appliedFilters.status != "--" && appliedFilters.status) ||
-          (local.status !== "--" && local.status),
-        "status"
-      )}
-      {badge(
-        "Emergency",
-        local.emergency === "yes" || appliedFilters.emergency === "true"
-          ? "yes"
-          : local.emergency === "no" || appliedFilters.emergency === "false"
-          ? "no"
-          : undefined,
-        "emergency"
-      )}
-      {badge(
-        `Is ${KASP_STRING}`,
-        local.is_kasp === "yes" || appliedFilters.is_kasp === "true"
-          ? "yes"
-          : local.is_kasp === "no" || appliedFilters.is_kasp === "false"
-          ? "no"
-          : undefined,
-        "is_kasp"
-      )}
-      {badge(
-        "Up Shift",
-        local.is_up_shift === "yes" || appliedFilters.is_up_shift === "true"
-          ? "yes"
-          : local.is_up_shift === "no" || appliedFilters.is_up_shift === "false"
-          ? "no"
-          : undefined,
-        "is_up_shift"
-      )}
-      {badge(
-        "Is Antenatal",
-        (local.gender === 2 || appliedFilters.gender === 2) &&
-          (local.is_antenatal === "yes" ||
-            appliedFilters.is_antenatal === "true")
-          ? "yes"
-          : local.is_antenatal === "no" ||
-            appliedFilters.is_antenatal === "false"
-          ? "no"
-          : undefined,
-        "is_antenatal"
-      )}
-      {badge(
-        "Phone Number",
-        appliedFilters.patient_phone_number || local.patient_phone_number,
-        "patient_phone_number"
-      )}
-      {badge(
-        "Patient Name",
-        appliedFilters.patient_name || local.patient_name,
-        "patient_name"
-      )}
-      {badge(
-        "Modified After",
-        appliedFilters.modified_date_after || local.modified_date_after,
-        "modified_date_after"
-      )}
-      {badge(
-        "Modified Before",
-        appliedFilters.modified_date_before || local.modified_date_before,
-        "modified_date_before"
-      )}
-      {badge(
-        "Created Before",
-        appliedFilters.created_date_before || local.created_date_before,
-        "created_date_before"
-      )}
-      {badge(
-        "Created After",
-        appliedFilters.created_date_after || local.created_date_after,
-        "created_date_after"
-      )}
-      {badge(
-        "Disease Status",
-        appliedFilters.disease_status || local.disease_status,
-        "disease_status"
-      )}
-      {badge(
-        "Breathlessness Level",
-        appliedFilters.breathlessness_level || local.breathlessness_level,
-        "breathlessness_level"
-      )}
-
-      {badge("Assigned To", assignedUsername, "assigned_to")}
-
-      {badge("Assigned Facility", assignedFacilityName, "assigned_facility")}
-      {badge("Origin Facility", orginFacilityName, "orgin_facility")}
-      {badge(
-        "Shifting Approving Facility",
-        approvingFacilityName,
-        "shifting_approving_facility"
-      )}
-      {filtersExists() && (
-        <Link
-          href="/shifting"
-          className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border cursor-pointer hover:border-gray-700 hover:text-gray-900"
-          onClick={clearFilters}
-        >
-          <i className="fas fa-minus-circle fa-lg mr-1.5"></i>
-          <span>Clear All Filters</span>
-        </Link>
-      )}
-    </div>
+    <FilterBadges
+      badges={({
+        badge,
+        boolean,
+        phoneNumber,
+        dateRange,
+        kasp,
+        value,
+      }: any) => [
+        badge("Status", "status"),
+        boolean("Emergency", "emergency", booleanFilterOptions),
+        kasp(),
+        boolean("Up shift", "is_up_shift", booleanFilterOptions),
+        boolean("Antenatal", "is_antenatal", booleanFilterOptions),
+        phoneNumber("Phone no.", "patient_phone_number"),
+        badge("Patient name", "patient_name"),
+        ...dateRange("Created", "created_date"),
+        badge("Disease status", "disease_status"),
+        badge("Breathlessness level", "breathlessness_level"),
+        value("Assigned to", "assigned_to", assignedUsername),
+        value("Facility assigned", "assigned_facility", assignedFacilityName),
+        value("Origin facility", "orgin_facility", originFacilityName),
+        value(
+          "Shifting approval facility",
+          "shifting_approving_facility",
+          approvingFacilityName
+        ),
+      ]}
+    />
   );
 }

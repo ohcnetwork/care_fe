@@ -510,15 +510,15 @@ export const UserAdd = (props: UserProps) => {
     return true;
   };
 
-  const validateRule = (valid: boolean, content: JSX.Element | string) => {
+  const validateRule = (condition: boolean, content: JSX.Element | string) => {
     return (
       <div>
-        {valid ? (
-          <i className="fas fa-circle-xmark text-red-500" />
-        ) : (
+        {condition ? (
           <i className="fas fa-circle-check text-green-500" />
+        ) : (
+          <i className="fas fa-circle-xmark text-red-500" />
         )}{" "}
-        <span className={clsx(valid ? "text-red-500" : "text-primary-500")}>
+        <span className={clsx(condition ? "text-primary-500" : "text-red-500")}>
           {content}
         </span>
       </div>
@@ -610,7 +610,6 @@ export const UserAdd = (props: UserProps) => {
                   name="facilities"
                   selected={selectedFacility}
                   setSelected={setFacility}
-                  district={currentUser.data.district}
                   errors={state.errors.facilities}
                   showAll={false}
                 />
@@ -711,8 +710,8 @@ export const UserAdd = (props: UserProps) => {
                             </span>
                           ) : (
                             validateRule(
-                              usernameExists === userExistsEnums.exists,
-                              "Username should not be taken"
+                              usernameExists !== userExistsEnums.exists,
+                              "Username is available"
                             )
                           )}
                         </>
@@ -720,13 +719,13 @@ export const UserAdd = (props: UserProps) => {
                     </div>
                     <div>
                       {validateRule(
-                        state.form.username?.length < 2,
+                        state.form.username?.length >= 2,
                         "Username should be atleast 2 characters long"
                       )}
                     </div>
                     <div>
                       {validateRule(
-                        !/[^.@+_-]/.test(
+                        /[^.@+_-]/.test(
                           state.form.username[state.form.username?.length - 1]
                         ),
                         "Username can't end with ^ . @ + _ -"
@@ -769,19 +768,19 @@ export const UserAdd = (props: UserProps) => {
                 {passwordInputInFocus && (
                   <div className="pl-2 text-small text-gray-500">
                     {validateRule(
-                      state.form.password?.length < 8,
+                      state.form.password?.length >= 8,
                       "Password should be atleast 8 characters long"
                     )}
                     {validateRule(
-                      state.form.password === state.form.password.toUpperCase(),
+                      state.form.password !== state.form.password.toUpperCase(),
                       "Password should contain at least 1 lowercase letter"
                     )}
                     {validateRule(
-                      state.form.password === state.form.password.toLowerCase(),
+                      state.form.password !== state.form.password.toLowerCase(),
                       "Password should contain at least 1 uppercase letter"
                     )}
                     {validateRule(
-                      !/\d/.test(state.form.password),
+                      /\d/.test(state.form.password),
                       "Password should contain at least 1 number"
                     )}
                   </div>
@@ -805,7 +804,7 @@ export const UserAdd = (props: UserProps) => {
                 {confirmPasswordInputInFocus &&
                   state.form.c_password.length > 0 &&
                   validateRule(
-                    state.form.c_password !== state.form.password,
+                    state.form.c_password === state.form.password,
                     "Confirm password should match the entered password"
                   )}
               </div>

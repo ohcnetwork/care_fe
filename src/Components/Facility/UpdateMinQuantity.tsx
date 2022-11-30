@@ -48,7 +48,7 @@ export const UpdateMinQuantity = (props: any) => {
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   // Given that setOffset is not being used, pagination might not be working
-  const [offset, _setOffset] = useState(0);
+  const [_offset, _setOffset] = useState(0);
   const [data, setData] = useState(" ");
   const [facilityName, setFacilityName] = useState("");
 
@@ -67,7 +67,7 @@ export const UpdateMinQuantity = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset]
+    [dispatchAction, facilityId, inventoryId]
   );
   useAbortableEffect(
     (status: statusType) => {
