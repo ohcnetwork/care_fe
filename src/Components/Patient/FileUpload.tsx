@@ -17,11 +17,10 @@ import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import { GetApp, Visibility } from "@material-ui/icons";
+import { Visibility } from "@material-ui/icons";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Modal from "@material-ui/core/Modal";
-import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
@@ -565,7 +564,6 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const validateAudioUpload = () => {
-    const filenameLength = audioName.trim().length;
     const f = audioBlob;
     if (f === undefined) {
       return false;
