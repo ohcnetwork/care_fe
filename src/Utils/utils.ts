@@ -130,6 +130,6 @@ export const isAppleDevice = _isAppleDevice();
  * // "md:flex p-0"
  * ```
  */
-export const classNames = (...classes: (string | boolean)[]) => {
+export const classNames = (...classes: (string | boolean | undefined)[]) => {
   return classes.filter(Boolean).join(" ");
 };
