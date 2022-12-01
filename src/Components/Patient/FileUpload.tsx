@@ -17,7 +17,6 @@ import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import { Visibility } from "@material-ui/icons";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Modal from "@material-ui/core/Modal";
@@ -25,9 +24,7 @@ import Modal from "@material-ui/core/Modal";
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
-import clsx from "clsx";
 import { formatDate } from "../../Utils/utils";
-import SelectMenu from "../Common/components/SelectMenu";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -175,7 +172,10 @@ export const FileUpload = (props: FileUploadProps) => {
   const currentuser_username = currentUser.data.username;
   const limit = RESULTS_PER_PAGE_LIMIT;
   const [isActive, setIsActive] = useState(true);
-
+  const tabs = [
+    { name: "Unarchived Files", value: "UNARCHIVED" },
+    { name: "Archived Files", value: "ARCHIVED" },
+  ];
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
@@ -1087,10 +1087,9 @@ export const FileUpload = (props: FileUploadProps) => {
                 className="btn-primary btn mr-2 w-full md:w-auto"
               >
                 <svg
-                  className={clsx(
-                    "animate-spin -ml-1 mr-3 h-5 w-5 text-white",
-                    !btnloader ? " hidden" : ""
-                  )}
+                  className={`animate-spin -ml-1 mr-3 h-5 w-5 text-white ${
+                    !btnloader ? " hidden " : " "
+                  }`}
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -1167,10 +1166,9 @@ export const FileUpload = (props: FileUploadProps) => {
                 className="btn-primary btn mr-2 w-full md:w-auto"
               >
                 <svg
-                  className={clsx(
-                    "animate-spin -ml-1 mr-3 h-5 w-5 text-white",
-                    !btnloader ? " hidden" : ""
-                  )}
+                  className={`animate-spin -ml-1 mr-3 h-5 w-5 text-white ${
+                    !btnloader ? " hidden " : " "
+                  } `}
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -1355,48 +1353,120 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={true}
         breadcrumbs={false}
       />
-      <div className="mt-2 sm:w-1/3 w-full">
-        <SelectMenu
-          options={[
-            { title: "Unarchived Files", value: "UNARCHIVED" },
-            { title: "Archived Files", value: "ARCHIVED" },
-          ]}
-          selected={sortFileState}
-          onSelect={setSortFileState}
-        />
-      </div>
-      {uploadedFiles && uploadedFiles.length > 0 ? (
-        sortFileState === "UNARCHIVED" ? (
-          [
-            // ...uploadedFiles.filter((item: FileUploadModel) => !item.is_archived),
-            ...uploadedFiles.filter(
-              (item: FileUploadModel) => !item.is_archived
-            ),
-          ].map((item: FileUploadModel) => renderFileUpload(item))
-        ) : (
-          [
-            ...uploadedFiles.filter(
-              (item: FileUploadModel) => item.is_archived
-            ),
-          ].map((item: FileUploadModel) => renderFileUpload(item))
-        )
-      ) : (
-        <div className="mt-4 border bg-white shadow rounded-lg p-4">
-          <div className="font-bold text-gray-500 text-md flex justify-center items-center">
-            {"No Data Found"}
+      <div>
+        <div className="sm:hidden">
+          <label htmlFor="tabs" className="sr-only">
+            Select a tab
+          </label>
+          {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
+          <select
+            id="tabs"
+            name="tabs"
+            className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+            defaultValue={tabs[0].value}
+            onChange={() => {
+              sortFileState === "UNARCHIVED"
+                ? setSortFileState("ARCHIVED")
+                : setSortFileState("UNARCHIVED");
+            }}
+          >
+            {tabs.map((tab) => (
+              <option key={tab.value}>{tab.name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="hidden sm:block">
+          <div className="border-b border-gray-200">
+            <nav
+              className="-mb-px flex items-center justify-center cursor: pointer"
+              aria-label="Tabs"
+            >
+              {tabs.map((tab) => (
+                <div
+                  key={tab.name}
+                  className={`
+                  ${
+                    tab.value === sortFileState
+                      ? " border-primary-500 text-primary-600 cursor: pointer "
+                      : " border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor: pointer "
+                  },
+                  ' w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm '
+                `}
+                  onClick={() => {
+                    setSortFileState(tab.value);
+                  }}
+                >
+                  {tab.name}
+                </div>
+              ))}
+            </nav>
           </div>
         </div>
-      )}
-      {totalCount > limit && (
-        <div className="mt-4 flex w-full justify-center">
-          <Pagination
-            cPage={currentPage}
-            defaultPerPage={limit}
-            data={{ totalCount }}
-            onChange={handlePagination}
-          />
-        </div>
-      )}
+      </div>
+
+      <div>
+        {uploadedFiles && uploadedFiles.length > 0 ? (
+          sortFileState === "UNARCHIVED" ? (
+            // First it would check the filtered array contains any files or not else it would state the message
+            <>
+              {[
+                ...uploadedFiles.filter(
+                  (item: FileUploadModel) => !item.is_archived
+                ),
+              ].length > 0 ? (
+                [
+                  ...uploadedFiles.filter(
+                    (item: FileUploadModel) => !item.is_archived
+                  ),
+                ].map((item: FileUploadModel) => renderFileUpload(item))
+              ) : (
+                <div className="mt-4 border bg-white shadow rounded-lg p-4">
+                  <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+                    {"No Unarchived File in the Current Page"}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            // First it would check the filtered array contains any files or not else it would state the message
+            <>
+              {[
+                ...uploadedFiles.filter(
+                  (item: FileUploadModel) => item.is_archived
+                ),
+              ].length > 0 ? (
+                [
+                  ...uploadedFiles.filter(
+                    (item: FileUploadModel) => item.is_archived
+                  ),
+                ].map((item: FileUploadModel) => renderFileUpload(item))
+              ) : (
+                <div className="mt-4 border bg-white shadow rounded-lg p-4">
+                  <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+                    {"No Archived File in the Current Page"}
+                  </div>
+                </div>
+              )}
+            </>
+          )
+        ) : (
+          <div className="mt-4 border bg-white shadow rounded-lg p-4">
+            <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+              {"No Data Found"}
+            </div>
+          </div>
+        )}
+        {totalCount > limit && (
+          <div className="mt-4 flex w-full justify-center">
+            <Pagination
+              cPage={currentPage}
+              defaultPerPage={limit}
+              data={{ totalCount }}
+              onChange={handlePagination}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
