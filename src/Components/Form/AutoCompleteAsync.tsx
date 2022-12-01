@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Combobox } from "@headlessui/react";
 import Spinner from "../Common/Spinner";
 import { debounce } from "lodash";
+import { DropdownTransition } from "../Common/components/HelperComponents";
 
 interface Props {
   name?: string;
@@ -11,6 +12,7 @@ interface Props {
   optionLabel?: (option: any) => string;
   showNOptions?: number;
   multiple?: boolean;
+  compareBy?: string;
   debounceTime?: number;
   className?: string;
   placeholder?: string;
@@ -26,6 +28,7 @@ const AutoCompleteAsync = (props: Props) => {
     optionLabel = (option: any) => option.label,
     showNOptions = 10,
     multiple = false,
+    compareBy,
     debounceTime = 300,
     className = "",
     placeholder,
@@ -34,15 +37,6 @@ const AutoCompleteAsync = (props: Props) => {
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const queryInputRef = React.useRef<HTMLInputElement>(null);
-
-  const getPlaceholder = () => {
-    if (!multiple && selected) return optionLabel(selected);
-    if (!visible && multiple && selected?.length > 0)
-      return `${selected.length} selected`;
-    return placeholder || "Start typing to search...";
-  };
 
   const hasSelection =
     (!multiple && selected) || (multiple && selected?.length > 0);
@@ -64,44 +58,38 @@ const AutoCompleteAsync = (props: Props) => {
 
   return (
     <div className={className}>
-      <Combobox value={selected} onChange={onChange} multiple={multiple as any}>
+      <Combobox
+        value={selected}
+        onChange={onChange}
+        by={compareBy}
+        multiple={multiple as any}
+      >
         <div className="relative mt-1">
           <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
-            <Combobox.Button
-              className="block w-full pl-3 pr-10 py-1 focus:outline-none focus:ring-0 sm:text-sm"
-              as="div"
-            >
-              <Combobox.Input
-                ref={queryInputRef}
-                onFocus={() => {
-                  setQuery("");
-                  setVisible(true);
-                }}
-                name={name}
-                className={`w-full border-none text-sm leading-5 text-gray-900 ${
-                  hasSelection
-                    ? "placeholder:text-gray-900 font-medium"
-                    : "placeholder:text-gray-500"
-                } focus:ring-0 bg-inherit shadow-none`}
-                placeholder={getPlaceholder()}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              <div className="absolute top-2 right-0 flex items-center pr-2">
+            <Combobox.Input
+              name={name}
+              className="w-full border-none text-sm leading-5 text-gray-900 placeholder:text-gray-600 font-medium focus:ring-0 bg-inherit shadow-none pr-16 truncate"
+              placeholder={
+                multiple && hasSelection
+                  ? `${selected.length} selected`
+                  : placeholder || "Start typing to search..."
+              }
+              displayValue={() =>
+                hasSelection && !multiple
+                  ? optionLabel && optionLabel(selected)
+                  : ""
+              }
+              onChange={({ target }) => setQuery(target.value)}
+            />
+            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+              <div className="absolute top-1 right-0 flex items-center pr-2">
                 {loading && <Spinner path={{ fill: "black" }} />}
                 <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
               </div>
             </Combobox.Button>
           </div>
-          <div className={visible ? "visible" : "hidden"}>
-            <Combobox.Options
-              static
-              onClick={() => {
-                setQuery("");
-                setVisible(false);
-                if (queryInputRef.current) queryInputRef.current.value = "";
-              }}
-              className="top-12 absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none text-sm"
-            >
+          <DropdownTransition>
+            <Combobox.Options className="top-12 absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none text-sm">
               {data?.length === 0 ? (
                 <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                   {query !== ""
@@ -118,9 +106,6 @@ const AutoCompleteAsync = (props: Props) => {
                       }`
                     }
                     value={item}
-                    onClick={() => {
-                      setVisible(false);
-                    }}
                   >
                     {({ selected, active }) => (
                       <>
@@ -146,7 +131,7 @@ const AutoCompleteAsync = (props: Props) => {
                 ))
               )}
             </Combobox.Options>
-          </div>
+          </DropdownTransition>
           {multiple && selected?.length > 0 && (
             <div className="p-2 flex flex-wrap gap-2">
               {selected?.map((option: any) => (

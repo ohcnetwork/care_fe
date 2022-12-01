@@ -13,6 +13,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@material-ui/core";
+import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 
 interface DoctorsCountProps extends DoctorModal {
   facilityId: number;
@@ -23,7 +24,6 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
   const specialization = DOCTOR_SPECIALIZATION.find((i) => i.id === props.area);
   const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-
   const handleDeleteSubmit = async () => {
     if (props.area) {
       const res = await dispatchAction(
@@ -48,19 +48,23 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
     setOpenDeleteDialog(false);
   };
 
-  const area = specialization ? specialization.text : "Unknown";
-
   return (
-    <div className="px-2 py-2 lg:w-1/5 w-full">
-      <div className="flex flex-col items-center shadow rounded-lg p-4 h-full justify-between">
-        <div className="text-bold text-3xl mt-2">{props.count}</div>
-        <div className="font-semibold text-md mt-2 text-center">
-          {area} Doctors
+    <div className="w-full">
+      <div className="shadow-sm rounded-sm h-full border border-[#D2D6DC] flex flex-col">
+        <div className="flex justify-start items-center gap-3 px-4 py-6 flex-1">
+          <div className={`rounded-full p-4 ${specialization?.desc}`}>
+            <DoctorIcon className="fill-current text-white w-5 h-5" />
+          </div>
+          <div>
+            <div className="font-medium text-sm text-[#808080]">
+              {specialization?.text} Doctors
+            </div>
+            <h2 className="font-bold text-xl mt-2">{props.count}</h2>
+          </div>
         </div>
-
-        <div className="flex justify-evenly w-full gap-2 mt-2 pt-2 border border-t-gray-300">
+        <div className="bg-[#FBF9FB] py-2 px-3 flex justify-end gap-8 border-t border-[#D2D6DC]">
           <RoleButton
-            className="btn btn-default w-1/2"
+            className="font-medium"
             handleClickCB={() =>
               navigate(`/facility/${props.facilityId}/doctor/${props.area}`)
             }
@@ -70,7 +74,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             Edit
           </RoleButton>
           <RoleButton
-            className="btn btn-danger w-1/2"
+            className="font-medium text-[#C81E1E]"
             handleClickCB={() => setOpenDeleteDialog(true)}
             disableFor="readOnly"
             buttonType="html"
@@ -78,14 +82,13 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             Delete
           </RoleButton>
         </div>
-
         <Dialog
           maxWidth={"md"}
           open={openDeleteDialog}
           onClose={handleDeleteClose}
         >
           <DialogTitle className="flex justify-center bg-primary-100">
-            Are you sure you want to delete {area} doctors?
+            Are you sure you want to delete {specialization?.text} doctors?
           </DialogTitle>
           <DialogContent>
             <DialogContentText>

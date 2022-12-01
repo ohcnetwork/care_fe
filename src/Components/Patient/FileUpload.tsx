@@ -17,6 +17,7 @@ import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
+import { Visibility } from "@material-ui/icons";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Modal from "@material-ui/core/Modal";
@@ -173,6 +174,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const { currentUser } = state;
   const currentuser_username = currentUser.data.username;
   const limit = RESULTS_PER_PAGE_LIMIT;
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -181,6 +183,7 @@ export const FileUpload = (props: FileUploadProps) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setIsActive(res.data.is_active);
         }
       } else {
         setPatientName("");
@@ -1319,7 +1322,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     </label>
                     <button
                       className="btn btn-primary"
-                      disabled={!file || !uploadFileName}
+                      disabled={!file || !uploadFileName || !isActive}
                       onClick={() => {
                         handleUpload({ status });
                       }}

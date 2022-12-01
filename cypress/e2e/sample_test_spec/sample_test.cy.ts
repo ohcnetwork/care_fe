@@ -8,17 +8,26 @@ describe("Sample List", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.awaitUrl("/");
-    cy.get("a").contains("Sample Test").click();
+    cy.awaitUrl("/sample");
   });
 
   it("Search by District name", () => {
-    cy.get("[placeholder='District Name']").type("TEst").wait(1000);
+    cy.intercept(/\/api\/v1\/test_sample/).as("test_sample");
+    cy.get("[placeholder='District Name']").type("TEst");
+    cy.wait("@test_sample").then((interception) => {
+      expect(interception.response.statusCode).to.equal(200);
+      expect(interception.request.url).to.include("district_name=TEst");
+    });
     cy.url().should("include", "TEst");
   });
 
   it("Search by Patient Name", () => {
-    cy.get("[placeholder='Search by Patient Name']").type("Test").wait(1000);
+    cy.intercept(/\/api\/v1\/test_sample/).as("test_sample");
+    cy.get("[placeholder='Search by Patient Name']").type("Test");
+    cy.wait("@test_sample").then((interception) => {
+      expect(interception.response.statusCode).to.equal(200);
+      expect(interception.request.url).to.include("patient_name=Test");
+    });
     cy.url().should("include", "Test");
   });
 

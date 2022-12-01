@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import loadable from "@loadable/component";
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import React, { useEffect, useState, useCallback } from "react";
@@ -8,7 +7,7 @@ import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { Tooltip } from "@material-ui/core";
+import { CircularProgress, Tooltip } from "@material-ui/core";
 
 import {
   getAllPatient,
@@ -18,14 +17,11 @@ import {
 } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
-import Pagination from "../Common/Pagination";
-import { InputSearchBox } from "../Common/SearchBox";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
   TELEMEDICINE_ACTIONS,
   PATIENT_FILTER_ADMITTED_TO,
-  KASP_STRING,
   PatientCategoryTailwindClass,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -34,7 +30,8 @@ import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import SearchInput from "../Form/SearchInput";
+import useFilters from "../../Common/hooks/useFilters";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -45,8 +42,6 @@ interface TabPanelProps {
   index: any;
   value: any;
 }
-
-type ParamsTypes = Record<string, number | boolean | string>;
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -66,8 +61,6 @@ function TabPanel(props: TabPanelProps) {
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const RESULT_LIMIT = 12;
-
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
   Stable: "STABLE",
@@ -84,8 +77,16 @@ export const PatientManager = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
-  const [qParams, setQueryParams] = useQueryParams();
-  const [showFilters, setShowFilters] = useState(false);
+  const {
+    qParams,
+    updateQuery,
+    advancedFilter,
+    Pagination,
+    FilterBadges,
+    resultsPerPage,
+  } = useFilters({
+    limit: 12,
+  });
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
@@ -93,22 +94,13 @@ export const PatientManager = (props: any) => {
 
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
-  const [facilityBadgeName, setFacilityBadgeName] = useState("");
+  const [facilityBadgeName, setFacilityBadge] = useState("");
   const [facilityCrumbName, setFacilityCrumbName] = useState("");
-  const { width } = useWindowDimensions();
-  const extremeSmallScreenBreakpoint = 320;
-  const isExtremeSmallScreen =
-    width <= extremeSmallScreenBreakpoint ? true : false;
-  const isTwoColumnCardBreakpointRange =
-    width <= 900 && width >= 769 ? true : false;
-  const isThreeColumnCardBreakpointRange =
-    width <= 1220 && width >= 1025 ? true : false;
-
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
   const params = {
     page: qParams.page || 1,
-    limit: RESULT_LIMIT,
+    limit: resultsPerPage,
     name: qParams.name || undefined,
     ip_no: qParams.ip_no || undefined,
     is_active: qParams.is_active || "True",
@@ -125,7 +117,7 @@ export const PatientManager = (props: any) => {
     facility: facilityId || qParams.facility,
     facility_type: qParams.facility_type || undefined,
     district: qParams.district || undefined,
-    offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
+    offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     created_date_before: qParams.created_date_before || undefined,
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
@@ -339,7 +331,7 @@ export const PatientManager = (props: any) => {
         qParams.facility && (await dispatch(getAnyFacility(qParams.facility)));
 
       if (!status.aborted) {
-        setFacilityBadgeName(res?.data?.name);
+        setFacilityBadge(res?.data?.name);
       }
     },
     [dispatch, qParams.facility]
@@ -351,75 +343,6 @@ export const PatientManager = (props: any) => {
     },
     [fetchFacilityBadgeName]
   );
-
-  const updateQuery = (params: ParamsTypes) => {
-    const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
-  };
-
-  const handleTabChange = async (tab: number) => {
-    updateQuery({
-      ...qParams,
-      is_active: tab ? "False" : "True",
-      page: 1,
-    });
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page, limit });
-  };
-
-  const searchByName = (value: string) => {
-    updateQuery({ name: value, page: 1 });
-  };
-
-  const searchByIpNo = (value: string) => {
-    updateQuery({ ip_no: value, page: 1 });
-  };
-
-  const searchByPhone = (value: string, name: string) => {
-    updateQuery({ [name]: value, page: 1 });
-  };
-
-  const applyFilter = (data: ParamsTypes) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
-  const removeFilter = (paramKey: string) => {
-    updateQuery({
-      ...qParams,
-      [paramKey]: "",
-    });
-  };
-
-  const removeMultipleFilters = (paramKeys: string[]) => {
-    const filter = { ...qParams };
-    paramKeys.forEach((key) => {
-      filter[key] = "";
-    });
-    updateQuery(filter);
-  };
-
-  const badge = (key: string, value: string, paramKey: string | string[]) => {
-    return (
-      value && (
-        <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={() =>
-              Array.isArray(paramKey)
-                ? removeMultipleFilters(paramKey)
-                : removeFilter(paramKey)
-            }
-          ></i>
-        </span>
-      )
-    );
-  };
 
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
@@ -457,19 +380,9 @@ export const PatientManager = (props: any) => {
       });
   };
 
-  const showReviewAlert = (patient: any) => {
-    return (
-      patient.review_time &&
-      !patient.last_consultation?.discharge_date &&
-      moment(patient.review_time).isAfter(
-        patient.last_consultation?.last_daily_round?.modified_date
-      )
-    );
-  };
-
   let patientList: any[] = [];
   if (data && data.length) {
-    patientList = data.map((patient: any, idx: number) => {
+    patientList = data.map((patient: any) => {
       let patientUrl = "";
       if (
         patient.last_consultation &&
@@ -490,7 +403,7 @@ export const PatientManager = (props: any) => {
         <Link
           key={`usr_${patient.id}`}
           href={patientUrl}
-          className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-9 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${categoryClass}-ring`}
+          className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-5 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${categoryClass}-ring overflow-hidden`}
         >
           <div
             className={`rounded-l-lg absolute top-0 bottom-0 left-0 h-full w-1 group-hover:w-5 transition-all duration-200 ease-in-out flex items-center ${categoryClass}`}
@@ -570,7 +483,8 @@ export const PatientManager = (props: any) => {
                 )}
                 <div className="flex w-full">
                   <div className="flex flex-wrap gap-2 flex-row justify-start">
-                    {patient.review_time &&
+                    {/* TODO: Re-enable Review Missed | Temporary Hack for Launch */}
+                    {/* {patient.review_time &&
                       !patient.last_consultation?.discharge_date &&
                       Number(patient.last_consultation?.review_interval) > 0 &&
                       moment().isAfter(patient.review_time) && (
@@ -579,7 +493,7 @@ export const PatientManager = (props: any) => {
                           startIcon="clock"
                           text="Review Missed"
                         />
-                      )}
+                      )} */}
                     {patient.allow_transfer ? (
                       <Chip
                         color="yellow"
@@ -653,19 +567,10 @@ export const PatientManager = (props: any) => {
   } else if (data && data.length) {
     managePatients = (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           {patientList}
         </div>
-        {totalCount > RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={qParams.page}
-              defaultPerPage={RESULT_LIMIT}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
-        )}
+        <Pagination totalCount={totalCount} />
       </>
     );
   } else if (data && data.length === 0) {
@@ -678,144 +583,147 @@ export const PatientManager = (props: any) => {
 
   return (
     <div>
-      {showDialog && (
-        <FacilitiesSelectDialogue
-          setSelected={(e) => setSelectedFacility(e)}
-          selectedFacility={selectedFacility}
-          handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
-          handleCancel={() => setShowDialog(false)}
-        />
-      )}
+      <FacilitiesSelectDialogue
+        show={showDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+        handleCancel={() => {
+          setShowDialog(false);
+          setSelectedFacility({ name: "" });
+        }}
+      />
+      <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-max">
+        <Tooltip
+          title={
+            !isDownloadAllowed ? (
+              <p className="self-end text-sm italic ">
+                * Select a 7 day period
+              </p>
+            ) : (
+              ""
+            )
+          }
+          arrow={true}
+          interactive={true}
+          enterNextDelay={100}
+          enterTouchDelay={0}
+          leaveTouchDelay={1000}
+        >
+          <div className="text-center">
+            <button
+              onClick={handleDownloadFiltered}
+              disabled={!isDownloadAllowed}
+              className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
+            >
+              <span>
+                <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
+                {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
+              </span>
+            </button>
+            <CSVLink
+              id="downloadlink"
+              className="hidden"
+              data={DownloadFile}
+              filename={`patients-${now}.csv`}
+              target="_blank"
+            ></CSVLink>
+          </div>
+        </Tooltip>
+        <div className="flex flex-col gap-2">
+          <Tooltip
+            title={
+              !isDownloadAllowed ? (
+                <p className="self-end text-sm italic ">
+                  * Select a 7 day period
+                </p>
+              ) : (
+                ""
+              )
+            }
+            arrow={true}
+            interactive={true}
+            enterNextDelay={100}
+            enterTouchDelay={0}
+            leaveTouchDelay={1000}
+          >
+            <div>
+              <button
+                disabled={!isDownloadAllowed}
+                onClick={handleDownloadAll}
+                className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
+              >
+                <span>
+                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
+                  DOWNLOAD ALL PATIENTS
+                </span>
+              </button>
+            </div>
+          </Tooltip>
+        </div>
+        <div>
+          <button
+            className="btn btn-primary w-full md:w-fit sm:w-fit mb-2 sm:mb-0 sm:mr-2"
+            onClick={() => {
+              if (facilityId) {
+                navigate(`/facility/${facilityId}/patient`);
+              } else {
+                setShowDialog(true);
+              }
+            }}
+            data-testid="add-patient-button"
+          >
+            <i className="fas fa-plus mr-2 text-white"></i>
+            <span className="pt-[2px]">Add Details of a Patient</span>
+          </button>
+        </div>
+        <div>
+          <button
+            className="btn btn-primary-ghost w-full md:w-fit"
+            onClick={() => advancedFilter.setShow(true)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="fill-current w-4 h-4 mr-2"
+            >
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12">
+                {" "}
+              </line>
+              <line x1="8" y1="18" x2="21" y2="18">
+                {" "}
+              </line>
+              <line x1="3" y1="6" x2="3.01" y2="6">
+                {" "}
+              </line>
+              <line x1="3" y1="12" x2="3.01" y2="12">
+                {" "}
+              </line>
+              <line x1="3" y1="18" x2="3.01" y2="18">
+                {" "}
+              </line>
+            </svg>
+            <span>Advanced Filters</span>
+          </button>
+        </div>
+      </div>
       <PageTitle
         title="Patients"
         hideBack={!facilityId}
         breadcrumbs={!!facilityId}
         crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
+        className="md:mt-[-15px]"
       />
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-24px]">
         <div>
-          <div className="flex flex-col right-3 top-0 gap-2 my-3 mr-3 sm:absolute sm:flex-row">
-            <Tooltip
-              title={
-                !isDownloadAllowed ? (
-                  <p className="self-end text-sm italic ">
-                    * Select a 7 day period
-                  </p>
-                ) : (
-                  ""
-                )
-              }
-              arrow={true}
-              interactive={true}
-              enterNextDelay={100}
-              enterTouchDelay={0}
-              leaveTouchDelay={1000}
-            >
-              <div className="text-center">
-                <button
-                  onClick={handleDownloadFiltered}
-                  disabled={!isDownloadAllowed}
-                  className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-                >
-                  <span>
-                    <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
-                    {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
-                  </span>
-                </button>
-                <CSVLink
-                  id="downloadlink"
-                  className="hidden"
-                  data={DownloadFile}
-                  filename={`patients-${now}.csv`}
-                  target="_blank"
-                ></CSVLink>
-              </div>
-            </Tooltip>
-            <div className="flex flex-col gap-2">
-              <Tooltip
-                title={
-                  !isDownloadAllowed ? (
-                    <p className="self-end text-sm italic ">
-                      * Select a 7 day period
-                    </p>
-                  ) : (
-                    ""
-                  )
-                }
-                arrow={true}
-                interactive={true}
-                enterNextDelay={100}
-                enterTouchDelay={0}
-                leaveTouchDelay={1000}
-              >
-                <div>
-                  <button
-                    disabled={!isDownloadAllowed}
-                    onClick={handleDownloadAll}
-                    className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-                  >
-                    <span>
-                      <i className="fa-solid fa-arrow-down-long mr-2"></i>
-                      DOWNLOAD ALL PATIENTS
-                    </span>
-                  </button>
-                </div>
-              </Tooltip>
-            </div>
-            <div>
-              <button
-                className="btn btn-primary w-full md:w-fit sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-                onClick={() => {
-                  if (facilityId) {
-                    navigate(`/facility/${facilityId}/patient`);
-                  } else {
-                    setShowDialog(true);
-                  }
-                }}
-                data-testid="add-patient-button"
-              >
-                <i className="fas fa-plus mr-2 text-white"></i>
-                <span className="pt-[2px]">Add Details of a Patient</span>
-              </button>
-            </div>
-            <div>
-              <button
-                className="btn btn-primary-ghost w-full md:w-fit"
-                onClick={(_) => setShowFilters((show) => !show)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
-            </div>
-          </div>
           <div className="flex flex-col mt-2">
             <div className="bg-white overflow-hidden shadow rounded-lg mb-2">
               <div className="px-4 py-5 sm:p-[35px]">
@@ -826,26 +734,7 @@ export const PatientManager = (props: any) => {
                   {/* Show spinner until count is fetched from server */}
                   {isLoading ? (
                     <dd className="mt-4 text-5xl leading-9">
-                      <svg
-                        className="animate-spin -ml-1 mr-3 h-10 w-10 text-primary-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cy="12"
-                          cx="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
+                      <CircularProgress className="text-primary-500" />
                     </dd>
                   ) : (
                     <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
@@ -863,25 +752,22 @@ export const PatientManager = (props: any) => {
               <div>
                 <div className="md:flex md:gap-4 mt-1">
                   <div className="grow lg:max-w-sm w-full mb-2">
-                    <div className="text-sm font-semibold mb-2">
-                      Search by Name
-                    </div>
-                    <InputSearchBox
-                      search={searchByName}
+                    <SearchInput
+                      label="Search by Name"
+                      name="name"
+                      onChange={(e) => updateQuery({ [e.name]: e.value })}
                       value={qParams.name}
-                      placeholder="Search by Patient Name"
-                      errors=""
+                      placeholder="Search patient"
                     />
                   </div>
                   <div className="grow lg:max-w-sm w-full mb-2">
-                    <div className="text-sm font-semibold mb-2">
-                      Search by IP number
-                    </div>
-                    <InputSearchBox
-                      search={searchByIpNo}
+                    <SearchInput
+                      label="Search by IP Number"
+                      name="ip_no"
+                      onChange={(e) => updateQuery({ [e.name]: e.value })}
                       value={qParams.ip_no}
-                      placeholder="Search by IP number"
-                      errors=""
+                      placeholder="Search IP Number"
+                      secondary
                     />
                   </div>
                 </div>
@@ -889,26 +775,26 @@ export const PatientManager = (props: any) => {
             </div>
             <div className="md:flex md:gap-4">
               <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-semibold">
+                <div className="text-sm font-medium">
                   Search by Primary Number
                 </div>
                 <PhoneNumberField
                   value={qParams.phone_number || "+91"}
                   onChange={(value: string) =>
-                    searchByPhone(value, "phone_number")
+                    updateQuery({ phone_number: value })
                   }
                   turnOffAutoFormat={false}
                   errors=""
                 />
               </div>
               <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-semibold">
+                <div className="text-sm font-medium">
                   Search by Emergency Number
                 </div>
                 <PhoneNumberField
                   value={qParams.emergency_phone_number || "+91"}
                   onChange={(value: string) =>
-                    searchByPhone(value, "emergency_phone_number")
+                    updateQuery({ emergency_phone_number: value })
                   }
                   turnOffAutoFormat={false}
                   errors=""
@@ -918,173 +804,66 @@ export const PatientManager = (props: any) => {
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap w-full col-span-3 ml-[-10px]">
-        {qParams.phone_number?.trim().split(" ").length - 1
-          ? badge("Primary Number", qParams.phone_number, "phone_number")
-          : null}
-        {qParams.emergency_phone_number?.trim().split(" ").length - 1
-          ? badge(
-              "Emergency Number",
-              qParams.emergency_phone_number,
-              "emergency_phone_number"
-            )
-          : null}
-        {badge("Patient Name", qParams.name, "name")}
-        {badge("IP number", qParams.ip_no, "ip_no")}
-        {badge(
-          "Modified After",
-          qParams.modified_date_after,
-          "modified_date_after"
-        )}
-        {badge(
-          "Modified Before",
-          qParams.modified_date_before,
-          "modified_date_before"
-        )}
-        {badge(
-          "Created Before",
-          qParams.created_date_before,
-          "created_date_before"
-        )}
-        {badge(
-          "Created After",
-          qParams.created_date_after,
-          "created_date_after"
-        )}
-        {qParams.last_consultation_admission_date_before ===
-        qParams.last_consultation_admission_date_after ? (
-          badge(
-            "Admission Date",
-            qParams.last_consultation_admission_date_before,
-            [
-              "last_consultation_admission_date_before",
-              "last_consultation_admission_date_after",
-            ]
-          )
-        ) : (
-          <>
-            {badge(
-              "Admitted Before",
-              qParams.last_consultation_admission_date_before,
-              "last_consultation_admission_date_before"
-            )}
-            {badge(
-              "Admitted After",
-              qParams.last_consultation_admission_date_after,
-              "last_consultation_admission_date_after"
-            )}
-          </>
-        )}
-        {badge(
-          "Discharged Before",
-          qParams.last_consultation_discharge_date_before,
-          "last_consultation_discharge_date_before"
-        )}
-        {badge(
-          "Discharged After",
-          qParams.last_consultation_discharge_date_after,
-          "last_consultation_discharge_date_after"
-        )}
+      <div className="flex flex-wrap w-full col-span-3">
+        <FilterBadges
+          badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
+            phoneNumber("Primary number", "phone_number"),
+            phoneNumber("Emergency number", "emergency_phone_number"),
+            badge("Patient name", "name"),
+            badge("IP number", "ip_no"),
+            ...dateRange("Modified", "modified_date"),
+            ...dateRange("Created", "created_date"),
+            ...dateRange("Admitted", "last_consultation_admission_date"),
+            ...dateRange("Discharged", "last_consultation_discharge_date"),
+            // Admitted to type badges
+            badge("No. of vaccination doses", "number_of_doses"),
+            kasp(),
+            badge("COWIN ID", "covin_id"),
+            badge("Is Antenatal", "is_antenatal"),
+            value("Facility", "facility", facilityBadgeName),
+            badge("Facility Type", "facility_type"),
+            value("District", "district", districtName),
+            badge("Ordering", "ordering"),
+            badge("Category", "category"),
+            badge("Disease Status", "disease_status"),
+            value(
+              "Gender",
+              "gender",
+              parseOptionId(GENDER_TYPES, qParams.gender) || ""
+            ),
+            {
+              name: "Admitted to",
+              value: ADMITTED_TO[qParams.last_consultation_admitted_to],
+              paramKey: "last_consultation_admitted_to",
+            },
+            ...range("Age", "age"),
+            badge("SRF ID", "srf_id"),
+            { name: "LSG Body", value: localbodyName, paramKey: "lsgBody" },
+            badge("Declared Status", "is_declared_positive"),
+            ...dateRange("Result", "date_of_result"),
+            ...dateRange("Declared positive", "date_declared_positive"),
+            ...dateRange(
+              "Symptoms onset",
+              "last_consultation_symptoms_onset_date"
+            ),
+            ...dateRange("Last vaccinated", "last_vaccinated_date"),
+            {
+              name: "Telemedicine",
+              paramKey: "last_consultation_is_telemedicine",
+            },
+          ]}
+        />
         {qParams.last_consultation_admitted_to_list &&
           LastAdmittedToTypeBadges()}
-        {qParams.number_of_doses &&
-          badge(
-            "Number of Vaccination Doses",
-            qParams.number_of_doses,
-            "number_of_doses"
-          )}
-        {qParams.is_kasp &&
-          badge(
-            KASP_STRING,
-            qParams.is_kasp === "true" ? KASP_STRING : `Non ${KASP_STRING}`,
-            "is_kasp"
-          )}
-        {badge("COWIN ID", qParams.covin_id, "covin_id")}
-        {badge("Is Antenatal", qParams.is_antenatal, "is_antenatal")}
-        {badge("Facility", facilityBadgeName, "facility")}
-        {badge("Facility Type", qParams.facility_type, "facility_type")}
-        {badge("District", districtName, "district")}
-        {badge("Ordering", qParams.ordering, "ordering")}
-        {badge("Category", qParams.category, "category")}
-        {badge("Disease Status", qParams.disease_status, "disease_status")}
-        {badge("Gender", parseOptionId(GENDER_TYPES, qParams.gender), "gender")}
-        {badge(
-          "Admitted to",
-          ADMITTED_TO[qParams.last_consultation_admitted_to],
-          "last_consultation_admitted_to"
-        )}
-        {badge("Age min", qParams.age_min, "age_min")}
-        {badge("Age max", qParams.age_max, "age_max")}
-        {badge("SRF ID", qParams.srf_id, "srf_id")}
-        {badge("LSG Body", localbodyName, "lsgBody")}
-        {badge(
-          "Declared Status",
-          qParams.is_declared_positive,
-          "is_declared_positive"
-        )}
-        {badge(
-          "Result before",
-          qParams.date_of_result_before,
-          "date_of_result_before"
-        )}
-        {badge(
-          "Result after",
-          qParams.date_of_result_after,
-          "date_of_result_after"
-        )}
-
-        {badge(
-          "Declared positive before",
-          qParams.date_declared_positive_before,
-          "date_declared_positive_before"
-        )}
-
-        {badge(
-          "Declared positive after",
-          qParams.date_declared_positive_after,
-          "date_declared_positive_after"
-        )}
-
-        {badge(
-          "Onset of symptoms before",
-          qParams.last_consultation_symptoms_onset_date_before,
-          "last_consultation_symptoms_onset_date_before"
-        )}
-
-        {badge(
-          "Onset of symptoms after",
-          qParams.last_consultation_symptoms_onset_date_after,
-          "last_consultation_symptoms_onset_date_after"
-        )}
-        {badge(
-          "Vaccinated Date before",
-          qParams.last_vaccinated_date_before,
-          "last_vaccinated_date_before"
-        )}
-
-        {badge(
-          "Vaccinated Date after",
-          qParams.last_vaccinated_date_after,
-          "last_vaccinated_date_after"
-        )}
-        {badge(
-          "Telemedicine",
-          qParams.last_consultation_is_telemedicine,
-          "last_consultation_is_telemedicine"
-        )}
       </div>
       <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
+        <SlideOver {...advancedFilter}>
           <div className="bg-white min-h-screen p-4">
-            <PatientFilterV2
-              filter={qParams}
-              onChange={applyFilter}
-              closeFilter={() => setShowFilters(false)}
-            />
+            <PatientFilterV2 {...advancedFilter} />
           </div>
         </SlideOver>
         <NavTabs
-          onChange={handleTabChange}
+          onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
           options={[
             { value: 0, label: "Live" },
             { value: 1, label: "Discharged" },

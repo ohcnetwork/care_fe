@@ -10,64 +10,53 @@ import {
 } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
 import { getAsset } from "../../Redux/actions";
-import React, { useState, useCallback, useEffect } from "react";
-import { navigate, useQueryParams } from "raviger";
+import { useState, useCallback, useEffect } from "react";
+import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import Pagination from "../Common/Pagination";
-import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
+import SearchInput from "../Form/SearchInput";
+import useFilters from "../../Common/hooks/useFilters";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
-interface qParamModel {
-  search?: string;
-  facility?: string;
-  asset_type?: string;
-  location?: string;
-  status?: string;
-}
-
 const AssetsList = () => {
-  const [qParams, setQueryParams] = useQueryParams();
-  const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [offset, setOffset] = useState<number>(0);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const {
+    qParams,
+    updateQuery,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({
+    limit: 21,
+  });
+  const [assets, setAssets] = useState([{} as AssetData]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isScannerActive, setIsScannerActive] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const [facilityName, setFacilityName] = useState<string>();
   const [asset_type, setAssetType] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
-  const limit = 21;
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const params = qParams.search
-        ? {
-            limit,
-            offset,
-            search_text: qParams.search,
-            facility: qParams.facility,
-            asset_type: qParams.asset_type,
-            location: qParams.location,
-            status: qParams.status,
-          }
-        : {
-            limit,
-            offset,
-            facility: qParams.facility,
-            asset_type: qParams.asset_type,
-            location: qParams.location,
-            status: qParams.status,
-          };
+      const params = {
+        limit: resultsPerPage,
+        page: qParams.page,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+        search_text: qParams.search || "",
+        facility: qParams.facility,
+        asset_type: qParams.asset_type,
+        location: qParams.location,
+        status: qParams.status,
+      };
       const { data }: any = await dispatch(listAssets(params));
       if (!status.aborted) {
         setIsLoading(false);
@@ -83,7 +72,7 @@ const AssetsList = () => {
     },
     [
       dispatch,
-      offset,
+      qParams.page,
       qParams.search,
       qParams.facility,
       qParams.asset_type,
@@ -105,37 +94,29 @@ const AssetsList = () => {
 
   const fetchFacilityName = useCallback(
     async (status: statusType) => {
-      if (qParams.facility) {
-        setIsLoading(true);
-
-        const res = await dispatch(getAnyFacility(qParams.facility));
-
-        if (!status.aborted) {
-          setFacilityName(res?.data?.name);
-          setIsLoading(false);
-        }
-      } else {
-        setFacilityName("");
+      if (!qParams.facility) return setFacilityName("");
+      setIsLoading(true);
+      const res = await dispatch(getAnyFacility(qParams.facility));
+      if (!status.aborted) {
+        setFacilityName(res?.data?.name);
+        setIsLoading(false);
       }
     },
     [dispatch, qParams.facility]
   );
   const fetchLocationName = useCallback(
     async (status: statusType) => {
-      if (qParams.location) {
-        setIsLoading(true);
-        const res = await dispatch(
-          getFacilityAssetLocation(qParams.facility, qParams.location)
-        );
-        if (!status.aborted) {
-          setLocationName(res?.data?.name);
-          setIsLoading(false);
-        }
-      } else {
-        setLocationName("");
+      if (!qParams.location) return setLocationName("");
+      setIsLoading(true);
+      const res = await dispatch(
+        getFacilityAssetLocation(qParams.facility, qParams.location)
+      );
+      if (!status.aborted) {
+        setLocationName(res?.data?.name);
+        setIsLoading(false);
       }
     },
-    [dispatch, qParams.location]
+    [dispatch, qParams.facility, qParams.location]
   );
 
   useAbortableEffect(
@@ -145,54 +126,6 @@ const AssetsList = () => {
     },
     [fetchFacilityName, fetchLocationName]
   );
-
-  const badge = (key: string, value: any, paramKey: string[]) => {
-    return (
-      value && (
-        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={() => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
-  };
-
-  const removeFilter = (paramKey: string[]) => {
-    const emptyObj: qParamModel = { ...qParams };
-    paramKey.forEach((p) => ((emptyObj as any)[p] = ""));
-    updateQuery({
-      ...emptyObj,
-    });
-  };
-
-  const onSearchSuspects = (search: string) => {
-    if (search !== "")
-      setQueryParams({ ...qParams, search }, { replace: true });
-    else setQueryParams({ ...qParams, search: "" }, { replace: true });
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
-
-  const updateQuery = (params: any) => {
-    const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
-    console.log(qParams);
-  };
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
 
   const getAssetIdFromQR = async (assetUrl: string) => {
     try {
@@ -255,6 +188,61 @@ const AssetsList = () => {
       </div>
     );
 
+  let manageAssets = null;
+  if (assetsExist) {
+    manageAssets = (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:-mx-8 gap-2">
+        {assets.map((asset: AssetData) => (
+          <div
+            key={asset.id}
+            className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
+            onClick={() => navigate(`/assets/${asset.id}`)}
+          >
+            <div className="md:flex">
+              <p className="text-xl flex font-medium capitalize break-words">
+                <span className="mr-2 text-primary-500">
+                  {" "}
+                  <i
+                    className={`fas fa-${
+                      (
+                        (asset.asset_class &&
+                          assetClassProps[asset.asset_class]) ||
+                        assetClassProps.NONE
+                      ).icon
+                    }`}
+                  />
+                </span>
+                <p className="truncate w-48">{asset.name}</p>
+              </p>
+            </div>
+            <p className="font-normal text-sm">
+              {asset?.location_object?.name}
+            </p>
+
+            <div className="flex flex-wrap gap-2 mt-2">
+              {asset.is_working ? (
+                <Chip color="green" startIcon="cog" text="Working" />
+              ) : (
+                <Chip color="red" startIcon="cog" text="Not Working" />
+              )}
+              <Chip
+                color="blue"
+                startIcon="location-arrow"
+                text={asset.status}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  } else {
+    manageAssets = (
+      <div className="w-full bg-white rounded-lg p-2 text-center col-span-3 py-8 pt-4">
+        <p className="text-2xl font-bold text-gray-600">No Assets Found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="px-6">
       <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
@@ -279,16 +267,18 @@ const AssetsList = () => {
           </div>
         </div>
         <div className="flex-1">
-          <InputSearchBox
+          <SearchInput
+            name="search"
             value={qParams.search}
-            search={onSearchSuspects}
-            placeholder="Search by Asset Name"
-            errors=""
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
+            placeholder="Search assets"
           />
         </div>
         <div className="flex flex-col md:flex-row lg:ml-2 justify-start items-start gap-2">
           <div className="w-full">
-            <AdvancedFilterButton setShowFilters={setShowFilters} />
+            <AdvancedFilterButton
+              setShowFilters={() => advancedFilter.setShow(true)}
+            />
           </div>
           <button
             className="btn btn-primary w-full"
@@ -299,13 +289,9 @@ const AssetsList = () => {
         </div>
       </div>
       <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
+        <SlideOver {...advancedFilter}>
           <div className="bg-white min-h-screen p-4">
-            <AssetFilter
-              filter={qParams}
-              onChange={applyFilter}
-              closeFilter={() => setShowFilters(false)}
-            />
+            <AssetFilter {...advancedFilter} />
           </div>
         </SlideOver>
       </div>
@@ -313,80 +299,19 @@ const AssetsList = () => {
         <Loading />
       ) : (
         <>
-          <div className="flex mt-2 flex-wrap w-full col-span-3">
-            {badge("Facility", facilityName, ["facility", "location"])}
-            {badge("Asset Name", qParams.search, ["search"])}
-            {badge("Location", locationName, ["location"])}
-            {badge("Asset Type", asset_type, ["asset_type"])}
-            {badge("Status", qParams.status, ["status"])}
-          </div>
+          <FilterBadges
+            badges={({ badge, value }) => [
+              value("Facility", ["facility", "location"], facilityName || ""),
+              badge("Name", "search"),
+              value("Asset Type", "asset_type", asset_type || ""),
+              badge("Status", "status"),
+              value("Location", "location", locationName || ""),
+            ]}
+          />
           <div className="grow">
             <div className="py-8 md:px-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:-mx-8 gap-2">
-                {assetsExist ? (
-                  assets.map((asset: AssetData) => (
-                    <div
-                      key={asset.id}
-                      className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
-                      onClick={() => navigate(`/assets/${asset.id}`)}
-                    >
-                      <div className="md:flex">
-                        <p className="text-xl flex font-medium capitalize break-words">
-                          <span className="mr-2 text-primary-500">
-                            {" "}
-                            <i
-                              className={`fas fa-${
-                                (
-                                  (asset.asset_class &&
-                                    assetClassProps[asset.asset_class]) ||
-                                  assetClassProps.None
-                                ).icon
-                              }`}
-                            />
-                          </span>
-                          <p className="truncate w-48">{asset.name}</p>
-                        </p>
-                      </div>
-                      <p className="font-normal text-sm">
-                        {asset?.location_object?.name}
-                      </p>
-
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {asset.is_working ? (
-                          <Chip color="green" startIcon="cog" text="Working" />
-                        ) : (
-                          <Chip
-                            color="red"
-                            startIcon="cog"
-                            text="Not Working"
-                          />
-                        )}
-                        <Chip
-                          color="blue"
-                          startIcon="location-arrow"
-                          text={asset.status}
-                        />
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="w-full pb-2 cursor-pointer mb-3">
-                    <p className="text-xl font-bold capitalize text-center">
-                      No Assets Found
-                    </p>
-                  </div>
-                )}
-              </div>
-              {totalCount > limit && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Pagination
-                    cPage={currentPage}
-                    defaultPerPage={limit}
-                    data={{ totalCount }}
-                    onChange={handlePagination}
-                  />
-                </div>
-              )}
+              {manageAssets}
+              <Pagination totalCount={totalCount} />
             </div>
           </div>
         </>

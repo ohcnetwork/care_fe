@@ -1,33 +1,33 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { postLogin } from "../../Redux/actions";
-import { navigate } from "raviger";
+import { postForgotPassword, postLogin } from "../../Redux/actions";
 import { Grid, CircularProgress } from "@material-ui/core";
-import { TextInputField } from "../Common/HelperInputFields";
-import { PublicDashboard } from "../Dashboard/PublicDashboard";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
-import LanguageSelector from "../Common/LanguageSelector";
 import { RECAPTCHA_SITE_KEY } from "../../Common/env";
+import * as Notification from "../../Utils/Notifications.js";
 import { get } from "lodash";
+import LegendInput from "../../CAREUI/interactive/LegendInput";
+import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 
-export const Login = () => {
+export const Login = (props: { forgot?: boolean }) => {
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
     password: "",
   };
+  const { forgot } = props;
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const captchaKey = RECAPTCHA_SITE_KEY ?? "";
   const { t } = useTranslation();
   // display spinner while login is under progress
   const [loading, setLoading] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(forgot);
+
+  // Login form validation
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
@@ -111,6 +111,51 @@ export const Login = () => {
     }
   };
 
+  const validateForgetData = () => {
+    let hasError = false;
+    const err = Object.assign({}, errors);
+
+    if (typeof form.username === "string") {
+      if (!form.username.match(/\w/)) {
+        hasError = true;
+        err.username = t("field_request");
+      }
+    }
+    if (!form.username) {
+      hasError = true;
+      err.username = t("field_request");
+    }
+
+    if (hasError) {
+      setErrors(err);
+      return false;
+    }
+    return form;
+  };
+
+  const handleForgetSubmit = (e: any) => {
+    e.preventDefault();
+    const valid = validateForgetData();
+    if (valid) {
+      setLoading(true);
+      dispatch(postForgotPassword(valid)).then((resp: any) => {
+        setLoading(false);
+        const res = resp && resp.data;
+        if (res && res.status === "OK") {
+          Notification.Success({
+            msg: t("password_sent"),
+          });
+        } else if (res && res.data) {
+          setErrors(res.data);
+        } else {
+          Notification.Error({
+            msg: t("something_wrong"),
+          });
+        }
+      });
+    }
+  };
+
   const onCaptchaChange = (value: any) => {
     if (value && isCaptchaEnabled) {
       const formCaptcha = { ...form };
@@ -120,104 +165,209 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row md:h-screen relative">
-      <div className="md:absolute top-2 right-2 p-2 md:p-0 bg-primary-500 md:bg-white">
-        <LanguageSelector className="md:bg-primary-500 md:text-white bg-white" />
+    <div className="flex flex-col-reverse md:flex-row md:h-screen relative">
+      <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
+        <a
+          href={"https://coronasafe.network?ref=care_login"}
+          className="inline-block"
+          target={"_blank"}
+          rel="noopener noreferrer"
+        >
+          <img
+            src={process.env.REACT_APP_LIGHT_LOGO}
+            className="h-8 hidden md:inline-block"
+            alt="coronasafe logo"
+          />
+        </a>
+        <div className="mt-4 md:mt-12 rounded-lg py-4">
+          <div className="max-w-lg">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-wider">
+              CARE
+            </h1>
+            <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
+              {t("goal")}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center lg:absolute lg:inset-x-0 lg:py-12 lg:px-16 pb-10 lg:bottom-0 lg:z-20">
+          <div className="text-xs md:text-sm max-w-lg">
+            <a
+              className="flex items-center text-gray-300 mb-2 font-bold"
+              href="https://coronasafe.network/"
+              rel="noopener noreferrer"
+              target={"_blank"}
+            >
+              <span>Powered By</span>
+              <img
+                src="https://3451063158-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-M233b0_JITp4nk0uAFp%2F-M2Dx6gKxOSU45cjfgNX%2F-M2DxFOkMmkPNn0I6U9P%2FCoronasafe-logo.png?alt=media&token=178cc96d-76d9-4e27-9efb-88f3186368e8"
+                className="h-8 inline-block"
+                alt="coronasafe logo"
+              />
+            </a>
+            <a
+              href="https://coronasafe.network/"
+              target={"_blank"}
+              rel="noopener noreferrer"
+              className="text-gray-500"
+            >
+              {t("footer_body")}
+            </a>
+            <div className="mx-auto mt-2">
+              <a
+                href={process.env.REACT_APP_GITHUB_URL}
+                target={"_blank"}
+                rel="noopener noreferrer"
+                className="text-primary-400 hover:text-primary-500"
+              >
+                {t("contribute_github")}
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="flex flex-col justify-center md:w-1/2 md:h-full bg-primary-500 border-primary-500">
-        <div className="pl-1/5">
-          <a href={"/"}>
+
+      <div className="w-full my-4 md:mt-0 md:w-1/2 md:h-full login-hero-form">
+        <div className="flex items-center justify-center h-full relative">
+          <div
+            className={
+              "w-full p-8 md:p-0 md:w-4/5 lg:w-[400px] transition-all " +
+              (forgotPassword
+                ? "invisible opacity-0 -translate-x-5"
+                : "visible opacity-100 -translate-x-0")
+            }
+          >
             <img
-              src={process.env.REACT_APP_LIGHT_LOGO}
-              className="h-8 w-auto"
+              src={process.env.REACT_APP_BLACK_LOGO}
+              className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
               alt="care logo"
             />{" "}
-          </a>
-        </div>
-        <div className="mt-4 md:mt-20 rounded-lg px-1/5 py-4">
-          <PublicDashboard />
-        </div>
-      </div>
-
-      <div className="flex items-center justify-center w-full my-4 md:mt-0 md:w-1/2 md:h-full">
-        <div className="bg-white mt-4 md:mt-20 px-4 py-4">
-          <div className="text-2xl font-bold text-center pt-4 text-primary-600">
-            {t("auth_login_title")}
-          </div>
-          <form onSubmit={handleSubmit}>
-            <div>
-              <TextInputField
-                name="username"
-                label={t("username")}
-                variant="outlined"
-                margin="dense"
-                autoFocus={true}
-                InputLabelProps={{ shrink: true }}
-                value={form.username}
-                onChange={handleChange}
-                errors={errors.username}
-              />
-              <div className="relative w-full">
-                <TextInputField
-                  className="w-full"
-                  type={showPassword ? "text" : "password"}
+            <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
+              {t("auth_login_title")}
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div>
+                <LegendInput
+                  name="username"
+                  id="username"
+                  type="TEXT"
+                  legend={t("username")}
+                  value={form.username}
+                  onChange={handleChange}
+                  error={errors.username}
+                  outerClassName="mb-4"
+                  size="large"
+                  className="font-extrabold"
+                />
+                <LegendInput
+                  type="PASSWORD"
                   name="password"
-                  label={t("password")}
-                  variant="outlined"
-                  margin="dense"
-                  autoComplete="off"
-                  InputLabelProps={{ shrink: true }}
+                  id="password"
+                  legend={t("password")}
                   value={form.password}
                   onChange={handleChange}
-                  errors={errors.password}
+                  error={errors.password}
+                  size="large"
+                  className="font-extrabold"
                 />
-                {showPassword ? (
-                  <VisibilityIcon
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-4"
-                  />
-                ) : (
-                  <VisibilityOffIcon
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-4"
-                  />
-                )}
-              </div>
-              <Grid container justify="center">
-                {isCaptchaEnabled && (
-                  <Grid item className="px-8 py-4">
-                    <ReCaptcha
-                      sitekey={captchaKey}
-                      onChange={onCaptchaChange}
-                    />
-                    <span className="text-red-500">{errors.captcha}</span>
-                  </Grid>
-                )}
+                <Grid container justify="center">
+                  {isCaptchaEnabled && (
+                    <Grid item className="px-8 py-4">
+                      <ReCaptcha
+                        sitekey={captchaKey}
+                        onChange={onCaptchaChange}
+                      />
+                      <span className="text-red-500">{errors.captcha}</span>
+                    </Grid>
+                  )}
 
-                <div className="w-full flex justify-between items-center pb-4">
-                  <a
-                    href="/forgot-password"
-                    className="text-sm text-primary-400 hover:text-primary-500"
-                  >
-                    {t("forget_password")}
-                  </a>
-                </div>
-
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <CircularProgress className="text-primary-500" />
+                  <div className="w-full flex justify-between items-center py-4">
+                    <button
+                      onClick={() => {
+                        setForgotPassword(true);
+                      }}
+                      type="button"
+                      className="text-sm text-primary-400 hover:text-primary-500"
+                    >
+                      {t("forget_password")}
+                    </button>
                   </div>
-                ) : (
-                  <button
-                    type="submit"
-                    className="w-full bg-primary-500 inline-flex items-center justify-center text-sm font-semibold py-2 px-4 rounded cursor-pointer text-white"
-                  >
-                    {t("login")}
-                  </button>
-                )}
-              </Grid>
+
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <CircularProgress className="text-primary-500" />
+                    </div>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="w-full bg-primary-500 inline-flex items-center justify-center text-sm font-semibold py-2 px-4 rounded cursor-pointer text-white"
+                    >
+                      {t("login")}
+                    </button>
+                  )}
+                </Grid>
+              </div>
+            </form>
+            <LanguageSelectorLogin />
+          </div>
+          <div
+            className={
+              "w-full p-8 md:p-0 md:w-4/5 lg:w-[400px] absolute transition-all " +
+              (!forgotPassword
+                ? "invisible opacity-0 translate-x-5"
+                : "visible opacity-100 translate-x-0")
+            }
+          >
+            <img
+              src={process.env.REACT_APP_BLACK_LOGO}
+              className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
+              alt="care logo"
+            />{" "}
+            <button
+              onClick={() => {
+                setForgotPassword(false);
+              }}
+              type="button"
+              className="text-sm text-primary-400 hover:text-primary-500 mb-4"
+            >
+              <i className="uil uil-arrow-left" /> Back to login
+            </button>
+            <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
+              {t("forget_password")}
             </div>
-          </form>
+            <form onSubmit={handleForgetSubmit}>
+              <div>
+                {t("forget_password_instruction")}
+                <LegendInput
+                  id="forgot_username"
+                  name="username"
+                  type="TEXT"
+                  legend={t("username")}
+                  value={form.username}
+                  onChange={handleChange}
+                  error={errors.username}
+                  outerClassName="my-4"
+                  required
+                  size="large"
+                  className="font-extrabold"
+                />
+                <Grid container justify="center">
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <CircularProgress className="text-primary-500" />
+                    </div>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="w-full bg-primary-500 inline-flex items-center justify-center text-sm font-semibold py-2 px-4 rounded cursor-pointer text-white"
+                    >
+                      {t("send_reset_link")}
+                    </button>
+                  )}
+                </Grid>
+              </div>
+            </form>
+            <LanguageSelectorLogin />
+          </div>
         </div>
       </div>
     </div>

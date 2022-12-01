@@ -4,6 +4,7 @@ import { ChangeEventHandler, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { deleteFacilityCoverImage } from "../../Redux/actions";
 import { Success } from "../../Utils/Notifications";
+import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
 import { FacilityModel } from "./models";
 
@@ -94,6 +95,16 @@ const CoverImageEditModal = ({
   const imgSrc =
     preview || `${facility.read_cover_image_url}?requested_on=${Date.now()}`;
 
+  const dragProps = useDragAndDrop();
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    dragProps.setDragOver(false);
+    const dropedFile = e?.dataTransfer?.files[0];
+    if (dropedFile.type.split("/")[0] !== "image")
+      return dragProps.setFileDropError("Please drop an image file to upload!");
+    setSelectedFile(dropedFile);
+  };
+
   return (
     <Modal open={open} onClose={closeModal}>
       <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
@@ -102,20 +113,63 @@ const CoverImageEditModal = ({
             <span className="text-xl font-medium">Edit Cover Photo</span>
             <span className="mt-1 text-gray-700">{facility.name}</span>
           </div>
-          <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
-            {hasImage ? (
+
+          {hasImage ? (
+            <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
               <img
                 src={imgSrc}
                 alt={facility.name}
                 className="w-full h-full object-cover"
               />
-            ) : (
-              <span className="mt-10 w-max text-xl text-gray-700 font-medium text-center">
+            </div>
+          ) : (
+            <div
+              onDragOver={dragProps.onDragOver}
+              onDragLeave={dragProps.onDragLeave}
+              onDrop={onDrop}
+              className={`px-3 py-6 flex-1 flex flex-col m-8 rounded-lg items-center justify-center border-[3px] border-dashed ${
+                dragProps.dragOver && "border-primary-500"
+              } ${
+                dragProps.fileDropError !== ""
+                  ? "border-red-500"
+                  : "border-gray-500"
+              }`}
+            >
+              <svg
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 48 48"
+                aria-hidden="true"
+                className={`w-12 h-12 stroke-[2px] ${
+                  dragProps.dragOver && "text-primary-500"
+                } ${
+                  dragProps.fileDropError !== ""
+                    ? "text-red-500"
+                    : "text-gray-600"
+                }`}
+              >
+                <path d="M28 8H12a4 4 0 0 0-4 4v20m32-12v8m0 0v8a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-4m32-4-3.172-3.172a4 4 0 0 0-5.656 0L28 28M8 32l9.172-9.172a4 4 0 0 1 5.656 0L28 28m0 0 4 4m4-24h8m-4-4v8m-12 4h.02" />
+              </svg>
+              <p
+                className={`text-sm ${
+                  dragProps.dragOver && "text-primary-500"
+                } ${
+                  dragProps.fileDropError !== ""
+                    ? "text-red-500"
+                    : "text-gray-700"
+                } text-center`}
+              >
+                {dragProps.fileDropError !== ""
+                  ? dragProps.fileDropError
+                  : "Drag & drop image to upload"}
+              </p>
+              <p className="mt-4 text-gray-700 font-medium text-center">
                 No cover photo uploaded for this facility. <br />
                 Recommended aspect ratio for facility cover photo is 1:1.
-              </span>
-            )}
-          </div>
+              </p>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row p-4 gap-2">
             <div>
               <label className="rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center justify-center cursor-pointer transition-all">
@@ -123,6 +177,7 @@ const CoverImageEditModal = ({
                 <input
                   title="changeFile"
                   type="file"
+                  accept="image/*"
                   className="hidden"
                   onChange={onSelectFile}
                 />
@@ -135,6 +190,7 @@ const CoverImageEditModal = ({
               onClick={(e) => {
                 e.stopPropagation();
                 closeModal();
+                dragProps.setFileDropError("");
               }}
               disabled={isUploading}
             >
@@ -143,7 +199,7 @@ const CoverImageEditModal = ({
             {facility.read_cover_image_url && (
               <button
                 type="button"
-                className="rounded-lg bg-error py-2 px-4 text-white font-medium text-sm flex gap-1 items-center justify-center  transition-all"
+                className="rounded-lg bg-danger-500 py-2 px-4 text-white font-medium text-sm flex gap-1 items-center justify-center transition-all"
                 onClick={handleDelete}
                 disabled={isUploading}
               >

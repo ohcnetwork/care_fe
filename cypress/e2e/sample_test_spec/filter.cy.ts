@@ -8,8 +8,7 @@ describe("Sample Filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.awaitUrl("/");
-    cy.get("a").contains("Sample Test").click();
+    cy.awaitUrl("/sample");
     cy.contains("Advanced Filters").click();
   });
 
@@ -21,8 +20,14 @@ describe("Sample Filter", () => {
     cy.get("[name='result']").select("POSITIVE");
   });
 
+  it("Filter by sample type", () => {
+    cy.get("[name='sample_type']").select("Biopsy");
+  });
+
   afterEach(() => {
+    cy.intercept(/\/api\/v1\/test_sample/).as("sample_filter");
     cy.contains("Apply").click();
+    cy.wait("@sample_filter");
     cy.saveLocalStorage();
   });
 });

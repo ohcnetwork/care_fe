@@ -23,25 +23,23 @@ interface PageTitleProps {
   focusOnLoad?: boolean;
 }
 
-export default function PageTitle(props: PageTitleProps) {
-  const {
-    title,
-    hideBack,
-    backUrl,
-    backButtonCB,
-    className = "",
-    componentRight = <></>,
-    breadcrumbs = true,
-    crumbsReplacements = {},
-    justifyContents = "justify-start",
-    focusOnLoad = false,
-  } = props;
-
+export default function PageTitle({
+  title,
+  hideBack = false,
+  backUrl,
+  backButtonCB,
+  className = "",
+  componentRight = <></>,
+  breadcrumbs = true,
+  crumbsReplacements = {},
+  justifyContents = "justify-start",
+  focusOnLoad = false,
+}: PageTitleProps) {
   const divRef = useRef<any>();
 
   useEffect(() => {
     if (divRef.current && focusOnLoad) {
-      divRef.current.scrollIntoView({ behavior: "smooth" });
+      divRef.current.scrollIntoView();
     }
   }, [divRef, focusOnLoad]);
 
