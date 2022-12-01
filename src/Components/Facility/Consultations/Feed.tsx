@@ -300,7 +300,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     updatePreset: (option) => {
       getCameraStatus({
-        onSuccess: async ({ data }) => {
+        onSuccess: async (data) => {
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
             const response = await dispatch(
