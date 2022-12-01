@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
@@ -24,6 +24,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import ButtonV2 from "../Common/components/ButtonV2";
 import AssetImportModal from "./AssetImportModal";
 import { FacilityModel } from "../Facility/models";
+import { USER_TYPES } from "../../Common/constants";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -148,6 +149,15 @@ const AssetsList = () => {
       console.log(err);
     }
   };
+
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+
+  const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
+
+  const showAssetImportExport =
+    USER_TYPES.findIndex((type) => type == currentUser.data.user_type) >=
+    DISTRICT_ADMIN_LEVEL;
 
   const checkValidAssetId = async (assetId: any) => {
     const assetData: any = await dispatch(getAsset(assetId));
@@ -319,37 +329,41 @@ const AssetsList = () => {
               <i className="fas fa-search mr-1"></i> Scan Asset QR
             </button>
           </div>
-          <div className="w-full tooltip flex flex-col md:flex-row gap-2">
-            {!facility ? (
-              <span className="tooltip-text tooltip-left">
-                <p className="self-end text-sm italic ">* Select a facility</p>
-              </span>
-            ) : (
-              ""
-            )}
-            <ButtonV2
-              className="w-1/2"
-              disabled={!facility}
-              onClick={() => {
-                setImportAssetModalOpen(true);
-              }}
-            >
-              <span>
-                <i className="fa-solid fa-arrow-up-long mr-2"></i>
-                Import Assets
-              </span>
-            </ButtonV2>
-            <ButtonV2
-              className="w-1/2"
-              disabled={!facility}
-              onClick={handleDownload}
-            >
-              <span>
-                <i className="fa-solid fa-arrow-down-long mr-2"></i>
-                Export Assets
-              </span>
-            </ButtonV2>
-          </div>
+          {showAssetImportExport && (
+            <div className="w-full tooltip flex flex-col md:flex-row gap-2">
+              {!facility ? (
+                <span className="tooltip-text tooltip-left">
+                  <p className="self-end text-sm italic ">
+                    * Select a facility
+                  </p>
+                </span>
+              ) : (
+                ""
+              )}
+              <ButtonV2
+                className="w-1/2"
+                disabled={!facility}
+                onClick={() => {
+                  setImportAssetModalOpen(true);
+                }}
+              >
+                <span>
+                  <i className="fa-solid fa-arrow-up-long mr-2"></i>
+                  Import Assets
+                </span>
+              </ButtonV2>
+              <ButtonV2
+                className="w-1/2"
+                disabled={!facility}
+                onClick={handleDownload}
+              >
+                <span>
+                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
+                  Export Assets
+                </span>
+              </ButtonV2>
+            </div>
+          )}
         </div>
       </div>
       <div>
