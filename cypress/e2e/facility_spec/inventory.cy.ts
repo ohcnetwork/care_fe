@@ -13,7 +13,8 @@ describe("Inventory Management Section", () => {
       .should("contain", "Facility")
       .contains("Facility")
       .click({ force: true });
-    cy.contains("Manage Inventory").click();
+    cy.get("[id=manage-facility-dropdown]").should("exist").click();
+    cy.get("[id=inventory-management]").click();
   });
 
   it("Adds Inventory", () => {

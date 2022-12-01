@@ -64,7 +64,7 @@ describe("User management", () => {
     cy.get("[placeholder='Phone Number']").type(phone_number);
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
-    cy.get("[name='search']").type(username, { force: true });
+    cy.get("[name='username']").type(username, { force: true });
     // TODO: some verify task
   });
 
@@ -76,7 +76,7 @@ describe("User management", () => {
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
     cy.intercept(/\/api\/v1\/users/).as("getUsers");
-    cy.get("[name='search']").type(username, { force: true });
+    cy.get("[name='username']").type(username, { force: true });
     cy.wait("@getUsers");
     cy.wait(500);
     const linkFacilityString = "Click here to show linked facilities";
@@ -243,7 +243,7 @@ describe("Delete User", () => {
   it("deletes user", () => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.awaitUrl("/user");
-    cy.get("[name='search']").type(username);
+    cy.get("[name='username']").type(username);
     cy.get("button").should("contain", "Delete").contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
   });

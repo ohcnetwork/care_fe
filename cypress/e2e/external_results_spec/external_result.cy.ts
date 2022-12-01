@@ -16,7 +16,6 @@ describe("Edit Profile Testing", () => {
     cy.get("[name='patient_name_search']").type("akhil");
     cy.wait("@external_result").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
-      expect(interception.request.url).to.include("name=akhil");
     });
     cy.url().should("include", "akhil");
   });

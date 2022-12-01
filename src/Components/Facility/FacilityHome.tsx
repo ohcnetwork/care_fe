@@ -430,10 +430,12 @@ export const FacilityHome = (props: any) => {
           <div className="flex flex-col justify-between mt-4">
             <div className="w-full md:w-auto">
               <DropdownMenu
+                id="manage-facility-dropdown"
                 title="Manage Facility"
                 icon={<i className="uil uil-setting text-xl"></i>}
               >
                 <DropdownItem
+                  id="update-facility"
                   onClick={() => navigate(`/facility/${facilityId}/update`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<i className="uil uil-edit-alt" />}
@@ -441,12 +443,14 @@ export const FacilityHome = (props: any) => {
                   Update Facility
                 </DropdownItem>
                 <DropdownItem
+                  id="inventory-management"
                   onClick={() => navigate(`/facility/${facilityId}/inventory`)}
                   icon={<i className="uil uil-clipboard-alt" />}
                 >
                   Inventory Management
                 </DropdownItem>
                 <DropdownItem
+                  id="location-management"
                   onClick={() => navigate(`/facility/${facilityId}/location`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<i className="uil uil-location-point" />}
