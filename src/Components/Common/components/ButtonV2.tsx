@@ -54,14 +54,14 @@ export type ButtonProps = RawButtonProps &
      * Whether the button should be disabled and show a loading animation.
      */
     loading?: boolean | undefined;
-    href?: string | undefined;
     /**
      * A button will convert to a link if the `href` prop is set.
      */
-    target?: string | undefined;
+    href?: string | undefined;
     /**
      * Link target. Only applicable if `href` is set.
      */
+    target?: string | undefined;
   };
 
 const shadowClasses =
