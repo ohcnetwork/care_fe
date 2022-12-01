@@ -646,13 +646,13 @@ export const FileUpload = (props: FileUploadProps) => {
                       [
                         t("Rotate Left"),
                         "rotate-left",
-                        () => handleRotate(90),
+                        () => handleRotate(-90),
                         false,
                       ],
                       [
                         t("Rotate Right"),
                         "rotate-right",
-                        () => handleRotate(-90),
+                        () => handleRotate(90),
                         false,
                       ],
                     ].map((button, index) => (

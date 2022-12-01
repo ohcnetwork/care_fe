@@ -29,9 +29,7 @@ import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
-import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
-import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
-import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
+import DoctorVideoSlideover from "./DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
 import Dialog from "@material-ui/core/Dialog";
@@ -50,6 +48,8 @@ import ReadMore from "../Common/components/Readmore";
 import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
 import { formatDate } from "../../Utils/utils";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
+import PatientInfoCard from "../Patient/PatientInfoCard";
+import PatientVitalsCard from "../Patient/PatientVitalsCard";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -500,7 +500,7 @@ export const ConsultationDetails = (props: any) => {
         </nav>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black w-full">
-            <TeleICUPatientInfoCard
+            <PatientInfoCard
               patient={patientData}
               ip_no={consultationData.ip_no}
               fetchPatientData={fetchData}
@@ -665,10 +665,7 @@ export const ConsultationDetails = (props: any) => {
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
               {!consultationData.discharge_date && (
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                  <TeleICUPatientVitalsCard patient={patientData} />
-                  {/*<TeleICUPatientVitalsGraphCard
-                  consultationId={patientData.last_consultation?.id}
-                />*/}
+                  <PatientVitalsCard patient={patientData} />
                 </section>
               )}
               <div className="grid lg:grid-cols-2 gap-4 mt-4">

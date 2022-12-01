@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import FormField from "./FormField";
 import {
   FormFieldBaseProps,
@@ -31,6 +31,11 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   const trailingFocused = props.trailingFocused || props.trailing;
   const hasIcon = !!(leading || trailing || leadingFocused || trailingFocused);
   const padding = `py-3 ${hasIcon ? "px-8" : "px-3"}`;
+  const [showPassword, setShowPassword] = useState(false);
+
+  const getPasswordFieldType = () => {
+    return showPassword ? "text" : "password";
+  };
 
   let child = (
     <input
@@ -42,7 +47,7 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
           : `peer text-sm block ${padding} w-full rounded placeholder:text-gray-500 bg-gray-200 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out ${borderColor} ${props.className}`
       }
       disabled={props.disabled}
-      type={props.type || "text"}
+      type={props.type === "password" ? getPasswordFieldType() : props.type}
       placeholder={props.placeholder}
       name={props.name}
       value={props.value}
@@ -56,6 +61,21 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
       }}
     />
   );
+
+  if (props.type === "password") {
+    child = (
+      <div className="relative">
+        {child}
+        <button
+          type="button"
+          className="absolute right-0 top-0 h-full flex items-center px-3 z-10 text-xl"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          <i className={`uil uil-eye${showPassword ? "" : "-slash"}`} />
+        </button>
+      </div>
+    );
+  }
 
   if (hasIcon) {
     const _leading =

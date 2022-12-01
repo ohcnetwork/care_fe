@@ -155,7 +155,6 @@ export default function InventoryList(props: any) {
     <div>
       <PageTitle
         title="Inventory Manager"
-        hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
