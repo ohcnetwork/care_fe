@@ -37,8 +37,9 @@ import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
 import SearchInput from "../Form/SearchInput";
-import { getFacilityFeatureIcon } from "./FacilityHome";
 import useFilters from "../../Common/hooks/useFilters";
+import Chip from "../../CAREUI/display/Chip";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -280,7 +281,10 @@ export const HospitalList = () => {
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg overflow-clip bg-white shadow h-full hover:border-primary-500">
             <div className="flex h-full">
-              <div className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
+              <Link
+                href={`/facility/${facility.id}`}
+                className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0"
+              >
                 {(facility.read_cover_image_url && (
                   <img
                     src={facility.read_cover_image_url}
@@ -290,9 +294,12 @@ export const HospitalList = () => {
                 )) || (
                   <i className="fas fa-hospital text-4xl block text-gray-500" />
                 )}
-              </div>
+              </Link>
               <div className="h-full w-full grow">
-                <div className="group md:hidden flex w-full self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0">
+                <Link
+                  href={`/facility/${facility.id}`}
+                  className="group md:hidden flex w-full self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0"
+                >
                   {(facility.read_cover_image_url && (
                     <img
                       src={facility.read_cover_image_url}
@@ -302,46 +309,52 @@ export const HospitalList = () => {
                   )) || (
                     <i className="fas fa-hospital text-4xl block text-gray-500 p-10" />
                   )}
-                </div>
+                </Link>
 
-                <div className="h-full flex flex-col justify-between w-full h-fit">
-                  <div className="pl-4 md:pl-2 pr-4 py-2 w-full ">
+                <div className="flex flex-col justify-between w-full h-fit md:h-full">
+                  <div className="px-4 py-4 w-full ">
                     <div className="flow-root">
                       {facility.kasp_empanelled && (
                         <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
                           {KASP_STRING}
                         </div>
                       )}
-                      <div className="float-left font-bold text-xl capitalize">
+                      <Link
+                        href={`/facility/${facility.id}`}
+                        className="float-left font-bold text-xl capitalize text-inherit hover:text-inherit"
+                      >
                         {facility.name}
-                      </div>
+                      </Link>
                     </div>
 
                     <div className="flex gap-1 flex-wrap mt-2">
-                      <div className="px-2.5 py-0.5 flex items-center rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
-                        {facility.facility_type}
-                      </div>
+                      <Chip
+                        text={facility.facility_type}
+                        color="blue"
+                        hideBorder
+                        size="small"
+                      />
                       {facility.features?.map(
                         (feature: number, i: number) =>
                           FACILITY_FEATURE_TYPES.some(
                             (f) => f.id === feature
                           ) && (
-                            <div
+                            <Chip
+                              hideBorder
                               key={i}
-                              className="flex gap-1 items-center bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-md text-sm leading-5"
-                              title={
+                              text={
                                 FACILITY_FEATURE_TYPES.filter(
                                   (f) => f.id === feature
                                 )[0]?.name
                               }
-                            >
-                              {getFacilityFeatureIcon(feature)} &nbsp;
-                              {
+                              color="primary"
+                              size="small"
+                              startIcon={
                                 FACILITY_FEATURE_TYPES.filter(
                                   (f) => f.id === feature
-                                )[0]?.name
+                                )[0]?.icon
                               }
-                            </div>
+                            />
                           )
                       )}
                     </div>
@@ -360,20 +373,18 @@ export const HospitalList = () => {
                       {facility.phone_number || "-"}
                     </a>
                   </div>
-                  <div className="bg-gray-50 border-t px-2 md:px-6 py-2 flex-none">
-                    <div className="flex py-4 justify-between">
+                  <div className="bg-gray-50 border-t px-2 md:px-4 py-2 flex-none">
+                    <div className="flex py-2 justify-between">
                       <div className="flex justify-between w-full flex-wrap gap-2">
                         <div>
-                          {userType !== "Staff" ? (
-                            <button
-                              className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                          {userType !== "Staff" && (
+                            <ButtonV2
+                              ghost
                               onClick={(_) => setNotifyModalFor(facility.id)}
                             >
-                              <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
+                              <i className="uil uil-megaphone"></i>{" "}
                               <span className="md:block hidden">Notify</span>
-                            </button>
-                          ) : (
-                            <></>
+                            </ButtonV2>
                           )}
                           <Modal
                             open={notifyModalFor === facility.id}
@@ -429,20 +440,19 @@ export const HospitalList = () => {
                           </Modal>
                         </div>
                         <div className="flex gap-2 ">
-                          <Link
-                            href={`/facility/${facility.id}`}
-                            className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                          >
-                            <i className="fas fa-hospital mr-2 text-primary-500"></i>
-                            {t("Facility")}
-                          </Link>
-                          <Link
+                          <ButtonV2 href={`/facility/${facility.id}`} ghost>
+                            <i className="uil uil-hospital" />
+                            <span className="hidden md:inline">
+                              {t("Facility")}
+                            </span>
+                          </ButtonV2>
+                          <ButtonV2
                             href={`/facility/${facility.id}/patients`}
-                            className=" inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                            ghost
                           >
-                            <i className="fas fa-user-injured text-primary-500 mr-2"></i>
+                            <i className="uil uil-accessible-icon-alt" />
                             {t("Patients")}
-                          </Link>
+                          </ButtonV2>
                         </div>
                       </div>
                     </div>
@@ -491,7 +501,7 @@ export const HospitalList = () => {
   }
 
   return (
-    <div className="px-6">
+    <div className="px-2 md:px-6">
       <div className="grid md:grid-cols-2">
         <PageTitle
           title={t("Facilities")}

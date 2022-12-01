@@ -38,6 +38,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ContactLink from "../Common/components/ContactLink";
+import Chip from "../../CAREUI/display/Chip";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -45,7 +46,7 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
   return typeof feature.icon === "string" ? (
-    <i className={`text-lg font-extrabold ${feature.icon}`} />
+    <i className={`${feature.icon}`} />
   ) : (
     feature.icon
   );
@@ -407,20 +408,23 @@ export const FacilityHome = (props: any) => {
                 )}
                 <div className="flex gap-2 flex-wrap mt-5">
                   {facilityData.features?.map(
-                    (feature, i) =>
+                    (feature: number, i: number) =>
                       FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
-                        <div
+                        <Chip
                           key={i}
-                          className="flex items-center gap-1 bg-[#F0FFF9] text-primary-500 font-medium px-3.5 py-2.5 rounded border border-primary-500 text-sm"
-                        >
-                          {getFacilityFeatureIcon(feature)}
-                          &nbsp;
-                          {
+                          size="large"
+                          text={
                             FACILITY_FEATURE_TYPES.filter(
                               (f) => f.id === feature
                             )[0]?.name
                           }
-                        </div>
+                          color="primary"
+                          startIcon={
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0]?.icon
+                          }
+                        />
                       )
                   )}
                 </div>

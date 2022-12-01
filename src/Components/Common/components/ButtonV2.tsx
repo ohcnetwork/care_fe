@@ -1,3 +1,4 @@
+import { Link } from "raviger";
 import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 
@@ -53,6 +54,14 @@ export type ButtonProps = RawButtonProps &
      * Whether the button should be disabled and show a loading animation.
      */
     loading?: boolean | undefined;
+    href?: string | undefined;
+    /**
+     * A button will convert to a link if the `href` prop is set.
+     */
+    target?: string | undefined;
+    /**
+     * Link target. Only applicable if `href` is set.
+     */
   };
 
 const shadowClasses =
@@ -69,10 +78,30 @@ const ButtonV2 = ({
   disabled,
   loading,
   children,
+  href,
+  target,
   ...props
 }: ButtonProps) => {
   const isAuthorized = useIsAuthorized(authorizeFor);
 
+  if (href && !(disabled || !isAuthorized || loading)) {
+    return (
+      <Link
+        href={href}
+        target={target}
+        className={[
+          "Button outline-offset-1",
+          `button-size-${size}`,
+          `button-shape-${circle ? "circle" : "square"}`,
+          `button-${variant}-${ghost ? "ghost" : "default"}`,
+          shadow && shadowClasses,
+          className,
+        ].join(" ")}
+      >
+        {children}
+      </Link>
+    );
+  }
   return (
     <button
       {...props}
