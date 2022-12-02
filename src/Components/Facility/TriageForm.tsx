@@ -11,9 +11,10 @@ import {
   getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { DateInputField, TextInputField } from "../Common/HelperInputFields";
+import { TextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
 import { goBack } from "../../Utils/utils";
+import DateInputV2 from "../Common/DateInputV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -214,14 +215,20 @@ export const TriageForm = (props: triageFormProps) => {
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div className="max-w-[250px]">
-                <DateInputField
-                  label="Entry Date"
+              <div className="max-w-[250px] pb-4">
+                <div className="text-sm text-gray-800">Entry Date</div>
+                <DateInputV2
+                  className="flex justify-center"
                   value={state.form.entry_date}
-                  max={new Date().toLocaleDateString("en-ca")}
                   onChange={(date) => handleDateChange(date, "entry_date")}
-                  errors={state.errors.entry_date}
-                />
+                  placeholder={"Entry Date"}
+                ></DateInputV2>
+                {state.errors.entry_date &&
+                  state.errors.entry_date.length > 0 && (
+                    <div className="text-sm text-red-500">
+                      {state.errors.entry_date}
+                    </div>
+                  )}
               </div>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
