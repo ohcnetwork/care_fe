@@ -11,7 +11,7 @@ jobs:
   auto-label-deploy-failed:
     runs-on: ubuntu-latest
     steps:
-      - name: Add labels
+      - name: Add 'Deploy-Failed'
         if: |
           github.event.issue.pull_request && 
           contains(github.event.comment.body, 'Deploy Preview') && 
@@ -24,4 +24,19 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               labels: ["Deploy-Failed", "do not merge"]
+            })
+
+      - name: Remove 'Deploy-Failed' label
+        if: |
+          github.event.issue.pull_request && 
+          contains(github.event.comment.body, 'Deploy Preview') && 
+          contains(github.event.comment.body, 'ready')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["Deploy-Failed"]
             })
