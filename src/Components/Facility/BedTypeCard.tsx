@@ -55,7 +55,6 @@ const BedTypeCard = (props: BedTypeProps) => {
       firstUpdate.current = false;
       return;
     }
-    console.log("Im isVisible");
     setTimeout(() => {
       if (props.current_capacity && props.total_capacity)
         setPercentage((props.current_capacity * 100) / props.total_capacity);

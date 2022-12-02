@@ -12,6 +12,7 @@ import AssetWarrantyCard from "./AssetWarrantyCard";
 import { formatDate } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -159,6 +160,20 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
     );
 
+  const downloadJSON = (data: AssetData) => {
+    const a = document.createElement("a");
+    const blob = new Blob([JSON.stringify([data])], {
+      type: "application/json",
+    });
+    a.href = URL.createObjectURL(blob);
+    a.download = `asset_${data.id}.json`;
+    a.click();
+  };
+
+  const handleDownload = async () => {
+    if (asset) downloadJSON(asset);
+  };
+
   return (
     <div className="px-2 pb-2">
       <PageTitle
@@ -220,29 +235,33 @@ const AssetManage = (props: AssetManageProps) => {
                 },
               ].map(detailBlock)}
             </div>
-            <div className="flex flex-col md:flex-row gap-1">
-              <button
+            <div className="flex flex-col lg:flex-row gap-1">
+              <ButtonV2
                 onClick={() =>
                   navigate(
                     `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
                   )
                 }
                 id="update-asset"
-                className="primary-button"
               >
                 <CareIcon className="care-l-pen h-5 mr-4" />
                 Update
-              </button>
+              </ButtonV2>
               {asset?.asset_class && (
-                <button
+                <ButtonV2
                   onClick={() => navigate(`/assets/${asset?.id}/configure`)}
                   id="configure-asset"
-                  className="primary-button"
                 >
                   <CareIcon className="care-l-setting h-5 mr-4" />
                   Configure
-                </button>
+                </ButtonV2>
               )}
+              <ButtonV2 onClick={handleDownload}>
+                <span>
+                  <i className="fa-solid fa-arrow-down-long mr-4"></i>
+                  Export Asset
+                </span>
+              </ButtonV2>
             </div>
           </div>
           <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 flex-shrink-0">

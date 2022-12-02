@@ -12,7 +12,6 @@ import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
 import * as Notification from "../../../Utils/Notifications.js";
-import { Console } from "console";
 
 const Loading = loadable(() => import("../../Common/Loading"));
 
@@ -149,7 +148,7 @@ export default function ShowInvestigation(props: any) {
 
   const handleUpdateCancel = useCallback(() => {
     const changedValues = _.chain(state.initialValues)
-      .map((val: any, key: string) => ({
+      .map((val: any, _key: string) => ({
         id: val?.id,
         initialValue: val?.notes || val?.value || null,
         value: val?.value || null,
@@ -164,7 +163,6 @@ export default function ShowInvestigation(props: any) {
     <div className="max-w-7xl mx-auto px-4">
       <PageTitle
         title="Investigation"
-        hideBack={false}
         className="mx-3 md:mx-4"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
