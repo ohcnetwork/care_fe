@@ -92,7 +92,7 @@
     "react-swipeable-views": "^0.13.9",
     "react-transition-group": "^4.4.5",
     "redux": "^4.1.0",
-    "redux-thunk": "^2.3.0",
+    "redux-thunk": "^2.4.2",
     "rescript-material-ui": "^2.1.2",
     "rescript-webapi": "^0.6.1",
     "screenfull": "^5.1.0",
