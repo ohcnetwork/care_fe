@@ -427,6 +427,7 @@ export const HospitalList = () => {
                   </div>
                   <div className="flex gap-2 ">
                     <ButtonV2
+                      name="facility-details"
                       className="flex gap-3 bg-white"
                       shadow
                       ghost
