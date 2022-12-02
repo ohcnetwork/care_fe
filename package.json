@@ -34,7 +34,7 @@
     "@glennsl/bs-json": "^5.0.3",
     "@googlemaps/react-wrapper": "^1.1.35",
     "@googlemaps/typescript-guards": "^2.0.0",
-    "@headlessui/react": "^1.7.3",
+    "@headlessui/react": "^1.7.4",
     "@loadable/component": "^5.15.0",
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
