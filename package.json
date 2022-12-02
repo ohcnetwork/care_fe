@@ -70,7 +70,7 @@
     "libphonenumber-js": "^1.10.13",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
-    "postcss-loader": "^7.0.1",
+    "postcss-loader": "^7.0.2",
     "qrcode.react": "^1.0.1",
     "querystring": "^0.2.1",
     "raviger": "^4.1.1",
