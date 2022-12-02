@@ -1,6 +1,6 @@
 import { usePath, Link } from "raviger";
 import { useState } from "react";
-import clsx from "clsx";
+import { classNames } from "../../Utils/utils";
 
 const MENU_TAGS: { [key: string]: string } = {
   facility: "Facilities",
@@ -105,7 +105,7 @@ export default function Breadcrumbs(props: any) {
               crumb.name && (
                 <li
                   key={crumb.name}
-                  className={clsx(
+                  className={classNames(
                     "text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer",
                     crumb.style
                   )}

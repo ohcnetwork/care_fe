@@ -10,19 +10,12 @@ import {
   Box,
   Button,
 } from "@material-ui/core";
-import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
+import { createStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
 import { SelectField, TextInputField } from "../../Common/HelperInputFields";
 import _ from "lodash";
-import clsx from "clsx";
-
-const useStyle = makeStyles(() => ({
-  tableCell: {
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-}));
+import { classNames } from "../../../Utils/utils";
 
 const StyledTableRow = withStyles(() =>
   createStyles({
@@ -51,7 +44,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
         {data?.investigation_object?.name || "---"}
       </TableCell>
       <TableCell
-        className={clsx(
+        className={classNames(
           "h-12 text-sm border-l border-r border-gray-400",
           showForm ? "p-0" : "px-2"
         )}
