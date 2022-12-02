@@ -73,7 +73,7 @@
     "postcss-loader": "^7.0.2",
     "qrcode.react": "^1.0.1",
     "querystring": "^0.2.1",
-    "raviger": "^4.1.1",
+    "raviger": "^4.1.2",
     "react": "18.2.0",
     "react-copy-to-clipboard": "^5.0.3",
     "react-csv": "^2.2.2",
