@@ -24,7 +24,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
-import clsx from "clsx";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import SearchInput from "../Form/SearchInput";
@@ -371,7 +370,7 @@ export default function ManageUsers() {
                         </span>
                         <span
                           aria-label="Online"
-                          className={clsx(
+                          className={classNames(
                             "shrink-0 inline-block h-2 w-2 rounded-full",
                             cur_online ? "bg-primary-400" : "bg-gray-300"
                           )}

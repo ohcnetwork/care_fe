@@ -1,5 +1,5 @@
-import clsx from "clsx";
 import { ReactNode, useState } from "react";
+import { classNames } from "../../../Utils/utils";
 
 interface TooltipProps {
   children: ReactNode;
@@ -25,7 +25,7 @@ export default function ToolTip(props: TooltipProps) {
 
   const [status, show] = useState(false);
 
-  const style = clsx(
+  const style = classNames(
     "absolute bg-black/50 backdrop-blur rounded text-white transition px-2 py-1 z-50 w-[150px] text-center block",
     position === "TOP" && "bottom-[calc(100%+5px)] left-[calc(50%-75px)]",
     position === "BOTTOM" && "top-[calc(100%+5px)] left-[calc(50%-75px)]",
