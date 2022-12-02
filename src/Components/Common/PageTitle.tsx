@@ -1,8 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
-import clsx from "clsx";
-import { goBack } from "../../Utils/utils";
+import { classNames, goBack } from "../../Utils/utils";
 
 interface PageTitleProps {
   title: string;
@@ -49,12 +48,7 @@ export default function PageTitle({
   return (
     <div ref={divRef} className={`pt-4 mb-4 ${className}`}>
       <PageHeadTitle title={title} />
-      <div
-        className={clsx({
-          "flex items-center": true,
-          [justifyContents]: true,
-        })}
-      >
+      <div className={classNames("flex items-center", justifyContents)}>
         <div className="flex items-center">
           {!hideBack && (
             <button onClick={onBackButtonClick}>
