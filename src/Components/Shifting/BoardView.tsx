@@ -107,7 +107,9 @@ export default function BoardView() {
           <div className="mt-1 w-fit inline-flex space-x-1 lg:space-x-4">
             <button
               className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-28 md:w-36 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-              onClick={() => navigate("/shifting/list-view", qParams)}
+              onClick={() =>
+                navigate("/shifting/list-view", { query: qParams })
+              }
             >
               <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
               List View

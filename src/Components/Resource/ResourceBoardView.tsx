@@ -51,7 +51,7 @@ export default function BoardView() {
   };
 
   const onListViewBtnClick = () => {
-    navigate("/resource/list-view", qParams);
+    navigate("/resource/list-view", { query: qParams });
     localStorage.setItem("defaultResourceView", "list");
   };
 
