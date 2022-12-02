@@ -4,7 +4,6 @@ permissions:
   pull-requests: write
 
 on:
-  workflow_dispatch:
   issue_comment:
     types: [created, edited]
 
