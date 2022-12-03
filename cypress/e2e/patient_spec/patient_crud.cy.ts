@@ -18,7 +18,7 @@ describe("Patient Creation", () => {
   });
 
   it("Create", () => {
-    cy.get("a")
+    cy.get("[data-cy=facility-buttons]")
       .should("contain", "Facility")
       .contains("Facility")
       .click({ force: true });

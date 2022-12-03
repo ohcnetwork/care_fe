@@ -425,7 +425,7 @@ export const HospitalList = () => {
                       </div>
                     </Modal>
                   </div>
-                  <div className="flex gap-2 ">
+                  <div className="flex gap-2 " data-cy="facility-buttons">
                     <ButtonV2
                       className="flex gap-3 bg-white"
                       shadow
