@@ -401,6 +401,13 @@ export const HospitalList = () => {
                               multiline
                               required
                               className="w-full border p-2 max-h-64"
+                              value={notifyMessage}
+                              autoFocus
+                              onFocus={(e) => {
+                                const val = e.target.value;
+                                e.target.value = "";
+                                e.target.value = val;
+                              }}
                               onChange={(e) => setNotifyMessage(e.target.value)}
                               placeholder="Type your message..."
                               variant="outlined"
