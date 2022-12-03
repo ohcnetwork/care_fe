@@ -28,9 +28,8 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { ErrorHelperText } from "../Common/HelperInputFields";
 import Modal from "@material-ui/core/Modal";
-import clsx from "clsx";
 import Chip from "../../CAREUI/display/Chip";
-import { formatDate } from "../../Utils/utils";
+import { classNames, formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
@@ -675,7 +674,8 @@ export const PatientHome = (props: any) => {
               className="space-y-2 flex-col justify-between flex h-full"
             >
               <div>
-                {patientData.review_time &&
+                {/* TODO: Re-enable Review Missed | Temporary Hack for Launch */}
+                {/* {patientData.review_time &&
                   !patientData.last_consultation?.discharge_date &&
                   Number(patientData.last_consultation?.review_interval) >
                     0 && (
@@ -692,10 +692,10 @@ export const PatientHome = (props: any) => {
                         {(moment().isBefore(patientData.review_time)
                           ? "Review before: "
                           : "Review Missed: ") +
-                          formatDate(patientData.review_time)}
+                            "") + formatDate(patientData.review_time)}
                       </p>
                     </div>
-                  )}
+                  )} */}
                 <div className="p-2 bg-white rounded-sm shadow text-center mb-6">
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2">
@@ -1168,7 +1168,7 @@ export const PatientHome = (props: any) => {
           <div className="hidden lg:block">
             <div className="grid grid-cols-6 xl:grid-cols-7 mt-4 gap-5">
               <div
-                className={clsx(
+                className={classNames(
                   "w-full rounded-lg border",
                   patientData.is_active &&
                     (!patientData?.last_consultation ||
@@ -1287,7 +1287,7 @@ export const PatientHome = (props: any) => {
                 }}
               >
                 <div
-                  className={clsx(
+                  className={classNames(
                     "bg-white rounded-lg shadow p-4 h-full space-y-2 border",
                     isPatientInactive(patientData, facilityId)
                       ? " hover:cursor-not-allowed border-gray-700"
@@ -1347,7 +1347,7 @@ export const PatientHome = (props: any) => {
                 }}
               >
                 <div
-                  className={clsx(
+                  className={classNames(
                     "bg-white rounded-lg shadow p-4 h-full space-y-2 border",
                     isPatientInactive(patientData, facilityId)
                       ? "hover:cursor-not-allowed border-gray-700"
@@ -1355,7 +1355,7 @@ export const PatientHome = (props: any) => {
                   )}
                 >
                   <div
-                    className={clsx(
+                    className={classNames(
                       "text-center",
                       isPatientInactive(patientData, facilityId)
                         ? "text-gray-700"
@@ -1368,7 +1368,7 @@ export const PatientHome = (props: any) => {
                   </div>
                   <div>
                     <p
-                      className={clsx(
+                      className={classNames(
                         "text-center text-sm font-medium",
                         isPatientInactive(patientData, facilityId)
                           ? "text-gray-700"

@@ -55,9 +55,6 @@ export type ButtonProps = RawButtonProps &
     loading?: boolean | undefined;
   };
 
-const shadowClasses =
-  "shadow enabled:hover:shadow-lg enabled:hover:-translate-y-1";
-
 const ButtonV2 = ({
   authorizeFor = Anyone,
   size = "default",
@@ -82,7 +79,7 @@ const ButtonV2 = ({
         `button-size-${size}`,
         `button-shape-${circle ? "circle" : "square"}`,
         `button-${variant}-${ghost ? "ghost" : "default"}`,
-        shadow && shadowClasses,
+        shadow && "shadow enabled:hover:shadow-lg",
         className,
       ].join(" ")}
     >
