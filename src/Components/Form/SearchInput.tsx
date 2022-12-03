@@ -76,7 +76,11 @@ const SearchInput = ({
       type="search"
       ref={ref}
       className={`${className} enabled:bg-white`}
-      leading={props.leading || <CareIcon className="care-l-search-alt h-5" />}
+      leading={
+        props.leading || (
+          <CareIcon className="text-gray-600 care-l-search-alt h-4 mt-1" />
+        )
+      }
       trailing={
         props.trailing ||
         (!props.secondary && (
