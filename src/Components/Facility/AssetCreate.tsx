@@ -806,6 +806,7 @@ const AssetCreate = (props: AssetProps) => {
                     <TextInputFieldV2
                       label="Vendor Name"
                       id="vendor-name"
+                      value={vendor_name}
                       placeholder="Eg. XYZ"
                       onValueChange={setVendorName}
                       error={state.errors.vendor_name}

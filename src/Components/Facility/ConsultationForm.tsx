@@ -40,7 +40,6 @@ import {
   DateInputField,
   ErrorHelperText,
   MultilineInputField,
-  MultiSelectField,
   NativeSelectField,
   SelectField,
   TextInputField,
@@ -68,6 +67,7 @@ import ProcedureBuilder, {
 import { ICD11DiagnosisModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -75,7 +75,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 type BooleanStrings = "true" | "false";
 
 type FormDetails = {
-  hasSymptom: boolean;
+  is_asymptomatic: boolean;
   otherSymptom: boolean;
   symptoms: number[];
   other_symptoms: string;
@@ -120,7 +120,7 @@ type Action =
   | { type: "set_error"; errors: FormDetails };
 
 const initForm: FormDetails = {
-  hasSymptom: false,
+  is_asymptomatic: false,
   otherSymptom: false,
   symptoms: [],
   other_symptoms: "",
@@ -270,14 +270,14 @@ export const ConsultationForm = (props: any) => {
         if (res && res.data) {
           const formData = {
             ...res.data,
-            hasSymptom:
+            is_asymptomatic:
               !!res.data.symptoms &&
               !!res.data.symptoms.length &&
-              !!res.data.symptoms.filter((i: number) => i !== 1).length,
+              !!res.data.symptoms.includes(1),
             otherSymptom:
               !!res.data.symptoms &&
               !!res.data.symptoms.length &&
-              !!res.data.symptoms.filter((i: number) => i === 9).length,
+              !!res.data.symptoms.includes(9),
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
@@ -368,13 +368,12 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "symptoms_onset_date":
-          if (state.form.hasSymptom && !state.form[field]) {
+          if (state.form.is_asymptomatic && !state.form[field]) {
             errors[field] = "Please enter date of onset of the above symptoms";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        // case "admitted_to":
         case "admission_date":
           if (state.form.suggestion === "A" && !state.form[field]) {
             errors[field] = "Field is required as person is admitted";
@@ -500,7 +499,7 @@ export const ConsultationForm = (props: any) => {
         other_symptoms: state.form.otherSymptom
           ? state.form.other_symptoms
           : undefined,
-        symptoms_onset_date: state.form.hasSymptom
+        symptoms_onset_date: !state.form.is_asymptomatic
           ? state.form.symptoms_onset_date
           : undefined,
         suggestion: state.form.suggestion,
@@ -599,34 +598,22 @@ export const ConsultationForm = (props: any) => {
         form: {
           ...state.form,
           [e.target.name]: e.target.value,
-          // admitted: e.target.value === "A" ? "true" : "false",
         },
       });
   };
 
-  const handleSymptomChange = (e: any, child?: any) => {
-    const form = { ...state.form };
-    const { value } = e?.target;
-    const otherSymptoms = value.filter((i: number) => i !== 1);
-    // prevent user from selecting asymptomatic along with other options
-    form.symptoms =
-      child?.props?.value === 1
-        ? otherSymptoms.length
-          ? [1]
-          : value
-        : otherSymptoms;
-    form.hasSymptom = !!form.symptoms.filter((i: number) => i !== 1).length;
-    form.otherSymptom = !!form.symptoms.filter((i: number) => i === 9).length;
-    dispatch({ type: "set_form", form });
+  const handleSymptomChange = (value: any) => {
+    const checkSymptoms = value.includes(1);
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        is_asymptomatic: checkSymptoms,
+        symptoms: checkSymptoms ? [1] : value,
+        otherSymptom: checkSymptoms ? false : value.includes(9),
+      },
+    });
   };
-
-  // ------------- DEPRECATED -------------
-  // const handleDateChange = (date: any, key: string) => {
-  //   if (moment(date).isValid()) {
-  //     const form = { ...state.form };
-  //     form[key] = date;
-  //     dispatch({ type: "set_form", form });
-  //   }
 
   const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
     moment(date).isValid() &&
@@ -684,13 +671,14 @@ export const ConsultationForm = (props: any) => {
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
                 <div id="symptoms-div">
-                  <InputLabel id="symptoms-label">Symptoms*</InputLabel>
-                  <MultiSelectField
-                    name="symptoms"
-                    variant="outlined"
+                  <MultiSelectMenuV2
+                    id="symptoms"
+                    placeholder="Symptoms"
                     value={state.form.symptoms}
                     options={symptomChoices}
-                    onChange={handleSymptomChange}
+                    optionLabel={(o) => o.text}
+                    optionValue={(o) => o.id}
+                    onChange={(o) => handleSymptomChange(o)}
                   />
                   <ErrorHelperText error={state.errors.symptoms} />
                 </div>
@@ -715,7 +703,7 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 )}
 
-                {state.form.hasSymptom && (
+                {!state.form.is_asymptomatic && (
                   <div id="symptoms_onset_date-div">
                     <DateInputField
                       label="Date of onset of the symptoms*"
@@ -876,7 +864,6 @@ export const ConsultationForm = (props: any) => {
                         margin="dense"
                         unoccupiedOnly={true}
                         disabled={!!id} // disabled while editing
-                        // location={state.form.}
                         facility={facilityId}
                       />
                       {!!id && (

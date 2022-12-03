@@ -247,7 +247,6 @@ export default function InventoryLog(props: any) {
     <div>
       <PageTitle
         title="Inventory Log"
-        hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },

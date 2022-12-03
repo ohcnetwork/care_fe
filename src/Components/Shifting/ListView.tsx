@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import loadable from "@loadable/component";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
-import BadgesList from "./BadgesList";
 import moment from "moment";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import { CSVLink } from "react-csv";
@@ -13,12 +12,13 @@ import {
 } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
-import Pagination from "../Common/Pagination";
 import { Modal, Button, CircularProgress } from "@material-ui/core";
 
-import { limit, formatFilter } from "./Commons";
+import { formatFilter } from "./Commons";
 import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
+import useFilters from "../../Common/hooks/useFilters";
+import BadgesList from "./BadgesList";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -27,13 +27,17 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ListView() {
   const dispatch: any = useDispatch();
-  const [qParams, setQueryParams] = useQueryParams();
+  const {
+    qParams,
+    updateQuery,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({});
   const [downloadFile, setDownloadFile] = useState("");
   const [data, setData] = useState<any[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
@@ -41,18 +45,6 @@ export default function ListView() {
     externalId: undefined,
     loading: false,
   });
-
-  const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
-
-  useEffect(() => {
-    applyFilter(local);
-  }, []);
 
   const triggerDownload = async () => {
     // while is getting ready
@@ -66,34 +58,6 @@ export default function ListView() {
     document.getElementById("shiftRequests-ALL")?.click();
   };
 
-  const updateQuery = (filter: any) => {
-    // prevent empty filters from cluttering the url
-    const nParams = Object.keys(filter).reduce(
-      (a, k) =>
-        filter[k] && filter[k] !== "--"
-          ? Object.assign(a, { [k]: filter[k] })
-          : a,
-      {}
-    );
-    setQueryParams(nParams, { replace: true });
-  };
-
-  const searchByName = (patient_name: string) => {
-    const filter = { ...qParams, patient_name };
-    updateQuery(filter);
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
-
-  const onBoardViewBtnClick = () => {
-    navigate("/shifting/board-view", qParams);
-    localStorage.setItem("defaultShiftView", "board");
-  };
-
   const handleTransferComplete = (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
     dispatch(completeTransfer({ externalId: modalFor })).then(() => {
@@ -103,8 +67,6 @@ export default function ListView() {
     });
   };
 
-  const appliedFilters = formatFilter(qParams);
-
   const refreshList = () => {
     fetchData();
   };
@@ -112,7 +74,13 @@ export default function ListView() {
   const fetchData = () => {
     setIsLoading(true);
     dispatch(
-      listShiftRequests(formatFilter({ ...qParams, offset }), "shift-list-call")
+      listShiftRequests(
+        formatFilter({
+          ...qParams,
+          offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+        }),
+        "shift-list-call"
+      )
     ).then((res: any) => {
       if (res && res.data) {
         setData(res.data.results);
@@ -144,13 +112,8 @@ export default function ListView() {
     qParams.disease_status,
     qParams.is_antenatal,
     qParams.breathlessness_level,
-    offset,
+    qParams.page,
   ]);
-
-  const updateFilter = (params: any, local: any) => {
-    updateQuery(params);
-    localStorage.setItem("shift-filters", JSON.stringify(local));
-  };
 
   const showShiftingCardList = (data: any) => {
     if (data && !data.length) {
@@ -374,7 +337,7 @@ export default function ListView() {
           <SearchInput
             name="patient_name"
             value={qParams.patient_name}
-            onChange={({ value }) => searchByName(value)}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder="Search patient"
           />
         </div>
@@ -384,7 +347,7 @@ export default function ListView() {
         <div className="my-2 md:my-0">
           <button
             className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-            onClick={onBoardViewBtnClick}
+            onClick={() => navigate("/shifting/board-view", { query: qParams })}
           >
             <i
               className="fa fa-list mr-1 transform rotate-90"
@@ -396,19 +359,14 @@ export default function ListView() {
         <div className="flex items-start gap-2">
           <button
             className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={(_) => setShowFilters((show) => !show)}
+            onClick={() => advancedFilter.setShow(true)}
           >
             <i className="fa fa-filter mr-1" aria-hidden="true"></i>
             <span>Filters</span>
           </button>
         </div>
       </div>
-      <BadgesList
-        filterParams={qParams}
-        appliedFilters={appliedFilters}
-        local={local}
-        updateFilter={updateFilter}
-      />
+      <BadgesList {...{ qParams, FilterBadges }} />
       <div className="px-1">
         {isLoading ? (
           <Loading />
@@ -428,16 +386,7 @@ export default function ListView() {
               {showShiftingCardList(data)}
             </div>
             <div>
-              {totalCount > limit && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Pagination
-                    cPage={currentPage}
-                    defaultPerPage={limit}
-                    data={{ totalCount }}
-                    onChange={handlePagination}
-                  />
-                </div>
-              )}
+              <Pagination totalCount={totalCount} />
             </div>
           </div>
         )}
@@ -450,15 +399,9 @@ export default function ListView() {
         className="hidden"
         id={"shiftRequests-ALL"}
       />
-      <SlideOver show={showFilters} setShow={setShowFilters}>
+      <SlideOver {...advancedFilter}>
         <div className="bg-white min-h-screen p-4">
-          <ListFilter
-            filter={qParams}
-            local={local}
-            showShiftingStatus={true}
-            onChange={applyFilter}
-            closeFilter={() => setShowFilters(false)}
-          />
+          <ListFilter showShiftingStatus={true} {...advancedFilter} />
         </div>
       </SlideOver>
     </div>

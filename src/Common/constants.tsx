@@ -738,12 +738,6 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
     shortcutKey: ["Shift", "S"],
   },
   {
-    icon: "stop",
-    label: "Stop",
-    action: "stop",
-    shortcutKey: ["Shift", "X"],
-  },
-  {
     icon: "undo",
     label: "Reset",
     action: "reset",
@@ -792,7 +786,7 @@ export const FACILITY_FEATURE_TYPES = [
   {
     id: 4,
     name: "Neonatal Care",
-    icon: "carriage",
+    icon: "baby-carriage",
   },
   {
     id: 5,
