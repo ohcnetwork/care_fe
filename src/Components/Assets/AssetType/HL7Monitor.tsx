@@ -65,7 +65,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     <>
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col md:flex-row gap-4">
-          <Card className="w-full md:w-2/6 flex flex-col justify-between">
+          <Card className="w-full md:w-[350px] shrink-0 flex flex-col justify-between">
             <div>
               <TextInputFieldV2
                 label="Middleware Hostname"
@@ -87,7 +87,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
               Save Configuration
             </ButtonV2>
           </Card>
-          <div className="w-full md:w-4/6 overflow-hidden relative rounded-xl bg-white shadow">
+          <div className="w-full grow-0 overflow-hidden relative rounded-xl bg-white shadow">
             <PatientVitalsCard
               socketUrl={`wss://${middlewareHostname}/observations/${localipAddress}`}
             />
