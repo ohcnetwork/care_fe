@@ -7,7 +7,8 @@ import { PatientModel } from "./models";
 import Waveform, { WaveformType } from "./Waveform";
 
 export interface IPatientVitalsCardProps {
-  patient: PatientModel;
+  patient?: PatientModel;
+  socketUrl?: string;
 }
 
 const getVital = (
@@ -31,9 +32,9 @@ const getVital = (
   return "";
 };
 
-export default function PatientVitalsCard({
-  patient,
-}: IPatientVitalsCardProps) {
+export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
+  const { patient, socketUrl } = props;
+
   const wsClient = useRef<WebSocket>();
 
   const [waveforms, setWaveForms] = useState<WaveformType[] | null>(null);
@@ -92,16 +93,21 @@ export default function PatientVitalsCard({
   };
 
   useEffect(() => {
-    const url = hl7Asset?.meta?.local_ip_address
-      ? `wss://${hl7Asset?.meta?.middleware_hostname}/observations/${hl7Asset?.meta?.local_ip_address}`
-      : null;
+    const url =
+      socketUrl ||
+      (hl7Asset?.meta?.local_ip_address &&
+        `wss://${hl7Asset?.meta?.middleware_hostname}/observations/${hl7Asset?.meta?.local_ip_address}`);
 
     if (url) connectWs(url);
 
     return () => {
       wsClient.current?.close();
     };
-  }, [hl7Asset?.meta?.local_ip_address, hl7Asset?.meta?.middleware_hostname]);
+  }, [
+    socketUrl,
+    hl7Asset?.meta?.local_ip_address,
+    hl7Asset?.meta?.middleware_hostname,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -218,13 +224,13 @@ export default function PatientVitalsCard({
                   {liveReading ||
                     (vital.vitalKey === "bp"
                       ? `${
-                          patient.last_consultation?.last_daily_round?.bp
+                          patient?.last_consultation?.last_daily_round?.bp
                             .systolic || "--"
                         }/${
-                          patient.last_consultation?.last_daily_round?.bp
+                          patient?.last_consultation?.last_daily_round?.bp
                             .diastolic || "--"
                         }`
-                      : patient.last_consultation?.last_daily_round?.[
+                      : patient?.last_consultation?.last_daily_round?.[
                           vital.vitalKey || ""
                         ]) ||
                     "--"}
