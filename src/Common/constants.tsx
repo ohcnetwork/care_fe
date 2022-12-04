@@ -755,7 +755,7 @@ export const FACILITY_FEATURE_TYPES = [
   {
     id: 1,
     name: "CT Scan",
-    icon: "uil uil-compact-disc",
+    icon: "compact-disc",
   },
   {
     id: 2,
@@ -786,17 +786,17 @@ export const FACILITY_FEATURE_TYPES = [
   {
     id: 4,
     name: "Neonatal Care",
-    icon: "uil uil-baby-carriage",
+    icon: "baby-carriage",
   },
   {
     id: 5,
     name: "Operation Theater",
-    icon: "uil uil-syringe",
+    icon: "syringe",
   },
   {
     id: 6,
     name: "Blood Bank",
-    icon: "uil uil-tear",
+    icon: "tear",
   },
 ];
 

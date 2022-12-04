@@ -38,6 +38,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ContactLink from "../Common/components/ContactLink";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -45,7 +46,7 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
   return typeof feature.icon === "string" ? (
-    <i className={`text-lg font-extrabold ${feature.icon}`} />
+    <CareIcon className={`care-l-${feature.icon} h-5`} />
   ) : (
     feature.icon
   );
@@ -446,25 +447,25 @@ export const FacilityHome = (props: any) => {
             <div className="w-full md:w-auto">
               <DropdownMenu
                 title="Manage Facility"
-                icon={<i className="uil uil-setting text-xl"></i>}
+                icon={<CareIcon className="care-l-setting h-5" />}
               >
                 <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/update`)}
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<i className="uil uil-edit-alt" />}
+                  icon={<CareIcon className="care-l-edit-alt h-5" />}
                 >
                   Update Facility
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/inventory`)}
-                  icon={<i className="uil uil-clipboard-alt" />}
+                  icon={<CareIcon className="care-l-clipboard-alt w-5 " />}
                 >
                   Inventory Management
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/location`)}
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<i className="uil uil-location-point" />}
+                  icon={<CareIcon className="care-l-location-point h-5" />}
                 >
                   Location Management
                 </DropdownItem>
@@ -473,26 +474,26 @@ export const FacilityHome = (props: any) => {
                     navigate(`/facility/${facilityId}/resource/new`)
                   }
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<i className="uil uil-gold" />}
+                  icon={<CareIcon className="care-l-gold h-5" />}
                 >
                   Resource Request
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<i className="uil uil-plus-circle" />}
+                  icon={<CareIcon className="care-l-plus-circle h-5" />}
                 >
                   Create Asset
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => navigate(`/assets?facility=${facilityId}`)}
-                  icon={<i className="uil uil-medkit" />}
+                  icon={<CareIcon className="care-l-medkit h-5" />}
                 >
                   View Assets
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/users`)}
-                  icon={<i className="uil uil-users-alt" />}
+                  icon={<CareIcon className="care-l-users-alt h-5" />}
                 >
                   View Users
                 </DropdownItem>
@@ -500,7 +501,7 @@ export const FacilityHome = (props: any) => {
                   variant="danger"
                   onClick={() => setOpenDeleteDialog(true)}
                   className="flex gap-3 items-center"
-                  icon={<i className="uil uil-trash-alt" />}
+                  icon={<CareIcon className="care-l-trash-alt h-5" />}
                   authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
                 >
                   Delete Facility
@@ -515,7 +516,7 @@ export const FacilityHome = (props: any) => {
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >
-                <i className="uil uil-plus text-lg"></i>
+                <CareIcon className="care-l-plus h-5" />
                 <span className="text-sm">Add Details of a Patient</span>
               </ButtonV2>
               <ButtonV2
