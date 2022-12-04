@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 
-.cui-input-legend::before{
+.cui-input-legend::before {
     content: " ";
     position: absolute;
     left: -4px;
@@ -12,7 +12,7 @@
     z-index: -1;
 }
 
-.cui-label-required::after{
+.cui-label-required::after {
     content: "*";
     color: rgb(255, 81, 0);
     font-size: 1.2em;
@@ -20,9 +20,63 @@
     margin-left: 4px;
 }
 
+.tooltip {
+    @apply relative
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    @apply bg-black/50 backdrop-blur text-white text-center px-2 py-1 rounded absolute z-50 text-sm block transition-all whitespace-nowrap
+}
+
+.tooltip .tooltip-left{
+    transform: translateX(20px);
+}
+
+.tooltip .tooltip-right{
+    transform: translateX(-20px);
+}
+
+.tooltip .tooltip-top{
+    transform: translateY(20px);
+}
+
+.tooltip .tooltip-bottom{
+    transform: translateY(-20px);
+}
+
+.tooltip .tooltip-right {
+    top: 20%;
+    left: calc(100% + 10px);
+}
+
+
+.tooltip .tooltip-top {
+    bottom: 100%;
+    left: 50%;
+}
+
+.tooltip .tooltip-bottom {
+    top: 100%;
+    left: 50%;
+}
+
+.tooltip .tooltip-left {
+    top: -5px;
+    right: calc(100% + 10px);
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 100;
+    transform: translateX(0px);
+    transform: translateY(0px);
+}
+
 .cui-input:-webkit-autofill,
-.cui-input:-webkit-autofill:hover, 
-.cui-input:-webkit-autofill:focus, 
-.cui-input:-webkit-autofill:active{
+.cui-input:-webkit-autofill:hover,
+.cui-input:-webkit-autofill:focus,
+.cui-input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 40px #f9fafb inset !important;
 }

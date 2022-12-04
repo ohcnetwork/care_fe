@@ -19,7 +19,6 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
-import { getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -32,6 +31,7 @@ import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import { DateRange } from "../Common/DateRangeInputV2";
 import FilterButtons from "../Common/FilterButtons";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -39,6 +39,9 @@ const useMergeState = (initialState: any) => {
     setState((prevState: any) => Object.assign({}, prevState, newState));
   return [state, setMergedState];
 };
+
+const getDate = (value: any) =>
+  value && moment(value).isValid() && moment(value).toDate();
 
 export default function PatientFilterV2(props: any) {
   const { filter, onChange, closeFilter } = props;
@@ -104,36 +107,36 @@ export default function PatientFilterV2(props: any) {
     facility_ref: null,
     lsgBody_ref: null,
     district_ref: null,
-    date_declared_positive_before: null,
-    date_declared_positive_after: null,
-    date_of_result_before: null,
-    date_of_result_after: null,
-    created_date_before: null,
-    created_date_after: null,
-    modified_date_before: null,
-    modified_date_after: null,
+    date_declared_positive_before: "",
+    date_declared_positive_after: "",
+    date_of_result_before: "",
+    date_of_result_after: "",
+    created_date_before: "",
+    created_date_after: "",
+    modified_date_before: "",
+    modified_date_after: "",
     ordering: "",
     category: null,
     gender: null,
     disease_status: null,
-    age_min: null,
-    age_max: null,
+    age_min: "",
+    age_max: "",
     date_of_result: null,
     date_declared_positive: null,
-    last_consultation_admission_date_before: null,
-    last_consultation_admission_date_after: null,
-    last_consultation_discharge_date_before: null,
-    last_consultation_discharge_date_after: null,
+    last_consultation_admission_date_before: "",
+    last_consultation_admission_date_after: "",
+    last_consultation_discharge_date_before: "",
+    last_consultation_discharge_date_after: "",
     last_consultation_admitted_to_list: [],
     srf_id: "",
     number_of_doses: null,
     covin_id: "",
     is_kasp: null,
     is_declared_positive: null,
-    last_consultation_symptoms_onset_date_before: null,
-    last_consultation_symptoms_onset_date_after: null,
-    last_vaccinated_date_before: null,
-    last_vaccinated_date_after: null,
+    last_consultation_symptoms_onset_date_before: "",
+    last_consultation_symptoms_onset_date_after: "",
+    last_vaccinated_date_before: "",
+    last_vaccinated_date_after: "",
     last_consultation_is_telemedicine: null,
     is_antenatal: null,
   };
@@ -169,9 +172,9 @@ export default function PatientFilterV2(props: any) {
   }, [dispatch]);
 
   const VACCINATED_FILTER = [
-    { id: 0, text: "Unvaccinated" },
-    { id: 1, text: "1st dose only" },
-    { id: 2, text: "Both doses" },
+    { id: "0", text: "Unvaccinated" },
+    { id: "1", text: "1st dose only" },
+    { id: "2", text: "Both doses" },
   ];
 
   const DECLARED_FILTER = [
@@ -367,18 +370,21 @@ export default function PatientFilterV2(props: any) {
         }}
       />
       <div className="w-full flex-none pt-20">
-        <FieldLabel className="text-sm">Ordering</FieldLabel>
+        <div className="mb-3 text-md flex items-center text-gray-700 gap-2">
+          <CareIcon className="care-l-sort h-5" />
+          <p>Ordering</p>
+        </div>
         <SelectMenuV2
           options={PATIENT_FILTER_ORDER}
           optionLabel={(o) => o.desc}
           optionSelectedLabel={(option) => `${option.desc} (${option.order})`}
           optionDescription={(o) => o.order}
           optionIcon={(option) => (
-            <i
-              className={`fa-solid ${
+            <CareIcon
+              className={`${
                 option.order === "Ascending"
-                  ? "fa-arrow-up-short-wide"
-                  : "fa-arrow-up-wide-short"
+                  ? "care-l-amount-up"
+                  : "care-l-amount-down"
               }`}
             />
           )}
@@ -388,7 +394,7 @@ export default function PatientFilterV2(props: any) {
         />
       </div>
       <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-        <i className="fa-solid fa-filter" />
+        <CareIcon className="care-l-filter h-5" />
         <p>Filter by</p>
       </div>
       <div className="flex flex-wrap gap-4">
@@ -447,7 +453,7 @@ export default function PatientFilterV2(props: any) {
             onChange={(v) =>
               setFilterState({ ...filterState, facility_type: v })
             }
-            optionIcon={() => <i className="fa-solid fa-hospital" />}
+            optionIcon={() => <CareIcon className="care-l-hospital h-5" />}
           />
         </div>
 
@@ -468,8 +474,8 @@ export default function PatientFilterV2(props: any) {
           <FieldLabel className="text-sm">Is Antenatal</FieldLabel>
           <SelectMenuV2
             placeholder="Show all"
-            options={[true, false]}
-            optionLabel={(o) => (o ? "Antenatal" : "Non-antenatal")}
+            options={["true", "false"]}
+            optionLabel={(o) => (o === "true" ? "Antenatal" : "Non-antenatal")}
             value={filterState.is_antenatal}
             onChange={(v) =>
               setFilterState({ ...filterState, is_antenatal: v })
@@ -520,8 +526,14 @@ export default function PatientFilterV2(props: any) {
           <SelectMenuV2
             placeholder="Show all"
             options={VACCINATED_FILTER}
-            optionLabel={(o) => o.text}
-            optionValue={(o) => o.id}
+            optionLabel={({ text }) => text}
+            optionValue={({ id }) => id}
+            optionIcon={({ id }) => (
+              <>
+                <CareIcon className="care-l-syringe w-5 mr-2" />
+                <span className="font-bold">{id}</span>
+              </>
+            )}
             value={filterState.number_of_doses}
             onChange={(v) =>
               setFilterState({ ...filterState, number_of_doses: v })
@@ -604,8 +616,8 @@ export default function PatientFilterV2(props: any) {
           name="date_of_result"
           label="Date of result"
           value={{
-            start: getDate(filterState.date_of_result_after)?.toDate(),
-            end: getDate(filterState.date_of_result_before)?.toDate(),
+            start: getDate(filterState.date_of_result_after),
+            end: getDate(filterState.date_of_result_before),
           }}
           onChange={handleDateRangeChange}
           errorClassName="hidden"
@@ -615,8 +627,8 @@ export default function PatientFilterV2(props: any) {
           name="date_declared_positive"
           label="Date Declared Positive"
           value={{
-            start: getDate(filterState.date_declared_positive_after)?.toDate(),
-            end: getDate(filterState.date_declared_positive_before)?.toDate(),
+            start: getDate(filterState.date_declared_positive_after),
+            end: getDate(filterState.date_declared_positive_before),
           }}
           onChange={handleDateRangeChange}
           errorClassName="hidden"
@@ -626,8 +638,8 @@ export default function PatientFilterV2(props: any) {
           name="created_date"
           label="Created Date"
           value={{
-            start: getDate(filterState.created_date_after)?.toDate(),
-            end: getDate(filterState.created_date_before)?.toDate(),
+            start: getDate(filterState.created_date_after),
+            end: getDate(filterState.created_date_before),
           }}
           onChange={handleDateRangeChange}
           errorClassName="hidden"
@@ -637,8 +649,8 @@ export default function PatientFilterV2(props: any) {
           name="modified_date"
           label="Modified Date"
           value={{
-            start: getDate(filterState.modified_date_after)?.toDate(),
-            end: getDate(filterState.modified_date_before)?.toDate(),
+            start: getDate(filterState.modified_date_after),
+            end: getDate(filterState.modified_date_before),
           }}
           onChange={handleDateRangeChange}
           errorClassName="hidden"
@@ -648,12 +660,8 @@ export default function PatientFilterV2(props: any) {
           name="last_consultation_admission_date"
           label="Admit Date"
           value={{
-            start: getDate(
-              filterState.last_consultation_admission_date_after
-            )?.toDate(),
-            end: getDate(
-              filterState.last_consultation_admission_date_before
-            )?.toDate(),
+            start: getDate(filterState.last_consultation_admission_date_after),
+            end: getDate(filterState.last_consultation_admission_date_before),
           }}
           onChange={handleDateRangeChange}
           errorClassName="hidden"
@@ -663,12 +671,8 @@ export default function PatientFilterV2(props: any) {
           name="last_consultation_discharge_date"
           label="Discharge Date"
           value={{
-            start: getDate(
-              filterState.last_consultation_discharge_date_after
-            )?.toDate(),
-            end: getDate(
-              filterState.last_consultation_discharge_date_before
-            )?.toDate(),
+            start: getDate(filterState.last_consultation_discharge_date_after),
+            end: getDate(filterState.last_consultation_discharge_date_before),
           }}
           onChange={handleDateRangeChange}
           errorClassName="hidden"
@@ -680,10 +684,10 @@ export default function PatientFilterV2(props: any) {
           value={{
             start: getDate(
               filterState.last_consultation_symptoms_onset_date_after
-            )?.toDate(),
+            ),
             end: getDate(
               filterState.last_consultation_symptoms_onset_date_before
-            )?.toDate(),
+            ),
           }}
           onChange={handleDateRangeChange}
           errorClassName="hidden"
@@ -693,8 +697,8 @@ export default function PatientFilterV2(props: any) {
           name="last_vaccinated_date"
           label="Vaccination Date"
           value={{
-            start: getDate(filterState.last_vaccinated_date_after)?.toDate(),
-            end: getDate(filterState.last_vaccinated_date_before)?.toDate(),
+            start: getDate(filterState.last_vaccinated_date_after),
+            end: getDate(filterState.last_vaccinated_date_before),
           }}
           onChange={handleDateRangeChange}
           errorClassName="hidden"
@@ -707,7 +711,12 @@ export default function PatientFilterV2(props: any) {
               name="age_min"
               placeholder="Min. age"
               label={null}
-              value={filterState.age_min}
+              value={
+                filterState.age_min &&
+                (filterState.age_min > 0 ? filterState.age_min : 0)
+              }
+              type="number"
+              min={0}
               onChange={handleFormFieldChange}
               errorClassName="hidden"
             />
@@ -715,7 +724,12 @@ export default function PatientFilterV2(props: any) {
               name="age_max"
               placeholder="Max. age"
               label={null}
-              value={filterState.age_max}
+              type="number"
+              min={0}
+              value={
+                filterState.age_max &&
+                (filterState.age_max > 0 ? filterState.age_max : 0)
+              }
               onChange={handleFormFieldChange}
               errorClassName="hidden"
             />

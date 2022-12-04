@@ -91,6 +91,7 @@ const LiveFeed = (props: any) => {
       middlewareHostname,
       ...cameraAsset,
     },
+    dispatch,
   });
 
   const getBedPresets = async (id: any) => {
@@ -229,16 +230,13 @@ const LiveFeed = (props: any) => {
         onError: () => setStreamStatus(StreamStatus.Offline),
       });
     },
-    stop: () => {
-      // NEED ID TO STOP STREAM
-    },
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       screenfull.request(liveFeedPlayerRef.current);
     },
     updatePreset: (option) => {
       getCameraStatus({
-        onSuccess: async ({ data }) => {
+        onSuccess: async (data) => {
           console.log({ currentPreset, data });
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
@@ -597,7 +595,7 @@ const LiveFeed = (props: any) => {
                   </button>
                   <button
                     className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                    disabled={presetsPage >= presets.length}
+                    disabled={presetsPage >= presets?.length}
                     onClick={() => {
                       setPresetsPage(presetsPage + 10);
                     }}

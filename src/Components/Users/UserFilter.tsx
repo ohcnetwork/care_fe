@@ -10,12 +10,18 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { USER_TYPE_OPTIONS } from "../../Common/constants";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
   const setMergedState = (newState: any) =>
     setState((prevState: any) => Object.assign({}, prevState, newState));
   return [state, setMergedState];
+};
+
+const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
+  if (!phoneNumber) return "";
+  return parsePhoneNumberFromString(phoneNumber)?.format("E.164") || "";
 };
 
 export default function UserFilter(props: any) {
@@ -41,15 +47,6 @@ export default function UserFilter(props: any) {
     district_ref: null,
   };
 
-  const handleChange = (event: any) => {
-    const { name, value } = event.target;
-
-    const filterData: any = { ...filterState };
-    filterData[name] = value;
-
-    setFilterState(filterData);
-  };
-
   const setDistrict = (selected: any) => {
     const filterData: any = { ...filterState };
     filterData["district_ref"] = selected;
@@ -69,12 +66,8 @@ export default function UserFilter(props: any) {
     const data = {
       first_name: first_name || "",
       last_name: last_name || "",
-      phone_number: phone_number
-        ? parsePhoneNumberFromString(phone_number)?.format("E.164")
-        : "",
-      alt_phone_number: alt_phone_number
-        ? parsePhoneNumberFromString(alt_phone_number)?.format("E.164")
-        : "",
+      phone_number: parsePhoneNumberForFilterParam(phone_number),
+      alt_phone_number: parsePhoneNumberForFilterParam(alt_phone_number),
       user_type: user_type || "",
       district_id: district_id || "",
     };
@@ -93,7 +86,7 @@ export default function UserFilter(props: any) {
     fetchData();
   }, [dispatch]);
 
-  const handleChangeV2 = ({ name, value }: any) =>
+  const handleChange = ({ name, value }: any) =>
     setFilterState({ ...filterState, [name]: value });
 
   return (
@@ -108,7 +101,7 @@ export default function UserFilter(props: any) {
       />
 
       <div className="pt-20 text-md my-6 flex items-center text-gray-700 gap-2">
-        <i className="fa-solid fa-filter" />
+        <CareIcon className="care-l-filter h-5" />
         <p>Filter by</p>
       </div>
 
@@ -119,7 +112,7 @@ export default function UserFilter(props: any) {
           labelClassName="text-sm"
           name="first_name"
           value={filterState.first_name}
-          onChange={handleChangeV2}
+          onChange={handleChange}
           errorClassName="hidden"
         />
         <TextFormField
@@ -128,7 +121,7 @@ export default function UserFilter(props: any) {
           labelClassName="text-sm"
           name="last_name"
           value={filterState.last_name}
-          onChange={handleChangeV2}
+          onChange={handleChange}
           errorClassName="hidden"
         />
 
@@ -165,7 +158,7 @@ export default function UserFilter(props: any) {
                   placeholder="Phone Number"
                   value={filterState.phone_number}
                   onChange={(value: string) => {
-                    handleChange({ target: { name: "phone_number", value } });
+                    handleChange({ name: "phone_number", value });
                   }}
                 />
               </div>
@@ -180,9 +173,7 @@ export default function UserFilter(props: any) {
                   placeholder="WhatsApp Phone Number"
                   value={filterState.alt_phone_number}
                   onChange={(value: string) => {
-                    handleChange({
-                      target: { name: "alt_phone_number", value },
-                    });
+                    handleChange({ name: "alt_phone_number", value });
                   }}
                 />
               </div>

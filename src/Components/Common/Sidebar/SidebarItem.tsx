@@ -1,5 +1,6 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export type SidebarIcon = React.ReactNode;
 
@@ -21,22 +22,23 @@ const SidebarItemBase = ({
 
   return (
     <Link
-      className={`relative w-full flex-1 min-h-[40px] md:flex-none md:h-11 text-white ${
-        props.selected
-          ? "font-bold bg-primary-900"
-          : "font-normal bg-primary-800 hover:bg-primary-700"
-      } tooltip transition-all duration-200 ease-in-out cursor-pointer`}
+      className={`relative mx-1 h-full rounded-lg flex-1 min-h-[40px] md:flex-none md:h-11 text-white tooltip transition-all duration-200 ease-in-out cursor-pointer
+        ${
+          props.selected
+            ? "font-bold bg-primary-900"
+            : "font-normal bg-primary-800 hover:bg-primary-700"
+        }`}
       target={external && "_blank"}
       rel={external && "noreferrer"}
       href={props.to ?? ""}
       onClick={props.do}
     >
       <span className={`tooltip-text tooltip-right ${!shrinked && "hidden"}`}>
-        {props.text}
+        {t(props.text)}
       </span>
       <div
         className={`flex items-center h-full ${
-          shrinked ? "justify-center" : "justify-start pl-10 pr-9"
+          shrinked ? "justify-center" : "justify-start pl-5 pr-4"
         } transition-all duration-200 ease-in-out`}
       >
         <div className="flex-none text-lg">{props.icon}</div>
@@ -47,7 +49,9 @@ const SidebarItemBase = ({
         >
           {t(props.text)}
         </span>
-        {external && !shrinked && <i className="uil uil-external-link-alt" />}
+        {external && !shrinked && (
+          <CareIcon className="care-l-external-link-alt h-5" />
+        )}
       </div>
 
       {!!props.badgeCount && (
@@ -55,7 +59,7 @@ const SidebarItemBase = ({
           className={`absolute flex items-center justify-center text-white font-semibold bg-primary-500 ${
             shrinked
               ? "right-3 top-0.5 h-4 w-5 text-[9px] rounded-md"
-              : "right-9 inset-y-0 h-6 my-auto text-xs px-2 rounded-md"
+              : "right-4 inset-y-0 h-6 my-auto text-xs px-2 rounded-md"
           } z-10 transition-all duration-200 ease-in-out animate-pulse`}
         >
           {props.badgeCount > 9 ? "9+" : props.badgeCount}

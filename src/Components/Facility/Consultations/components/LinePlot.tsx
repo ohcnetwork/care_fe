@@ -8,10 +8,11 @@ export const LinePlot = (props: any) => {
     yData,
     low = null,
     high = null,
-    defaultSpace = true,
+    defaultSpace,
   } = props;
   let generalOptions: any = {
     grid: {
+      top: "40px",
       left: "20px",
       right: "30px",
       containLabel: true,
@@ -102,8 +103,10 @@ export const LinePlot = (props: any) => {
         text: "",
       },
       grid: {
-        left: "15px",
-        right: "30px",
+        show: false,
+        borderColor: "transparent",
+        left: "40px",
+        right: "20px",
       },
       animation: false,
       xAxis: {
@@ -112,9 +115,14 @@ export const LinePlot = (props: any) => {
       },
       yAxis: {
         ...generalOptions.yAxis,
-        show: false,
+        show: true,
         min: props.yStart,
         max: props.yEnd,
+        splitLine: {
+          lineStyle: {
+            color: "#4E4E4E",
+          },
+        },
       },
       toolbox: {
         ...generalOptions.toolbox,
@@ -144,12 +152,13 @@ export const LinePlot = (props: any) => {
               ],
             },
           },
+          connectNulls: false,
         },
       ],
     };
   }
 
-  if (!defaultSpace) {
+  if (props.type === "WAVEFORM" && defaultSpace != true) {
     generalOptions = {
       ...generalOptions,
       grid: {

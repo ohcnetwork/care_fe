@@ -25,31 +25,47 @@ import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
-import SelectMenu from "../Common/components/SelectMenu";
 import moment from "moment";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
-const initError = {
-  name: "",
-  asset_type: "",
-  asset_class: "",
-  description: "",
-  is_working: "",
-  serial_number: "",
-  location: "",
-  vendor_name: "",
-  support_name: "",
-  support_phone: "",
-  support_email: "",
-  manufacturer: "",
-  warranty_amc_end_of_validity: "",
-  last_serviced_on: "",
-  notes: "",
-};
+const formErrorKeys = [
+  "name",
+  "asset_type",
+  "asset_class",
+  "description",
+  "is_working",
+  "serial_number",
+  "location",
+  "vendor_name",
+  "support_name",
+  "support_phone",
+  "support_email",
+  "manufacturer",
+  "warranty_amc_end_of_validity",
+  "last_serviced_on",
+  "notes",
+];
+
+const initError = formErrorKeys.reduce(
+  (acc: { [key: string]: string }, key) => {
+    acc[key] = "";
+    return acc;
+  },
+  {}
+);
+
+const fieldRef = formErrorKeys.reduce(
+  (acc: { [key: string]: React.RefObject<any> }, key) => {
+    acc[key] = React.createRef();
+    return acc;
+  },
+  {}
+);
 
 const initialState = {
   errors: { ...initError },
@@ -164,7 +180,7 @@ const AssetCreate = (props: AssetProps) => {
         setIsLoading(false);
       });
     }
-  }, [assetId]);
+  }, [assetId, dispatchAction, facilityId]);
 
   useEffect(() => {
     if (asset) {
@@ -216,7 +232,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "asset_type":
-          if (!asset_type) {
+          if (!asset_type || asset_type == "NONE") {
             errors[field] = "Select an asset type";
             invalidForm = true;
           }
@@ -245,6 +261,13 @@ const AssetCreate = (props: AssetProps) => {
     });
     if (invalidForm) {
       dispatch({ type: "set_error", errors });
+      const firstError = Object.keys(errors).find((key) => errors[key]);
+      if (firstError) {
+        fieldRef[firstError].current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
       return false;
     }
     dispatch({ type: "set_error", errors });
@@ -308,6 +331,8 @@ const AssetCreate = (props: AssetProps) => {
             goBack();
           } else {
             resetFilters();
+            const pageContainer = window.document.getElementById("pages");
+            pageContainer?.scroll(0, 0);
           }
         }
         setIsLoading(false);
@@ -466,7 +491,7 @@ const AssetCreate = (props: AssetProps) => {
                   {sectionTitle("General Details")}
 
                   {/* Asset Name */}
-                  <div className="col-span-6">
+                  <div className="col-span-6" ref={fieldRef["name"]}>
                     <TextInputFieldV2
                       id="asset-name"
                       label="Asset Name"
@@ -479,16 +504,16 @@ const AssetCreate = (props: AssetProps) => {
 
                   <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
                     {/* Location */}
-                    <div>
-                      <label htmlFor="asset-location">Location * </label>
+                    <div ref={fieldRef["location"]}>
+                      <label htmlFor="asset-location">Location *</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
+                          required
                           options={[
                             {
                               title: "Select",
-                              description:
-                                "Select an Asset Location from the following",
-                              value: "",
+                              description: "Select the location",
+                              value: "0",
                             },
                             ...locations.map((location: any) => ({
                               title: location.name,
@@ -496,25 +521,22 @@ const AssetCreate = (props: AssetProps) => {
                               value: location.id,
                             })),
                           ]}
-                          selected={location}
-                          onSelect={setLocation}
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) => o.value}
+                          value={location}
+                          onChange={(e) => setLocation(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.location} />
                     </div>
 
                     {/* Asset Type */}
-                    <div>
-                      <label htmlFor="asset-type">Asset Type * </label>
+                    <div ref={fieldRef["asset_type"]}>
+                      <label htmlFor="asset-type">Asset Type *</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
+                          required
                           options={[
-                            {
-                              title: "Select",
-                              description:
-                                "Select an Asset Type from the following",
-                              value: undefined,
-                            },
                             {
                               title: "Internal",
                               description:
@@ -528,28 +550,41 @@ const AssetCreate = (props: AssetProps) => {
                               value: "EXTERNAL",
                             },
                           ]}
-                          selected={asset_type}
-                          onSelect={setAssetType}
+                          value={asset_type}
+                          placeholder="Select"
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) =>
+                            o.value === "INTERNAL"
+                              ? AssetType.INTERNAL
+                              : AssetType.EXTERNAL
+                          }
+                          onChange={(e) => setAssetType(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.asset_type} />
                     </div>
 
                     {/* Asset Class */}
-                    <div>
+                    <div ref={fieldRef["asset_class"]}>
                       <label htmlFor="asset-class">Asset Class</label>
                       <div className="mt-2">
-                        <SelectMenu
+                        <SelectMenuV2
                           options={[
-                            { title: "Not Applicable", value: undefined },
                             { title: "ONVIF Camera", value: "ONVIF" },
                             {
                               title: "HL7 Vitals Monitor",
                               value: "HL7MONITOR",
                             },
                           ]}
-                          selected={asset_class}
-                          onSelect={setAssetClass}
+                          value={asset_class}
+                          placeholder="Select"
+                          optionLabel={(o) => o.title}
+                          optionValue={(o) =>
+                            o.value === "ONVIF"
+                              ? AssetClass.ONVIF
+                              : AssetClass.HL7MONITOR
+                          }
+                          onChange={(e) => setAssetClass(e)}
                         />
                       </div>
                       <ErrorHelperText error={state.errors.asset_class} />
@@ -590,28 +625,30 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Working Status */}
-                  <SwitchV2
-                    className="col-span-6"
-                    required
-                    name="is_working"
-                    label="Working Status"
-                    options={["true", "false"]}
-                    optionLabel={(option) => {
-                      return (
-                        {
-                          true: "Working",
-                          false: "Not Working",
-                        }[option] || "undefined"
-                      );
-                    }}
-                    optionClassName={(option) =>
-                      option === "false" &&
-                      "bg-error text-white border-error focus:ring-error"
-                    }
-                    value={is_working}
-                    onChange={setIsWorking}
-                    error={state.errors.is_working}
-                  />
+                  <div ref={fieldRef["is_working"]} className="col-span-6">
+                    <SwitchV2
+                      className="col-span-6"
+                      required
+                      name="is_working"
+                      label="Working Status"
+                      options={["true", "false"]}
+                      optionLabel={(option) => {
+                        return (
+                          {
+                            true: "Working",
+                            false: "Not Working",
+                          }[option] || "undefined"
+                        );
+                      }}
+                      optionClassName={(option) =>
+                        option === "false" &&
+                        "bg-danger-500 text-white border-danger-500 focus:ring-danger-500"
+                      }
+                      value={is_working}
+                      onChange={setIsWorking}
+                      error={state.errors.is_working}
+                    />
+                  </div>
 
                   {/* Not Working Reason */}
                   <div
@@ -676,7 +713,10 @@ const AssetCreate = (props: AssetProps) => {
                   {sectionTitle("Warranty Details")}
 
                   {/* Manufacturer */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["manufacturer"]}
+                  >
                     <TextInputFieldV2
                       id="manufacturer"
                       label="Manufacturer"
@@ -688,7 +728,10 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Warranty / AMC Expiry */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["warranty_amc_end_of_validity"]}
+                  >
                     <label htmlFor="warranty-expiry">
                       Warranty / AMC Expiry
                     </label>
@@ -709,7 +752,10 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Customer Support Name */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["support_name"]}
+                  >
                     <TextInputFieldV2
                       id="support-name"
                       label="Customer Support Name"
@@ -721,7 +767,10 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Customer Support Number */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["support_phone"]}
+                  >
                     <label htmlFor="support-name">
                       Customer Support Number *{" "}
                     </label>
@@ -733,7 +782,10 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Customer Support Email */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["support_email"]}
+                  >
                     <TextInputFieldV2
                       id="support-email"
                       label="Customer Support Email"
@@ -747,10 +799,14 @@ const AssetCreate = (props: AssetProps) => {
                   <div className="sm:col-span-3" />
 
                   {/* Vendor Name */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["vendor_name"]}
+                  >
                     <TextInputFieldV2
                       label="Vendor Name"
                       id="vendor-name"
+                      value={vendor_name}
                       placeholder="Eg. XYZ"
                       onValueChange={setVendorName}
                       error={state.errors.vendor_name}
@@ -758,7 +814,10 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Serial Number */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["serial_number"]}
+                  >
                     <TextInputFieldV2
                       label="Serial Number"
                       id="serial-number"
@@ -772,7 +831,10 @@ const AssetCreate = (props: AssetProps) => {
                   {sectionTitle("Service Details")}
 
                   {/* Last serviced on */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["last_serviced_on"]}
+                  >
                     <label htmlFor="last-serviced-on">Last Serviced On</label>
                     <DateInputField
                       className="w-56"
@@ -788,7 +850,7 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Notes */}
-                  <div className="col-span-6 mt-6">
+                  <div className="col-span-6 mt-6" ref={fieldRef["notes"]}>
                     <label htmlFor="notes">Notes</label>
                     <textarea
                       id="notes"

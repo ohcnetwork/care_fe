@@ -59,9 +59,6 @@ import AssetManage from "../Components/Assets/AssetManage";
 import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import HubDashboard from "../Components/Dashboard/HubDashboard";
-import { TeleICUFacility } from "../Components/TeleIcu/Facility";
-import TeleICUPatientPage from "../Components/TeleIcu/Patient";
-import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 import Error404 from "../Components/ErrorPages/404";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -70,6 +67,7 @@ import {
   DesktopSidebar,
   MobileSidebar,
 } from "../Components/Common/Sidebar/Sidebar";
+import { BLACKLISTED_PATHS } from "../Common/constants";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -77,7 +75,7 @@ const routes = {
   "/hub": () => <HubDashboard />,
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
-  "/user/add": () => <UserAdd />,
+  "/users/add": () => <UserAdd />,
   "/user/profile": () => <UserProfile />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
@@ -398,42 +396,27 @@ const routes = {
         tab={tab}
       />
     ),
-
-  "/teleicu/facility/:facilityId/patient/:patientId": ({
-    patientId,
-    facilityId,
-  }: any) => (
-    <TeleICUPatientPage facilityId={facilityId} patientId={patientId} />
-  ),
-  "/teleicu/facility": () => <TeleICUFacility />,
-  "/teleicu/facility/:facilityId": ({ facilityId }: any) => (
-    <TeleICUPatientsList facilityId={facilityId} />
-  ),
   "/not-found": () => <Error404 />,
 };
 
 export default function AppRouter() {
   useRedirect("/", "/facility");
-  useRedirect("/teleicu", "/teleicu/facility");
   useRedirect("/user", "/users");
   const pages = useRoutes(routes) || <Error404 />;
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const WHITELIST: RegExp[] = [
-    /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/updates+/i,
-  ];
   useEffect(() => {
     setSidebarOpen(false);
-
     let flag = false;
-    if (path)
-      WHITELIST.forEach((regex: RegExp) => {
+    if (path) {
+      BLACKLISTED_PATHS.forEach((regex: RegExp) => {
         flag = flag || regex.test(path);
       });
-    if (path && flag) {
-      const pageContainer = window.document.getElementById("pages");
-      pageContainer?.scroll(0, 0);
+      if (!flag) {
+        const pageContainer = window.document.getElementById("pages");
+        pageContainer?.scroll(0, 0);
+      }
     }
   }, [path]);
 

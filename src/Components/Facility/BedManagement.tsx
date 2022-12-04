@@ -85,12 +85,13 @@ const BedRow = (props: BedRowProps) => {
       <div className="px-4 lg:w-3/4 space-y-2 mt-2">
         <div>
           <p className="inline text-xl capitalize break-words">{name}</p> &nbsp;
-          <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
-            {LOCATION_BED_TYPES.find((item) => item.id === bedType).name.slice(
-              0,
-              25
-            ) + (bedType.length > 25 ? "..." : "")}
-          </p>
+          {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
+            <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
+              {LOCATION_BED_TYPES.find(
+                (item) => item.id === bedType
+              )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
+            </p>
+          )}
         </div>
         <p className="break-all">{description}</p>
       </div>
@@ -239,7 +240,6 @@ export const BedManagement = (props: BedManagementProps) => {
     <div>
       <PageTitle
         title="Bed Management"
-        hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
@@ -255,7 +255,8 @@ export const BedManagement = (props: BedManagementProps) => {
             className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
             onClick={() =>
               navigate(
-                `/facility/${facilityId}/location/${locationId}/beds/add`
+                `/facility/${facilityId}/location/${locationId}/beds/add`,
+                { replace: true }
               )
             }
           >

@@ -1,0 +1,8 @@
+/*  Pulling the svg icon down by -0.125em places the icon onto the proper baseline of the text. */
+
+.care-svg-icon__baseline {
+  display: inline-block;
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+}

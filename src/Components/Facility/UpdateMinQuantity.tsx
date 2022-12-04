@@ -47,7 +47,8 @@ export const UpdateMinQuantity = (props: any) => {
   const { facilityId, inventoryId, itemId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
+  // Given that setOffset is not being used, pagination might not be working
+  const [_offset, _setOffset] = useState(0);
   const [data, setData] = useState(" ");
   const [facilityName, setFacilityName] = useState("");
 
@@ -66,7 +67,7 @@ export const UpdateMinQuantity = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset]
+    [dispatchAction, facilityId, inventoryId]
   );
   useAbortableEffect(
     (status: statusType) => {
@@ -122,7 +123,6 @@ export const UpdateMinQuantity = (props: any) => {
     <div className="px-2 pb-2">
       <PageTitle
         title="Update Minimum Quantity"
-        hideBack={false}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [itemId]: { name: data },

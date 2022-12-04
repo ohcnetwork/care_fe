@@ -4,8 +4,8 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
-import clsx from "clsx";
 import { UserModel } from "../Users/models";
+import { classNames } from "../../Utils/utils";
 
 type UserFetchState = {
   loading: boolean;
@@ -90,7 +90,7 @@ export const OnlineUsersSelect = (props: Props) => {
                 aria-haspopup="listbox"
                 aria-expanded="true"
                 aria-labelledby="listbox-label"
-                className={clsx(
+                className={classNames(
                   "border-2 h-14 cursor-default relative w-full rounded-md pl-3 pr-10 py-2 text-left transition ease-in-out duration-150 sm:text-sm sm:leading-5",
                   isDropdownExpanded &&
                     outline &&
@@ -102,7 +102,7 @@ export const OnlineUsersSelect = (props: Props) => {
                   name="searchTerm"
                   type="text"
                   placeholder="Search by name or username"
-                  className={clsx(
+                  className={classNames(
                     "py-2 pl-3 w-full outline-none focus:ring-gray-200 border-none",
                     !isDropdownExpanded && "hidden"
                   )}
@@ -116,9 +116,10 @@ export const OnlineUsersSelect = (props: Props) => {
                   onKeyUp={(e) => e.preventDefault()}
                 />
                 <div
-                  className={clsx("flex items-center justify-between", {
-                    hidden: isDropdownExpanded,
-                  })}
+                  className={classNames(
+                    "flex items-center justify-between",
+                    isDropdownExpanded && "hidden"
+                  )}
                 >
                   <div className="space-x-3 flex items-center overflow-hidden">
                     <span
@@ -199,7 +200,12 @@ export const OnlineUsersSelect = (props: Props) => {
                             }
                           ></span>
                           <span className="font-normal block truncate">
-                            {user.first_name} {user.last_name}
+                            {user.first_name} {user.last_name}{" "}
+                            {user.home_facility_object?.name && (
+                              <span className="text-gray-700 ml-2">
+                                {user.home_facility_object?.name}
+                              </span>
+                            )}
                           </span>
                         </div>
                         {user.id?.toString() == userId && (

@@ -9,6 +9,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { get } from "lodash";
 import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export const Login = (props: { forgot?: boolean }) => {
   const dispatch: any = useDispatch();
@@ -248,6 +249,7 @@ export const Login = (props: { forgot?: boolean }) => {
               <div>
                 <LegendInput
                   name="username"
+                  id="username"
                   type="TEXT"
                   legend={t("username")}
                   value={form.username}
@@ -260,6 +262,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 <LegendInput
                   type="PASSWORD"
                   name="password"
+                  id="password"
                   legend={t("password")}
                   value={form.password}
                   onChange={handleChange}
@@ -327,7 +330,7 @@ export const Login = (props: { forgot?: boolean }) => {
               type="button"
               className="text-sm text-primary-400 hover:text-primary-500 mb-4"
             >
-              <i className="uil uil-arrow-left" /> Back to login
+              <CareIcon className="care-l-arrow-left h-5" /> Back to login
             </button>
             <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
               {t("forget_password")}
