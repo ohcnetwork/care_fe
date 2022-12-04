@@ -1,26 +1,12 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React from "react";
+import ButtonV2 from "../Common/components/ButtonV2";
+import DialogModal from "../Common/Dialog";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import { makeStyles } from "@material-ui/core/styles";
-
-const useStyles = makeStyles({
-  paperFullWidth: {
-    overflowY: "visible",
-  },
-  dialogContentRoot: {
-    overflowY: "visible",
-  },
-});
+import { FieldLabel } from "../Form/FormFields/FormField";
 
 interface Props {
+  show: boolean;
   handleOk: () => void;
   handleCancel: () => void;
   selectedFacility: FacilityModel;
@@ -28,64 +14,35 @@ interface Props {
 }
 
 const FacilitiesSelectDialog = (props: Props) => {
-  const { handleOk, handleCancel, selectedFacility, setSelected } = props;
-  const classes = useStyles();
-
-  const handleEscKeyPress = (event: any) => {
-    if (event.key === "Escape") {
-      handleCancel();
-    }
-  };
+  const { show, handleOk, handleCancel, selectedFacility, setSelected } = props;
 
   return (
-    <Dialog
-      open={true}
-      fullWidth={true}
-      classes={{
-        paperFullWidth: classes.paperFullWidth,
-      }}
-      onKeyDown={(e) => handleEscKeyPress(e)}
+    <DialogModal
+      title={<FieldLabel className="text-lg">Search for Facility</FieldLabel>}
+      show={show}
+      onClose={handleCancel}
     >
-      <DialogTitle
-        className="font-semibold text-3xl max-w-md md:min-w-[400px]"
-        id="font-semibold text-3xl"
-      >
-        Search for a facility
-      </DialogTitle>
-      <DialogContent
-        classes={{
-          root: classes.dialogContentRoot,
-        }}
-      >
-        <FacilitySelect
-          name="facilities"
-          selected={selectedFacility}
-          setSelected={setSelected}
-          errors=""
-          showAll={false}
-          multiple={false}
-          className="z-40"
-        />
-      </DialogContent>
-      <DialogActions style={{ justifyContent: "space-between" }}>
-        <Button
-          className="capitalize"
-          color="secondary"
-          onClick={() => handleCancel()}
-        >
+      <FacilitySelect
+        name="facilities"
+        selected={selectedFacility}
+        setSelected={setSelected}
+        errors=""
+        showAll={false}
+        multiple={false}
+      />
+      <div className="mt-4 flex justify-between">
+        <ButtonV2 onClick={handleCancel} variant="secondary">
           Cancel
-        </Button>
-        <Button
+        </ButtonV2>
+        <ButtonV2
           onClick={handleOk}
-          color="primary"
-          variant="contained"
-          disabled={!selectedFacility?.name || !selectedFacility}
-          startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
+          variant="primary"
+          disabled={!selectedFacility.id}
         >
           Continue
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </ButtonV2>
+      </div>
+    </DialogModal>
   );
 };
 

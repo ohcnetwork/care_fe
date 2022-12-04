@@ -195,7 +195,6 @@ export default function MinQuantityList(props: any) {
     <div>
       <PageTitle
         title="Minimum Quantity Required"
-        hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },

@@ -240,7 +240,6 @@ export const BedManagement = (props: BedManagementProps) => {
     <div>
       <PageTitle
         title="Bed Management"
-        hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
