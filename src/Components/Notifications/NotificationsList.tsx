@@ -16,6 +16,7 @@ import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
 import { classNames } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 import * as Sentry from "@sentry/browser";
 import { formatDate } from "../../Utils/utils";
@@ -388,7 +389,7 @@ export default function NotificationsList({
       <Item
         text="Notifications"
         do={() => setShowNotifications(!showNotifications)}
-        icon={<i className="uil uil-bell" />}
+        icon={<CareIcon className="care-l-bell h-5" />}
         badgeCount={unreadCount}
       />
       <SlideOver show={showNotifications} setShow={setShowNotifications}>

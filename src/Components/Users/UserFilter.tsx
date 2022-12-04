@@ -10,6 +10,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { USER_TYPE_OPTIONS } from "../../Common/constants";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -100,7 +101,7 @@ export default function UserFilter(props: any) {
       />
 
       <div className="pt-20 text-md my-6 flex items-center text-gray-700 gap-2">
-        <i className="uil uil-filter" />
+        <CareIcon className="care-l-filter h-5" />
         <p>Filter by</p>
       </div>
 
