@@ -664,7 +664,7 @@ export const PhoneNumberField = (props: any) => {
       <div className="flex items-center">
         <PhoneInput
           inputClass={` ${
-            bgColor ? bgColor : " bg-gray-200 "
+            bgColor || " bg-gray-200 "
           }  py-3 text-sm border-gray-200 shadow-none focus:border-primary-400`}
           countryCodeEditable={false}
           value={value}
