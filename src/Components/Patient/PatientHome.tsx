@@ -333,7 +333,10 @@ export const PatientHome = (props: any) => {
 
   if (isConsultationLoading) {
     consultationList = <CircularProgress size={20} />;
-  } else if (consultationListData.length === 0) {
+  } else if (
+    consultationListData.length === 0 ||
+    (consultationListData.at(0)?.discharge_date && patientData.is_active)
+  ) {
     consultationList = (
       <div>
         <hr />
@@ -447,7 +450,9 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         </div>
-        {patientData?.facility != patientData?.last_consultation?.facility && (
+        {(patientData?.facility != patientData?.last_consultation?.facility ||
+          (patientData.is_active &&
+            patientData?.last_consultation?.discharge_date)) && (
           <div className="relative mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8 rounded-lg shadow bg-red-200 ">
               <div className="text-center">

@@ -386,7 +386,8 @@ export const PatientManager = (props: any) => {
       let patientUrl = "";
       if (
         patient.last_consultation &&
-        patient.last_consultation?.facility === patient.facility
+        patient.last_consultation?.facility === patient.facility &&
+        !(patient.last_consultation?.discharge_date && patient.is_active)
       ) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation.id}`;
       } else if (patient.facility) {
@@ -535,7 +536,9 @@ export const PatientManager = (props: any) => {
                     )}
                     {(!patient.last_consultation ||
                       patient.last_consultation?.facility !==
-                        patient.facility) && (
+                        patient.facility ||
+                      (patient.last_consultation?.discharge_date &&
+                        patient.is_active)) && (
                       <span className="relative inline-flex">
                         <Chip
                           color="red"
