@@ -1,12 +1,12 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { listAssetBeds } from "../../../Redux/actions";
-import { AssetData } from "../../Assets/AssetTypes";
-import ToolTip from "../../Common/utils/Tooltip";
-import { PatientModel } from "../../Patient/models";
+import { listAssetBeds } from "../../Redux/actions";
+import { AssetData } from "../Assets/AssetTypes";
+import ToolTip from "../Common/utils/Tooltip";
+import { PatientModel } from "./models";
 import Waveform, { WaveformType } from "./Waveform";
 
-export interface ITeleICUPatientVitalsCardProps {
+export interface IPatientVitalsCardProps {
   patient: PatientModel;
 }
 
@@ -31,9 +31,9 @@ const getVital = (
   return "";
 };
 
-export default function TeleICUPatientVitalsCard({
+export default function PatientVitalsCard({
   patient,
-}: ITeleICUPatientVitalsCardProps) {
+}: IPatientVitalsCardProps) {
   const wsClient = useRef<WebSocket>();
 
   const [waveforms, setWaveForms] = useState<WaveformType[] | null>(null);
@@ -217,20 +217,23 @@ export default function TeleICUPatientVitalsCard({
                 <h2 className="font-bold text-xl md:text-3xl">
                   {liveReading ||
                     (vital.vitalKey === "bp"
-                      ? `${patient.last_consultation?.last_daily_round?.bp
-                        .systolic || "--"
-                      }/${patient.last_consultation?.last_daily_round?.bp
-                        .diastolic || "--"
-                      }`
+                      ? `${
+                          patient.last_consultation?.last_daily_round?.bp
+                            .systolic || "--"
+                        }/${
+                          patient.last_consultation?.last_daily_round?.bp
+                            .diastolic || "--"
+                        }`
                       : patient.last_consultation?.last_daily_round?.[
-                      vital.vitalKey || ""
-                      ]) ||
+                          vital.vitalKey || ""
+                        ]) ||
                     "--"}
                 </h2>
                 <div className="text-xs md:text-base">
                   <i
-                    className={`fas fa-circle text-xs mr-2 ${liveReading ? "text-green-600" : "text-gray-400"
-                      }`}
+                    className={`fas fa-circle text-xs mr-2 ${
+                      liveReading ? "text-green-600" : "text-gray-400"
+                    }`}
                   />
                   {vital.label}
                 </div>
