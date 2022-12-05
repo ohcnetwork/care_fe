@@ -21,6 +21,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, TextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
 import { goBack } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -277,13 +278,16 @@ export const TriageForm = (props: triageFormProps) => {
             <div className="mb-4">
               <i className="fa-solid fa-triangle-exclamation text-red-500 fa-4x"></i>
               <h1 className="sm:text-xl text-sm">
-                A Triage already exist on this date if you wish to proceed then
-                the existing triage will be over written!
+                A Triage already exist on this date
               </h1>
+              <p className="text-base">
+                If you wish to proceed then the existing triage will be over
+                written!
+              </p>
             </div>
             <div></div>
             <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-              <button
+              {/* <button
                 type="button"
                 className="btn-danger btn mr-2 w-full md:w-auto"
                 onClick={() => {
@@ -291,8 +295,16 @@ export const TriageForm = (props: triageFormProps) => {
                 }}
               >
                 Cancel
-              </button>
-              <button
+              </button> */}
+              <ButtonV2
+                variant="secondary"
+                onClick={() => {
+                  setOpenModalForExistingTriage(false);
+                }}
+              >
+                Cancel
+              </ButtonV2>
+              {/* <button
                 id="triageConfirm"
                 className="btn-primary btn mr-2 w-full md:w-auto"
                 onClick={(e) => {
@@ -300,7 +312,16 @@ export const TriageForm = (props: triageFormProps) => {
                 }}
               >
                 Proceed
-              </button>
+              </button> */}
+              <ButtonV2
+                variant="danger"
+                id="triageConfirm"
+                onClick={(e) => {
+                  handleSubmit(e);
+                }}
+              >
+                Proceed
+              </ButtonV2>
             </div>
           </div>
         </div>
