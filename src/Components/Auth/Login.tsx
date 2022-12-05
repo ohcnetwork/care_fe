@@ -166,7 +166,7 @@ export const Login = (props: { forgot?: boolean }) => {
   };
 
   return (
-    <div className="flex flex-col-reverse md:flex-row md:h-screen relative">
+    <div className="flex flex-col-reverse md:flex-row md:h-screen relative overflow-hidden">
       <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
         <a
           href={"https://coronasafe.network?ref=care_login"}
