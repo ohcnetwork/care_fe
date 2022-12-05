@@ -318,7 +318,9 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
   };
 
-  const handleSelectCurrentLocation = () => {
+  const handleSelectCurrentLocation = (
+    setCenter: (lat: number, lng: number) => void
+  ) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         dispatch({
@@ -329,9 +331,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             longitude: String(position.coords.longitude),
           },
         });
-      });
 
-      // setAnchorEl(null);
+        setCenter?.(position.coords.latitude, position.coords.longitude);
+      });
     }
   };
 
