@@ -348,7 +348,7 @@ export const PatientManager = (props: any) => {
     const badge = (key: string, value: any, id: string) => {
       return (
         value && (
-          <span className="inline-flex items-center px-3 py-1 mt-2 ml-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          <span className="inline-flex items-center px-3 py-1 mt-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border-gray-300">
             {key}
             {": "}
             {value}
