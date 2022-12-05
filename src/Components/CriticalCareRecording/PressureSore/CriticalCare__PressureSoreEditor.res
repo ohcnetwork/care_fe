@@ -305,7 +305,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
           previewMode={state.previewMode}
         />
       </div>
-      <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
+      <svg className="h-screen py-4 cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
         {Js.Array.mapi((part, renderIndex) => {
           let regionType = PressureSore.regionForPath(part)
           let selectedPart = Js.Array.find(p => PressureSore.region(p) === regionType, state.parts)
