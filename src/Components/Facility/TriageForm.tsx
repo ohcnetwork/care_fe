@@ -287,15 +287,6 @@ export const TriageForm = (props: triageFormProps) => {
             </div>
             <div></div>
             <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-              {/* <button
-                type="button"
-                className="btn-danger btn mr-2 w-full md:w-auto"
-                onClick={() => {
-                  setOpenModalForExistingTriage(false);
-                }}
-              >
-                Cancel
-              </button> */}
               <ButtonV2
                 variant="secondary"
                 onClick={() => {
@@ -304,15 +295,6 @@ export const TriageForm = (props: triageFormProps) => {
               >
                 Cancel
               </ButtonV2>
-              {/* <button
-                id="triageConfirm"
-                className="btn-primary btn mr-2 w-full md:w-auto"
-                onClick={(e) => {
-                  handleSubmit(e);
-                }}
-              >
-                Proceed
-              </button> */}
               <ButtonV2
                 variant="danger"
                 id="triageConfirm"
