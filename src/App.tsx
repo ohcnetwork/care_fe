@@ -16,7 +16,10 @@ const App: React.FC = () => {
   const [user, setUser] = useState(null);
 
   useAbortableEffect(async () => {
-    await dispatch(getConfig());
+    const res = await dispatch(getConfig());
+    if (res?.data) {
+      localStorage.setItem("config", JSON.stringify(res.data));
+    }
   }, [dispatch]);
 
   const updateRefreshToken = () => {
