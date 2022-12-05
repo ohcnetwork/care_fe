@@ -3,7 +3,7 @@ import loadable from "@loadable/component";
 import SessionRouter from "./Router/SessionRouter";
 import AppRouter from "./Router/AppRouter";
 import { useDispatch, useSelector } from "react-redux";
-import { getCurrentUser } from "./Redux/actions";
+import { getConfig, getCurrentUser } from "./Redux/actions";
 import { useAbortableEffect, statusType } from "./Common/utils";
 import axios from "axios";
 
@@ -12,8 +12,12 @@ const Loading = loadable(() => import("./Components/Common/Loading"));
 const App: React.FC = () => {
   const dispatch: any = useDispatch();
   const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const { currentUser, config } = state;
   const [user, setUser] = useState(null);
+
+  useAbortableEffect(async () => {
+    await dispatch(getConfig());
+  }, [dispatch]);
 
   const updateRefreshToken = () => {
     const refresh = localStorage.getItem("care_refresh_token");
@@ -30,12 +34,9 @@ const App: React.FC = () => {
       .post("/api/v1/auth/token/refresh/", {
         refresh,
       })
-      .then((resp: any) => {
+      .then((resp) => {
         localStorage.setItem("care_access_token", resp.data.access);
         localStorage.setItem("care_refresh_token", resp.data.refresh);
-      })
-      .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
       });
   };
   useEffect(() => {
@@ -53,10 +54,17 @@ const App: React.FC = () => {
     [dispatch]
   );
 
-  if (!currentUser || currentUser.isFetching) {
+  if (
+    !currentUser ||
+    currentUser.isFetching ||
+    !config ||
+    config.isFetching ||
+    !config.data
+  ) {
     return <Loading />;
   }
-  if (currentUser && currentUser.data) {
+
+  if (currentUser?.data) {
     return <AppRouter />;
   } else {
     return <SessionRouter />;
