@@ -20,9 +20,9 @@ import CloseIcon from "@material-ui/icons/Close";
 import LinkFacilityDialog from "../Users/LinkFacilityDialog";
 import UserDeleteDialog from "../Users/UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
-import classNames from "classnames";
 import UserDetails from "../Common/UserDetails";
 import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
+import { classNames } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -198,11 +198,10 @@ export default function FacilityUsers(props: any) {
     });
   };
 
-  const facilityClassname = classNames({
-    "align-baseline font-bold text-sm": true,
-    "text-blue-500 hover:text-blue-800": !isFacilityLoading,
-    "text-gray-500": isFacilityLoading,
-  });
+  const facilityClassname = classNames(
+    "align-baseline font-bold text-sm",
+    isFacilityLoading ? "text-gray-500" : "text-blue-500 hover:text-blue-800"
+  );
 
   const showLinkFacility = (username: string) => {
     return (

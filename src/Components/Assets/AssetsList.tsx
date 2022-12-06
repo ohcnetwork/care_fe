@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
@@ -19,6 +19,10 @@ import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import ButtonV2 from "../Common/components/ButtonV2";
+import AssetImportModal from "./AssetImportModal";
+import { FacilityModel } from "../Facility/models";
+import { USER_TYPES } from "../../Common/constants";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -37,9 +41,10 @@ const AssetsList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [facilityName, setFacilityName] = useState<string>();
+  const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
+  const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const fetchData = useCallback(
@@ -90,13 +95,13 @@ const AssetsList = () => {
     [dispatch, fetchData]
   );
 
-  const fetchFacilityName = useCallback(
+  const fetchFacility = useCallback(
     async (status: statusType) => {
-      if (!qParams.facility) return setFacilityName("");
+      if (!qParams.facility) return setFacility(undefined);
       setIsLoading(true);
       const res = await dispatch(getAnyFacility(qParams.facility));
       if (!status.aborted) {
-        setFacilityName(res?.data?.name);
+        setFacility(res?.data);
         setIsLoading(false);
       }
     },
@@ -119,10 +124,10 @@ const AssetsList = () => {
 
   useAbortableEffect(
     (status: statusType) => {
-      fetchFacilityName(status);
+      fetchFacility(status);
       fetchLocationName(status);
     },
-    [fetchFacilityName, fetchLocationName]
+    [fetchFacility, fetchLocationName]
   );
 
   const getAssetIdFromQR = async (assetUrl: string) => {
@@ -143,6 +148,15 @@ const AssetsList = () => {
     }
   };
 
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+
+  const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
+
+  const showAssetImportExport =
+    USER_TYPES.findIndex((type) => type == currentUser.data.user_type) >=
+    DISTRICT_ADMIN_LEVEL;
+
   const checkValidAssetId = async (assetId: any) => {
     const assetData: any = await dispatch(getAsset(assetId));
     try {
@@ -155,6 +169,33 @@ const AssetsList = () => {
       Notification.Error({
         msg: "Invalid QR code scanned !!!",
       });
+    }
+  };
+
+  const downloadJSON = (data: JSON) => {
+    const a = document.createElement("a");
+    const blob = new Blob([JSON.stringify(data)], {
+      type: "application/json",
+    });
+    a.href = URL.createObjectURL(blob);
+    a.download = `assets_${facility?.name}_${new Date().toISOString()}.json`;
+    a.click();
+  };
+
+  const handleDownload = async () => {
+    if (totalCount == 0) {
+      Notification.Error({
+        msg: "No assets to export",
+      });
+    }
+    const filters = {
+      ...qParams,
+      json: true,
+      limit: totalCount,
+    };
+    const res = await dispatch(listAssets(filters));
+    if (res && res.data && res.status === 200) {
+      downloadJSON(res.data.results);
     }
   };
 
@@ -276,12 +317,41 @@ const AssetsList = () => {
           <div className="w-full">
             <AdvancedFilters.Button />
           </div>
-          <button
-            className="btn btn-primary w-full"
-            onClick={() => setIsScannerActive(true)}
-          >
-            <i className="fas fa-search mr-1"></i> Scan Asset QR
-          </button>
+          {showAssetImportExport && (
+            <div className="w-full tooltip flex flex-col md:flex-row gap-2">
+              {!facility ? (
+                <span className="tooltip-text tooltip-left">
+                  <p className="self-end text-sm italic ">
+                    * Select a facility
+                  </p>
+                </span>
+              ) : (
+                ""
+              )}
+              <ButtonV2
+                className="w-1/2"
+                disabled={!facility}
+                onClick={() => {
+                  setImportAssetModalOpen(true);
+                }}
+              >
+                <span>
+                  <i className="fa-solid fa-arrow-up-long mr-2"></i>
+                  Import Assets
+                </span>
+              </ButtonV2>
+              <ButtonV2
+                className="w-1/2"
+                disabled={!facility}
+                onClick={handleDownload}
+              >
+                <span>
+                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
+                  Export Assets
+                </span>
+              </ButtonV2>
+            </div>
+          )}
         </div>
       </div>
       <AssetFilter {...AdvancedFilters.props} />
@@ -291,7 +361,7 @@ const AssetsList = () => {
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", ["facility", "location"], facilityName || ""),
+              value("Facility", ["facility", "location"], facility?.name || ""),
               badge("Name", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
               badge("Status", "status"),
@@ -305,6 +375,13 @@ const AssetsList = () => {
             </div>
           </div>
         </>
+      )}
+      {facility && (
+        <AssetImportModal
+          open={importAssetModalOpen}
+          onClose={() => setImportAssetModalOpen(false)}
+          facility={facility}
+        />
       )}
     </div>
   );

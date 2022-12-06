@@ -4,6 +4,7 @@ import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -25,28 +26,20 @@ type StatelessSidebarProps =
       setShrinked?: undefined;
     };
 
-// Sidebar item icons.
-const Facility = () => <i className="uil uil-hospital" />;
-const Patient = () => <i className="uil uil-wheelchair" />;
-const Asset = () => <i className="uil uil-shopping-cart-alt" />;
-const SampleTest = () => <i className="uil uil-medkit" />;
-const Shifting = () => <i className="uil uil-ambulance" />;
-const Resource = () => <i className="uil uil-heart-medical" />;
-const Result = () => <i className="uil uil-clipboard-notes" />;
-const Users = () => <i className="uil uil-users-alt" />;
-const NoticeBoard = () => <i className="uil uil-meeting-board" />;
-const Dashboard = () => <i className="uil uil-dashboard" />;
-
 const NavItems = [
-  { text: "Facilities", to: "/facility", icon: <Facility /> },
-  { text: "Patients", to: "/patients", icon: <Patient /> },
-  { text: "Assets", to: "/assets", icon: <Asset /> },
-  { text: "Sample Test", to: "/sample", icon: <SampleTest /> },
-  { text: "Shifting", to: "/shifting", icon: <Shifting /> },
-  { text: "Resource", to: "/resource", icon: <Resource /> },
-  { text: "External Results", to: "/external_results", icon: <Result /> },
-  { text: "Users", to: "/users", icon: <Users /> },
-  { text: "Notice Board", to: "/notice_board", icon: <NoticeBoard /> },
+  { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
+  { text: "Patients", to: "/patients", icon: "care-l-wheelchair" },
+  { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
+  { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
+  { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
+  { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
+  {
+    text: "External Results",
+    to: "/external_results",
+    icon: "care-l-clipboard-notes",
+  },
+  { text: "Users", to: "/users", icon: "care-l-users-alt" },
+  { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
 ];
 
 const StatelessSidebar = ({
@@ -129,11 +122,23 @@ const StatelessSidebar = ({
             bg-primary-400 rounded z-10 transition-all`}
         />
         {NavItems.map((i) => {
-          return <Item key={i.text} {...i} selected={i.to === activeLink} />;
+          return (
+            <Item
+              key={i.text}
+              {...i}
+              icon={<CareIcon className={`${i.icon} h-5`} />}
+              selected={i.to === activeLink}
+            />
+          );
         })}
 
         <NotificationItem shrinked={shrinked} />
-        <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
+        <Item
+          text="Dashboard"
+          to={DASHBOARD}
+          icon={<CareIcon className="care-l-dashboard h-5" />}
+          external
+        />
       </div>
       <div className="flex-1" />
       <div className="relative flex justify-end">
