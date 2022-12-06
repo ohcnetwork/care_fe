@@ -63,9 +63,9 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   if (isLoading) return <Loading />;
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <div className="flex flex-col md:flex-row gap-4">
-          <Card className="w-full md:w-[350px] shrink-0 flex flex-col justify-between">
+      <div className="flex flex-col md:flex-row gap-4">
+        <Card className="w-full md:w-[350px] shrink-0 flex flex-col justify-between">
+          <form onSubmit={handleSubmit}>
             <div>
               <TextInputFieldV2
                 label="Middleware Hostname"
@@ -86,14 +86,15 @@ const HL7Monitor = (props: HL7MonitorProps) => {
               <i className="fas fa-save" />
               Save Configuration
             </ButtonV2>
-          </Card>
-          <div className="w-full grow-0 overflow-hidden relative rounded-xl bg-white shadow">
-            <PatientVitalsCard
-              socketUrl={`wss://${middlewareHostname}/observations/${localipAddress}`}
-            />
-          </div>
+          </form>
+        </Card>
+        <div className="w-full grow-0 overflow-hidden relative rounded-xl bg-white shadow">
+          <PatientVitalsCard
+            socketUrl={`wss://${middlewareHostname}/observations/${localipAddress}`}
+          />
         </div>
-      </form>
+      </div>
+
       <Card className="mt-4">
         {assetType === "HL7MONITOR" ? (
           <MonitorConfigure asset={asset as AssetData} />

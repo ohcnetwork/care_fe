@@ -112,8 +112,9 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
   useEffect(() => {
     return () => {
       wsClient.current?.close();
+      setWaveForms(null);
     };
-  }, []);
+  }, [socketUrl, patient]);
 
   type VitalType = {
     label: ReactNode;
@@ -174,7 +175,7 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
           {waveforms ? (
             <>
               {vitals.map((v, i) => {
-                const waveform = waveforms.filter(
+                const waveform: any = waveforms.filter(
                   (w) => w["wave-name"] === v.waveformKey
                 )[0];
                 return v.waveformKey && waveform ? (
