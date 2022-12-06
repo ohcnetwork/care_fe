@@ -17,7 +17,7 @@ const App: React.FC = () => {
 
   useAbortableEffect(async () => {
     const res = await dispatch(getConfig());
-    if (res?.data) {
+    if (res.data && res.status < 400) {
       localStorage.setItem("config", JSON.stringify(res.data));
     }
   }, [dispatch]);
