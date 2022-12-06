@@ -48,7 +48,7 @@
     "@types/google.maps": "^3.50.4",
     "@types/loadable__component": "^5.13.3",
     "@types/lodash": "^4.14.186",
-    "@types/node": "^18.11.5",
+    "@types/node": "^18.11.11",
     "@types/prop-types": "*",
     "@types/qrcode.react": "^1.0.1",
     "@types/react": "18.0.21",
