@@ -244,21 +244,25 @@ const AssetManage = (props: AssetManageProps) => {
                 }
                 id="update-asset"
               >
-                <CareIcon className="care-l-pen h-5 mr-4" />
-                Update
+                <span>
+                  <CareIcon className="care-l-pen h-4 mr-1" />
+                  Update
+                </span>
               </ButtonV2>
               {asset?.asset_class && (
                 <ButtonV2
                   onClick={() => navigate(`/assets/${asset?.id}/configure`)}
                   id="configure-asset"
                 >
-                  <CareIcon className="care-l-setting h-5 mr-4" />
-                  Configure
+                  <span>
+                    <CareIcon className="care-l-setting h-4 mr-1" />
+                    Configure
+                  </span>
                 </ButtonV2>
               )}
               <ButtonV2 onClick={handleDownload}>
                 <span>
-                  <i className="fa-solid fa-arrow-down-long mr-4"></i>
+                  <i className="fa-solid fa-arrow-down-long mr-1"></i>
                   Export Asset
                 </span>
               </ButtonV2>

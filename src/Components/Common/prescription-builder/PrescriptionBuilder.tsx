@@ -132,7 +132,7 @@ export default function PrescriptionBuilder(
                     onChange={(route) => setRoute(route || "")}
                     optionLabel={(option) => option}
                     required={false}
-                    className="mt-[2px]"
+                    className="mt-[6px]"
                   />
                 </div>
                 <div>
@@ -162,7 +162,7 @@ export default function PrescriptionBuilder(
                     )}
                     showIconWhenSelected={false}
                     required={false}
-                    className="mt-[2px] w-[150px]"
+                    className="mt-[6px] w-[150px]"
                   />
                 </div>
               </div>
@@ -174,7 +174,7 @@ export default function PrescriptionBuilder(
                   <div className="flex gap-1">
                     <input
                       type="number"
-                      className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                      className="text-gray-700 bg-gray-200 w-full focus:border-primary-400 block border rounded px-4 text-sm"
                       value={prescription.dosage_new?.split(" ")[0]}
                       placeholder="Dosage"
                       min={0}

@@ -1,7 +1,6 @@
 import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
 import SelectMenuV2 from "../../Form/SelectMenuV2";
 import { medicines, routes, units } from "./PrescriptionBuilder";
-import { PrescriptionDropdown } from "./PrescriptionDropdown";
 
 export type PRNPrescriptionType = {
   medicine?: string;
@@ -143,7 +142,7 @@ export default function PRNPrescriptionBuilder(
                       <div className="flex gap-1 mt-[2px] h-12">
                         <input
                           type="number"
-                          className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                          className="text-gray-700 bg-gray-200 w-full focus:border-primary-400 block border rounded px-4 text-sm"
                           value={prescription.dosage?.split(" ")[0]}
                           placeholder="Dosage"
                           min={0}
@@ -246,14 +245,15 @@ export default function PRNPrescriptionBuilder(
               <div className="w-[160px] shrink-0">
                 Min. time btwn. 2 doses
                 <div className="flex items-center">
-                  <PrescriptionDropdown
-                    type="number"
+                  <SelectMenuV2
                     placeholder="hours"
-                    className="!py-3"
                     options={DOSAGE_HRS}
                     value={prescription.min_time || 0}
-                    setValue={setMinTime}
-                    min={0}
+                    onChange={(min_time) =>
+                      min_time && (min_time > 0 ? setMinTime(min_time) : 0)
+                    }
+                    optionLabel={(option) => option}
+                    required={false}
                   />
                   <div className="ml-2">Hrs.</div>
                 </div>
