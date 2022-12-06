@@ -65,7 +65,7 @@ const AutoCompleteAsync = (props: Props) => {
         multiple={multiple as any}
       >
         <div className="relative mt-1">
-          <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
+          <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out py-[4px]">
             <Combobox.Input
               name={name}
               className="w-full border-none text-sm leading-5 text-gray-900 placeholder:text-gray-600 font-medium focus:ring-0 bg-inherit shadow-none pr-16 truncate"
