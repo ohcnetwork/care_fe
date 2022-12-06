@@ -11,6 +11,7 @@ import _ from "lodash";
 import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -164,7 +165,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
                       </div>
                     </span>
                   </span>
-                  <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                  <CareIcon className="ml-1 care-l-user-circle text-green-700 font-semibold text-xl hover:text-green-600" />
                 </div>
               )}
             </div>
@@ -185,7 +186,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
                     </p>
                   </div>
                 </span>
-                <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                <CareIcon className="ml-1 care-l-user-circle text-green-700 font-semibold text-xl hover:text-green-600" />
               </div>
             )}
           </div>
