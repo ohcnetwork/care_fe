@@ -9,7 +9,7 @@ import { navigate } from "raviger";
 import moment from "moment";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
-import clsx from "clsx";
+import { classNames } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
 import { formatDate } from "../../Utils/utils";
 
@@ -254,7 +254,7 @@ export default function ResourceBoard({
   return (
     <div
       ref={drop}
-      className={clsx(
+      className={classNames(
         "bg-gray-200 mr-2 shrink-0 w-full sm:w-1/2 md:w-3/4 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md",
         isOver && "cursor-move"
       )}
