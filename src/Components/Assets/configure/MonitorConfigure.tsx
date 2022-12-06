@@ -75,7 +75,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
         }
       }}
     >
-      <div className="flex flex-row gap-3 items-center">
+      <div className="flex flex-col">
         <div className="w-full">
           <InputLabel id="asset-type">Bed</InputLabel>
           <BedSelect
@@ -90,7 +90,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
             className="w-full"
           />
         </div>
-        <ButtonV2 className="shrink-0" variant="primary" type="submit">
+        <ButtonV2 className="shrink-0 w-full" variant="primary" type="submit">
           <i className="fas fa-bed-pulse" />
           {updateLink ? "Update Bed" : "Save Bed"}
         </ButtonV2>
