@@ -61,7 +61,7 @@ const SearchInput = ({
     ));
 
   // Escape hotkey to clear related
-  useKeyboardShortcut(["Escape"], () => setValue(""), {
+  useKeyboardShortcut(["Escape"], () => value && setValue(""), {
     ignoreInputFields: false,
   });
 
