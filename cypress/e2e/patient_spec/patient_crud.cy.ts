@@ -14,18 +14,18 @@ describe("Patient Creation", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.awaitUrl("/");
+    cy.awaitUrl("/patients");
   });
 
   it("Create", () => {
-    cy.get("a")
-      .should("contain", "Facility")
-      .contains("Facility")
-      .click({ force: true });
-    cy.get("button").should("contain", "Add Details of a Patient");
+    cy.intercept(/\/api\/v1\/facility/).as("getFacilities");
     cy.get("button")
+      .should("contain", "Add Details of a Patient")
       .contains("Add Details of a Patient")
       .click({ force: true });
+    cy.wait("@getFacilities");
+    cy.get("input[name='facilities']").type("{downarrow}{enter}");
+    cy.get("button").contains("Continue").click({ force: true });
     cy.get("[data-testid=phone-number] input").type(phone_number);
     cy.get("[data-testid=date-of-birth] svg").click();
     cy.get("div").contains("1999").click();
@@ -95,6 +95,22 @@ describe("Patient Creation", () => {
       "MANAKKAPADY"
     );
     cy.get("[data-testid=pincode] input").should("have.value", "159015");
+    cy.get("[data-testid=pincode] input").type("159111");
+    cy.get("[data-testid=blood-group] select").select("B+");
+    cy.get("[data-testid=emergency-phone-number] input").type(phone_number, {
+      delay: 100,
+    });
+    cy.get("[data-testid=current-address] textarea").type(
+      "Test Patient Address Modified"
+    );
+    cy.get("button[type='submit']").click();
+  });
+
+  it("Doctors Notes", () => {
+    cy.awaitUrl(patient_url + "/notes");
+    cy.get("textarea").type("Test Doctor Note");
+    cy.get("button").contains("Post Your Note").click({ force: true });
+    cy.verifyNotification("Note added successfully");
   });
 
   afterEach(() => {
