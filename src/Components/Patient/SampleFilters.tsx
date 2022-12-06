@@ -20,7 +20,7 @@ const useMergeState = (initialState: any) => {
 };
 
 export default function UserFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter } = props;
 
   const [filterState, setFilterState] = useMergeState({
     status: filter.status || "",
@@ -156,11 +156,9 @@ export default function UserFilter(props: any) {
                 selected={filterState.facility_ref}
                 showAll={true}
                 setSelected={(obj) =>
-                  handleChange({
-                    target: {
-                      name: "facility",
-                      value: (obj as FacilityModel)?.id,
-                    },
+                  setFilterState({
+                    facility: (obj as FacilityModel)?.id,
+                    facility_ref: obj,
                   })
                 }
                 className="shifting-page-filter-dropdown"

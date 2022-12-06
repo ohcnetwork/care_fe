@@ -61,7 +61,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     }}
                   />
                 </div>
-                <div className="flex gap-2 flex-row">
+                <div className="flex gap-2 flex-col md:flex-row">
                   <div className="shrink-0">
                     Repetitive
                     <br />
