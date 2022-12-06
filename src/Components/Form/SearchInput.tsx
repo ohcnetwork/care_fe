@@ -1,5 +1,6 @@
 import { createRef, useEffect, useState } from "react";
 import useKeyboardShortcut from "use-keyboard-shortcut";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import { isAppleDevice } from "../../Utils/utils";
 import TextFormField, { TextFormFieldProps } from "./FormFields/TextFormField";
 
@@ -76,7 +77,9 @@ const SearchInput = ({
       ref={ref}
       className={`${className} enabled:bg-white`}
       leading={
-        props.leading || <i className="text-gray-600 uil uil-search-alt" />
+        props.leading || (
+          <CareIcon className="text-gray-600 p-0.5 mt-1 care-l-search-alt h-5" />
+        )
       }
       trailing={
         props.trailing ||

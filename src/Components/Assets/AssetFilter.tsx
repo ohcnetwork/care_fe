@@ -12,6 +12,7 @@ import { LocationSelect } from "../Common/LocationSelect";
 import { AssetLocationObject } from "./AssetTypes";
 import FilterButtons from "../Common/FilterButtons";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const initialLocation = {
   id: "",
@@ -122,7 +123,7 @@ function AssetFilter(props: any) {
       />
       <div className="w-full flex-none pt-14">
         <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-          <i className="uil uil-filter" />
+          <CareIcon className="care-l-filter h-5" />
           <p>Filter by</p>
         </div>
 

@@ -756,7 +756,7 @@ export const FACILITY_FEATURE_TYPES = [
   {
     id: 1,
     name: "CT Scan",
-    icon: "circle-dot",
+    icon: "compact-disc",
   },
   {
     id: 2,
@@ -771,7 +771,7 @@ export const FACILITY_FEATURE_TYPES = [
   {
     id: 4,
     name: "Neonatal Care",
-    icon: "baby",
+    icon: "baby-carriage",
   },
   {
     id: 5,
