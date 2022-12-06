@@ -86,6 +86,7 @@ interface DateInputFieldProps extends DatePickerProps {
   ) => void;
   label?: string;
   min?: string;
+  max?: string;
   errors: string;
   inputVariant?: "standard" | "outlined" | "filled";
   disabled?: boolean;
@@ -219,6 +220,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
     label,
     errors,
     min,
+    max,
     // variant,
     disabled,
     margin,
@@ -234,6 +236,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
         value={value}
         onChange={onChange}
         minDate={min}
+        maxDate={max}
         disabled={disabled}
         KeyboardButtonProps={{
           "aria-label": "change date",
