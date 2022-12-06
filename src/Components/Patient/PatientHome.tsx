@@ -1425,7 +1425,7 @@ export const PatientHome = (props: any) => {
                       )
                     }
                   >
-                    <CareIcon className="care-l-file-upload text-5xl  mr-2" />
+                    <CareIcon className="care-l-file-upload text-5xl mr-2" />
                     View/Upload Patient Files
                   </ButtonV2>
                 </div>
@@ -1440,7 +1440,7 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-ambulance text-5xl  mr-2" />
+                    <CareIcon className="care-l-ambulance text-5xl mr-2" />
                     SHIFT PATIENT
                   </ButtonV2>
                 </div>
@@ -1455,7 +1455,7 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-medkit text-5xl  mr-2" />
+                    <CareIcon className="care-l-medkit text-5xl mr-2" />
                     Request Sample Test
                   </ButtonV2>
                 </div>
@@ -1468,7 +1468,7 @@ export const PatientHome = (props: any) => {
                       )
                     }
                   >
-                    <CareIcon className="care-l-clipboard-notes text-5xl  mr-2" />
+                    <CareIcon className="care-l-clipboard-notes text-5xl mr-2" />
                     View Patient Notes
                   </ButtonV2>
                 </div>
@@ -1479,7 +1479,7 @@ export const PatientHome = (props: any) => {
                     disabled={false}
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-users-alt mr-2" />
+                    <CareIcon className="care-l-users-alt mr-2 text-5xl" />
                     Assign to a volunteer
                   </ButtonV2>
                 </div>
