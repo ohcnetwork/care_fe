@@ -14,7 +14,7 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
 
   return (
     <div
-      className={`flex ${
+      className={`flex my-2 ${
         shrinked ? "mx-auto" : "mx-5"
       } transition-all duration-200 ease-in-out`}
     >
