@@ -368,7 +368,6 @@ export const PatientManager = (props: any) => {
         )
       );
     };
-    console.log(qParams.last_consultation_admitted_bed_type_list);
     return qParams.last_consultation_admitted_bed_type_list
       .split(",")
       .map((id: string) => {
