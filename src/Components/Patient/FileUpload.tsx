@@ -25,6 +25,7 @@ import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
 import { formatDate } from "../../Utils/utils";
+import HeadedTabs from "../Common/HeadedTabs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -973,6 +974,10 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
+  const handleTabChange = (tabValue: string) => {
+    setSortFileState(tabValue);
+  };
+
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
       <Modal
@@ -1353,56 +1358,11 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={true}
         breadcrumbs={false}
       />
-      <div>
-        <div className="sm:hidden">
-          <label htmlFor="tabs" className="sr-only">
-            Select a tab
-          </label>
-          {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
-          <select
-            id="tabs"
-            name="tabs"
-            className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-            defaultValue={tabs[0].value}
-            onChange={() => {
-              sortFileState === "UNARCHIVED"
-                ? setSortFileState("ARCHIVED")
-                : setSortFileState("UNARCHIVED");
-            }}
-          >
-            {tabs.map((tab) => (
-              <option key={tab.value}>{tab.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="hidden sm:block">
-          <div className="border-b border-gray-200">
-            <nav
-              className="-mb-px flex items-center justify-center cursor: pointer"
-              aria-label="Tabs"
-            >
-              {tabs.map((tab) => (
-                <div
-                  key={tab.name}
-                  className={`
-                  ${
-                    tab.value === sortFileState
-                      ? " border-primary-500 text-primary-600 cursor: pointer "
-                      : " border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor: pointer "
-                  },
-                  ' w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm '
-                `}
-                  onClick={() => {
-                    setSortFileState(tab.value);
-                  }}
-                >
-                  {tab.name}
-                </div>
-              ))}
-            </nav>
-          </div>
-        </div>
-      </div>
+      <HeadedTabs
+        tabs={tabs}
+        handleChange={handleTabChange}
+        currentTabState={sortFileState}
+      />
 
       <div>
         {uploadedFiles && uploadedFiles.length > 0 ? (
