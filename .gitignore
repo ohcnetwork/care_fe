@@ -51,7 +51,6 @@ public/build-meta.json
 # Using NPM
 yarn.lock
 pnpm-lock.yaml
-.npmrc
 
 # Cypress
 cypress/downloads
