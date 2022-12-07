@@ -40,6 +40,7 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import Chip from "../../CAREUI/display/Chip";
 import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -378,7 +379,7 @@ export const HospitalList = () => {
                           className="h-[38px]"
                           onClick={(_) => setNotifyModalFor(facility.id)}
                         >
-                          <i className="fas fa-bullhorn" />{" "}
+                          <CareIcon className="care-l-megaphone text-lg" />
                           <span className="md:block hidden">Notify</span>
                         </ButtonV2>
                       )}
@@ -441,7 +442,7 @@ export const HospitalList = () => {
                         ghost
                         className="h-[38px]"
                       >
-                        <i className="fas fa-hospital" />
+                        <CareIcon className="care-l-hospital text-lg" />
                         <span className="hidden md:inline">
                           {t("Facility")}
                         </span>
@@ -450,7 +451,7 @@ export const HospitalList = () => {
                         href={`/facility/${facility.id}/patients`}
                         ghost
                       >
-                        <i className="fas fa-user-injured" />
+                        <CareIcon className="care-l-accessible-icon-alt text-lg" />
                         {t("Patients")}
                       </ButtonV2>
                     </div>
