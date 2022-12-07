@@ -12,6 +12,7 @@ import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 interface ONVIFCameraProps {
   assetId: string;
@@ -175,8 +176,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                   className="w-full md:w-auto ml-auto"
                   onClick={handleSubmit}
                 >
-                  <i className="uil uil-check-circle text-lg"></i> Set
-                  Configuration
+                  <CareIcon className="care-l-check-circle text-lg" />
+                  Set Configuration
                 </ButtonV2>
               </div>
             </CardContent>

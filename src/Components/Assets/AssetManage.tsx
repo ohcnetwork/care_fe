@@ -11,6 +11,7 @@ import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
 import { formatDate } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
@@ -149,7 +150,7 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="flex flex-col">
         <div className="flex flex-start items-center">
           <div className="w-8">
-            <i className={`uil uil-${item.icon} text-gray-700 text-lg`}></i>
+            <CareIcon className={`care-l-${item.icon} h-5 fill-gray-700`} />
           </div>
           <div className="text-gray-700 break-words">{item.label}</div>
         </div>
@@ -243,21 +244,25 @@ const AssetManage = (props: AssetManageProps) => {
                 }
                 id="update-asset"
               >
-                <i className="uil uil-pen text-white mr-4" />
-                Update
+                <span>
+                  <CareIcon className="care-l-pen h-4 mr-1" />
+                  Update
+                </span>
               </ButtonV2>
               {asset?.asset_class && (
                 <ButtonV2
                   onClick={() => navigate(`/assets/${asset?.id}/configure`)}
                   id="configure-asset"
                 >
-                  <i className="uil uil-setting text-white mr-4"></i>
-                  Configure
+                  <span>
+                    <CareIcon className="care-l-setting h-4 mr-1" />
+                    Configure
+                  </span>
                 </ButtonV2>
               )}
               <ButtonV2 onClick={handleDownload}>
                 <span>
-                  <i className="fa-solid fa-arrow-down-long mr-4"></i>
+                  <i className="fa-solid fa-arrow-down-long mr-1"></i>
                   Export Asset
                 </span>
               </ButtonV2>

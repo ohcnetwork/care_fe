@@ -86,6 +86,7 @@ interface DateInputFieldProps extends DatePickerProps {
   ) => void;
   label?: string;
   min?: string;
+  max?: string;
   errors: string;
   inputVariant?: "standard" | "outlined" | "filled";
   disabled?: boolean;
@@ -219,6 +220,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
     label,
     errors,
     min,
+    max,
     // variant,
     disabled,
     margin,
@@ -234,6 +236,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
         value={value}
         onChange={onChange}
         minDate={min}
+        maxDate={max}
         disabled={disabled}
         KeyboardButtonProps={{
           "aria-label": "change date",
@@ -647,6 +650,7 @@ export const PhoneNumberField = (props: any) => {
     value,
     turnOffAutoFormat,
     disabled,
+    bgColor,
   } = props;
   const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
   const onChangeHandler = debounce(onChange, 500);
@@ -664,7 +668,9 @@ export const PhoneNumberField = (props: any) => {
       <div className="flex items-center" data-cy={id}>
         <PhoneInput
           data-cy={id}
-          inputClass="bg-gray-200 py-3 text-sm border-gray-200 shadow-none focus:border-primary-400"
+          inputClass={` ${
+            bgColor || " bg-gray-200 "
+          }  py-3 text-sm border-gray-200 shadow-none focus:border-primary-400`}
           countryCodeEditable={false}
           value={value}
           placeholder={placeholder}

@@ -29,7 +29,13 @@ const TextInputFieldV2 = (props: Props) => {
     <div>
       {props.label && (
         <label className="mb-2" htmlFor={props.id}>
-          {props.label + ((props.required && " *") || "")}
+          {props.label}
+          {props.required && (
+            <span className="text-red-500" title="required">
+              {" "}
+              *
+            </span>
+          )}
         </label>
       )}
       <input
