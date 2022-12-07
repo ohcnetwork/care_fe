@@ -129,7 +129,6 @@ export const FileUpload = (props: FileUploadProps) => {
   ]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
-  // const [uploadSuccess, setUploadSuccess] = useState(false);
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
@@ -139,8 +138,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const [audioName, setAudioName] = useState<string>("");
   const [audioNameError, setAudioNameError] = useState<string>("");
   const [contentType, setcontentType] = useState<string>("");
-  // const classes = useStyles();
-  // const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
   const initialState = {
     open: false,
@@ -171,6 +168,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const currentuser_username = currentUser.data.username;
+  const currentuser_type = currentUser.data.user_type;
   const limit = RESULTS_PER_PAGE_LIMIT;
   const [isActive, setIsActive] = useState(true);
   const tabs = [
@@ -560,7 +558,9 @@ export const FileUpload = (props: FileUploadProps) => {
                             DOWNLOAD
                           </a>
                           {item?.uploaded_by?.username ===
-                          currentuser_username ? (
+                            currentuser_username ||
+                          currentuser_type === "DistrictAdmin" ||
+                          currentuser_type === "StateAdmin" ? (
                             <>
                               <label
                                 onClick={() => {
@@ -580,17 +580,29 @@ export const FileUpload = (props: FileUploadProps) => {
                           ) : (
                             <></>
                           )}
-                          <label
-                            onClick={() => {
-                              setArchiveReason("");
-                              setModalDetails({ name: item.name, id: item.id });
-                              setModalOpenForArchive(true);
-                            }}
-                            className="btn btn-primary m-1 sm:w-auto w-full"
-                          >
-                            <i className="fa-solid fa-box-archive mr-2 "></i>
-                            ARCHIVE
-                          </label>
+                          {item?.uploaded_by?.username ===
+                            currentuser_username ||
+                          currentuser_type === "DistrictAdmin" ||
+                          currentuser_type === "StateAdmin" ? (
+                            <>
+                              <label
+                                onClick={() => {
+                                  setArchiveReason("");
+                                  setModalDetails({
+                                    name: item.name,
+                                    id: item.id,
+                                  });
+                                  setModalOpenForArchive(true);
+                                }}
+                                className="btn btn-primary m-1 sm:w-auto w-full"
+                              >
+                                <i className="fa-solid fa-box-archive mr-2 "></i>
+                                ARCHIVE
+                              </label>
+                            </>
+                          ) : (
+                            <></>
+                          )}
                         </div>
                       ) : (
                         <CircularProgress />
@@ -643,7 +655,9 @@ export const FileUpload = (props: FileUploadProps) => {
                       {" "}
                       <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
                     </label>
-                    {item?.uploaded_by?.username === currentuser_username ? (
+                    {item?.uploaded_by?.username === currentuser_username ||
+                    currentuser_type === "DistrictAdmin" ||
+                    currentuser_type === "StateAdmin" ? (
                       <>
                         {" "}
                         <label
@@ -661,16 +675,25 @@ export const FileUpload = (props: FileUploadProps) => {
                     ) : (
                       <></>
                     )}
-                    <label
-                      onClick={() => {
-                        setArchiveReason("");
-                        setModalDetails({ name: item.name, id: item.id });
-                        setModalOpenForArchive(true);
-                      }}
-                      className="btn btn-primary m-1 sm:w-auto w-full"
-                    >
-                      <i className="fa-solid fa-box-archive mr-2 "></i>ARCHIVE
-                    </label>
+                    {item?.uploaded_by?.username === currentuser_username ||
+                    currentuser_type === "DistrictAdmin" ||
+                    currentuser_type === "StateAdmin" ? (
+                      <>
+                        <label
+                          onClick={() => {
+                            setArchiveReason("");
+                            setModalDetails({ name: item.name, id: item.id });
+                            setModalOpenForArchive(true);
+                          }}
+                          className="btn btn-primary m-1 sm:w-auto w-full"
+                        >
+                          <i className="fa-solid fa-box-archive mr-2 "></i>
+                          ARCHIVE
+                        </label>
+                      </>
+                    ) : (
+                      <></>
+                    )}
                   </div>
                 </div>
               )}
