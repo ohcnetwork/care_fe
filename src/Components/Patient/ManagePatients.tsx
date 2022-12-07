@@ -21,7 +21,6 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   TELEMEDICINE_ACTIONS,
-  KASP_STRING,
   PatientCategoryTailwindClass,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -369,7 +368,7 @@ export const PatientManager = (props: any) => {
         )
       );
     };
-
+    console.log(qParams.last_consultation_admitted_bed_type_list);
     return qParams.last_consultation_admitted_bed_type_list
       .split(",")
       .map((id: string) => {
@@ -851,7 +850,7 @@ export const PatientManager = (props: any) => {
             },
           ]}
         />
-        {qParams.last_consultation_admitted_to_list &&
+        {qParams.last_consultation_admitted_bed_type_list &&
           LastAdmittedToTypeBadges()}
       </div>
       <div>
