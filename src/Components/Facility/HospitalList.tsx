@@ -375,6 +375,7 @@ export const HospitalList = () => {
                       {userType !== "Staff" && (
                         <ButtonV2
                           ghost
+                          className="h-[38px]"
                           onClick={(_) => setNotifyModalFor(facility.id)}
                         >
                           <i className="fas fa-bullhorn" />{" "}
@@ -435,7 +436,11 @@ export const HospitalList = () => {
                       </Modal>
                     </div>
                     <div className="flex gap-2 ">
-                      <ButtonV2 href={`/facility/${facility.id}`} ghost>
+                      <ButtonV2
+                        href={`/facility/${facility.id}`}
+                        ghost
+                        className="h-[38px]"
+                      >
                         <i className="fas fa-hospital" />
                         <span className="hidden md:inline">
                           {t("Facility")}
