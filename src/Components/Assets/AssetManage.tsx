@@ -237,6 +237,7 @@ const AssetManage = (props: AssetManageProps) => {
             </div>
             <div className="flex flex-col lg:flex-row gap-1">
               <ButtonV2
+                className="flex gap-2"
                 onClick={() =>
                   navigate(
                     `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
@@ -244,27 +245,26 @@ const AssetManage = (props: AssetManageProps) => {
                 }
                 id="update-asset"
               >
-                <span>
-                  <CareIcon className="care-l-pen h-4 mr-1" />
-                  Update
-                </span>
+                <CareIcon className="care-l-pen h-4" />
+                <span>Update</span>
               </ButtonV2>
               {asset?.asset_class && (
                 <ButtonV2
+                  className="flex gap-2"
                   onClick={() => navigate(`/assets/${asset?.id}/configure`)}
                   id="configure-asset"
                 >
-                  <span>
-                    <CareIcon className="care-l-setting h-4 mr-1" />
-                    Configure
-                  </span>
+                  <CareIcon className="care-l-setting h-4" />
+                  <span>Configure</span>
                 </ButtonV2>
               )}
-              <ButtonV2 onClick={handleDownload}>
-                <span>
-                  <i className="fa-solid fa-arrow-down-long mr-1"></i>
-                  Export Asset
-                </span>
+              <ButtonV2
+                variant="secondary"
+                onClick={handleDownload}
+                className="flex gap-2"
+              >
+                <CareIcon className="care-l-file-export h-4" />
+                <span>Export Asset</span>
               </ButtonV2>
             </div>
           </div>
