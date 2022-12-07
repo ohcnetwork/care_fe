@@ -1,5 +1,6 @@
 import { Menu } from "@headlessui/react";
 import { ReactNode } from "react";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 import { ButtonVariant } from "./ButtonV2";
@@ -19,7 +20,7 @@ export default function DropdownMenu(props: {
             {props.title}
           </div>
 
-          <i className="ml-2 -mr-1 uil uil-angle-down text-2xl"></i>
+          <CareIcon className="ml-2 -mr-1 care-l-angle-down h-6" />
         </Menu.Button>
         <DropdownTransition>
           <Menu.Items className="absolute right-0 mt-2 py-1 min-w-full sm:min-w-[250px] origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">

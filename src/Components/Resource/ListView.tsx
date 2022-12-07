@@ -45,7 +45,8 @@ export default function ListView() {
     setDownloadFile(res.data);
     document.getElementById("resourceRequests-ALL")?.click();
   };
-  const onBoardViewBtnClick = () => navigate("/resource/board-view", qParams);
+  const onBoardViewBtnClick = () =>
+    navigate("/resource/board-view", { query: qParams });
   const appliedFilters = formatFilter(qParams);
 
   const refreshList = () => {

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import FormField from "./FormField";
 import {
   FormFieldBaseProps,
@@ -71,7 +72,7 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
           className="absolute right-0 top-0 h-full flex items-center px-3 z-10 text-xl"
           onClick={() => setShowPassword(!showPassword)}
         >
-          <i className={`uil uil-eye${showPassword ? "" : "-slash"}`} />
+          <CareIcon className={`care-l-eye${showPassword ? "" : "-slash"}`} />
         </button>
       </div>
     );

@@ -23,6 +23,7 @@ i18n
     fallbackLng: "en",
     interpolation: {
       escapeValue: false,
+      skipOnVariables: false,
     },
   });
 
