@@ -138,7 +138,7 @@ const StatelessSidebar = ({
           <NotificationItem shrinked={shrinked} />
           <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
         </div>
-        <div className="py-2 hidden md:block md:flex-1" />
+        <div className="hidden md:block md:flex-1" />
 
         <div className="relative flex justify-end">
           {shrinkable && (
