@@ -6,6 +6,7 @@ import { KASP_STRING } from "../../Common/constants";
 import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -130,7 +131,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                       </p>
                     </div>
                   </span>
-                  <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                  <CareIcon className="ml-1 care-l-user-circle text-green-700 font-semibold text-xl hover:text-green-600" />
                 </div>
               )}
             </div>
@@ -153,7 +154,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                     </p>
                   </div>
                 </span>
-                <i className="ml-1 uil uil-user-circle text-green-700 font-semibold text-xl hover:text-green-600"></i>
+                <CareIcon className="ml-1 care-l-user-circle text-green-700 font-semibold text-xl hover:text-green-600" />
               </div>
             )}
           </div>
