@@ -1035,17 +1035,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ) : (
             <>
               <>
+                <button
+                  className="btn btn-primary mb-8 mx-4"
+                  onClick={(_) => {
+                    setShowImport(true);
+                    setQuery({ extId: "" }, { replace: true });
+                  }}
+                >
+                  {" "}
+                  Import From External Results
+                </button>
                 <form onSubmit={(e) => handleSubmit(e)}>
-                  <button
-                    className="btn btn-primary mb-8 mx-4"
-                    onClick={(_) => {
-                      setShowImport(true);
-                      setQuery({ extId: "" }, { replace: true });
-                    }}
-                  >
-                    {" "}
-                    Import From External Results
-                  </button>
                   <Card elevation={0} className="mb-8 rounded">
                     <CardContent>
                       <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
