@@ -1,0 +1,20 @@
+name: Comment on P1 issues
+
+on:
+  issues:
+    types:
+      - labeled
+
+jobs:
+  add-comment:
+    if: github.event.label.name == 'P1'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Add comment
+        uses: peter-evans/create-or-update-comment@v2.1.0
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            :warning: **Refrain from assigning this issue to yourself if you have another P1 issues assigned that is not yet closed.**
