@@ -194,6 +194,7 @@ const AssetManage = (props: AssetManageProps) => {
                     className="tooltip"
                     variant="secondary"
                     ghost
+                    circle
                   >
                     <CareIcon className="care-l-export text-lg" />
                     <span className="tooltip-text tooltip-right">
