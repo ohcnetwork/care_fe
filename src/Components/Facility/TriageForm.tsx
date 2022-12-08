@@ -75,17 +75,12 @@ export const TriageForm = (props: triageFormProps) => {
           getTriageDetails({ facilityId: facilityId, id: id })
         );
         if (!status.aborted && res && res.data) {
-          // getting the entry date in new Date() format
-          const month = parseInt(res.data.entry_date.substring(5, 7)) - 1;
-          const date = parseInt(res.data.entry_date.substring(8, 10));
-          const year = parseInt(res.data.entry_date.substring(0, 4));
-          const entryDate = new Date();
-          entryDate.setFullYear(year, month, date);
-
           dispatch({
             type: "set_form",
             form: {
-              entry_date: res.data.entry_date ? entryDate : null,
+              entry_date: res.data.entry_date
+                ? moment(res.data.entry_date).toDate()
+                : null,
               num_patients_visited: res.data.num_patients_visited,
               num_patients_home_quarantine:
                 res.data.num_patients_home_quarantine,
