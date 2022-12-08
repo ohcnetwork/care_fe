@@ -15,7 +15,8 @@ import { Button, CircularProgress } from "@material-ui/core";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
-import clsx from "clsx";
+import { classNames } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 import * as Sentry from "@sentry/browser";
 import { formatDate } from "../../Utils/utils";
@@ -83,7 +84,7 @@ const NotificationTile = ({
         onClickCB && onClickCB();
         setShowNotifications(false);
       }}
-      className={clsx(
+      className={classNames(
         "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer",
         result.read_at && "text-gray-500"
       )}
@@ -388,7 +389,7 @@ export default function NotificationsList({
       <Item
         text="Notifications"
         do={() => setShowNotifications(!showNotifications)}
-        icon={<i className="uil uil-bell" />}
+        icon={<CareIcon className="care-l-bell h-5" />}
         badgeCount={unreadCount}
       />
       <SlideOver show={showNotifications} setShow={setShowNotifications}>

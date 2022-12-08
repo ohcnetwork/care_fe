@@ -347,7 +347,7 @@ export default function ListView() {
         <div className="my-2 md:my-0">
           <button
             className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-            onClick={() => navigate("/shifting/board-view", qParams)}
+            onClick={() => navigate("/shifting/board-view", { query: qParams })}
           >
             <i
               className="fa fa-list mr-1 transform rotate-90"

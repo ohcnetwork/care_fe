@@ -12,11 +12,12 @@ import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-import clsx from "clsx";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import parsePhoneNumberFromString from "libphonenumber-js";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import { classNames } from "../../Utils/utils";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
@@ -232,18 +233,17 @@ export default function ResultList() {
 
   return (
     <div className="px-6">
-      {showDialog && (
-        <FacilitiesSelectDialogue
-          setSelected={(e) => setSelectedFacility(e)}
-          selectedFacility={selectedFacility}
-          handleOk={() =>
-            navigate(`facility/${selectedFacility.id}/patient`, {
-              query: { extId: resultId },
-            })
-          }
-          handleCancel={() => setShowDialog(false)}
-        />
-      )}
+      <FacilitiesSelectDialogue
+        show={showDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() =>
+          navigate(`facility/${selectedFacility.id}/patient`, {
+            query: { extId: resultId },
+          })
+        }
+        handleCancel={() => setShowDialog(false)}
+      />
       <PageTitle title="External Results" hideBack={true} breadcrumbs={false} />
       <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -292,7 +292,7 @@ export default function ResultList() {
               Upload List
             </button>
             <button
-              className={clsx(
+              className={classNames(
                 "btn btn-primary",
                 downloadLoading && "pointer-events-none"
               )}

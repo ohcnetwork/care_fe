@@ -258,22 +258,10 @@ export const CONSULTATION_SUGGESTION = [
 ];
 
 export const ADMITTED_TO = [
-  "Home Isolation",
-  "Isolation Room",
-  "Bed with Oxygen Support",
-  "ICU",
-  "ICU with Oxygen Support",
-  "ICU with Non Invasive Ventilator",
-  "ICU with Invasive Ventilator",
-  "Gynaecology Ward",
-  "Paediatric Ward",
-];
-
-export const PATIENT_FILTER_ADMITTED_TO = [
-  { id: "0", text: "Not admitted" },
-  { id: "1", text: "Isolation Room" },
-  { id: "6", text: "Bed with Oxygen Support" },
+  { id: "1", text: "Isolation" },
   { id: "2", text: "ICU" },
+  { id: "6", text: "Bed with oxygen support" },
+  { id: "7", text: "Regular" },
 ];
 
 export const PATIENT_CATEGORIES = [
@@ -755,7 +743,7 @@ export const FACILITY_FEATURE_TYPES = [
   {
     id: 1,
     name: "CT Scan",
-    icon: "uil uil-compact-disc",
+    icon: "compact-disc",
   },
   {
     id: 2,
@@ -786,17 +774,17 @@ export const FACILITY_FEATURE_TYPES = [
   {
     id: 4,
     name: "Neonatal Care",
-    icon: "uil uil-baby-carriage",
+    icon: "baby-carriage",
   },
   {
     id: 5,
     name: "Operation Theater",
-    icon: "uil uil-syringe",
+    icon: "syringe",
   },
   {
     id: 6,
     name: "Blood Bank",
-    icon: "uil uil-tear",
+    icon: "tear",
   },
 ];
 

@@ -1,0 +1,42 @@
+name: Auto label failed preview deploys
+
+permissions:
+  pull-requests: write
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  auto-label-deploy-failed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add 'Deploy-Failed'
+        if: |
+          github.event.issue.pull_request && 
+          contains(github.event.comment.body, 'Deploy Preview') && 
+          contains(github.event.comment.body, 'failed')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["Deploy-Failed"]
+            })
+
+      - name: Remove 'Deploy-Failed' label
+        if: |
+          github.event.issue.pull_request && 
+          contains(github.event.comment.body, 'Deploy Preview') && 
+          contains(github.event.comment.body, 'ready')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["Deploy-Failed"]
+            })

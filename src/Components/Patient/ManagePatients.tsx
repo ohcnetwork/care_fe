@@ -21,7 +21,6 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   TELEMEDICINE_ACTIONS,
-  PATIENT_FILTER_ADMITTED_TO,
   PatientCategoryTailwindClass,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -141,8 +140,8 @@ export const PatientManager = (props: any) => {
       qParams.last_consultation_discharge_date_before || undefined,
     last_consultation_discharge_date_after:
       qParams.last_consultation_discharge_date_after || undefined,
-    last_consultation_admitted_to_list:
-      qParams.last_consultation_admitted_to_list || undefined,
+    last_consultation_admitted_bed_type_list:
+      qParams.last_consultation_admitted_bed_type_list || undefined,
     srf_id: qParams.srf_id || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
@@ -251,7 +250,7 @@ export const PatientManager = (props: any) => {
     qParams.last_consultation_discharge_date_after,
     qParams.age_max,
     qParams.age_min,
-    qParams.last_consultation_admitted_to_list,
+    qParams.last_consultation_admitted_bed_type_list,
     qParams.facility,
     qParams.facility_type,
     qParams.district,
@@ -355,13 +354,13 @@ export const PatientManager = (props: any) => {
             <i
               className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
               onClick={(_) => {
-                const lcat = qParams.last_consultation_admitted_to_list
+                const lcat = qParams.last_consultation_admitted_bed_type_list
                   .split(",")
                   .filter((x: string) => x != id)
                   .join(",");
                 updateQuery({
                   ...qParams,
-                  last_consultation_admitted_to_list: lcat,
+                  last_consultation_admitted_bed_type_list: lcat,
                 });
               }}
             ></i>
@@ -369,18 +368,15 @@ export const PatientManager = (props: any) => {
         )
       );
     };
-
-    return qParams.last_consultation_admitted_to_list
+    return qParams.last_consultation_admitted_bed_type_list
       .split(",")
       .map((id: string) => {
-        const text = PATIENT_FILTER_ADMITTED_TO.find(
-          (obj) => obj.id == id
-        )?.text;
+        const text = ADMITTED_TO.find((obj) => obj.id == id)?.text;
         return badge("Bed Type", text, id);
       });
   };
 
-  let patientList: any[] = [];
+  let patientList: React.ReactNode[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any) => {
       let patientUrl = "";
@@ -403,7 +399,7 @@ export const PatientManager = (props: any) => {
         <Link
           key={`usr_${patient.id}`}
           href={patientUrl}
-          className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-5 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${categoryClass}-ring`}
+          className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-5 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${categoryClass}-ring overflow-hidden`}
         >
           <div
             className={`rounded-l-lg absolute top-0 bottom-0 left-0 h-full w-1 group-hover:w-5 transition-all duration-200 ease-in-out flex items-center ${categoryClass}`}
@@ -483,7 +479,8 @@ export const PatientManager = (props: any) => {
                 )}
                 <div className="flex w-full">
                   <div className="flex flex-wrap gap-2 flex-row justify-start">
-                    {patient.review_time &&
+                    {/* TODO: Re-enable Review Missed | Temporary Hack for Launch */}
+                    {/* {patient.review_time &&
                       !patient.last_consultation?.discharge_date &&
                       Number(patient.last_consultation?.review_interval) > 0 &&
                       moment().isAfter(patient.review_time) && (
@@ -492,7 +489,7 @@ export const PatientManager = (props: any) => {
                           startIcon="clock"
                           text="Review Missed"
                         />
-                      )}
+                      )} */}
                     {patient.allow_transfer ? (
                       <Chip
                         color="yellow"
@@ -582,18 +579,17 @@ export const PatientManager = (props: any) => {
 
   return (
     <div>
-      {showDialog && (
-        <FacilitiesSelectDialogue
-          setSelected={(e) => setSelectedFacility(e)}
-          selectedFacility={selectedFacility}
-          handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
-          handleCancel={() => {
-            setShowDialog(false);
-            setSelectedFacility({ name: "" });
-          }}
-        />
-      )}
-      <div className="flex flex-wrap flex-col right-3 gap-2 mr-3 sm:flex-row-reverse ml-auto">
+      <FacilitiesSelectDialogue
+        show={showDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+        handleCancel={() => {
+          setShowDialog(false);
+          setSelectedFacility({ name: "" });
+        }}
+      />
+      <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-max">
         <Tooltip
           title={
             !isDownloadAllowed ? (
@@ -779,6 +775,7 @@ export const PatientManager = (props: any) => {
                   Search by Primary Number
                 </div>
                 <PhoneNumberField
+                  bgColor="bg-white"
                   value={qParams.phone_number || "+91"}
                   onChange={(value: string) =>
                     updateQuery({ phone_number: value })
@@ -792,6 +789,7 @@ export const PatientManager = (props: any) => {
                   Search by Emergency Number
                 </div>
                 <PhoneNumberField
+                  bgColor="bg-white"
                   value={qParams.emergency_phone_number || "+91"}
                   onChange={(value: string) =>
                     updateQuery({ emergency_phone_number: value })
@@ -853,7 +851,7 @@ export const PatientManager = (props: any) => {
             },
           ]}
         />
-        {qParams.last_consultation_admitted_to_list &&
+        {qParams.last_consultation_admitted_bed_type_list &&
           LastAdmittedToTypeBadges()}
       </div>
       <div>

@@ -1,17 +1,12 @@
 import React, { useState, useCallback } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
-import clsx from "clsx";
+import { classNames } from "../../Utils/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
-import { navigate, Link } from "raviger";
+import { navigate } from "raviger";
 import Button from "@material-ui/core/Button";
-import QRCode from "qrcode.react";
-import {
-  GENDER_TYPES,
-  TEST_TYPE_CHOICES,
-  KeralaLogo,
-} from "../../Common/constants";
+import { KeralaLogo } from "../../Common/constants";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -25,7 +20,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResourceDetails(props: { id: string }) {
   const dispatch: any = useDispatch();
-  let initialData: any = {};
+  const initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
@@ -457,7 +452,7 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
           </div>
           <div
-            className={clsx(
+            className={classNames(
               "grid grid-cols-1 mt-8 gap-x-6 gap-y-12",
               data.assigned_facility_object
                 ? "lg:grid-cols-3"

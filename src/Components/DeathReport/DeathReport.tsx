@@ -1,8 +1,7 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { getPatient } from "../../Redux/actions";
-import { PatientModel } from "../Patient/models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import {
@@ -44,7 +43,7 @@ export default function PrintDeathReport(props: { id: string }) {
 
   const [patientData, setPatientData] = useState(initialState);
   const [patientName, setPatientName] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const { id } = props;
   const dispatch: any = useDispatch();
@@ -87,6 +86,8 @@ export default function PrintDeathReport(props: { id: string }) {
               ? "Yes"
               : "No",
             is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
+            cause_of_death:
+              patientRes.data.last_consultation?.discharge_notes || "",
           };
           setPatientData(data);
         }
@@ -287,7 +288,7 @@ export default function PrintDeathReport(props: { id: string }) {
       ) : (
         <div className="m-5 p-5 bg-gray-100 border rounded-xl shadow">
           <PageTitle
-            title={`Covid-19 Death Reporting : Form 1`}
+            title={"Covid-19 Death Reporting : Form 1"}
             crumbsReplacements={{
               [props.id]: { name: patientName },
               death_report: { style: "pointer-events-none" },
