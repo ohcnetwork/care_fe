@@ -421,7 +421,7 @@ export default function AppRouter() {
   }, [path]);
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-100">
+    <div className="absolute inset-0 h-screen flex overflow-hidden bg-gray-100">
       <>
         <div className="block md:hidden">
           <MobileSidebar open={sidebarOpen} setOpen={setSidebarOpen} />{" "}
