@@ -212,6 +212,7 @@ export const FacilityHome = (props: any) => {
       <ButtonV2
         variant="secondary"
         ghost
+        border
         onClick={() =>
           navigate(`/facility/${facilityId}/triage/${patientStatsData[i].id}`)
         }
@@ -501,6 +502,7 @@ export const FacilityHome = (props: any) => {
               <ButtonV2
                 variant="primary"
                 ghost
+                border
                 className="mt-2 w-full md:w-auto"
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
@@ -511,6 +513,7 @@ export const FacilityHome = (props: any) => {
               <ButtonV2
                 variant="primary"
                 ghost
+                border
                 className="mt-2 w-full md:w-auto py-3"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >

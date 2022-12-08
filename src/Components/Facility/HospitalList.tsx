@@ -366,6 +366,7 @@ export const HospitalList = () => {
                         className="flex gap-3 bg-white"
                         shadow
                         ghost
+                        border
                         onClick={() => setNotifyModalFor(facility.id)}
                       >
                         <i className="far fa-comment-dots"></i>
@@ -430,6 +431,7 @@ export const HospitalList = () => {
                       className="flex gap-3 bg-white"
                       shadow
                       ghost
+                      border
                       onClick={() => navigate(`/facility/${facility.id}`)}
                     >
                       <i className="fas fa-hospital"></i>
@@ -439,6 +441,7 @@ export const HospitalList = () => {
                       className="flex gap-3 bg-white"
                       shadow
                       ghost
+                      border
                       onClick={() =>
                         navigate(`/facility/${facility.id}/patients`)
                       }
