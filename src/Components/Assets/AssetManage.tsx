@@ -189,8 +189,16 @@ const AssetManage = (props: AssetManageProps) => {
                   <span className="text-2xl md:text-3xl font-bold break-words">
                     {asset?.name}
                   </span>
-                  <ButtonV2 onClick={handleDownload} variant="secondary" ghost>
+                  <ButtonV2
+                    onClick={handleDownload}
+                    className="tooltip"
+                    variant="secondary"
+                    ghost
+                  >
                     <CareIcon className="care-l-export text-lg" />
+                    <span className="tooltip-text tooltip-right">
+                      Export as JSON
+                    </span>
                   </ButtonV2>
                 </div>
                 <div className="flex flex-wrap gap-2">
