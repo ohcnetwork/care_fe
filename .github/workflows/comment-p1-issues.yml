@@ -17,4 +17,4 @@ jobs:
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
-            :warning: **Refrain from assigning this issue to yourself if you have another P1 issues assigned that is not yet closed.**
+            :warning: **Refrain from assigning this issue to yourself if you have another P1 issue assigned that is not yet closed.**
