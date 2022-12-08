@@ -25,6 +25,7 @@ import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
 import { formatDate } from "../../Utils/utils";
+import HeadedTabs from "../Common/HeadedTabs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -128,7 +129,6 @@ export const FileUpload = (props: FileUploadProps) => {
   ]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
-  // const [uploadSuccess, setUploadSuccess] = useState(false);
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
@@ -138,8 +138,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const [audioName, setAudioName] = useState<string>("");
   const [audioNameError, setAudioNameError] = useState<string>("");
   const [contentType, setcontentType] = useState<string>("");
-  // const classes = useStyles();
-  // const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
   const initialState = {
     open: false,
@@ -170,6 +168,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const currentuser_username = currentUser.data.username;
+  const currentuser_type = currentUser.data.user_type;
   const limit = RESULTS_PER_PAGE_LIMIT;
   const [isActive, setIsActive] = useState(true);
   const tabs = [
@@ -559,7 +558,9 @@ export const FileUpload = (props: FileUploadProps) => {
                             DOWNLOAD
                           </a>
                           {item?.uploaded_by?.username ===
-                          currentuser_username ? (
+                            currentuser_username ||
+                          currentuser_type === "DistrictAdmin" ||
+                          currentuser_type === "StateAdmin" ? (
                             <>
                               <label
                                 onClick={() => {
@@ -579,17 +580,29 @@ export const FileUpload = (props: FileUploadProps) => {
                           ) : (
                             <></>
                           )}
-                          <label
-                            onClick={() => {
-                              setArchiveReason("");
-                              setModalDetails({ name: item.name, id: item.id });
-                              setModalOpenForArchive(true);
-                            }}
-                            className="btn btn-primary m-1 sm:w-auto w-full"
-                          >
-                            <i className="fa-solid fa-box-archive mr-2 "></i>
-                            ARCHIVE
-                          </label>
+                          {item?.uploaded_by?.username ===
+                            currentuser_username ||
+                          currentuser_type === "DistrictAdmin" ||
+                          currentuser_type === "StateAdmin" ? (
+                            <>
+                              <label
+                                onClick={() => {
+                                  setArchiveReason("");
+                                  setModalDetails({
+                                    name: item.name,
+                                    id: item.id,
+                                  });
+                                  setModalOpenForArchive(true);
+                                }}
+                                className="btn btn-primary m-1 sm:w-auto w-full"
+                              >
+                                <i className="fa-solid fa-box-archive mr-2 "></i>
+                                ARCHIVE
+                              </label>
+                            </>
+                          ) : (
+                            <></>
+                          )}
                         </div>
                       ) : (
                         <CircularProgress />
@@ -642,7 +655,9 @@ export const FileUpload = (props: FileUploadProps) => {
                       {" "}
                       <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
                     </label>
-                    {item?.uploaded_by?.username === currentuser_username ? (
+                    {item?.uploaded_by?.username === currentuser_username ||
+                    currentuser_type === "DistrictAdmin" ||
+                    currentuser_type === "StateAdmin" ? (
                       <>
                         {" "}
                         <label
@@ -660,16 +675,25 @@ export const FileUpload = (props: FileUploadProps) => {
                     ) : (
                       <></>
                     )}
-                    <label
-                      onClick={() => {
-                        setArchiveReason("");
-                        setModalDetails({ name: item.name, id: item.id });
-                        setModalOpenForArchive(true);
-                      }}
-                      className="btn btn-primary m-1 sm:w-auto w-full"
-                    >
-                      <i className="fa-solid fa-box-archive mr-2 "></i>ARCHIVE
-                    </label>
+                    {item?.uploaded_by?.username === currentuser_username ||
+                    currentuser_type === "DistrictAdmin" ||
+                    currentuser_type === "StateAdmin" ? (
+                      <>
+                        <label
+                          onClick={() => {
+                            setArchiveReason("");
+                            setModalDetails({ name: item.name, id: item.id });
+                            setModalOpenForArchive(true);
+                          }}
+                          className="btn btn-primary m-1 sm:w-auto w-full"
+                        >
+                          <i className="fa-solid fa-box-archive mr-2 "></i>
+                          ARCHIVE
+                        </label>
+                      </>
+                    ) : (
+                      <></>
+                    )}
                   </div>
                 </div>
               )}
@@ -971,6 +995,10 @@ export const FileUpload = (props: FileUploadProps) => {
       .then((blob) => {
         setDownloadURL(URL.createObjectURL(blob));
       });
+  };
+
+  const handleTabChange = (tabValue: string) => {
+    setSortFileState(tabValue);
   };
 
   return (
@@ -1353,56 +1381,11 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={true}
         breadcrumbs={false}
       />
-      <div>
-        <div className="sm:hidden">
-          <label htmlFor="tabs" className="sr-only">
-            Select a tab
-          </label>
-          {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
-          <select
-            id="tabs"
-            name="tabs"
-            className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-            defaultValue={tabs[0].value}
-            onChange={() => {
-              sortFileState === "UNARCHIVED"
-                ? setSortFileState("ARCHIVED")
-                : setSortFileState("UNARCHIVED");
-            }}
-          >
-            {tabs.map((tab) => (
-              <option key={tab.value}>{tab.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="hidden sm:block">
-          <div className="border-b border-gray-200">
-            <nav
-              className="-mb-px flex items-center justify-center cursor: pointer"
-              aria-label="Tabs"
-            >
-              {tabs.map((tab) => (
-                <div
-                  key={tab.name}
-                  className={`
-                  ${
-                    tab.value === sortFileState
-                      ? " border-primary-500 text-primary-600 cursor: pointer "
-                      : " border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor: pointer "
-                  },
-                  ' w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm '
-                `}
-                  onClick={() => {
-                    setSortFileState(tab.value);
-                  }}
-                >
-                  {tab.name}
-                </div>
-              ))}
-            </nav>
-          </div>
-        </div>
-      </div>
+      <HeadedTabs
+        tabs={tabs}
+        handleChange={handleTabChange}
+        currentTabState={sortFileState}
+      />
 
       <div>
         {uploadedFiles && uploadedFiles.length > 0 ? (
