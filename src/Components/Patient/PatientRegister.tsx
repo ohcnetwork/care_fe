@@ -1037,13 +1037,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             <>
               <>
                 <ButtonV2
-                  className="mb-8 mx-4"
+                  className="mb-8 mx-4 flex gap-2 items-center"
                   onClick={(_) => {
                     setShowImport(true);
                     setQuery({ extId: "" }, { replace: true });
                   }}
                 >
-                  {" "}
+                  <CareIcon className="care-l-import text-lg" />
                   Import From External Results
                 </ButtonV2>
                 <form onSubmit={(e) => handleSubmit(e)}>
