@@ -63,6 +63,7 @@ import AccordionV2 from "../Common/components/AccordionV2";
 import CollapseV2 from "../Common/components/CollapseV2";
 import { debounce } from "lodash";
 import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
