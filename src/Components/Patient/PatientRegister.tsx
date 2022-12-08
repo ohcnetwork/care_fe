@@ -62,6 +62,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 import AccordionV2 from "../Common/components/AccordionV2";
 import CollapseV2 from "../Common/components/CollapseV2";
 import { debounce } from "lodash";
+import ButtonV2 from "../Common/components/ButtonV2";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -1035,8 +1036,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ) : (
             <>
               <>
-                <button
-                  className="btn btn-primary mb-8 mx-4"
+                <ButtonV2
+                  className="mb-8 mx-4"
                   onClick={(_) => {
                     setShowImport(true);
                     setQuery({ extId: "" }, { replace: true });
@@ -1044,7 +1045,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 >
                   {" "}
                   Import From External Results
-                </button>
+                </ButtonV2>
                 <form onSubmit={(e) => handleSubmit(e)}>
                   <Card elevation={0} className="mb-8 rounded">
                     <CardContent>
