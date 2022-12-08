@@ -7,12 +7,15 @@ describe("Patient Creation", () => {
   users.forEach((user) => {
     const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
     const emergency_phone_number = "9430123487";
+    const unique_user_num = parseInt((Math.random() * 10 ** 5).toString());
     it(`Create as ${user.username}`, () => {
       //login with credentials
       cy.loginByApi(user.username, user.password);
       cy.saveLocalStorage();
       cy.restoreLocalStorage();
-      cy.awaitUrl("/");
+      cy.awaitUrl("/patients");
+
+      cy.intercept(/\/api\/v1\/facility/).as("getFacilities");
 
       if (user.username == "devdoctor") {
         cy.visit("/users");
@@ -20,23 +23,23 @@ describe("Patient Creation", () => {
         cy.wait(500);
         cy.get("[data-cy=home-facility]").then(function ($elem) {
           const homeFacility = $elem.text();
-          cy.visit("/");
-          cy.get(".peer").type(homeFacility);
-          cy.wait(500);
-          cy.get("[data-cy=facility-buttons]")
-            .should("contain", "Facility")
-            .contains("Facility")
+          cy.visit("/patients");
+          cy.get("button")
+            .should("contain", "Add Details of a Patient")
+            .contains("Add Details of a Patient")
             .click({ force: true });
+          cy.wait("@getFacilities");
+          cy.get("input[name='facilities']").type(homeFacility);
+          cy.wait("@getFacilities");
         });
       } else {
-        cy.intercept(/\/api\/v1\/facility/).as("getFacilities");
+        cy.get("button")
+          .should("contain", "Add Details of a Patient")
+          .contains("Add Details of a Patient")
+          .click({ force: true });
+        cy.wait("@getFacilities");
       }
 
-      cy.get("button")
-        .should("contain", "Add Details of a Patient")
-        .contains("Add Details of a Patient")
-        .click({ force: true });
-      cy.wait("@getFacilities");
       cy.get("input[name='facilities']").type("{downarrow}{enter}");
       cy.get("button").contains("Continue").click({ force: true });
       cy.get("[data-testid=phone-number] input").type(phone_number);
@@ -44,7 +47,7 @@ describe("Patient Creation", () => {
       cy.get("div").contains("1999").click();
       cy.get("span").contains("OK").click();
       cy.get("[data-testid=name] input").type(
-        "Test E2E User" + parseInt((Math.random() * 10 ** 5).toString())
+        "Test E2E User " + unique_user_num
       );
       cy.get("[data-testid=Gender] select").select("Male");
       cy.get("[data-testid=state] select").select("Kerala");
@@ -71,7 +74,7 @@ describe("Patient Creation", () => {
       cy.wait(1000);
       cy.get("button").get("[data-testid=submit-button]").click();
       cy.url().should("include", "/consultation");
-      cy.url().then((url) => {
+      cy.url().then((url: string) => {
         cy.log(url);
         patient_url = url.split("/").slice(0, -1).join("/");
         cy.log(patient_url);
@@ -79,7 +82,6 @@ describe("Patient Creation", () => {
     });
 
     it(`Accessing patient dashboard as ${user.username}`, () => {
-      //login with credentials
       cy.loginByApi(user.username, user.password);
       cy.saveLocalStorage();
       cy.restoreLocalStorage();
@@ -90,7 +92,7 @@ describe("Patient Creation", () => {
       cy.get("[data-testid=patient-dashboard]").should("contain", "22");
       cy.get("[data-testid=patient-dashboard]").should(
         "contain",
-        "Test E2E User"
+        "Test E2E User " + unique_user_num
       );
       cy.get("[data-testid=patient-dashboard]").should("contain", phone_number);
       cy.get("[data-testid=patient-dashboard]").should(
@@ -101,7 +103,12 @@ describe("Patient Creation", () => {
       cy.get("[data-testid=patient-dashboard]").should("contain", "O+");
     });
 
-    it("Edit", () => {
+    it(`Edit as ${user.username}`, () => {
+      cy.loginByApi(user.username, user.password);
+      cy.saveLocalStorage();
+      cy.restoreLocalStorage();
+      cy.awaitUrl("/patients");
+
       cy.awaitUrl(patient_url + "/update");
       cy.get("[data-testid=state] select").should("contain", "Kerala");
       cy.get("[data-testid=district] select").should("contain", "Ernakulam");
@@ -127,7 +134,12 @@ describe("Patient Creation", () => {
       cy.get("button[type='submit']").click();
     });
 
-    it("Doctors Notes", () => {
+    it(`Add Doctors Notes as ${user.username}`, () => {
+      cy.loginByApi(user.username, user.password);
+      cy.saveLocalStorage();
+      cy.restoreLocalStorage();
+      cy.awaitUrl("/patients");
+
       cy.awaitUrl(patient_url + "/notes");
       cy.get("textarea").type("Test Doctor Note");
       cy.get("button").contains("Post Your Note").click({ force: true });

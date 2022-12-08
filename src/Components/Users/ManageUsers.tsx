@@ -473,7 +473,10 @@ export default function ManageUsers() {
                   {user.username && (
                     <div className="col-span-2">
                       <UserDetails title="Home Facility">
-                        <span className="font-semibold block">
+                        <span
+                          className="font-semibold block"
+                          data-cy="home-facility"
+                        >
                           {user.home_facility_object?.name ||
                             "No Home Facility"}
                         </span>
