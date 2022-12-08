@@ -348,7 +348,7 @@ const AssetsList = () => {
                   setImportAssetModalOpen(true);
                 }}
               >
-                <CareIcon className="care-l-file-import text-lg" />
+                <CareIcon className="care-l-import text-lg" />
                 <span>Import Assets</span>
               </ButtonV2>
               <ButtonV2
@@ -356,7 +356,7 @@ const AssetsList = () => {
                 disabled={!facility}
                 onClick={handleDownload}
               >
-                <CareIcon className="care-l-file-export text-lg" />
+                <CareIcon className="care-l-export text-lg" />
                 <span>Export Assets</span>
               </ButtonV2>
             </div>
