@@ -238,7 +238,6 @@ export default function UserProfile() {
     e.preventDefault();
     const validForm = validateForm();
     if (validForm) {
-      setIsLoading(true);
       const data = {
         username: username,
         first_name: states.form.firstName,
@@ -255,11 +254,11 @@ export default function UserProfile() {
         age: states.form.age,
       };
       const res = await dispatchAction(partialUpdateUser(username, data));
-      setIsLoading(false);
       if (res && res.data) {
         Notification.Success({
           msg: "Details updated successfully",
         });
+        window.location.reload();
         setDetails({
           ...details,
           first_name: states.form.firstName,
