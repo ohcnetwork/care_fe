@@ -333,10 +333,7 @@ export const PatientHome = (props: any) => {
 
   if (isConsultationLoading) {
     consultationList = <CircularProgress size={20} />;
-  } else if (
-    consultationListData.length === 0 ||
-    (consultationListData.at(0)?.discharge_date && patientData.is_active)
-  ) {
+  } else if (consultationListData.length === 0) {
     consultationList = (
       <div>
         <hr />
