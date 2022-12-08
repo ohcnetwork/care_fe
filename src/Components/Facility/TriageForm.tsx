@@ -233,6 +233,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <DateInputV2
                     className={`bg-gray-50 ${borderColor}`}
                     value={state.form.entry_date}
+                    max={new Date()}
                     onChange={(date) => handleDateChange(date, "entry_date")}
                     position="RIGHT"
                     placeholder="Entry Date"
