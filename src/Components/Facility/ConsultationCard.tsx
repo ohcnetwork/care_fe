@@ -6,7 +6,7 @@ import { KASP_STRING } from "../../Common/constants";
 import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -115,48 +115,18 @@ export const ConsultationCard = (props: ConsultationProps) => {
           {
             <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
               Created:{" "}
-              <p>
-                {itemData.created_date
-                  ? formatDate(itemData.created_date)
-                  : "--:--"}{" "}
-              </p>
-              {itemData.created_by && (
-                <div className="tooltip">
-                  <span className="tooltip-text tooltip-top">
-                    <div className="text-sm leading-5 text-white whitespace-normal font-semibold flex flex-col md:w-max">
-                      <p className="flex justify-center">{`${itemData.created_by?.first_name} ${itemData.created_by?.last_name}`}</p>
-                      <p className="flex justify-center">{`@${itemData.created_by?.username}`}</p>
-                      <p className="flex justify-center">
-                        {itemData.created_by?.user_type}
-                      </p>
-                    </div>
-                  </span>
-                  <CareIcon className="ml-1 care-l-user-circle text-green-700 font-semibold text-xl hover:text-green-600" />
-                </div>
-              )}
+              <RelativeDateUserMention
+                actionDate={itemData.created_date}
+                user={itemData.created_by}
+              />
             </div>
           }
           <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
             Last Modified:{" "}
-            <p>
-              {itemData.modified_date
-                ? formatDate(itemData.modified_date)
-                : "--:--"}{" "}
-            </p>
-            {itemData.last_edited_by && (
-              <div className="tooltip">
-                <span className="tooltip-text tooltip-top">
-                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold flex flex-col md:w-max">
-                    <p className="flex justify-center">{`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name}`}</p>
-                    <p className="flex justify-center">{`@${itemData.last_edited_by?.username}`}</p>
-                    <p className="flex justify-center">
-                      {itemData.last_edited_by?.user_type}
-                    </p>
-                  </div>
-                </span>
-                <CareIcon className="ml-1 care-l-user-circle text-green-700 font-semibold text-xl hover:text-green-600" />
-              </div>
-            )}
+            <RelativeDateUserMention
+              actionDate={itemData.modified_date}
+              user={itemData.last_edited_by}
+            />
           </div>
         </div>
         <div className="mt-4 flex flex-col gap-1 md:flex-row justify-between w-full">
