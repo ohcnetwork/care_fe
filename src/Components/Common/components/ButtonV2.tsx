@@ -33,7 +33,7 @@ export type ButtonProps = RawButtonProps &
      */
     circle?: boolean | undefined;
     /**
-     * - `"success"` is ideal for form submissions, etc.
+     * - `"primary"` is ideal for form submissions, etc.
      * - `"secondary"` is ideal for things that have secondary importance.
      * - `"danger"` is ideal for destructive or dangerous actions, such as delete.
      * - `"warning"` is ideal for actions that require caution such as archive.
