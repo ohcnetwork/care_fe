@@ -185,10 +185,15 @@ const AssetManage = (props: AssetManageProps) => {
           <div className="w-full md:p-8 p-6 flex flex-col justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 justify-between w-full">
-                <span className="text-2xl md:text-3xl font-bold break-words">
-                  {asset?.name}
-                </span>
-                <div className=" flex flex-wrap gap-2">
+                <div className="flex gap-3">
+                  <span className="text-2xl md:text-3xl font-bold break-words">
+                    {asset?.name}
+                  </span>
+                  <ButtonV2 onClick={handleDownload} variant="secondary" ghost>
+                    <CareIcon className="care-l-export text-lg" />
+                  </ButtonV2>
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {asset?.status === "ACTIVE" ? (
                     <Chip color="green" text="Active" startIcon="check" />
                   ) : (
@@ -258,14 +263,6 @@ const AssetManage = (props: AssetManageProps) => {
                   <span>Configure</span>
                 </ButtonV2>
               )}
-              <ButtonV2
-                variant="secondary"
-                onClick={handleDownload}
-                className="flex gap-2"
-              >
-                <CareIcon className="care-l-file-export h-4" />
-                <span>Export Asset</span>
-              </ButtonV2>
             </div>
           </div>
           <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 flex-shrink-0">
