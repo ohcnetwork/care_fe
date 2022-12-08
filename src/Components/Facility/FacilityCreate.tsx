@@ -984,7 +984,10 @@ export const FacilityCreate = (props: FacilityProps) => {
             >
               <button
                 className="btn btn-default border-2 border-grey-300"
-                onClick={() => goBack()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  goBack();
+                }}
               >
                 Cancel
               </button>
