@@ -463,7 +463,7 @@ export default function SampleViewAdmin() {
 
       <CSVLink
         data={downloadFile}
-        filename={`shift-requests--${now}.csv`}
+        filename={`sample-tests--${now}.csv`}
         target="_blank"
         className="hidden"
         id={"download-sample-tests"}
