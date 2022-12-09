@@ -74,6 +74,11 @@ const CoverImageEditModal = ({
       );
       if (response.status === 200) {
         Success({ msg: "Cover image updated." });
+      } else {
+        Notification.Error({
+          msg: "Something went wrong",
+        });
+        setIsUploading(false);
       }
     } catch (e) {
       Notification.Error({
