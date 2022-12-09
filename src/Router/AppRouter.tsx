@@ -68,6 +68,7 @@ import {
   MobileSidebar,
 } from "../Components/Common/Sidebar/Sidebar";
 import { BLACKLISTED_PATHS } from "../Common/constants";
+import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -92,6 +93,9 @@ const routes = {
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
     <FacilityCreate facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/middleware/update": ({ facilityId }: any) => (
+    <UpdateFacilityMiddleware facilityId={facilityId} />
   ),
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
