@@ -7,7 +7,7 @@ import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
 import { FacilityModel } from "./models";
-
+import * as Notification from "../../Utils/Notifications.js";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -60,20 +60,28 @@ const CoverImageEditModal = ({
     formData.append("cover_image", selectedFile);
 
     setIsUploading(true);
-    const response = await axios.post(
-      `/api/v1/facility/${facility.id}/cover_image/`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: "Bearer " + localStorage.getItem("care_access_token"),
-        },
+    try {
+      const response = await axios.post(
+        `/api/v1/facility/${facility.id}/cover_image/`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization:
+              "Bearer " + localStorage.getItem("care_access_token"),
+          },
+        }
+      );
+      if (response.status === 200) {
+        Success({ msg: "Cover image updated." });
       }
-    );
-
-    if (response.status === 200) {
-      Success({ msg: "Cover image updated." });
+    } catch (e) {
+      Notification.Error({
+        msg: "Something went wrong",
+      });
+      setIsUploading(false);
     }
+
     await sleep(1000);
     setIsUploading(false);
 
@@ -115,13 +123,22 @@ const CoverImageEditModal = ({
           </div>
 
           {hasImage ? (
-            <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
-              <img
-                src={imgSrc}
-                alt={facility.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <>
+              <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
+                <img
+                  src={imgSrc}
+                  alt={facility.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p className="text-gray-700 font-medium text-center">
+                Max size for image uploaded should be 1mb.
+                <br />
+                Allowed formats are jpg,png,jpeg.
+                <br />
+                Recommended aspect ratio for facility cover photo is 1:1.
+              </p>
+            </>
           ) : (
             <div
               onDragOver={dragProps.onDragOver}
@@ -165,6 +182,10 @@ const CoverImageEditModal = ({
               </p>
               <p className="mt-4 text-gray-700 font-medium text-center">
                 No cover photo uploaded for this facility. <br />
+                Max size for image uploaded should be 1mb.
+                <br />
+                Allowed formats are jpg,png,jpeg.
+                <br />
                 Recommended aspect ratio for facility cover photo is 1:1.
               </p>
             </div>
