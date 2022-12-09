@@ -88,7 +88,7 @@ export default function DoctorVideoSlideover(props: {
               {doctors
                 .filter((doc) => {
                   const isHomeUser =
-                    (doc.home_facility?.id || "") === facilityId;
+                    (doc.home_facility_object?.id || "") === facilityId;
                   return (
                     doc.user_type === type.user_type && isHomeUser === type.home
                   );

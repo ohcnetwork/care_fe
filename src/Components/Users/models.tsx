@@ -39,5 +39,5 @@ export interface UserAssignedModel {
   is_superuser?: boolean;
   verified?: boolean;
   last_login?: Date;
-  home_facility?: HomeFacilityObjectModel;
+  home_facility_object?: HomeFacilityObjectModel;
 }

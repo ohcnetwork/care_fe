@@ -12,11 +12,12 @@ import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-import clsx from "clsx";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import parsePhoneNumberFromString from "libphonenumber-js";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import { classNames } from "../../Utils/utils";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
@@ -291,7 +292,7 @@ export default function ResultList() {
               Upload List
             </button>
             <button
-              className={clsx(
+              className={classNames(
                 "btn btn-primary",
                 downloadLoading && "pointer-events-none"
               )}

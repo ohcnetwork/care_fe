@@ -305,7 +305,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
           previewMode={state.previewMode}
         />
       </div>
-      <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
+      <svg className="h-screen py-4 cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
         {Js.Array.mapi((part, renderIndex) => {
           let regionType = PressureSore.regionForPath(part)
           let selectedPart = Js.Array.find(p => PressureSore.region(p) === regionType, state.parts)
@@ -318,16 +318,6 @@ let renderBody = (state, send, title, partPaths, substr) => {
             id={"part" ++ PressureSore.regionToString(regionType)}
             onClick={e => {
               send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
-            }}
-            onMouseOver={e => {
-              if state.previewMode && innerWidth > 720 {
-                send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
-              }
-            }}
-            onMouseLeave={e => {
-              if state.previewMode && innerWidth > 720 && !isMouseOverInputModal(e, inputModal) {
-                send(SetSelectedRegion(PressureSore.Other))
-              }
             }}
           >
             <title className=""> {str(PressureSore.regionToString(regionType))} </title>

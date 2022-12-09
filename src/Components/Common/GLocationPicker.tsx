@@ -20,7 +20,9 @@ interface GLocationPickerProps {
   lng: number;
   handleOnChange: (location: google.maps.LatLng) => void;
   handleOnClose?: () => void;
-  handleOnSelectCurrentLocation?: () => void;
+  handleOnSelectCurrentLocation?: (
+    setCenter: (lat: number, lng: number) => void
+  ) => void;
 }
 
 const GLocationPicker = ({
@@ -87,7 +89,9 @@ interface MapProps extends google.maps.MapOptions {
   onIdle?: (map: google.maps.Map) => void;
   handleOnChange?: (location: google.maps.LatLng) => void;
   handleOnClose?: () => void;
-  handleOnSelectCurrentLocation?: () => void;
+  handleOnSelectCurrentLocation?: (
+    setCenter: (lat: number, lng: number) => void
+  ) => void;
   children?: React.ReactNode;
 }
 
@@ -211,7 +215,11 @@ const Map: React.FC<MapProps> = ({
             id="current-loaction-select"
             className="bg-white m-[10px] p-2 rounded cursor-pointer"
             ref={currentLocationSelectRef}
-            onClick={handleOnSelectCurrentLocation}
+            onClick={() =>
+              handleOnSelectCurrentLocation((lat: number, lng: number) =>
+                map?.setCenter(new window.google.maps.LatLng(lat, lng))
+              )
+            }
           >
             <PersonPinIcon />
           </div>

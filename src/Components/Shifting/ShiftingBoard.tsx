@@ -13,8 +13,7 @@ import { CSVLink } from "react-csv";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import { useDrag, useDrop } from "react-dnd";
-import clsx from "clsx";
-import { formatDate } from "../../Utils/utils";
+import { classNames, formatDate } from "../../Utils/utils";
 
 const limit = 14;
 
@@ -70,7 +69,7 @@ const ShiftCard = ({ shift, filter }: any) => {
         }}
       >
         <div
-          className={clsx(
+          className={classNames(
             "p-4 h-full flex flex-col justify-between",
             shift.patient_object.disease_status == "POSITIVE" && "bg-red-50"
           )}
@@ -375,7 +374,7 @@ export default function ShiftingBoard({
   return (
     <div
       ref={drop}
-      className={clsx(
+      className={classNames(
         "bg-gray-200 mr-2 flex-shrink-0 w-full md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md",
         isOver && "cursor-move"
       )}
