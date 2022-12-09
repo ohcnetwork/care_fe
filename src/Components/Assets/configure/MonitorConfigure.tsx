@@ -1,6 +1,5 @@
 import React, { Dispatch, useEffect } from "react";
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import { InputLabel } from "@material-ui/core";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { AssetData } from "../AssetTypes";
@@ -11,6 +10,7 @@ import {
 } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
+import ButtonV2 from "../../Common/components/ButtonV2";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const saveLink = (assetId: string, bedId: string, dispatch: Dispatch<any>) => {
   dispatch(createAssetBed({}, assetId, bedId));
@@ -59,54 +59,42 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
   }, [asset]);
 
   return (
-    <Card>
-      {/* Heading for "Link Bed to Monitor" */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (updateLink) {
-            update_Link(
-              assetBed?.id as string,
-              asset.id as string,
-              bed as BedModel,
-              assetBed,
-              dispatch
-            );
-          } else {
-            saveLink(asset.id as string, bed?.id as string, dispatch);
-          }
-        }}
-      >
-        <CardContent>
-          <div className="mt-2 ml-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-            <div>
-              <InputLabel id="asset-type">Bed</InputLabel>
-              <BedSelect
-                name="bed"
-                setSelected={(selected) => setBed(selected as BedModel)}
-                selected={bed}
-                errors=""
-                multiple={false}
-                margin="dense"
-                location={asset?.location_object?.id}
-                facility={asset?.location_object?.facility?.id}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-between mt-4">
-            <Button
-              color="primary"
-              variant="contained"
-              type="submit"
-              style={{ marginLeft: "auto" }}
-              startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-            >
-              {updateLink ? "Update Link" : "Save Link"}
-            </Button>
-          </div>
-        </CardContent>
-      </form>
-    </Card>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (updateLink) {
+          update_Link(
+            assetBed?.id as string,
+            asset.id as string,
+            bed as BedModel,
+            assetBed,
+            dispatch
+          );
+        } else {
+          saveLink(asset.id as string, bed?.id as string, dispatch);
+        }
+      }}
+    >
+      <div className="flex flex-col">
+        <div className="w-full">
+          <InputLabel id="asset-type">Bed</InputLabel>
+          <BedSelect
+            name="bed"
+            setSelected={(selected) => setBed(selected as BedModel)}
+            selected={bed}
+            errors=""
+            multiple={false}
+            margin="dense"
+            location={asset?.location_object?.id}
+            facility={asset?.location_object?.facility?.id}
+            className="w-full"
+          />
+        </div>
+        <ButtonV2 className="shrink-0 w-full" variant="primary" type="submit">
+          <i className="fas fa-bed-pulse" />
+          {updateLink ? "Update Bed" : "Save Bed"}
+        </ButtonV2>
+      </div>
+    </form>
   );
 }

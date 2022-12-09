@@ -67,19 +67,21 @@ const StatelessSidebar = ({
       const indexDifference = index - lastIndicatorPosition;
       e.style.display = "block";
 
-      if (indexDifference > 0) {
-        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
-        e.style.bottom = "auto";
-      } else {
-        e.style.bottom =
-          itemHeight * (NavItems.length + bottomItemOffset) -
-          lastIndicatorPosition * itemHeight -
-          28 +
-          "px";
-        e.style.top = "auto";
-      }
+      // if (indexDifference > 0) {
+      //   console.log("indexDifference > 0");
+      //   e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
+      //   e.style.bottom = "auto";
+      // } else {
+      //   console.log("indexDifference < 0");
+      //   e.style.bottom =
+      //     itemHeight * (NavItems.length + bottomItemOffset) -
+      //     lastIndicatorPosition * itemHeight -
+      //     28 +
+      //     "px";
+      //   e.style.top = "auto";
+      // }
 
-      e.style.height = `${Math.abs(indexDifference) * itemHeight + 12}px`;
+      // e.style.height = `${Math.abs(indexDifference) * itemHeight + 12}px`;
       setTimeout(() => {
         if (!e) return;
         if (indexDifference > 0) {
@@ -105,7 +107,7 @@ const StatelessSidebar = ({
     <nav
       className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
-      } transition-all duration-300 ease-in-out`}
+      } transition-all duration-300 ease-in-out overflow-auto`}
     >
       <div className="h-3" /> {/* flexible spacing */}
       <img
@@ -115,47 +117,50 @@ const StatelessSidebar = ({
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
       <div className="h-3" /> {/* flexible spacing */}
-      <div className="flex flex-col relative h-full md:h-auto mb-4 md:mb-0">
-        <div
-          ref={indicatorRef}
-          className={`absolute left-2 w-1 hidden md:block
-            bg-primary-400 rounded z-10 transition-all`}
-        />
-        {NavItems.map((i) => {
-          return (
-            <Item
-              key={i.text}
-              {...i}
-              icon={<CareIcon className={`${i.icon} h-5`} />}
-              selected={i.to === activeLink}
-            />
-          );
-        })}
-
-        <NotificationItem shrinked={shrinked} />
-        <Item
-          text="Dashboard"
-          to={dashboard_url}
-          icon={<CareIcon className="care-l-dashboard h-5" />}
-          external
-        />
-      </div>
-      <div className="flex-1" />
-      <div className="relative flex justify-end">
-        {shrinkable && (
+      <div className="flex flex-col relative h-full mb-4 md:mb-0">
+        <div className="flex flex-col relative flex-1 md:flex-none">
           <div
-            className={`${
-              shrinked ? "mx-auto" : "self-end"
-            } flex self-end h-12 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
-          >
-            <ToggleShrink
-              shrinked={shrinked}
-              toggle={() => setShrinked && setShrinked(!shrinked)}
-            />
-          </div>
-        )}
+            ref={indicatorRef}
+            className={`absolute left-2 w-1 hidden md:block
+            bg-primary-400 rounded z-10 transition-all`}
+          />
+          {NavItems.map((i) => {
+            return (
+              <Item
+                key={i.text}
+                {...i}
+                icon={<CareIcon className={`${i.icon} h-5`} />}
+                selected={i.to === activeLink}
+              />
+            );
+          })}
+
+          <NotificationItem shrinked={shrinked} />
+          <Item
+            text="Dashboard"
+            to={dashboard_url}
+            icon={<CareIcon className="care-l-dashboard h-5" />}
+            external
+          />
+        </div>
+        <div className="hidden md:block md:flex-1" />
+
+        <div className="relative flex justify-end">
+          {shrinkable && (
+            <div
+              className={`${
+                shrinked ? "mx-auto" : "self-end"
+              } flex self-end h-12 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
+            >
+              <ToggleShrink
+                shrinked={shrinked}
+                toggle={() => setShrinked && setShrinked(!shrinked)}
+              />
+            </div>
+          )}
+        </div>
+        <SidebarUserCard shrinked={shrinked} />
       </div>
-      <SidebarUserCard shrinked={shrinked} />
     </nav>
   );
 };

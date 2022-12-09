@@ -15,7 +15,7 @@ import { Button, CircularProgress } from "@material-ui/core";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
-import clsx from "clsx";
+import { classNames } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
 import * as Sentry from "@sentry/browser";
@@ -84,7 +84,7 @@ const NotificationTile = ({
         onClickCB && onClickCB();
         setShowNotifications(false);
       }}
-      className={clsx(
+      className={classNames(
         "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer",
         result.read_at && "text-gray-500"
       )}
