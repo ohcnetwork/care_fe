@@ -32,6 +32,7 @@ import Chip from "../../CAREUI/display/Chip";
 import { classNames, formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -447,7 +448,9 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         </div>
-        {patientData?.facility != patientData?.last_consultation?.facility && (
+        {(patientData?.facility != patientData?.last_consultation?.facility ||
+          (patientData.is_active &&
+            patientData?.last_consultation?.discharge_date)) && (
           <div className="relative mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8 rounded-lg shadow bg-red-200 ">
               <div className="text-center">
@@ -723,30 +726,10 @@ export const PatientHome = (props: any) => {
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-normal font-semibold">
                       <div className="text-sm flex justify-center font-semibold">
-                        {patientData.created_date && (
-                          <div className="flex flex-col md:flex-row gap-1">
-                            <div className="flex flex-col md:flex-row items-center">
-                              <p>{formatDate(patientData.created_date)}</p>
-                              <div className="tooltip">
-                                <span className="tooltip-text tooltip-top">
-                                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold md:w-max">
-                                    <div>
-                                      <p className="flex flex-row justify-center">
-                                        {patientData?.created_by?.first_name}
-                                        {patientData?.created_by?.last_name}
-                                      </p>
-                                      <p className="flex flex-row justify-center">{`@${patientData.created_by?.username}`}</p>
-                                      <p className="flex flex-row justify-center">
-                                        {patientData.created_by?.user_type}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </span>
-                                <CareIcon className="ml-1 care-l-user-circle text-green-700 font-semibold text-xl hover:text-green-600" />
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                        <RelativeDateUserMention
+                          actionDate={patientData.created_date}
+                          user={patientData.created_by}
+                        />
                       </div>
                     </div>
                   </div>
@@ -756,30 +739,11 @@ export const PatientHome = (props: any) => {
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-normal">
                       <div className="text-sm flex justify-center font-semibold whitespace-normal">
-                        {patientData.modified_date && (
-                          <div className="flex flex-col md:flex-row gap-1">
-                            <div className="flex flex-col md:flex-row items-center">
-                              <p>{formatDate(patientData.modified_date)}</p>
-                              <div className="tooltip">
-                                <span className="tooltip-text tooltip-left">
-                                  <div className="text-sm leading-5 text-white whitespace-normal font-semibold md:w-max">
-                                    <div className="flex flex-col">
-                                      <p className="flex flex-row justify-center">
-                                        {patientData?.last_edited?.first_name}
-                                        {patientData?.last_edited?.last_name}
-                                      </p>
-                                      <p className="flex flex-row justify-center">{`@${patientData.last_edited?.username}`}</p>
-                                      <p className="flex flex-row justify-center">
-                                        {patientData.last_edited?.user_type}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </span>
-                                <CareIcon className="ml-1 care-l-user-circle text-green-700 font-semibold text-xl hover:text-green-600" />
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                        <RelativeDateUserMention
+                          actionDate={patientData.modified_date}
+                          user={patientData.last_edited}
+                          tooltipPosition="left"
+                        />
                       </div>
                     </div>
                   </div>
