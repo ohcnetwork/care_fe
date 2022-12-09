@@ -3,12 +3,7 @@ import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 
-import {
-  DOWNLOAD_TYPES,
-  FACILITY_FEATURE_TYPES,
-  FACILITY_TYPES,
-  KASP_STRING,
-} from "../../Common/constants";
+import { DOWNLOAD_TYPES, FACILITY_TYPES } from "../../Common/constants";
 import {
   getPermittedFacilities,
   downloadFacility,
@@ -18,11 +13,10 @@ import {
   getState,
   getDistrict,
   getLocalBody,
-  sendNotificationMessages,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 
-import { InputLabel, TextField } from "@material-ui/core";
+import { InputLabel } from "@material-ui/core";
 import { FacilityModel } from "./models";
 import { CSVLink } from "react-csv";
 import moment from "moment";
@@ -32,14 +26,12 @@ import GetAppIcon from "@material-ui/icons/GetApp";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
-import * as Notification from "../../Utils/Notifications.js";
-import { Modal } from "@material-ui/core";
 import SelectMenu from "../Common/components/SelectMenu";
 import AccordionV2 from "../Common/components/AccordionV2";
-import ButtonV2 from "../Common/components/ButtonV2";
 import SearchInput from "../Form/SearchInput";
-import { getFacilityFeatureIcon } from "./FacilityHome";
 import useFilters from "../../Common/hooks/useFilters";
+import { FacilityCard } from "./FacilityCard";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -73,8 +65,6 @@ export const HospitalList = () => {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const userType = currentUser.data.user_type;
-  const [notifyMessage, setNotifyMessage] = useState("");
-  const [notifyModalFor, setNotifyModalFor] = useState(undefined);
   // state to change download button to loading while file is not ready
   const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
@@ -459,7 +449,7 @@ export const HospitalList = () => {
   let facilityList: any[] = [];
   if (data && data.length) {
     facilityList = data.map((facility: any) => (
-      <FacilityCard facility={facility} />
+      <FacilityCard facility={facility} userType={userType} />
     ));
   }
 
