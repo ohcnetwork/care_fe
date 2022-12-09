@@ -983,6 +983,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               } mt-6 gap-2 `}
             >
               <button
+                type="reset"
                 className="btn btn-default border-2 border-grey-300"
                 onClick={() => goBack()}
               >
