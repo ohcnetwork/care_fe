@@ -1,6 +1,7 @@
-import { RefObject, useRef, useState } from "react";
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
+import clsx from "clsx";
+import { RefObject, useRef, useState, useEffect } from "react";
 
 type InputProps = {
   id?: string;
@@ -33,8 +34,39 @@ export default function LegendInput(props: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const ref = props.ref || inputRef;
+
   const legendRef = useRef<HTMLLabelElement>(null);
-  const [focused, setFocused] = useState(true);
+  const [focused, setFocused] = useState(false);
+
+  const getAutofill = (element: Element) => {
+    let hasValue;
+    try {
+      hasValue = element.matches(":autofill");
+    } catch (err) {
+      try {
+        hasValue = element.matches(":-webkit-autofill");
+      } catch (er) {
+        hasValue = false;
+      }
+    }
+    hasValue && setFocused(true);
+  };
+
+  const detectAutofill = (element: Element) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(getAutofill(element));
+      }, 600);
+    });
+  };
+
+  const testAutoFill = async (element: Element) => {
+    await detectAutofill(element);
+  };
+
+  useEffect(() => {
+    ref.current && testAutoFill(ref.current);
+  }, [ref.current]);
 
   return (
     <div className={props.outerClassName}>
