@@ -1,6 +1,5 @@
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
-import clsx from "clsx";
 import { RefObject, useRef, useState, useEffect } from "react";
 
 type InputProps = {
