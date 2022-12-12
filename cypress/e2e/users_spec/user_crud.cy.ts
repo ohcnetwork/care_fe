@@ -80,7 +80,7 @@ describe("User management", () => {
     cy.wait("@getUsers");
     cy.wait(500);
     const linkFacilityString = "Click here to show linked facilities";
-    cy.get("a")
+    cy.get("div")
       .should("contain", linkFacilityString)
       .contains(linkFacilityString)
       .click({ force: true })
@@ -136,7 +136,8 @@ describe("Edit Profile Testing", () => {
 
   it("Valid First-Name field of " + username, () => {
     cy.get("input[name=firstName]")
-      .type(backspace + "User 1")
+      .clear()
+      .type("User 1")
       .trigger("change", { force: true });
     cy.get("form").get("button[type='submit']").contains("UPDATE").click();
     cy.get("dt").contains("First Name").siblings().first().contains("User 1");
@@ -150,7 +151,8 @@ describe("Edit Profile Testing", () => {
 
   it("Valid Last-Name field of " + username, () => {
     cy.get("input[name=lastName]")
-      .type(backspace + "User 1")
+      .clear()
+      .type("User 1")
       .trigger("change", { force: true });
     cy.get("form").get("button[type='submit']").contains("UPDATE").click();
     cy.get("dt").contains("Last Name").siblings().first().contains("User 1");
@@ -192,7 +194,7 @@ describe("Edit Profile Testing", () => {
       .contains("Whatsapp No")
       .siblings()
       .first()
-      .contains(`+91 ${whatsapp_num}`);
+      .contains(`+91 ${whatsapp_num}`.replace(/[ -]/g, ""));
   });
 
   it("Invalid Phone Number of " + username, () => {
@@ -231,7 +233,7 @@ describe("Edit Profile Testing", () => {
       .contains("Contact No")
       .siblings()
       .first()
-      .contains(`+91 ${phone_num}`);
+      .contains(`+91 ${phone_num}`.replace(/[ -]/g, ""));
   });
 
   afterEach(() => {
