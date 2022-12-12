@@ -787,7 +787,6 @@ export const FileUpload = (props: FileUploadProps) => {
                   </label>
                   <label
                     onClick={() => {
-                      console.log(item);
                       setModalDetails({
                         name: item.name,
                         reason: item.archive_reason,
