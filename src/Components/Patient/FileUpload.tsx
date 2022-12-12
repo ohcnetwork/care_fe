@@ -96,7 +96,7 @@ interface ModalDetails {
   name?: string;
   id?: string;
   reason?: string;
-  userArchived?: any;
+  userArchived?: string;
   archiveTime?: any;
 }
 
