@@ -7,12 +7,13 @@ import { ButtonVariant } from "./ButtonV2";
 import { DropdownTransition } from "./HelperComponents";
 
 export default function DropdownMenu(props: {
+  id?: string;
   title: string;
   icon: JSX.Element;
   children: JSX.Element | JSX.Element[];
 }) {
   return (
-    <div className="text-right">
+    <div id={props.id} className="text-right">
       <Menu as="div" className="relative inline-block text-left w-full">
         <Menu.Button className="text-white flex w-full lg:justify-between justify-center items-center outline-offset-1 Button button-primary-default button-size-default button-shape-square">
           <div className="flex gap-2 items-center">
@@ -53,8 +54,10 @@ export function DropdownItem({
 }: DropdownItemProps) {
   const isAuthorized = useIsAuthorized(authorizeFor);
 
+  console.log({ ...props });
+
   return (
-    <Menu.Item>
+    <Menu.Item as="div">
       <div
         {...props}
         className={[
