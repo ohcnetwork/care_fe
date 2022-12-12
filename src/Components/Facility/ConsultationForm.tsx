@@ -615,7 +615,7 @@ export const ConsultationForm = (props: any) => {
     } else {
       form.symptoms = otherSymptoms;
       form.hasSymptom = !!otherSymptoms.length;
-      form.otherSymptom = !otherSymptoms.includes(9);
+      form.otherSymptom = otherSymptoms.includes(9);
     }
     dispatch({ type: "set_form", form });
   };
