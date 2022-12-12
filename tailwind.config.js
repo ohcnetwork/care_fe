@@ -33,17 +33,6 @@ module.exports = {
         danger: colors.red,
         warning: colors.amber,
         alert: colors.violet,
-        gray: {
-          100: "#FBF9FB",
-          200: "#F6F6F6",
-          300: "#F1EDF7",
-          400: "#DFDAE8",
-          500: "#BFB8CC",
-          600: "#9C9C9C",
-          700: "#808080",
-          800: "#6A5F7A",
-          900: "#453C52",
-        },
         patient: {
           comfort: {
             DEFAULT: colors.slate[200],
