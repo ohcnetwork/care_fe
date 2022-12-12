@@ -479,82 +479,88 @@ export const PatientHome = (props: any) => {
           </div>
         )}
         <section className="lg:flex" data-testid="patient-dashboard">
-          <div className="lg:w-2/3 mx-2 h-full">
-            <div className="bg-white rounded-lg shadow pt-11 pb-5 pl-9 h-full">
-              <div className="flex flex-row">
-                <h1 className="font-bold text-2xl pb-3 flex flex-row">
-                  {patientData.name} - {patientData.age}
-                </h1>
-                <div className="flex flex-wrap gap-2 ml-auto mr-9">
-                  {patientData.is_vaccinated ? (
-                    <Chip color="blue" startIcon="syringe" text="Vaccinated" />
-                  ) : (
-                    <Chip
-                      color="yellow"
-                      startIcon="exclamation-triangle"
-                      text="Not Vaccinated"
-                    />
-                  )}
-                  {patientData.allow_transfer ? (
-                    <Chip
-                      color="yellow"
-                      startIcon="unlock"
-                      text="Transfer Allowed"
-                    />
-                  ) : (
-                    <Chip
-                      color="primary"
-                      startIcon="lock"
-                      text="Transfer Blocked"
-                    />
-                  )}
-                  {patientData.gender === 2 &&
-                    patientData.is_antenatal &&
-                    patientData.is_active && (
+          <div className="lg:w-2/3 mx-2">
+            <div className="bg-white rounded-lg shadow flex flex-col justify-between pt-11 pb-5 pl-9 h-full">
+              <div>
+                <div className="flex flex-row">
+                  <h1 className="font-bold text-2xl pb-3 flex flex-row">
+                    {patientData.name} - {patientData.age}
+                  </h1>
+                  <div className="flex flex-wrap gap-2 ml-auto mr-9">
+                    {patientData.is_vaccinated ? (
                       <Chip
                         color="blue"
-                        startIcon="baby-carriage"
-                        text="Antenatal"
+                        startIcon="syringe"
+                        text="Vaccinated"
+                      />
+                    ) : (
+                      <Chip
+                        color="yellow"
+                        startIcon="exclamation-triangle"
+                        text="Not Vaccinated"
                       />
                     )}
-                  {patientData.contact_with_confirmed_carrier && (
-                    <Chip
-                      color="red"
-                      startIcon="exclamation-triangle"
-                      text="Contact with confirmed carrier"
-                    />
-                  )}
-                  {patientData.contact_with_suspected_carrier && (
-                    <Chip
-                      color="yellow"
-                      startIcon="exclamation-triangle"
-                      text="Contact with suspected carrier"
-                    />
-                  )}
-                  {patientData.past_travel && (
-                    <Chip
-                      color="yellow"
-                      startIcon="exclamation-triangle"
-                      text="Travel (within last 28 days)"
-                    />
-                  )}
-                  {patientData.last_consultation?.is_telemedicine && (
-                    <Chip
-                      color="purple"
-                      startIcon="phone"
-                      text="Telemedicine"
-                    />
-                  )}
+                    {patientData.allow_transfer ? (
+                      <Chip
+                        color="yellow"
+                        startIcon="unlock"
+                        text="Transfer Allowed"
+                      />
+                    ) : (
+                      <Chip
+                        color="primary"
+                        startIcon="lock"
+                        text="Transfer Blocked"
+                      />
+                    )}
+                    {patientData.gender === 2 &&
+                      patientData.is_antenatal &&
+                      patientData.is_active && (
+                        <Chip
+                          color="blue"
+                          startIcon="baby-carriage"
+                          text="Antenatal"
+                        />
+                      )}
+                    {patientData.contact_with_confirmed_carrier && (
+                      <Chip
+                        color="red"
+                        startIcon="exclamation-triangle"
+                        text="Contact with confirmed carrier"
+                      />
+                    )}
+                    {patientData.contact_with_suspected_carrier && (
+                      <Chip
+                        color="yellow"
+                        startIcon="exclamation-triangle"
+                        text="Contact with suspected carrier"
+                      />
+                    )}
+                    {patientData.past_travel && (
+                      <Chip
+                        color="yellow"
+                        startIcon="exclamation-triangle"
+                        text="Travel (within last 28 days)"
+                      />
+                    )}
+                    {patientData.last_consultation?.is_telemedicine && (
+                      <Chip
+                        color="purple"
+                        startIcon="phone"
+                        text="Telemedicine"
+                      />
+                    )}
+                  </div>
                 </div>
+                <h3 className="text-base font-medium">
+                  <i className="fa-regular fa-hospital mr-2 text-emerald-900" />
+                  {patientData.facility_object?.name || "-"}
+                </h3>
+                <p className="text-sm text-zinc-500 mt-4 mb-7 font-medium">
+                  {patientGender} | {patientData.blood_group || "-"}
+                </p>
               </div>
-              <h3 className="text-base font-medium">
-                <i className="fa-regular fa-hospital mr-2 text-emerald-900" />
-                {patientData.facility_object?.name || "-"}
-              </h3>
-              <p className="text-sm text-zinc-500 mt-4 mb-7 font-medium">
-                {patientGender} | {patientData.blood_group || "-"}
-              </p>
-              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 md:grid-cols-2 lg:grid-cols-3 mt-2 mb-8">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 md:grid-cols-2 lg:grid-cols-3 mt-2 mb-8 items-center">
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-semibold text-zinc-400">
                     Date of Birth
@@ -623,7 +629,7 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
-                {patientData.is_vaccinated && patientData.number_of_doses && (
+                {patientData.is_vaccinated && !!patientData.number_of_doses && (
                   <div className="sm:col-span-1">
                     <div className="text-sm leading-5 font-semibold text-zinc-400">
                       Number of vaccine doses
