@@ -19,6 +19,8 @@ export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
 interface Props {
   className?: string;
   value: Date | undefined;
+  min?: Date;
+  max?: Date;
   onChange: (date: Date) => void;
   position?: DatePickerPosition;
   disabled?: boolean;
@@ -30,6 +32,8 @@ const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const DateInputV2: React.FC<Props> = ({
   className,
   value,
+  min,
+  max,
   onChange,
   position,
   disabled,
@@ -108,6 +112,25 @@ const DateInputV2: React.FC<Props> = ({
     setDayCount(daysArray);
   };
 
+  const getLastDay = (
+    year = datePickerHeaderDate.getFullYear(),
+    month = datePickerHeaderDate.getMonth()
+  ) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const isDateWithinConstraints = (
+    day = datePickerHeaderDate.getDate(),
+    month = datePickerHeaderDate.getMonth(),
+    year = datePickerHeaderDate.getFullYear()
+  ) => {
+    const date = new Date(year, month, day);
+
+    console.log();
+
+    return !(min! > date) && !(date > max!);
+  };
+
   const isSelectedMonth = (month: number) =>
     month === datePickerHeaderDate.getMonth();
 
@@ -184,6 +207,7 @@ const DateInputV2: React.FC<Props> = ({
               <div className="flex justify-between items-center w-full mb-4">
                 <button
                   type="button"
+                  disabled={!isDateWithinConstraints()}
                   className="transition ease-in-out duration-100 p-2 rounded inline-flex items-center justify-center aspect-square cursor-pointer  hover:bg-slate-200"
                   onClick={decrement}
                 >
@@ -213,8 +237,9 @@ const DateInputV2: React.FC<Props> = ({
                 <button
                   type="button"
                   disabled={
-                    type === "year" &&
-                    new Date().getFullYear() === year.getFullYear()
+                    (type === "year" &&
+                      new Date().getFullYear() === year.getFullYear()) ||
+                    !isDateWithinConstraints(getLastDay())
                   }
                   className="transition ease-in-out duration-100 h-full p-2 rounded inline-flex items-center justify-center aspect-square cursor-pointer hover:bg-slate-200"
                   onClick={increment}
@@ -248,7 +273,8 @@ const DateInputV2: React.FC<Props> = ({
                             "cursor-pointer flex items-center justify-center text-center h-full text-sm rounded leading-loose transition ease-in-out duration-100 text-slate-900 hover:bg-slate-200",
                             value &&
                               isSelectedDate(d) &&
-                              "bg-primary-500 text-slate-100 font-bold"
+                              "bg-primary-500 text-slate-100 font-bold",
+                            !isDateWithinConstraints(d) && "!text-slate-300"
                           )}
                         >
                           {d}

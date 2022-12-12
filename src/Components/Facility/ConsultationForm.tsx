@@ -75,7 +75,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 type BooleanStrings = "true" | "false";
 
 type FormDetails = {
-  is_asymptomatic: boolean;
+  hasSymptom: boolean;
   otherSymptom: boolean;
   symptoms: number[];
   other_symptoms: string;
@@ -120,7 +120,7 @@ type Action =
   | { type: "set_error"; errors: FormDetails };
 
 const initForm: FormDetails = {
-  is_asymptomatic: false,
+  hasSymptom: false,
   otherSymptom: false,
   symptoms: [],
   other_symptoms: "",
@@ -270,10 +270,10 @@ export const ConsultationForm = (props: any) => {
         if (res && res.data) {
           const formData = {
             ...res.data,
-            is_asymptomatic:
+            hasSymptom:
               !!res.data.symptoms &&
               !!res.data.symptoms.length &&
-              !!res.data.symptoms.includes(1),
+              !!res.data.symptoms.filter((i: number) => i !== 1).length,
             otherSymptom:
               !!res.data.symptoms &&
               !!res.data.symptoms.length &&
@@ -368,7 +368,7 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "symptoms_onset_date":
-          if (state.form.is_asymptomatic && !state.form[field]) {
+          if (state.form.hasSymptom && !state.form[field]) {
             errors[field] = "Please enter date of onset of the above symptoms";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -488,7 +488,9 @@ export const ConsultationForm = (props: any) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    console.log("handling");
     const [validForm, error_div] = validateForm();
+    console.log(validForm);
 
     if (!validForm) {
       scrollTo(error_div);
@@ -499,7 +501,7 @@ export const ConsultationForm = (props: any) => {
         other_symptoms: state.form.otherSymptom
           ? state.form.other_symptoms
           : undefined,
-        symptoms_onset_date: !state.form.is_asymptomatic
+        symptoms_onset_date: state.form.hasSymptom
           ? state.form.symptoms_onset_date
           : undefined,
         suggestion: state.form.suggestion,
@@ -602,17 +604,20 @@ export const ConsultationForm = (props: any) => {
       });
   };
 
-  const handleSymptomChange = (value: any) => {
-    const checkSymptoms = value.includes(1);
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        is_asymptomatic: checkSymptoms,
-        symptoms: checkSymptoms ? [1] : value,
-        otherSymptom: checkSymptoms ? false : value.includes(9),
-      },
-    });
+  const handleSymptomChange = (value: number[]) => {
+    const form = { ...state.form };
+    const otherSymptoms = value.filter((i) => i !== 1);
+    // prevent user from selecting asymptomatic along with other options
+    if (value.includes(1)) {
+      form.symptoms = otherSymptoms.length ? [1] : value;
+      form.hasSymptom = false;
+      form.otherSymptom = false;
+    } else {
+      form.symptoms = otherSymptoms;
+      form.hasSymptom = !!otherSymptoms.length;
+      form.otherSymptom = !otherSymptoms.includes(9);
+    }
+    dispatch({ type: "set_form", form });
   };
 
   const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
@@ -676,8 +681,8 @@ export const ConsultationForm = (props: any) => {
                     placeholder="Symptoms"
                     value={state.form.symptoms}
                     options={symptomChoices}
-                    optionLabel={(o) => o.text}
-                    optionValue={(o) => o.id}
+                    optionLabel={({ text }) => text}
+                    optionValue={({ id }) => id}
                     onChange={(o) => handleSymptomChange(o)}
                   />
                   <ErrorHelperText error={state.errors.symptoms} />
@@ -703,7 +708,7 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 )}
 
-                {!state.form.is_asymptomatic && (
+                {state.form.hasSymptom && (
                   <div id="symptoms_onset_date-div">
                     <DateInputField
                       label="Date of onset of the symptoms*"

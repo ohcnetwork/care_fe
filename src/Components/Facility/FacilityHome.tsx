@@ -175,22 +175,26 @@ export const FacilityHome = (props: any) => {
       </h5>
     );
   } else {
-    doctorList = doctorData.map((data: DoctorModal) => {
-      const removeCurrentDoctorData = (doctorId: number | undefined) => {
-        setDoctorData((state) =>
-          state.filter((i: DoctorModal) => i.id !== doctorId)
-        );
-      };
+    doctorList = (
+      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
+        {doctorData.map((data: DoctorModal) => {
+          const removeCurrentDoctorData = (doctorId: number | undefined) => {
+            setDoctorData((state) =>
+              state.filter((i: DoctorModal) => i.id !== doctorId)
+            );
+          };
 
-      return (
-        <DoctorsCountCard
-          facilityId={facilityId}
-          key={`bed_${data.id}`}
-          {...data}
-          removeDoctor={removeCurrentDoctorData}
-        />
-      );
-    });
+          return (
+            <DoctorsCountCard
+              facilityId={facilityId}
+              key={`bed_${data.id}`}
+              {...data}
+              removeDoctor={removeCurrentDoctorData}
+            />
+          );
+        })}
+      </div>
+    );
   }
 
   const stats: (string | JSX.Element)[][] = [];
@@ -291,7 +295,7 @@ export const FacilityHome = (props: any) => {
         onDelete={() => window.location.reload()}
         facility={facilityData}
       />
-      {hasCoverImage && (
+      {hasCoverImage ? (
         <div
           className={`group relative overflow-clip w-full rounded-t bg-gray-200 h-48 md:h-0 opacity-100 md:opacity-0 transition-all duration-200 ease-in-out ${
             hasPermissionToEditCoverImage && "cursor-pointer"
@@ -301,6 +305,21 @@ export const FacilityHome = (props: any) => {
           }
         >
           <CoverImage />
+          {editCoverImageTooltip}
+        </div>
+      ) : (
+        <div
+          className={`group md:hidden flex w-full self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0 ${
+            hasPermissionToEditCoverImage && "cursor-pointer"
+          }`}
+          onClick={() =>
+            hasPermissionToEditCoverImage && setEditCoverImage(true)
+          }
+        >
+          <i
+            className="fas fa-hospital text-4xl block text-gray-500 p-10"
+            aria-hidden="true"
+          ></i>
           {editCoverImageTooltip}
         </div>
       )}
@@ -442,6 +461,15 @@ export const FacilityHome = (props: any) => {
                   Update Facility
                 </DropdownItem>
                 <DropdownItem
+                  onClick={() =>
+                    navigate(`/facility/${facilityId}/middleware/update`)
+                  }
+                  authorizeFor={NonReadOnlyUsers}
+                  icon={<CareIcon className="care-l-setting h-5" />}
+                >
+                  Configure Facility
+                </DropdownItem>
+                <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/inventory`)}
                   icon={<CareIcon className="care-l-clipboard-alt w-5 " />}
                 >
@@ -577,9 +605,7 @@ export const FacilityHome = (props: any) => {
             Add Doctor Types
           </ButtonV2>
         </div>
-        <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
-          {doctorList}
-        </div>
+        <div className="mt-4">{doctorList}</div>
       </div>
       <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
         <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
