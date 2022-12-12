@@ -38,11 +38,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import InputLabel from "@material-ui/core/InputLabel";
-import {
-  TextInputField,
-  SelectField,
-  MultilineInputField,
-} from "../Common/HelperInputFields";
+import { TextInputField, SelectField } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
 import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
@@ -50,6 +46,7 @@ import { formatDate } from "../../Utils/utils";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -419,21 +416,16 @@ export const ConsultationDetails = (props: any) => {
                   ? "Cause of death *"
                   : "Discharge notes"}
               </InputLabel>
-              <MultilineInputField
+              <TextAreaFormField
                 name="discharge_notes"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                rows={2}
-                InputLabelProps={{ shrink: !!preDischargeForm.discharge_notes }}
                 value={preDischargeForm.discharge_notes}
-                onChange={(e) =>
+                onChange={(event) =>
                   setPreDischargeForm((prev) => ({
                     ...prev,
-                    discharge_notes: e.target.value,
+                    discharge_notes: event.value,
                   }))
                 }
-                errors={errors?.discharge_notes}
+                error={errors?.discharge_notes}
               />
             </div>
           </div>
