@@ -39,7 +39,6 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   DateInputField,
   ErrorHelperText,
-  MultilineInputField,
   NativeSelectField,
   SelectField,
   TextInputField,
@@ -68,6 +67,8 @@ import { ICD11DiagnosisModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -566,15 +567,20 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleChange:
-    | ChangeEventHandler<HTMLInputElement>
-    | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e: any) => {
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (e: any) => {
     e &&
       e.target &&
       dispatch({
         type: "set_form",
         form: { ...state.form, [e.target.name]: e.target.value },
       });
+  };
+
+  const handleFormFieldChange: FieldChangeEventHandler<unknown> = (event) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [event.name]: event.value },
+    });
   };
 
   const handleTelemedicineChange: ChangeEventHandler<HTMLInputElement> = (
@@ -615,7 +621,7 @@ export const ConsultationForm = (props: any) => {
     } else {
       form.symptoms = otherSymptoms;
       form.hasSymptom = !!otherSymptoms.length;
-      form.otherSymptom = !otherSymptoms.includes(9);
+      form.otherSymptom = otherSymptoms.includes(9);
     }
     dispatch({ type: "set_form", form });
   };
@@ -693,17 +699,13 @@ export const ConsultationForm = (props: any) => {
                     <InputLabel id="other-symptoms-label">
                       Other Symptom Details
                     </InputLabel>
-                    <MultilineInputField
-                      rows={5}
+                    <TextAreaFormField
+                      className="mt-2"
                       name="other_symptoms"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
                       placeholder="Enter the other symptoms here"
-                      InputLabelProps={{ shrink: !!state.form.other_symptoms }}
                       value={state.form.other_symptoms}
-                      onChange={handleChange}
-                      errors={state.errors.other_symptoms}
+                      error={state.errors.other_symptoms}
+                      onChange={handleFormFieldChange}
                     />
                   </div>
                 )}
@@ -726,19 +728,13 @@ export const ConsultationForm = (props: any) => {
                   <InputLabel id="existing-medication-label">
                     History of present illness
                   </InputLabel>
-                  <MultilineInputField
-                    rows={5}
+                  <TextAreaFormField
+                    className="mt-2"
                     name="history_of_present_illness"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
                     placeholder="Information optional"
-                    InputLabelProps={{
-                      shrink: !!state.form.history_of_present_illness,
-                    }}
                     value={state.form.history_of_present_illness}
-                    onChange={handleChange}
-                    errors={state.errors.history_of_present_illness}
+                    error={state.errors.history_of_present_illness}
+                    onChange={handleFormFieldChange}
                   />
                 </div>
 
@@ -746,19 +742,13 @@ export const ConsultationForm = (props: any) => {
                   <InputLabel id="exam-details-label">
                     Examination details and Clinical conditions
                   </InputLabel>
-                  <MultilineInputField
-                    rows={5}
+                  <TextAreaFormField
+                    className="mt-2"
                     name="examination_details"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
                     placeholder="Information optional"
-                    InputLabelProps={{
-                      shrink: !!state.form.examination_details,
-                    }}
                     value={state.form.examination_details}
-                    onChange={handleChange}
-                    errors={state.errors.examination_details}
+                    error={state.errors.examination_details}
+                    onChange={handleFormFieldChange}
                   />
                 </div>
 
@@ -766,19 +756,13 @@ export const ConsultationForm = (props: any) => {
                   <InputLabel id="prescribed-medication-label">
                     Treatment Plan / Treatment Summary
                   </InputLabel>
-                  <MultilineInputField
-                    rows={5}
+                  <TextAreaFormField
+                    className="mt-2"
                     name="prescribed_medication"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
                     placeholder="Information optional"
-                    InputLabelProps={{
-                      shrink: !!state.form.prescribed_medication,
-                    }}
                     value={state.form.prescribed_medication}
-                    onChange={handleChange}
-                    errors={state.errors.prescribed_medication}
+                    error={state.errors.prescribed_medication}
+                    onChange={handleFormFieldChange}
                   />
                 </div>
                 <div className="flex-1" id="category-div">
@@ -825,22 +809,6 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 )}
 
-                {/* {JSON.parse(state.form.admitted) && (
-                    <div className="flex-1" id="admitted_to-div">
-                      <SelectField
-                        optionArray={true}
-                        name="admitted_to"
-                        variant="standard"
-                        value={state.form.admitted_to}
-                        options={admittedToChoices}
-                        onChange={handleChange}
-                        label="Admitted To*"
-                        labelId="admitted-to-label"
-                        errors={state.errors.admitted_to}
-                      />
-                    </div>
-                  )}
-                */}
                 {state.form.suggestion === "A" && (
                   <>
                     <div className="flex">
@@ -884,20 +852,13 @@ export const ConsultationForm = (props: any) => {
 
               <div className="mt-4" id="consultation_notes-div">
                 <InputLabel>General Instructions (Advice)*</InputLabel>
-                <MultilineInputField
-                  rows={5}
+                <TextAreaFormField
                   className="mt-2"
                   name="consultation_notes"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
                   placeholder="Consultation Notes..."
-                  InputLabelProps={{
-                    shrink: !!state.form.consultation_notes,
-                  }}
                   value={state.form.consultation_notes}
-                  onChange={handleChange}
-                  errors={state.errors.consultation_notes}
+                  onChange={handleFormFieldChange}
+                  error={state.errors.consultation_notes}
                 />
               </div>
               <div id="investigation-div" className="mt-4">
@@ -956,19 +917,13 @@ export const ConsultationForm = (props: any) => {
               </div>
               <div id="verified_by-div">
                 <InputLabel id="exam-details-label">Verified By</InputLabel>
-                <MultilineInputField
-                  rows={3}
+                <TextAreaFormField
+                  className="mt-2"
                   name="verified_by"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
                   placeholder="Attending Doctors Name and Designation"
-                  InputLabelProps={{
-                    shrink: !!state.form.verified_by,
-                  }}
                   value={state.form.verified_by}
-                  onChange={handleChange}
-                  errors={state.errors.verified_by}
+                  onChange={handleFormFieldChange}
+                  error={state.errors.verified_by}
                 />
               </div>
               <div id="provisional-diagnosis-div" className="mt-4">
@@ -1120,19 +1075,13 @@ export const ConsultationForm = (props: any) => {
                 <InputLabel id="special-instruction-label">
                   Special Instructions
                 </InputLabel>
-                <MultilineInputField
-                  rows={5}
+                <TextAreaFormField
+                  className="mt-2"
                   name="special_instruction"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
                   placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.special_instruction,
-                  }}
                   value={state.form.special_instruction}
-                  onChange={handleChange}
-                  errors={state.errors.special_instruction}
+                  onChange={handleFormFieldChange}
+                  error={state.errors.special_instruction}
                 />
               </div>
 

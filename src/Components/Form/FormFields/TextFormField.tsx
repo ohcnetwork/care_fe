@@ -25,7 +25,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
 const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
-  const borderColor = error ? "border-red-500" : "border-gray-200";
+  const borderColor = error ? "border-red-500" : "border-gray-300";
 
   const { leading, trailing } = props;
   const leadingFocused = props.leadingFocused || props.leading;
@@ -45,7 +45,7 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
       className={
         props.removeDefaultClasses
           ? props.className
-          : `peer text-sm block ${padding} w-full rounded placeholder:text-gray-500 bg-gray-200 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out ${borderColor} ${props.className}`
+          : `peer text-sm block ${padding} w-full rounded placeholder:text-gray-400 bg-gray-200 disabled:bg-gray-100 border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out ${borderColor} ${props.className}`
       }
       disabled={props.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}

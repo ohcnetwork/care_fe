@@ -17,14 +17,14 @@ const TextAreaFormField = ({ rows = 3, ...props }: TextAreaFormFieldProps) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
 
-  const bgColor = error ? "bg-red-50" : "bg-gray-200";
-  const borderColor = error ? "border-red-500" : "border-gray-200";
+  const bgColor = error ? "bg-red-50" : "bg-white";
+  const borderColor = error ? "border-red-500" : "border-gray-300";
 
   return (
     <FormField props={props}>
       <textarea
         id={props.id}
-        className={`text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out resize-none ${bgColor} ${borderColor}`}
+        className={`text-sm block py-3 px-4 w-full rounded placeholder:text-gray-400 border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out resize-none ${bgColor} ${borderColor} disabled:bg-gray-100`}
         disabled={props.disabled}
         rows={rows}
         placeholder={props.placeholder}
