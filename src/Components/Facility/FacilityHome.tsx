@@ -450,10 +450,12 @@ export const FacilityHome = (props: any) => {
           <div className="flex flex-col justify-between mt-4">
             <div className="w-full md:w-auto">
               <DropdownMenu
+                id="manage-facility-dropdown"
                 title="Manage Facility"
                 icon={<CareIcon className="care-l-setting h-5" />}
               >
                 <DropdownItem
+                  id="update-facility"
                   onClick={() => navigate(`/facility/${facilityId}/update`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon className="care-l-edit-alt h-5" />}
@@ -461,6 +463,7 @@ export const FacilityHome = (props: any) => {
                   Update Facility
                 </DropdownItem>
                 <DropdownItem
+                  id="configure-facility"
                   onClick={() =>
                     navigate(`/facility/${facilityId}/middleware/update`)
                   }
@@ -470,12 +473,14 @@ export const FacilityHome = (props: any) => {
                   Configure Facility
                 </DropdownItem>
                 <DropdownItem
+                  id="inventory-management"
                   onClick={() => navigate(`/facility/${facilityId}/inventory`)}
                   icon={<CareIcon className="care-l-clipboard-alt w-5 " />}
                 >
                   Inventory Management
                 </DropdownItem>
                 <DropdownItem
+                  id="location-management"
                   onClick={() => navigate(`/facility/${facilityId}/location`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon className="care-l-location-point h-5" />}
