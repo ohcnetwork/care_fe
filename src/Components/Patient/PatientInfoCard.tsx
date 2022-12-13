@@ -6,6 +6,9 @@ import Beds from "../Facility/Consultations/Beds";
 import { useState } from "react";
 import { PatientCategoryTailwindClass } from "../../Common/constants";
 import { PatientCategory } from "../Facility/models";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
@@ -21,6 +24,7 @@ export default function PatientInfoCard(props: {
   fetchPatientData?: (state: { aborted: boolean }) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [showLinkABHANumber, setShowLinkABHANumber] = useState(false);
 
   const patient = props.patient;
   const ip_no = props.ip_no;
@@ -222,6 +226,23 @@ export default function PatientInfoCard(props: {
                 <p className="font-semibold">{action[1]}</p>
               </Link>
             )
+        )}
+        {/* TODO: hide if already linked */}
+        {!patient.abha_number && (
+          <>
+            <ButtonV2
+              className="hover:text-white flex gap-3 justify-start font-semibold"
+              onClick={() => setShowLinkABHANumber(true)}
+            >
+              <CareIcon className="care-l-link" />
+              <p>Link ABHA Number</p>
+            </ButtonV2>
+            <LinkABHANumberModal
+              show={showLinkABHANumber}
+              onClose={() => setShowLinkABHANumber(false)}
+              patientId={patient.id as any}
+            />
+          </>
         )}
       </div>
     </section>

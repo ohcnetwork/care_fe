@@ -114,6 +114,9 @@ export interface PatientModel {
   };
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
+
+  // ABDM related
+  abha_number?: string;
 }
 
 export interface SampleTestModel {
@@ -172,7 +175,7 @@ export interface SampleReportModel {
     address?: string;
     pincode?: string;
     passport_no?: string;
-    aadhar_no?: string;
+    aadhaar_no?: string;
     local_body_name?: string;
     district_name?: string;
     state_name?: string;

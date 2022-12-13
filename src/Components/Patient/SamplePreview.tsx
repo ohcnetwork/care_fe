@@ -851,7 +851,7 @@ export default function SampleReport(props: samplePreviewProps) {
                       <Typography
                         className={`${classes.cellTitle} ${classes.marginRight10}`}
                       >
-                        Patient Aadhar Number
+                        Patient Aadhaar Number
                       </Typography>
                     </Box>
                     <Box width="35%" className={`${classes.cellTBPadding}`}>

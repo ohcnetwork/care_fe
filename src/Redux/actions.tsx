@@ -1,3 +1,4 @@
+import { ICreateHealthIdRequest } from "../Components/ABDM/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
 // User
@@ -798,3 +799,23 @@ export const listAssetTransaction = (params: object) =>
   fireRequest("listAssetTransaction", [], params);
 export const getAssetTransaction = (id: string) =>
   fireRequest("getAssetTransaction", [], {}, { id });
+
+// ABDM related
+
+export const generateAadhaarOtp = (aadhaar: string) =>
+  fireRequest("generateAadhaarOtp", [], { aadhaar });
+
+export const resentAadhaarOtp = (txnId: string) =>
+  fireRequest("resendAadhaarOtp", [], { txnId });
+
+export const verifyAadhaarOtp = (txnId: string, otp: string) =>
+  fireRequest("verifyAadhaarOtp", [], { txnId, otp });
+
+export const generateMobileOtp = (txnId: string, mobile: string) =>
+  fireRequest("generateMobileOtp", [], { txnId, mobile });
+
+export const verifyMobileOtp = (txnId: string, otp: string) =>
+  fireRequest("verifyMobileOtp", [], { txnId, otp });
+
+export const createHealthId = (data: ICreateHealthIdRequest) =>
+  fireRequest("createHealthId", [], data);

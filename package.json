@@ -15,7 +15,7 @@
     "coronasafe Contributors"
   ],
   "homepage": "https://care.coronasafe.in",
-  "proxy": "https://careapi.coronasafe.in",
+  "proxy": "https://next.gigin.dev",
   "main": "./src/index.tsx",
   "keywords": [
     "Coronasafe",

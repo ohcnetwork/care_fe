@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { classNames } from "../../../Utils/utils";
 import FormField from "./FormField";
 import {
   FormFieldBaseProps,
@@ -13,6 +14,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   autoComplete?: string;
   type?: "email" | "password" | "search" | "text" | "number";
   className?: string | undefined;
+  inputClassName?: string | undefined;
   removeDefaultClasses?: true | undefined;
   leading?: React.ReactNode | undefined;
   trailing?: React.ReactNode | undefined;
@@ -42,11 +44,12 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
     <input
       ref={ref as any}
       id={props.id}
-      className={
+      className={classNames(
+        props.inputClassName,
         props.removeDefaultClasses
           ? props.className
           : `peer text-sm block ${padding} w-full rounded placeholder:text-gray-500 bg-gray-200 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out ${borderColor} ${props.className}`
-      }
+      )}
       disabled={props.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}
       placeholder={props.placeholder}
