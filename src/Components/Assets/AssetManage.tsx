@@ -182,22 +182,22 @@ const AssetManage = (props: AssetManageProps) => {
       />
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
-          <div className="w-full md:p-8 p-6 flex flex-col justify-between gap-6">
+          <div className="w-full md:p-8 md:pt-6 p-6 pt-4 flex flex-col justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 justify-between w-full">
-                <div className="flex gap-3">
+                <div className="flex items-center gap-3">
                   <span className="text-2xl md:text-3xl font-bold break-words">
                     {asset?.name}
                   </span>
                   <ButtonV2
                     onClick={handleDownload}
-                    className="tooltip"
+                    className="tooltip p-4"
                     variant="secondary"
                     ghost
                     circle
                   >
                     <CareIcon className="care-l-export text-lg" />
-                    <span className="tooltip-text tooltip-right">
+                    <span className="tooltip-text tooltip-bottom -translate-x-16">
                       Export as JSON
                     </span>
                   </ButtonV2>

@@ -1106,7 +1106,7 @@ button:disabled,
   @apply rounded
 }
 .button-shape-circle { 
-  @apply rounded-full p-2 !important
+  @apply rounded-full
 }
 
 .button-size-small { 
