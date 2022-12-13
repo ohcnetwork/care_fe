@@ -775,6 +775,7 @@ const AssetCreate = (props: AssetProps) => {
                       Customer Support Number *{" "}
                     </label>
                     <PhoneNumberField
+                      enableTollFree
                       value={support_phone}
                       onChange={setSupportPhone}
                       errors={state.errors.support_phone}

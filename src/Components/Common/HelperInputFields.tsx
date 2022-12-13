@@ -29,7 +29,7 @@ import {
 } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { debounce } from "lodash";
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useState } from "react";
 import PhoneInput, { ICountryData } from "react-phone-input-2";
 import "react-phone-input-2/lib/high-res.css";
 
@@ -650,6 +650,8 @@ export const PhoneNumberField = (props: any) => {
     turnOffAutoFormat,
     disabled,
     bgColor,
+    enableTollFree,
+    countryCodeEditable = false,
   } = props;
   const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
   const onChangeHandler = debounce(onChange, 500);
@@ -659,8 +661,15 @@ export const PhoneNumberField = (props: any) => {
     event: ChangeEvent<HTMLInputElement>,
     formattedValue: string
   ) => {
+    const tollFreeCheck = value.slice(2, 6);
+    if (tollFreeCheck === "1800") {
+      setMaxLength(16);
+    } else {
+      setMaxLength(15);
+    }
     onChangeHandler(formattedValue);
   };
+  const [maxLength, setMaxLength] = useState(15);
   return (
     <>
       {label && <InputLabel>{label}</InputLabel>}
@@ -669,14 +678,17 @@ export const PhoneNumberField = (props: any) => {
           inputClass={` ${
             bgColor || " bg-gray-200 "
           }  py-3 text-sm border-gray-200 shadow-none focus:border-primary-400`}
-          countryCodeEditable={false}
+          countryCodeEditable={countryCodeEditable}
           value={value}
           placeholder={placeholder}
           onChange={handleChange}
           country="in"
           disabled={disabled}
           autoFormat={!turnOffAutoFormat}
-          enableLongNumbers={true}
+          enableLongNumbers={enableTollFree}
+          inputProps={{
+            maxLength: maxLength,
+          }}
           {...countryRestriction}
         />
         <div
