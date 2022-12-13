@@ -478,6 +478,15 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
+
+        case "verified_by":
+          if (!state.form[field]) {
+            errors[field] = "Please fill verified by";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+
         default:
           return;
       }
