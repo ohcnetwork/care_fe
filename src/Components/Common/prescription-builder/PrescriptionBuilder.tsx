@@ -21,7 +21,7 @@ const frequencyTips = {
   qwk: "Once a week",
 };
 export const routes = ["Oral", "IV", "IM", "S/C"];
-export const units = ["mg", "ml", "drops", "ampule", "tsp"];
+export const units = ["mg", "g", "ml", "drops", "ampule", "tsp"];
 
 export type PrescriptionType = {
   medicine?: string;
