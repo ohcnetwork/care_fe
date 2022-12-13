@@ -676,6 +676,7 @@ export const PhoneNumberField = (props: any) => {
           country="in"
           disabled={disabled}
           autoFormat={!turnOffAutoFormat}
+          enableLongNumbers={true}
           {...countryRestriction}
         />
         <div
