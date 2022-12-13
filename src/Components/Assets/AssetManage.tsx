@@ -174,6 +174,18 @@ const AssetManage = (props: AssetManageProps) => {
     if (asset) downloadJSON(asset);
   };
 
+  const handleDelete = async () => {
+    const confirm = window.confirm(
+      "Are you sure you want to delete this asset?"
+    );
+    if (asset && confirm) {
+      /*const response = await dispatch(deleteAsset(asset.id));
+      if (response && response.status === "success") {
+        navigate("/assets");
+      }*/
+    }
+  };
+
   return (
     <div className="px-2 pb-2">
       <PageTitle
@@ -235,7 +247,7 @@ const AssetManage = (props: AssetManageProps) => {
                 },
               ].map(detailBlock)}
             </div>
-            <div className="flex flex-col lg:flex-row gap-1">
+            <div className="grid xl:grid-cols-2 grid-cols-1 gap-1">
               <ButtonV2
                 onClick={() =>
                   navigate(
@@ -244,27 +256,29 @@ const AssetManage = (props: AssetManageProps) => {
                 }
                 id="update-asset"
               >
-                <span>
-                  <CareIcon className="care-l-pen h-4 mr-1" />
-                  Update
-                </span>
+                <CareIcon className="care-l-pen h-4 mr-1" />
+                Update
               </ButtonV2>
               {asset?.asset_class && (
                 <ButtonV2
                   onClick={() => navigate(`/assets/${asset?.id}/configure`)}
                   id="configure-asset"
                 >
-                  <span>
-                    <CareIcon className="care-l-setting h-4 mr-1" />
-                    Configure
-                  </span>
+                  <CareIcon className="care-l-setting h-4 mr-1" />
+                  Configure
                 </ButtonV2>
               )}
               <ButtonV2 onClick={handleDownload}>
-                <span>
-                  <i className="fa-solid fa-arrow-down-long mr-1"></i>
-                  Export Asset
-                </span>
+                <CareIcon className="care-l-arrow-down h-4 mr-1" />
+                Export Asset
+              </ButtonV2>
+              <ButtonV2
+                onClick={handleDelete}
+                variant={"danger"}
+                className="inline-flex"
+              >
+                <CareIcon className="care-l-trash h-4 mr-1" />
+                Delete
               </ButtonV2>
             </div>
           </div>
