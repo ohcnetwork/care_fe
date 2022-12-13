@@ -247,7 +247,7 @@ const AssetManage = (props: AssetManageProps) => {
                 },
               ].map(detailBlock)}
             </div>
-            <div className="grid xl:grid-cols-2 grid-cols-1 gap-1">
+            <div className="flex flex-col md:flex-row gap-1">
               <ButtonV2
                 onClick={() =>
                   navigate(
@@ -264,12 +264,12 @@ const AssetManage = (props: AssetManageProps) => {
                   onClick={() => navigate(`/assets/${asset?.id}/configure`)}
                   id="configure-asset"
                 >
-                  <CareIcon className="care-l-setting h-4 mr-1" />
+                  <CareIcon className="care-l-setting h-4" />
                   Configure
                 </ButtonV2>
               )}
               <ButtonV2 onClick={handleDownload}>
-                <CareIcon className="care-l-arrow-down h-4 mr-1" />
+                <CareIcon className="care-l-arrow-down h-4" />
                 Export Asset
               </ButtonV2>
               <ButtonV2
@@ -277,8 +277,7 @@ const AssetManage = (props: AssetManageProps) => {
                 variant={"danger"}
                 className="inline-flex"
               >
-                <CareIcon className="care-l-trash h-4 mr-1" />
-                Delete
+                <CareIcon className="care-l-trash h-4" />
               </ButtonV2>
             </div>
           </div>
