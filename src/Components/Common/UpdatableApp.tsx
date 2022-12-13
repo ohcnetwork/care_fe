@@ -15,7 +15,13 @@ interface UpdatableAppProps {
 const checkForUpdate = async () => {
   const appVersion = localStorage.getItem(APP_VERSION_KEY);
 
-  const res = await fetch(META_URL);
+  const res = await fetch(META_URL, {
+    headers: {
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+      Expires: "0",
+    },
+  });
 
   if (res.status !== 200) {
     console.error(
