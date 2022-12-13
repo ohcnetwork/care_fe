@@ -237,7 +237,11 @@ const AssetsList = () => {
           <div
             key={asset.id}
             className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
-            onClick={() => navigate(`/assets/${asset.id}`)}
+            onClick={() =>
+              navigate(
+                `facility/${asset?.location_object.facility.id}/assets/${asset.id}`
+              )
+            }
           >
             <div className="md:flex">
               <p className="text-xl flex font-medium capitalize break-words">

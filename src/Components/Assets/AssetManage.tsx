@@ -18,10 +18,11 @@ const Loading = loadable(() => import("../Common/Loading"));
 
 interface AssetManageProps {
   assetId: string;
+  facilityId: string;
 }
 
 const AssetManage = (props: AssetManageProps) => {
-  const { assetId } = props;
+  const { assetId, facilityId } = props;
   const [asset, setAsset] = useState<AssetData>();
   const [isPrintMode, setIsPrintMode] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -178,7 +179,13 @@ const AssetManage = (props: AssetManageProps) => {
     <div className="px-2 pb-2">
       <PageTitle
         title="Asset Details"
-        crumbsReplacements={{ [assetId]: { name: asset?.name } }}
+        crumbsReplacements={{
+          [facilityId]: { name: asset?.location_object.facility.name },
+          assets: { uri: `/assets?facility=${facilityId}` },
+          [assetId]: {
+            name: asset?.name,
+          },
+        }}
       />
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
@@ -239,7 +246,7 @@ const AssetManage = (props: AssetManageProps) => {
               <ButtonV2
                 onClick={() =>
                   navigate(
-                    `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
+                    `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/update`
                   )
                 }
                 id="update-asset"
@@ -251,7 +258,11 @@ const AssetManage = (props: AssetManageProps) => {
               </ButtonV2>
               {asset?.asset_class && (
                 <ButtonV2
-                  onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+                  onClick={() =>
+                    navigate(
+                      `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/configure`
+                    )
+                  }
                   id="configure-asset"
                 >
                   <span>
