@@ -1043,10 +1043,6 @@ button:disabled,
   }
 }
 
-.Button { 
-  @apply font-medium h-min flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500
-}
-
 .button-primary-default { 
   @apply accent-primary-500 bg-primary-500 hover:bg-primary-400 text-white
 }
