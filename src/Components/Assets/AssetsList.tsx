@@ -286,25 +286,33 @@ const AssetsList = () => {
       <div className="flex justify-between items-center">
         <PageTitle title="Assets" breadcrumbs={false} hideBack />
         {authorizedForImportExport && (
-          <DropdownMenu
-            disabled={!facility} // TODO: ask for facility select dialog instead
-            title="Import/Export"
-            icon={<CareIcon className="care-l-import" />}
-            className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500"
-          >
-            <DropdownItem
+          <div className="tooltip">
+            {!facility && (
+              <span className="tooltip-text tooltip-left flex flex-col items-end">
+                <p>Select a facility from the Facilities page and</p>
+                <p>click 'View Assets' from the Manage Facility dropdown</p>
+              </span>
+            )}
+            <DropdownMenu
+              disabled={!facility} // TODO: ask for facility select dialog instead
+              title="Import/Export"
               icon={<CareIcon className="care-l-import" />}
-              onClick={() => setImportAssetModalOpen(true)}
+              className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
             >
-              Import Assets
-            </DropdownItem>
-            <DropdownItem
-              icon={<CareIcon className="care-l-export" />}
-              onClick={handleDownload}
-            >
-              Export Assets
-            </DropdownItem>
-          </DropdownMenu>
+              <DropdownItem
+                icon={<CareIcon className="care-l-import" />}
+                onClick={() => setImportAssetModalOpen(true)}
+              >
+                Import Assets
+              </DropdownItem>
+              <DropdownItem
+                icon={<CareIcon className="care-l-export" />}
+                onClick={handleDownload}
+              >
+                Export Assets
+              </DropdownItem>
+            </DropdownMenu>
+          </div>
         )}
       </div>
       <div className="lg:flex mt-5 space-y-2">
