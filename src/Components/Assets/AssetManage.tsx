@@ -292,6 +292,7 @@ const AssetManage = (props: AssetManageProps) => {
                   className="inline-flex"
                 >
                   <CareIcon className="care-l-trash h-4" />
+                  <span className="md:hidden">Delete</span>
                 </ButtonV2>
               )}
             </div>
