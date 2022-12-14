@@ -247,7 +247,6 @@ const AssetCreate = (props: AssetProps) => {
             .replace(/[^0-9]/g, "")
             .slice(2);
           const checkTollFree = supportPhoneSimple.startsWith("1800");
-          console.log(supportPhoneSimple, checkTollFree);
           if (supportPhoneSimple.length > 10 && !checkTollFree) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
