@@ -3,8 +3,12 @@ import { useState, useCallback, useEffect, ReactElement } from "react";
 import loadable from "@loadable/component";
 import { assetClassProps, AssetData, AssetTransaction } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useDispatch } from "react-redux";
-import { getAsset, listAssetTransaction } from "../../Redux/actions";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  deleteAsset,
+  getAsset,
+  listAssetTransaction,
+} from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
@@ -13,12 +17,19 @@ import { formatDate } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { USER_TYPES } from "../../Common/constants";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface AssetManageProps {
   assetId: string;
 }
+
+const checkAuthority = (type: string, cutoff: string) => {
+  const userAuthority = USER_TYPES.indexOf(type);
+  const cutoffAuthority = USER_TYPES.indexOf(cutoff);
+  return userAuthority >= cutoffAuthority;
+};
 
 const AssetManage = (props: AssetManageProps) => {
   const { assetId } = props;
@@ -34,6 +45,8 @@ const AssetManage = (props: AssetManageProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch<any>();
   const limit = 14;
+  const { currentUser }: any = useSelector((state) => state);
+  const user_type = currentUser.data.user_type;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -179,10 +192,10 @@ const AssetManage = (props: AssetManageProps) => {
       "Are you sure you want to delete this asset?"
     );
     if (asset && confirm) {
-      /*const response = await dispatch(deleteAsset(asset.id));
-      if (response && response.status === "success") {
+      const response = await dispatch(deleteAsset(asset.id));
+      if (response && response.status === 204) {
         navigate("/assets");
-      }*/
+      }
     }
   };
 
@@ -272,13 +285,15 @@ const AssetManage = (props: AssetManageProps) => {
                 <CareIcon className="care-l-arrow-down h-4" />
                 Export Asset
               </ButtonV2>
-              <ButtonV2
-                onClick={handleDelete}
-                variant={"danger"}
-                className="inline-flex"
-              >
-                <CareIcon className="care-l-trash h-4" />
-              </ButtonV2>
+              {checkAuthority(user_type, "DistrictAdmin") && (
+                <ButtonV2
+                  onClick={handleDelete}
+                  variant={"danger"}
+                  className="inline-flex"
+                >
+                  <CareIcon className="care-l-trash h-4" />
+                </ButtonV2>
+              )}
             </div>
           </div>
           <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 flex-shrink-0">
