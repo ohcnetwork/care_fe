@@ -34,7 +34,7 @@
     "@glennsl/bs-json": "^5.0.3",
     "@googlemaps/react-wrapper": "^1.1.35",
     "@googlemaps/typescript-guards": "^2.0.0",
-    "@headlessui/react": "^1.7.5",
+    "@headlessui/react": "^1.7.3",
     "@loadable/component": "^5.15.0",
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
@@ -187,7 +187,7 @@
     "rescript": "^9.1.4",
     "snyk": "^1.618.0",
     "storybook-dark-mode": "^1.1.2",
-    "tailwindcss": "^3.2.4",
+    "tailwindcss": "^3.0.24",
     "yarn-run-all": "^3.1.1"
   },
   "jest": {
