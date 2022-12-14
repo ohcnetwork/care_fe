@@ -31,6 +31,8 @@ import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -581,7 +583,7 @@ export const PatientManager = (props: any) => {
   }
 
   return (
-    <div>
+    <div className="px-6">
       <FacilitiesSelectDialogue
         show={showDialog}
         setSelected={(e) => setSelectedFacility(e)}
@@ -592,44 +594,14 @@ export const PatientManager = (props: any) => {
           setSelectedFacility({ name: "" });
         }}
       />
-      <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-max">
-        <Tooltip
-          title={
-            !isDownloadAllowed ? (
-              <p className="self-end text-sm italic ">
-                * Select a 7 day period
-              </p>
-            ) : (
-              ""
-            )
-          }
-          arrow={true}
-          interactive={true}
-          enterNextDelay={100}
-          enterTouchDelay={0}
-          leaveTouchDelay={1000}
-        >
-          <div className="text-center">
-            <button
-              onClick={handleDownloadFiltered}
-              disabled={!isDownloadAllowed}
-              className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-            >
-              <span>
-                <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
-                {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
-              </span>
-            </button>
-            <CSVLink
-              id="downloadlink"
-              className="hidden"
-              data={DownloadFile}
-              filename={`patients-${now}.csv`}
-              target="_blank"
-            ></CSVLink>
-          </div>
-        </Tooltip>
-        <div className="flex flex-col gap-2">
+      <div className="flex justify-between items-center">
+        <PageTitle
+          title="Patients"
+          hideBack={!facilityId}
+          breadcrumbs={!!facilityId}
+          crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
+        />
+        <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-max">
           <Tooltip
             title={
               !isDownloadAllowed ? (
@@ -646,81 +618,109 @@ export const PatientManager = (props: any) => {
             enterTouchDelay={0}
             leaveTouchDelay={1000}
           >
-            <div>
+            <div className="text-center">
               <button
+                onClick={handleDownloadFiltered}
                 disabled={!isDownloadAllowed}
-                onClick={handleDownloadAll}
                 className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
               >
                 <span>
-                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
-                  DOWNLOAD ALL PATIENTS
+                  <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
+                  {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
                 </span>
               </button>
+              <CSVLink
+                id="downloadlink"
+                className="hidden"
+                data={DownloadFile}
+                filename={`patients-${now}.csv`}
+                target="_blank"
+              ></CSVLink>
             </div>
           </Tooltip>
-        </div>
-        <div>
-          <button
-            className="btn btn-primary w-full md:w-fit sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-            onClick={() => {
-              if (facilityId) {
-                navigate(`/facility/${facilityId}/patient`);
-              } else {
-                setShowDialog(true);
+          <div className="flex flex-col gap-2">
+            <Tooltip
+              title={
+                !isDownloadAllowed ? (
+                  <p className="self-end text-sm italic ">
+                    * Select a 7 day period
+                  </p>
+                ) : (
+                  ""
+                )
               }
-            }}
-            data-testid="add-patient-button"
-          >
-            <i className="fas fa-plus mr-2 text-white"></i>
-            <span className="pt-[2px]">Add Details of a Patient</span>
-          </button>
-        </div>
-        <div>
-          <button
-            className="btn btn-primary-ghost w-full md:w-fit"
-            onClick={() => advancedFilter.setShow(true)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="fill-current w-4 h-4 mr-2"
+              arrow={true}
+              interactive={true}
+              enterNextDelay={100}
+              enterTouchDelay={0}
+              leaveTouchDelay={1000}
             >
-              <line x1="8" y1="6" x2="21" y2="6"></line>
-              <line x1="8" y1="12" x2="21" y2="12">
-                {" "}
-              </line>
-              <line x1="8" y1="18" x2="21" y2="18">
-                {" "}
-              </line>
-              <line x1="3" y1="6" x2="3.01" y2="6">
-                {" "}
-              </line>
-              <line x1="3" y1="12" x2="3.01" y2="12">
-                {" "}
-              </line>
-              <line x1="3" y1="18" x2="3.01" y2="18">
-                {" "}
-              </line>
-            </svg>
-            <span>Advanced Filters</span>
-          </button>
+              <div>
+                <button
+                  disabled={!isDownloadAllowed}
+                  onClick={handleDownloadAll}
+                  className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
+                >
+                  <span>
+                    <i className="fa-solid fa-arrow-down-long mr-2"></i>
+                    DOWNLOAD ALL PATIENTS
+                  </span>
+                </button>
+              </div>
+            </Tooltip>
+          </div>
+          <div>
+            <ButtonV2
+              className="flex gap-2 items-center font-semibold"
+              onClick={() => {
+                facilityId
+                  ? navigate(`/facility/${facilityId}/patient`)
+                  : setShowDialog(true);
+              }}
+            >
+              <CareIcon className="care-l-plus text-lg" />
+              <p>Add Patient Details</p>
+            </ButtonV2>
+          </div>
+          <div>
+            <button
+              className="btn btn-primary-ghost w-full md:w-fit"
+              onClick={() => advancedFilter.setShow(true)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="fill-current w-4 h-4 mr-2"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12">
+                  {" "}
+                </line>
+                <line x1="8" y1="18" x2="21" y2="18">
+                  {" "}
+                </line>
+                <line x1="3" y1="6" x2="3.01" y2="6">
+                  {" "}
+                </line>
+                <line x1="3" y1="12" x2="3.01" y2="12">
+                  {" "}
+                </line>
+                <line x1="3" y1="18" x2="3.01" y2="18">
+                  {" "}
+                </line>
+              </svg>
+              <span>Advanced Filters</span>
+            </button>
+          </div>
         </div>
       </div>
-      <PageTitle
-        title="Patients"
-        hideBack={!facilityId}
-        breadcrumbs={!!facilityId}
-        crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
-        className="md:mt-[-15px]"
-      />
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-24px]">
         <div>
           <div className="flex flex-col mt-2">
