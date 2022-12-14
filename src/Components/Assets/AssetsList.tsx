@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
@@ -21,10 +21,12 @@ import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
-import ButtonV2 from "../Common/components/ButtonV2";
 import AssetImportModal from "./AssetImportModal";
 import { FacilityModel } from "../Facility/models";
-import { USER_TYPES } from "../../Common/constants";
+import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
+import AuthorizeFor from "../../Utils/AuthorizeFor";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -150,14 +152,9 @@ const AssetsList = () => {
     }
   };
 
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-
-  const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
-
-  const showAssetImportExport =
-    USER_TYPES.findIndex((type) => type == currentUser.data.user_type) >=
-    DISTRICT_ADMIN_LEVEL;
+  const authorizedForImportExport = useIsAuthorized(
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+  );
 
   const checkValidAssetId = async (assetId: any) => {
     const assetData: any = await dispatch(getAsset(assetId));
@@ -286,7 +283,30 @@ const AssetsList = () => {
 
   return (
     <div className="px-6">
-      <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
+      <div className="flex justify-between items-center">
+        <PageTitle title="Assets" breadcrumbs={false} hideBack />
+        {authorizedForImportExport && (
+          <DropdownMenu
+            disabled={!facility} // TODO: ask for facility select dialog instead
+            title="Import/Export"
+            icon={<CareIcon className="care-l-import" />}
+            className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500"
+          >
+            <DropdownItem
+              icon={<CareIcon className="care-l-import" />}
+              onClick={() => setImportAssetModalOpen(true)}
+            >
+              Import Assets
+            </DropdownItem>
+            <DropdownItem
+              icon={<CareIcon className="care-l-export" />}
+              onClick={handleDownload}
+            >
+              Export Assets
+            </DropdownItem>
+          </DropdownMenu>
+        )}
+      </div>
       <div className="lg:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
@@ -329,41 +349,6 @@ const AssetsList = () => {
               <i className="fas fa-search mr-1"></i> Scan Asset QR
             </button>
           </div>
-          {showAssetImportExport && (
-            <div className="w-full tooltip flex flex-col md:flex-row gap-2">
-              {!facility ? (
-                <span className="tooltip-text tooltip-left">
-                  <p className="self-end text-sm italic ">
-                    * Select a facility
-                  </p>
-                </span>
-              ) : (
-                ""
-              )}
-              <ButtonV2
-                className="w-1/2"
-                disabled={!facility}
-                onClick={() => {
-                  setImportAssetModalOpen(true);
-                }}
-              >
-                <span>
-                  <i className="fa-solid fa-arrow-up-long mr-2"></i>
-                  Import Assets
-                </span>
-              </ButtonV2>
-              <ButtonV2
-                className="w-1/2"
-                disabled={!facility}
-                onClick={handleDownload}
-              >
-                <span>
-                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
-                  Export Assets
-                </span>
-              </ButtonV2>
-            </div>
-          )}
         </div>
       </div>
       <div>
