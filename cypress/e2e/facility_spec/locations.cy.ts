@@ -9,11 +9,9 @@ describe("Location Management Section", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/");
-    cy.get("a")
-      .should("contain", "Facility")
-      .contains("Facility")
-      .click({ force: true });
-    cy.contains("Manage Locations").click();
+    cy.get("[name='facility-details']").first().click();
+    cy.get("[id=manage-facility-dropdown]").should("exist").click();
+    cy.get("[id=location-management]").click();
   });
 
   it("Adds Location", () => {
