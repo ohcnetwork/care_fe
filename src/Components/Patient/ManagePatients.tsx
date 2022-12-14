@@ -33,6 +33,7 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
+import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -60,8 +61,6 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
-
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
   Stable: "STABLE",
@@ -77,7 +76,12 @@ export const PatientManager = (props: any) => {
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [DownloadFile, setDownloadFile] = useState("");
+  const [exporting, setExporting] = useState(false);
+  const [csvLinkProps, setCsvLinkProps] = useState({
+    id: "csv-download-link",
+    filename: "",
+    data: "",
+  });
   const {
     qParams,
     updateQuery,
@@ -197,24 +201,19 @@ export const PatientManager = (props: any) => {
     !durations.every((x) => x === 0);
 
   let managePatients: any = null;
-  const handleDownload = async (isFiltered: boolean) => {
-    const filters = {
-      ...params,
-      csv: true,
-      facility: facilityId,
-    };
+
+  const exportCsv = async (isFiltered: boolean) => {
+    setExporting(true);
+    const timestamp = moment().format("DD-MM-YYYY:hh:mm:ss");
+    const filename = `patients-${timestamp}.csv`;
+    const filters = { ...params, csv: true, facility: facilityId };
     if (!isFiltered) delete filters.is_active;
     const res = await dispatch(getAllPatient(filters, "downloadPatients"));
-    if (res && res.data && res.status === 200) {
-      setDownloadFile(res.data);
-      document.getElementById("downloadlink")?.click();
+    if (res.status === 200) {
+      setCsvLinkProps({ ...csvLinkProps, filename, data: res.data });
+      document.getElementById(csvLinkProps.id)?.click();
     }
-  };
-  const handleDownloadAll = async () => {
-    await handleDownload(false);
-  };
-  const handleDownloadFiltered = async () => {
-    await handleDownload(true);
+    setExporting(false);
   };
 
   useEffect(() => {
@@ -601,123 +600,75 @@ export const PatientManager = (props: any) => {
           breadcrumbs={!!facilityId}
           crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
         />
-        <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-max">
-          <Tooltip
-            title={
-              !isDownloadAllowed ? (
-                <p className="self-end text-sm italic ">
-                  * Select a 7 day period
-                </p>
-              ) : (
-                ""
-              )
-            }
-            arrow={true}
-            interactive={true}
-            enterNextDelay={100}
-            enterTouchDelay={0}
-            leaveTouchDelay={1000}
+        <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
+          <ButtonV2
+            className="flex gap-2 items-center font-semibold"
+            onClick={() => {
+              facilityId
+                ? navigate(`/facility/${facilityId}/patient`)
+                : setShowDialog(true);
+            }}
           >
-            <div className="text-center">
-              <button
-                onClick={handleDownloadFiltered}
-                disabled={!isDownloadAllowed}
-                className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-              >
-                <span>
-                  <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
-                  {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
-                </span>
-              </button>
-              <CSVLink
-                id="downloadlink"
-                className="hidden"
-                data={DownloadFile}
-                filename={`patients-${now}.csv`}
-                target="_blank"
-              ></CSVLink>
-            </div>
-          </Tooltip>
-          <div className="flex flex-col gap-2">
-            <Tooltip
-              title={
-                !isDownloadAllowed ? (
-                  <p className="self-end text-sm italic ">
-                    * Select a 7 day period
-                  </p>
-                ) : (
-                  ""
-                )
-              }
-              arrow={true}
-              interactive={true}
-              enterNextDelay={100}
-              enterTouchDelay={0}
-              leaveTouchDelay={1000}
+            <CareIcon className="care-l-plus text-lg" />
+            <p>Add Patient Details</p>
+          </ButtonV2>
+          <button
+            className="btn btn-primary-ghost w-full lg:w-fit"
+            onClick={() => advancedFilter.setShow(true)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="fill-current w-4 h-4 mr-2"
             >
-              <div>
-                <button
-                  disabled={!isDownloadAllowed}
-                  onClick={handleDownloadAll}
-                  className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-                >
-                  <span>
-                    <i className="fa-solid fa-arrow-down-long mr-2"></i>
-                    DOWNLOAD ALL PATIENTS
-                  </span>
-                </button>
-              </div>
-            </Tooltip>
-          </div>
-          <div>
-            <ButtonV2
-              className="flex gap-2 items-center font-semibold"
-              onClick={() => {
-                facilityId
-                  ? navigate(`/facility/${facilityId}/patient`)
-                  : setShowDialog(true);
-              }}
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12">
+                {" "}
+              </line>
+              <line x1="8" y1="18" x2="21" y2="18">
+                {" "}
+              </line>
+              <line x1="3" y1="6" x2="3.01" y2="6">
+                {" "}
+              </line>
+              <line x1="3" y1="12" x2="3.01" y2="12">
+                {" "}
+              </line>
+              <line x1="3" y1="18" x2="3.01" y2="18">
+                {" "}
+              </line>
+            </svg>
+            <span>Advanced Filters</span>
+          </button>
+          <div className="tooltip">
+            <CSVLink hidden target="_blank" {...csvLinkProps} />
+            <DropdownMenu
+              disabled={exporting || !isDownloadAllowed}
+              title={exporting ? "Exporting..." : "Export"}
+              icon={<CareIcon className="care-l-export" />}
+              className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
             >
-              <CareIcon className="care-l-plus text-lg" />
-              <p>Add Patient Details</p>
-            </ButtonV2>
-          </div>
-          <div>
-            <button
-              className="btn btn-primary-ghost w-full md:w-fit"
-              onClick={() => advancedFilter.setShow(true)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="fill-current w-4 h-4 mr-2"
-              >
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12">
-                  {" "}
-                </line>
-                <line x1="8" y1="18" x2="21" y2="18">
-                  {" "}
-                </line>
-                <line x1="3" y1="6" x2="3.01" y2="6">
-                  {" "}
-                </line>
-                <line x1="3" y1="12" x2="3.01" y2="12">
-                  {" "}
-                </line>
-                <line x1="3" y1="18" x2="3.01" y2="18">
-                  {" "}
-                </line>
-              </svg>
-              <span>Advanced Filters</span>
-            </button>
+              <DropdownItem onClick={() => exportCsv(true)}>
+                {tabValue === 0 ? "Live patients" : "Discharged patients"}
+              </DropdownItem>
+              <DropdownItem onClick={() => exportCsv(false)}>
+                All patients
+              </DropdownItem>
+            </DropdownMenu>
+
+            <CSVLink hidden target="_blank" {...csvLinkProps} />
+            {!isDownloadAllowed && (
+              <span className="tooltip-text tooltip-left translate-y-3">
+                Select a seven day period
+              </span>
+            )}
           </div>
         </div>
       </div>

@@ -169,9 +169,11 @@ export const HospitalList = () => {
     setExporting(true);
     const timestamp = moment().format("DD-MM-YYYY:hh:mm:ss");
     const filename = `${filenamePrefix}-${timestamp}.csv`;
-    const { data } = await dispatchAction(action());
-    setCsvLinkProps({ ...csvLinkProps, filename, data });
-    document.getElementById("csv-download-link")?.click();
+    const res = await dispatchAction(action);
+    if (res.status === 200) {
+      setCsvLinkProps({ ...csvLinkProps, filename, data: res.data });
+      document.getElementById(csvLinkProps.id)?.click();
+    }
     setExporting(false);
   };
 
@@ -236,29 +238,25 @@ export const HospitalList = () => {
           disabled={exporting}
           title={exporting ? "Exporting..." : "Export"}
           icon={<CareIcon className="care-l-export" />}
-          className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
+          className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500"
         >
           <DropdownItem
-            icon={<CareIcon className="care-l-hospital" />}
-            onClick={() => exportCsv("facilities", downloadFacility)}
+            onClick={() => exportCsv("facilities", downloadFacility())}
           >
             Facilities
           </DropdownItem>
           <DropdownItem
-            icon={<CareIcon className="care-l-percentage" />}
-            onClick={() => exportCsv("capacities", downloadFacilityCapacity)}
+            onClick={() => exportCsv("capacities", downloadFacilityCapacity())}
           >
             Capacities
           </DropdownItem>
           <DropdownItem
-            icon={<CareIcon className="care-l-user-md" />}
-            onClick={() => exportCsv("doctors", downloadFacilityDoctors)}
+            onClick={() => exportCsv("doctors", downloadFacilityDoctors())}
           >
             Doctors
           </DropdownItem>
           <DropdownItem
-            icon={<CareIcon className="care-l-notes" />}
-            onClick={() => exportCsv("triages", downloadFacilityTriage)}
+            onClick={() => exportCsv("triages", downloadFacilityTriage())}
           >
             Triages
           </DropdownItem>
