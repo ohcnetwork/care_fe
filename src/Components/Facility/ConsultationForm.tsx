@@ -480,7 +480,11 @@ export const ConsultationForm = (props: any) => {
         }
 
         case "verified_by":
-          if (!state.form[field]) {
+          if (
+            !state.form[field] ||
+            state.form[field] === " " ||
+            !state.form[field].replace(/\s/g, "").length
+          ) {
             errors[field] = "Please fill verified by";
             if (!error_div) error_div = field;
             invalidForm = true;
