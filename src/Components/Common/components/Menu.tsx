@@ -35,7 +35,7 @@ export default function DropdownMenu({
           <CareIcon className="ml-2 -mr-1 -mb-0.5 care-l-angle-down text-lg" />
         </Menu.Button>
         <DropdownTransition>
-          <Menu.Items className="absolute right-0 mt-2 py-1 min-w-full sm:min-w-[250px] origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <Menu.Items className="z-10 absolute right-0 mt-2 py-1 min-w-full sm:min-w-[250px] origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <>{props.children}</>
           </Menu.Items>
         </DropdownTransition>

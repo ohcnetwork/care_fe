@@ -2,8 +2,7 @@ import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-
-import { DOWNLOAD_TYPES, FACILITY_TYPES } from "../../Common/constants";
+import { FACILITY_TYPES } from "../../Common/constants";
 import {
   getPermittedFacilities,
   downloadFacility,
@@ -15,27 +14,21 @@ import {
   getLocalBody,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
-
-import { InputLabel } from "@material-ui/core";
 import { FacilityModel } from "./models";
 import { CSVLink } from "react-csv";
 import moment from "moment";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import GetAppIcon from "@material-ui/icons/GetApp";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
-import SelectMenu from "../Common/components/SelectMenu";
-import AccordionV2 from "../Common/components/AccordionV2";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { FacilityCard } from "./FacilityCard";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export const HospitalList = () => {
   const {
@@ -53,20 +46,18 @@ export const HospitalList = () => {
   let manageFacilities: any = null;
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [DownloadFile, setDownloadFile] = useState("");
-  const [capacityDownloadFile, setCapacityDownloadFile] = useState("");
-  const [doctorsDownloadFile, setDoctorsDownloadFile] = useState("");
-  const [triageDownloadFile, setTriageDownloadFile] = useState("");
-  const downloadTypes = [...DOWNLOAD_TYPES];
-  const [downloadSelect, setdownloadSelect] = useState("Facility List");
+  const [exporting, setExporting] = useState(false);
+  const [csvLinkProps, setCsvLinkProps] = useState({
+    id: "csv-download-link",
+    filename: "",
+    data: "",
+  });
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const userType = currentUser.data.user_type;
-  // state to change download button to loading while file is not ready
-  const [downloadLoading, setDownloadLoading] = useState(false);
   const { t } = useTranslation();
 
   const fetchData = useCallback(
@@ -174,44 +165,14 @@ export const HospitalList = () => {
     return facility_type?.text;
   };
 
-  const handleDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatchAction(downloadFacility());
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById("facilityDownloader")?.click();
-  };
-
-  const handleCapacityDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const cap = await dispatchAction(downloadFacilityCapacity());
-    // file ready to download
-    setDownloadLoading(false);
-    setCapacityDownloadFile(cap.data);
-    document.getElementById("capacityDownloader")?.click();
-  };
-
-  const handleDoctorsDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const doc = await dispatchAction(downloadFacilityDoctors());
-    // file ready to download
-    setDownloadLoading(false);
-    setDoctorsDownloadFile(doc.data);
-    document.getElementById("doctorsDownloader")?.click();
-  };
-
-  const handleTriageDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const tri = await dispatchAction(downloadFacilityTriage());
-    // file ready to download
-    setDownloadLoading(false);
-    setTriageDownloadFile(tri.data);
-    document.getElementById("triageDownloader")?.click();
+  const exportCsv = async (filenamePrefix: string, action: any) => {
+    setExporting(true);
+    const timestamp = moment().format("DD-MM-YYYY:hh:mm:ss");
+    const filename = `${filenamePrefix}-${timestamp}.csv`;
+    const { data } = await dispatchAction(action());
+    setCsvLinkProps({ ...csvLinkProps, filename, data });
+    document.getElementById("csv-download-link")?.click();
+    setExporting(false);
   };
 
   const hasFiltersApplied = (qParams: any) => {
@@ -223,23 +184,6 @@ export const HospitalList = () => {
       qParams.kasp_empanelled ||
       qParams?.search
     );
-  };
-
-  const handleDownloader = () => {
-    switch (downloadSelect) {
-      case "Facility List":
-        handleDownload();
-        break;
-      case "Facility Capacity List":
-        handleCapacityDownload();
-        break;
-      case "Facility Doctors List":
-        handleDoctorsDownload();
-        break;
-      case "Facility Triage Data":
-        handleTriageDownload();
-        break;
-    }
   };
 
   let facilityList: any[] = [];
@@ -285,85 +229,40 @@ export const HospitalList = () => {
 
   return (
     <div className="px-6">
-      <div className="grid md:grid-cols-2">
-        <PageTitle
-          title={t("Facilities")}
-          hideBack={true}
-          breadcrumbs={false}
-        />
-
-        <div className="flex md:justify-end w-full md:mt-4">
-          <div className="w-full md:w-auto">
-            <AccordionV2
-              title={<p className="pl-2 text-lg">Downloads</p>}
-              className="lg:mt-0 md:mt-0 sm:mt-0 bg-white shadow-md rounded-lg p-2 relative"
-              expandIcon={<ExpandMoreIcon />}
-            >
-              <div className="mt-3">
-                <InputLabel className="text-sm mb-2">
-                  {t("download_type")}
-                </InputLabel>
-                <div className="flex flex-row gap-6">
-                  <SelectMenu
-                    options={[
-                      ...downloadTypes.map((download) => ({
-                        title: download,
-                        value: download,
-                      })),
-                    ]}
-                    selected={downloadSelect}
-                    onSelect={setdownloadSelect}
-                    position="left"
-                    parentRelative={false}
-                  />
-                  {downloadLoading ? (
-                    <div className="px-2 ml-2 my-2 pt-1 rounded">
-                      <CircularProgress className="text-primary-600 w-6 h-6" />
-                    </div>
-                  ) : (
-                    <button
-                      className="bg-primary-600 hover:shadow-md px-2 rounded-full"
-                      onClick={handleDownloader}
-                      disabled={downloadLoading}
-                    >
-                      <GetAppIcon style={{ color: "white" }} />
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div className="hidden">
-                <CSVLink
-                  data={DownloadFile}
-                  filename={`facilities-${now}.csv`}
-                  target="_blank"
-                  className="hidden"
-                  id="facilityDownloader"
-                ></CSVLink>
-                <CSVLink
-                  data={capacityDownloadFile}
-                  filename={`facility-capacity-${now}.csv`}
-                  className="hidden"
-                  id="capacityDownloader"
-                  target="_blank"
-                ></CSVLink>
-                <CSVLink
-                  data={doctorsDownloadFile}
-                  filename={`facility-doctors-${now}.csv`}
-                  target="_blank"
-                  className="hidden"
-                  id="doctorsDownloader"
-                ></CSVLink>
-                <CSVLink
-                  data={triageDownloadFile}
-                  filename={`facility-triage-${now}.csv`}
-                  target="_blank"
-                  className="hidden"
-                  id="triageDownloader"
-                ></CSVLink>
-              </div>
-            </AccordionV2>
-          </div>
-        </div>
+      <div className="flex justify-between items-center">
+        <PageTitle title={t("Facilities")} breadcrumbs={false} hideBack />
+        <CSVLink hidden target="_blank" {...csvLinkProps} />
+        <DropdownMenu
+          disabled={exporting}
+          title={exporting ? "Exporting..." : "Export"}
+          icon={<CareIcon className="care-l-export" />}
+          className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
+        >
+          <DropdownItem
+            icon={<CareIcon className="care-l-hospital" />}
+            onClick={() => exportCsv("facilities", downloadFacility)}
+          >
+            Facilities
+          </DropdownItem>
+          <DropdownItem
+            icon={<CareIcon className="care-l-percentage" />}
+            onClick={() => exportCsv("capacities", downloadFacilityCapacity)}
+          >
+            Capacities
+          </DropdownItem>
+          <DropdownItem
+            icon={<CareIcon className="care-l-user-md" />}
+            onClick={() => exportCsv("doctors", downloadFacilityDoctors)}
+          >
+            Doctors
+          </DropdownItem>
+          <DropdownItem
+            icon={<CareIcon className="care-l-notes" />}
+            onClick={() => exportCsv("triages", downloadFacilityTriage)}
+          >
+            Triages
+          </DropdownItem>
+        </DropdownMenu>
       </div>
       <div className="lg:flex gap-2 mt-4">
         <div className="bg-white overflow-hidden shadow rounded-lg md:mr-2 min-w-fit flex-1">
