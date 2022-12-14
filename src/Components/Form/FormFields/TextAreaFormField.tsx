@@ -1,3 +1,4 @@
+import { classNames } from "../../../Utils/utils";
 import FormField from "./FormField";
 import {
   FormFieldBaseProps,
@@ -17,14 +18,15 @@ const TextAreaFormField = ({ rows = 3, ...props }: TextAreaFormFieldProps) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
 
-  const bgColor = error ? "bg-red-50" : "bg-gray-200";
-  const borderColor = error ? "border-red-500" : "border-gray-200";
-
   return (
     <FormField props={props}>
       <textarea
         id={props.id}
-        className={`text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out resize-none ${bgColor} ${borderColor}`}
+        className={classNames(
+          "shadow-none text-sm block py-3 px-4 w-full rounded text-secondary-900 placeholder:text-secondary-400 border focus:border-primary-400 invalid:border-danger-500 outline-none ring-0 focus:ring-1 transition-all duration-200 ease-in-out resize-none",
+          error ? "bg-white" : "bg-white",
+          error ? "border-danger-500" : "border-secondary-300"
+        )}
         disabled={props.disabled}
         rows={rows}
         placeholder={props.placeholder}
