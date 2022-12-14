@@ -27,6 +27,8 @@ import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
 import AuthorizeFor from "../../Utils/AuthorizeFor";
+import ButtonV2 from "../Common/components/ButtonV2";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -51,6 +53,11 @@ const AssetsList = () => {
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
+  const [showFacilityDialog, setShowFacilityDialog] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
+    name: "",
+  });
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -350,12 +357,20 @@ const AssetsList = () => {
                 setShowFilters={() => advancedFilter.setShow(true)}
               />
             </div>
-            <button
-              className="btn btn-primary w-full"
+            <ButtonV2
+              className="w-full"
               onClick={() => setIsScannerActive(true)}
             >
               <i className="fas fa-search mr-1"></i> Scan Asset QR
-            </button>
+            </ButtonV2>
+          </div>
+          <div className="flex flex-col md:flex-row w-full">
+            <ButtonV2
+              className="w-full inline-flex items-center justify-center"
+              onClick={() => setShowFacilityDialog(true)}
+            >
+              <CareIcon className="care-l-plus-circle h-5 mr-1" /> Create Asset
+            </ButtonV2>
           </div>
         </div>
       </div>
@@ -394,6 +409,16 @@ const AssetsList = () => {
           facility={facility}
         />
       )}
+      <FacilitiesSelectDialogue
+        show={showFacilityDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() => navigate(`facility/${selectedFacility.id}/assets/new`)}
+        handleCancel={() => {
+          setShowFacilityDialog(false);
+          setSelectedFacility({ name: "" });
+        }}
+      />
     </div>
   );
 };
