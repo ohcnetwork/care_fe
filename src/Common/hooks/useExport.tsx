@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { MouseEventHandler, useState } from "react";
 import { useDispatch } from "react-redux";
 import DropdownMenu from "../../Components/Common/components/Menu";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { CSVLink } from "react-csv";
+import ButtonV2 from "../../Components/Common/components/ButtonV2";
 
 interface CSVLinkProps {
   id: string;
@@ -14,6 +15,13 @@ interface ExportMenuProps {
   disabled?: boolean | undefined;
   label?: string;
   children: JSX.Element | JSX.Element[];
+}
+
+interface ExportButtonProps {
+  disabled?: boolean | undefined;
+  tooltip?: string | undefined;
+  tooltipClassName?: string;
+  onClick: MouseEventHandler<HTMLElement>;
 }
 
 export default function useExport() {
@@ -58,6 +66,8 @@ export default function useExport() {
     setIsExporting(false);
   };
 
+  const _CSVLink = () => <CSVLink hidden target="_blank" {...csvLinkProps} />;
+
   const ExportMenu = ({
     label = "Export",
     disabled,
@@ -65,7 +75,7 @@ export default function useExport() {
   }: ExportMenuProps) => {
     return (
       <>
-        <CSVLink hidden target="_blank" {...csvLinkProps} />
+        <_CSVLink />
         <DropdownMenu
           disabled={isExporting || disabled}
           title={isExporting ? "Exporting..." : label}
@@ -78,9 +88,40 @@ export default function useExport() {
     );
   };
 
+  const ExportButton = ({
+    tooltip,
+    tooltipClassName = "tooltip-bottom -translate-x-16",
+    disabled,
+    onClick,
+  }: ExportButtonProps) => {
+    return (
+      <>
+        <_CSVLink />
+        <ButtonV2
+          disabled={isExporting || disabled}
+          onClick={onClick}
+          className="tooltip p-4"
+          variant="secondary"
+          ghost
+          circle
+        >
+          <CareIcon className="care-l-export text-lg" />
+          {tooltip && (
+            <span className={`tooltip-text ${tooltipClassName}`}>
+              {tooltip || "Export"}
+            </span>
+          )}
+        </ButtonV2>
+      </>
+    );
+  };
+
   return {
     isExporting,
+
     ExportMenu,
+    ExportButton,
+
     exportCSV,
     exportJSON,
   };
