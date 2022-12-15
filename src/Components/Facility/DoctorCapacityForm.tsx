@@ -1,8 +1,6 @@
-import { Button, Card, CardContent, Grid, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import React, { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -13,13 +11,14 @@ import {
   getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  ErrorHelperText,
-  NativeSelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { ErrorHelperText } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
 import { goBack } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+
 const Loading = loadable(() => import("../../Components/Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -27,13 +26,7 @@ interface DoctorCapacityProps extends DoctorModal {
   facilityId: number;
 }
 
-const initDoctorTypes: Array<OptionsType> = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...DOCTOR_SPECIALIZATION,
-];
+const initDoctorTypes: Array<OptionsType> = [...DOCTOR_SPECIALIZATION];
 
 const initForm: any = {
   area: "",
@@ -155,9 +148,9 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   }, [doctorTypes]);
 
   const validateData = () => {
-    let errors = { ...initForm };
+    const errors = { ...initForm };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field, _i) => {
       if (!state.form[field]) {
         errors[field] = "Field is required";
         invalidForm = true;
@@ -172,12 +165,12 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
-    form[e.target.name] = e.target.value;
+    const form = { ...state.form };
+    form[e.name] = e.value;
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any, btnType: string = "Save") => {
+  const handleSubmit = async (e: any, btnType = "Save") => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
@@ -232,99 +225,91 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         }}
       />
       <div>
-        <Card style={{ marginTop: "10px" }}>
+        <div className="mt-4 shadow-md rounded bg-white">
           <form
             onSubmit={(e) => {
               handleSubmit(e);
             }}
           >
-            <CardContent>
-              <InputLabel
+            <div className="p-4">
+              <label
                 htmlFor="area-of-specialization"
                 id="demo-simple-select-outlined-label"
+                className="mb-2"
               >
                 Area of specialization*
-              </InputLabel>
-              <NativeSelectField
+              </label>
+              <SelectMenuV2
                 id="area-of-specialization"
-                name="area"
-                variant="outlined"
-                value={state.form.area}
-                options={doctorTypes}
-                onChange={handleChange}
+                value={doctorTypes.find((type) => type.id == state.form.area)}
+                options={doctorTypes.filter((type) => !type.disabled)}
+                optionLabel={(option) => option.text}
+                onChange={(e) =>
+                  handleChange({ name: "area", value: (e && e.id) || "" })
+                }
                 disabled={!!id}
               />
               <ErrorHelperText error={state.errors.area} />
-            </CardContent>
-            <CardContent>
-              <InputLabel
+            </div>
+            <div className="p-4">
+              <label
                 htmlFor="count"
                 id="demo-simple-select-outlined-label"
+                className="mb-2"
               >
                 Count*
-              </InputLabel>
-              <TextInputField
+              </label>
+              <TextFormField
                 id="count"
                 name="count"
-                variant="outlined"
-                margin="dense"
                 type="number"
-                InputLabelProps={{ shrink: !!state.form.count }}
                 value={state.form.count}
-                onChange={handleChange}
-                errors={state.errors.count}
+                onChange={(e) =>
+                  handleChange({ name: "count", value: e.value })
+                }
+                error={state.errors.count}
               />
-            </CardContent>
-            <CardContent>
-              <Grid container spacing={2} className="flex justify-between">
-                <Grid item className="flex flex-row w-full sm:w-auto gap-4">
-                  <Button
+            </div>
+            <div className="p-4">
+              <div className="flex justify-between">
+                <div className="flex flex-row w-full sm:w-auto gap-4">
+                  <ButtonV2
                     id="doctor-cancel"
+                    variant="secondary"
                     className="w-full sm:w-auto"
-                    color="default"
-                    variant="contained"
                     onClick={() => goBack(!id && `/facility/${facilityId}`)}
                   >
                     Cancel
-                  </Button>
-                </Grid>
-                <Grid
-                  item
-                  className="flex flex-row w-full sm:w-auto gap-4 flex-wrap"
-                >
+                  </ButtonV2>
+                </div>
+                <div className="flex flex-row w-full sm:w-auto gap-4 flex-wrap">
                   {!id && !isLastOptionType && (
-                    <Button
+                    <ButtonV2
                       id="doctor-save-and-exit"
                       color="primary"
                       className="w-full sm:w-auto"
-                      variant="contained"
                       type="submit"
-                      startIcon={
-                        <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                      }
                       onClick={(e) => handleSubmit(e, "Save and Exit")}
                     >
+                      <CareIcon className="care-l-check-circle text-lg"></CareIcon>{" "}
                       Save Doctor Capacity
-                    </Button>
+                    </ButtonV2>
                   )}
-                  <Button
+                  <ButtonV2
                     id="doctor-save"
                     color="primary"
                     className="w-full sm:w-auto"
-                    variant="contained"
                     type="submit"
-                    startIcon={
-                      <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                    }
                     onClick={(e) => handleSubmit(e)}
                   >
+                    <CareIcon className="care-l-check-circle text-lg"></CareIcon>{" "}
                     {buttonText}
-                  </Button>
-                </Grid>
-              </Grid>
-            </CardContent>
+                  </ButtonV2>
+                </div>
+              </div>
+            </div>
           </form>
-        </Card>
+        </div>
       </div>
     </div>
   );
