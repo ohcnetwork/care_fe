@@ -386,10 +386,13 @@ export const ConsultationDetails = (props: any) => {
 
       <DialogModal
         title={
-          <span className="flex gap-3 items-center justify-between">
+          <div>
             <p>Discharge patient from CARE</p>
-            <CareIcon className="text-warning-500 care-l-exclamation-triangle text-2xl" />
-          </span>
+            <span className="mt-1 flex gap-1 text-sm text-secondary-500 font-medium">
+              <CareIcon className="care-l-exclamation-triangle text-base" />
+              <p>Caution: this action is irreversible.</p>
+            </span>
+          </div>
         }
         show={openDischargeDialog}
         onClose={handleDischargeClose}
