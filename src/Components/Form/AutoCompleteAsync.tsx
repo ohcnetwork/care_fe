@@ -125,7 +125,7 @@ const AutoCompleteAsync = (props: Props) => {
                               active ? "text-white" : "text-primary-500"
                             }`}
                           >
-                            <i className="fa-solid fa-check" />
+                            <CareIcon className="care-l-check text-lg" />
                           </span>
                         ) : null}
                       </>
@@ -141,13 +141,15 @@ const AutoCompleteAsync = (props: Props) => {
                 <span className="bg-gray-200 border border-gray-400 text-gray-800 rounded-full text-xs px-2 py-1">
                   {optionLabel(option)}
                   <i
-                    className="fa-solid fa-x h-3 w-3 ml-1 text-gray-700 cursor-pointer"
+                    className="h-3 w-3 ml-1 text-lg text-gray-700 cursor-pointer"
                     onClick={() => {
                       onChange(
                         selected.filter((item: any) => item.id !== option.id)
                       );
                     }}
-                  />
+                  >
+                    <CareIcon className="care-l-multiply" />
+                  </i>
                 </span>
               ))}
             </div>
