@@ -32,6 +32,8 @@ import { debounce } from "lodash";
 import React, { ChangeEvent } from "react";
 import PhoneInput, { ICountryData } from "react-phone-input-2";
 import "react-phone-input-2/lib/high-res.css";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "./components/ButtonV2";
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, "onChange"> {
   options: Array<any>;
@@ -649,7 +651,6 @@ export const PhoneNumberField = (props: any) => {
     value,
     turnOffAutoFormat,
     disabled,
-    bgColor,
   } = props;
   const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
   const onChangeHandler = debounce(onChange, 500);
@@ -666,9 +667,7 @@ export const PhoneNumberField = (props: any) => {
       {label && <InputLabel>{label}</InputLabel>}
       <div className="flex items-center">
         <PhoneInput
-          inputClass={` ${
-            bgColor || " bg-gray-200 "
-          }  py-3 text-sm border-gray-200 shadow-none focus:border-primary-400`}
+          inputClass="bg-white py-3 text-sm border border-secondary-300 shadow-none focus:border-primary-400 w-full tracking-widest rounded-r-none border-r-0"
           countryCodeEditable={false}
           value={value}
           placeholder={placeholder}
@@ -678,12 +677,14 @@ export const PhoneNumberField = (props: any) => {
           autoFormat={!turnOffAutoFormat}
           {...countryRestriction}
         />
-        <div
-          className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-          onClick={(_) => onChange("+91")}
+        <ButtonV2
+          className="mt-1 max-h-10 border border-secondary-300 bg-white rounded-l-none border-l-0"
+          variant="secondary"
+          ghost
+          onClick={() => onChange("+91")}
         >
-          <i className="fas fa-times text-red-600" />
-        </div>
+          <CareIcon className="care-l-multiply" />
+        </ButtonV2>
       </div>
       <ErrorHelperText error={errors} />
     </>
