@@ -10,6 +10,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { parsePhoneNumber } from "libphonenumber-js";
 
 export const FacilityCard = (props: { facility: any; userType: any }) => {
   const { facility, userType } = props;
@@ -130,12 +131,14 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 </div>
                 <a
                   href={`tel:${facility.phone_number}`}
-                  className="font-semibold"
+                  className="font-semibold tracking-wider text-sm"
                 >
-                  {facility.phone_number || "-"}
+                  {parsePhoneNumber(
+                    facility.phone_number as string
+                  ).formatInternational() || "-"}
                 </a>
               </div>
-              <div className="bg-gray-50 border-t px-2 md:px-4 py-2 flex-none">
+              <div className="bg-gray-50 border-t px-2 md:px-3 py-1 flex-none">
                 <div className="flex py-2 justify-between">
                   <div className="flex justify-between w-full flex-wrap gap-2">
                     <div>
@@ -222,7 +225,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         border
                         ghost
                       >
-                        <CareIcon className="care-l-user-injured text-lg" />
+                        <CareIcon className="care-l-wheelchair text-lg" />
                         {t("Patients")}
                       </ButtonV2>
                     </div>
