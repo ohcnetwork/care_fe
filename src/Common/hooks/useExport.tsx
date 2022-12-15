@@ -90,7 +90,7 @@ export default function useExport() {
 
   const ExportButton = ({
     tooltip,
-    tooltipClassName = "tooltip-bottom -translate-x-16",
+    tooltipClassName = "tooltip-bottom",
     disabled,
     onClick,
   }: ExportButtonProps) => {
@@ -100,12 +100,16 @@ export default function useExport() {
         <ButtonV2
           disabled={isExporting || disabled}
           onClick={onClick}
-          className="tooltip p-4"
+          className="tooltip p-4 text-lg"
           variant="secondary"
           ghost
           circle
         >
-          <CareIcon className="care-l-export text-lg" />
+          {isExporting ? (
+            <CareIcon className="care-l-spinner-alt animate-spin" />
+          ) : (
+            <CareIcon className="care-l-export" />
+          )}
           {tooltip && (
             <span className={`tooltip-text ${tooltipClassName}`}>
               {tooltip || "Export"}
