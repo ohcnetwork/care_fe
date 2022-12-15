@@ -665,9 +665,9 @@ export const PhoneNumberField = (props: any) => {
   return (
     <>
       {label && <InputLabel>{label}</InputLabel>}
-      <div className="flex items-center">
+      <div className="relative flex items-center">
         <PhoneInput
-          inputClass="bg-white py-3 text-sm border border-secondary-300 shadow-none focus:border-primary-400 w-full tracking-widest rounded-r-none border-r-0"
+          inputClass="bg-white py-3 text-sm border border-secondary-300 shadow-none focus:border-primary-400 w-full tracking-widest"
           countryCodeEditable={false}
           value={value}
           placeholder={placeholder}
@@ -678,7 +678,7 @@ export const PhoneNumberField = (props: any) => {
           {...countryRestriction}
         />
         <ButtonV2
-          className="mt-1 max-h-10 border border-secondary-300 bg-white rounded-l-none border-l-0"
+          className="absolute right-0 mt-1 max-h-10"
           variant="secondary"
           ghost
           onClick={() => onChange("+91")}
