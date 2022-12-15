@@ -308,6 +308,9 @@ export default function SampleViewAdmin() {
     );
   }
 
+  const exportSamples = () =>
+    exportCSV("samples", downloadSampleTests({ ...qParams }));
+
   return (
     <div className="px-6">
       {statusDialog.show && (
@@ -322,13 +325,7 @@ export default function SampleViewAdmin() {
         title="Sample Management System"
         hideBack={true}
         breadcrumbs={false}
-        componentRight={
-          <ExportButton
-            onClick={() =>
-              exportCSV("samples", downloadSampleTests({ ...qParams }))
-            }
-          />
-        }
+        componentRight={<ExportButton onClick={exportSamples} />}
       />
       <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
         <div className="flex flex-col lg:flex-row gap-6 justify-between">
