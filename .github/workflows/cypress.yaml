@@ -55,6 +55,10 @@ jobs:
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: electron
+          record: true
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Remove cypress failed label on success 🏷️
         uses: actions-ecosystem/action-remove-labels@v1

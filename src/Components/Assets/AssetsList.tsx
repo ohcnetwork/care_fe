@@ -25,6 +25,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import AssetImportModal from "./AssetImportModal";
 import { FacilityModel } from "../Facility/models";
 import { USER_TYPES } from "../../Common/constants";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -345,26 +346,22 @@ const AssetsList = () => {
                 ""
               )}
               <ButtonV2
-                className="w-1/2"
+                className="w-1/2 flex gap-2 items-center"
                 disabled={!facility}
                 onClick={() => {
                   setImportAssetModalOpen(true);
                 }}
               >
-                <span>
-                  <i className="fa-solid fa-arrow-up-long mr-2"></i>
-                  Import Assets
-                </span>
+                <CareIcon className="care-l-import text-lg" />
+                <span>Import Assets</span>
               </ButtonV2>
               <ButtonV2
-                className="w-1/2"
+                className="w-1/2 flex gap-2 items-center"
                 disabled={!facility}
                 onClick={handleDownload}
               >
-                <span>
-                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
-                  Export Assets
-                </span>
+                <CareIcon className="care-l-export text-lg" />
+                <span>Export Assets</span>
               </ButtonV2>
             </div>
           )}

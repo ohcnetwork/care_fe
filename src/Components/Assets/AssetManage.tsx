@@ -189,13 +189,27 @@ const AssetManage = (props: AssetManageProps) => {
       />
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
-          <div className="w-full md:p-8 p-6 flex flex-col justify-between gap-6">
+          <div className="w-full md:p-8 md:pt-6 p-6 pt-4 flex flex-col justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 justify-between w-full">
-                <span className="text-2xl md:text-3xl font-bold break-words">
-                  {asset?.name}
-                </span>
-                <div className=" flex flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl md:text-3xl font-bold break-words">
+                    {asset?.name}
+                  </span>
+                  <ButtonV2
+                    onClick={handleDownload}
+                    className="tooltip p-4"
+                    variant="secondary"
+                    ghost
+                    circle
+                  >
+                    <CareIcon className="care-l-export text-lg" />
+                    <span className="tooltip-text tooltip-bottom -translate-x-16">
+                      Export as JSON
+                    </span>
+                  </ButtonV2>
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {asset?.status === "ACTIVE" ? (
                     <Chip color="green" text="Active" startIcon="check" />
                   ) : (
@@ -244,6 +258,7 @@ const AssetManage = (props: AssetManageProps) => {
             </div>
             <div className="flex flex-col lg:flex-row gap-1">
               <ButtonV2
+                className="flex gap-2"
                 onClick={() =>
                   navigate(
                     `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/update`
@@ -251,10 +266,8 @@ const AssetManage = (props: AssetManageProps) => {
                 }
                 id="update-asset"
               >
-                <span>
-                  <CareIcon className="care-l-pen h-4 mr-1" />
-                  Update
-                </span>
+                <CareIcon className="care-l-pen h-4" />
+                <span>Update</span>
               </ButtonV2>
               {asset?.asset_class && (
                 <ButtonV2
@@ -265,18 +278,10 @@ const AssetManage = (props: AssetManageProps) => {
                   }
                   id="configure-asset"
                 >
-                  <span>
-                    <CareIcon className="care-l-setting h-4 mr-1" />
-                    Configure
-                  </span>
+                  <CareIcon className="care-l-setting h-4" />
+                  <span>Configure</span>
                 </ButtonV2>
               )}
-              <ButtonV2 onClick={handleDownload}>
-                <span>
-                  <i className="fa-solid fa-arrow-down-long mr-1"></i>
-                  Export Asset
-                </span>
-              </ButtonV2>
             </div>
           </div>
           <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 flex-shrink-0">
