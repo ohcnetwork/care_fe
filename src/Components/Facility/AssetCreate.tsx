@@ -469,7 +469,7 @@ const AssetCreate = (props: AssetProps) => {
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
-        backUrl={`/facility/${facilityId}`}
+        backUrl={assetId ? `/assets/${assetId}` : `/facility/${facilityId}`}
       />
       <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
         <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
