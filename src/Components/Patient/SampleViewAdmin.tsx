@@ -46,7 +46,6 @@ export default function SampleViewAdmin() {
   const [sample, setSample] = useState<Array<SampleTestModel>>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const { ExportButton, exportCSV } = useExport();
   const [fetchFlag, callFetchData] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [statusDialog, setStatusDialog] = useState<{
@@ -57,6 +56,7 @@ export default function SampleViewAdmin() {
   const { currentUser } = state;
   const userType: "Staff" | "DistrictAdmin" | "StateLabAdmin" =
     currentUser.data.user_type;
+  const { ExportButton } = useExport();
 
   useEffect(() => {
     async function fetchData() {
@@ -308,9 +308,6 @@ export default function SampleViewAdmin() {
     );
   }
 
-  const exportSamples = () =>
-    exportCSV("samples", downloadSampleTests({ ...qParams }));
-
   return (
     <div className="px-6">
       {statusDialog.show && (
@@ -325,7 +322,13 @@ export default function SampleViewAdmin() {
         title="Sample Management System"
         hideBack={true}
         breadcrumbs={false}
-        componentRight={<ExportButton onClick={exportSamples} />}
+        componentRight={
+          <ExportButton
+            action={() => downloadSampleTests({ ...qParams })}
+            filenamePrefix="samples"
+            type="csv"
+          />
+        }
       />
       <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
         <div className="flex flex-col lg:flex-row gap-6 justify-between">

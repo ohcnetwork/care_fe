@@ -1,4 +1,4 @@
-import { MouseEventHandler, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import DropdownMenu from "../../Components/Common/components/Menu";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -21,7 +21,9 @@ interface ExportButtonProps {
   disabled?: boolean | undefined;
   tooltip?: string | undefined;
   tooltipClassName?: string;
-  onClick: MouseEventHandler<HTMLElement>;
+  type: "csv" | "json";
+  action: any;
+  filenamePrefix: string;
 }
 
 export default function useExport() {
@@ -89,17 +91,20 @@ export default function useExport() {
   };
 
   const ExportButton = ({
-    tooltip,
     tooltipClassName = "tooltip-bottom",
-    disabled,
-    onClick,
+    ...props
   }: ExportButtonProps) => {
+    const exportFile = () => {
+      if (props.type === "csv") exportCSV(props.filenamePrefix, props.action);
+      if (props.type === "json") exportJSON(props.filenamePrefix, props.action);
+    };
+
     return (
       <>
         <_CSVLink />
         <ButtonV2
-          disabled={isExporting || disabled}
-          onClick={onClick}
+          disabled={isExporting || props.disabled}
+          onClick={exportFile}
           className="tooltip p-4 text-lg"
           variant="secondary"
           ghost
@@ -110,9 +115,9 @@ export default function useExport() {
           ) : (
             <CareIcon className="care-l-export" />
           )}
-          {tooltip && (
+          {props.tooltip && (
             <span className={`tooltip-text ${tooltipClassName}`}>
-              {tooltip || "Export"}
+              {props.tooltip || "Export"}
             </span>
           )}
         </ButtonV2>

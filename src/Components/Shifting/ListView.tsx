@@ -38,13 +38,7 @@ export default function ListView() {
     externalId: undefined,
     loading: false,
   });
-  const { ExportButton, exportCSV } = useExport();
-
-  const exportShiftRequests = (qParams: any) =>
-    exportCSV(
-      "shift_requests",
-      downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
-    );
+  const { ExportButton } = useExport();
 
   const handleTransferComplete = (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
@@ -308,7 +302,15 @@ export default function ListView() {
         <PageTitle
           title="Shifting"
           hideBack
-          componentRight={<ExportButton onClick={exportShiftRequests} />}
+          componentRight={
+            <ExportButton
+              action={() =>
+                downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
+              }
+              type="csv"
+              filenamePrefix="shift_requests"
+            />
+          }
           breadcrumbs={false}
         />
 

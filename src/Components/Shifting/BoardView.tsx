@@ -29,13 +29,7 @@ export default function BoardView() {
   });
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [isLoading] = useState(false);
-  const { ExportButton, exportCSV } = useExport();
-
-  const exportShiftRequests = (qParams: any) =>
-    exportCSV(
-      "shift_requests",
-      downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
-    );
+  const { ExportButton } = useExport();
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
@@ -45,7 +39,15 @@ export default function BoardView() {
             title="Shifting"
             className="mx-3 md:mx-5"
             hideBack
-            componentRight={<ExportButton onClick={exportShiftRequests} />}
+            componentRight={
+              <ExportButton
+                action={() =>
+                  downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
+                }
+                type="csv"
+                filenamePrefix="shift_requests"
+              />
+            }
             breadcrumbs={false}
           />
         </div>
