@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { classNames } from "../../../Utils/utils";
 import FormField from "./FormField";
 import {
   FormFieldBaseProps,
@@ -25,13 +26,11 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
 const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
-  const borderColor = error ? "border-red-500" : "border-gray-200";
 
   const { leading, trailing } = props;
   const leadingFocused = props.leadingFocused || props.leading;
   const trailingFocused = props.trailingFocused || props.trailing;
   const hasIcon = !!(leading || trailing || leadingFocused || trailingFocused);
-  const padding = `py-3 ${hasIcon ? "px-8" : "px-3"}`;
   const [showPassword, setShowPassword] = useState(false);
 
   const getPasswordFieldType = () => {
@@ -45,7 +44,12 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
       className={
         props.removeDefaultClasses
           ? props.className
-          : `peer text-sm block ${padding} w-full rounded placeholder:text-gray-500 bg-gray-200 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out ${borderColor} ${props.className}`
+          : classNames(
+              "peer text-sm block w-full rounded shadow-none bg-white disabled:bg-secondary-100 text-secondary-900 disabled:text-secondary-400 placeholder:text-secondary-400 border focus:border-primary-400 invalid:border-danger-500 outline-none ring-0 focus:ring-1 transition-all duration-200 ease-in-out",
+              hasIcon ? "py-3 px-8" : "p-3",
+              error ? "border-red-500" : "border-secondary-300",
+              props.className
+            )
       }
       disabled={props.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}

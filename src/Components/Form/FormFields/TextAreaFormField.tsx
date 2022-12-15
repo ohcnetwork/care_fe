@@ -23,8 +23,7 @@ const TextAreaFormField = ({ rows = 3, ...props }: TextAreaFormFieldProps) => {
       <textarea
         id={props.id}
         className={classNames(
-          "shadow-none text-sm block py-3 px-4 w-full rounded text-secondary-900 placeholder:text-secondary-400 border focus:border-primary-400 invalid:border-danger-500 outline-none ring-0 focus:ring-1 transition-all duration-200 ease-in-out resize-none",
-          error ? "bg-white" : "bg-white",
+          "shadow-none text-sm block py-3 px-4 w-full rounded bg-white disabled:bg-secondary-100 text-secondary-900 disabled:text-secondary-400 placeholder:text-secondary-400 border focus:border-primary-400 invalid:border-danger-500 outline-none ring-0 focus:ring-1 ring-primary-400 transition-all duration-200 ease-in-out resize-none",
           error ? "border-danger-500" : "border-secondary-300"
         )}
         disabled={props.disabled}

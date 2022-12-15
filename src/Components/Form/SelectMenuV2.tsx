@@ -50,7 +50,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const defaultOption = {
     label: placeholder,
     selectedLabel: (
-      <p className="font-normal text-secondary-500">{placeholder}</p>
+      <p className="font-normal text-secondary-400">{placeholder}</p>
     ),
     description: undefined,
     icon: undefined,
