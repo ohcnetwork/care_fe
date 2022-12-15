@@ -106,7 +106,7 @@ export default function useExport() {
         <ButtonV2
           disabled={isExporting || props.disabled}
           onClick={exportFile}
-          className="mx-2 tooltip p-4 text-lg text-secondary-800"
+          className="mx-2 tooltip p-4 text-lg text-secondary-800 disabled:text-secondary-500 disabled:bg-transparent"
           variant="secondary"
           ghost
           circle
