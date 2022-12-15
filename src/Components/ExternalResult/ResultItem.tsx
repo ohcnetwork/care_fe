@@ -60,7 +60,11 @@ export default function ResultItem(props: any) {
 
   return (
     <div>
-      <PageTitle title={"Result details"} className="px-6 mb-2" />
+      <PageTitle
+        title={"Result details"}
+        backUrl="/external_results"
+        className="px-6 mb-2"
+      />
 
       {showDeleteAlert && (
         <AlertDialog

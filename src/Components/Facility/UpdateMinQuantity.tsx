@@ -1,14 +1,17 @@
-import { Card, CardContent, InputLabel } from "@material-ui/core";
+import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import loadable from "@loadable/component";
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
+import {
+  updateMinQuantity,
+  getAnyFacility,
+  getMinQuantityOfItem,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
-import { InventoryItemsModel } from "./models";
+import { TextInputField } from "../Common/HelperInputFields";
 import { goBack } from "../../Utils/utils";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -39,35 +42,32 @@ const inventoryFormReducer = (state = initialState, action: any) => {
   }
 };
 
-export const SetInventoryForm = (props: any) => {
+export const UpdateMinQuantity = (props: any) => {
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
-  const { facilityId } = props;
+  const { facilityId, inventoryId, itemId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  // const [offset, setOffset] = useState(0);
-  const [data, setData] = useState<Array<InventoryItemsModel>>([]);
-  const [currentUnit, setCurrentUnit] = useState<any>();
+  // Given that setOffset is not being used, pagination might not be working
+  const [_offset, _setOffset] = useState(0);
+  const [data, setData] = useState(" ");
   const [facilityName, setFacilityName] = useState("");
-
-  const limit = 14;
-  const offset = 0;
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(getItems({ limit, offset }));
+      const res = await dispatchAction(
+        getMinQuantityOfItem(facilityId, inventoryId)
+      );
       if (!status.aborted) {
         if (res && res.data) {
-          setData(res.data.results);
-          dispatch({
-            type: "set_form",
-            form: { ...state.form, id: res.data.results[0]?.id },
-          });
+          setData(res.data.item_object.name);
+          const form = { ...state.form, quantity: res.data.min_quantity };
+          dispatch({ type: "set_form", form });
         }
         setIsLoading(false);
       }
     },
-    [dispatchAction]
+    [dispatchAction, facilityId, inventoryId]
   );
   useAbortableEffect(
     (status: statusType) => {
@@ -89,31 +89,21 @@ export const SetInventoryForm = (props: any) => {
     fetchFacilityName();
   }, [dispatchAction, facilityId]);
 
-  useEffect(() => {
-    // set the default units according to the item
-    const item = data.find((item) => item.id === Number(state.form.id));
-    if (item) {
-      dispatch({
-        type: "set_form",
-        form: { ...state.form, unit: item.default_unit?.name },
-      });
-      setCurrentUnit(item.default_unit?.name);
-    }
-  }, [state.form.id]);
-
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
     const data: any = {
       min_quantity: Number(state.form.quantity),
-      item: Number(state.form.id),
+      item: Number(itemId),
     };
 
-    const res = await dispatchAction(setMinQuantity(data, { facilityId }));
+    const res = await dispatchAction(
+      updateMinQuantity(data, { facilityId, inventoryId })
+    );
     setIsLoading(false);
     if (res && res.data) {
       Notification.Success({
-        msg: "Minimum quantiy updated successfully",
+        msg: "Minimum quantity updated successfully",
       });
     }
     goBack();
@@ -128,20 +118,19 @@ export const SetInventoryForm = (props: any) => {
   if (isLoading) {
     return <Loading />;
   }
-
+  console.log(facilityId, inventoryId, state, data);
   return (
     <div className="px-2 pb-2">
       <PageTitle
-        title="Set Minimum Quantity"
+        title="Update Minimum Quantity"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
-          min_quantity: {
+          [itemId]: { name: data },
+          [inventoryId]: {
             name: "Min Quantity",
             uri: `/facility/${facilityId}/inventory/min_quantity/list`,
           },
-          set: {
-            style: "pointer-events-none",
-          },
+          update: { style: "text-gray-100 pointer-events-none" },
         }}
         backUrl={`/facility/${facilityId}/inventory/min_quantity/list`}
       />
@@ -154,36 +143,19 @@ export const SetInventoryForm = (props: any) => {
                   <InputLabel id="inventory_name_label">
                     Inventory Name
                   </InputLabel>
-                  <SelectField
-                    name="id"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.id}
-                    options={data.map((e) => {
-                      return { id: e.id, name: e.name };
-                    })}
-                    onChange={handleChange}
-                    optionKey="id"
-                    optionValue="name"
-                  />
-                </div>
-
-                <div>
-                  <InputLabel id="inventory_name_label">Unit</InputLabel>
                   <TextInputField
                     name="id"
                     variant="outlined"
                     margin="dense"
                     type="string"
-                    value={currentUnit}
+                    value={data}
                     errors=""
                   />
                 </div>
 
-                <div className="md:col-span-2">
+                <div>
                   <InputLabel id="quantity">Item Min Quantity</InputLabel>
                   <TextInputField
-                    fullWidth
                     name="quantity"
                     variant="outlined"
                     margin="dense"
@@ -195,8 +167,26 @@ export const SetInventoryForm = (props: any) => {
                 </div>
               </div>
               <div className="sm:flex sm:justify-between mt-4">
-                <Cancel onClick={() => goBack()} />
-                <Submit onClick={handleSubmit} label="Set" />
+                <Button
+                  color="default"
+                  variant="contained"
+                  type="button"
+                  className="w-full sm:w-fit mt-2"
+                  onClick={() => goBack()}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  className="w-full sm:w-fit mt-2"
+                  type="submit"
+                  style={{ marginLeft: "auto" }}
+                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
+                  onClick={(e) => handleSubmit(e)}
+                >
+                  SET{" "}
+                </Button>
               </div>
             </CardContent>
           </form>

@@ -229,6 +229,7 @@ export default function ResourceCreate(props: resourceProps) {
           [facilityId]: { name: facilityName },
           resource: { style: "pointer-events-none" },
         }}
+        backUrl={`/facility/${facilityId}`}
       />
       <div className="mt-4">
         <Card>

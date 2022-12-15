@@ -294,7 +294,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title="Sample Test Details" />
+      <PageTitle title="Sample Test Details" backUrl="/sample" />
       {sampleDetails.patient && (
         <div className="flex justify-end">
           <Button

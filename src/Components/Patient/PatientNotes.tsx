@@ -113,6 +113,7 @@ const PatientNotes = (props: PatientNotesProps) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={`/facility/${facilityId}/patient/${patientId}`}
       />
       <h3 className="text-lg pl-10">Add new notes</h3>
       <textarea
