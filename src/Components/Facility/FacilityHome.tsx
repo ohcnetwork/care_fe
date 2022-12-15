@@ -602,9 +602,7 @@ export const FacilityHome = (props: any) => {
             Add More Bed Types
           </ButtonV2>
         </div>
-        <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
-          {capacityList}
-        </div>
+        <div>{capacityList}</div>
       </div>
       <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
         <div className="md:flex justify-between md:pb-2">

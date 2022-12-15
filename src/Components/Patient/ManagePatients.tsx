@@ -798,7 +798,7 @@ export const PatientManager = (props: any) => {
                     if (value !== "+91") {
                       updateQuery({ emergency_phone_number: value });
                     } else {
-                      updateQuery({ phone_number: "" });
+                      updateQuery({ emergency_phone_number: "" });
                     }
                   }}
                   turnOffAutoFormat={false}
