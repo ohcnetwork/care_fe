@@ -80,7 +80,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                 <div className="relative z-0 flex items-center w-full">
                   <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
                     {props.showIconWhenSelected && value?.icon && (
-                      <div className="ml-2 text-sm text-gray-700">
+                      <div className="ml-2 text-sm text-secondary-700">
                         {value.icon}
                       </div>
                     )}

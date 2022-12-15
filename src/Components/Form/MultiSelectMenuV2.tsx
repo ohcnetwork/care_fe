@@ -1,6 +1,7 @@
 import React from "react";
 import { Listbox } from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -38,7 +39,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       value,
       isSelected: props.value?.includes(value as any) ?? false,
       displayChip: (
-        <div className="px-2 bg-gray-100 rounded-full text-xs text-gray-900 border border-gray-400">
+        <div className="px-2 bg-secondary-100 rounded-full text-xs text-secondary-900 border border-secondary-400">
           {selectedLabel}
         </div>
       ),
@@ -53,7 +54,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
     if (props.renderSelectedOptions)
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
     return (
-      <span className="text-gray-700">{`${selectedOptions.length} items selected`}</span>
+      <span className="text-secondary-700">{`${selectedOptions.length} items selected`}</span>
     );
   };
 
@@ -74,20 +75,20 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
             </Listbox.Label>
             <div className="relative">
               <div className="">
-                <Listbox.Button className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
+                <Listbox.Button className="w-full flex rounded bg-white disabled:bg-secondary-100 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 ring-primary-400 transition-all duration-200 ease-in-out">
                   <div className="relative z-0 flex items-center w-full">
                     <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
                       <p className="ml-2.5 text-sm font-normal text-gray-500">
                         <Placeholder />
                       </p>
                     </div>
-                    <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
+                    <CareIcon className="-mb-0.5 mr-2 care-l-angle-down text-lg text-secondary-900" />
                   </div>
                 </Listbox.Button>
                 {selectedOptions.length !== 0 && (
                   <div className="p-2 flex flex-wrap gap-2">
                     {selectedOptions.map((option) => (
-                      <span className="bg-gray-200 border border-gray-400 text-gray-800 rounded-full text-xs px-2 py-1">
+                      <span className="bg-secondary-100 border-secondary-200 text-secondary-600 rounded-full text-xs px-3 py-1.5">
                         {option.selectedLabel}
                       </span>
                     ))}
@@ -95,14 +96,16 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                 )}
               </div>
               <DropdownTransition show={open}>
-                <Listbox.Options className="top-12 absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
+                <Listbox.Options className="top-12 absolute z-10 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
                   {options.map((option, index) => (
                     <Listbox.Option
                       id={`${props.id}-option-${index}`}
                       key={index}
                       className={({ active }) =>
                         `cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
-                          active ? "text-white bg-primary-500" : "text-gray-900"
+                          active
+                            ? "text-white bg-primary-500"
+                            : "text-secondary-900"
                         }`
                       }
                       value={option}
@@ -134,7 +137,9 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                           {option.description && (
                             <p
                               className={`mt-2 ${
-                                active ? "text-primary-200" : "text-gray-500"
+                                active
+                                  ? "text-primary-200"
+                                  : "text-secondary-500"
                               }`}
                             >
                               {option.description}
