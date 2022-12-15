@@ -127,7 +127,9 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   {userType !== "Staff" ? (
                     <ButtonV2
                       className="flex gap-3 bg-white"
+                      name="facility-notify"
                       shadow
+                      border
                       ghost
                       onClick={() => setNotifyModalFor(facility.id)}
                     >
@@ -189,7 +191,9 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div className="flex gap-2 ">
                   <ButtonV2
                     className="flex gap-3 bg-white"
+                    name="facility-details"
                     shadow
+                    border
                     ghost
                     onClick={() => navigate(`/facility/${facility.id}`)}
                   >
@@ -198,7 +202,9 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   </ButtonV2>
                   <ButtonV2
                     className="flex gap-3 bg-white"
+                    name="facility-patients"
                     shadow
+                    border
                     ghost
                     onClick={() =>
                       navigate(`/facility/${facility.id}/patients`)

@@ -1141,10 +1141,11 @@ export const FileUpload = (props: FileUploadProps) => {
             <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
               <button
                 type="submit"
+                disabled={modalDetails?.name === editFileName || btnloader}
                 className="btn-primary btn mr-2 w-full md:w-auto"
               >
                 <svg
-                  className={`animate-spin -ml-1 mr-3 h-5 w-5 text-white ${
+                  className={`animate-spin -ml-1 mr-3 h-5 w-5 text-primary ${
                     !btnloader ? " hidden " : " "
                   }`}
                   xmlns="http://www.w3.org/2000/svg"
@@ -1170,6 +1171,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <button
                 type="button"
                 className="btn-danger btn mr-2 w-full md:w-auto"
+                disabled={btnloader}
                 onClick={(_) => setModalOpenForEdit(false)}
               >
                 Cancel
