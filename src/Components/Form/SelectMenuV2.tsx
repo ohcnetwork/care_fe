@@ -1,12 +1,14 @@
 import React from "react";
 import { Listbox } from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 type OptionCallback<T, R> = (option: T) => R;
 
 type SelectMenuProps<T, V = T> = {
   id?: string;
   options: T[];
+  disabled?: boolean | undefined;
   value: V | undefined;
   placeholder?: React.ReactNode;
   optionLabel: OptionCallback<T, React.ReactNode>;
@@ -31,7 +33,6 @@ type SelectMenuProps<T, V = T> = {
 const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const valueOptions = props.options.map((option) => {
     const label = props.optionLabel(option);
-
     return {
       label,
       selectedLabel: props.optionSelectedLabel
@@ -48,7 +49,9 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const placeholder = props.placeholder ?? "Select";
   const defaultOption = {
     label: placeholder,
-    selectedLabel: <p className="font-normal text-gray-500">{placeholder}</p>,
+    selectedLabel: (
+      <p className="font-normal text-secondary-500">{placeholder}</p>
+    ),
     description: undefined,
     icon: undefined,
     value: undefined,
@@ -63,6 +66,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   return (
     <div className={props.className}>
       <Listbox
+        disabled={props.disabled}
         value={value}
         onChange={(selection: any) => props.onChange(selection.value)}
       >
@@ -72,7 +76,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
               {props.placeholder}
             </Listbox.Label>
             <div className="relative">
-              <Listbox.Button className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
+              <Listbox.Button className="w-full flex rounded bg-white disabled:bg-secondary-100 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 ring-primary-400 transition-all duration-200 ease-in-out">
                 <div className="relative z-0 flex items-center w-full">
                   <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
                     {props.showIconWhenSelected && value?.icon && (
@@ -85,12 +89,12 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                     </p>
                   </div>
                   {showChevronIcon && (
-                    <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
+                    <CareIcon className="-mb-0.5 mr-2 care-l-angle-down text-lg text-secondary-900" />
                   )}
                 </div>
               </Listbox.Button>
               <DropdownTransition show={open}>
-                <Listbox.Options className="origin-top-right absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
+                <Listbox.Options className="origin-top-right absolute z-10 mt-0.5 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
                   {options.map((option, index) => (
                     <Listbox.Option
                       id={`${props.id}-option-${option.value}`}
@@ -105,11 +109,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                       {({ selected, active }) => (
                         <div className="flex flex-col">
                           <div className="flex justify-between">
-                            <p
-                              className={
-                                selected ? "font-semibold" : "font-normal"
-                              }
-                            >
+                            <p className={selected ? "font-semibold" : ""}>
                               {option.label}
                             </p>
                             {option.icon && (
@@ -125,7 +125,9 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                           {option.description && (
                             <p
                               className={`mt-2 ${
-                                active ? "text-primary-200" : "text-gray-500"
+                                active
+                                  ? "text-primary-200"
+                                  : "text-secondary-500"
                               }`}
                             >
                               {option.description}
