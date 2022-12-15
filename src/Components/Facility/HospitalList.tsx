@@ -15,8 +15,6 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { FacilityModel } from "./models";
-import { CSVLink } from "react-csv";
-import moment from "moment";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
@@ -24,8 +22,8 @@ import { useTranslation } from "react-i18next";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { FacilityCard } from "./FacilityCard";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+import useExport from "../../Common/hooks/useExport";
+import { DropdownItem } from "../Common/components/Menu";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -46,12 +44,7 @@ export const HospitalList = () => {
   let manageFacilities: any = null;
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [exporting, setExporting] = useState(false);
-  const [csvLinkProps, setCsvLinkProps] = useState({
-    id: "csv-download-link",
-    filename: "",
-    data: "",
-  });
+  const { exportCSV, ExportMenu } = useExport();
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
@@ -165,18 +158,6 @@ export const HospitalList = () => {
     return facility_type?.text;
   };
 
-  const exportCsv = async (filenamePrefix: string, action: any) => {
-    setExporting(true);
-    const timestamp = moment().format("DD-MM-YYYY:hh:mm:ss");
-    const filename = `${filenamePrefix}-${timestamp}.csv`;
-    const res = await dispatchAction(action);
-    if (res.status === 200) {
-      setCsvLinkProps({ ...csvLinkProps, filename, data: res.data });
-      document.getElementById(csvLinkProps.id)?.click();
-    }
-    setExporting(false);
-  };
-
   const hasFiltersApplied = (qParams: any) => {
     return (
       qParams.state ||
@@ -233,34 +214,28 @@ export const HospitalList = () => {
     <div className="px-6">
       <div className="flex justify-between items-center">
         <PageTitle title={t("Facilities")} breadcrumbs={false} hideBack />
-        <CSVLink hidden target="_blank" {...csvLinkProps} />
-        <DropdownMenu
-          disabled={exporting}
-          title={exporting ? "Exporting..." : "Export"}
-          icon={<CareIcon className="care-l-export" />}
-          className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500"
-        >
+        <ExportMenu>
           <DropdownItem
-            onClick={() => exportCsv("facilities", downloadFacility())}
+            onClick={() => exportCSV("facilities", downloadFacility())}
           >
             Facilities
           </DropdownItem>
           <DropdownItem
-            onClick={() => exportCsv("capacities", downloadFacilityCapacity())}
+            onClick={() => exportCSV("capacities", downloadFacilityCapacity())}
           >
             Capacities
           </DropdownItem>
           <DropdownItem
-            onClick={() => exportCsv("doctors", downloadFacilityDoctors())}
+            onClick={() => exportCSV("doctors", downloadFacilityDoctors())}
           >
             Doctors
           </DropdownItem>
           <DropdownItem
-            onClick={() => exportCsv("triages", downloadFacilityTriage())}
+            onClick={() => exportCSV("triages", downloadFacilityTriage())}
           >
             Triages
           </DropdownItem>
-        </DropdownMenu>
+        </ExportMenu>
       </div>
       <div className="lg:flex gap-2 mt-4">
         <div className="bg-white overflow-hidden shadow rounded-lg md:mr-2 min-w-fit flex-1">

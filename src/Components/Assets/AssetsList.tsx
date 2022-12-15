@@ -23,12 +23,13 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import AssetImportModal from "./AssetImportModal";
 import { FacilityModel } from "../Facility/models";
-import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+import { DropdownItem } from "../Common/components/Menu";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
 import AuthorizeFor from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import useExport from "../../Common/hooks/useExport";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -57,6 +58,7 @@ const AssetsList = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
+  const { exportJSON, ExportMenu } = useExport();
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -159,10 +161,6 @@ const AssetsList = () => {
     }
   };
 
-  const authorizedForImportExport = useIsAuthorized(
-    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
-  );
-
   const checkValidAssetId = async (assetId: any) => {
     const assetData: any = await dispatch(getAsset(assetId));
     try {
@@ -178,32 +176,16 @@ const AssetsList = () => {
     }
   };
 
-  const downloadJSON = (data: JSON) => {
-    const a = document.createElement("a");
-    const blob = new Blob([JSON.stringify(data)], {
-      type: "application/json",
-    });
-    a.href = URL.createObjectURL(blob);
-    a.download = `assets_${facility?.name}_${new Date().toISOString()}.json`;
-    a.click();
-  };
+  const authorizedForImportExport = useIsAuthorized(
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+  );
 
-  const handleDownload = async () => {
-    if (totalCount == 0) {
-      Notification.Error({
-        msg: "No assets to export",
-      });
-    }
-    const filters = {
-      ...qParams,
-      json: true,
-      limit: totalCount,
-    };
-    const res = await dispatch(listAssets(filters));
-    if (res && res.data && res.status === 200) {
-      downloadJSON(res.data.results);
-    }
-  };
+  const exportAssets = () =>
+    authorizedForImportExport &&
+    exportJSON(
+      `assets_${facility?.name}`,
+      listAssets({ ...qParams, json: true, limit: totalCount })
+    );
 
   if (isScannerActive)
     return (
@@ -246,7 +228,6 @@ const AssetsList = () => {
             <div className="md:flex">
               <p className="text-xl flex font-medium capitalize break-words">
                 <span className="mr-2 text-primary-500">
-                  {" "}
                   <i
                     className={`fas fa-${
                       (
@@ -300,12 +281,8 @@ const AssetsList = () => {
                 <p>click 'View Assets' from the Manage Facility dropdown</p>
               </span>
             )}
-            <DropdownMenu
-              disabled={!facility} // TODO: ask for facility select dialog instead
-              title="Import/Export"
-              icon={<CareIcon className="care-l-import" />}
-              className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
-            >
+            {/* TODO: ask for facility select dialog instead of disabling */}
+            <ExportMenu disabled={!facility} label="Import/Export">
               <DropdownItem
                 icon={<CareIcon className="care-l-import" />}
                 onClick={() => setImportAssetModalOpen(true)}
@@ -313,12 +290,13 @@ const AssetsList = () => {
                 Import Assets
               </DropdownItem>
               <DropdownItem
+                disabled={totalCount === 0}
                 icon={<CareIcon className="care-l-export" />}
-                onClick={handleDownload}
+                onClick={exportAssets}
               >
                 Export Assets
               </DropdownItem>
-            </DropdownMenu>
+            </ExportMenu>
           </div>
         )}
       </div>

@@ -53,6 +53,7 @@ export type DropdownItemProps = RawDivProps &
   AuthorizedElementProps & {
     variant?: ButtonVariant;
     icon?: ReactNode | undefined;
+    disabled?: boolean | undefined;
   };
 
 export function DropdownItem({
@@ -66,7 +67,7 @@ export function DropdownItem({
   const isAuthorized = useIsAuthorized(authorizeFor);
 
   return (
-    <Menu.Item as="div">
+    <Menu.Item as="div" disabled={props.disabled}>
       <div
         {...props}
         className={classNames(

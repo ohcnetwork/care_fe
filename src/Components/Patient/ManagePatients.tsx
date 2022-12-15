@@ -3,7 +3,6 @@ import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import React, { useEffect, useState, useCallback } from "react";
-import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
@@ -33,7 +32,8 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
-import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+import { DropdownItem } from "../Common/components/Menu";
+import useExport from "../../Common/hooks/useExport";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -76,12 +76,7 @@ export const PatientManager = (props: any) => {
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [exporting, setExporting] = useState(false);
-  const [csvLinkProps, setCsvLinkProps] = useState({
-    id: "csv-download-link",
-    filename: "",
-    data: "",
-  });
+  const { exportCSV, ExportMenu } = useExport();
   const {
     qParams,
     updateQuery,
@@ -196,24 +191,16 @@ export const PatientManager = (props: any) => {
     return 0;
   });
 
-  const isDownloadAllowed =
+  const isExportAllowed =
     durations.every((x) => x >= 0 && x <= 7) &&
     !durations.every((x) => x === 0);
 
   let managePatients: any = null;
 
-  const exportCsv = async (isFiltered: boolean) => {
-    setExporting(true);
-    const timestamp = moment().format("DD-MM-YYYY:hh:mm:ss");
-    const filename = `patients-${timestamp}.csv`;
+  const exportPatients = async (isFiltered: boolean) => {
     const filters = { ...params, csv: true, facility: facilityId };
     if (!isFiltered) delete filters.is_active;
-    const res = await dispatch(getAllPatient(filters, "downloadPatients"));
-    if (res.status === 200) {
-      setCsvLinkProps({ ...csvLinkProps, filename, data: res.data });
-      document.getElementById(csvLinkProps.id)?.click();
-    }
-    setExporting(false);
+    exportCSV("patients", getAllPatient(filters, "downloadPatients"));
   };
 
   useEffect(() => {
@@ -648,21 +635,15 @@ export const PatientManager = (props: any) => {
             <span>Advanced Filters</span>
           </button>
           <div className="tooltip">
-            <DropdownMenu
-              disabled={exporting || !isDownloadAllowed}
-              title={exporting ? "Exporting..." : "Export"}
-              icon={<CareIcon className="care-l-export" />}
-              className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
-            >
-              <DropdownItem onClick={() => exportCsv(true)}>
+            <ExportMenu disabled={!isExportAllowed}>
+              <DropdownItem onClick={() => exportPatients(true)}>
                 {tabValue === 0 ? "Live patients" : "Discharged patients"}
               </DropdownItem>
-              <DropdownItem onClick={() => exportCsv(false)}>
+              <DropdownItem onClick={() => exportPatients(false)}>
                 All patients
               </DropdownItem>
-            </DropdownMenu>
-            <CSVLink hidden target="_blank" {...csvLinkProps} />
-            {!isDownloadAllowed && (
+            </ExportMenu>
+            {!isExportAllowed && (
               <span className="tooltip-text tooltip-bottom -translate-x-1/2">
                 Select a seven day period
               </span>
