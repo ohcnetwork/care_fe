@@ -370,13 +370,13 @@ export default function SampleViewAdmin() {
 
           <div className="w-full flex flex-col gap-3 p-2">
             <SearchInput
-              name="patient_name"
+              name="patient_name_search"
               value={qParams.patient_name}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search patient"
             />
             <SearchInput
-              name="district_name"
+              name="district_name_search"
               value={qParams.district_name}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search by district"
