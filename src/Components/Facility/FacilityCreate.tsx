@@ -284,13 +284,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
   };
 
-  const handleFieldChange = (e: FieldChangeEvent<string>) => {
-    dispatch({
-      type: "set_form",
-      form: { ...state.form, [e.name]: e.value },
-    });
-  };
-
   const handleLocationChange = (location: google.maps.LatLng | undefined) => {
     if (location) {
       dispatch({
@@ -644,7 +637,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   name="address"
                   label={<span>Address</span>}
                   required
-                  onChange={handleFieldChange}
+                  onChange={handleChange}
                   value={state.form.address}
                   error={state.errors.address}
                 />
