@@ -4,7 +4,7 @@ type BaseProps = {
   name?: string;
   id?: string;
   autoComplete?: string;
-  type?: "email" | "password" | "search" | "text";
+  type?: "email" | "password" | "search" | "text" | "number";
   label?: string;
   placeholder?: string;
   value?: string | number;
