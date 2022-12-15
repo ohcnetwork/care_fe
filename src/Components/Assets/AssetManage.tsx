@@ -307,10 +307,6 @@ const AssetManage = (props: AssetManageProps) => {
                   Configure
                 </ButtonV2>
               )}
-              <ButtonV2 onClick={handleDownload}>
-                <CareIcon className="care-l-arrow-down h-4" />
-                Export Asset
-              </ButtonV2>
               {checkAuthority(user_type, "DistrictAdmin") && (
                 <ButtonV2
                   onClick={handleDelete}
