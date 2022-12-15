@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Combobox } from "@headlessui/react";
-import Spinner from "../Common/Spinner";
 import { debounce } from "lodash";
 import { DropdownTransition } from "../Common/components/HelperComponents";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   name?: string;
@@ -65,10 +65,10 @@ const AutoCompleteAsync = (props: Props) => {
         multiple={multiple as any}
       >
         <div className="relative mt-1">
-          <div className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out py-[4px]">
+          <div className="w-full flex rounded bg-white disabled:bg-secondary-100 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 ring-primary-400 transition-all duration-200 ease-in-out py-1">
             <Combobox.Input
               name={name}
-              className="w-full border-none text-sm leading-5 text-gray-900 placeholder:text-gray-600 font-medium focus:ring-0 bg-inherit shadow-none pr-16 truncate"
+              className="w-full border-none text-sm leading-5 text-secondary-700 placeholder:text-secondary-400 font-medium placeholder:font-normal focus:ring-0 bg-inherit shadow-none pr-16 truncate"
               placeholder={
                 multiple && hasSelection
                   ? `${selected.length} selected`
@@ -82,9 +82,12 @@ const AutoCompleteAsync = (props: Props) => {
               onChange={({ target }) => setQuery(target.value)}
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="absolute top-1 right-0 flex items-center pr-2">
-                {loading && <Spinner path={{ fill: "black" }} />}
-                <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
+              <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-secondary-900">
+                {loading ? (
+                  <CareIcon className="care-l-spinner animate-spin -mb-1.5" />
+                ) : (
+                  <CareIcon className="care-l-angle-down -mb-1.5" />
+                )}
               </div>
             </Combobox.Button>
           </div>

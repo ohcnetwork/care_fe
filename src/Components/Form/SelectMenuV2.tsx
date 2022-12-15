@@ -78,11 +78,9 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
             <div className="relative">
               <Listbox.Button className="w-full flex rounded bg-white disabled:bg-secondary-100 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 ring-primary-400 transition-all duration-200 ease-in-out">
                 <div className="relative z-0 flex items-center w-full">
-                  <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
+                  <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10 text-secondary-700">
                     {props.showIconWhenSelected && value?.icon && (
-                      <div className="ml-2 text-sm text-secondary-700">
-                        {value.icon}
-                      </div>
+                      <div className="ml-2 text-sm">{value.icon}</div>
                     )}
                     <p className="ml-2.5 text-sm font-medium">
                       {value.selectedLabel}
