@@ -49,7 +49,7 @@ jobs:
       - name: Cypress run 🥬
         uses: cypress-io/github-action@v4
         with:
-          env: SKIP_PREFLIGHT_CHECK=true
+          env: SKIP_PREFLIGHT_CHECK=true,NODE_OPTIONS=--max-old-space-size=4096
           install: false
           start: "npm run start:react"
           wait-on: "http://localhost:4000"
