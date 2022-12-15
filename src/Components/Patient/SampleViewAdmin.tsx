@@ -326,7 +326,6 @@ export default function SampleViewAdmin() {
           <ExportButton
             action={() => downloadSampleTests({ ...qParams })}
             filenamePrefix="samples"
-            type="csv"
           />
         }
       />

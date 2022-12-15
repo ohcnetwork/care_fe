@@ -44,7 +44,6 @@ export default function BoardView() {
                 action={() =>
                   downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
                 }
-                type="csv"
                 filenamePrefix="shift_requests"
               />
             }

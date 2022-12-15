@@ -21,7 +21,7 @@ interface ExportButtonProps {
   disabled?: boolean | undefined;
   tooltip?: string | undefined;
   tooltipClassName?: string;
-  type: "csv" | "json";
+  type?: "csv" | "json";
   action: any;
   filenamePrefix: string;
 }
@@ -92,11 +92,12 @@ export default function useExport() {
 
   const ExportButton = ({
     tooltipClassName = "tooltip-bottom -translate-x-7",
+    type = "csv",
     ...props
   }: ExportButtonProps) => {
     const exportFile = () => {
-      if (props.type === "csv") exportCSV(props.filenamePrefix, props.action);
-      if (props.type === "json") exportJSON(props.filenamePrefix, props.action);
+      if (type === "csv") exportCSV(props.filenamePrefix, props.action());
+      if (type === "json") exportJSON(props.filenamePrefix, props.action());
     };
 
     return (

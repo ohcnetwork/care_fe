@@ -43,7 +43,6 @@ export default function BoardView() {
             className="mx-3 md:mx-5"
             componentRight={
               <ExportButton
-                type="csv"
                 action={() =>
                   downloadResourceRequests({ ...appliedFilters, csv: 1 })
                 }

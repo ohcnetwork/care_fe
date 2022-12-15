@@ -191,7 +191,6 @@ export default function ListView() {
           hideBack
           componentRight={
             <ExportButton
-              type="csv"
               action={() =>
                 downloadResourceRequests({ ...appliedFilters, csv: 1 })
               }

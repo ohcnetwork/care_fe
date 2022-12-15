@@ -307,7 +307,6 @@ export default function ListView() {
               action={() =>
                 downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
               }
-              type="csv"
               filenamePrefix="shift_requests"
             />
           }
