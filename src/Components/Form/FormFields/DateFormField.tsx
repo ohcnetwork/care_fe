@@ -1,3 +1,4 @@
+import { classNames } from "../../../Utils/utils";
 import DateInputV2, { DatePickerPosition } from "../../Common/DateInputV2";
 import FormField from "./FormField";
 import {
@@ -14,16 +15,12 @@ type Props = FormFieldBaseProps<Date> & {
 const DateFormField = ({ position = "CENTER", ...props }: Props) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
-
-  const bgColor = error ? "bg-red-50" : "bg-gray-200";
-  const borderColor = error ? "border-red-500" : "border-gray-200";
-
   const name = props.name;
 
   return (
     <FormField props={props}>
       <DateInputV2
-        className={`${bgColor} ${borderColor}`}
+        className={classNames(error && "border-red-500")}
         value={props.value}
         onChange={(value) => handleChange({ name, value })}
         position={position}
