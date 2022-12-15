@@ -22,6 +22,7 @@ type Props =
       onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
     });
 
+/** Deprecated. Use TextFormField instead */
 const TextInputFieldV2 = (props: Props) => {
   const { onChange, onValueChange } = props;
 
