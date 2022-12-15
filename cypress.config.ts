@@ -3,8 +3,8 @@ import { defineConfig } from "cypress";
 import fs from "fs";
 
 export default defineConfig({
+  projectId: "wf7d2m",
   defaultCommandTimeout: 10000,
-
   e2e: {
     setupNodeEvents(on, _) {
       // implement node event listeners here

@@ -20,11 +20,11 @@ import Box from "@material-ui/core/Box";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Modal from "@material-ui/core/Modal";
-
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
 import { formatDate } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
 import HeadedTabs from "../Common/HeadedTabs";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -106,9 +106,11 @@ interface StateInterface {
   zoom: number;
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
+  rotation: number;
 }
 
 export const FileUpload = (props: FileUploadProps) => {
+  const { t } = useTranslation();
   const [audioBlob, setAudioBlob] = useState<Blob>();
   const [file, setFile] = useState<File | null>();
   const {
@@ -147,6 +149,7 @@ export const FileUpload = (props: FileUploadProps) => {
     zoom: 3,
     isZoomInDisabled: false,
     isZoomOutDisabled: false,
+    rotation: 0,
   };
   const [file_state, setFileState] = useState<StateInterface>(initialState);
 
@@ -221,6 +224,13 @@ export const FileUpload = (props: FileUploadProps) => {
       ...file_state,
       zoom: !checkFull ? file_state.zoom - 1 : file_state.zoom,
     });
+  };
+
+  const handleRotate = (rotation: number) => {
+    setFileState((prev) => ({
+      ...prev,
+      rotation: prev.rotation + rotation,
+    }));
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
@@ -1017,22 +1027,34 @@ export const FileUpload = (props: FileUploadProps) => {
                   <>
                     {[
                       [
-                        "Zoom In",
+                        t("Zoom In"),
                         "magnifying-glass-plus",
                         handleZoomIn,
                         file_state.zoom === zoom_values.length,
                       ],
                       [
-                        "Zoom Out",
+                        t("Zoom Out"),
                         "magnifying-glass-minus",
                         handleZoomOut,
                         file_state.zoom === 1,
+                      ],
+                      [
+                        t("Rotate Left"),
+                        "rotate-left",
+                        () => handleRotate(-90),
+                        false,
+                      ],
+                      [
+                        t("Rotate Right"),
+                        "rotate-right",
+                        () => handleRotate(90),
+                        false,
                       ],
                     ].map((button, index) => (
                       <button
                         key={index}
                         onClick={button[2] as () => void}
-                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70 z-50"
                         disabled={button[3] as boolean}
                       >
                         <i className={`fas fa-${button[1]} mr-2`} />
@@ -1069,6 +1091,9 @@ export const FileUpload = (props: FileUploadProps) => {
                 className={
                   "object-contain mx-auto " + zoom_values[file_state.zoom]
                 }
+                style={{
+                  transform: `rotate(${file_state.rotation}deg)`,
+                }}
               />
             ) : (
               <iframe
@@ -1112,10 +1137,11 @@ export const FileUpload = (props: FileUploadProps) => {
             <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
               <button
                 type="submit"
+                disabled={modalDetails?.name === editFileName || btnloader}
                 className="btn-primary btn mr-2 w-full md:w-auto"
               >
                 <svg
-                  className={`animate-spin -ml-1 mr-3 h-5 w-5 text-white ${
+                  className={`animate-spin -ml-1 mr-3 h-5 w-5 text-primary ${
                     !btnloader ? " hidden " : " "
                   }`}
                   xmlns="http://www.w3.org/2000/svg"
@@ -1141,6 +1167,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <button
                 type="button"
                 className="btn-danger btn mr-2 w-full md:w-auto"
+                disabled={btnloader}
                 onClick={(_) => setModalOpenForEdit(false)}
               >
                 Cancel
