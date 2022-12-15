@@ -20,11 +20,12 @@ import Box from "@material-ui/core/Box";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Modal from "@material-ui/core/Modal";
-
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
 import { formatDate } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
+import HeadedTabs from "../Common/HeadedTabs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -105,9 +106,11 @@ interface StateInterface {
   zoom: number;
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
+  rotation: number;
 }
 
 export const FileUpload = (props: FileUploadProps) => {
+  const { t } = useTranslation();
   const [audioBlob, setAudioBlob] = useState<Blob>();
   const [file, setFile] = useState<File | null>();
   const {
@@ -128,7 +131,6 @@ export const FileUpload = (props: FileUploadProps) => {
   ]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
-  // const [uploadSuccess, setUploadSuccess] = useState(false);
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
@@ -138,8 +140,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const [audioName, setAudioName] = useState<string>("");
   const [audioNameError, setAudioNameError] = useState<string>("");
   const [contentType, setcontentType] = useState<string>("");
-  // const classes = useStyles();
-  // const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
   const initialState = {
     open: false,
@@ -149,6 +149,7 @@ export const FileUpload = (props: FileUploadProps) => {
     zoom: 3,
     isZoomInDisabled: false,
     isZoomOutDisabled: false,
+    rotation: 0,
   };
   const [file_state, setFileState] = useState<StateInterface>(initialState);
 
@@ -170,6 +171,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const currentuser_username = currentUser.data.username;
+  const currentuser_type = currentUser.data.user_type;
   const limit = RESULTS_PER_PAGE_LIMIT;
   const [isActive, setIsActive] = useState(true);
   const tabs = [
@@ -222,6 +224,13 @@ export const FileUpload = (props: FileUploadProps) => {
       ...file_state,
       zoom: !checkFull ? file_state.zoom - 1 : file_state.zoom,
     });
+  };
+
+  const handleRotate = (rotation: number) => {
+    setFileState((prev) => ({
+      ...prev,
+      rotation: prev.rotation + rotation,
+    }));
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
@@ -559,7 +568,9 @@ export const FileUpload = (props: FileUploadProps) => {
                             DOWNLOAD
                           </a>
                           {item?.uploaded_by?.username ===
-                          currentuser_username ? (
+                            currentuser_username ||
+                          currentuser_type === "DistrictAdmin" ||
+                          currentuser_type === "StateAdmin" ? (
                             <>
                               <label
                                 onClick={() => {
@@ -579,17 +590,29 @@ export const FileUpload = (props: FileUploadProps) => {
                           ) : (
                             <></>
                           )}
-                          <label
-                            onClick={() => {
-                              setArchiveReason("");
-                              setModalDetails({ name: item.name, id: item.id });
-                              setModalOpenForArchive(true);
-                            }}
-                            className="btn btn-primary m-1 sm:w-auto w-full"
-                          >
-                            <i className="fa-solid fa-box-archive mr-2 "></i>
-                            ARCHIVE
-                          </label>
+                          {item?.uploaded_by?.username ===
+                            currentuser_username ||
+                          currentuser_type === "DistrictAdmin" ||
+                          currentuser_type === "StateAdmin" ? (
+                            <>
+                              <label
+                                onClick={() => {
+                                  setArchiveReason("");
+                                  setModalDetails({
+                                    name: item.name,
+                                    id: item.id,
+                                  });
+                                  setModalOpenForArchive(true);
+                                }}
+                                className="btn btn-primary m-1 sm:w-auto w-full"
+                              >
+                                <i className="fa-solid fa-box-archive mr-2 "></i>
+                                ARCHIVE
+                              </label>
+                            </>
+                          ) : (
+                            <></>
+                          )}
                         </div>
                       ) : (
                         <CircularProgress />
@@ -642,7 +665,9 @@ export const FileUpload = (props: FileUploadProps) => {
                       {" "}
                       <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
                     </label>
-                    {item?.uploaded_by?.username === currentuser_username ? (
+                    {item?.uploaded_by?.username === currentuser_username ||
+                    currentuser_type === "DistrictAdmin" ||
+                    currentuser_type === "StateAdmin" ? (
                       <>
                         {" "}
                         <label
@@ -660,16 +685,25 @@ export const FileUpload = (props: FileUploadProps) => {
                     ) : (
                       <></>
                     )}
-                    <label
-                      onClick={() => {
-                        setArchiveReason("");
-                        setModalDetails({ name: item.name, id: item.id });
-                        setModalOpenForArchive(true);
-                      }}
-                      className="btn btn-primary m-1 sm:w-auto w-full"
-                    >
-                      <i className="fa-solid fa-box-archive mr-2 "></i>ARCHIVE
-                    </label>
+                    {item?.uploaded_by?.username === currentuser_username ||
+                    currentuser_type === "DistrictAdmin" ||
+                    currentuser_type === "StateAdmin" ? (
+                      <>
+                        <label
+                          onClick={() => {
+                            setArchiveReason("");
+                            setModalDetails({ name: item.name, id: item.id });
+                            setModalOpenForArchive(true);
+                          }}
+                          className="btn btn-primary m-1 sm:w-auto w-full"
+                        >
+                          <i className="fa-solid fa-box-archive mr-2 "></i>
+                          ARCHIVE
+                        </label>
+                      </>
+                    ) : (
+                      <></>
+                    )}
                   </div>
                 </div>
               )}
@@ -973,6 +1007,10 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
+  const handleTabChange = (tabValue: string) => {
+    setSortFileState(tabValue);
+  };
+
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
       <Modal
@@ -989,22 +1027,34 @@ export const FileUpload = (props: FileUploadProps) => {
                   <>
                     {[
                       [
-                        "Zoom In",
+                        t("Zoom In"),
                         "magnifying-glass-plus",
                         handleZoomIn,
                         file_state.zoom === zoom_values.length,
                       ],
                       [
-                        "Zoom Out",
+                        t("Zoom Out"),
                         "magnifying-glass-minus",
                         handleZoomOut,
                         file_state.zoom === 1,
+                      ],
+                      [
+                        t("Rotate Left"),
+                        "rotate-left",
+                        () => handleRotate(-90),
+                        false,
+                      ],
+                      [
+                        t("Rotate Right"),
+                        "rotate-right",
+                        () => handleRotate(90),
+                        false,
                       ],
                     ].map((button, index) => (
                       <button
                         key={index}
                         onClick={button[2] as () => void}
-                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70 z-50"
                         disabled={button[3] as boolean}
                       >
                         <i className={`fas fa-${button[1]} mr-2`} />
@@ -1041,6 +1091,9 @@ export const FileUpload = (props: FileUploadProps) => {
                 className={
                   "object-contain mx-auto " + zoom_values[file_state.zoom]
                 }
+                style={{
+                  transform: `rotate(${file_state.rotation}deg)`,
+                }}
               />
             ) : (
               <iframe
@@ -1353,56 +1406,11 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={true}
         breadcrumbs={false}
       />
-      <div>
-        <div className="sm:hidden">
-          <label htmlFor="tabs" className="sr-only">
-            Select a tab
-          </label>
-          {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
-          <select
-            id="tabs"
-            name="tabs"
-            className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-            defaultValue={tabs[0].value}
-            onChange={() => {
-              sortFileState === "UNARCHIVED"
-                ? setSortFileState("ARCHIVED")
-                : setSortFileState("UNARCHIVED");
-            }}
-          >
-            {tabs.map((tab) => (
-              <option key={tab.value}>{tab.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="hidden sm:block">
-          <div className="border-b border-gray-200">
-            <nav
-              className="-mb-px flex items-center justify-center cursor: pointer"
-              aria-label="Tabs"
-            >
-              {tabs.map((tab) => (
-                <div
-                  key={tab.name}
-                  className={`
-                  ${
-                    tab.value === sortFileState
-                      ? " border-primary-500 text-primary-600 cursor: pointer "
-                      : " border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor: pointer "
-                  },
-                  ' w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm '
-                `}
-                  onClick={() => {
-                    setSortFileState(tab.value);
-                  }}
-                >
-                  {tab.name}
-                </div>
-              ))}
-            </nav>
-          </div>
-        </div>
-      </div>
+      <HeadedTabs
+        tabs={tabs}
+        handleChange={handleTabChange}
+        currentTabState={sortFileState}
+      />
 
       <div>
         {uploadedFiles && uploadedFiles.length > 0 ? (
