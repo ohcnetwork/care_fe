@@ -14,7 +14,6 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
-import { goBack } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -78,7 +77,9 @@ export const AddLocationForm = (props: LocationFormProps) => {
         ? "Location updated successfully"
         : "Location created successfully";
 
-      navigate(`/facility/${facilityId}/location`);
+      navigate(`/facility/${facilityId}/location`, {
+        replace: true,
+      });
       Notification.Success({
         msg: notificationMessage,
       });
@@ -136,7 +137,14 @@ export const AddLocationForm = (props: LocationFormProps) => {
                 </div>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-between mt-4">
-                <ButtonV2 onClick={() => goBack()} variant="secondary">
+                <ButtonV2
+                  onClick={() =>
+                    navigate(`/facility/${facilityId}/location`, {
+                      replace: true,
+                    })
+                  }
+                  variant="secondary"
+                >
                   <CareIcon className="care-l-times-circle h-5" />
                   Cancel
                 </ButtonV2>
