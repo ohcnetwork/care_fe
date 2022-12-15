@@ -31,7 +31,7 @@ export default function BoardView() {
   const [isLoading] = useState(false);
   const { ExportButton, exportCSV } = useExport();
 
-  const exportShiftRequests = async () =>
+  const exportShiftRequests = (qParams: any) =>
     exportCSV(
       "shift_requests",
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
@@ -44,7 +44,7 @@ export default function BoardView() {
           <PageTitle
             title="Shifting"
             className="mx-3 md:mx-5"
-            hideBack={true}
+            hideBack
             componentRight={<ExportButton onClick={exportShiftRequests} />}
             breadcrumbs={false}
           />
