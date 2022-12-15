@@ -1031,6 +1031,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           if (showImport) {
             setShowImport(false);
             return false;
+          } else {
+            id
+              ? navigate(`/facility/${facilityId}/patient/${id}`)
+              : navigate(`/facility/${facilityId}`);
           }
         }}
         crumbsReplacements={{
