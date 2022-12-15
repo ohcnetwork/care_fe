@@ -62,7 +62,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const value = options.find((o) => props.value == o.value) || defaultOption;
 
   return (
-    <div className={props.className}>
+    <div className={props.className} id={props.id}>
       <Listbox
         value={value}
         onChange={(selection: any) => props.onChange(selection.value)}

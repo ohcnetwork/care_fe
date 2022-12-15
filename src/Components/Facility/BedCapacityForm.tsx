@@ -282,7 +282,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
               <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
                 <div className="w-full md:w-auto">
                   <ButtonV2
-                    id="bed-capacity-save-and-exit"
+                    id="bed-capacity-cancel"
                     className="w-full md:w-auto"
                     type="submit"
                     variant="secondary"
@@ -294,7 +294,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                   {!isLastOptionType && headerText === "Add Bed Capacity" && (
                     <ButtonV2
-                      id="bed-capacity-save-and-add"
+                      id="bed-capacity-save-and-exit"
                       className="w-full md:w-auto"
                       type="submit"
                       onClick={(e) => handleSubmit(e, "Save and Exit")}
