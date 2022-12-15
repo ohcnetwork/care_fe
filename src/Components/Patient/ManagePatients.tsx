@@ -648,7 +648,6 @@ export const PatientManager = (props: any) => {
             <span>Advanced Filters</span>
           </button>
           <div className="tooltip">
-            <CSVLink hidden target="_blank" {...csvLinkProps} />
             <DropdownMenu
               disabled={exporting || !isDownloadAllowed}
               title={exporting ? "Exporting..." : "Export"}
@@ -662,10 +661,9 @@ export const PatientManager = (props: any) => {
                 All patients
               </DropdownItem>
             </DropdownMenu>
-
             <CSVLink hidden target="_blank" {...csvLinkProps} />
             {!isDownloadAllowed && (
-              <span className="tooltip-text tooltip-left translate-y-3">
+              <span className="tooltip-text tooltip-bottom -translate-x-1/2">
                 Select a seven day period
               </span>
             )}
