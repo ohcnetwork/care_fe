@@ -13,12 +13,9 @@ describe("Edit Profile Testing", () => {
 
   it("Search by Patient name", () => {
     cy.intercept(/\/api\/v1\/external_result/).as("external_result");
-    cy.get("[name='search'][placeholder='Search by Patient Name']").type(
-      "akhil"
-    );
+    cy.get("[name='patient_name_search']").type("akhil");
     cy.wait("@external_result").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
-      expect(interception.request.url).to.include("name=akhil");
     });
     cy.url().should("include", "akhil");
   });
@@ -32,14 +29,16 @@ describe("Edit Profile Testing", () => {
     cy.url().should("include", "%2B91+47387-43424");
   });
 
-  it("upload list", () => {
-    cy.contains("Upload List").click().wait(100);
+  it("import", () => {
+    cy.contains("Import/Export").click().wait(100);
+    cy.contains("Import Results").click().wait(100);
     // TODO: attach file and save
   });
 
   it("export", () => {
     cy.intercept("/api/v1/external_result/?csv=true").as("export");
-    cy.contains("Export").click();
+    cy.contains("Import/Export").click().wait(100);
+    cy.contains("Export Results").click();
     cy.wait("@export").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });

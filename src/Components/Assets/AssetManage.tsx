@@ -11,15 +11,18 @@ import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
 import { formatDate } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface AssetManageProps {
   assetId: string;
+  facilityId: string;
 }
 
 const AssetManage = (props: AssetManageProps) => {
-  const { assetId } = props;
+  const { assetId, facilityId } = props;
   const [asset, setAsset] = useState<AssetData>();
   const [isPrintMode, setIsPrintMode] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -148,7 +151,7 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="flex flex-col">
         <div className="flex flex-start items-center">
           <div className="w-8">
-            <i className={`uil uil-${item.icon} text-gray-700 text-lg`}></i>
+            <CareIcon className={`care-l-${item.icon} h-5 fill-gray-700`} />
           </div>
           <div className="text-gray-700 break-words">{item.label}</div>
         </div>
@@ -158,21 +161,55 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
     );
 
+  const downloadJSON = (data: AssetData) => {
+    const a = document.createElement("a");
+    const blob = new Blob([JSON.stringify([data])], {
+      type: "application/json",
+    });
+    a.href = URL.createObjectURL(blob);
+    a.download = `asset_${data.id}.json`;
+    a.click();
+  };
+
+  const handleDownload = async () => {
+    if (asset) downloadJSON(asset);
+  };
+
   return (
     <div className="px-2 pb-2">
       <PageTitle
         title="Asset Details"
-        crumbsReplacements={{ [assetId]: { name: asset?.name } }}
+        crumbsReplacements={{
+          [facilityId]: { name: asset?.location_object.facility.name },
+          assets: { uri: `/assets?facility=${facilityId}` },
+          [assetId]: {
+            name: asset?.name,
+          },
+        }}
       />
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
-          <div className="w-full md:p-8 p-6 flex flex-col justify-between gap-6">
+          <div className="w-full md:p-8 md:pt-6 p-6 pt-4 flex flex-col justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 justify-between w-full">
-                <span className="text-2xl md:text-3xl font-bold break-words">
-                  {asset?.name}
-                </span>
-                <div className=" flex flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl md:text-3xl font-bold break-words">
+                    {asset?.name}
+                  </span>
+                  <ButtonV2
+                    onClick={handleDownload}
+                    className="tooltip p-4"
+                    variant="secondary"
+                    ghost
+                    circle
+                  >
+                    <CareIcon className="care-l-export text-lg" />
+                    <span className="tooltip-text tooltip-bottom -translate-x-16">
+                      Export as JSON
+                    </span>
+                  </ButtonV2>
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {asset?.status === "ACTIVE" ? (
                     <Chip color="green" text="Active" startIcon="check" />
                   ) : (
@@ -219,28 +256,31 @@ const AssetManage = (props: AssetManageProps) => {
                 },
               ].map(detailBlock)}
             </div>
-            <div className="flex flex-col md:flex-row gap-1">
-              <button
+            <div className="flex flex-col lg:flex-row gap-1">
+              <ButtonV2
+                className="flex gap-2"
                 onClick={() =>
                   navigate(
-                    `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
+                    `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/update`
                   )
                 }
                 id="update-asset"
-                className="primary-button"
               >
-                <i className="uil uil-pen text-white mr-4" />
-                Update
-              </button>
+                <CareIcon className="care-l-pen h-4" />
+                <span>Update</span>
+              </ButtonV2>
               {asset?.asset_class && (
-                <button
-                  onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+                <ButtonV2
+                  onClick={() =>
+                    navigate(
+                      `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/configure`
+                    )
+                  }
                   id="configure-asset"
-                  className="primary-button"
                 >
-                  <i className="uil uil-setting text-white mr-4"></i>
-                  Configure
-                </button>
+                  <CareIcon className="care-l-setting h-4" />
+                  <span>Configure</span>
+                </ButtonV2>
               )}
             </div>
           </div>

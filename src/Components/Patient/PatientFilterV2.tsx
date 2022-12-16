@@ -7,9 +7,9 @@ import {
   FACILITY_TYPES,
   DISEASE_STATUS,
   PATIENT_FILTER_CATEGORIES,
-  PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
   KASP_ENABLED,
+  ADMITTED_TO,
 } from "../../Common/constants";
 import moment from "moment";
 import {
@@ -31,6 +31,7 @@ import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import { DateRange } from "../Common/DateRangeInputV2";
 import FilterButtons from "../Common/FilterButtons";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -77,9 +78,9 @@ export default function PatientFilterV2(props: any) {
       filter.last_consultation_discharge_date_before || null,
     last_consultation_discharge_date_after:
       filter.last_consultation_discharge_date_after || null,
-    last_consultation_admitted_to_list:
-      filter.last_consultation_admitted_to_list
-        ? filter.last_consultation_admitted_to_list.split(",")
+    last_consultation_admitted_bed_type_list:
+      filter.last_consultation_admitted_bed_type_list
+        ? filter.last_consultation_admitted_bed_type_list.split(",")
         : [],
     srf_id: filter.srf_id || null,
     number_of_doses: filter.number_of_doses || null,
@@ -227,7 +228,7 @@ export default function PatientFilterV2(props: any) {
       last_consultation_admission_date_after,
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
-      last_consultation_admitted_to_list,
+      last_consultation_admitted_bed_type_list,
       number_of_doses,
       covin_id,
       srf_id,
@@ -310,8 +311,8 @@ export default function PatientFilterV2(props: any) {
         (disease_status == "Show All" ? "" : disease_status) || "",
       age_min: age_min || "",
       age_max: age_max || "",
-      last_consultation_admitted_to_list:
-        last_consultation_admitted_to_list || [],
+      last_consultation_admitted_bed_type_list:
+        last_consultation_admitted_bed_type_list || [],
       srf_id: srf_id || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
@@ -370,7 +371,7 @@ export default function PatientFilterV2(props: any) {
       />
       <div className="w-full flex-none pt-20">
         <div className="mb-3 text-md flex items-center text-gray-700 gap-2">
-          <i className="text-lg uil uil-sort" />
+          <CareIcon className="care-l-sort h-5" />
           <p>Ordering</p>
         </div>
         <SelectMenuV2
@@ -379,11 +380,11 @@ export default function PatientFilterV2(props: any) {
           optionSelectedLabel={(option) => `${option.desc} (${option.order})`}
           optionDescription={(o) => o.order}
           optionIcon={(option) => (
-            <i
-              className={`text-lg uil ${
+            <CareIcon
+              className={`${
                 option.order === "Ascending"
-                  ? "uil-sort-amount-up"
-                  : "uil-sort-amount-down"
+                  ? "care-l-amount-up"
+                  : "care-l-amount-down"
               }`}
             />
           )}
@@ -393,7 +394,7 @@ export default function PatientFilterV2(props: any) {
         />
       </div>
       <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-        <i className="text-lg uil uil-filter" />
+        <CareIcon className="care-l-filter h-5" />
         <p>Filter by</p>
       </div>
       <div className="flex flex-wrap gap-4">
@@ -452,7 +453,7 @@ export default function PatientFilterV2(props: any) {
             onChange={(v) =>
               setFilterState({ ...filterState, facility_type: v })
             }
-            optionIcon={() => <i className="uil uil-hospital" />}
+            optionIcon={() => <CareIcon className="care-l-hospital h-5" />}
           />
         </div>
 
@@ -529,7 +530,7 @@ export default function PatientFilterV2(props: any) {
             optionValue={({ id }) => id}
             optionIcon={({ id }) => (
               <>
-                <i className="uil uil-syringe mr-2" />
+                <CareIcon className="care-l-syringe w-5 mr-2" />
                 <span className="font-bold">{id}</span>
               </>
             )}
@@ -591,20 +592,18 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-full flex-none">
-          <FieldLabel className="text-sm">
-            Last Admitted to (Bed Type)
-          </FieldLabel>
+          <FieldLabel className="text-sm">Admitted to (Bed Types)</FieldLabel>
           <MultiSelectMenuV2
-            id="last_consultation_admitted_to_list"
+            id="last_consultation_admitted_bed_type_list"
             placeholder="Select bed types"
-            options={PATIENT_FILTER_ADMITTED_TO}
-            value={filterState.last_consultation_admitted_to_list}
+            options={ADMITTED_TO}
+            value={filterState.last_consultation_admitted_bed_type_list}
             optionValue={(o) => o.id}
             optionLabel={(o) => o.text}
             onChange={(o) =>
               setFilterState({
                 ...filterState,
-                last_consultation_admitted_to_list: o,
+                last_consultation_admitted_bed_type_list: o,
               })
             }
           />

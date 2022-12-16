@@ -48,6 +48,9 @@ export const createFacility = (params: object) => {
 export const updateFacility = (id: number, params: object) => {
   return fireRequest("updateFacility", [id], params);
 };
+export const partialUpdateFacility = (id: number, params: object) => {
+  return fireRequest("partialUpdateFacility", [id], params);
+};
 export const deleteFacility = (id: number) => {
   return fireRequest("deleteFacility", [id], {});
 };

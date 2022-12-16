@@ -15,6 +15,7 @@ type Props<T, V = T> = {
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
   className?: string;
+  disabled?: boolean;
   renderSelectedOptions?: OptionCallback<T[], React.ReactNode>;
   onChange: OptionCallback<V[]>;
 };
@@ -57,8 +58,9 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
   };
 
   return (
-    <div className={props.className}>
+    <div className={props.className} id={props.id}>
       <Listbox
+        disabled={props.disabled}
         value={selectedOptions}
         onChange={(opts: typeof options) =>
           props.onChange(opts.map((o) => o.value) as any)

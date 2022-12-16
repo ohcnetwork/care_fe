@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -23,7 +23,7 @@ interface LocationRowProps {
 }
 
 const LocationRow = (props: LocationRowProps) => {
-  let { id, facilityId, name, description } = props;
+  const { id, facilityId, name, description } = props;
 
   return (
     <div
@@ -165,7 +165,6 @@ export const LocationManagement = (props: LocationManagementProps) => {
     <div>
       <PageTitle
         title="Location Management"
-        hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />

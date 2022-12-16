@@ -6,15 +6,11 @@ import { RESOURCE_CHOICES } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { downloadResourceRequests } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import { CSVLink } from "react-csv";
-import { useDispatch } from "react-redux";
-import moment from "moment";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import GetAppIcon from "@material-ui/icons/GetApp";
 import withScrolling from "react-dnd-scrolling";
 import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
 import useFilters from "../../Common/hooks/useFilters";
+import useExport from "../../Common/hooks/useExport";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -24,34 +20,16 @@ const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 const COMPLETED = ["COMPLETED", "REJECTED"];
 const ACTIVE = resourceStatusOptions.filter((o) => !COMPLETED.includes(o));
 
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
-
 export default function BoardView() {
   const { qParams, FilterBadges, advancedFilter } = useFilters({ limit: -1 });
-  const dispatch: any = useDispatch();
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
-  const [downloadFile, setDownloadFile] = useState("");
   // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(false);
-  // state to change download button to loading while file is not ready
-  const [downloadLoading, setDownloadLoading] = useState(false);
-
+  const { ExportButton } = useExport();
   const appliedFilters = formatFilter(qParams);
 
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(
-      downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
-    );
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById("resourceRequests-ALL")?.click();
-  };
-
   const onListViewBtnClick = () => {
-    navigate("/resource/list-view", qParams);
+    navigate("/resource/list-view", { query: qParams });
     localStorage.setItem("defaultResourceView", "list");
   };
 
@@ -60,18 +38,16 @@ export default function BoardView() {
       <div className="w-full flex-col md:flex-row flex items-center justify-between">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
-            title={"Resource"}
-            hideBack={true}
+            title="Resource"
+            hideBack
             className="mx-3 md:mx-5"
             componentRight={
-              downloadLoading ? (
-                <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
-              ) : (
-                <GetAppIcon
-                  className="cursor-pointer mt-2 ml-2"
-                  onClick={triggerDownload}
-                />
-              )
+              <ExportButton
+                action={() =>
+                  downloadResourceRequests({ ...appliedFilters, csv: 1 })
+                }
+                filenamePrefix="resource_requests"
+              />
             }
             breadcrumbs={false}
           />
@@ -138,13 +114,6 @@ export default function BoardView() {
           )}
         </div>
       </ScrollingComponent>
-      <CSVLink
-        data={downloadFile}
-        filename={`resource-requests--${now}.csv`}
-        target="_blank"
-        className="hidden"
-        id={"resourceRequests-ALL"}
-      />
       <SlideOver {...advancedFilter}>
         <div className="bg-white min-h-screen p-4">
           <ListFilter {...advancedFilter} />

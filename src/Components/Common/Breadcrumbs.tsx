@@ -1,6 +1,7 @@
 import { usePath, Link } from "raviger";
 import { useState } from "react";
-import clsx from "clsx";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { classNames } from "../../Utils/utils";
 
 const MENU_TAGS: { [key: string]: string } = {
   facility: "Facilities",
@@ -54,7 +55,7 @@ export default function Breadcrumbs(props: any) {
           <li>
             <div>
               <Link href="/" className="text-gray-500 hover:text-gray-700">
-                <i className="uil uil-estate mr-1 text-lg"></i>
+                <CareIcon className="care-l-estate mr-1 text-lg" />
                 <span className="sr-only">Home</span>
               </Link>
             </div>
@@ -105,7 +106,7 @@ export default function Breadcrumbs(props: any) {
               crumb.name && (
                 <li
                   key={crumb.name}
-                  className={clsx(
+                  className={classNames(
                     "text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer",
                     crumb.style
                   )}

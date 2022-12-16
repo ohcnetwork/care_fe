@@ -3,49 +3,32 @@ import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import moment from "moment";
-import GetAppIcon from "@material-ui/icons/GetApp";
-import { CSVLink } from "react-csv";
 import {
   listResourceRequests,
   downloadResourceRequests,
 } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
-import CircularProgress from "@material-ui/core/CircularProgress";
-
 import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
 import { formatDate } from "../../Utils/utils";
 import useFilters from "../../Common/hooks/useFilters";
+import useExport from "../../Common/hooks/useExport";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ListView() {
   const dispatch: any = useDispatch();
   const { qParams, Pagination, FilterBadges, advancedFilter, resultsPerPage } =
     useFilters({});
-  const [downloadFile, setDownloadFile] = useState("");
   const [data, setData] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  // state to change download button to loading while file is not ready
-  const [downloadLoading, setDownloadLoading] = useState(false);
+  const { ExportButton } = useExport();
 
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(
-      downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
-    );
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById("resourceRequests-ALL")?.click();
-  };
-  const onBoardViewBtnClick = () => navigate("/resource/board-view", qParams);
+  const onBoardViewBtnClick = () =>
+    navigate("/resource/board-view", { query: qParams });
   const appliedFilters = formatFilter(qParams);
 
   const refreshList = () => {
@@ -204,17 +187,15 @@ export default function ListView() {
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="md:flex md:items-center md:justify-between px-4">
         <PageTitle
-          title={"Resource"}
-          hideBack={true}
+          title="Resource"
+          hideBack
           componentRight={
-            downloadLoading ? (
-              <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
-            ) : (
-              <GetAppIcon
-                className="cursor-pointer ml-2 mt-2"
-                onClick={triggerDownload}
-              />
-            )
+            <ExportButton
+              action={() =>
+                downloadResourceRequests({ ...appliedFilters, csv: 1 })
+              }
+              filenamePrefix="resource_requests"
+            />
           }
           breadcrumbs={false}
         />
@@ -267,14 +248,6 @@ export default function ListView() {
           </div>
         )}
       </div>
-
-      <CSVLink
-        data={downloadFile}
-        filename={`resource-requests--${now}.csv`}
-        target="_blank"
-        className="hidden"
-        id={"resourceRequests-ALL"}
-      />
       <SlideOver {...advancedFilter}>
         <div className="bg-white min-h-screen p-4">
           <ListFilter {...advancedFilter} showResourceStatus={true} />

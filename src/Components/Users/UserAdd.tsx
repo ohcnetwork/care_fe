@@ -38,9 +38,8 @@ import {
   CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
-import clsx from "clsx";
 
-import { goBack } from "../../Utils/utils";
+import { classNames, goBack } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -518,7 +517,11 @@ export const UserAdd = (props: UserProps) => {
         ) : (
           <i className="fas fa-circle-xmark text-red-500" />
         )}{" "}
-        <span className={clsx(condition ? "text-primary-500" : "text-red-500")}>
+        <span
+          className={classNames(
+            condition ? "text-primary-500" : "text-red-500"
+          )}
+        >
           {content}
         </span>
       </div>
