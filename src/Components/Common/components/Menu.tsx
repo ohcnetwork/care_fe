@@ -54,8 +54,6 @@ export function DropdownItem({
 }: DropdownItemProps) {
   const isAuthorized = useIsAuthorized(authorizeFor);
 
-  console.log({ ...props });
-
   return (
     <Menu.Item as="div">
       <div
