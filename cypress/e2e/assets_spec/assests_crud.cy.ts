@@ -24,7 +24,6 @@ describe("Asset Creation", () => {
       cy.verifyNotification("Location created successfully");
       cy.get("[data-cy=back-button]").click();
       cy.get("[data-cy=back-button]").click();
-      cy.get("[data-cy=back-button]").click();
       cy.contains("Manage Facility").click();
       cy.contains("Create Asset").click();
       cy.get("#asset-name").type("New Test Asset");
