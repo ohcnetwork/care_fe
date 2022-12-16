@@ -96,6 +96,8 @@ interface ModalDetails {
   name?: string;
   id?: string;
   reason?: string;
+  userArchived?: string;
+  archiveTime?: any;
 }
 
 interface StateInterface {
@@ -788,6 +790,8 @@ export const FileUpload = (props: FileUploadProps) => {
                       setModalDetails({
                         name: item.name,
                         reason: item.archive_reason,
+                        userArchived: item.archived_by?.username,
+                        archiveTime: item.archived_datetime,
                       });
                       setModalOpenForMoreDetails(true);
                     }}
@@ -1137,10 +1141,11 @@ export const FileUpload = (props: FileUploadProps) => {
             <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
               <button
                 type="submit"
+                disabled={modalDetails?.name === editFileName || btnloader}
                 className="btn-primary btn mr-2 w-full md:w-auto"
               >
                 <svg
-                  className={`animate-spin -ml-1 mr-3 h-5 w-5 text-white ${
+                  className={`animate-spin -ml-1 mr-3 h-5 w-5 text-primary ${
                     !btnloader ? " hidden " : " "
                   }`}
                   xmlns="http://www.w3.org/2000/svg"
@@ -1166,6 +1171,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <button
                 type="button"
                 className="btn-danger btn mr-2 w-full md:w-auto"
+                disabled={btnloader}
                 onClick={(_) => setModalOpenForEdit(false)}
               >
                 Cancel
@@ -1260,11 +1266,18 @@ export const FileUpload = (props: FileUploadProps) => {
               <div className="text-center">
                 <i className="fa-solid fa-file-circle-xmark my-2 fa-4x text-primary-500"></i>
               </div>
-              <div className="text-md text-center">
-                <b>{modalDetails?.name}</b> file is archived.
+              <div className="text-md text-center m-2">
+                <b>{modalDetails?.name} file is archived.</b>
               </div>
               <div className="text-md text-center">
                 <b>Reason:</b> {modalDetails?.reason}
+              </div>
+              <div className="text-md text-center">
+                <b>Archived_by:</b> {modalDetails?.userArchived}
+              </div>
+              <div className="text-md text-center">
+                <b>Time of Archive:</b>
+                {formatDate(modalDetails?.archiveTime)}
               </div>
             </div>
             <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">

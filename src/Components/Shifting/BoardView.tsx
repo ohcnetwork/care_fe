@@ -7,15 +7,11 @@ import { SHIFTING_CHOICES } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { downloadShiftRequests } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import { CSVLink } from "react-csv";
-import { useDispatch } from "react-redux";
-import moment from "moment";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import GetAppIcon from "@material-ui/icons/GetApp";
 import withScrolling from "react-dnd-scrolling";
 import { formatFilter } from "./Commons";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import useExport from "../../Common/hooks/useExport";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -27,48 +23,29 @@ const ACTIVE = shiftStatusOptions.filter(
   (option) => !COMPLETED.includes(option)
 );
 
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
-
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
     limit: -1,
   });
-  const dispatch: any = useDispatch();
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
-  const [downloadFile, setDownloadFile] = useState("");
   const [isLoading] = useState(false);
-  // state to change download button to loading while file is not ready
-  const [downloadLoading, setDownloadLoading] = useState(false);
-
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(
-      downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
-    );
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById("shiftRequests-ALL")?.click();
-  };
+  const { ExportButton } = useExport();
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="w-full flex flex-col md:flex-row items-center justify-between">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
-            title={"Shifting"}
+            title="Shifting"
             className="mx-3 md:mx-5"
-            hideBack={true}
+            hideBack
             componentRight={
-              downloadLoading ? (
-                <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
-              ) : (
-                <GetAppIcon
-                  className="cursor-pointer mt-2 ml-2"
-                  onClick={triggerDownload}
-                />
-              )
+              <ExportButton
+                action={() =>
+                  downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
+                }
+                filenamePrefix="shift_requests"
+              />
             }
             breadcrumbs={false}
           />
@@ -141,13 +118,6 @@ export default function BoardView() {
           )}
         </div>
       </ScrollingComponent>
-      <CSVLink
-        data={downloadFile}
-        filename={`shift-requests--${now}.csv`}
-        target="_blank"
-        className="hidden"
-        id={"shiftRequests-ALL"}
-      />
       <SlideOver {...advancedFilter}>
         <div className="bg-white min-h-screen p-4">
           <ListFilter {...advancedFilter} />
