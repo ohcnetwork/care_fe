@@ -84,6 +84,11 @@ export const formatDate = (date: string | Date) => {
   return moment(date).format("hh:mm A; DD/MM/YYYY");
 };
 
+export const relativeDate = (date: string | Date) => {
+  const momentDate = moment(date);
+  return `${momentDate.fromNow()} at ${momentDate.format("hh:mm A")}`;
+};
+
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const handleSignOut = (forceReload: boolean) => {

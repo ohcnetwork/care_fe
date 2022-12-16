@@ -1,5 +1,6 @@
 import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
+import { classNames } from "../../../Utils/utils";
 
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
@@ -33,7 +34,7 @@ export type ButtonProps = RawButtonProps &
      */
     circle?: boolean | undefined;
     /**
-     * - `"success"` is ideal for form submissions, etc.
+     * - `"primary"` is ideal for form submissions, etc.
      * - `"secondary"` is ideal for things that have secondary importance.
      * - `"danger"` is ideal for destructive or dangerous actions, such as delete.
      * - `"warning"` is ideal for actions that require caution such as archive.
@@ -44,6 +45,10 @@ export type ButtonProps = RawButtonProps &
     shadow?: boolean | undefined;
     /** If set, removes the background to give a simple text button. */
     ghost?: boolean | undefined;
+    /**
+     * If set, applies border to the button.
+     */
+    border?: boolean | undefined;
     /**
      * Whether the button is disabled or not.
      * This is overriden to `true` if `loading` is `true`.
@@ -62,6 +67,7 @@ const ButtonV2 = ({
   circle,
   shadow,
   ghost,
+  border,
   className,
   disabled,
   loading,
@@ -74,14 +80,15 @@ const ButtonV2 = ({
     <button
       {...props}
       disabled={disabled || !isAuthorized || loading}
-      className={[
+      className={classNames(
         "Button outline-offset-1",
         `button-size-${size}`,
         `button-shape-${circle ? "circle" : "square"}`,
-        `button-${variant}-${ghost ? "ghost" : "default"}`,
+        ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
+        border && `button-${variant}-border`,
         shadow && "shadow enabled:hover:shadow-lg",
-        className,
-      ].join(" ")}
+        className
+      )}
     >
       {children}
     </button>

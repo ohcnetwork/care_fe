@@ -2,12 +2,7 @@ import {
   Card,
   CardContent,
   CircularProgress,
-  InputLabel,
   IconButton,
-  RadioGroup,
-  FormControlLabel,
-  Box,
-  Radio,
 } from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
@@ -39,17 +34,17 @@ import {
   getWardByLocalBody,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  ErrorHelperText,
-  MultilineInputField,
-  PhoneNumberField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
 import GLocationPicker from "../Common/GLocationPicker";
 import { goBack } from "../../Utils/utils";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import RadioInputsV2 from "../Common/components/RadioInputsV2";
+import ButtonV2 from "../Common/components/ButtonV2";
+import TextFormField from "../Form/FormFields/TextFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -57,48 +52,46 @@ interface FacilityProps {
   facilityId?: number;
 }
 
-const facilityTypes = [...FACILITY_TYPES.map((i) => i.text)];
-const initialStates = [{ id: 0, name: "Choose State *" }];
-const initialDistricts = [{ id: 0, name: "Choose District" }];
-const selectStates = [{ id: 0, name: "Please select your state" }];
-const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
-const selectLocalBody = [
-  { id: 0, name: "Please select your Local Body", number: 0 },
-];
-const initialWards = [{ id: 0, name: "Choose Ward", number: 0 }];
+interface StateObj {
+  id: number;
+  name: string;
+}
+
+interface WardObj extends StateObj {
+  number: number;
+}
 
 type FacilityForm = {
   facility_type: string;
   name: string;
-  state: string;
-  district: string;
-  local_body: string;
+  state: number;
+  district: number;
+  local_body: number;
   features: number[];
-  ward: string;
+  ward: number;
   kasp_empanelled: string;
   address: string;
   phone_number: string;
   latitude: string;
   longitude: string;
   pincode: string;
-  oxygen_capacity: string;
-  type_b_cylinders: string;
-  type_c_cylinders: string;
-  type_d_cylinders: string;
-  expected_oxygen_requirement: string;
-  expected_type_b_cylinders: string;
-  expected_type_c_cylinders: string;
-  expected_type_d_cylinders: string;
+  oxygen_capacity: number;
+  type_b_cylinders: number;
+  type_c_cylinders: number;
+  type_d_cylinders: number;
+  expected_oxygen_requirement: number;
+  expected_type_b_cylinders: number;
+  expected_type_c_cylinders: number;
+  expected_type_d_cylinders: number;
 };
 
 const initForm: FacilityForm = {
-  facility_type: "2",
+  facility_type: "Private Hospital",
   name: "",
-  state: "",
-  district: "",
-  local_body: "",
-  ward: "",
+  state: 0,
+  district: 0,
+  local_body: 0,
+  ward: 0,
   kasp_empanelled: "false",
   features: [],
   address: "",
@@ -106,14 +99,14 @@ const initForm: FacilityForm = {
   latitude: "",
   longitude: "",
   pincode: "",
-  oxygen_capacity: "",
-  type_b_cylinders: "",
-  type_c_cylinders: "",
-  type_d_cylinders: "",
-  expected_oxygen_requirement: "",
-  expected_type_b_cylinders: "",
-  expected_type_c_cylinders: "",
-  expected_type_d_cylinders: "",
+  oxygen_capacity: 0,
+  type_b_cylinders: 0,
+  type_c_cylinders: 0,
+  type_d_cylinders: 0,
+  expected_oxygen_requirement: 0,
+  expected_type_b_cylinders: 0,
+  expected_type_c_cylinders: 0,
+  expected_type_d_cylinders: 0,
 };
 
 const initError: Record<keyof FacilityForm, string> = Object.assign(
@@ -155,10 +148,10 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
-  const [states, setStates] = useState(initialStates);
-  const [districts, setDistricts] = useState(selectStates);
-  const [localBodies, setLocalBodies] = useState(selectDistrict);
-  const [ward, setWard] = useState(selectLocalBody);
+  const [states, setStates] = useState<StateObj[]>([]);
+  const [districts, setDistricts] = useState<StateObj[]>([]);
+  const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
+  const [ward, setWard] = useState<WardObj[]>([]);
   const { width } = useWindowDimensions();
 
   const [anchorEl, setAnchorEl] = React.useState<
@@ -169,50 +162,44 @@ export const FacilityCreate = (props: FacilityProps) => {
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
   const fetchDistricts = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
+    async (id: number) => {
+      if (id > 0) {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
         if (districtList) {
-          setDistricts([...initialDistricts, ...districtList.data]);
+          setDistricts([...districtList.data]);
         }
         setIsDistrictLoading(false);
-      } else {
-        setDistricts(selectStates);
       }
     },
     [dispatchAction]
   );
 
   const fetchLocalBody = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
+    async (id: number) => {
+      if (id > 0) {
         setIsLocalbodyLoading(true);
         const localBodyList = await dispatchAction(
           getLocalbodyByDistrict({ id })
         );
         setIsLocalbodyLoading(false);
         if (localBodyList) {
-          setLocalBodies([...initialLocalbodies, ...localBodyList.data]);
+          setLocalBodies([...localBodyList.data]);
         }
-      } else {
-        setLocalBodies(selectDistrict);
       }
     },
     [dispatchAction]
   );
 
   const fetchWards = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
+    async (id: number) => {
+      if (id > 0) {
         setIsWardLoading(true);
         const wardList = await dispatchAction(getWardByLocalBody({ id }));
         setIsWardLoading(false);
         if (wardList) {
-          setWard([...initialWards, ...wardList.data.results]);
+          setWard([...wardList.data.results]);
         }
-      } else {
-        setWard(selectLocalBody);
       }
     },
     [dispatchAction]
@@ -227,11 +214,11 @@ export const FacilityCreate = (props: FacilityProps) => {
           const formData = {
             facility_type: res.data.facility_type,
             name: res.data.name,
-            state: res.data.state ? res.data.state : "",
-            district: res.data.district ? res.data.district : "",
-            local_body: res.data.local_body ? res.data.local_body : "",
+            state: res.data.state ? res.data.state : 0,
+            district: res.data.district ? res.data.district : 0,
+            local_body: res.data.local_body ? res.data.local_body : 0,
             features: res.data.features || [],
-            ward: res.data.ward_object ? res.data.ward_object.id : initialWards,
+            ward: res.data.ward_object ? res.data.ward_object.id : 0,
             kasp_empanelled: res.data.kasp_empanelled
               ? String(res.data.kasp_empanelled)
               : "false",
@@ -250,9 +237,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             expected_type_c_cylinders: res.data.expected_type_c_cylinders,
             expected_type_d_cylinders: res.data.expected_type_d_cylinders,
             expected_oxygen_requirement: res.data.expected_oxygen_requirement,
-            oxygen_capacity: res.data.oxygen_capacity
-              ? res.data.oxygen_capacity
-              : "",
+            oxygen_capacity: res.data.oxygen_capacity,
           };
           dispatch({ type: "set_form", form: formData });
           Promise.all([
@@ -274,7 +259,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        setStates([...initialStates, ...statesRes.data.results]);
+        setStates([...statesRes.data.results]);
       }
       setIsStateLoading(false);
     },
@@ -291,10 +276,10 @@ export const FacilityCreate = (props: FacilityProps) => {
     [dispatch, fetchData]
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: FieldChangeEvent<string>) => {
     dispatch({
       type: "set_form",
-      form: { ...state.form, [e.target.name]: e.target.value },
+      form: { ...state.form, [e.name]: e.value },
     });
   };
 
@@ -318,7 +303,9 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
   };
 
-  const handleSelectCurrentLocation = () => {
+  const handleSelectCurrentLocation = (
+    setCenter: (lat: number, lng: number) => void
+  ) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         dispatch({
@@ -329,9 +316,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             longitude: String(position.coords.longitude),
           },
         });
-      });
 
-      // setAnchorEl(null);
+        setCenter?.(position.coords.latitude, position.coords.longitude);
+      });
     }
   };
 
@@ -409,6 +396,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validated = validateForm();
+    console.log(state.form);
     if (validated) {
       setIsLoading(true);
       const data = {
@@ -428,30 +416,30 @@ export const FacilityCreate = (props: FacilityProps) => {
           state.form.phone_number
         )?.format("E.164"),
         oxygen_capacity: state.form.oxygen_capacity
-          ? Number(state.form.oxygen_capacity)
+          ? state.form.oxygen_capacity
           : 0,
         type_b_cylinders: state.form.type_b_cylinders
-          ? Number(state.form.type_b_cylinders)
+          ? state.form.type_b_cylinders
           : 0,
         type_c_cylinders: state.form.type_c_cylinders
-          ? Number(state.form.type_c_cylinders)
+          ? state.form.type_c_cylinders
           : 0,
         type_d_cylinders: state.form.type_d_cylinders
-          ? Number(state.form.type_d_cylinders)
+          ? state.form.type_d_cylinders
           : 0,
         expected_oxygen_requirement: state.form.expected_oxygen_requirement
-          ? Number(state.form.expected_oxygen_requirement)
+          ? state.form.expected_oxygen_requirement
           : 0,
         expected_type_b_cylinders: state.form.expected_type_b_cylinders
-          ? Number(state.form.expected_type_b_cylinders)
+          ? state.form.expected_type_b_cylinders
           : 0,
 
         expected_type_c_cylinders: state.form.expected_type_c_cylinders
-          ? Number(state.form.expected_type_c_cylinders)
+          ? state.form.expected_type_c_cylinders
           : 0,
 
         expected_type_d_cylinders: state.form.expected_type_d_cylinders
-          ? Number(state.form.expected_type_d_cylinders)
+          ? state.form.expected_type_d_cylinders
           : 0,
       };
       const res = await dispatchAction(
@@ -482,43 +470,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
-  const setLocalBody = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        local_body: e.target.value,
-
-        ward: "0",
-      },
-    });
-  };
-
-  const setDistrict = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        district: e.target.value,
-
-        local_body: "0",
-        ward: "0",
-      },
-    });
-  };
-  const setState = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        state: e.target.value,
-        district: "0",
-        local_body: "0",
-        ward: "0",
-      },
-    });
-  };
-
   if (isLoading) {
     return <Loading />;
   }
@@ -541,40 +492,41 @@ export const FacilityCreate = (props: FacilityProps) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <InputLabel id="facility_type-label">Facility Type*</InputLabel>
-                <SelectField
-                  data-test="facility-type"
-                  name="facility_type"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
+                <label htmlFor="facility-type" className="mb-2">
+                  Facility Type
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <SelectMenuV2
+                  id="facility-type"
+                  required
+                  options={FACILITY_TYPES}
                   value={state.form.facility_type}
-                  options={facilityTypes}
-                  onChange={handleChange}
-                  errors={state.errors.facility_type}
+                  optionLabel={(o) => o.text}
+                  optionValue={(o) => o.text}
+                  onChange={(e) => handleValueChange(e, "facility_type")}
                 />
+                <ErrorHelperText error={state.errors.facility_type} />
               </div>
-
               <div>
-                <InputLabel htmlFor="facility-name" id="name-label">
-                  Facility Name*
-                </InputLabel>
-                <TextInputField
+                <label htmlFor="facility-name" className="mb-2">
+                  Facility Name
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <TextFormField
                   id="facility-name"
-                  fullWidth
                   name="name"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.name}
+                  required
                   onChange={handleChange}
-                  errors={state.errors.name}
+                  value={state.form.name}
+                  error={state.errors.name}
                 />
               </div>
-              <div className="">
-                <InputLabel id="features-label">Features</InputLabel>
+              <div>
+                <label htmlFor="facility-features" className="mb-2">
+                  Features
+                </label>
                 <MultiSelectMenuV2
-                  id="features"
+                  id="facility-features"
                   placeholder="Features"
                   value={state.form.features}
                   options={FACILITY_FEATURE_TYPES}
@@ -585,127 +537,160 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <ErrorHelperText error={state.errors.features} />
               </div>
               <div>
-                <InputLabel id="gender-label">State*</InputLabel>
+                <label htmlFor="facility-state" className="mb-2">
+                  State
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 {isStateLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                  <SelectField
-                    data-test="facility-state"
-                    name="state"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.state}
-                    options={states}
-                    optionValue="name"
-                    onChange={(e) => [
-                      setState(e),
-                      fetchDistricts(String(e.target.value)),
-                    ]}
-                    errors={state.errors.state}
-                  />
+                  <>
+                    <SelectMenuV2
+                      id="facility-state"
+                      placeholder="Choose State *"
+                      options={states}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      value={state.form.state}
+                      onChange={(e) => {
+                        if (e) {
+                          return [
+                            handleValueChange(e, "state"),
+                            fetchDistricts(e),
+                          ];
+                        }
+                      }}
+                    />
+                    <ErrorHelperText error={state.errors.state} />
+                  </>
                 )}
               </div>
 
               <div>
-                <InputLabel id="district-label">District*</InputLabel>
+                <label htmlFor="facility-district" className="mb-2">
+                  District
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+
                 {isDistrictLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                  <SelectField
-                    data-test="facility-district"
-                    name="district"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.district}
-                    options={districts}
-                    optionValue="name"
-                    onChange={(e) => [
-                      setDistrict(e),
-                      fetchLocalBody(String(e.target.value)),
-                    ]}
-                    errors={state.errors.district}
-                  />
+                  <>
+                    <SelectMenuV2
+                      id="facility-district"
+                      placeholder="Choose District"
+                      options={districts}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      value={state.form.district}
+                      onChange={(e) => {
+                        if (e) {
+                          return [
+                            handleValueChange(e, "district"),
+                            fetchLocalBody(e),
+                          ];
+                        }
+                      }}
+                    />
+                    <ErrorHelperText error={state.errors.district} />
+                  </>
                 )}
               </div>
 
-              <div className="">
-                <InputLabel id="local_body-label">Localbody*</InputLabel>
+              <div>
+                <label htmlFor="facility-localbody" className="mb-2">
+                  LocalBody
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                  <SelectField
-                    data-test="facility-localbody"
-                    name="local_body"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.local_body}
-                    options={localBodies}
-                    optionValue="name"
-                    onChange={(e) => [
-                      setLocalBody(e),
-                      fetchWards(String(e.target.value)),
-                    ]}
-                    errors={state.errors.local_body}
-                  />
+                  <>
+                    <SelectMenuV2
+                      id="facility-localbody"
+                      placeholder="Choose LocalBody"
+                      options={localBodies}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      value={state.form.local_body}
+                      onChange={(e) => {
+                        if (e) {
+                          return [
+                            handleValueChange(e, "local_body"),
+                            fetchWards(e),
+                          ];
+                        }
+                      }}
+                    />
+                    <ErrorHelperText error={state.errors.local_body} />
+                  </>
                 )}
               </div>
               <div className="md:col-span-2">
-                <InputLabel id="ward-label">Ward*</InputLabel>
+                <label htmlFor="facility-ward" className="mb-2">
+                  Ward
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 {isWardLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                  <SelectField
-                    data-test="facility-ward"
-                    name="ward"
-                    variant="outlined"
-                    margin="dense"
-                    options={ward
-                      .sort((a, b) => a.number - b.number)
-                      .map((e) => {
-                        return { id: e.id, name: e.number + ": " + e.name };
-                      })}
-                    value={state.form.ward}
-                    optionValue="name"
-                    onChange={handleChange}
-                    errors={state.errors.ward}
-                  />
+                  <>
+                    <SelectMenuV2
+                      id="facility-ward"
+                      placeholder="Choose Ward"
+                      options={ward
+                        .sort((a, b) => a.number - b.number)
+                        .map((e) => {
+                          return { id: e.id, name: e.number + ": " + e.name };
+                        })}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      value={state.form.ward}
+                      onChange={(e) => {
+                        if (e) {
+                          return [handleValueChange(e, "ward")];
+                        }
+                      }}
+                    />
+                    <ErrorHelperText error={state.errors.ward} />
+                  </>
                 )}
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel htmlFor="facility-address" id="name-label">
-                  Address*
-                </InputLabel>
-                <MultilineInputField
+                <label htmlFor="facility-address" className="mb-2">
+                  Address
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <TextAreaFormField
                   id="facility-address"
-                  rows={5}
                   name="address"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.address}
+                  required
                   onChange={handleChange}
-                  errors={state.errors.address}
+                  value={state.form.address}
+                  error={state.errors.address}
                 />
               </div>
               <div>
-                <InputLabel htmlFor="facility-pincode" id="name-label">
-                  Pincode*
-                </InputLabel>
-                <TextInputField
+                <label htmlFor="facility-pincode" className="mb-2">
+                  Pincode
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <TextFormField
                   id="facility-pincode"
                   name="pincode"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={state.form.pincode}
+                  required
                   onChange={handleChange}
-                  errors={state.errors.pincode}
+                  value={state.form.pincode}
+                  error={state.errors.pincode}
                 />
               </div>
               <div>
+                <label htmlFor="facility-tel" className="mb-1">
+                  Emergency Contact Number
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 <PhoneNumberField
-                  label="Emergency Contact Number*"
                   value={state.form.phone_number}
                   onChange={(value: string) =>
                     handleValueChange(value, "phone_number")
@@ -718,161 +703,148 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div className="md:col-span-2 grid grid-cols-1 xl:grid-cols-2 gap-4 py-4">
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
-                    <InputLabel
-                      htmlFor="facility-oxygen-capacity"
-                      id="oxygen_capacity"
-                    >
+                    <label htmlFor="facility-oxygen_capacity" className="mb-2">
                       Liquid Oxygen Capacity
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-oxygen-capacity"
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-oxygen_capacity"
                       name="oxygen_capacity"
                       type="number"
-                      variant="outlined"
-                      margin="dense"
-                      placeholder="Litres"
-                      value={state.form.oxygen_capacity}
-                      onChange={handleChange}
-                      errors={state.errors.oxygen_capacity}
+                      required
+                      onChange={(e) => handleValueChange(e.value, e.name)}
+                      value={String(state.form.oxygen_capacity)}
+                      errorClassName="hidden"
                     />
                   </div>
                   <div>
-                    <InputLabel
-                      htmlFor="facility-oxygen-requirement"
-                      id="name-label"
+                    <label
+                      htmlFor="facility-expected_oxygen_requirement"
+                      className="mb-2"
                     >
                       Expected Burn Rate
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-oxygen-requirement"
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-expected_oxygen_requirement"
                       name="expected_oxygen_requirement"
                       type="number"
-                      variant="outlined"
-                      margin="dense"
+                      required
                       placeholder="Litres / day"
-                      value={state.form.expected_oxygen_requirement}
                       onChange={handleChange}
-                      errors={state.errors.expected_oxygen_requirement}
+                      value={String(state.form.expected_oxygen_requirement)}
+                      error={state.errors.expected_oxygen_requirement}
                     />
                   </div>
                 </div>
 
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
-                    <InputLabel
-                      htmlFor="facility-type-b-cylinders"
-                      id="type_b_cylinders"
-                    >
+                    <label htmlFor="facility-type_b_cylinders" className="mb-2">
                       B Type Cylinders
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-type-b-cylinders"
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-type_b_cylinders"
                       name="type_b_cylinders"
                       type="number"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.type_b_cylinders}
+                      required
                       onChange={handleChange}
-                      errors={state.errors.type_b_cylinders}
+                      value={String(state.form.type_b_cylinders)}
+                      error={state.errors.type_b_cylinders}
                     />
                   </div>
                   <div>
-                    <InputLabel
-                      htmlFor="facility-expected-type-b-cylinders"
-                      id="expected_type_b_cylinders"
+                    <label
+                      htmlFor="facility-expected_type_b_cylinders"
+                      className="mb-2"
                     >
                       Expected Burn Rate
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-expected-type-b-cylinders"
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-expected_type_b_cylinders"
                       name="expected_type_b_cylinders"
                       type="number"
-                      variant="outlined"
-                      margin="dense"
+                      required
                       placeholder="Cylinders / day"
-                      value={state.form.expected_type_b_cylinders}
                       onChange={handleChange}
-                      errors={state.errors.expected_type_b_cylinders}
+                      value={String(state.form.expected_type_b_cylinders)}
+                      error={state.errors.expected_type_b_cylinders}
                     />
                   </div>
                 </div>
 
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
-                    <InputLabel
-                      htmlFor="facility-type-c-cylinders"
-                      id="type_c_cylinders"
-                    >
+                    <label htmlFor="facility-type_c_cylinders" className="mb-2">
                       C Type Cylinders
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-type-c-cylinders"
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-type_c_cylinders"
                       name="type_c_cylinders"
                       type="number"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.type_c_cylinders}
+                      required
                       onChange={handleChange}
-                      errors={state.errors.type_c_cylinders}
+                      value={String(state.form.type_c_cylinders)}
+                      error={state.errors.type_c_cylinders}
                     />
                   </div>
                   <div>
-                    <InputLabel
-                      htmlFor="facility-expected-type-c-cylinders"
-                      id="expected_type_c_cylinders"
+                    <label
+                      htmlFor="facility-expected_type_c_cylinders"
+                      className="mb-2"
                     >
                       Expected Burn Rate
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-expected-type-c-cylinders"
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-expected_type_c_cylinders"
                       name="expected_type_c_cylinders"
                       type="number"
-                      variant="outlined"
-                      margin="dense"
+                      required
                       placeholder="Cylinders / day"
-                      value={state.form.expected_type_c_cylinders}
                       onChange={handleChange}
-                      errors={state.errors.expected_type_c_cylinders}
+                      value={String(state.form.expected_type_c_cylinders)}
+                      error={state.errors.expected_type_c_cylinders}
                     />
                   </div>
                 </div>
 
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
-                    <InputLabel
-                      htmlFor="facility-type-d-cylinders"
-                      id="type_d_cylinders"
-                    >
+                    <label htmlFor="facility-type_d_cylinders" className="mb-2">
                       D Type Cylinders
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-type-d-cylinders"
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-type_d_cylinders"
                       name="type_d_cylinders"
                       type="number"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.type_d_cylinders}
+                      required
                       onChange={handleChange}
-                      errors={state.errors.type_d_cylinders}
+                      value={String(state.form.type_d_cylinders)}
+                      error={state.errors.type_d_cylinders}
                     />
                   </div>
                   <div>
-                    <InputLabel
-                      htmlFor="facility-expected-type-d-cylinders"
-                      id="expected_type_d_cylinders"
+                    <label
+                      htmlFor="facility-expected_type_d_cylinders"
+                      className="mb-2"
                     >
                       Expected Burn Rate
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-expected-type-d-cylinders"
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-expected_type_d_cylinders"
                       name="expected_type_d_cylinders"
                       type="number"
-                      variant="outlined"
-                      margin="dense"
+                      required
                       placeholder="Cylinders / day"
-                      value={state.form.expected_type_d_cylinders}
                       onChange={handleChange}
-                      errors={state.errors.expected_type_d_cylinders}
+                      value={String(state.form.expected_type_d_cylinders)}
+                      error={state.errors.expected_type_d_cylinders}
                     />
                   </div>
                 </div>
@@ -880,36 +852,21 @@ export const FacilityCreate = (props: FacilityProps) => {
 
               {KASP_ENABLED && (
                 <div>
-                  <InputLabel
-                    htmlFor="facility-kasp-empanelled"
-                    id="kasp_empanelled"
-                  >
+                  <label htmlFor="facility-kasp_empanelled" className="mb-2">
                     Is this facility {KASP_STRING} empanelled?
-                  </InputLabel>
-                  <RadioGroup
-                    aria-label="kasp_empanelled"
+                  </label>
+                  <RadioInputsV2
                     name="kasp_empanelled"
-                    value={state.form.kasp_empanelled}
-                    onChange={handleChange}
-                    style={{ padding: "0px 5px" }}
-                  >
-                    <Box
-                      display="flex"
-                      id="facility-kasp-empanelled"
-                      flexDirection="row"
-                    >
-                      <FormControlLabel
-                        value="true"
-                        control={<Radio />}
-                        label="Yes"
-                      />
-                      <FormControlLabel
-                        value="false"
-                        control={<Radio />}
-                        label="No"
-                      />
-                    </Box>
-                  </RadioGroup>
+                    selected={state.form.kasp_empanelled}
+                    onSelect={(value) =>
+                      handleValueChange(value, "kasp_empanelled")
+                    }
+                    error={state.errors.kasp_empanelled}
+                    options={[
+                      { label: "Yes", value: "true" },
+                      { label: "No", value: "false" },
+                    ]}
+                  />
                 </div>
               )}
             </div>
@@ -918,21 +875,19 @@ export const FacilityCreate = (props: FacilityProps) => {
                 isExtremeSmallScreen
                   ? " grid grid-cols-1 "
                   : " flex items-center "
-              } mt-4 -mx-2`}
+              } -mx-2`}
             >
               <div className="flex-1 px-2">
-                <InputLabel id="location-label">Location</InputLabel>
-                <TextInputField
+                <label className="mb-2">Location</label>
+                <TextFormField
                   name="latitude"
                   placeholder="Latitude"
-                  variant="outlined"
-                  margin="dense"
                   value={state.form.latitude}
                   onChange={handleChange}
-                  errors={state.errors.latitude}
+                  error={state.errors.latitude}
                 />
               </div>
-              <div className="pt-4">
+              <div className="">
                 <IconButton
                   id="facility-location-button"
                   onClick={(event) => setAnchorEl(event.currentTarget)}
@@ -963,15 +918,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                 </Popover>
               </div>
               <div className="flex-1 px-2">
-                <InputLabel>&nbsp;</InputLabel>
-                <TextInputField
+                <label className="mb-1">&nbsp;</label>
+                <TextFormField
                   name="longitude"
                   placeholder="Longitude"
-                  variant="outlined"
-                  margin="dense"
                   value={state.form.longitude}
                   onChange={handleChange}
-                  errors={state.errors.longitude}
+                  error={state.errors.longitude}
                 />
               </div>
             </div>
@@ -980,22 +933,25 @@ export const FacilityCreate = (props: FacilityProps) => {
                 isExtremeSmallScreen
                   ? " grid grid-cols-1 "
                   : " flex justify-between "
-              } mt-6 gap-2 `}
+              } mt-2 gap-2 `}
             >
-              <button
-                className="btn btn-default border-2 border-grey-300"
-                onClick={() => goBack()}
+              <ButtonV2
+                variant="secondary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  goBack();
+                }}
               >
                 Cancel
-              </button>
-              <button
-                className="btn btn-primary"
+              </ButtonV2>
+              <ButtonV2
                 id="facility-save"
+                variant="primary"
                 type="submit"
                 onClick={(e) => handleSubmit(e)}
               >
-                <i className="mr-2 fa-regular fa-circle-check"></i> {buttonText}
-              </button>
+                <i className="fa-regular fa-circle-check"></i> {buttonText}
+              </ButtonV2>
             </div>
           </form>
         </CardContent>

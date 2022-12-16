@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
@@ -11,9 +11,10 @@ import {
   getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { DateInputField, TextInputField } from "../Common/HelperInputFields";
+import { TextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
 import { goBack } from "../../Utils/utils";
+import DateInputV2 from "../Common/DateInputV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -78,7 +79,7 @@ export const TriageForm = (props: triageFormProps) => {
             type: "set_form",
             form: {
               entry_date: res.data.entry_date
-                ? moment(res.data.entry_date, "YYYY-MM-DD")
+                ? moment(res.data.entry_date).toDate()
                 : null,
               num_patients_visited: res.data.num_patients_visited,
               num_patients_home_quarantine:
@@ -124,6 +125,12 @@ export const TriageForm = (props: triageFormProps) => {
         case "entry_date":
           if (!state.form[field]) {
             errors[field] = "Field is required";
+            invalidForm = true;
+          } else if (
+            moment(state.form.entry_date).format("YYYY-MM-DD") >
+            new Date().toLocaleDateString("en-ca")
+          ) {
+            errors[field] = "Date cannot be in future";
             invalidForm = true;
           }
           return;
@@ -183,6 +190,14 @@ export const TriageForm = (props: triageFormProps) => {
 
   const handleDateChange = (date: any, key: string) => {
     if (moment(date).isValid()) {
+      // ensuring that the date is not in future
+      if (
+        moment(date).format("YYYY-MM-DD") >
+        new Date().toLocaleDateString("en-ca")
+      ) {
+        Notification.Error({ msg: "Date can't be in future" });
+        return;
+      }
       const form = { ...state.form };
       form[key] = date;
       dispatch({ type: "set_form", form });
@@ -192,6 +207,10 @@ export const TriageForm = (props: triageFormProps) => {
   if (isLoading) {
     return <Loading />;
   }
+
+  const borderColor = state.errors["entry_date"]
+    ? "border-red-500"
+    : "border-gray-200";
 
   return (
     <div className="px-2">
@@ -208,13 +227,24 @@ export const TriageForm = (props: triageFormProps) => {
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div className="max-w-[250px]">
-                <DateInputField
-                  label="Entry Date"
-                  value={state.form.entry_date}
-                  onChange={(date) => handleDateChange(date, "entry_date")}
-                  errors={state.errors.entry_date}
-                />
+              <div className="max-w-[250px] pb-4">
+                <InputLabel>Entry Date</InputLabel>
+                <div className="flex-auto">
+                  <DateInputV2
+                    className={`bg-gray-50 ${borderColor}`}
+                    value={state.form.entry_date}
+                    max={new Date()}
+                    onChange={(date) => handleDateChange(date, "entry_date")}
+                    position="RIGHT"
+                    placeholder="Entry Date"
+                  />
+                </div>
+                {state.errors.entry_date &&
+                  state.errors.entry_date.length > 0 && (
+                    <div className="text-sm text-red-500">
+                      {state.errors.entry_date}
+                    </div>
+                  )}
               </div>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
@@ -304,30 +334,21 @@ export const TriageForm = (props: triageFormProps) => {
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  fullWidth
-                  className="w-full md:w-auto"
+                <button
+                  className="btn btn-default bg-gray-300 hover:bg-gray-400 btn-large mr-4 w-full md:w-auto"
                   type="button"
                   onClick={() => goBack()}
                 >
                   Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  fullWidth
-                  className="w-full md:w-auto"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
+                </button>
+                <button
+                  className="btn btn-large btn-primary mr-4 w-full md:w-auto flex gap-2"
                   onClick={(e) => handleSubmit(e)}
+                  data-testid="add-patient-button"
                 >
+                  <CheckCircleOutlineIcon />
                   {buttonText}
-                </Button>
+                </button>
               </div>
             </CardContent>
           </form>

@@ -21,11 +21,6 @@ describe("Resource Page", () => {
     });
   });
 
-  it("switch between list view and board view", () => {
-    cy.contains("List View").click();
-    cy.contains("Board View").click();
-  });
-
   it("switch between active/completed", () => {
     cy.intercept(/\/api\/v1\/resource/).as("resource");
     cy.contains("Completed").click();
@@ -41,6 +36,11 @@ describe("Resource Page", () => {
     });
     cy.contains("Active").should("have.class", "bg-white");
     cy.contains("Completed").should("have.class", "bg-gray-200");
+  });
+
+  it("switch between list view and board view", () => {
+    cy.contains("List View").click();
+    cy.contains("Board View").click();
   });
 
   afterEach(() => {

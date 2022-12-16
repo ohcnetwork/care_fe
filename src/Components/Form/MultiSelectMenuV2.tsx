@@ -58,7 +58,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
   };
 
   return (
-    <div className={props.className}>
+    <div className={props.className} id={props.id}>
       <Listbox
         disabled={props.disabled}
         value={selectedOptions}

@@ -25,7 +25,7 @@ describe("Shifting Page", () => {
   });
 
   it("search patient", () => {
-    cy.get("[name='search']").type("Akhil");
+    cy.get("[name='patient_name_search']").type("Akhil");
     cy.url().should("include", "Akhil");
   });
 
