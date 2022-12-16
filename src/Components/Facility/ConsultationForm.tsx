@@ -901,16 +901,15 @@ export const ConsultationForm = (props: any) => {
                   required
                 />
               </div>
-              <div id="verified_by-div">
-                <TextAreaFormField
-                  id="verified_by"
-                  name="verified_by"
-                  placeholder="Attending Doctors Name and Designation"
-                  value={state.form.verified_by}
-                  onChange={handleFormFieldChange}
-                  error={state.errors.verified_by}
-                />
-              </div>
+              <TextAreaFormField
+                label="Verified by"
+                id="verified_by"
+                name="verified_by"
+                placeholder="Attending Doctors Name and Designation"
+                value={state.form.verified_by}
+                onChange={handleFormFieldChange}
+                error={state.errors.verified_by}
+              />
               <div id="provisional-diagnosis-div" className="mt-4">
                 <FieldLabel id="diagnosis-label">
                   Provisional Diagnosis
