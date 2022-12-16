@@ -25,6 +25,7 @@ import {
   REVIEW_AT_CHOICES,
   KASP_STRING,
   KASP_ENABLED,
+  PatientCategoryID,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -69,6 +70,7 @@ import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import PatientCategorySelect from "../Patient/PatientCategorySelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -332,12 +334,7 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "category":
-          if (
-            !state.form[field] ||
-            !PATIENT_CATEGORIES.map((category) => category.id).includes(
-              state.form[field]
-            )
-          ) {
+          if (!state.form[field]) {
             errors[field] = "Please select a category";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -761,6 +758,15 @@ export const ConsultationForm = (props: any) => {
                     error={state.errors.prescribed_medication}
                   />
                 </div>
+                <PatientCategorySelect
+                  required
+                  label="Category"
+                  id="category"
+                  name="category"
+                  value={state.form.category as PatientCategoryID | undefined}
+                  onChange={handleFormFieldChange}
+                  error={state.errors.category}
+                />
                 <div className="flex-1" id="category-div">
                   <FieldLabel required>Category</FieldLabel>
                   <SelectField
