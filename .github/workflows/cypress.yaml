@@ -49,7 +49,7 @@ jobs:
       - name: Cypress run 🥬
         uses: cypress-io/github-action@v4
         with:
-          env: SKIP_PREFLIGHT_CHECK=true,NODE_OPTIONS=--max-old-space-size=4096
+          env: SKIP_PREFLIGHT_CHECK=true
           install: false
           start: "npm run start:react"
           wait-on: "http://localhost:4000"
@@ -59,6 +59,7 @@ jobs:
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max_old_space_size=4096
 
       - name: Remove cypress failed label on success 🏷️
         uses: actions-ecosystem/action-remove-labels@v1
