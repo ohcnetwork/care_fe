@@ -145,7 +145,8 @@ describe("Facility", () => {
       .contains("Add Doctor Types")
       .click({ force: true });
     cy.url().should("include", "doctor");
-    cy.get("[id=area-of-specialization]").select("1");
+    cy.get("[id=area-of-specialization] > div > button").click();
+    cy.get("ul > li:nth-child(2)").click();
     cy.get("[id=count]").type("15");
     cy.get("[id=doctor-save").click();
     cy.verifyNotification("Doctor count added successfully");
