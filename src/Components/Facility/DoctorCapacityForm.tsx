@@ -271,7 +271,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
               />
             </div>
             <div className="p-4">
-              <div className="flex justify-between">
+              <div className="flex justify-between flex-col md:flex-row">
                 <div className="flex flex-row w-full sm:w-auto gap-4">
                   <ButtonV2
                     id="doctor-cancel"
@@ -282,12 +282,12 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     Cancel
                   </ButtonV2>
                 </div>
-                <div className="flex flex-row w-full sm:w-auto gap-4 flex-wrap">
+                <div className="flex flex-row w-full sm:w-auto flex-wrap">
                   {!id && !isLastOptionType && (
                     <ButtonV2
                       id="doctor-save-and-exit"
                       color="primary"
-                      className="w-full sm:w-auto"
+                      className="w-full sm:w-auto mt-2 md:mt-0 md:mr-2"
                       type="submit"
                       onClick={(e) => handleSubmit(e, "Save and Exit")}
                     >
@@ -298,7 +298,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                   <ButtonV2
                     id="doctor-save"
                     color="primary"
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto mt-2 md:mt-0"
                     type="submit"
                     onClick={(e) => handleSubmit(e)}
                   >
