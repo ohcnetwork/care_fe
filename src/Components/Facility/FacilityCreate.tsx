@@ -41,7 +41,6 @@ import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import RadioInputsV2 from "../Common/components/RadioInputsV2";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -493,7 +492,10 @@ export const FacilityCreate = (props: FacilityProps) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <FieldLabel required>Facility Type</FieldLabel>
+                <label htmlFor="facility-type" className="mb-2">
+                  Facility Type
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 <SelectMenuV2
                   id="facility-type"
                   required
@@ -505,19 +507,26 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
                 <ErrorHelperText error={state.errors.facility_type} />
               </div>
-
-              <TextFormField
-                name="name"
-                label="Facility Name"
-                required
-                onChange={handleChange}
-                value={state.form.name}
-                error={state.errors.name}
-              />
               <div>
-                <FieldLabel>Features</FieldLabel>
+                <label htmlFor="facility-name" className="mb-2">
+                  Facility Name
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <TextFormField
+                  id="facility-name"
+                  name="name"
+                  required
+                  onChange={handleChange}
+                  value={state.form.name}
+                  error={state.errors.name}
+                />
+              </div>
+              <div>
+                <label htmlFor="facility-features" className="mb-2">
+                  Features
+                </label>
                 <MultiSelectMenuV2
-                  id="features"
+                  id="facility-features"
                   placeholder="Features"
                   value={state.form.features}
                   options={FACILITY_FEATURE_TYPES}
@@ -528,12 +537,16 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <ErrorHelperText error={state.errors.features} />
               </div>
               <div>
-                <FieldLabel required>State</FieldLabel>
+                <label htmlFor="facility-state" className="mb-2">
+                  State
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 {isStateLoading ? (
                   <CircularProgress size={20} />
                 ) : (
                   <>
                     <SelectMenuV2
+                      id="facility-state"
                       placeholder="Choose State *"
                       options={states}
                       optionLabel={(o) => o.name}
@@ -554,13 +567,17 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
 
               <div>
-                <FieldLabel required>District</FieldLabel>
+                <label htmlFor="facility-district" className="mb-2">
+                  District
+                  <span className="text-red-500">{" *"}</span>
+                </label>
 
                 {isDistrictLoading ? (
                   <CircularProgress size={20} />
                 ) : (
                   <>
                     <SelectMenuV2
+                      id="facility-district"
                       placeholder="Choose District"
                       options={districts}
                       optionLabel={(o) => o.name}
@@ -581,12 +598,16 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
 
               <div>
-                <FieldLabel required>LocalBody</FieldLabel>
+                <label htmlFor="facility-localbody" className="mb-2">
+                  LocalBody
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
                 ) : (
                   <>
                     <SelectMenuV2
+                      id="facility-localbody"
                       placeholder="Choose LocalBody"
                       options={localBodies}
                       optionLabel={(o) => o.name}
@@ -606,12 +627,16 @@ export const FacilityCreate = (props: FacilityProps) => {
                 )}
               </div>
               <div className="md:col-span-2">
-                <FieldLabel required>Ward</FieldLabel>
+                <label htmlFor="facility-ward" className="mb-2">
+                  Ward
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 {isWardLoading ? (
                   <CircularProgress size={20} />
                 ) : (
                   <>
                     <SelectMenuV2
+                      id="facility-ward"
                       placeholder="Choose Ward"
                       options={ward
                         .sort((a, b) => a.number - b.number)
@@ -633,9 +658,13 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
 
               <div className="md:col-span-2">
+                <label htmlFor="facility-address" className="mb-2">
+                  Address
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 <TextAreaFormField
+                  id="facility-address"
                   name="address"
-                  label={<span>Address</span>}
                   required
                   onChange={handleChange}
                   value={state.form.address}
@@ -643,9 +672,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
               <div>
+                <label htmlFor="facility-pincode" className="mb-2">
+                  Pincode
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 <TextFormField
+                  id="facility-pincode"
                   name="pincode"
-                  label="Pincode"
                   required
                   onChange={handleChange}
                   value={state.form.pincode}
@@ -653,9 +686,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
               <div>
-                <FieldLabel className="mb-0" required>
+                <label htmlFor="facility-tel" className="mb-1">
                   Emergency Contact Number
-                </FieldLabel>
+                  <span className="text-red-500">{" *"}</span>
+                </label>
                 <PhoneNumberField
                   value={state.form.phone_number}
                   onChange={(value: string) =>
@@ -668,102 +702,159 @@ export const FacilityCreate = (props: FacilityProps) => {
 
               <div className="md:col-span-2 grid grid-cols-1 xl:grid-cols-2 gap-4 py-4">
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
-                  <TextFormField
-                    name="oxygen_capacity"
-                    label="Liquid Oxygen Capacity"
-                    type="number"
-                    required
-                    onChange={(e) => handleValueChange(e.value, e.name)}
-                    value={String(state.form.oxygen_capacity)}
-                    errorClassName="hidden"
-                  />
-                  <TextFormField
-                    name="expected_oxygen_requirement"
-                    label="Expected Burn Rate"
-                    type="number"
-                    required
-                    placeholder="Litres / day"
-                    onChange={handleChange}
-                    value={String(state.form.expected_oxygen_requirement)}
-                    error={state.errors.expected_oxygen_requirement}
-                  />
+                  <div>
+                    <label htmlFor="facility-oxygen_capacity" className="mb-2">
+                      Liquid Oxygen Capacity
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-oxygen_capacity"
+                      name="oxygen_capacity"
+                      type="number"
+                      required
+                      onChange={(e) => handleValueChange(e.value, e.name)}
+                      value={String(state.form.oxygen_capacity)}
+                      errorClassName="hidden"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="facility-expected_oxygen_requirement"
+                      className="mb-2"
+                    >
+                      Expected Burn Rate
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-expected_oxygen_requirement"
+                      name="expected_oxygen_requirement"
+                      type="number"
+                      required
+                      placeholder="Litres / day"
+                      onChange={handleChange}
+                      value={String(state.form.expected_oxygen_requirement)}
+                      error={state.errors.expected_oxygen_requirement}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
-                  <TextFormField
-                    name="type_b_cylinders"
-                    label="B Type Cylinders"
-                    type="number"
-                    required
-                    onChange={handleChange}
-                    value={String(state.form.type_b_cylinders)}
-                    error={state.errors.type_b_cylinders}
-                  />
-
-                  <TextFormField
-                    name="expected_type_b_cylinders"
-                    label="Expected Burn Rate"
-                    type="number"
-                    required
-                    placeholder="Cylinders / day"
-                    onChange={handleChange}
-                    value={String(state.form.expected_type_b_cylinders)}
-                    error={state.errors.expected_type_b_cylinders}
-                  />
+                  <div>
+                    <label htmlFor="facility-type_b_cylinders" className="mb-2">
+                      B Type Cylinders
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-type_b_cylinders"
+                      name="type_b_cylinders"
+                      type="number"
+                      required
+                      onChange={handleChange}
+                      value={String(state.form.type_b_cylinders)}
+                      error={state.errors.type_b_cylinders}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="facility-expected_type_b_cylinders"
+                      className="mb-2"
+                    >
+                      Expected Burn Rate
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-expected_type_b_cylinders"
+                      name="expected_type_b_cylinders"
+                      type="number"
+                      required
+                      placeholder="Cylinders / day"
+                      onChange={handleChange}
+                      value={String(state.form.expected_type_b_cylinders)}
+                      error={state.errors.expected_type_b_cylinders}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
-                  <TextFormField
-                    name="type_c_cylinders"
-                    label="C Type Cylinders"
-                    type="number"
-                    required
-                    onChange={handleChange}
-                    value={String(state.form.type_c_cylinders)}
-                    error={state.errors.type_c_cylinders}
-                  />
-
-                  <TextFormField
-                    name="expected_type_c_cylinders"
-                    label="Expected Burn Rate"
-                    type="number"
-                    required
-                    placeholder="Cylinders / day"
-                    onChange={handleChange}
-                    value={String(state.form.expected_type_c_cylinders)}
-                    error={state.errors.expected_type_c_cylinders}
-                  />
+                  <div>
+                    <label htmlFor="facility-type_c_cylinders" className="mb-2">
+                      C Type Cylinders
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-type_c_cylinders"
+                      name="type_c_cylinders"
+                      type="number"
+                      required
+                      onChange={handleChange}
+                      value={String(state.form.type_c_cylinders)}
+                      error={state.errors.type_c_cylinders}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="facility-expected_type_c_cylinders"
+                      className="mb-2"
+                    >
+                      Expected Burn Rate
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-expected_type_c_cylinders"
+                      name="expected_type_c_cylinders"
+                      type="number"
+                      required
+                      placeholder="Cylinders / day"
+                      onChange={handleChange}
+                      value={String(state.form.expected_type_c_cylinders)}
+                      error={state.errors.expected_type_c_cylinders}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
-                  <TextFormField
-                    name="type_d_cylinders"
-                    label="D Type Cylinders"
-                    type="number"
-                    required
-                    onChange={handleChange}
-                    value={String(state.form.type_d_cylinders)}
-                    error={state.errors.type_d_cylinders}
-                  />
-
-                  <TextFormField
-                    name="expected_type_d_cylinders"
-                    label="Expected Burn Rate"
-                    type="number"
-                    required
-                    placeholder="Cylinders / day"
-                    onChange={handleChange}
-                    value={String(state.form.expected_type_d_cylinders)}
-                    error={state.errors.expected_type_d_cylinders}
-                  />
+                  <div>
+                    <label htmlFor="facility-type_d_cylinders" className="mb-2">
+                      D Type Cylinders
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-type_d_cylinders"
+                      name="type_d_cylinders"
+                      type="number"
+                      required
+                      onChange={handleChange}
+                      value={String(state.form.type_d_cylinders)}
+                      error={state.errors.type_d_cylinders}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="facility-expected_type_d_cylinders"
+                      className="mb-2"
+                    >
+                      Expected Burn Rate
+                      <span className="text-red-500">{" *"}</span>
+                    </label>
+                    <TextFormField
+                      id="facility-expected_type_d_cylinders"
+                      name="expected_type_d_cylinders"
+                      type="number"
+                      required
+                      placeholder="Cylinders / day"
+                      onChange={handleChange}
+                      value={String(state.form.expected_type_d_cylinders)}
+                      error={state.errors.expected_type_d_cylinders}
+                    />
+                  </div>
                 </div>
               </div>
 
               {KASP_ENABLED && (
                 <div>
-                  <FieldLabel>
+                  <label htmlFor="facility-kasp_empanelled" className="mb-2">
                     Is this facility {KASP_STRING} empanelled?
-                  </FieldLabel>
+                  </label>
                   <RadioInputsV2
                     name="kasp_empanelled"
                     selected={state.form.kasp_empanelled}
@@ -787,9 +878,9 @@ export const FacilityCreate = (props: FacilityProps) => {
               } -mx-2`}
             >
               <div className="flex-1 px-2">
+                <label className="mb-2">Location</label>
                 <TextFormField
                   name="latitude"
-                  label="Location"
                   placeholder="Latitude"
                   value={state.form.latitude}
                   onChange={handleChange}
@@ -827,10 +918,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                 </Popover>
               </div>
               <div className="flex-1 px-2">
+                <label className="mb-1">&nbsp;</label>
                 <TextFormField
                   name="longitude"
-                  label="&nbsp;"
-                  labelClassName="mb-1"
                   placeholder="Longitude"
                   value={state.form.longitude}
                   onChange={handleChange}
@@ -855,6 +945,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 Cancel
               </ButtonV2>
               <ButtonV2
+                id="facility-save"
                 variant="primary"
                 type="submit"
                 onClick={(e) => handleSubmit(e)}
