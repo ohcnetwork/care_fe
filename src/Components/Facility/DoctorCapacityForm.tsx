@@ -18,6 +18,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../../Components/Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -232,13 +233,9 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             }}
           >
             <div className="p-4">
-              <label
-                htmlFor="area-of-specialization"
-                id="demo-simple-select-outlined-label"
-                className="mb-2"
-              >
-                Area of specialization*
-              </label>
+              <FieldLabel className="mb-2" required={true}>
+                Area of specialization
+              </FieldLabel>
               <SelectMenuV2
                 id="area-of-specialization"
                 value={doctorTypes.find((type) => type.id == state.form.area)}
@@ -252,13 +249,9 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
               <ErrorHelperText error={state.errors.area} />
             </div>
             <div className="p-4">
-              <label
-                htmlFor="count"
-                id="demo-simple-select-outlined-label"
-                className="mb-2"
-              >
-                Count*
-              </label>
+              <FieldLabel htmlFor="count" required={true} className="mb-2">
+                Count
+              </FieldLabel>
               <TextFormField
                 id="count"
                 name="count"
