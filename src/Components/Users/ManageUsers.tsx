@@ -298,6 +298,17 @@ export default function ManageUsers() {
     );
   };
 
+  const hideFacilities = (username: string) => {
+    setUsers(
+      users.filter((user) => {
+        if (user.username === username) {
+          user.facilities = null;
+        }
+        return user;
+      })
+    );
+  };
+
   const addFacility = async (username: string, facility: any) => {
     hideLinkFacilityModal();
     setIsFacilityLoading(true);
@@ -485,6 +496,12 @@ export default function ManageUsers() {
                       <UserDetails title="Linked Facilities">
                         {showFacilities(user.username, user.facilities)}
                       </UserDetails>
+                      <div
+                        className="hover:text-blue-500"
+                        onClick={() => hideFacilities(user.username)}
+                      >
+                        Hide Linked Facilities
+                      </div>
                     </div>
                   )}
                   {user.username && !user.facilities && (
