@@ -9,6 +9,7 @@ class facility {
   }
 
   static update(facility) {
+    cy.get("[id=manage-facility-dropdown]").should("exist").click();
     cy.get("[id=update-facility]").click();
     cy.url().should("include", "update");
     this.fillForm(facility);
@@ -128,7 +129,8 @@ describe("Facility", () => {
 
     // add bed type
     cy.url().should("include", "bed");
-    cy.get("[id=bed-type]").select("1");
+    cy.get("[id=bed-type] > div > button").click();
+    cy.get("ul > li:nth-child(2)").click();
     cy.get("[id=total-capacity]").type("150");
     cy.get("[id=currently-occupied]").type("100");
     cy.get("[id=bed-capacity-save]").click();
