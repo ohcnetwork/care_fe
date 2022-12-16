@@ -142,29 +142,35 @@ export const FacilityHome = (props: any) => {
   let capacityList: any = null;
   if (!capacityData || !capacityData.length) {
     capacityList = (
-      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+      <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
         No Bed Types Found
       </h5>
     );
   } else {
-    capacityList = BED_TYPES.map((x) => {
-      const res = capacityData.find((data) => {
-        return data.room_type === x.id;
-      });
-      if (res) {
-        const removeCurrentBedType = (bedTypeId: number | undefined) => {
-          setCapacityData((state) => state.filter((i) => i.id !== bedTypeId));
-        };
-        return (
-          <BedTypeCard
-            facilityId={facilityId}
-            key={`bed_${res.id}`}
-            {...res}
-            removeBedType={removeCurrentBedType}
-          />
-        );
-      }
-    });
+    capacityList = (
+      <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
+        {BED_TYPES.map((x) => {
+          const res = capacityData.find((data) => {
+            return data.room_type === x.id;
+          });
+          if (res) {
+            const removeCurrentBedType = (bedTypeId: number | undefined) => {
+              setCapacityData((state) =>
+                state.filter((i) => i.id !== bedTypeId)
+              );
+            };
+            return (
+              <BedTypeCard
+                facilityId={facilityId}
+                key={`bed_${res.id}`}
+                {...res}
+                removeBedType={removeCurrentBedType}
+              />
+            );
+          }
+        })}
+      </div>
+    );
   }
 
   let doctorList: any = null;
@@ -596,9 +602,7 @@ export const FacilityHome = (props: any) => {
             Add More Bed Types
           </ButtonV2>
         </div>
-        <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
-          {capacityList}
-        </div>
+        <div>{capacityList}</div>
       </div>
       <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
         <div className="md:flex justify-between md:pb-2">

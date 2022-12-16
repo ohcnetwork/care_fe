@@ -19,6 +19,7 @@ type SelectMenuProps<T, V = T> = {
   showIconWhenSelected?: boolean;
   showChevronIcon?: boolean;
   className?: string;
+  disabled?: boolean;
 } & (
   | {
       required?: false;
@@ -64,11 +65,12 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const value = options.find((o) => props.value == o.value) || defaultOption;
 
   return (
-    <div className={props.className}>
+    <div className={props.className} id={props.id}>
       <Listbox
         disabled={props.disabled}
         value={value}
         onChange={(selection: any) => props.onChange(selection.value)}
+        disabled={props.disabled ?? false}
       >
         {({ open }) => (
           <>

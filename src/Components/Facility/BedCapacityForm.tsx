@@ -1,11 +1,3 @@
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  InputLabel,
-} from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import { useCallback, useEffect, useReducer, useState } from "react";
@@ -19,13 +11,13 @@ import {
   getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  ErrorHelperText,
-  NativeSelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { ErrorHelperText } from "../Common/HelperInputFields";
 import { CapacityModal, OptionsType } from "./models";
 import { goBack } from "../../Utils/utils";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../../Components/Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -33,13 +25,7 @@ interface BedCapacityProps extends CapacityModal {
   facilityId: number;
 }
 
-const initBedTypes: Array<OptionsType> = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...BED_TYPES,
-];
+const initBedTypes: Array<OptionsType> = [...BED_TYPES];
 
 const initForm: any = {
   bedType: "",
@@ -164,7 +150,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
 
   const handleChange = (e: any) => {
     const form = { ...state.form };
-    form[e.target.name] = e.target.value;
+    form[e.name] = e.value;
     dispatch({ type: "set_form", form });
   };
 
@@ -251,120 +237,86 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         }}
       />
       <div>
-        <Card className="mt-4">
-          <form
-            onSubmit={(e) => {
-              handleSubmit(e);
-            }}
-          >
-            <CardContent>
-              <InputLabel
-                htmlFor="bed-type"
-                id="demo-simple-select-outlined-label"
-              >
-                Bed Type*
-              </InputLabel>
-              <NativeSelectField
+        <div className="mt-4 shadow-md rounded bg-white">
+          <div>
+            <div className="p-4">
+              <label htmlFor="bed-type">Bed Type*</label>
+              <SelectMenuV2
                 id="bed-type"
-                name="bedType"
-                variant="outlined"
-                value={state.form.bedType}
-                options={bedTypes}
-                onChange={handleChange}
+                value={bedTypes.find((type) => type.id == state.form.bedType)}
+                options={bedTypes.filter((type) => !type.disabled)}
+                optionLabel={(option) => option.text}
+                onChange={(e) =>
+                  handleChange({ name: "bedType", value: (e && e.id) || "" })
+                }
                 disabled={!!id}
+                className="mt-2"
               />
               <ErrorHelperText error={state.errors.bedType} />
-            </CardContent>
-            <div className="flex flex-col md:flex-row gap-2">
-              <CardContent className="w-full">
-                <InputLabel
-                  htmlFor="total-capacity"
-                  id="demo-simple-select-outlined-label"
-                >
-                  Total Capacity*
-                </InputLabel>
-                <TextInputField
+            </div>
+            <div className="flex flex-col md:flex-row gap-2 p-4">
+              <div className="w-full">
+                <label htmlFor="total-capacity">Total Capacity*</label>
+                <TextFormField
                   id="total-capacity"
                   name="totalCapacity"
-                  variant="outlined"
-                  margin="dense"
                   type="number"
-                  InputLabelProps={{ shrink: !!state.form.totalCapacity }}
                   value={state.form.totalCapacity}
                   onChange={handleChange}
-                  errors={state.errors.totalCapacity}
+                  error={state.errors.totalCapacity}
                 />
-              </CardContent>
-              <CardContent className="w-full">
-                <InputLabel
-                  htmlFor="currently-occupied"
-                  id="demo-simple-select-outlined-label"
-                >
-                  Currently Occupied*
-                </InputLabel>
-                <TextInputField
+              </div>
+              <div className="w-full">
+                <label htmlFor="currently-occupied">Currently Occupied*</label>
+                <TextFormField
                   id="currently-occupied"
                   name="currentOccupancy"
-                  variant="outlined"
-                  margin="dense"
                   type="number"
-                  InputLabelProps={{ shrink: !!state.form.currentOccupancy }}
                   value={state.form.currentOccupancy}
                   onChange={handleChange}
-                  errors={state.errors.currentOccupancy}
+                  error={state.errors.currentOccupancy}
                 />
-              </CardContent>
+              </div>
             </div>
-            <CardContent>
-              <CardActions className="flex flex-col md:flex-row gap-4 justify-between items-end">
+            <div className="p-4">
+              <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
                 <div className="w-full md:w-auto">
-                  <Button
+                  <ButtonV2
                     id="bed-capacity-cancel"
-                    color="default"
-                    variant="contained"
-                    type="button"
-                    fullWidth
+                    className="w-full md:w-auto"
+                    type="submit"
+                    variant="secondary"
                     onClick={() => goBack(!id && `/facility/${facilityId}`)}
                   >
                     Cancel
-                  </Button>
+                  </ButtonV2>
                 </div>
                 <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                   {!isLastOptionType && headerText === "Add Bed Capacity" && (
-                    <Button
+                    <ButtonV2
                       id="bed-capacity-save-and-exit"
-                      color="primary"
-                      variant="contained"
-                      fullWidth
                       className="w-full md:w-auto"
                       type="submit"
                       onClick={(e) => handleSubmit(e, "Save and Exit")}
-                      startIcon={
-                        <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                      }
                     >
+                      <CareIcon className="care-l-check-circle text-lg"></CareIcon>{" "}
                       Save Bed Capacity
-                    </Button>
+                    </ButtonV2>
                   )}
-                  <Button
+                  <ButtonV2
                     id="bed-capacity-save"
-                    color="primary"
-                    variant="contained"
-                    fullWidth
                     className="w-full md:w-auto"
                     type="submit"
                     onClick={(e) => handleSubmit(e)}
-                    startIcon={
-                      <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                    }
                   >
+                    <CareIcon className="care-l-check-circle text-lg"></CareIcon>{" "}
                     {buttonText}
-                  </Button>
+                  </ButtonV2>
                 </div>
-              </CardActions>
-            </CardContent>
-          </form>
-        </Card>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
