@@ -283,7 +283,12 @@ export const ADMITTED_TO = [
   { id: "7", text: "Regular" },
 ];
 
-export const PATIENT_CATEGORIES = [
+export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
+
+export const PATIENT_CATEGORIES: {
+  id: PatientCategoryID;
+  text: PatientCategory;
+}[] = [
   { id: "Comfort", text: "Comfort Care" },
   { id: "Stable", text: "Stable" },
   { id: "Moderate", text: "Slightly Abnormal" },
