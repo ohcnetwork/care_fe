@@ -917,6 +917,7 @@ export const UserAdd = (props: UserProps) => {
                   <span className="text-red-500">{" *"}</span>
                 </label>
                 <DateFormField
+                  id="date_of_birth"
                   name="date_of_birth"
                   value={getDate(state.form.date_of_birth)}
                   onChange={handleDateChange}
@@ -981,7 +982,11 @@ export const UserAdd = (props: UserProps) => {
               <ButtonV2 variant="secondary" onClick={() => goBack()}>
                 Cancel
               </ButtonV2>
-              <ButtonV2 variant="primary" onClick={(e) => handleSubmit(e)}>
+              <ButtonV2
+                id="submit"
+                variant="primary"
+                onClick={(e) => handleSubmit(e)}
+              >
                 <i className="fa-regular fa-circle-check"></i>
                 {buttonText}
               </ButtonV2>
