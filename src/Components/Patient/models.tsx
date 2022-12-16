@@ -306,4 +306,6 @@ export interface FileUploadModel {
   is_archived?: boolean;
   archive_reason?: string;
   extension?: string;
+  archived_by?: { username?: string };
+  archived_datetime?: string;
 }
