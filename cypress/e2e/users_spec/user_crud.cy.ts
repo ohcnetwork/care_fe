@@ -31,7 +31,7 @@ describe("User management", () => {
   it("create user", () => {
     cy.contains("Add New User").click();
     cy.get("[id='user_type'] > div > button").click();
-    cy.get("div").contains("WardAdmin").click();
+    cy.get("div").contains("Ward Admin").click();
     cy.get("[id='state'] > div > button").click();
     cy.get("div").contains("Kerala").click();
     cy.get("[id='district'] > div > button").click();
@@ -61,6 +61,7 @@ describe("User management", () => {
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
       force: true,
     });
+    cy.wait(1000);
     cy.get("[name='email']").type("cypress@tester.com");
     cy.get("button[id='submit']").contains("Save User").click();
     cy.verifyNotification("User added successfully");
@@ -127,7 +128,7 @@ const backspace =
 
 describe("Edit Profile Testing", () => {
   before(() => {
-    cy.loginByApi("@cypress_test123", "Coronasafe@123");
+    cy.loginByApi(username, "#@Cypress_test123");
     cy.saveLocalStorage();
   });
 

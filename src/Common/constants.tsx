@@ -50,7 +50,7 @@ export const USER_TYPE_OPTIONS: {
   { id: "StateAdmin", role: "State Admin", readOnly: false },
 ];
 
-export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.role);
+export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
 
 export const DOWNLOAD_TYPES: Array<string> = [
   "Facility List",

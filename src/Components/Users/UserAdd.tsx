@@ -27,11 +27,7 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  PhoneNumberField,
-  CheckboxField,
-  ErrorHelperText,
-} from "../Common/HelperInputFields";
+import { PhoneNumberField, ErrorHelperText } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 
 import { classNames, goBack } from "../../Utils/utils";
@@ -40,6 +36,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import DateFormField from "../Form/FormFields/DateFormField";
+import Checkbox from "../Common/components/CheckBox";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -66,7 +63,7 @@ type UserForm = {
   email: string;
   phone_number: string;
   alt_phone_number: string;
-  age: string;
+  age: number;
   date_of_birth: Date | null;
   state: number;
   district: number;
@@ -86,7 +83,7 @@ const initForm: UserForm = {
   email: "",
   phone_number: "",
   alt_phone_number: "",
-  age: "",
+  age: 0,
   date_of_birth: null,
   state: 0,
   district: 0,
@@ -630,7 +627,7 @@ export const UserAdd = (props: UserProps) => {
                   placeholder="Select User Type"
                   value={state.form.user_type}
                   options={userTypes}
-                  optionValue={(o) => o.role}
+                  optionValue={(o) => o.id}
                   optionLabel={(o) =>
                     o.role + ((o.readOnly && " (Read Only)") || "")
                   }
@@ -940,14 +937,13 @@ export const UserAdd = (props: UserProps) => {
                   errors={state.errors.phone_number}
                   onlyIndia={true}
                 />
-                <CheckboxField
+                <Checkbox
                   checked={phoneIsWhatsApp}
-                  onChange={(_, checked) => {
+                  onCheck={(checked) => {
                     setPhoneIsWhatsApp(checked);
                     !checked && handleValueChange("+91", "alt_phone_number");
                   }}
                   label="Is the phone number a WhatsApp number?"
-                  className="font-bold"
                 />
               </div>
 
@@ -985,10 +981,10 @@ export const UserAdd = (props: UserProps) => {
               <ButtonV2
                 id="submit"
                 variant="primary"
+                type="submit"
                 onClick={(e) => handleSubmit(e)}
               >
-                <i className="fa-regular fa-circle-check"></i>
-                {buttonText}
+                <i className="fa-regular fa-circle-check"></i> {buttonText}
               </ButtonV2>
             </div>
           </form>

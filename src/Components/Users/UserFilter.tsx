@@ -125,7 +125,7 @@ export default function UserFilter(props: any) {
             placeholder="Show all"
             options={USER_TYPE_OPTIONS}
             optionLabel={(o) => o.role + ((o.readOnly && " (Read Only)") || "")}
-            optionValue={(o) => o.role}
+            optionValue={(o) => o.id}
             value={filterState.user_type}
             onChange={(v) => setFilterState({ ...filterState, user_type: v })}
           />

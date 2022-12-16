@@ -73,7 +73,7 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
         {child}
         <button
           type="button"
-          className="absolute right-0 top-0 h-full flex items-center px-3 z-10 text-xl"
+          className="absolute right-0 top-0 h-full flex items-center px-3 z-5 text-xl"
           onClick={() => setShowPassword(!showPassword)}
         >
           <CareIcon className={`care-l-eye${showPassword ? "" : "-slash"}`} />
