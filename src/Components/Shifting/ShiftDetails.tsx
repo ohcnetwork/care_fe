@@ -26,7 +26,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ShiftDetails(props: { id: string }) {
   const dispatch: any = useDispatch();
-  let initialData: any = {};
+  const initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
@@ -846,7 +846,7 @@ export default function ShiftDetails(props: { id: string }) {
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
                     <div className="text-sm">
-                      {data?.last_edited_by_object?.first_name}
+                      {data?.last_edited_by_object?.first_name}{" "}
                       {data?.last_edited_by_object?.last_name}
                     </div>
                     <div className="text-xs">
