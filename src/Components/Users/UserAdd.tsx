@@ -1,16 +1,15 @@
-import {
-  Card,
-  CardContent,
-  CircularProgress,
-  InputLabel,
-} from "@material-ui/core";
+import { Card, CardContent, CircularProgress } from "@material-ui/core";
 import loadable from "@loadable/component";
 import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
 import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
+import {
+  GENDER_TYPES,
+  USER_TYPES,
+  USER_TYPE_OPTIONS,
+} from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateEmailAddress,
@@ -29,39 +28,52 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
-  DateInputField,
-  SelectField,
-  TextInputField,
+  PhoneNumberField,
   CheckboxField,
+  ErrorHelperText,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 
 import { classNames, goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import TextFormField from "../Form/FormFields/TextFormField";
+import DateFormField from "../Form/FormFields/DateFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const genderTypes = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...GENDER_TYPES,
-];
 
 interface UserProps {
   userId?: number;
 }
 
-const initialStates = [{ id: 0, name: "Choose State *" }];
-const initialDistricts = [{ id: 0, name: "Choose District" }];
-const selectStates = [{ id: 0, name: "Please select your state" }];
-const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
+interface StateObj {
+  id: number;
+  name: string;
+}
 
-const initForm: any = {
+type UserForm = {
+  user_type: string;
+  gender: string;
+  password: string;
+  c_password: string;
+  facilities: Array<FacilityModel>;
+  home_facility: FacilityModel | null;
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  alt_phone_number: string;
+  age: string;
+  date_of_birth: Date | null;
+  state: number;
+  district: number;
+  local_body: number;
+};
+
+const initForm: UserForm = {
   user_type: "",
   gender: "",
   password: "",
@@ -76,9 +88,9 @@ const initForm: any = {
   alt_phone_number: "",
   age: "",
   date_of_birth: null,
-  state: "",
-  district: "",
-  local_body: "",
+  state: 0,
+  district: 0,
+  local_body: 0,
 };
 
 const initError = Object.assign(
@@ -110,6 +122,9 @@ const user_create_reducer = (state = initialState, action: any) => {
   }
 };
 
+const getDate = (value: any) =>
+  value && moment(value).isValid() && moment(value).toDate();
+
 export const UserAdd = (props: UserProps) => {
   const dispatchAction: any = useDispatch();
   const { userId } = props;
@@ -122,12 +137,10 @@ export const UserAdd = (props: UserProps) => {
   const [_current_user_facilities, setFacilities] = useState<
     Array<FacilityModel>
   >([]);
-  const [states, setStates] = useState(initialStates);
-  const [districts, setDistricts] = useState(selectStates);
-  const [localBody, setLocalBody] = useState(selectDistrict);
-  const [selectedFacility, setSelectedFacility] = useState<
-    FacilityModel[] | null
-  >([]);
+  const [states, setStates] = useState<StateObj[]>([]);
+  const [districts, setDistricts] = useState<StateObj[]>([]);
+  const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel[]>([]);
   const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
   const [passwordInputInFocus, setPasswordInputInFocus] = useState(false);
@@ -183,21 +196,21 @@ export const UserAdd = (props: UserProps) => {
 
   const userIndex = USER_TYPES.indexOf(userType);
 
-  const defaultAllowedUserTypes = USER_TYPES.slice(0, userIndex + 1);
+  const readOnlyUsers = USER_TYPE_OPTIONS.filter((user) => user.readOnly);
+
+  const defaultAllowedUserTypes = USER_TYPE_OPTIONS.slice(0, userIndex + 1);
   const userTypes = isSuperuser
-    ? [...USER_TYPES]
+    ? [...USER_TYPE_OPTIONS]
     : userType === "StaffReadOnly"
-    ? ["StaffReadOnly"]
-    : userType === "DistrictReadOnlyAdmin"
-    ? ["StaffReadOnly", "DistrictReadOnlyAdmin"]
-    : userType === "StateReadOnlyAdmin"
-    ? ["StaffReadOnly", "DistrictReadOnlyAdmin", "StateReadOnlyAdmin"]
-    : userType === "Pharmacist"
-    ? ["Pharmacist"]
-    : // Exception to allow Staff to Create Doctors
-    userType === "Staff"
-    ? ["Doctor", ...defaultAllowedUserTypes]
-    : defaultAllowedUserTypes;
+      ? readOnlyUsers.slice(0, 1)
+      : userType === "DistrictReadOnlyAdmin"
+        ? readOnlyUsers.slice(0, 2)
+        : userType === "StateReadOnlyAdmin"
+          ? readOnlyUsers.slice(0, 3)
+          : userType === "Pharmacist"
+            ? USER_TYPE_OPTIONS.slice(0, 1)
+            : // Exception to allow Staff to Create Doctors
+            defaultAllowedUserTypes;
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
@@ -210,34 +223,31 @@ export const UserAdd = (props: UserProps) => {
   );
 
   const fetchDistricts = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
+    async (id: number) => {
+      if (id > 0) {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
         if (districtList) {
           if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
             setDistricts([
-              ...initialDistricts,
               {
                 id: currentUser.data.district,
                 name: currentUser.data.district_object.name,
               },
             ]);
           } else {
-            setDistricts([...initialDistricts, ...districtList.data]);
+            setDistricts(districtList.data);
           }
         }
         setIsDistrictLoading(false);
-      } else {
-        setDistricts(selectStates);
       }
     },
     [dispatchAction]
   );
 
   const fetchLocalBody = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
+    async (id: number) => {
+      if (id > 0) {
         setIsLocalbodyLoading(true);
         const localBodyList = await dispatchAction(
           getLocalbodyByDistrict({ id })
@@ -245,19 +255,16 @@ export const UserAdd = (props: UserProps) => {
         setIsLocalbodyLoading(false);
         if (localBodyList) {
           if (userIndex <= USER_TYPES.indexOf("LocalBodyAdmin")) {
-            setLocalBody([
-              ...initialLocalbodies,
+            setLocalBodies([
               {
                 id: currentUser.data.local_body,
                 name: currentUser.data.local_body_object.name,
               },
             ]);
           } else {
-            setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+            setLocalBodies(localBodyList.data);
           }
         }
-      } else {
-        setLocalBody(selectDistrict);
       }
     },
     [dispatchAction]
@@ -270,14 +277,13 @@ export const UserAdd = (props: UserProps) => {
       if (!status.aborted && statesRes.data.results) {
         if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
           setStates([
-            ...initialStates,
             {
               id: currentUser.data.state,
               name: currentUser.data.state_object.name,
             },
           ]);
         } else {
-          setStates([...initialStates, ...statesRes.data.results]);
+          setStates(statesRes.data.results);
         }
       }
       setIsStateLoading(false);
@@ -307,39 +313,36 @@ export const UserAdd = (props: UserProps) => {
     [dispatch]
   );
 
-  const handleChange = (e: any) => {
-    const { value, name } = e.target;
-    const form = { ...state.form };
-    form[name] = value;
-    if (name === "username") {
-      form[name] = value.toLowerCase();
-    }
-    if (name === "state") {
-      form["district"] = "";
-    }
-    dispatch({ type: "set_form", form });
+  const handleChange = (e: FieldChangeEvent<string>) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        [e.name]: e.name === "username" ? e.value.toLowerCase() : e.value,
+      },
+    });
   };
 
-  const handleChangeHomeFacility = (e: any) => {
-    const { value, name } = e.target;
-    const newValue = value === "" ? null : value;
-    const form = { ...state.form };
-    form[name] = newValue;
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleDateChange = (date: any, field: string) => {
-    if (moment(date).isValid()) {
-      const form = { ...state.form };
-      form[field] = date;
-      dispatch({ type: "set_form", form });
+  const handleDateChange = (e: FieldChangeEvent<Date>) => {
+    if (moment(e.value).isValid()) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          [e.name]: moment(e.value).format("YYYY-MM-DD"),
+        },
+      });
     }
   };
 
   const handleValueChange = (value: any, name: string) => {
-    const form = { ...state.form };
-    form[name] = value;
-    dispatch({ type: "set_form", form });
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        [name]: value,
+      },
+    });
   };
 
   useAbortableEffect(() => {
@@ -606,7 +609,7 @@ export const UserAdd = (props: UserProps) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-2">
-                <InputLabel>Facilities</InputLabel>
+                <label className="mb-2">Facilities</label>
                 <FacilitySelect
                   multiple={true}
                   name="facilities"
@@ -618,91 +621,140 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <InputLabel>User Type*</InputLabel>
-                <SelectField
-                  showEmpty={true}
-                  name="user_type"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
+                <label className="mb-2">
+                  User Type
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <SelectMenuV2
+                  id="user_type"
+                  placeholder="Select User Type"
                   value={state.form.user_type}
                   options={userTypes}
-                  onChange={handleChange}
-                  errors={state.errors.user_type}
+                  optionValue={(o) => o.role}
+                  optionLabel={(o) =>
+                    o.role + ((o.readOnly && " (Read Only)") || "")
+                  }
+                  onChange={(e) => handleValueChange(e, "user_type")}
                 />
+                <ErrorHelperText error={state.errors.user_type} />
               </div>
               <div>
-                <InputLabel>Home Facility</InputLabel>
-                <SelectField
-                  name="home_facility"
-                  variant="outlined"
-                  margin="dense"
+                <label className="mb-2">Home Facility</label>
+                <SelectMenuV2
+                  id="home_facility"
                   value={state.form.home_facility}
-                  options={[
-                    { id: "", name: "Select" },
-                    ...(selectedFacility ?? []),
-                  ]}
-                  optionValue="name"
-                  onChange={handleChangeHomeFacility}
-                  errors={state.errors.home_facility}
+                  options={selectedFacility}
+                  optionLabel={(o) => o.name}
+                  optionValue={(o) => o.id}
+                  onChange={(e) => handleValueChange(e, "home_facility")}
                 />
+                <ErrorHelperText error={state.errors.home_facility} />
               </div>
 
               <div>
-                <PhoneNumberFormField
-                  placeholder="Phone Number"
-                  label="Phone Number"
-                  name="phone_number"
-                  required
-                  value={state.form.phone_number}
-                  onChange={(event) =>
-                    handleValueChange(event.value, event.name)
-                  }
-                  error={state.errors.phone_number}
-                  onlyIndia
-                />
-                <CheckboxField
-                  checked={phoneIsWhatsApp}
-                  onChange={(_, checked) => {
-                    setPhoneIsWhatsApp(checked);
-                    !checked && handleValueChange("+91", "alt_phone_number");
-                  }}
-                  label="Is the phone number a WhatsApp number?"
-                  className="font-bold"
-                />
+                <label className="mb-2">
+                  State
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                {isStateLoading ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <>
+                    <SelectMenuV2
+                      id="state"
+                      placeholder="Choose State *"
+                      options={states}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      value={state.form.state}
+                      onChange={(e) => {
+                        if (e) {
+                          return [
+                            handleValueChange(e, "state"),
+                            fetchDistricts(e),
+                          ];
+                        }
+                      }}
+                    />
+                    <ErrorHelperText error={state.errors.state} />
+                  </>
+                )}
               </div>
 
               <div>
-                <PhoneNumberFormField
-                  placeholder="WhatsApp Phone Number"
-                  label="Whatsapp Number"
-                  name="alt_phone_number"
-                  value={state.form.alt_phone_number}
-                  onChange={(event) =>
-                    handleValueChange(event.value, event.name)
-                  }
-                  disabled={phoneIsWhatsApp}
-                  error={state.errors.alt_phone_number}
-                  onlyIndia
-                />
+                <label className="mb-2">
+                  District
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                {isDistrictLoading ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <>
+                    <SelectMenuV2
+                      id="district"
+                      placeholder="Choose District"
+                      options={districts}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      value={state.form.district}
+                      onChange={(e) => {
+                        if (e) {
+                          return [
+                            handleValueChange(e, "district"),
+                            fetchLocalBody(e),
+                          ];
+                        }
+                      }}
+                    />
+                    <ErrorHelperText error={state.errors.district} />
+                  </>
+                )}
               </div>
 
+              {showLocalbody && (
+                <div>
+                  <label className="mb-2">
+                    LocalBody
+                    <span className="text-red-500">{" *"}</span>
+                  </label>
+                  {isLocalbodyLoading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <>
+                      <SelectMenuV2
+                        id="localbody"
+                        placeholder="Choose LocalBody"
+                        options={localBodies}
+                        optionLabel={(o) => o.name}
+                        optionValue={(o) => o.id}
+                        value={state.form.local_body}
+                        onChange={(e) => handleValueChange(e, "local_body")}
+                      />
+                      <ErrorHelperText error={state.errors.local_body} />
+                    </>
+                  )}
+                </div>
+              )}
+
               <div>
-                <InputLabel>Username*</InputLabel>
-                <TextInputField
-                  fullWidth
+                <label className="mb-2">
+                  Username
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <TextFormField
+                  id="username"
                   name="username"
                   autoComplete="new-username"
-                  variant="outlined"
-                  margin="dense"
                   value={usernameInput}
                   onChange={(e) => {
                     handleChange(e);
-                    setUsernameInput(e.target.value);
+                    setUsernameInput(e.value);
                   }}
-                  errors={state.errors.username}
                   onFocus={() => setUsernameInputInFocus(true)}
-                  onBlur={() => setUsernameInputInFocus(false)}
+                  onBlur={() => {
+                    setUsernameInputInFocus(false);
+                  }}
+                  error={state.errors.username}
                 />
                 {usernameInputInFocus && (
                   <div className="pl-2 text-small text-gray-500">
@@ -754,34 +806,19 @@ export const UserAdd = (props: UserProps) => {
                   </div>
                 )}
               </div>
-
               <div>
-                <InputLabel>Date of birth*</InputLabel>
-                <DateInputField
-                  name="dob"
-                  fullWidth={true}
-                  value={state.form.date_of_birth}
-                  onChange={(date) => handleDateChange(date, "date_of_birth")}
-                  errors={state.errors.date_of_birth}
-                  inputVariant="outlined"
-                  margin="dense"
-                  openTo="year"
-                  disableFuture={true}
-                />
-              </div>
-
-              <div>
-                <InputLabel>Password*</InputLabel>
-                <TextInputField
-                  fullWidth
+                <label className="mb-2">
+                  Password
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <TextFormField
+                  id="password"
                   name="password"
                   autoComplete="new-password"
                   type="password"
-                  variant="outlined"
-                  margin="dense"
                   value={state.form.password}
                   onChange={handleChange}
-                  errors={state.errors.password}
+                  error={state.errors.password}
                   onFocus={() => setPasswordInputInFocus(true)}
                   onBlur={() => setPasswordInputInFocus(false)}
                 />
@@ -806,18 +843,20 @@ export const UserAdd = (props: UserProps) => {
                   </div>
                 )}
               </div>
+
               <div>
-                <InputLabel>Confirm Password*</InputLabel>
-                <TextInputField
-                  fullWidth
+                <label className="mb-2">
+                  Confirm Password
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <TextFormField
+                  id="c_password"
                   name="c_password"
                   type="password"
-                  variant="outlined"
-                  margin="dense"
                   autoComplete="off"
                   value={state.form.c_password}
                   onChange={handleChange}
-                  errors={state.errors.c_password}
+                  error={state.errors.c_password}
                   onFocus={() => setConfirmPasswordInputInFocus(true)}
                   onBlur={() => setConfirmPasswordInputInFocus(false)}
                 />
@@ -828,119 +867,115 @@ export const UserAdd = (props: UserProps) => {
                     "Confirm password should match the entered password"
                   )}
               </div>
+
               <div>
-                <InputLabel>First name*</InputLabel>
-                <TextInputField
-                  fullWidth
+                <label className="mb-2">
+                  First name
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <TextFormField
+                  id="first_name"
                   name="first_name"
-                  variant="outlined"
-                  margin="dense"
                   value={state.form.first_name}
                   onChange={handleChange}
-                  errors={state.errors.first_name}
+                  error={state.errors.first_name}
                 />
               </div>
 
               <div>
-                <InputLabel>Last name*</InputLabel>
-                <TextInputField
-                  fullWidth
+                <label className="mb-2">
+                  Last name
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <TextFormField
+                  id="last_name"
                   name="last_name"
-                  variant="outlined"
-                  margin="dense"
                   value={state.form.last_name}
                   onChange={handleChange}
-                  errors={state.errors.last_name}
+                  error={state.errors.last_name}
                 />
               </div>
 
               <div>
-                <InputLabel>Email</InputLabel>
-                <TextInputField
-                  fullWidth
+                <label className="mb-2">
+                  Gender
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <SelectMenuV2
+                  id="gender"
+                  value={state.form.gender}
+                  options={GENDER_TYPES}
+                  optionLabel={(o) => o.text}
+                  optionValue={(o) => o.text}
+                  onChange={(e) => handleValueChange(e, "gender")}
+                />
+              </div>
+
+              <div>
+                <label className="mb-2">
+                  Date of birth
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <DateFormField
+                  name="date_of_birth"
+                  value={getDate(state.form.date_of_birth)}
+                  onChange={handleDateChange}
+                  error={state.errors.date_of_birth}
+                  position="LEFT"
+                  disableFuture={true}
+                />
+              </div>
+              <div>
+                <label className="mb-2">
+                  Phone Number
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <PhoneNumberField
+                  placeholder="Phone Number"
+                  value={state.form.phone_number}
+                  onChange={(value: any) =>
+                    handleValueChange(value, "phone_number")
+                  }
+                  errors={state.errors.phone_number}
+                  onlyIndia={true}
+                />
+                <CheckboxField
+                  checked={phoneIsWhatsApp}
+                  onChange={(_, checked) => {
+                    setPhoneIsWhatsApp(checked);
+                    !checked && handleValueChange("+91", "alt_phone_number");
+                  }}
+                  label="Is the phone number a WhatsApp number?"
+                  className="font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2">Whatsapp Number</label>
+                <PhoneNumberField
+                  placeholder="WhatsApp Phone Number"
+                  value={state.form.alt_phone_number}
+                  onChange={(value: any) =>
+                    handleValueChange(value, "alt_phone_number")
+                  }
+                  disabled={phoneIsWhatsApp}
+                  errors={state.errors.alt_phone_number}
+                  onlyIndia={true}
+                />
+              </div>
+              <div>
+                <label className="mb-2">
+                  Email
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <TextFormField
+                  id="email"
                   name="email"
-                  variant="outlined"
-                  margin="dense"
                   value={state.form.email}
                   onChange={handleChange}
-                  errors={state.errors.email}
+                  error={state.errors.email}
                 />
               </div>
-
-              <div>
-                <InputLabel>Gender*</InputLabel>
-                <SelectField
-                  name="gender"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.gender}
-                  options={genderTypes}
-                  onChange={handleChange}
-                  errors={state.errors.gender}
-                />
-              </div>
-
-              <div>
-                <InputLabel>State*</InputLabel>
-                {isStateLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <SelectField
-                    name="state"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.state}
-                    options={states}
-                    optionValue="name"
-                    onChange={(e) => [
-                      handleChange(e),
-                      fetchDistricts(String(e.target.value)),
-                    ]}
-                    errors={state.errors.state}
-                  />
-                )}
-              </div>
-
-              <div>
-                <InputLabel>District*</InputLabel>
-                {isDistrictLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <SelectField
-                    name="district"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.district}
-                    options={districts}
-                    optionValue="name"
-                    onChange={(e) => [
-                      handleChange(e),
-                      fetchLocalBody(String(e.target.value)),
-                    ]}
-                    errors={state.errors.district}
-                  />
-                )}
-              </div>
-
-              {showLocalbody && (
-                <div>
-                  <InputLabel>Localbody</InputLabel>
-                  {isLocalbodyLoading ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                    <SelectField
-                      name="local_body"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.local_body}
-                      options={localBody}
-                      optionValue="name"
-                      onChange={handleChange}
-                      errors={state.errors.local_body}
-                    />
-                  )}
-                </div>
-              )}
             </div>
             <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
               <Cancel onClick={() => goBack()} />

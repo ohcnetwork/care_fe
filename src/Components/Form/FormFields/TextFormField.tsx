@@ -20,6 +20,8 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   trailingFocused?: React.ReactNode | undefined;
   min?: string | number;
   max?: string | number;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
 };
 
 const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
@@ -55,6 +57,8 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
       max={props.max}
       autoComplete={props.autoComplete}
       required={props.required}
+      onFocus={props.onFocus}
+      onBlur={props.onBlur}
       onChange={(event) => {
         event.preventDefault();
         handleChange(event.target);
