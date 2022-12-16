@@ -15,8 +15,27 @@ export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
 export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
 export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
+export type UserRole =
+  | "Pharmacist"
+  | "Volunteer"
+  | "StaffReadOnly"
+  | "Staff"
+  | "Doctor"
+  | "WardAdmin"
+  | "LocalBodyAdmin"
+  | "DistrictLabAdmin"
+  | "DistrictReadOnlyAdmin"
+  | "DistrictAdmin"
+  | "StateLabAdmin"
+  | "StateReadOnlyAdmin"
+  | "StateAdmin";
+
 const readOnly = true;
-export const USER_TYPE_OPTIONS = [
+export const USER_TYPE_OPTIONS: {
+  id: UserRole;
+  role: string;
+  readOnly?: true | undefined;
+}[] = [
   { id: "Pharmacist", role: "Pharmacist" },
   { id: "Volunteer", role: "Volunteer" },
   { id: "StaffReadOnly", role: "Staff", readOnly },
