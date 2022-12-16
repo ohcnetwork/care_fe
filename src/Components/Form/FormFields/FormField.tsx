@@ -50,7 +50,7 @@ const FormField = (props: {
   const error = resolveFormFieldError(props.props);
 
   return (
-    <div className={className}>
+    <div className={className} id={id}>
       {label && (
         <FieldLabel htmlFor={id} required={required} className={labelClassName}>
           {label}

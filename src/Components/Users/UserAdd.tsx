@@ -917,6 +917,7 @@ export const UserAdd = (props: UserProps) => {
                   <span className="text-red-500">{" *"}</span>
                 </label>
                 <DateFormField
+                  id="date_of_birth"
                   name="date_of_birth"
                   value={getDate(state.form.date_of_birth)}
                   onChange={handleDateChange}
