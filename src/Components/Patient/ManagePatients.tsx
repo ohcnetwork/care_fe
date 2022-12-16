@@ -728,9 +728,13 @@ export const PatientManager = (props: any) => {
                 <PhoneNumberField
                   bgColor="bg-white"
                   value={qParams.emergency_phone_number || "+91"}
-                  onChange={(value: string) =>
-                    updateQuery({ emergency_phone_number: value })
-                  }
+                  onChange={(value: string) => {
+                    if (value !== "+91") {
+                      updateQuery({ emergency_phone_number: value });
+                    } else {
+                      updateQuery({ emergency_phone_number: "" });
+                    }
+                  }}
                   turnOffAutoFormat={false}
                   errors=""
                 />
