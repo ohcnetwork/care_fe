@@ -74,7 +74,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
               {props.placeholder}
             </Listbox.Label>
             <div className="relative">
-              <div className="">
+              <div>
                 <Listbox.Button className="w-full flex rounded bg-white disabled:bg-secondary-100 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 ring-primary-400 transition-all duration-200 ease-in-out">
                   <div className="relative z-0 flex items-center w-full">
                     <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
@@ -88,9 +88,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                 {selectedOptions.length !== 0 && (
                   <div className="p-2 flex flex-wrap gap-2">
                     {selectedOptions.map((option) => (
-                      <span className="bg-secondary-100 border-secondary-200 text-secondary-600 rounded-full text-xs px-3 py-1.5">
-                        {option.selectedLabel}
-                      </span>
+                      <MultiSelectOptionChip label={option.selectedLabel} />
                     ))}
                   </div>
                 )}
@@ -160,3 +158,24 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
 };
 
 export default MultiSelectMenuV2;
+
+interface MultiSelectOptionChipProps {
+  label: React.ReactNode;
+  onRemove?: () => void;
+}
+
+export function MultiSelectOptionChip(props: MultiSelectOptionChipProps) {
+  return (
+    <span className="flex gap-2 items-center bg-secondary-100 border-secondary-200 text-secondary-600 rounded-full text-xs px-3">
+      <p className="py-1.5">{props.label}</p>
+      {props.onRemove && (
+        <p
+          className="cursor-pointer rounded-full hover:bg-white"
+          onClick={props.onRemove}
+        >
+          <CareIcon className="care-l-times text-base" />
+        </p>
+      )}
+    </span>
+  );
+}
