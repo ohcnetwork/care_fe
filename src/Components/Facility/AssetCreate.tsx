@@ -736,7 +736,7 @@ const AssetCreate = (props: AssetProps) => {
                     <label>Warranty / AMC Expiry</label>
                     <div className="flex-auto">
                       <DateInputV2
-                        className="w-56"
+                        className="w-56 border-2 border-gray-500"
                         value={warranty_amc_end_of_validity}
                         onChange={(date) =>
                           setWarrantyAmcEndOfValidity(
