@@ -1,4 +1,12 @@
-import { cy, describe, it, before, beforeEach, afterEach } from "local-cypress";
+import {
+  cy,
+  describe,
+  it,
+  before,
+  beforeEach,
+  afterEach,
+  expect,
+} from "local-cypress";
 
 describe("Edit Profile Testing", () => {
   before(() => {
@@ -30,16 +38,22 @@ describe("Edit Profile Testing", () => {
   });
 
   it("import", () => {
-    cy.wait(100);
-    cy.contains("Import/Export").click().wait(100);
-    cy.contains("Import Results").click().wait(100);
-    // TODO: attach file and save
+    cy.intercept("POST", "/api/v1/external_result/bulk_upsert").as("import");
+    cy.get("div").contains("Import/Export").click({ force: true });
+    cy.get("div").contains("Import Results").click({ force: true });
+    cy.get("[id=result-upload]")
+      .selectFile("cypress/fixtures/external-result_sample.csv")
+      .wait(100);
+    cy.get("button").contains("Save").click({ force: true });
+    cy.wait("@import").then((interception) => {
+      expect(interception.response.statusCode).to.equal(202);
+    });
   });
 
   it("export", () => {
     cy.intercept("/api/v1/external_result/?csv=true").as("export");
-    cy.contains("Import/Export").click().wait(100);
-    cy.contains("Export Results").click();
+    cy.get("div").contains("Import/Export").click({ force: true });
+    cy.get("div").contains("Export Results").click({ force: true });
     cy.wait("@export").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
