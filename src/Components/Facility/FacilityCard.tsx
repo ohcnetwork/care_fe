@@ -126,7 +126,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div>
                   {userType !== "Staff" ? (
                     <ButtonV2
-                      className="flex gap-3 bg-white"
+                      className="flex gap-3 items-center bg-white"
                       name="facility-notify"
                       shadow
                       border
@@ -134,7 +134,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       onClick={() => setNotifyModalFor(facility.id)}
                     >
                       <i className="far fa-comment-dots"></i>
-                      Notify
+                      <span>Notify</span>
                     </ButtonV2>
                   ) : (
                     <></>
@@ -190,7 +190,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 </div>
                 <div className="flex gap-2 ">
                   <ButtonV2
-                    className="flex gap-3 bg-white"
+                    className="flex gap-3 items-center bg-white"
                     name="facility-details"
                     shadow
                     border
@@ -198,10 +198,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     onClick={() => navigate(`/facility/${facility.id}`)}
                   >
                     <i className="fas fa-hospital"></i>
-                    {t("Facility")}
+                    <span>{t("Facility")}</span>
                   </ButtonV2>
                   <ButtonV2
-                    className="flex gap-3 bg-white"
+                    className="flex gap-3 items-center bg-white"
                     name="facility-patients"
                     shadow
                     border
@@ -211,7 +211,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     }
                   >
                     <i className="fas fa-user-injured"></i>
-                    {t("Patients")}
+                    <span>{t("Patients")}</span>
                   </ButtonV2>
                 </div>
               </div>
