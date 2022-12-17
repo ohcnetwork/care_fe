@@ -748,17 +748,19 @@ const AssetCreate = (props: AssetProps) => {
                       errors={state.errors.warranty_amc_end_of_validity}
                       InputLabelProps={{ shrink: true }}
                     /> */}
-                    <DateInputV2
-                      className="w-56"
-                      value={warranty_amc_end_of_validity}
-                      onChange={(date) =>
-                        setWarrantyAmcEndOfValidity(
-                          moment(date).format("YYYY-MM-DD")
-                        )
-                      }
-                      position="RIGHT"
-                      min={new Date()}
-                    />
+                    <div className="flex-auto">
+                      <DateInputV2
+                        className="w-56"
+                        value={warranty_amc_end_of_validity}
+                        onChange={(date) =>
+                          setWarrantyAmcEndOfValidity(
+                            moment(date).format("YYYY-MM-DD")
+                          )
+                        }
+                        position="LEFT"
+                        min={new Date()}
+                      />
+                    </div>
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
                     />
