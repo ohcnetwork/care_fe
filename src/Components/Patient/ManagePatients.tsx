@@ -21,7 +21,6 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   TELEMEDICINE_ACTIONS,
-  PATIENT_FILTER_ADMITTED_TO,
   PatientCategoryTailwindClass,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -141,8 +140,8 @@ export const PatientManager = (props: any) => {
       qParams.last_consultation_discharge_date_before || undefined,
     last_consultation_discharge_date_after:
       qParams.last_consultation_discharge_date_after || undefined,
-    last_consultation_admitted_to_list:
-      qParams.last_consultation_admitted_to_list || undefined,
+    last_consultation_admitted_bed_type_list:
+      qParams.last_consultation_admitted_bed_type_list || undefined,
     srf_id: qParams.srf_id || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
@@ -251,7 +250,7 @@ export const PatientManager = (props: any) => {
     qParams.last_consultation_discharge_date_after,
     qParams.age_max,
     qParams.age_min,
-    qParams.last_consultation_admitted_to_list,
+    qParams.last_consultation_admitted_bed_type_list,
     qParams.facility,
     qParams.facility_type,
     qParams.district,
@@ -355,13 +354,13 @@ export const PatientManager = (props: any) => {
             <i
               className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
               onClick={(_) => {
-                const lcat = qParams.last_consultation_admitted_to_list
+                const lcat = qParams.last_consultation_admitted_bed_type_list
                   .split(",")
                   .filter((x: string) => x != id)
                   .join(",");
                 updateQuery({
                   ...qParams,
-                  last_consultation_admitted_to_list: lcat,
+                  last_consultation_admitted_bed_type_list: lcat,
                 });
               }}
             ></i>
@@ -369,24 +368,22 @@ export const PatientManager = (props: any) => {
         )
       );
     };
-
-    return qParams.last_consultation_admitted_to_list
+    return qParams.last_consultation_admitted_bed_type_list
       .split(",")
       .map((id: string) => {
-        const text = PATIENT_FILTER_ADMITTED_TO.find(
-          (obj) => obj.id == id
-        )?.text;
+        const text = ADMITTED_TO.find((obj) => obj.id == id)?.text;
         return badge("Bed Type", text, id);
       });
   };
 
-  let patientList: any[] = [];
+  let patientList: React.ReactNode[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any) => {
       let patientUrl = "";
       if (
         patient.last_consultation &&
-        patient.last_consultation?.facility === patient.facility
+        patient.last_consultation?.facility === patient.facility &&
+        !(patient.last_consultation?.discharge_date && patient.is_active)
       ) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation.id}`;
       } else if (patient.facility) {
@@ -535,7 +532,9 @@ export const PatientManager = (props: any) => {
                     )}
                     {(!patient.last_consultation ||
                       patient.last_consultation?.facility !==
-                        patient.facility) && (
+                        patient.facility ||
+                      (patient.last_consultation?.discharge_date &&
+                        patient.is_active)) && (
                       <span className="relative inline-flex">
                         <Chip
                           color="red"
@@ -593,7 +592,7 @@ export const PatientManager = (props: any) => {
           setSelectedFacility({ name: "" });
         }}
       />
-      <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-max">
+      <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-full md:w-max">
         <Tooltip
           title={
             !isDownloadAllowed ? (
@@ -779,10 +778,15 @@ export const PatientManager = (props: any) => {
                   Search by Primary Number
                 </div>
                 <PhoneNumberField
+                  bgColor="bg-white"
                   value={qParams.phone_number || "+91"}
-                  onChange={(value: string) =>
-                    updateQuery({ phone_number: value })
-                  }
+                  onChange={(value: string) => {
+                    if (value !== "+91") {
+                      updateQuery({ phone_number: value });
+                    } else {
+                      updateQuery({ phone_number: "" });
+                    }
+                  }}
                   turnOffAutoFormat={false}
                   errors=""
                 />
@@ -792,10 +796,15 @@ export const PatientManager = (props: any) => {
                   Search by Emergency Number
                 </div>
                 <PhoneNumberField
+                  bgColor="bg-white"
                   value={qParams.emergency_phone_number || "+91"}
-                  onChange={(value: string) =>
-                    updateQuery({ emergency_phone_number: value })
-                  }
+                  onChange={(value: string) => {
+                    if (value !== "+91") {
+                      updateQuery({ emergency_phone_number: value });
+                    } else {
+                      updateQuery({ emergency_phone_number: "" });
+                    }
+                  }}
                   turnOffAutoFormat={false}
                   errors=""
                 />
@@ -853,7 +862,7 @@ export const PatientManager = (props: any) => {
             },
           ]}
         />
-        {qParams.last_consultation_admitted_to_list &&
+        {qParams.last_consultation_admitted_bed_type_list &&
           LastAdmittedToTypeBadges()}
       </div>
       <div>

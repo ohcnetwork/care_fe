@@ -37,9 +37,9 @@ describe("Shifting section filter", () => {
     cy.contains("Apply").click();
   });
 
-  it("filter by assigned to facility", () => {
-    cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-    cy.get("[name='assigned_to']").type("test").wait("@facilities_filter");
+  it("filter by assigned to user", () => {
+    cy.intercept(/\/api\/v1\/users/).as("users_filter");
+    cy.get("[name='assigned_to']").type("test").wait("@users_filter");
     cy.get("[name='assigned_to']").type("{downarrow}{enter}");
     cy.contains("Apply").click();
   });
