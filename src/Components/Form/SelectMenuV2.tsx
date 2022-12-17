@@ -30,6 +30,10 @@ type SelectMenuProps<T, V = T> = {
     }
 );
 
+/**
+ * Do not use this component directly! Use `SelectFormField` instead as it API
+ * is easier to use and compliant with `FormField` based components.
+ */
 const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const valueOptions = props.options.map((option) => {
     const label = props.optionLabel(option);
