@@ -318,7 +318,9 @@ const AssetCreate = (props: AssetProps) => {
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
         manufacturer: manufacturer,
-        warranty_amc_end_of_validity: warranty_amc_end_of_validity,
+        warranty_amc_end_of_validity: moment(
+          warranty_amc_end_of_validity
+        ).format("YYYY-MM-DD"),
         last_serviced_on: last_serviced_on,
         notes: notes,
       };
@@ -731,22 +733,20 @@ const AssetCreate = (props: AssetProps) => {
                   {/* Warranty / AMC Expiry */}
                   <div
                     className="col-span-6 sm:col-span-3"
-                    // ref={fieldRef["warranty_amc_end_of_validity"]}
+                    ref={fieldRef["warranty_amc_end_of_validity"]}
                   >
                     <label>Warranty / AMC Expiry</label>
-                    <div className="flex-auto">
-                      <DateInputV2
-                        className="w-56 border-2 border-gray-500"
-                        value={warranty_amc_end_of_validity}
-                        onChange={(date) =>
-                          setWarrantyAmcEndOfValidity(
-                            moment(date).format("YYYY-MM-DD")
-                          )
-                        }
-                        position="LEFT"
-                        min={new Date()}
-                      />
-                    </div>
+                    <DateInputV2
+                      className="border-1 border-gray-200"
+                      value={warranty_amc_end_of_validity}
+                      onChange={(date) => {
+                        console.log(date);
+                        console.log(moment(date).format("YYYY-MM-DD"));
+                        setWarrantyAmcEndOfValidity(moment(date).toDate());
+                      }}
+                      position="LEFT"
+                      min={new Date()}
+                    />
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
                     />
