@@ -204,8 +204,7 @@ export const ConsultationForm = (props: any) => {
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
 
-  const actionText = !id ? "Create Consultation" : "Update Consultation";
-
+  const isUpdate = Boolean(id);
   const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -454,6 +453,15 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
+
+        case "verified_by":
+          if (!state.form[field].replace(/\s/g, "").length) {
+            errors[field] = "Please fill verified by";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+
         default:
           return;
       }
@@ -640,7 +648,7 @@ export const ConsultationForm = (props: any) => {
     <div ref={topRef}>
       <PageTitle
         className="ml-3 mt-5"
-        title={actionText}
+        title={isUpdate ? "Edit Consultation" : "Create Consultation"}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
@@ -756,26 +764,22 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
               </div>
-              <div>
-                <FieldLabel>Bed</FieldLabel>
-                <BedSelect
-                  name="bed"
-                  setSelected={setBed}
-                  selected={bed}
-                  errors=""
-                  multiple={false}
-                  margin="dense"
-                  unoccupiedOnly={true}
-                  disabled={!!id} // disabled while editing
-                  facility={facilityId}
-                />
-                {!!id && (
-                  <p className="text-gray-500 text-sm -mt-5 mb-1">
-                    Can't be edited while Consultation update. To change bed use
-                    the form bellow
-                  </p>
-                )}
-              </div>
+
+              {!isUpdate && (
+                <div>
+                  <FieldLabel>Bed</FieldLabel>
+                  <BedSelect
+                    name="bed"
+                    setSelected={setBed}
+                    selected={bed}
+                    errors=""
+                    multiple={false}
+                    margin="dense"
+                    unoccupiedOnly={true}
+                    facility={facilityId}
+                  />
+                </div>
+              )}
             </>
           )}
         </div>
@@ -826,8 +830,9 @@ export const ConsultationForm = (props: any) => {
         </div>
         <TextFormField {...field("ip_no")} label="IP Number" required />
         <TextAreaFormField
-          label="Verified by"
           {...field("verified_by")}
+          label="Verified by"
+          required
           placeholder="Attending Doctors Name and Designation"
         />
 
@@ -968,12 +973,12 @@ export const ConsultationForm = (props: any) => {
           </ButtonV2>
           <ButtonV2 variant="primary" type="submit" onClick={handleSubmit}>
             <CareIcon className="care-l-check text-lg pt-0.5" />
-            {actionText}
+            {isUpdate ? "Update Consultation" : "Create Consultation"}
           </ButtonV2>
         </div>
       </form>
 
-      {!id ? null : (
+      {isUpdate && (
         <div className="mt-4 bg-white rounded max-w-3xl px-11 py-8 mx-auto">
           <h4>Update Bed</h4>
           <div className="py-11 px-6">
