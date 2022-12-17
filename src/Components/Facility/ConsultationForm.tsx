@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
-import React, {
+import {
   ChangeEventHandler,
   useCallback,
   useEffect,
@@ -25,7 +25,6 @@ import {
   REVIEW_AT_CHOICES,
   KASP_STRING,
   KASP_ENABLED,
-  PatientCategoryID,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -36,13 +35,7 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  DateInputField,
-  ErrorHelperText,
-  NativeSelectField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { DateInputField, ErrorHelperText } from "../Common/HelperInputFields";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
@@ -71,6 +64,8 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
+import SelectMenuFormField from "../Form/FormFields/SelectMenuFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -190,18 +185,8 @@ const consultationFormReducer = (state = initialState, action: Action) => {
   }
 };
 
-const suggestionTypes = [
-  {
-    id: 0,
-    text: "Select the decision",
-  },
-  ...CONSULTATION_SUGGESTION,
-];
-
-const symptomChoices = [...SYMPTOM_CHOICES];
-
 const scrollTo = (id: any) => {
-  const element = document.querySelector(`#${id}-div`);
+  const element = document.querySelector(`#${id}`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
@@ -564,17 +549,6 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleChange:
-    | ChangeEventHandler<HTMLInputElement>
-    | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e: any) => {
-    e &&
-      e.target &&
-      dispatch({
-        type: "set_form",
-        form: { ...state.form, [e.target.name]: e.target.value },
-      });
-  };
-
   const handleFormFieldChange: FieldChangeEventHandler<unknown> = (event) => {
     dispatch({
       type: "set_form",
@@ -593,18 +567,6 @@ export const ConsultationForm = (props: any) => {
           ...state.form,
           [e.target.name]: e.target.value,
           action: e.target.value === "false" ? "PENDING" : state.form.action,
-        },
-      });
-  };
-
-  const handleDecisionChange = (e: any) => {
-    e &&
-      e.target &&
-      dispatch({
-        type: "set_form",
-        form: {
-          ...state.form,
-          [e.target.name]: e.target.value,
         },
       });
   };
@@ -666,6 +628,25 @@ export const ConsultationForm = (props: any) => {
     return <Loading />;
   }
 
+  const field = (name: string) => {
+    return {
+      id: name,
+      name,
+      value: (state.form as any)[name],
+      error: state.errors[name],
+      onChange: handleFormFieldChange,
+    };
+  };
+
+  const selectField = (name: string) => {
+    return {
+      ...field(name),
+      optionValue: (option: any) => option.id,
+      optionLabel: (option: any) => option.text,
+      optionDescription: (option: any) => option.desc,
+    };
+  };
+
   return (
     <div className="px-2 pb-2 max-w-3xl mx-auto" ref={topRef}>
       <PageTitle
@@ -679,120 +660,85 @@ export const ConsultationForm = (props: any) => {
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div className="grid gap-4 grid-cols-1">
-                <div id="symptoms-div">
+              <div className="flex flex-col gap-4">
+                <div>
                   <MultiSelectMenuV2
                     id="symptoms"
                     placeholder="Symptoms"
                     value={state.form.symptoms}
-                    options={symptomChoices}
-                    optionLabel={({ text }) => text}
-                    optionValue={({ id }) => id}
+                    options={SYMPTOM_CHOICES}
+                    optionLabel={(option) => option.text}
+                    optionValue={(option) => option.id}
                     onChange={(o) => handleSymptomChange(o)}
                   />
                   <ErrorHelperText error={state.errors.symptoms} />
                 </div>
 
                 {state.form.otherSymptom && (
-                  <div id="other_symptoms-div">
-                    <TextAreaFormField
-                      label="Other symptom details"
-                      required
-                      id="other_symptoms"
-                      name="other_symptoms"
-                      placeholder="Enter details of other symptoms here"
-                      value={state.form.other_symptoms}
-                      onChange={handleFormFieldChange}
-                      error={state.errors.other_symptoms}
-                    />
-                  </div>
+                  <TextAreaFormField
+                    {...field("other_symptoms")}
+                    label="Other symptom details"
+                    required
+                    placeholder="Enter details of other symptoms here"
+                  />
                 )}
 
                 {state.form.hasSymptom && (
-                  <div id="symptoms_onset_date-div">
-                    <DateInputField
-                      label="Date of onset of the symptoms *"
-                      value={state.form?.symptoms_onset_date}
-                      onChange={(date) =>
-                        handleDateChange(date, "symptoms_onset_date")
-                      }
-                      disableFuture={true}
-                      errors={state.errors.symptoms_onset_date}
-                      InputLabelProps={{ shrink: true }}
-                    />
-                  </div>
+                  // <DateFormField
+                  //   id="symptoms_onset_date"
+                  //   name="symptoms_onset_date"
+                  //   required
+                  //   label="Date of onset of the symptoms"
+                  //   value={state.form?.symptoms_onset_date}
+                  //   error={state.errors.symptoms_onset_date}
+                  //   onChange={handleFormFieldChange}
+                  // />
+                  <DateInputField
+                    id="symptoms_onset_date"
+                    label="Date of onset of the symptoms *"
+                    value={state.form?.symptoms_onset_date}
+                    onChange={(date) =>
+                      handleDateChange(date, "symptoms_onset_date")
+                    }
+                    disableFuture={true}
+                    errors={state.errors.symptoms_onset_date}
+                    InputLabelProps={{ shrink: true }}
+                  />
                 )}
 
-                <div id="existing-medication-div">
-                  <TextAreaFormField
-                    label="History of present illness"
-                    id="history_of_present_illness"
-                    name="history_of_present_illness"
-                    placeholder="Optional information"
-                    value={state.form.history_of_present_illness}
-                    onChange={handleFormFieldChange}
-                    error={state.errors.history_of_present_illness}
-                  />
-                </div>
+                <TextAreaFormField
+                  {...field("history_of_present_illness")}
+                  label="History of present illness"
+                  placeholder="Optional information"
+                />
 
-                <div id="examination_details-div">
-                  <TextAreaFormField
-                    label="Examination details and Clinical conditions"
-                    id="examination_details"
-                    name="examination_details"
-                    placeholder="Optional information"
-                    value={state.form.examination_details}
-                    onChange={handleFormFieldChange}
-                    error={state.errors.examination_details}
-                  />
-                </div>
+                <TextAreaFormField
+                  {...field("examination_details")}
+                  label="Examination details and Clinical conditions"
+                  placeholder="Optional information"
+                />
 
-                <div id="prescribed_medication-div">
-                  <TextAreaFormField
-                    label="Treatment Plan / Treatment Summary"
-                    id="prescribed_medication"
-                    name="prescribed_medication"
-                    placeholder="Optional information"
-                    value={state.form.prescribed_medication}
-                    onChange={handleFormFieldChange}
-                    error={state.errors.prescribed_medication}
-                  />
-                </div>
+                <TextAreaFormField
+                  {...field("prescribed_medication")}
+                  label="Treatment Plan / Treatment Summary"
+                  placeholder="Optional information"
+                />
+
                 <PatientCategorySelect
                   required
                   label="Category"
-                  id="category"
-                  name="category"
-                  value={state.form.category as PatientCategoryID | undefined}
-                  onChange={handleFormFieldChange}
-                  error={state.errors.category}
+                  {...field("category")}
                 />
-                <div className="flex-1" id="category-div">
-                  <FieldLabel required>Category</FieldLabel>
-                  <SelectField
-                    name="category"
-                    variant="standard"
-                    value={state.form.category}
-                    options={PATIENT_CATEGORIES}
-                    onChange={handleChange}
-                    errors={state.errors.category}
-                  />
-                </div>
 
-                <div id="suggestion-div">
-                  <FieldLabel required>Decision after Consultation</FieldLabel>
-                  <NativeSelectField
-                    name="suggestion"
-                    variant="outlined"
-                    value={state.form.suggestion}
-                    options={suggestionTypes}
-                    onChange={handleDecisionChange}
-                  />
-                  <ErrorHelperText error={state.errors.suggestion} />
-                </div>
+                <SelectMenuFormField
+                  required
+                  label="Decision after consultation"
+                  {...selectField("suggestion")}
+                  options={CONSULTATION_SUGGESTION}
+                />
 
                 {state.form.suggestion === "R" && (
-                  <div id="referred_to-div">
+                  <div id="referred_to">
                     <FieldLabel>Referred To Facility</FieldLabel>
                     <FacilitySelect
                       name="referred_to"
@@ -807,7 +753,7 @@ export const ConsultationForm = (props: any) => {
                 {state.form.suggestion === "A" && (
                   <>
                     <div className="flex">
-                      <div className="flex-1" id="admission_date-div">
+                      <div className="flex-1">
                         <DateInputField
                           id="admission_date"
                           label="Admission Date *"
@@ -822,7 +768,7 @@ export const ConsultationForm = (props: any) => {
                       </div>
                     </div>
                     <div>
-                      <FieldLabel id="asset-type">Bed</FieldLabel>
+                      <FieldLabel>Bed</FieldLabel>
                       <BedSelect
                         name="bed"
                         setSelected={setBed}
@@ -845,19 +791,15 @@ export const ConsultationForm = (props: any) => {
                 )}
               </div>
 
-              <div className="mt-4" id="consultation_notes-div">
+              <div className="mt-4">
                 <TextAreaFormField
                   label="General Instructions (Advice)"
                   required
-                  id="consultation_notes"
-                  name="consultation_notes"
-                  placeholder="Consultation Notes..."
-                  value={state.form.consultation_notes}
-                  onChange={handleFormFieldChange}
-                  error={state.errors.consultation_notes}
+                  placeholder="Consultation Notes"
+                  {...field("consultation_notes")}
                 />
               </div>
-              <div id="investigation-div" className="mt-4">
+              <div id="investigation" className="mt-4">
                 <FieldLabel>Investigation Suggestions</FieldLabel>
                 <InvestigationBuilder
                   investigations={InvestigationAdvice}
@@ -866,7 +808,7 @@ export const ConsultationForm = (props: any) => {
                 <br />
                 <ErrorHelperText error={state.errors.investigation} />
               </div>
-              <div id="procedures-div" className="mt-4">
+              <div id="procedures" className="mt-4">
                 <FieldLabel>Procedures</FieldLabel>
                 <ProcedureBuilder
                   procedures={procedures}
@@ -875,7 +817,7 @@ export const ConsultationForm = (props: any) => {
                 <br />
                 <ErrorHelperText error={state.errors.procedures} />
               </div>
-              <div id="discharge_advice-div" className="mt-4">
+              <div id="discharge_advice" className="mt-4">
                 <FieldLabel>Prescription Medication</FieldLabel>
                 <PrescriptionBuilder
                   prescriptions={dischargeAdvice}
@@ -884,7 +826,7 @@ export const ConsultationForm = (props: any) => {
                 <br />
                 <ErrorHelperText error={state.errors.discharge_advice} />
               </div>
-              <div id="discharge_advice-div" className="mt-4">
+              <div id="discharge_advice" className="mt-4">
                 <FieldLabel>PRN Prescription</FieldLabel>
                 <PRNPrescriptionBuilder
                   prescriptions={PRNAdvice}
@@ -893,33 +835,14 @@ export const ConsultationForm = (props: any) => {
                 <br />
                 <ErrorHelperText error={state.errors.prn_prescription} />
               </div>
-              <div id="ip_no-div" className="mt-4">
-                <FieldLabel required>IP number</FieldLabel>
-                <TextInputField
-                  name="ip_no"
-                  variant="outlined"
-                  margin="dense"
-                  type="string"
-                  InputLabelProps={{ shrink: !!state.form.ip_no }}
-                  value={state.form.ip_no}
-                  onChange={handleChange}
-                  errors={state.errors.ip_no}
-                  required
-                />
-              </div>
+              <TextFormField {...field("ip_no")} label="IP Number" required />
               <TextAreaFormField
                 label="Verified by"
-                id="verified_by"
-                name="verified_by"
+                {...field("verified_by")}
                 placeholder="Attending Doctors Name and Designation"
-                value={state.form.verified_by}
-                onChange={handleFormFieldChange}
-                error={state.errors.verified_by}
               />
-              <div id="provisional-diagnosis-div" className="mt-4">
-                <FieldLabel id="diagnosis-label">
-                  Provisional Diagnosis
-                </FieldLabel>
+              <div id="provisional-diagnosis" className="mt-4">
+                <FieldLabel>Provisional Diagnosis</FieldLabel>
                 <DiagnosisSelect
                   name="icd11_provisional_diagnoses"
                   selected={state.form.icd11_provisional_diagnoses_object}
@@ -938,8 +861,8 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div id="diagnosis-div" className="mt-4">
-                <FieldLabel id="diagnosis-label">Diagnosis</FieldLabel>
+              <div id="icd11_diagnoses" className="mt-4">
+                <FieldLabel>Diagnosis</FieldLabel>
                 <DiagnosisSelect
                   name="icd11_diagnoses"
                   selected={state.form.icd11_diagnoses_object}
@@ -959,8 +882,8 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               {KASP_ENABLED && (
-                <div className="flex-1" id="is_kasp-div">
-                  <FieldLabel required>{KASP_STRING} *</FieldLabel>
+                <div className="flex-1" id="is_kasp">
+                  <FieldLabel required>{KASP_STRING}</FieldLabel>
                   <RadioGroup
                     aria-label="covid"
                     name="is_kasp"
@@ -985,9 +908,9 @@ export const ConsultationForm = (props: any) => {
                 </div>
               )}
               {/* Telemedicine Fields */}
-              <div className="flex mt-4">
-                <div className="flex-1" id="is_telemedicine-div">
-                  <FieldLabel id="admitted-label">Telemedicine</FieldLabel>
+              <div className="mt-4">
+                <div id="is_telemedicine">
+                  <FieldLabel>Telemedicine</FieldLabel>
                   <RadioGroup
                     aria-label="covid"
                     name="is_telemedicine"
@@ -1012,91 +935,57 @@ export const ConsultationForm = (props: any) => {
                 </div>
 
                 {JSON.parse(state.form.is_telemedicine) && (
-                  <div className="flex-1" id="review_interval">
-                    <FieldLabel id="review_interval-label">
-                      Review After{" "}
-                    </FieldLabel>
-                    <SelectField
-                      name="review_interval"
-                      variant="standard"
-                      value={state.form.review_interval}
-                      options={[
-                        { id: -1, text: "select" },
-                        ...REVIEW_AT_CHOICES,
-                      ]}
-                      onChange={handleChange}
-                      errors={state.errors.review_interval}
+                  <div className="flex flex-col md:flex-row justify-between gap-3">
+                    <SelectMenuFormField
+                      {...selectField("review_interval")}
+                      label="Review After"
+                      options={REVIEW_AT_CHOICES}
+                    />
+
+                    <div className="flex-1">
+                      <OnlineUsersSelect
+                        userId={state.form.assigned_to}
+                        selectedUser={state.form.assigned_to_object}
+                        onSelect={handleDoctorSelect}
+                        user_type="Doctor"
+                        outline
+                      />
+                    </div>
+
+                    <SelectMenuFormField
+                      className="flex-1"
+                      {...field("action")}
+                      label="Action"
+                      required
+                      options={TELEMEDICINE_ACTIONS}
+                      optionLabel={(option) => option.desc}
+                      optionValue={(option) => option.text}
                     />
                   </div>
                 )}
               </div>
-              {JSON.parse(state.form.is_telemedicine) && (
-                <div className="md:col-span-1" id="assigned_to-div">
-                  <OnlineUsersSelect
-                    userId={state.form.assigned_to}
-                    selectedUser={state.form.assigned_to_object}
-                    onSelect={handleDoctorSelect}
-                    user_type={"Doctor"}
-                    outline={true}
-                  />
-                </div>
-              )}
-              {JSON.parse(state.form.is_telemedicine) && (
-                <div id="action-div">
-                  <FieldLabel required>Action</FieldLabel>
-                  <NativeSelectField
-                    name="action"
-                    variant="outlined"
-                    value={state.form.action}
-                    optionKey="text"
-                    optionValue="desc"
-                    options={TELEMEDICINE_ACTIONS}
-                    onChange={handleChange}
-                  />
-                  <ErrorHelperText error={state.errors.action} />
-                </div>
-              )}
-              <div id="special_instruction-div" className="mt-2">
+
+              <div className="mt-2">
                 <TextAreaFormField
                   label="Special Instructions"
-                  id="special_instruction"
-                  name="special_instruction"
                   placeholder="Optional information"
-                  value={state.form.special_instruction}
-                  onChange={handleFormFieldChange}
-                  error={state.errors.special_instruction}
+                  {...field("special_instruction")}
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row justify-between md:gap-5 mt-4">
-                <div id="weight-div" className="flex-1">
-                  <FieldLabel id="refered-label">Weight (in Kg)</FieldLabel>
-                  <TextInputField
-                    name="weight"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    InputLabelProps={{ shrink: !!state.form.weight }}
-                    value={state.form.weight}
-                    onChange={handleChange}
-                    errors={state.errors.weight}
-                  />
-                </div>
-                <div id="height-div" className="flex-1">
-                  <FieldLabel id="refered-label">Height (in cm)</FieldLabel>
-                  <TextInputField
-                    name="height"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    InputLabelProps={{ shrink: !!state.form.height }}
-                    value={state.form.height}
-                    onChange={handleChange}
-                    errors={state.errors.height}
-                  />
-                </div>
+              <div className="flex flex-col md:flex-row gap-3">
+                <TextFormField
+                  {...field("weight")}
+                  label="Weight (kg)"
+                  placeholder="kg"
+                />
+                <TextFormField
+                  {...field("height")}
+                  label="Height (cm)"
+                  placeholder="cm"
+                />
               </div>
-              <div id="body_surface-div" className="flex-1">
+              <div id="body_surface" className="flex-1">
                 Body Surface area :{" "}
                 {Math.sqrt(
                   (Number(state.form.weight) * Number(state.form.height)) / 3600
