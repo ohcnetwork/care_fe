@@ -48,7 +48,6 @@ import PrescriptionBuilder, {
 import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
-import { DiagnosisSelect } from "../Common/DiagnosisSelect";
 import { goBack } from "../../Utils/utils";
 import InvestigationBuilder, {
   InvestigationType,
@@ -66,6 +65,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import SelectMenuFormField from "../Form/FormFields/SelectMenuFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
+import { DiagnosisSelectFormField } from "../Common/DiagnosisAutocompleteFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -841,45 +841,18 @@ export const ConsultationForm = (props: any) => {
                 {...field("verified_by")}
                 placeholder="Attending Doctors Name and Designation"
               />
-              <div id="provisional-diagnosis" className="mt-4">
-                <FieldLabel>Provisional Diagnosis</FieldLabel>
-                <DiagnosisSelect
-                  name="icd11_provisional_diagnoses"
-                  selected={state.form.icd11_provisional_diagnoses_object}
-                  setSelected={(selected: ICD11DiagnosisModel[] | null) => {
-                    dispatch({
-                      type: "set_form",
-                      form: {
-                        ...state.form,
-                        icd11_provisional_diagnoses:
-                          selected?.map(
-                            (diagnosis: ICD11DiagnosisModel) => diagnosis.id
-                          ) || [],
-                      },
-                    });
-                  }}
-                />
-              </div>
 
-              <div id="icd11_diagnoses" className="mt-4">
-                <FieldLabel>Diagnosis</FieldLabel>
-                <DiagnosisSelect
-                  name="icd11_diagnoses"
-                  selected={state.form.icd11_diagnoses_object}
-                  setSelected={(selected: ICD11DiagnosisModel[] | null) => {
-                    dispatch({
-                      type: "set_form",
-                      form: {
-                        ...state.form,
-                        icd11_diagnoses:
-                          selected?.map(
-                            (diagnosis: ICD11DiagnosisModel) => diagnosis.id
-                          ) || [],
-                      },
-                    });
-                  }}
-                />
-              </div>
+              <DiagnosisSelectFormField
+                {...field("icd11_provisional_diagnoses")}
+                multiple
+                label="Provisional Diagnosis"
+              />
+
+              <DiagnosisSelectFormField
+                {...field("icd11_diagnoses")}
+                multiple
+                label="Diagnosis"
+              />
 
               {KASP_ENABLED && (
                 <div className="flex-1" id="is_kasp">

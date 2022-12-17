@@ -29,4 +29,10 @@ export function DiagnosisSelectFormField(props: Props) {
       />
     );
   }
+
+  return (
+    <div className="bg-danger-500 text-white font-bold">
+      Component not implemented
+    </div>
+  );
 }
