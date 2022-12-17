@@ -288,20 +288,13 @@ export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
 export const PATIENT_CATEGORIES: {
   id: PatientCategoryID;
   text: PatientCategory;
+  twClass: string;
 }[] = [
-  { id: "Comfort", text: "Comfort Care" },
-  { id: "Stable", text: "Stable" },
-  { id: "Moderate", text: "Slightly Abnormal" },
-  { id: "Critical", text: "Critical" },
+  { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
+  { id: "Stable", text: "Stable", twClass: "patient-stable" },
+  { id: "Moderate", text: "Slightly Abnormal", twClass: "patient-abnormal" },
+  { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
-
-export const PatientCategoryTailwindClass: Record<PatientCategory, string> = {
-  "Comfort Care": "patient-comfort",
-  Stable: "patient-stable",
-  "Slightly Abnormal": "patient-abnormal",
-  Critical: "patient-critical",
-  unknown: "patient-unknown",
-};
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 

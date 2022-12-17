@@ -76,8 +76,7 @@ export type PatientCategory =
   | "Comfort Care"
   | "Stable"
   | "Slightly Abnormal"
-  | "Critical"
-  | "unknown";
+  | "Critical";
 
 export interface ConsultationModel {
   admission_date?: string;
