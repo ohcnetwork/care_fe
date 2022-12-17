@@ -17,7 +17,6 @@ import {
   ActionTextInputField,
   PhoneNumberField,
   ErrorHelperText,
-  DateInputField,
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
@@ -321,7 +320,7 @@ const AssetCreate = (props: AssetProps) => {
         warranty_amc_end_of_validity: moment(
           warranty_amc_end_of_validity
         ).format("YYYY-MM-DD"),
-        last_serviced_on: last_serviced_on,
+        last_serviced_on: moment(last_serviced_on).format("YYYY-MM-DD"),
         notes: notes,
       };
       if (!assetId) {
@@ -837,15 +836,14 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["last_serviced_on"]}
                   >
                     <label htmlFor="last-serviced-on">Last Serviced On</label>
-                    <DateInputField
-                      className="w-56"
+                    <DateInputV2
+                      className="border-1 border-gray-200"
                       value={last_serviced_on}
-                      onChange={(date) =>
-                        setLastServicedOn(moment(date).format("YYYY-MM-DD"))
-                      }
-                      disableFuture={true}
-                      errors={state.errors.last_serviced_on}
-                      InputLabelProps={{ shrink: true }}
+                      onChange={(date) => {
+                        setLastServicedOn(moment(date).toDate());
+                      }}
+                      position="LEFT"
+                      max={new Date()}
                     />
                     <ErrorHelperText error={state.errors.last_serviced_on} />
                   </div>
