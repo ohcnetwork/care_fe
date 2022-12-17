@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from "react";
-import { navigate } from "raviger";
 import { SelectField } from "../../Common/HelperInputFields";
 import { CircularProgress } from "@material-ui/core";
 import { FACILITY_TYPES, KASP_STRING } from "../../../Common/constants";
@@ -7,6 +6,7 @@ import { getStates, getDistrictByState } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useAbortableEffect, statusType } from "../../../Common/utils";
 import LocalBodySelect from "./LocalBodySelect";
+import { navigate } from "raviger";
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -19,16 +19,16 @@ function useMergeState(initialState: any) {
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
-function FacillityFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+function FacilityFilter(props: any) {
+  const { filter, onChange, closeFilter } = props;
   const dispatchAction: any = useDispatch();
 
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
+  const [selectedLocalBodyObject, setSelectedLocalBodyObject] = useState(null);
   const [filterState, setFilterState] = useMergeState({
     state: filter.state || "",
     district: filter.district || "",
@@ -120,7 +120,14 @@ function FacillityFilter(props: any) {
         <button
           className="btn btn-default mt-1"
           onClick={(_) => {
-            closeFilter();
+            setFilterState({
+              state: "",
+              district: "",
+              local_body: "",
+              facility_type: "",
+              kasp_empanelled: "",
+            });
+            setSelectedLocalBodyObject(null);
             navigate("/facility");
           }}
         >
@@ -182,6 +189,8 @@ function FacillityFilter(props: any) {
               selected={filterState.local_body}
               setSelected={handleLocalBodyChange}
               margin="dense"
+              selectedLocalBodyObject={selectedLocalBodyObject}
+              setSelectedLocalBodyObject={setSelectedLocalBodyObject}
             />
           </div>
         </div>
@@ -222,4 +231,4 @@ function FacillityFilter(props: any) {
   );
 }
 
-export default FacillityFilter;
+export default FacilityFilter;
