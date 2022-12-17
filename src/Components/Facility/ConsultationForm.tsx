@@ -462,7 +462,8 @@ export const ConsultationForm = (props: any) => {
     return [!invalidForm, error_div];
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
     const [validForm, error_div] = validateForm();
     console.log(validForm);
 
@@ -646,7 +647,10 @@ export const ConsultationForm = (props: any) => {
         }}
       />
 
-      <form className="mt-10 bg-white rounded px-16 py-11 max-w-3xl mx-auto">
+      <form
+        className="mt-10 bg-white rounded px-16 py-11 max-w-3xl mx-auto"
+        onSubmit={handleSubmit}
+      >
         <div className="flex flex-col gap-4">
           <div>
             <MultiSelectMenuV2
@@ -962,11 +966,7 @@ export const ConsultationForm = (props: any) => {
           >
             Cancel
           </ButtonV2>
-          <ButtonV2
-            variant="primary"
-            type="submit"
-            onClick={() => handleSubmit()}
-          >
+          <ButtonV2 variant="primary" type="submit" onClick={handleSubmit}>
             <CareIcon className="care-l-check text-lg pt-0.5" />
             {actionText}
           </ButtonV2>
