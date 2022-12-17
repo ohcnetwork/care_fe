@@ -246,7 +246,7 @@
   "lint-staged": {
     "**/*": [
       "prettier --write --ignore-unknown",
-      "eslint --fix --ignore-pattern *.stories.mdx",
+      "eslint --fix",
       "git update-index --again"
     ]
   },

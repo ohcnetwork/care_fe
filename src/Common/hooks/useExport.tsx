@@ -12,6 +12,7 @@ interface CSVLinkProps {
 }
 
 interface ExportMenuProps {
+  id?: string;
   disabled?: boolean | undefined;
   label?: string;
   children: JSX.Element | JSX.Element[];
