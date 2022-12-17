@@ -31,6 +31,7 @@ import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import DateInputV2 from "../Common/DateInputV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -735,7 +736,7 @@ const AssetCreate = (props: AssetProps) => {
                     <label htmlFor="warranty-expiry">
                       Warranty / AMC Expiry
                     </label>
-                    <DateInputField
+                    {/* <DateInputField
                       className="w-56"
                       value={warranty_amc_end_of_validity}
                       onChange={(date) =>
@@ -743,8 +744,20 @@ const AssetCreate = (props: AssetProps) => {
                           moment(date).format("YYYY-MM-DD")
                         )
                       }
+                      minDate={new Date()}
                       errors={state.errors.warranty_amc_end_of_validity}
                       InputLabelProps={{ shrink: true }}
+                    /> */}
+                    <DateInputV2
+                      className="w-56"
+                      value={warranty_amc_end_of_validity}
+                      onChange={(date) =>
+                        setWarrantyAmcEndOfValidity(
+                          moment(date).format("YYYY-MM-DD")
+                        )
+                      }
+                      position="RIGHT"
+                      min={new Date()}
                     />
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}

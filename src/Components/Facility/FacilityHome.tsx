@@ -552,7 +552,7 @@ export const FacilityHome = (props: any) => {
                 className="mt-2 w-full md:w-auto py-3"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
-                <PatientIcon className="w-4 h-4 fill-current" />
+                <PatientIcon className="w-4 h-4" />
                 View Patients
               </ButtonV2>
             </div>
