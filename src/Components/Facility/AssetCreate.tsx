@@ -739,9 +739,16 @@ const AssetCreate = (props: AssetProps) => {
                       className="border-1 border-gray-200"
                       value={warranty_amc_end_of_validity}
                       onChange={(date) => {
-                        console.log(date);
-                        console.log(moment(date).format("YYYY-MM-DD"));
-                        setWarrantyAmcEndOfValidity(moment(date).toDate());
+                        if (
+                          moment(date).format("YYYY-MM-DD") <
+                          new Date().toLocaleDateString("en-ca")
+                        ) {
+                          Notification.Error({
+                            msg: "Warranty / AMC Expiry date can't be in past",
+                          });
+                        } else {
+                          setWarrantyAmcEndOfValidity(moment(date).toDate());
+                        }
                       }}
                       position="LEFT"
                       min={new Date()}
@@ -840,7 +847,16 @@ const AssetCreate = (props: AssetProps) => {
                       className="border-1 border-gray-200"
                       value={last_serviced_on}
                       onChange={(date) => {
-                        setLastServicedOn(moment(date).toDate());
+                        if (
+                          moment(date).format("YYYY-MM-DD") >
+                          new Date().toLocaleDateString("en-ca")
+                        ) {
+                          Notification.Error({
+                            msg: "Last Serviced date can't be in future",
+                          });
+                        } else {
+                          setLastServicedOn(moment(date).toDate());
+                        }
                       }}
                       position="LEFT"
                       max={new Date()}
