@@ -733,21 +733,7 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["warranty_amc_end_of_validity"]}
                   >
-                    <label htmlFor="warranty-expiry">
-                      Warranty / AMC Expiry
-                    </label>
-                    {/* <DateInputField
-                      className="w-56"
-                      value={warranty_amc_end_of_validity}
-                      onChange={(date) =>
-                        setWarrantyAmcEndOfValidity(
-                          moment(date).format("YYYY-MM-DD")
-                        )
-                      }
-                      minDate={new Date()}
-                      errors={state.errors.warranty_amc_end_of_validity}
-                      InputLabelProps={{ shrink: true }}
-                    /> */}
+                    <label>Warranty / AMC Expiry</label>
                     <div className="flex-auto">
                       <DateInputV2
                         className="w-56"

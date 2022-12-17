@@ -549,7 +549,7 @@ export const FacilityHome = (props: any) => {
                 variant="primary"
                 ghost
                 border
-                className="mt-2 w-full md:w-auto"
+                className="mt-2 w-full md:w-auto py-3"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
                 <PatientIcon className="w-4 h-4 fill-current" />
