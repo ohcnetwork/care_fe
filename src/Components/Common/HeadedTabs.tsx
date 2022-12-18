@@ -36,20 +36,17 @@ export default function HeadedTabs(props: headedTabsProps) {
       <div className="hidden sm:block">
         <div className="border-b border-gray-200">
           <nav
-            className="-mb-px flex items-center justify-center cursor: pointer"
+            className="-mb-px flex items-center justify-center cursor-pointer"
             aria-label="Tabs"
           >
             {tabs.map((tab) => (
               <div
                 key={tab.name}
-                className={`
-              ${
-                tab.value === currentTabState
-                  ? " border-primary-500 text-primary-600 cursor: pointer "
-                  : " border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor: pointer "
-              },
-              ' w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm '
-            `}
+                className={`${
+                  tab.value === currentTabState
+                    ? "border-primary-500 text-primary-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                } w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm cursor-pointer`}
                 onClick={() => {
                   handleChange(tab.value);
                 }}
