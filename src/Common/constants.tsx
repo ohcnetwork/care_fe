@@ -223,7 +223,7 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
   { id: 2880, text: "48 hr" },
 ];
 
-export const SYMPTOM_CHOICES: Array<OptionsType> = [
+export const SYMPTOM_CHOICES = [
   { id: 1, text: "ASYMPTOMATIC" },
   { id: 2, text: "FEVER" },
   { id: 3, text: "SORE THROAT" },

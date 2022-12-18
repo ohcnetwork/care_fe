@@ -1,5 +1,5 @@
 import { PatientCategoryID, PATIENT_CATEGORIES } from "../../Common/constants";
-import SelectFormField from "../Form/FormFields/SelectFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FormFieldBaseProps } from "../Form/FormFields/Utils";
 
 /**
