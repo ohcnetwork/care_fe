@@ -1,4 +1,6 @@
-export type AuthorizedForCB = (userType: string) => boolean;
+import { UserRole } from "../Common/constants";
+
+export type AuthorizedForCB = (userType: UserRole) => boolean;
 export type AuthorizedElementProps = {
   /**
    * Restrict access of this button to specific roles.
@@ -16,11 +18,11 @@ export type AuthorizedElementProps = {
   authorizeFor?: AuthorizedForCB | undefined;
 };
 
-export const NonReadOnlyUsers = (userType: string) =>
+export const NonReadOnlyUsers = (userType: UserRole) =>
   !userType.includes("ReadOnly");
 
 export const Anyone = () => true;
 
-export default function (userTypes: string[]) {
-  return (userType: string) => userTypes.includes(userType);
+export default function (userTypes: UserRole[]) {
+  return (userType: UserRole) => userTypes.includes(userType);
 }
