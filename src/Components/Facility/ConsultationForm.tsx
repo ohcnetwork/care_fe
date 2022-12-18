@@ -14,7 +14,6 @@ import { useDispatch } from "react-redux";
 import {
   CONSULTATION_SUGGESTION,
   PATIENT_CATEGORIES,
-  SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
   KASP_STRING,
@@ -52,7 +51,6 @@ import ProcedureBuilder, {
 import { ICD11DiagnosisModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -60,6 +58,7 @@ import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisAutocompleteFormField";
+import { SymptomsSelect } from "../Common/SymptomsSelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -67,8 +66,6 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 type BooleanStrings = "true" | "false";
 
 type FormDetails = {
-  hasSymptom: boolean;
-  otherSymptom: boolean;
   symptoms: number[];
   other_symptoms: string;
   symptoms_onset_date: any;
@@ -112,8 +109,6 @@ type Action =
   | { type: "set_error"; errors: FormDetails };
 
 const initForm: FormDetails = {
-  hasSymptom: false,
-  otherSymptom: false,
   symptoms: [],
   other_symptoms: "",
   symptoms_onset_date: null,
@@ -229,6 +224,10 @@ export const ConsultationForm = (props: any) => {
     fetchPatientName();
   }, [dispatchAction, patientId]);
 
+  const hasSymptoms =
+    state.form.symptoms.length && !state.form.symptoms.includes(1);
+  const isOtherSymptomsSelected = state.form.symptoms.includes(9);
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -250,14 +249,6 @@ export const ConsultationForm = (props: any) => {
         if (res && res.data) {
           const formData = {
             ...res.data,
-            hasSymptom:
-              !!res.data.symptoms &&
-              !!res.data.symptoms.length &&
-              !!res.data.symptoms.filter((i: number) => i !== 1).length,
-            otherSymptom:
-              !!res.data.symptoms &&
-              !!res.data.symptoms.length &&
-              !!res.data.symptoms.includes(9),
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
@@ -336,14 +327,14 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "other_symptoms":
-          if (state.form.otherSymptom && !state.form[field]) {
+          if (isOtherSymptomsSelected && !state.form[field]) {
             errors[field] = "Please enter the other symptom details";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "symptoms_onset_date":
-          if (state.form.hasSymptom && !state.form[field]) {
+          if (hasSymptoms && !state.form[field]) {
             errors[field] = "Please enter date of onset of the above symptoms";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -481,10 +472,10 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(true);
       const data = {
         symptoms: state.form.symptoms,
-        other_symptoms: state.form.otherSymptom
+        other_symptoms: isOtherSymptomsSelected
           ? state.form.other_symptoms
           : undefined,
-        symptoms_onset_date: state.form.hasSymptom
+        symptoms_onset_date: hasSymptoms
           ? state.form.symptoms_onset_date
           : undefined,
         suggestion: state.form.suggestion,
@@ -568,22 +559,6 @@ export const ConsultationForm = (props: any) => {
       });
   };
 
-  const handleSymptomChange = (value: number[]) => {
-    const form = { ...state.form };
-    const otherSymptoms = value.filter((i) => i !== 1);
-    // prevent user from selecting asymptomatic along with other options
-    if (value.includes(1)) {
-      form.symptoms = otherSymptoms.length ? [1] : value;
-      form.hasSymptom = false;
-      form.otherSymptom = false;
-    } else {
-      form.symptoms = otherSymptoms;
-      form.hasSymptom = !!otherSymptoms.length;
-      form.otherSymptom = otherSymptoms.includes(9);
-    }
-    dispatch({ type: "set_form", form });
-  };
-
   const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
     moment(date).isValid() &&
       dispatch({ type: "set_form", form: { ...state.form, [key]: date } });
@@ -656,24 +631,13 @@ export const ConsultationForm = (props: any) => {
       />
 
       <form
-        className="mt-10 bg-white rounded px-16 py-11 max-w-3xl mx-auto"
+        className="mt-10 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto"
         onSubmit={handleSubmit}
       >
         <div className="flex flex-col gap-4">
-          <div>
-            <MultiSelectMenuV2
-              id="symptoms"
-              placeholder="Symptoms"
-              value={state.form.symptoms}
-              options={SYMPTOM_CHOICES}
-              optionLabel={(option) => option.text}
-              optionValue={(option) => option.id}
-              onChange={(o) => handleSymptomChange(o)}
-            />
-            <ErrorHelperText error={state.errors.symptoms} />
-          </div>
+          <SymptomsSelect required label="Symptoms" {...field("symptoms")} />
 
-          {state.form.otherSymptom && (
+          {isOtherSymptomsSelected && (
             <TextAreaFormField
               {...field("other_symptoms")}
               label="Other symptom details"
@@ -682,7 +646,7 @@ export const ConsultationForm = (props: any) => {
             />
           )}
 
-          {state.form.hasSymptom && (
+          {hasSymptoms && (
             // <DateFormField
             //   id="symptoms_onset_date"
             //   name="symptoms_onset_date"

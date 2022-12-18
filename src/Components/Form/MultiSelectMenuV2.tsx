@@ -54,7 +54,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
     if (props.renderSelectedOptions)
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
     return (
-      <span className="text-secondary-700">{`${selectedOptions.length} items selected`}</span>
+      <span className="text-secondary-700">{`${selectedOptions.length} item(s) selected`}</span>
     );
   };
 
