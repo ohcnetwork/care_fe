@@ -28,11 +28,10 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { DateInputField, ErrorHelperText } from "../Common/HelperInputFields";
+import { ErrorHelperText } from "../Common/HelperInputFields";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
-import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
 import PrescriptionBuilder, {
@@ -59,6 +58,7 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisAutocompleteFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
+import DateFormField from "../Form/FormFields/DateFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -68,14 +68,14 @@ type BooleanStrings = "true" | "false";
 type FormDetails = {
   symptoms: number[];
   other_symptoms: string;
-  symptoms_onset_date: any;
+  symptoms_onset_date?: Date;
   suggestion: string;
   patient: string;
   facility: string;
   admitted: BooleanStrings;
   admitted_to: string;
   category: string;
-  admission_date: string;
+  admission_date?: Date;
   discharge_date: null;
   referred_to: string;
   icd11_diagnoses: string[];
@@ -111,14 +111,14 @@ type Action =
 const initForm: FormDetails = {
   symptoms: [],
   other_symptoms: "",
-  symptoms_onset_date: null,
+  symptoms_onset_date: undefined,
   suggestion: "A",
   patient: "",
   facility: "",
   admitted: "false",
   admitted_to: "",
   category: "Comfort",
-  admission_date: new Date().toISOString(),
+  admission_date: new Date(),
   discharge_date: null,
   referred_to: "",
   icd11_diagnoses: [],
@@ -151,6 +151,9 @@ const initError = Object.assign(
   {},
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
+
+const isoStringToDate = (isoDate: string) =>
+  (moment(isoDate).isValid() && moment(isoDate).toDate()) || undefined;
 
 const initialState = {
   form: { ...initForm },
@@ -199,7 +202,7 @@ export const ConsultationForm = (props: any) => {
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
 
-  const isUpdate = Boolean(id);
+  const isUpdate = !!id;
   const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -225,7 +228,7 @@ export const ConsultationForm = (props: any) => {
   }, [dispatchAction, patientId]);
 
   const hasSymptoms =
-    state.form.symptoms.length && !state.form.symptoms.includes(1);
+    !!state.form.symptoms.length && !state.form.symptoms.includes(1);
   const isOtherSymptomsSelected = state.form.symptoms.includes(9);
 
   const fetchData = useCallback(
@@ -249,6 +252,8 @@ export const ConsultationForm = (props: any) => {
         if (res && res.data) {
           const formData = {
             ...res.data,
+            symptoms_onset_date: isoStringToDate(res.data.symptoms_onset_date),
+            admission_date: isoStringToDate(res.data.admission_date),
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
@@ -559,11 +564,6 @@ export const ConsultationForm = (props: any) => {
       });
   };
 
-  const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
-    moment(date).isValid() &&
-      dispatch({ type: "set_form", form: { ...state.form, [key]: date } });
-  };
-
   const handleDoctorSelect = (doctor: UserModel | null) => {
     if (doctor?.id) {
       dispatch({
@@ -619,6 +619,8 @@ export const ConsultationForm = (props: any) => {
     };
   };
 
+  console.log(state.form.symptoms_onset_date);
+
   return (
     <div ref={topRef}>
       <PageTitle
@@ -631,168 +633,141 @@ export const ConsultationForm = (props: any) => {
       />
 
       <form
-        className="mt-10 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto"
+        className="mt-10 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto flex flex-col gap-4"
         onSubmit={handleSubmit}
       >
-        <div className="flex flex-col gap-4">
-          <SymptomsSelect required label="Symptoms" {...field("symptoms")} />
+        <SymptomsSelect required label="Symptoms" {...field("symptoms")} />
 
-          {isOtherSymptomsSelected && (
-            <TextAreaFormField
-              {...field("other_symptoms")}
-              label="Other symptom details"
+        <TextAreaFormField
+          {...field("other_symptoms")}
+          label="Other symptom details"
+          required={isOtherSymptomsSelected}
+          disabled={!isOtherSymptomsSelected}
+          placeholder="Enter details of other symptoms here"
+        />
+
+        <DateFormField
+          {...field("symptoms_onset_date")}
+          required={hasSymptoms}
+          disabled={!hasSymptoms}
+          label="Date of onset of the symptoms"
+        />
+
+        <TextAreaFormField
+          {...field("history_of_present_illness")}
+          label="History of present illness"
+          placeholder="Optional information"
+        />
+
+        <TextAreaFormField
+          {...field("examination_details")}
+          label="Examination details and Clinical conditions"
+          placeholder="Optional information"
+        />
+
+        <TextAreaFormField
+          {...field("prescribed_medication")}
+          label="Treatment Plan / Treatment Summary"
+          placeholder="Optional information"
+        />
+
+        <PatientCategorySelect
+          required
+          label="Category"
+          {...field("category")}
+        />
+
+        <SelectFormField
+          required
+          label="Decision after consultation"
+          {...selectField("suggestion")}
+          options={CONSULTATION_SUGGESTION}
+        />
+
+        {state.form.suggestion === "R" && (
+          <div id="referred_to">
+            <FieldLabel>Referred To Facility</FieldLabel>
+            <FacilitySelect
+              name="referred_to"
+              searchAll={true}
+              selected={selectedFacility}
+              setSelected={setFacility}
+              errors={state.errors.referred_to}
+            />
+          </div>
+        )}
+
+        {state.form.suggestion === "A" && (
+          <>
+            <DateFormField
               required
-              placeholder="Enter details of other symptoms here"
+              {...field("admission_date")}
+              label="Admission date"
             />
-          )}
 
-          {hasSymptoms && (
-            // <DateFormField
-            //   id="symptoms_onset_date"
-            //   name="symptoms_onset_date"
-            //   required
-            //   label="Date of onset of the symptoms"
-            //   value={state.form?.symptoms_onset_date}
-            //   error={state.errors.symptoms_onset_date}
-            //   onChange={handleFormFieldChange}
-            // />
-            <DateInputField
-              id="symptoms_onset_date"
-              label="Date of onset of the symptoms *"
-              value={state.form?.symptoms_onset_date}
-              onChange={(date) => handleDateChange(date, "symptoms_onset_date")}
-              disableFuture={true}
-              errors={state.errors.symptoms_onset_date}
-              InputLabelProps={{ shrink: true }}
-            />
-          )}
-
-          <TextAreaFormField
-            {...field("history_of_present_illness")}
-            label="History of present illness"
-            placeholder="Optional information"
-          />
-
-          <TextAreaFormField
-            {...field("examination_details")}
-            label="Examination details and Clinical conditions"
-            placeholder="Optional information"
-          />
-
-          <TextAreaFormField
-            {...field("prescribed_medication")}
-            label="Treatment Plan / Treatment Summary"
-            placeholder="Optional information"
-          />
-
-          <PatientCategorySelect
-            required
-            label="Category"
-            {...field("category")}
-          />
-
-          <SelectFormField
-            required
-            label="Decision after consultation"
-            {...selectField("suggestion")}
-            options={CONSULTATION_SUGGESTION}
-          />
-
-          {state.form.suggestion === "R" && (
-            <div id="referred_to">
-              <FieldLabel>Referred To Facility</FieldLabel>
-              <FacilitySelect
-                name="referred_to"
-                searchAll={true}
-                selected={selectedFacility}
-                setSelected={setFacility}
-                errors={state.errors.referred_to}
-              />
-            </div>
-          )}
-
-          {state.form.suggestion === "A" && (
-            <>
-              <div className="flex">
-                <div className="flex-1">
-                  <DateInputField
-                    id="admission_date"
-                    label="Admission Date *"
-                    margin="dense"
-                    value={state.form.admission_date}
-                    disableFuture={true}
-                    onChange={(date) =>
-                      handleDateChange(date, "admission_date")
-                    }
-                    errors={state.errors.admission_date}
-                  />
-                </div>
+            {!isUpdate && (
+              <div>
+                <FieldLabel>Bed</FieldLabel>
+                <BedSelect
+                  name="bed"
+                  setSelected={setBed}
+                  selected={bed}
+                  errors=""
+                  multiple={false}
+                  margin="dense"
+                  unoccupiedOnly={true}
+                  facility={facilityId}
+                />
               </div>
+            )}
+          </>
+        )}
 
-              {!isUpdate && (
-                <div>
-                  <FieldLabel>Bed</FieldLabel>
-                  <BedSelect
-                    name="bed"
-                    setSelected={setBed}
-                    selected={bed}
-                    errors=""
-                    multiple={false}
-                    margin="dense"
-                    unoccupiedOnly={true}
-                    facility={facilityId}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
+        <TextAreaFormField
+          label="General Instructions (Advice)"
+          required
+          placeholder="Consultation Notes"
+          {...field("consultation_notes")}
+        />
 
-        <div className="mt-4">
-          <TextAreaFormField
-            label="General Instructions (Advice)"
-            required
-            placeholder="Consultation Notes"
-            {...field("consultation_notes")}
-          />
-        </div>
-        <div id="investigation" className="mt-4">
+        <div id="investigation">
           <FieldLabel>Investigation Suggestions</FieldLabel>
           <InvestigationBuilder
             investigations={InvestigationAdvice}
             setInvestigations={setInvestigationAdvice}
           />
-          <br />
           <ErrorHelperText error={state.errors.investigation} />
         </div>
-        <div id="procedures" className="mt-4">
+
+        <div id="procedures">
           <FieldLabel>Procedures</FieldLabel>
           <ProcedureBuilder
             procedures={procedures}
             setProcedures={setProcedures}
           />
-          <br />
           <ErrorHelperText error={state.errors.procedures} />
         </div>
-        <div id="discharge_advice" className="mt-4">
+
+        <div id="discharge_advice">
           <FieldLabel>Prescription Medication</FieldLabel>
           <PrescriptionBuilder
             prescriptions={dischargeAdvice}
             setPrescriptions={setDischargeAdvice}
           />
-          <br />
           <ErrorHelperText error={state.errors.discharge_advice} />
         </div>
-        <div id="discharge_advice" className="mt-4">
+
+        <div id="discharge_advice">
           <FieldLabel>PRN Prescription</FieldLabel>
           <PRNPrescriptionBuilder
             prescriptions={PRNAdvice}
             setPrescriptions={setPRNAdvice}
           />
-          <br />
           <ErrorHelperText error={state.errors.prn_prescription} />
         </div>
+
         <TextFormField {...field("ip_no")} label="IP Number" required />
+
         <TextAreaFormField
           {...field("verified_by")}
           label="Verified by"
@@ -838,90 +813,81 @@ export const ConsultationForm = (props: any) => {
             <ErrorHelperText error={state.errors.is_kasp} />
           </div>
         )}
+
         {/* Telemedicine Fields */}
-        <div className="mt-4">
-          <div id="is_telemedicine">
-            <FieldLabel>Telemedicine</FieldLabel>
-            <RadioGroup
-              aria-label="covid"
-              name="is_telemedicine"
-              value={state.form.is_telemedicine}
-              onChange={handleTelemedicineChange}
-              style={{ padding: "0px 5px" }}
-            >
-              <Box display="flex" flexDirection="row">
-                <FormControlLabel
-                  value="true"
-                  control={<Radio />}
-                  label="Yes"
-                />
-                <FormControlLabel
-                  value="false"
-                  control={<Radio />}
-                  label="No"
-                />
-              </Box>
-            </RadioGroup>
-            <ErrorHelperText error={state.errors.is_telemedicine} />
-          </div>
+        <div id="is_telemedicine">
+          <FieldLabel>Telemedicine</FieldLabel>
+          <RadioGroup
+            aria-label="covid"
+            name="is_telemedicine"
+            value={state.form.is_telemedicine}
+            onChange={handleTelemedicineChange}
+            style={{ padding: "0px 5px" }}
+          >
+            <Box display="flex" flexDirection="row">
+              <FormControlLabel value="true" control={<Radio />} label="Yes" />
+              <FormControlLabel value="false" control={<Radio />} label="No" />
+            </Box>
+          </RadioGroup>
+          <ErrorHelperText error={state.errors.is_telemedicine} />
+        </div>
 
-          {JSON.parse(state.form.is_telemedicine) && (
-            <div className="flex flex-col md:flex-row justify-between gap-3">
-              <SelectFormField
-                {...selectField("review_interval")}
-                label="Review After"
-                options={REVIEW_AT_CHOICES}
-              />
+        {JSON.parse(state.form.is_telemedicine) && (
+          <div className="flex flex-col md:flex-row justify-between gap-3">
+            <SelectFormField
+              {...selectField("review_interval")}
+              label="Review After"
+              options={REVIEW_AT_CHOICES}
+            />
 
-              <div className="flex-1">
-                <OnlineUsersSelect
-                  userId={state.form.assigned_to}
-                  selectedUser={state.form.assigned_to_object}
-                  onSelect={handleDoctorSelect}
-                  user_type="Doctor"
-                  outline
-                />
-              </div>
-
-              <SelectFormField
-                className="flex-1"
-                {...field("action")}
-                label="Action"
-                required
-                options={TELEMEDICINE_ACTIONS}
-                optionLabel={(option) => option.desc}
-                optionValue={(option) => option.text}
+            <div className="flex-1">
+              <OnlineUsersSelect
+                userId={state.form.assigned_to}
+                selectedUser={state.form.assigned_to_object}
+                onSelect={handleDoctorSelect}
+                user_type="Doctor"
+                outline
               />
             </div>
-          )}
-        </div>
 
-        <div className="mt-2">
-          <TextAreaFormField
-            label="Special Instructions"
-            placeholder="Optional information"
-            {...field("special_instruction")}
-          />
-        </div>
+            <SelectFormField
+              className="flex-1"
+              {...field("action")}
+              label="Action"
+              required
+              options={TELEMEDICINE_ACTIONS}
+              optionLabel={(option) => option.desc}
+              optionValue={(option) => option.text}
+            />
+          </div>
+        )}
 
-        <div className="flex flex-col md:flex-row gap-3">
-          <TextFormField
-            {...field("weight")}
-            label="Weight (kg)"
-            placeholder="kg"
-          />
-          <TextFormField
-            {...field("height")}
-            label="Height (cm)"
-            placeholder="cm"
-          />
-        </div>
-        <div id="body_surface" className="flex-1">
-          Body Surface area :{" "}
-          {Math.sqrt(
-            (Number(state.form.weight) * Number(state.form.height)) / 3600
-          ).toFixed(2)}{" "}
-          m<sup>2</sup>
+        <TextAreaFormField
+          label="Special Instructions"
+          placeholder="Optional information"
+          {...field("special_instruction")}
+        />
+
+        <div>
+          <div className="flex flex-col md:flex-row gap-3">
+            <TextFormField
+              {...field("weight")}
+              label="Weight (kg)"
+              placeholder="kg"
+            />
+            <TextFormField
+              {...field("height")}
+              label="Height (cm)"
+              placeholder="cm"
+            />
+          </div>
+          <div id="body_surface" className="flex-1">
+            Body Surface area :{" "}
+            {Math.sqrt(
+              (Number(state.form.weight) * Number(state.form.height)) / 3600
+            ).toFixed(2)}{" "}
+            m<sup>2</sup>
+          </div>
         </div>
         {/* End of Telemedicine fields */}
 
