@@ -12,7 +12,7 @@ type Props = FormFieldBaseProps<Date> & {
   position?: DatePickerPosition;
 };
 
-const DateFormField = ({ position = "CENTER", ...props }: Props) => {
+const DateFormField = ({ position = "RIGHT", ...props }: Props) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
   const name = props.name;
