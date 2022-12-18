@@ -164,7 +164,7 @@ interface MultiSelectOptionChipProps {
   onRemove?: () => void;
 }
 
-export function MultiSelectOptionChip(props: MultiSelectOptionChipProps) {
+export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
   return (
     <span className="flex gap-2 items-center bg-secondary-100 border-secondary-200 text-secondary-600 rounded-full text-xs px-3">
       <p className="py-1.5">{props.label}</p>
@@ -178,4 +178,4 @@ export function MultiSelectOptionChip(props: MultiSelectOptionChipProps) {
       )}
     </span>
   );
-}
+};

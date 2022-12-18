@@ -57,7 +57,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import SelectFormField from "../Form/FormFields/SelectFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisAutocompleteFormField";
 
