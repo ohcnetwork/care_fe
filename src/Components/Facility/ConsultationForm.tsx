@@ -57,7 +57,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import SelectMenuFormField from "../Form/FormFields/SelectMenuFormField";
+import SelectFormField from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisAutocompleteFormField";
 
@@ -727,7 +727,7 @@ export const ConsultationForm = (props: any) => {
             {...field("category")}
           />
 
-          <SelectMenuFormField
+          <SelectFormField
             required
             label="Decision after consultation"
             {...selectField("suggestion")}
@@ -903,7 +903,7 @@ export const ConsultationForm = (props: any) => {
 
           {JSON.parse(state.form.is_telemedicine) && (
             <div className="flex flex-col md:flex-row justify-between gap-3">
-              <SelectMenuFormField
+              <SelectFormField
                 {...selectField("review_interval")}
                 label="Review After"
                 options={REVIEW_AT_CHOICES}
@@ -919,7 +919,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <SelectMenuFormField
+              <SelectFormField
                 className="flex-1"
                 {...field("action")}
                 label="Action"

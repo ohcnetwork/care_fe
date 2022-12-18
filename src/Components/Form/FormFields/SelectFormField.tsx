@@ -17,7 +17,7 @@ type Props<T, V = T> = FormFieldBaseProps<V> & {
   optionValue?: OptionCallback<T, V>;
 };
 
-const SelectMenuFormField = <T, V>(props: Props<T, V>) => {
+const SelectFormField = <T, V>(props: Props<T, V>) => {
   const { name } = props;
   const handleChange = resolveFormFieldChangeEventHandler(props);
 
@@ -41,4 +41,4 @@ const SelectMenuFormField = <T, V>(props: Props<T, V>) => {
   );
 };
 
-export default SelectMenuFormField;
+export default SelectFormField;

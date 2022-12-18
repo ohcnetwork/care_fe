@@ -1,5 +1,5 @@
 import { PatientCategoryID, PATIENT_CATEGORIES } from "../../Common/constants";
-import SelectMenuFormField from "../Form/FormFields/SelectMenuFormField";
+import SelectFormField from "../Form/FormFields/SelectFormField";
 import { FormFieldBaseProps } from "../Form/FormFields/Utils";
 
 /**
@@ -10,7 +10,7 @@ export default function PatientCategorySelect(
   props: FormFieldBaseProps<PatientCategoryID>
 ) {
   return (
-    <SelectMenuFormField
+    <SelectFormField
       {...props}
       required
       options={PATIENT_CATEGORIES}
