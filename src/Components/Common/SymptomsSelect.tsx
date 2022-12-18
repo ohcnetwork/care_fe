@@ -1,3 +1,4 @@
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import { SYMPTOM_CHOICES } from "../../Common/constants";
 import FormField from "../Form/FormFields/FormField";
 import {
@@ -5,6 +6,8 @@ import {
   resolveFormFieldChangeEventHandler,
 } from "../Form/FormFields/Utils";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
+
+const ASYMPTOMATIC_ID = 1;
 
 /**
  * A `FormField` component to select symptoms.
@@ -24,7 +27,7 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
 
     const initialValue = props.value || [];
 
-    if (initialValue.includes(1) && value.length > 1) {
+    if (initialValue.includes(ASYMPTOMATIC_ID) && value.length > 1) {
       // If asym. already selected, and new selections have more than one value
       const asymptomaticIndex = value.indexOf(1);
       if (asymptomaticIndex > -1) {
@@ -34,12 +37,35 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
       }
     }
 
-    if (!initialValue.includes(1) && value.includes(1)) {
+    if (!initialValue.includes(ASYMPTOMATIC_ID) && value.includes(1)) {
       // If new selections have asym., unselect everything else
-      return handleChange({ name, value: [1] });
+      return handleChange({ name, value: [ASYMPTOMATIC_ID] });
     }
 
     handleChange({ name, value });
+  };
+
+  const getDescription = ({ id }: { id: number }) => {
+    const value = props.value || [];
+    if (!value.length) return;
+
+    if (value.includes(ASYMPTOMATIC_ID) && id !== ASYMPTOMATIC_ID)
+      return (
+        <div className="items-center">
+          <CareIcon className="care-l-exclamation-triangle mr-2" />
+          <span>
+            also unselects <b className="font-medium">Asymptomatic</b>
+          </span>
+        </div>
+      );
+
+    if (!value.includes(ASYMPTOMATIC_ID) && id === ASYMPTOMATIC_ID)
+      return (
+        <span className="items-center">
+          <CareIcon className="care-l-exclamation-triangle mr-2" />
+          {`also unselects the other ${value.length} option(s)`}
+        </span>
+      );
   };
 
   return (
@@ -51,6 +77,7 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
         placeholder="Select symptoms"
         optionLabel={(option) => option.text}
         optionValue={(option) => option.id}
+        optionDescription={getDescription}
         value={props.value}
         onChange={updateSelection}
       />
