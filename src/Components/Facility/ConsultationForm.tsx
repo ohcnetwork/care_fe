@@ -638,20 +638,22 @@ export const ConsultationForm = (props: any) => {
       >
         <SymptomsSelect required label="Symptoms" {...field("symptoms")} />
 
-        <TextAreaFormField
-          {...field("other_symptoms")}
-          label="Other symptom details"
-          required={isOtherSymptomsSelected}
-          disabled={!isOtherSymptomsSelected}
-          placeholder="Enter details of other symptoms here"
-        />
+        {isOtherSymptomsSelected && (
+          <TextAreaFormField
+            {...field("other_symptoms")}
+            label="Other symptom details"
+            required
+            placeholder="Enter details of other symptoms here"
+          />
+        )}
 
-        <DateFormField
-          {...field("symptoms_onset_date")}
-          required={hasSymptoms}
-          disabled={!hasSymptoms}
-          label="Date of onset of the symptoms"
-        />
+        {hasSymptoms && (
+          <DateFormField
+            {...field("symptoms_onset_date")}
+            required
+            label="Date of onset of the symptoms"
+          />
+        )}
 
         <TextAreaFormField
           {...field("history_of_present_illness")}
