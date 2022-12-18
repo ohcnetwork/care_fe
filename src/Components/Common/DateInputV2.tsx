@@ -179,19 +179,20 @@ const DateInputV2: React.FC<Props> = ({
   };
 
   return (
-    <div className={disabled ? "pointer-events-none opacity-0.8" : ""}>
+    <div>
       <div className="container mx-auto text-black">
         <Popover className="relative">
-          <Popover.Button className="w-full">
+          <Popover.Button disabled={disabled} className="w-full">
             <input type="hidden" name="date" />
             <input
               type="text"
               readOnly
-              className={`shadow-none text-sm block py-3 px-4 w-full rounded bg-white disabled:bg-secondary-100 text-secondary-900 disabled:text-secondary-400 placeholder:text-secondary-400 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 transition-all duration-200 ease-in-out ${className}`}
+              disabled={disabled}
+              className={`shadow-none cursor-pointer disabled:cursor-not-allowed text-sm block py-3 px-4 w-full rounded bg-white disabled:bg-secondary-100 text-secondary-900 disabled:text-secondary-400 placeholder:text-secondary-400 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 transition-all duration-200 ease-in-out ${className}`}
               placeholder={placeholder ? placeholder : "Select date"}
               value={value && format(value, "yyyy-MM-dd")}
             />
-            <div className="cursor-pointer absolute top-1/2 right-0 p-2 -translate-y-1/2">
+            <div className="absolute top-1/2 right-0 p-2 -translate-y-1/2">
               <CareIcon className="care-l-calendar-alt text-lg text-secondary-500" />
             </div>
           </Popover.Button>
