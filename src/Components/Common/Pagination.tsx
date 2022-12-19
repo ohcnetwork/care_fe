@@ -125,8 +125,8 @@ const Pagination = (props: PaginationProps) => {
     <div className="mx-auto my-4">
       {/* Mobile view */}
       <div className="flex-1 flex justify-between sm:hidden">
-        <NavButtons.First />
         <NavButtons.Previous />
+        <NavButtons.Next />
       </div>
 
       {/* Desktop view */}
