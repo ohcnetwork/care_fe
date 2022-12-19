@@ -1,11 +1,9 @@
 import {
-  Button,
   Card,
   CardContent,
   CircularProgress,
   InputLabel,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
 import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
@@ -40,6 +38,8 @@ import {
 import { FacilityModel } from "../Facility/models";
 
 import { classNames, goBack } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -941,27 +941,17 @@ export const UserAdd = (props: UserProps) => {
               )}
             </div>
             <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-              <Button
-                color="default"
-                variant="contained"
-                onClick={() => goBack()}
-              >
+              <ButtonV2 variant="secondary" onClick={() => goBack()}>
                 Cancel
-              </Button>
-              <Button
-                color="primary"
-                fullWidth
+              </ButtonV2>
+              <ButtonV2
                 className="w-full md:w-auto"
-                variant="contained"
                 type="submit"
-                style={{ marginLeft: "auto" }}
-                onClick={(e) => handleSubmit(e)}
-                startIcon={
-                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                }
+                onClick={handleSubmit}
               >
-                {buttonText}
-              </Button>
+                <CareIcon className="care-l-check text-lg" />
+                <span>{buttonText}</span>
+              </ButtonV2>
             </div>
           </form>
         </CardContent>

@@ -594,7 +594,7 @@ export const ConsultationDetails = (props: any) => {
                       Verified By:{" "}
                     </span>
                     {consultationData.verified_by}
-                    <i className="fas fa-check-circle fill-current text-lg text-green-500 ml-2"></i>
+                    <i className="fas fa-check fill-current text-lg text-green-500 ml-2"></i>
                   </div>
                 )}
               </div>

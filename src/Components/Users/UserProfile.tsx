@@ -1,7 +1,5 @@
 import loadable from "@loadable/component";
 import React, { useState, useCallback, useReducer } from "react";
-import { Button } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,6 +17,8 @@ import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -564,19 +564,10 @@ export default function UserProfile() {
                       </div>
                     </div>
                     <div className="px-4 pb-3 bg-gray-50 text-right sm:px-6">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        style={{ marginLeft: "auto" }}
-                        startIcon={
-                          <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                        }
-                        onClick={(e) => handleSubmit(e)}
-                      >
-                        {" "}
-                        UPDATE{" "}
-                      </Button>
+                      <ButtonV2 type="submit" onClick={handleSubmit}>
+                        <CareIcon className="care-l-check text-lg" />
+                        <span>Update</span>
+                      </ButtonV2>
                     </div>
                   </div>
                 </form>
@@ -634,19 +625,10 @@ export default function UserProfile() {
                       </div>
                     </div>
                     <div className="px-4 pb-3 bg-gray-50 text-right sm:px-6">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        style={{ marginLeft: "auto" }}
-                        startIcon={
-                          <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                        }
-                        onClick={(e) => changePassword(e)}
-                      >
-                        {" "}
-                        CHANGE PASSWORD{" "}
-                      </Button>
+                      <ButtonV2 type="submit" onClick={changePassword}>
+                        <CareIcon className="care-l-check text-lg" />
+                        <span>Change Password</span>
+                      </ButtonV2>
                     </div>
                   </div>
                 </form>

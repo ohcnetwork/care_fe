@@ -1,12 +1,10 @@
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   InputLabel,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useReducer, useState } from "react";
@@ -16,6 +14,8 @@ import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, SelectField } from "../Common/HelperInputFields";
 import { DupPatientModel } from "./models";
 import { OptionsType } from "../../Common/constants";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   patientList: Array<DupPatientModel>;
@@ -183,22 +183,17 @@ const TransferPatientDialog = (props: Props) => {
         </div>
       </DialogContent>
       <DialogActions className="justify-between flex flex-col md:flex-row">
-        <Button
+        <ButtonV2
           disabled={isLoading}
-          color="secondary"
-          onClick={() => handleCancel()}
+          variant="secondary"
+          onClick={handleCancel}
         >
           Cancel
-        </Button>
-        <Button
-          disabled={isLoading}
-          onClick={handleSubmit}
-          color="primary"
-          variant="contained"
-          startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-        >
-          Transfer Suspect / Patient
-        </Button>
+        </ButtonV2>
+        <ButtonV2 disabled={isLoading} onClick={handleSubmit} variant="primary">
+          <CareIcon className="care-l-check text-lg" />
+          <span>Transfer Suspect / Patient</span>
+        </ButtonV2>
       </DialogActions>
     </Dialog>
   );

@@ -9,7 +9,6 @@ import {
   Box,
   FormControlLabel,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -23,6 +22,8 @@ import {
 import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { goBack } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2.js";
+import CareIcon from "../../CAREUI/icons/CareIcon.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -334,17 +335,14 @@ export default function UpdateResult(props: any) {
             >
               Cancel
             </Button>
-            <Button
-              color="primary"
-              variant="contained"
+            <ButtonV2
               type="submit"
-              startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
               onClick={(e) => handleSubmit(e)}
-              data-testid="submit-button"
               className="w-full md:w-auto"
             >
-              Submit
-            </Button>
+              <CareIcon className="care-l-check text-lg" />
+              <span>Submit</span>
+            </ButtonV2>
           </div>
         </form>
       </CardContent>

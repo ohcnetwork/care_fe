@@ -1,5 +1,4 @@
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -10,8 +9,9 @@ import {
   RadioGroup,
   InputLabel,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useState } from "react";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
 import { DupPatientModel } from "./models";
 
 interface Props {
@@ -112,22 +112,13 @@ const DuplicatePatientDialog = (props: Props) => {
         </div>
       </DialogContent>
       <DialogActions className="justify-between flex flex-col md:flex-row md:px-6">
-        <Button
-          className="capitalize"
-          color="secondary"
-          onClick={() => handleCancel()}
-        >
+        <ButtonV2 variant="secondary" onClick={handleCancel}>
           Cancel {text}
-        </Button>
-        <Button
-          onClick={() => handleOk(action)}
-          color="primary"
-          variant="contained"
-          disabled={!action}
-          startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-        >
-          Continue
-        </Button>
+        </ButtonV2>
+        <ButtonV2 onClick={() => handleOk(action)} disabled={!action}>
+          <CareIcon className="care-l-check text-lg" />
+          <span>Continue</span>
+        </ButtonV2>
       </DialogActions>
     </Dialog>
   );

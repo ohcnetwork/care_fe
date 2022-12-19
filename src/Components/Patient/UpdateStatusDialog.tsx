@@ -1,12 +1,10 @@
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
 } from "@material-ui/core";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
@@ -20,6 +18,8 @@ import * as Notification from "../../Utils/Notifications.js";
 import { createUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   sample: SampleTestModel;
@@ -237,18 +237,14 @@ const UpdateStatusDialog = (props: Props) => {
                 )}
               </div>
               <div className="flex justify-end col-start-2 col-span-2">
-                <Button
-                  color="primary"
-                  variant="contained"
+                <ButtonV2
                   type="submit"
-                  startIcon={
-                    <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                  }
                   onClick={handleUpload}
                   disabled={uploadDone}
                 >
-                  Upload
-                </Button>
+                  <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
+                  <span>Upload</span>
+                </ButtonV2>
               </div>
             </>
           )}
@@ -265,16 +261,13 @@ const UpdateStatusDialog = (props: Props) => {
         </div>
       </DialogContent>
       <DialogActions style={{ justifyContent: "space-between" }}>
-        <Button onClick={cancelClicked}>Cancel</Button>
-        <Button
-          onClick={okClicked}
-          color="primary"
-          variant="contained"
-          disabled={state.form.disabled}
-          startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-        >
+        <ButtonV2 variant="secondary" onClick={cancelClicked}>
+          Cancel
+        </ButtonV2>
+        <ButtonV2 onClick={okClicked} disabled={state.form.disabled}>
+          <CareIcon className="care-l-check text-lg" />
           Update Status
-        </Button>
+        </ButtonV2>
       </DialogActions>
     </Dialog>
   );

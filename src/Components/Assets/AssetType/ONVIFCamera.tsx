@@ -176,7 +176,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                   className="w-full md:w-auto ml-auto"
                   onClick={handleSubmit}
                 >
-                  <CareIcon className="care-l-check-circle text-lg" />
+                  <CareIcon className="care-l-check text-lg" />
                   Set Configuration
                 </ButtonV2>
               </div>

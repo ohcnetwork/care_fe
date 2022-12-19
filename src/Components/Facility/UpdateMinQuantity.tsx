@@ -1,6 +1,5 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -12,6 +11,8 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
 import { goBack } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -166,26 +167,21 @@ export const UpdateMinQuantity = (props: any) => {
                 </div>
               </div>
               <div className="sm:flex sm:justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
+                <ButtonV2
+                  variant="secondary"
                   className="w-full sm:w-fit mt-2"
                   onClick={() => goBack()}
                 >
                   Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
+                </ButtonV2>
+                <ButtonV2
                   className="w-full sm:w-fit mt-2"
                   type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-                  onClick={(e) => handleSubmit(e)}
+                  onClick={handleSubmit}
                 >
-                  SET{" "}
-                </Button>
+                  <CareIcon className="care-l-check text-lg" />
+                  <span>Set</span>
+                </ButtonV2>
               </div>
             </CardContent>
           </form>

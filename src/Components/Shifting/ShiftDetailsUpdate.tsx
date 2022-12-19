@@ -1,13 +1,10 @@
 import { useReducer, useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
-
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   MultilineInputField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate, useQueryParams } from "raviger";
@@ -32,9 +29,10 @@ import {
   RadioGroup,
   Box,
   FormControlLabel,
-  Button,
 } from "@material-ui/core";
 import { goBack } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -452,27 +450,21 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
+                <ButtonV2
+                  variant="secondary"
                   className="w-full md:w-auto"
                   onClick={() => goBack()}
                 >
                   Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
+                </ButtonV2>
+                <ButtonV2
                   type="submit"
                   className="w-full md:w-auto"
-                  style={{ marginLeft: "auto" }}
                   onClick={handleSubmit}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
                 >
-                  Submit
-                </Button>
+                  <CareIcon className="care-l-check text-lg" />
+                  <span>Submit</span>
+                </ButtonV2>
               </div>
             </div>
           </CardContent>

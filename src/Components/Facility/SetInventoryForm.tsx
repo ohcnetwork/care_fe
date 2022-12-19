@@ -1,5 +1,4 @@
 import { Card, CardContent, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
@@ -9,6 +8,8 @@ import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
 import { goBack } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -205,15 +206,14 @@ export const SetInventoryForm = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button
-                    color="primary"
+                  <ButtonV2
                     type="submit"
-                    style={{ marginLeft: "auto" }}
-                    className="w-full sm:w-fit rounded-md p-2 px-6 mt-2 bg-green-500 hover:bg-green-700 text-white"
-                    onClick={(e) => handleSubmit(e)}
+                    className="w-full sm:w-fit"
+                    onClick={handleSubmit}
                   >
-                    <CheckCircleOutlineIcon></CheckCircleOutlineIcon> SET
-                  </button>
+                    <CareIcon className="care-l-check text-lg" />
+                    <span>Set</span>
+                  </ButtonV2>
                 </div>
               </div>
             </CardContent>

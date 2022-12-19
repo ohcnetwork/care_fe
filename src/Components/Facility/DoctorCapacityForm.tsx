@@ -1,5 +1,4 @@
 import { Button, Card, CardContent, Grid, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import React, { useCallback, useEffect, useReducer, useState } from "react";
@@ -20,6 +19,8 @@ import {
 } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
 import { goBack } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../../Components/Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -155,9 +156,9 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   }, [doctorTypes]);
 
   const validateData = () => {
-    let errors = { ...initForm };
+    const errors = { ...initForm };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       if (!state.form[field]) {
         errors[field] = "Field is required";
         invalidForm = true;
@@ -172,12 +173,12 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any, btnType: string = "Save") => {
+  const handleSubmit = async (e: any, btnType = "Save") => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
@@ -293,33 +294,25 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                   className="flex flex-row w-full sm:w-auto gap-4 flex-wrap"
                 >
                   {!id && !isLastOptionType && (
-                    <Button
+                    <ButtonV2
                       id="doctor-save-and-exit"
-                      color="primary"
                       className="w-full sm:w-auto"
-                      variant="contained"
                       type="submit"
-                      startIcon={
-                        <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                      }
                       onClick={(e) => handleSubmit(e, "Save and Exit")}
                     >
-                      Save Doctor Capacity
-                    </Button>
+                      <CareIcon className="care-l-check text-lg" />
+                      <span>Save Doctor Capacity</span>
+                    </ButtonV2>
                   )}
-                  <Button
+                  <ButtonV2
                     id="doctor-save"
-                    color="primary"
                     className="w-full sm:w-auto"
-                    variant="contained"
                     type="submit"
-                    startIcon={
-                      <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                    }
                     onClick={(e) => handleSubmit(e)}
                   >
-                    {buttonText}
-                  </Button>
+                    <CareIcon className="care-l-check text-lg" />
+                    <span>{buttonText}</span>
+                  </ButtonV2>
                 </Grid>
               </Grid>
             </CardContent>

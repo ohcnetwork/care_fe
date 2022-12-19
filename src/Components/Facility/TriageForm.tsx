@@ -1,6 +1,5 @@
 import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -15,6 +14,8 @@ import { TextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
 import { goBack } from "../../Utils/utils";
 import DateInputV2 from "../Common/DateInputV2";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -334,21 +335,21 @@ export const TriageForm = (props: triageFormProps) => {
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <button
-                  className="btn btn-default bg-gray-300 hover:bg-gray-400 btn-large mr-4 w-full md:w-auto"
-                  type="button"
+                <ButtonV2
+                  variant="secondary"
+                  className="w-full md:w-auto"
                   onClick={() => goBack()}
                 >
                   Cancel
-                </button>
-                <button
-                  className="btn btn-large btn-primary mr-4 w-full md:w-auto flex gap-2"
-                  onClick={(e) => handleSubmit(e)}
+                </ButtonV2>
+                <ButtonV2
+                  className="w-full md:w-auto"
+                  onClick={handleSubmit}
                   data-testid="add-patient-button"
                 >
-                  <CheckCircleOutlineIcon />
-                  {buttonText}
-                </button>
+                  <CareIcon className="care-l-check text-lg" />
+                  <span>{buttonText}</span>
+                </ButtonV2>
               </div>
             </CardContent>
           </form>
