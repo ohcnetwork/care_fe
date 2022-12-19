@@ -72,7 +72,11 @@ const AssetConfigure = (props: AssetConfigureProps) => {
               [assetId]: { name: asset?.name },
             }}
           />
-          <ONVIFCamera asset={asset} assetId={assetId} />
+          <ONVIFCamera
+            asset={asset}
+            assetId={assetId}
+            facilityId={facilityId}
+          />
         </>
       )}
     </div>

@@ -681,7 +681,10 @@ export const ConsultationDetails = (props: any) => {
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
               {!consultationData.discharge_date && (
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                  <PatientVitalsCard patient={patientData} />
+                  <PatientVitalsCard
+                    patient={patientData}
+                    facilityId={facilityId}
+                  />
                 </section>
               )}
               <div className="grid lg:grid-cols-2 gap-4 mt-4">

@@ -1,12 +1,13 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { listAssetBeds } from "../../Redux/actions";
+import { listAssetBeds, getPermittedFacility } from "../../Redux/actions";
 import { AssetData } from "../Assets/AssetTypes";
 import ToolTip from "../Common/utils/Tooltip";
 import { PatientModel } from "./models";
 import Waveform, { WaveformType } from "./Waveform";
 
 export interface IPatientVitalsCardProps {
+  facilityId?: string;
   patient?: PatientModel;
   socketUrl?: string;
 }
@@ -33,22 +34,35 @@ const getVital = (
 };
 
 export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
-  const { patient, socketUrl } = props;
+  const { patient, socketUrl, facilityId } = props;
 
   const wsClient = useRef<WebSocket>();
 
   const [waveforms, setWaveForms] = useState<WaveformType[] | null>(null);
 
   const dispatch: any = useDispatch();
-  const [hl7Asset, setHl7Asset] = React.useState<AssetData>();
+  const [middlewareHostname, setMiddlewareHostname] = useState("");
+  const [wsUrl, setWsUrl] = useState(socketUrl);
   const [patientObservations, setPatientObservations] = React.useState<any>();
   const [stats, setStats] = React.useState(false);
 
-  const fetchData = async () => {
-    if (patient?.last_consultation?.current_bed?.bed_object?.id) {
+  useEffect(() => {
+    const fetchFacility = async () => {
+      const res = await dispatch(getPermittedFacility(facilityId || ""));
+
+      if (res.status === 200 && res.data) {
+        setMiddlewareHostname(res.data.middleware_address);
+      }
+    };
+
+    if (facilityId) fetchFacility();
+  }, [dispatch, facilityId]);
+
+  useEffect(() => {
+    const fetchAssetData = async () => {
       let bedAssets = await dispatch(
         listAssetBeds({
-          bed: patient.last_consultation?.current_bed?.bed_object?.id,
+          bed: patient?.last_consultation?.current_bed?.bed_object?.id,
         })
       );
       bedAssets = {
@@ -62,15 +76,24 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
           ),
         },
       };
-      if (bedAssets.data.results.length > 0) {
-        setHl7Asset(bedAssets.data.results[0].asset_object);
-      }
-    }
-  };
 
-  useEffect(() => {
-    fetchData();
-  }, [patient]);
+      if (bedAssets.data.results.length > 0) {
+        const asset: AssetData = bedAssets.data.results[0].asset_object;
+        if (asset?.meta?.local_ip_address) {
+          setWsUrl(
+            (prev) =>
+              prev ||
+              `wss://${
+                middlewareHostname || asset?.meta?.middleware_hostname
+              }/observations/${asset?.meta?.local_ip_address}`
+          );
+        }
+      }
+    };
+
+    if (patient?.last_consultation?.current_bed?.bed_object?.id)
+      fetchAssetData();
+  });
 
   const connectWs = (url: string) => {
     wsClient.current = new WebSocket(url);
@@ -93,21 +116,12 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
   };
 
   useEffect(() => {
-    const url =
-      socketUrl ||
-      (hl7Asset?.meta?.local_ip_address &&
-        `wss://${hl7Asset?.meta?.middleware_hostname}/observations/${hl7Asset?.meta?.local_ip_address}`);
-
-    if (url) connectWs(url);
+    if (wsUrl) connectWs(wsUrl);
 
     return () => {
       wsClient.current?.close();
     };
-  }, [
-    socketUrl,
-    hl7Asset?.meta?.local_ip_address,
-    hl7Asset?.meta?.middleware_hostname,
-  ]);
+  }, [wsUrl]);
 
   useEffect(() => {
     return () => {
