@@ -36,7 +36,7 @@ export default function HeadedTabs(props: headedTabsProps) {
       <div className="hidden sm:block">
         <div className="border-b border-gray-200">
           <nav
-            className="-mb-px flex items-center justify-center cursor-pointer"
+            className="-mb-px flex items-center justify-center"
             aria-label="Tabs"
           >
             {tabs.map((tab) => (
