@@ -225,7 +225,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         border
                         ghost
                       >
-                        <CareIcon className="care-l-wheelchair text-lg" />
+                        <CareIcon className="care-l-user-injured text-lg" />
                         {t("Patients")}
                       </ButtonV2>
                     </div>
