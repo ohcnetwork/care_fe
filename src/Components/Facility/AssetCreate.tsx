@@ -320,7 +320,9 @@ const AssetCreate = (props: AssetProps) => {
         warranty_amc_end_of_validity: moment(
           warranty_amc_end_of_validity
         ).format("YYYY-MM-DD"),
-        last_serviced_on: moment(last_serviced_on).format("YYYY-MM-DD"),
+        last_serviced_on: last_serviced_on
+          ? moment(last_serviced_on).format("YYYY-MM-DD")
+          : last_serviced_on,
         notes: notes,
       };
       if (!assetId) {
@@ -445,6 +447,9 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
   };
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
 
   return (
     <div className="pb-2 relative flex flex-col">
@@ -751,7 +756,7 @@ const AssetCreate = (props: AssetProps) => {
                         }
                       }}
                       position="LEFT"
-                      min={new Date()}
+                      min={yesterday}
                     />
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
