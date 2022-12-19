@@ -30,8 +30,9 @@ describe("Edit Profile Testing", () => {
   });
 
   it("import", () => {
+    cy.wait(100);
     cy.contains("Import/Export").click().wait(100);
-    cy.contains("Import Results").click().wait(100);
+    cy.contains("Import Results").click();
     // TODO: attach file and save
   });
 

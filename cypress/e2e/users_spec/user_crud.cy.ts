@@ -99,12 +99,12 @@ describe("User management", () => {
   it("Next/Previous Page", () => {
     // only works for desktop mode
     cy.get("button")
-      .should("contain", ">")
-      .contains(">")
+      .should("contain", "Next")
+      .contains("Next")
       .click({ force: true });
     cy.get("button")
-      .should("contain", "<")
-      .contains("<")
+      .should("contain", "Previous")
+      .contains("Previous")
       .click({ force: true });
   });
 
