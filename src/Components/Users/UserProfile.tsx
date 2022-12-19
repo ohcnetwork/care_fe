@@ -563,7 +563,7 @@ export default function UserProfile() {
                         </div>
                       </div>
                     </div>
-                    <div className="px-4 pb-3 bg-gray-50 text-right sm:px-6">
+                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
                       <ButtonV2 type="submit" onClick={handleSubmit}>
                         <CareIcon className="care-l-check text-lg" />
                         <span>Update</span>
@@ -624,7 +624,7 @@ export default function UserProfile() {
                         </div>
                       </div>
                     </div>
-                    <div className="px-4 pb-3 bg-gray-50 text-right sm:px-6">
+                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
                       <ButtonV2 type="submit" onClick={changePassword}>
                         <CareIcon className="care-l-check text-lg" />
                         <span>Change Password</span>
