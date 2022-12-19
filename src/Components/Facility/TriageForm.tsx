@@ -347,7 +347,7 @@ export const TriageForm = (props: triageFormProps) => {
                   onClick={handleSubmit}
                   data-testid="add-patient-button"
                 >
-                  <CareIcon className="care-l-check text-lg" />
+                  <CareIcon className="care-l-check-circle text-lg" />
                   <span>{buttonText}</span>
                 </ButtonV2>
               </div>

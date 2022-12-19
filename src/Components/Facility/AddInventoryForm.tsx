@@ -296,7 +296,7 @@ export const AddInventoryForm = (props: any) => {
                   Cancel
                 </ButtonV2>
                 <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
-                  <CareIcon className="care-l-check text-lg" />
+                  <CareIcon className="care-l-check-circle text-lg" />
                   <span>Add/Update Inventory</span>
                 </ButtonV2>
               </div>

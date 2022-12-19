@@ -211,7 +211,7 @@ export const SetInventoryForm = (props: any) => {
                     className="w-full sm:w-fit"
                     onClick={handleSubmit}
                   >
-                    <CareIcon className="care-l-check text-lg" />
+                    <CareIcon className="care-l-check-circle text-lg" />
                     <span>Set</span>
                   </ButtonV2>
                 </div>

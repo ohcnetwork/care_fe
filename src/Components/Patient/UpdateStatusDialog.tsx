@@ -265,7 +265,7 @@ const UpdateStatusDialog = (props: Props) => {
           Cancel
         </ButtonV2>
         <ButtonV2 onClick={okClicked} disabled={state.form.disabled}>
-          <CareIcon className="care-l-check text-lg" />
+          <CareIcon className="care-l-check-circle text-lg" />
           Update Status
         </ButtonV2>
       </DialogActions>

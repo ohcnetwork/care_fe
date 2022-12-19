@@ -949,7 +949,7 @@ export const UserAdd = (props: UserProps) => {
                 type="submit"
                 onClick={handleSubmit}
               >
-                <CareIcon className="care-l-check text-lg" />
+                <CareIcon className="care-l-check-circle text-lg" />
                 <span>{buttonText}</span>
               </ButtonV2>
             </div>

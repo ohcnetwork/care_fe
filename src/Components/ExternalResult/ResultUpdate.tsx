@@ -340,7 +340,7 @@ export default function UpdateResult(props: any) {
               onClick={(e) => handleSubmit(e)}
               className="w-full md:w-auto"
             >
-              <CareIcon className="care-l-check text-lg" />
+              <CareIcon className="care-l-check-circle text-lg" />
               <span>Submit</span>
             </ButtonV2>
           </div>

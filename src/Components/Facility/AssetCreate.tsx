@@ -889,7 +889,7 @@ const AssetCreate = (props: AssetProps) => {
                     type="submit"
                     onClick={(e) => handleSubmit(e, false)}
                   >
-                    <CareIcon className="care-l-check text-lg" />
+                    <CareIcon className="care-l-check-circle text-lg" />
                     <span>{assetId ? "Update" : "Create Asset"}</span>
                   </ButtonV2>
                   {!assetId && (
@@ -899,7 +899,7 @@ const AssetCreate = (props: AssetProps) => {
                       type="submit"
                       onClick={(e) => handleSubmit(e, true)}
                     >
-                      <CareIcon className="care-l-check text-lg" />
+                      <CareIcon className="care-l-check-circle text-lg" />
                       <span>Create & Add More</span>
                     </ButtonV2>
                   )}
@@ -915,7 +915,7 @@ const AssetCreate = (props: AssetProps) => {
                       )
                     }
                   >
-                    <CareIcon className="care-l-check text-lg" />
+                    <CareIcon className="care-l-check-circle text-lg" />
                     <span>Cancel</span>
                   </ButtonV2>
                 </div>

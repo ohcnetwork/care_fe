@@ -224,7 +224,7 @@ export const AddBedForm = (props: BedFormProps) => {
                     Cancel
                   </ButtonV2>
                   <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
-                    <CareIcon className="care-l-check text-lg" />
+                    <CareIcon className="care-l-check-circle text-lg" />
                     {buttonText}
                   </ButtonV2>
                 </div>

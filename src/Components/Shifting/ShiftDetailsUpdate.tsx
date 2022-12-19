@@ -462,7 +462,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   className="w-full md:w-auto"
                   onClick={handleSubmit}
                 >
-                  <CareIcon className="care-l-check text-lg" />
+                  <CareIcon className="care-l-check-circle text-lg" />
                   <span>Submit</span>
                 </ButtonV2>
               </div>

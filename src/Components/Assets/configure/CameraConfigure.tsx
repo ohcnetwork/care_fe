@@ -65,7 +65,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             </div>
             <div className="flex justify-between mt-4">
               <ButtonV2 type="submit">
-                <CareIcon className="care-l-check text-lg" />
+                <CareIcon className="care-l-check-circle text-lg" />
                 <span>Add Preset</span>
               </ButtonV2>
             </div>

@@ -377,7 +377,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                   Cancel
                 </ButtonV2>
                 <ButtonV2 type="submit" onClick={handleSubmit}>
-                  <CareIcon className="care-l-check text-lg" />
+                  <CareIcon className="care-l-check-circle text-lg" />
                   <span>Submit</span>
                 </ButtonV2>
               </div>

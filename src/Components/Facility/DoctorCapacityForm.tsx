@@ -300,7 +300,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                       type="submit"
                       onClick={(e) => handleSubmit(e, "Save and Exit")}
                     >
-                      <CareIcon className="care-l-check text-lg" />
+                      <CareIcon className="care-l-check-circle text-lg" />
                       <span>Save Doctor Capacity</span>
                     </ButtonV2>
                   )}
@@ -310,7 +310,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     type="submit"
                     onClick={(e) => handleSubmit(e)}
                   >
-                    <CareIcon className="care-l-check text-lg" />
+                    <CareIcon className="care-l-check-circle text-lg" />
                     <span>{buttonText}</span>
                   </ButtonV2>
                 </Grid>

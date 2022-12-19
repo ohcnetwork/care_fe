@@ -299,7 +299,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                       type="submit"
                       onClick={(e) => handleSubmit(e, "Save and Exit")}
                     >
-                      <CareIcon className="care-l-check text-lg" />
+                      <CareIcon className="care-l-check-circle text-lg" />
                       <span>Save Bed Capacity</span>
                     </ButtonV2>
                   )}
@@ -309,7 +309,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                     type="submit"
                     onClick={(e) => handleSubmit(e)}
                   >
-                    <CareIcon className="care-l-check text-lg" />
+                    <CareIcon className="care-l-check-circle text-lg" />
                     <span>{buttonText}</span>
                   </ButtonV2>
                 </div>

@@ -191,7 +191,7 @@ const TransferPatientDialog = (props: Props) => {
           Cancel
         </ButtonV2>
         <ButtonV2 disabled={isLoading} onClick={handleSubmit} variant="primary">
-          <CareIcon className="care-l-check text-lg" />
+          <CareIcon className="care-l-check-circle text-lg" />
           <span>Transfer Suspect / Patient</span>
         </ButtonV2>
       </DialogActions>

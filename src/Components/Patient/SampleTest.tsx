@@ -502,7 +502,7 @@ export const SampleTest = (props: any) => {
                   Cancel
                 </ButtonV2>
                 <ButtonV2 type="submit" onClick={handleSubmit}>
-                  <CareIcon className="care-l-check text-lg" />
+                  <CareIcon className="care-l-check-circle text-lg" />
                   <span>{buttonText}</span>
                 </ButtonV2>
               </div>

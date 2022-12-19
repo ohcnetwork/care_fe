@@ -179,7 +179,7 @@ export const UpdateMinQuantity = (props: any) => {
                   type="submit"
                   onClick={handleSubmit}
                 >
-                  <CareIcon className="care-l-check text-lg" />
+                  <CareIcon className="care-l-check-circle text-lg" />
                   <span>Set</span>
                 </ButtonV2>
               </div>

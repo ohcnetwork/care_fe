@@ -116,7 +116,7 @@ const DuplicatePatientDialog = (props: Props) => {
           Cancel {text}
         </ButtonV2>
         <ButtonV2 onClick={() => handleOk(action)} disabled={!action}>
-          <CareIcon className="care-l-check text-lg" />
+          <CareIcon className="care-l-check-circle text-lg" />
           <span>Continue</span>
         </ButtonV2>
       </DialogActions>
