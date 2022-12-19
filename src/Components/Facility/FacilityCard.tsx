@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "raviger";
-import { TextField, Modal } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 
 import { sendNotificationMessages } from "../../Redux/actions";
@@ -11,6 +10,8 @@ import * as Notification from "../../Utils/Notifications.js";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { parsePhoneNumber } from "libphonenumber-js";
+import DialogModal from "../Common/Dialog";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 
 export const FacilityCard = (props: { facility: any; userType: any }) => {
   const { facility, userType } = props;
@@ -155,58 +156,46 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       ) : (
                         <></>
                       )}
-                      <Modal
-                        open={notifyModalFor === facility.id}
+                      <DialogModal
+                        show={notifyModalFor === facility.id}
+                        title={
+                          <span className="flex justify-center text-2xl">
+                            Notify: {facility.name}
+                          </span>
+                        }
                         onClose={() => setNotifyModalFor(undefined)}
-                        aria-labelledby="Notify This Facility"
-                        aria-describedby="Type a message and notify this facility"
-                        className=""
                       >
-                        <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                          <form
-                            onSubmit={(event) => {
-                              event.preventDefault();
-                              handleNotifySubmit(notifyModalFor);
-                            }}
-                            className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
-                          >
-                            <div className="mb-4">
-                              <h1 className="text-2xl">
-                                Notify: {facility.name}
-                              </h1>
-                            </div>
-                            <div>
-                              <TextField
-                                id="NotifyModalMessageInput"
-                                rows={6}
-                                multiline
-                                required
-                                className="w-full border p-2 max-h-64"
-                                onChange={(e) =>
-                                  setNotifyMessage(e.target.value)
-                                }
-                                placeholder="Type your message..."
-                                variant="outlined"
-                              />
-                            </div>
-                            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-                              <button
-                                type="button"
-                                className="btn-danger btn mr-2 w-full md:w-auto"
-                                onClick={() => setNotifyModalFor(undefined)}
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                type="submit"
-                                className="btn-primary btn mr-2 w-full md:w-auto"
-                              >
-                                Send Notification
-                              </button>
-                            </div>
-                          </form>
-                        </div>
-                      </Modal>
+                        <form
+                          onSubmit={(event) => {
+                            event.preventDefault();
+                            handleNotifySubmit(notifyModalFor);
+                          }}
+                          className="bg-white text-center flex flex-col w-full"
+                        >
+                          <div>
+                            <TextAreaFormField
+                              id="NotifyModalMessageInput"
+                              name="message"
+                              rows={6}
+                              required
+                              className="py-2"
+                              onChange={(e) => setNotifyMessage(e.value)}
+                              placeholder="Type your message..."
+                            />
+                          </div>
+                          <div className="flex flex-col-reverse md:flex-row gap-2 justify-between">
+                            <ButtonV2
+                              variant="secondary"
+                              onClick={() => setNotifyModalFor(undefined)}
+                            >
+                              Cancel
+                            </ButtonV2>
+                            <ButtonV2 variant="primary" type="submit">
+                              Send Notification
+                            </ButtonV2>
+                          </div>
+                        </form>
+                      </DialogModal>
                     </div>
                     <div className="flex gap-2 ">
                       <ButtonV2

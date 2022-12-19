@@ -93,7 +93,7 @@ const ButtonV2 = ({
         href={href}
         target={target}
         className={classNames(
-          "Button outline-offset-1",
+          "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
           `button-size-${size}`,
           `button-shape-${circle ? "circle" : "square"}`,
           ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
@@ -111,7 +111,7 @@ const ButtonV2 = ({
       {...props}
       disabled={disabled || !isAuthorized || loading}
       className={classNames(
-        "Button outline-offset-1",
+        "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
         `button-size-${size}`,
         `button-shape-${circle ? "circle" : "square"}`,
         ghost ? `button-${variant}-ghost` : `button-${variant}-default`,

@@ -3,7 +3,6 @@ import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
-import moment from "moment";
 import loadable from "@loadable/component";
 import { useCallback, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,14 +22,12 @@ import {
 import * as Notification from "../../Utils/Notifications";
 import { SampleTestModel } from "./models";
 import UpdateStatusDialog from "./UpdateStatusDialog";
-import { CSVLink } from "react-csv";
-import GetAppIcon from "@material-ui/icons/GetApp";
 import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import useExport from "../../Common/hooks/useExport";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function SampleViewAdmin() {
   const {
@@ -49,11 +46,8 @@ export default function SampleViewAdmin() {
   const [sample, setSample] = useState<Array<SampleTestModel>>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [downloadFile, setDownloadFile] = useState("");
   const [fetchFlag, callFetchData] = useState(false);
   const [facilityName, setFacilityName] = useState("");
-  // state to change download button to loading while file is not ready
-  const [downloadLoading, setDownloadLoading] = useState(false);
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
     sample: SampleTestModel;
@@ -62,6 +56,7 @@ export default function SampleViewAdmin() {
   const { currentUser } = state;
   const userType: "Staff" | "DistrictAdmin" | "StateLabAdmin" =
     currentUser.data.user_type;
+  const { ExportButton } = useExport();
 
   useEffect(() => {
     async function fetchData() {
@@ -106,16 +101,6 @@ export default function SampleViewAdmin() {
       qParams.sample_type,
     ]
   );
-
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(downloadSampleTests({ ...qParams }));
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById("download-sample-tests")?.click();
-  };
 
   useAbortableEffect(
     (status: statusType) => {
@@ -338,14 +323,10 @@ export default function SampleViewAdmin() {
         hideBack={true}
         breadcrumbs={false}
         componentRight={
-          downloadLoading ? (
-            <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
-          ) : (
-            <GetAppIcon
-              className="cursor-pointer mt-2 ml-2"
-              onClick={triggerDownload}
-            />
-          )
+          <ExportButton
+            action={() => downloadSampleTests({ ...qParams })}
+            filenamePrefix="samples"
+          />
         }
       />
       <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
@@ -460,14 +441,6 @@ export default function SampleViewAdmin() {
       <div className="md:px-2">
         <div className="flex flex-wrap md:-mx-2 lg:-mx-6">{manageSamples}</div>
       </div>
-
-      <CSVLink
-        data={downloadFile}
-        filename={`shift-requests--${now}.csv`}
-        target="_blank"
-        className="hidden"
-        id={"download-sample-tests"}
-      />
     </div>
   );
 }
