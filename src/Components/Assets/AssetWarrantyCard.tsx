@@ -14,12 +14,12 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
   };
 
   return (
-    <div className="warranty-card md:rounded-xl relative overflow-hidden z-10 hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 text-white p-6 md:w-full lg:w-[300px] xl:w-96 h-full w-screen transition-all flex flex-col">
+    <div className="warranty-card md:rounded-xl relative overflow-hidden z-10 hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 text-white p-6 md:w-full xl:w-96 h-full w-screen transition-all flex flex-col">
       <div className="text-right font-bold text-lg italic mb-3">
         {asset.manufacturer}
       </div>
-      <div className="flex flex-col md:flex-row lg:flex-col justify-between gap-6 h-full">
-        <div className="flex flex-col gap-4 border-b md:border-r md:border-b-0 lg:border-r-0 lg:border-b border-white/40 h-full w-full lg:w-auto">
+      <div className="flex flex-col md:flex-row xl:flex-col justify-between gap-6 h-full">
+        <div className="flex flex-col gap-4 border-b md:border-r md:border-b-0 xl:border-r-0 xl:border-b border-white/40 h-full w-full xl:w-auto">
           {Object.keys(details).map((key) => (
             <div className="">
               <div className="italic text-gray-200 uppercase text-xs tracking-widest mb-1">

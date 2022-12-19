@@ -18,6 +18,7 @@ import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { USER_TYPES } from "../../Common/constants";
+import moment from "moment";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -212,7 +213,7 @@ const AssetManage = (props: AssetManageProps) => {
           },
         }}
       />
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col xl:flex-row gap-8">
         <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
           <div className="w-full md:p-8 md:pt-6 p-6 pt-4 flex flex-col justify-between gap-6">
             <div>
@@ -319,7 +320,7 @@ const AssetManage = (props: AssetManageProps) => {
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 flex-shrink-0">
+          <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 shrink-0">
             <div>
               <div className="font-bold text-lg mb-5">Service Details</div>
               <div className="flex flex-col gap-6">
@@ -329,7 +330,7 @@ const AssetManage = (props: AssetManageProps) => {
                     icon: "wrench",
                     content:
                       asset?.last_serviced_on &&
-                      formatDate(asset?.last_serviced_on),
+                      moment(asset?.last_serviced_on).format("DD MMM YYYY"),
                   },
                   {
                     label: "Notes",
@@ -342,15 +343,17 @@ const AssetManage = (props: AssetManageProps) => {
 
             <div className="text-xs text-gray-900 break-words">
               <i className="text-gray-700">Created: </i>
-              {asset?.created_date && formatDate(asset?.created_date)}
+              {asset?.created_date &&
+                moment(asset?.created_date).format("DD/MM/YYYY LT")}
               <br />
               <i className="text-gray-700">Last Modified: </i>
-              {asset?.modified_date && formatDate(asset?.modified_date)}
+              {asset?.modified_date &&
+                moment(asset?.created_date).format("DD/MM/YYYY LT")}
             </div>
           </div>
         </div>
         {asset && (
-          <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col md:flex-row lg:flex-col transition-all duration-200 ease-in">
+          <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col md:flex-row xl:flex-col transition-all duration-200 ease-in">
             <AssetWarrantyCard asset={asset} />
           </div>
         )}
