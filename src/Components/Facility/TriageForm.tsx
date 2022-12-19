@@ -99,7 +99,7 @@ export const TriageForm = (props: triageFormProps) => {
             type: "set_form",
             form: {
               entry_date: res.data.entry_date
-                ? moment(res.data.entry_date, "YYYY-MM-DD")
+                ? moment(res.data.entry_date).toDate()
                 : null,
               num_patients_visited: res.data.num_patients_visited,
               num_patients_home_quarantine:
@@ -345,6 +345,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <DateInputV2
                     className={`bg-gray-50 ${borderColor}`}
                     value={state.form.entry_date}
+                    max={new Date()}
                     onChange={(date) => handleDateChange(date, "entry_date")}
                     position="RIGHT"
                     placeholder="Entry Date"

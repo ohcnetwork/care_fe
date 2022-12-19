@@ -39,6 +39,7 @@ export interface FacilityModel {
   type_b_cylinders?: number;
   type_c_cylinders?: number;
   type_d_cylinders?: number;
+  middleware_address?: string;
   expected_type_b_cylinders?: number;
   expected_type_c_cylinders?: number;
   expected_type_d_cylinders?: number;

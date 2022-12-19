@@ -4,7 +4,7 @@ type BaseProps = {
   name?: string;
   id?: string;
   autoComplete?: string;
-  type?: "email" | "password" | "search" | "text";
+  type?: "email" | "password" | "search" | "text" | "number";
   label?: string;
   placeholder?: string;
   value?: string | number;
@@ -22,6 +22,7 @@ type Props =
       onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
     });
 
+/** Deprecated. Use TextFormField instead */
 const TextInputFieldV2 = (props: Props) => {
   const { onChange, onValueChange } = props;
 
@@ -29,7 +30,13 @@ const TextInputFieldV2 = (props: Props) => {
     <div>
       {props.label && (
         <label className="mb-2" htmlFor={props.id}>
-          {props.label + ((props.required && " *") || "")}
+          {props.label}
+          {props.required && (
+            <span className="text-red-500" title="required">
+              {" "}
+              *
+            </span>
+          )}
         </label>
       )}
       <input

@@ -7,27 +7,25 @@ import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
-import moment from "moment";
-import { CSVLink } from "react-csv";
-import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import parsePhoneNumberFromString from "libphonenumber-js";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
-import { classNames } from "../../Utils/utils";
+import { DropdownItem } from "../Common/components/Menu";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import useExport from "../../Common/hooks/useExport";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {
   const dispatch: any = useDispatch();
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [downloadFile, setDownloadFile] = useState("");
+  const { ExportMenu, exportCSV } = useExport();
   const {
     qParams,
     updateQuery,
@@ -37,8 +35,6 @@ export default function ResultList() {
     resultsPerPage,
   } = useFilters({ limit: 14 });
   const [showDialog, setShowDialog] = useState(false);
-  // state to change download button to loading while file is not ready
-  const [downloadLoading, setDownloadLoading] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
@@ -116,17 +112,11 @@ export default function ResultList() {
   const lsgWardData = (lsgs: any, wards: any) =>
     setDataList({ lsgList: lsgs, wardList: wards });
 
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(
+  const exportResults = () =>
+    exportCSV(
+      "external_results",
       externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res?.data);
-    document.getElementById("downloadCSV")?.click();
-  };
 
   const lsgWardBadge = (key: string, value: any, paramKey: string) => {
     return (
@@ -244,7 +234,23 @@ export default function ResultList() {
         }
         handleCancel={() => setShowDialog(false)}
       />
-      <PageTitle title="External Results" hideBack={true} breadcrumbs={false} />
+      <div className="flex items-center justify-between">
+        <PageTitle title="External Results" hideBack breadcrumbs={false} />
+        <ExportMenu label="Import/Export">
+          <DropdownItem
+            icon={<CareIcon className="care-l-import" />}
+            onClick={() => navigate("/external_results/upload")}
+          >
+            Import Results
+          </DropdownItem>
+          <DropdownItem
+            icon={<CareIcon className="care-l-export" />}
+            onClick={exportResults}
+          >
+            Export Results
+          </DropdownItem>
+        </ExportMenu>
+      </div>
       <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -267,7 +273,7 @@ export default function ResultList() {
         <div className="mt-2">
           <SearchInput
             label="Search by name"
-            name="name"
+            name="patient_name_search"
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             value={qParams.name}
             placeholder="Search patient"
@@ -284,30 +290,6 @@ export default function ResultList() {
           </div>
         </div>
         <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
-          <div className="flex flex-col md:flex-row md:justify-end gap-2">
-            <button
-              className="btn btn-primary"
-              onClick={(_) => navigate("external_results/upload")}
-            >
-              Upload List
-            </button>
-            <button
-              className={classNames(
-                "btn btn-primary",
-                downloadLoading && "pointer-events-none"
-              )}
-              onClick={triggerDownload}
-            >
-              <span className="flex flex-row justify-center">
-                {downloadLoading ? (
-                  <CircularProgress className="w-5 h-5 mr-1 text-white" />
-                ) : (
-                  <GetAppIcon className="cursor-pointer" />
-                )}
-                Export
-              </span>
-            </button>
-          </div>
           <div className="flex ml-auto gap-2 md:pt-0 pt-2">
             <button
               className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
@@ -360,13 +342,6 @@ export default function ResultList() {
         </table>
       </div>
       <Pagination totalCount={totalCount} />
-      <CSVLink
-        data={downloadFile}
-        filename={`external-result--${now}.csv`}
-        target="_blank"
-        className="hidden"
-        id={"downloadCSV"}
-      />
       <SlideOver {...advancedFilter}>
         <div className="bg-white min-h-screen p-4">
           <ListFilter {...advancedFilter} dataList={lsgWardData} />
