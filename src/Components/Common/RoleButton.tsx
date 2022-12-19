@@ -1,6 +1,5 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import Button from "@material-ui/core/Button";
 import { ButtonProps } from "@material-ui/core/Button";
 
 export type roleType = "readOnly";
@@ -58,7 +57,7 @@ export function RoleButton(props: {
 
   const renderMaterialUIButton = () => {
     return (
-      <Button
+      <button
         id={props.id}
         className={props.className}
         {...props.materialButtonProps}
@@ -66,7 +65,7 @@ export function RoleButton(props: {
         disabled={getDisableButton(type, props.disableFor) || props.disabled}
       >
         {props.children}
-      </Button>
+      </button>
     );
   };
 
