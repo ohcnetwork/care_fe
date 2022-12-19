@@ -22,8 +22,8 @@ import {
 import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { goBack } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2.js";
-import CareIcon from "../../CAREUI/icons/CareIcon.js";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
