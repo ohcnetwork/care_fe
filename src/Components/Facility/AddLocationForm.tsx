@@ -145,12 +145,11 @@ export const AddLocationForm = (props: LocationFormProps) => {
                   }
                   variant="secondary"
                 >
-                  <CareIcon className="care-l-times-circle h-5" />
-                  Cancel
+                  <span>Cancel</span>
                 </ButtonV2>
-                <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
-                  <CareIcon className="care-l-check-circle h-5" />
-                  {buttonText}
+                <ButtonV2 type="submit" onClick={handleSubmit}>
+                  <CareIcon className="care-l-check text-lg" />
+                  <span>{buttonText}</span>
                 </ButtonV2>
               </div>
             </CardContent>

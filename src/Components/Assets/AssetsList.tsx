@@ -351,7 +351,8 @@ const AssetsList = () => {
               className="w-full inline-flex items-center justify-center"
               onClick={() => setShowFacilityDialog(true)}
             >
-              <CareIcon className="care-l-plus-circle h-5 mr-1" /> Create Asset
+              <CareIcon className="care-l-plus-circle text-lg mr-1" />
+              <span>Create Asset</span>
             </ButtonV2>
           </div>
         </div>

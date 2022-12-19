@@ -123,7 +123,7 @@ const StatelessSidebar = ({
             ref={indicatorRef}
             className={`absolute left-2 w-1 hidden md:block
             bg-primary-400 rounded z-10 transition-all`}
-           />
+          />
           {NavItems.map((i) => {
             return (
               <Item
@@ -139,7 +139,7 @@ const StatelessSidebar = ({
           <Item
             text="Dashboard"
             to={DASHBOARD}
-            icon={<CareIcon className="care-l-dashboard h-5" />}
+            icon={<CareIcon className="care-l-dashboard text-lg" />}
             external
           />
         </div>
