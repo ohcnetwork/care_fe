@@ -49,7 +49,7 @@ const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface FacilityProps {
-  facilityId?: number;
+  facilityId?: string;
 }
 
 interface StateObj {
