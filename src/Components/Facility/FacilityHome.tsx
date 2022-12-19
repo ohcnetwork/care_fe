@@ -538,7 +538,7 @@ export const FacilityHome = (props: any) => {
                 variant="primary"
                 ghost
                 border
-                className="mt-2 w-full md:w-auto"
+                className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >
@@ -549,11 +549,11 @@ export const FacilityHome = (props: any) => {
                 variant="primary"
                 ghost
                 border
-                className="mt-2 w-full md:w-auto py-3"
+                className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
-                <PatientIcon className="w-4 h-4 fill-current" />
-                View Patients
+                <PatientIcon className="w-4 h-4 fill-current mr-2" />
+                <span>View Patients</span>
               </ButtonV2>
             </div>
           </div>

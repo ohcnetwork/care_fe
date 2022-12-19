@@ -651,6 +651,8 @@ export const PhoneNumberField = (props: any) => {
     turnOffAutoFormat,
     disabled,
     bgColor,
+    enableTollFree,
+    countryCodeEditable = false,
   } = props;
   const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
   const onChangeHandler = debounce(onChange, 500);
@@ -671,13 +673,17 @@ export const PhoneNumberField = (props: any) => {
           inputClass={` ${
             bgColor || " bg-gray-200 "
           }  py-3 text-sm border-gray-200 shadow-none focus:border-primary-400`}
-          countryCodeEditable={false}
+          countryCodeEditable={countryCodeEditable}
           value={value}
           placeholder={placeholder}
           onChange={handleChange}
           country="in"
           disabled={disabled}
           autoFormat={!turnOffAutoFormat}
+          enableLongNumbers={enableTollFree}
+          inputProps={{
+            maxLength: 16,
+          }}
           {...countryRestriction}
         />
         <div
