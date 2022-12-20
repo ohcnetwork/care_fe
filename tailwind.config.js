@@ -2,6 +2,18 @@
 const colors = require("tailwindcss/colors");
 const defaultTheme = require("tailwindcss/defaultTheme");
 
+const gray = {
+  100: "#FBFAFC",
+  200: "#F7F5FA",
+  300: "#F1EDF7",
+  400: "#DFDAE8",
+  500: "#BFB8CC",
+  600: "#9187A1",
+  700: "#7D728F",
+  800: "#6A5F7A",
+  900: "#453C52",
+};
+
 module.exports = {
   important: true,
   theme: {
@@ -29,33 +41,11 @@ module.exports = {
           800: "#03543F",
           900: "#014737",
         },
-        // TODO: change to `colors.gray` when #4307 is merged.
-        secondary: {
-          50: "#f9fafb",
-          100: "#f3f4f6",
-          200: "#e5e7eb",
-          300: "#d1d5db",
-          400: "#9ca3af",
-          500: "#6b7280",
-          600: "#4b5563",
-          700: "#374151",
-          800: "#1f2937",
-          900: "#111827",
-        },
+        secondary: gray, // equivalent to our custom gray, but will become equivalent to tailwind's gray in tailwind v3.2
         danger: colors.red,
         warning: colors.amber,
         alert: colors.violet,
-        gray: {
-          100: "#FBF9FB",
-          200: "#F6F6F6",
-          300: "#F1EDF7",
-          400: "#DFDAE8",
-          500: "#BFB8CC",
-          600: "#9C9C9C",
-          700: "#808080",
-          800: "#6A5F7A",
-          900: "#453C52",
-        },
+        gray,
         patient: {
           comfort: {
             DEFAULT: colors.slate[200],
@@ -74,8 +64,8 @@ module.exports = {
             fore: colors.red[100],
           },
           unknown: {
-            DEFAULT: colors.gray[400],
-            fore: colors.gray[800],
+            DEFAULT: gray[400],
+            fore: gray[800],
           },
         },
         doctors: {
