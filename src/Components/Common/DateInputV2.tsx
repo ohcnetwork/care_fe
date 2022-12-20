@@ -252,8 +252,12 @@ const DateInputV2: React.FC<Props> = ({
               {type === "date" && (
                 <>
                   <div className="flex flex-wrap mb-3">
-                    {DAYS.map((day) => (
-                      <div key={day} className="aspect-square w-[14.26%]">
+                    {DAYS.map((day, i) => (
+                      <div
+                        key={day}
+                        id={`day-${i}`}
+                        className="aspect-square w-[14.26%]"
+                      >
                         <div className="text-gray-800 font-medium text-center text-sm">
                           {day}
                         </div>
@@ -268,7 +272,11 @@ const DateInputV2: React.FC<Props> = ({
                       />
                     ))}
                     {dayCount.map((d, i) => (
-                      <div key={i} className="aspect-square w-[14.26%]">
+                      <div
+                        key={i}
+                        id={`date-${d}`}
+                        className="aspect-square w-[14.26%]"
+                      >
                         <div
                           onClick={setDateValue(d)}
                           className={classNames(
@@ -293,6 +301,7 @@ const DateInputV2: React.FC<Props> = ({
                     .map((_, i) => (
                       <div
                         key={i}
+                        id={`month-${i}`}
                         className={classNames(
                           "cursor-pointer w-1/4 font-semibold py-4 px-2 text-center text-sm rounded-lg",
                           value && isSelectedMonth(i)
@@ -322,6 +331,7 @@ const DateInputV2: React.FC<Props> = ({
                       return (
                         <div
                           key={i}
+                          id={`year-${i}`}
                           className={classNames(
                             "cursor-pointer w-1/4 font-semibold py-4 px-2 text-center text-sm rounded-lg",
                             value && isSelectedYear(y)

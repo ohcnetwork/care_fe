@@ -11,7 +11,7 @@ const makeid = (length: number) => {
 };
 
 const makePhoneNumber = () =>
-  "9199" + Math.floor(Math.random() * 99999999).toString();
+  "98" + Math.floor(Math.random() * 99999999).toString();
 
 const username = makeid(25);
 const phone_number = makePhoneNumber();
@@ -41,29 +41,28 @@ describe("User management", () => {
     cy.intercept(/\/api\/v1\/facility/).as("facility");
     cy.get("[name='facilities']").type("Mysore").wait("@facility");
     cy.get("[name='facilities']").type("{downarrow}{enter}");
+    cy.get("input[type='checkbox']").click();
+    cy.get("[placeholder='Phone Number']").type(phone_number);
+    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
+      force: true,
+    });
     cy.intercept(/users/).as("check_availability");
     cy.get("[name='username']").type(username, { force: true });
+    cy.get("[id='date_of_birth']").click();
+    cy.get("div").contains("20").click();
+    cy.get("[id='year-0']").click();
+    cy.get("[id='date-1']").click();
     cy.wait("@check_availability").its("response.statusCode").should("eq", 200);
     cy.get("[name='password']").type("#@Cypress_test123");
     cy.get("[name='c_password']").type("#@Cypress_test123");
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
+    cy.get("[name='email']").type("cypress@tester.com");
     cy.get("[id='gender'] > div > button").click();
     cy.get("div").contains("Male").click();
-    cy.get("[id='date_of_birth']").click();
-    cy.get("div").contains("20").click();
-    cy.get("body").click(700, 450);
-    cy.get("body").click(720, 470);
-    cy.get("input[type='checkbox']").click();
-    cy.wait(1000);
-    cy.get("[placeholder='Phone Number']").type(phone_number);
-    cy.wait(1000);
-    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
+    cy.get("button[id='submit']").contains("Save User").click({
       force: true,
     });
-    cy.wait(1000);
-    cy.get("[name='email']").type("cypress@tester.com");
-    cy.get("button[id='submit']").contains("Save User").click();
     cy.verifyNotification("User added successfully");
   });
 
@@ -72,10 +71,10 @@ describe("User management", () => {
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
     cy.get("[placeholder='Phone Number']").type(phone_number);
+    cy.get("input[name='district']").type("Ernakulam");
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
     cy.get("[name='username']").type(username, { force: true });
-    // TODO: some verify task
   });
 
   it("link facility for user", () => {
