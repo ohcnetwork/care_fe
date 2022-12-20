@@ -14,7 +14,6 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   autoComplete?: string;
   type?: "email" | "password" | "search" | "text" | "number";
   className?: string | undefined;
-  removeDefaultClasses?: true | undefined;
   leading?: React.ReactNode | undefined;
   trailing?: React.ReactNode | undefined;
   leadingFocused?: React.ReactNode | undefined;
@@ -41,16 +40,12 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
     <input
       ref={ref as any}
       id={props.id}
-      className={
-        props.removeDefaultClasses
-          ? props.className
-          : classNames(
-              "cui-input-base peer",
-              hasIcon && "px-8",
-              error && "border-danger-500",
-              props.className
-            )
-      }
+      className={classNames(
+        "cui-input-base peer",
+        hasIcon && "px-10",
+        error && "border-danger-500",
+        props.className
+      )}
       disabled={props.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}
       placeholder={props.placeholder}

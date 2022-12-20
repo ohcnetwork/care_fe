@@ -21,7 +21,7 @@
 }
 
 .cui-input-base {
-    @apply text-sm block w-full text-black placeholder:text-gray-600 bg-white disabled:bg-gray-200 border border-gray-400 focus:border-primary-400 invalid:border-danger-500 ring-0 focus:ring-1 ring-primary-400 outline-none focus:outline-none shadow-none rounded py-3 px-4 transition-colors duration-300 
+    @apply text-sm block w-full text-black placeholder:text-gray-600 bg-white disabled:bg-gray-200 border border-gray-400 focus:border-primary-400 invalid:border-danger-500 ring-0 focus:ring-1 ring-primary-400 outline-none focus:outline-none shadow-none rounded py-3 px-4 transition-colors duration-300 !important
 }
 
 .tooltip {

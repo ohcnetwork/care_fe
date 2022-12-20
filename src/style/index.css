@@ -361,7 +361,7 @@ label {
 }
 
 input {
-  @apply border-gray-300 rounded focus:ring-primary-500 focus:border-primary-500;
+  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300;
 }
 
 input:disabled,
@@ -370,7 +370,7 @@ input:disabled,
 }
 
 textarea {
-  @apply border-gray-300 rounded focus:ring-primary-500 focus:border-primary-500;
+  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300;
 }
 
 button:disabled,

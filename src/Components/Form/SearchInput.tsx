@@ -5,7 +5,6 @@ import { isAppleDevice } from "../../Utils/utils";
 import TextFormField, { TextFormFieldProps } from "./FormFields/TextFormField";
 
 type SearchInputProps = TextFormFieldProps & {
-  className?: string | undefined;
   debouncePeriod?: number;
   secondary?: true | undefined;
 } & (
@@ -44,9 +43,7 @@ const SearchInput = ({
   useKeyboardShortcut(
     props.hotkey || [isAppleDevice ? "Meta" : "Control", "K"],
     () => !props.secondary && ref.current?.focus(),
-    {
-      overrideSystem: !props.secondary,
-    }
+    { overrideSystem: !props.secondary }
   );
 
   const shortcutKeyIcon =
@@ -75,7 +72,7 @@ const SearchInput = ({
       validate={undefined}
       type="search"
       ref={ref}
-      className={`${className} enabled:bg-white`}
+      className={className}
       leading={
         props.leading || (
           <CareIcon className="text-gray-600 p-0.5 mt-1 care-l-search-alt h-5" />
