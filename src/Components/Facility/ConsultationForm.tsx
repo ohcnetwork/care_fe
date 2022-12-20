@@ -904,7 +904,7 @@ export const ConsultationForm = (props: any) => {
             Cancel
           </ButtonV2>
           <ButtonV2 variant="primary" type="submit" onClick={handleSubmit}>
-            <CareIcon className="care-l-check text-lg pt-0.5" />
+            <CareIcon className="care-l-check-circle text-lg" />
             {isUpdate ? "Update Consultation" : "Create Consultation"}
           </ButtonV2>
         </div>
