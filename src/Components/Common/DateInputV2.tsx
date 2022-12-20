@@ -18,6 +18,7 @@ type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
 
 interface Props {
+  id?: string;
   className?: string;
   value: Date | undefined;
   min?: Date;
@@ -31,6 +32,7 @@ interface Props {
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 const DateInputV2: React.FC<Props> = ({
+  id,
   className,
   value,
   min,
@@ -188,6 +190,7 @@ const DateInputV2: React.FC<Props> = ({
           <Popover.Button disabled={disabled} className="w-full">
             <input type="hidden" name="date" />
             <input
+              id={id}
               type="text"
               readOnly
               disabled={disabled}

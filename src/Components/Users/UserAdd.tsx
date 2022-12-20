@@ -37,6 +37,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import Checkbox from "../Common/components/CheckBox";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -871,13 +872,14 @@ export const UserAdd = (props: UserProps) => {
                   Gender
                   <span className="text-red-500">{" *"}</span>
                 </label>
-                <SelectMenuV2
+                <SelectFormField
                   id="gender"
+                  name="gender"
                   value={state.form.gender}
                   options={GENDER_TYPES}
                   optionLabel={(o) => o.text}
                   optionValue={(o) => o.text}
-                  onChange={(e) => handleValueChange(e, "gender")}
+                  onChange={(e) => handleValueChange(e.value, "gender")}
                 />
               </div>
               <div>
@@ -889,8 +891,9 @@ export const UserAdd = (props: UserProps) => {
                   <CircularProgress size={20} />
                 ) : (
                   <>
-                    <SelectMenuV2
+                    <SelectFormField
                       id="state"
+                      name="state"
                       placeholder="Choose State *"
                       options={states}
                       optionLabel={(o) => o.name}
@@ -899,8 +902,8 @@ export const UserAdd = (props: UserProps) => {
                       onChange={(e) => {
                         if (e) {
                           return [
-                            handleValueChange(e, "state"),
-                            fetchDistricts(e),
+                            handleValueChange(e.value, "state"),
+                            fetchDistricts(e.value),
                           ];
                         }
                       }}
@@ -918,8 +921,9 @@ export const UserAdd = (props: UserProps) => {
                   <CircularProgress size={20} />
                 ) : (
                   <>
-                    <SelectMenuV2
+                    <SelectFormField
                       id="district"
+                      name="district"
                       placeholder="Choose District"
                       options={districts}
                       optionLabel={(o) => o.name}
@@ -928,8 +932,8 @@ export const UserAdd = (props: UserProps) => {
                       onChange={(e) => {
                         if (e) {
                           return [
-                            handleValueChange(e, "district"),
-                            fetchLocalBody(e),
+                            handleValueChange(e.value, "district"),
+                            fetchLocalBody(e.value),
                           ];
                         }
                       }}
@@ -948,15 +952,18 @@ export const UserAdd = (props: UserProps) => {
                     <CircularProgress size={20} />
                   ) : (
                     <>
-                      <SelectMenuV2
+                      <SelectFormField
                         id="localbody"
+                        name="localbody"
                         position="above"
                         placeholder="Choose LocalBody"
                         options={localBodies}
                         optionLabel={(o) => o.name}
                         optionValue={(o) => o.id}
                         value={state.form.local_body}
-                        onChange={(e) => handleValueChange(e, "local_body")}
+                        onChange={(e) =>
+                          handleValueChange(e.value, "local_body")
+                        }
                       />
                       <ErrorHelperText error={state.errors.local_body} />
                     </>

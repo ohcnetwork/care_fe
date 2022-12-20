@@ -48,6 +48,7 @@
     "*.res",
     "*.css",
     "*.csv",
-    "*.stories.mdx"
+    "*.stories.mdx",
+    "Dockerfile"
   ]
 }

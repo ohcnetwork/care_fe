@@ -11,7 +11,7 @@ const makeid = (length: number) => {
 };
 
 const makePhoneNumber = () =>
-  "98" + Math.floor(Math.random() * 99999999).toString();
+  "9199" + Math.floor(Math.random() * 99999999).toString();
 
 const username = makeid(25);
 const phone_number = makePhoneNumber();
@@ -41,8 +41,11 @@ describe("User management", () => {
     cy.intercept(/\/api\/v1\/facility/).as("facility");
     cy.get("[name='facilities']").type("Mysore").wait("@facility");
     cy.get("[name='facilities']").type("{downarrow}{enter}");
+    cy.wait(1000);
     cy.get("input[type='checkbox']").click();
+    cy.wait(1000);
     cy.get("[placeholder='Phone Number']").type(phone_number);
+    cy.wait(1000);
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
       force: true,
     });
@@ -70,11 +73,36 @@ describe("User management", () => {
     cy.contains("Advanced Filters").click();
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
+    cy.get("[id='role'] > div > button").click();
+    cy.get("div")
+      .contains(/^Ward Admin$/)
+      .click();
+    cy.get("input[name='district']").type("Ernakulam").wait(1000);
+    cy.get("input[name='district']").type("{downarrow}{enter}");
     cy.get("[placeholder='Phone Number']").type(phone_number);
-    cy.get("input[name='district']").type("Ernakulam");
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
+    cy.intercept(/\/api\/v1\/users/).as("getUsers");
+    cy.wait(1000);
     cy.get("[name='username']").type(username, { force: true });
+    cy.wait("@getUsers");
+    cy.wait(1000);
+    cy.get("dd[id='count']").contains(/^1$/).click();
+    cy.get("div[id='usr_0']").within(() => {
+      cy.get("div[id='role']").contains(/^WardAdmin$/);
+      cy.get("div[id='name']").contains("Cypress Test Tester");
+      cy.get("div[id='district']").contains(/^Ernakulam$/);
+      cy.get("div[id='local_body']").contains("Aikaranad");
+      cy.get("div[id='created_by']").contains(/^devdistrictadmin$/);
+      cy.get("div[id='home_facility']").contains("No Home Facility");
+      cy.get("div").contains("Click").click({
+        force: true,
+      });
+      cy.intercept(`/api/v1/users/${username}/get_facilities/`).as("facility");
+      cy.get("div[id='facilities'] > div:nth-child(2) > div").contains(
+        "(Test) Mysore"
+      );
+    });
   });
 
   it("link facility for user", () => {

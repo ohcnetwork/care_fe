@@ -103,12 +103,12 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
               </Listbox.Button>
               <div
                 className={classNames(
-                  "absolute z-10 w-full",
-                  props.position === "above" ? "bottom-0 mb-14" : "top-0 mt-14"
+                  "absolute w-full z-10",
+                  props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12"
                 )}
               >
                 <DropdownTransition show={open}>
-                  <Listbox.Options className="cui-dropdown-base origin-top-right absolute mt-0.5">
+                  <Listbox.Options className="cui-dropdown-base">
                     {options.map((option, index) => (
                       <Listbox.Option
                         id={`${props.id}-option-${option.value}`}
