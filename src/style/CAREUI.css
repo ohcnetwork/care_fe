@@ -20,6 +20,10 @@
     margin-left: 4px;
 }
 
+.cui-input-base {
+    @apply text-sm text-black placeholder:text-gray-600 bg-white disabled:bg-gray-200 border border-gray-400 focus:border-primary-400 invalid:border-danger-500 focus:outline-none ring-0 focus:ring-1 ring-primary-400 shadow-none rounded py-3 px-4 transition-all duration-200 ease-in-out
+}
+
 .tooltip {
     @apply relative
 }
