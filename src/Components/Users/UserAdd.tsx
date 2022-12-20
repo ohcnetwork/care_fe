@@ -616,7 +616,6 @@ export const UserAdd = (props: UserProps) => {
                   showAll={false}
                 />
               </div>
-
               <div>
                 <label className="mb-2">
                   User Type
@@ -647,92 +646,42 @@ export const UserAdd = (props: UserProps) => {
                 />
                 <ErrorHelperText error={state.errors.home_facility} />
               </div>
-
               <div>
                 <label className="mb-2">
-                  State
+                  Phone Number
                   <span className="text-red-500">{" *"}</span>
                 </label>
-                {isStateLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <>
-                    <SelectMenuV2
-                      id="state"
-                      placeholder="Choose State *"
-                      options={states}
-                      optionLabel={(o) => o.name}
-                      optionValue={(o) => o.id}
-                      value={state.form.state}
-                      onChange={(e) => {
-                        if (e) {
-                          return [
-                            handleValueChange(e, "state"),
-                            fetchDistricts(e),
-                          ];
-                        }
-                      }}
-                    />
-                    <ErrorHelperText error={state.errors.state} />
-                  </>
-                )}
+                <PhoneNumberField
+                  placeholder="Phone Number"
+                  value={state.form.phone_number}
+                  onChange={(value: any) =>
+                    handleValueChange(value, "phone_number")
+                  }
+                  errors={state.errors.phone_number}
+                  onlyIndia={true}
+                />
+                <Checkbox
+                  checked={phoneIsWhatsApp}
+                  onCheck={(checked) => {
+                    setPhoneIsWhatsApp(checked);
+                    !checked && handleValueChange("+91", "alt_phone_number");
+                  }}
+                  label="Is the phone number a WhatsApp number?"
+                />
               </div>
-
               <div>
-                <label className="mb-2">
-                  District
-                  <span className="text-red-500">{" *"}</span>
-                </label>
-                {isDistrictLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <>
-                    <SelectMenuV2
-                      id="district"
-                      placeholder="Choose District"
-                      options={districts}
-                      optionLabel={(o) => o.name}
-                      optionValue={(o) => o.id}
-                      value={state.form.district}
-                      onChange={(e) => {
-                        if (e) {
-                          return [
-                            handleValueChange(e, "district"),
-                            fetchLocalBody(e),
-                          ];
-                        }
-                      }}
-                    />
-                    <ErrorHelperText error={state.errors.district} />
-                  </>
-                )}
+                <label className="mb-2">Whatsapp Number</label>
+                <PhoneNumberField
+                  placeholder="WhatsApp Phone Number"
+                  value={state.form.alt_phone_number}
+                  onChange={(value: any) =>
+                    handleValueChange(value, "alt_phone_number")
+                  }
+                  disabled={phoneIsWhatsApp}
+                  errors={state.errors.alt_phone_number}
+                  onlyIndia={true}
+                />
               </div>
-
-              {showLocalbody && (
-                <div>
-                  <label className="mb-2">
-                    LocalBody
-                    <span className="text-red-500">{" *"}</span>
-                  </label>
-                  {isLocalbodyLoading ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                    <>
-                      <SelectMenuV2
-                        id="localbody"
-                        placeholder="Choose LocalBody"
-                        options={localBodies}
-                        optionLabel={(o) => o.name}
-                        optionValue={(o) => o.id}
-                        value={state.form.local_body}
-                        onChange={(e) => handleValueChange(e, "local_body")}
-                      />
-                      <ErrorHelperText error={state.errors.local_body} />
-                    </>
-                  )}
-                </div>
-              )}
-
               <div>
                 <label className="mb-2">
                   Username
@@ -805,6 +754,21 @@ export const UserAdd = (props: UserProps) => {
               </div>
               <div>
                 <label className="mb-2">
+                  Date of birth
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <DateFormField
+                  id="date_of_birth"
+                  name="date_of_birth"
+                  value={getDate(state.form.date_of_birth)}
+                  onChange={handleDateChange}
+                  error={state.errors.date_of_birth}
+                  position="LEFT"
+                  maxDate={new Date()}
+                />
+              </div>
+              <div>
+                <label className="mb-2">
                   Password
                   <span className="text-red-500">{" *"}</span>
                 </label>
@@ -840,7 +804,6 @@ export const UserAdd = (props: UserProps) => {
                   </div>
                 )}
               </div>
-
               <div>
                 <label className="mb-2">
                   Confirm Password
@@ -864,7 +827,6 @@ export const UserAdd = (props: UserProps) => {
                     "Confirm password should match the entered password"
                   )}
               </div>
-
               <div>
                 <label className="mb-2">
                   First name
@@ -878,7 +840,6 @@ export const UserAdd = (props: UserProps) => {
                   error={state.errors.first_name}
                 />
               </div>
-
               <div>
                 <label className="mb-2">
                   Last name
@@ -890,74 +851,6 @@ export const UserAdd = (props: UserProps) => {
                   value={state.form.last_name}
                   onChange={handleChange}
                   error={state.errors.last_name}
-                />
-              </div>
-
-              <div>
-                <label className="mb-2">
-                  Gender
-                  <span className="text-red-500">{" *"}</span>
-                </label>
-                <SelectMenuV2
-                  id="gender"
-                  value={state.form.gender}
-                  options={GENDER_TYPES}
-                  optionLabel={(o) => o.text}
-                  optionValue={(o) => o.text}
-                  onChange={(e) => handleValueChange(e, "gender")}
-                />
-              </div>
-
-              <div>
-                <label className="mb-2">
-                  Date of birth
-                  <span className="text-red-500">{" *"}</span>
-                </label>
-                <DateFormField
-                  id="date_of_birth"
-                  name="date_of_birth"
-                  value={getDate(state.form.date_of_birth)}
-                  onChange={handleDateChange}
-                  error={state.errors.date_of_birth}
-                  position="LEFT"
-                  maxDate={new Date()}
-                />
-              </div>
-              <div>
-                <label className="mb-2">
-                  Phone Number
-                  <span className="text-red-500">{" *"}</span>
-                </label>
-                <PhoneNumberField
-                  placeholder="Phone Number"
-                  value={state.form.phone_number}
-                  onChange={(value: any) =>
-                    handleValueChange(value, "phone_number")
-                  }
-                  errors={state.errors.phone_number}
-                  onlyIndia={true}
-                />
-                <Checkbox
-                  checked={phoneIsWhatsApp}
-                  onCheck={(checked) => {
-                    setPhoneIsWhatsApp(checked);
-                    !checked && handleValueChange("+91", "alt_phone_number");
-                  }}
-                  label="Is the phone number a WhatsApp number?"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2">Whatsapp Number</label>
-                <PhoneNumberField
-                  placeholder="WhatsApp Phone Number"
-                  value={state.form.alt_phone_number}
-                  onChange={(value: any) =>
-                    handleValueChange(value, "alt_phone_number")
-                  }
-                  disabled={phoneIsWhatsApp}
-                  errors={state.errors.alt_phone_number}
-                  onlyIndia={true}
                 />
               </div>
               <div>
@@ -973,6 +866,103 @@ export const UserAdd = (props: UserProps) => {
                   error={state.errors.email}
                 />
               </div>
+              <div>
+                <label className="mb-2">
+                  Gender
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                <SelectMenuV2
+                  id="gender"
+                  value={state.form.gender}
+                  options={GENDER_TYPES}
+                  optionLabel={(o) => o.text}
+                  optionValue={(o) => o.text}
+                  onChange={(e) => handleValueChange(e, "gender")}
+                />
+              </div>
+              <div>
+                <label className="mb-2">
+                  State
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                {isStateLoading ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <>
+                    <SelectMenuV2
+                      id="state"
+                      placeholder="Choose State *"
+                      options={states}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      value={state.form.state}
+                      onChange={(e) => {
+                        if (e) {
+                          return [
+                            handleValueChange(e, "state"),
+                            fetchDistricts(e),
+                          ];
+                        }
+                      }}
+                    />
+                    <ErrorHelperText error={state.errors.state} />
+                  </>
+                )}
+              </div>
+              <div>
+                <label className="mb-2">
+                  District
+                  <span className="text-red-500">{" *"}</span>
+                </label>
+                {isDistrictLoading ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <>
+                    <SelectMenuV2
+                      id="district"
+                      placeholder="Choose District"
+                      options={districts}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      value={state.form.district}
+                      onChange={(e) => {
+                        if (e) {
+                          return [
+                            handleValueChange(e, "district"),
+                            fetchLocalBody(e),
+                          ];
+                        }
+                      }}
+                    />
+                    <ErrorHelperText error={state.errors.district} />
+                  </>
+                )}
+              </div>
+              {showLocalbody && (
+                <div>
+                  <label className="mb-2">
+                    LocalBody
+                    <span className="text-red-500">{" *"}</span>
+                  </label>
+                  {isLocalbodyLoading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <>
+                      <SelectMenuV2
+                        id="localbody"
+                        position="above"
+                        placeholder="Choose LocalBody"
+                        options={localBodies}
+                        optionLabel={(o) => o.name}
+                        optionValue={(o) => o.id}
+                        value={state.form.local_body}
+                        onChange={(e) => handleValueChange(e, "local_body")}
+                      />
+                      <ErrorHelperText error={state.errors.local_body} />
+                    </>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
               <ButtonV2 variant="secondary" onClick={() => goBack()}>

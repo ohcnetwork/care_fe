@@ -1,6 +1,7 @@
 import React from "react";
 import { Listbox } from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
+import { classNames } from "../../Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -9,6 +10,7 @@ type SelectMenuProps<T, V = T> = {
   options: T[];
   value: V | undefined;
   placeholder?: React.ReactNode;
+  position?: "above" | "below";
   optionLabel: OptionCallback<T, React.ReactNode>;
   optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
@@ -91,54 +93,63 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                   )}
                 </div>
               </Listbox.Button>
-              <DropdownTransition show={open}>
-                <Listbox.Options className="origin-top-right absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
-                  {options.map((option, index) => (
-                    <Listbox.Option
-                      id={`${props.id}-option-${option.value}`}
-                      key={index}
-                      className={({ active }) =>
-                        `cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
-                          active ? "text-white bg-primary-500" : "text-gray-900"
-                        }`
-                      }
-                      value={option}
-                    >
-                      {({ selected, active }) => (
-                        <div className="flex flex-col">
-                          <div className="flex justify-between">
-                            <p
-                              className={
-                                selected ? "font-semibold" : "font-normal"
-                              }
-                            >
-                              {option.label}
-                            </p>
-                            {option.icon && (
-                              <span
-                                className={`transition-all duration-100 ease-in-out ${
-                                  active ? "text-white" : "text-primary-500"
+              <div
+                className={classNames(
+                  "absolute z-10 w-full",
+                  props.position === "above" ? "bottom-0 mb-14" : "top-0 mt-14"
+                )}
+              >
+                <DropdownTransition show={open}>
+                  <Listbox.Options className="w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
+                    {options.map((option, index) => (
+                      <Listbox.Option
+                        id={`${props.id}-option-${option.value}`}
+                        key={index}
+                        className={({ active }) =>
+                          `cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
+                            active
+                              ? "text-white bg-primary-500"
+                              : "text-gray-900"
+                          }`
+                        }
+                        value={option}
+                      >
+                        {({ selected, active }) => (
+                          <div className="flex flex-col">
+                            <div className="flex justify-between">
+                              <p
+                                className={
+                                  selected ? "font-semibold" : "font-normal"
+                                }
+                              >
+                                {option.label}
+                              </p>
+                              {option.icon && (
+                                <span
+                                  className={`transition-all duration-100 ease-in-out ${
+                                    active ? "text-white" : "text-primary-500"
+                                  }`}
+                                >
+                                  {option.icon}
+                                </span>
+                              )}
+                            </div>
+                            {option.description && (
+                              <p
+                                className={`mt-2 ${
+                                  active ? "text-primary-200" : "text-gray-500"
                                 }`}
                               >
-                                {option.icon}
-                              </span>
+                                {option.description}
+                              </p>
                             )}
                           </div>
-                          {option.description && (
-                            <p
-                              className={`mt-2 ${
-                                active ? "text-primary-200" : "text-gray-500"
-                              }`}
-                            >
-                              {option.description}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </Listbox.Option>
-                  ))}
-                </Listbox.Options>
-              </DropdownTransition>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </DropdownTransition>
+              </div>
             </div>
           </>
         )}
