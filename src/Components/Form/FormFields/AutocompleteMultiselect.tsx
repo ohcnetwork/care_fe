@@ -128,7 +128,7 @@ export const AutocompleteMutliSelect = <T, V>(
           )}
 
           <DropdownTransition>
-            <Combobox.Options className="top-12 absolute z-10 mt-0.5 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
+            <Combobox.Options className="cui-dropdown-base top-12 absolute z-10 mt-0.5">
               {filteredOptions.map((option, index) => (
                 <Combobox.Option
                   id={`${props.id}-option-${option.value}`}

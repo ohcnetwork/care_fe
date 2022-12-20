@@ -100,7 +100,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                 </div>
               </Listbox.Button>
               <DropdownTransition show={open}>
-                <Listbox.Options className="origin-top-right absolute z-10 mt-0.5 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
+                <Listbox.Options className="cui-dropdown-base origin-top-right absolute mt-0.5">
                   {options.map((option, index) => (
                     <Listbox.Option
                       id={`${props.id}-option-${option.value}`}

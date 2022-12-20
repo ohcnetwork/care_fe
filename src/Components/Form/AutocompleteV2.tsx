@@ -92,7 +92,7 @@ export const AutocompleteV2 = <T, V>(props: AutocompleteProps<T, V>) => {
           </div>
 
           <DropdownTransition>
-            <Combobox.Options className="origin-top-right absolute z-10 mt-0.5 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
+            <Combobox.Options className="origin-top-right absolute z-10 mt-0.5 cui-dropdown-base">
               {filteredOptions.map((option, index) => (
                 <Combobox.Option
                   id={`${props.id}-option-${option.value}`}

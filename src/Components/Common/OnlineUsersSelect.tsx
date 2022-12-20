@@ -247,7 +247,7 @@ export const OnlineUsersSelect = (props: Props) => {
             variant="secondary"
             ghost
             circle
-            className={`p-1 absolute right-8 top-2.5 ${
+            className={`p-1 absolute right-8 top-1/2 -translate-y-1/2 ${
               isDropdownExpanded && "hidden"
             }`}
             onClick={(_) => {
@@ -255,7 +255,7 @@ export const OnlineUsersSelect = (props: Props) => {
               setDropdownExpand(false);
             }}
           >
-            <CareIcon className="care-l-times text-lg text-gray-600" />
+            <CareIcon className="care-l-times text-gray-600" />
           </ButtonV2>
         </div>
       </div>
