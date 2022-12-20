@@ -66,6 +66,7 @@ export default function LinkABHANumberModal({
           <CreateHealthIDSection
             transactionId={transactionId}
             onCreateSuccess={() => props.onClose()}
+            patientId={props.patientId}
           />
         )}
       </div>
@@ -388,11 +389,13 @@ const VerifyMobileSection = ({
 interface CreateHealthIDSectionProps {
   transactionId: string;
   onCreateSuccess: (transactionId: string) => void;
+  patientId: string;
 }
 
 const CreateHealthIDSection = ({
   transactionId,
   onCreateSuccess,
+  patientId,
 }: CreateHealthIDSectionProps) => {
   const dispatch = useDispatch<any>();
   const [healthId, setHealthId] = useState("");
@@ -401,7 +404,7 @@ const CreateHealthIDSection = ({
   const handleCreateHealthId = async () => {
     setIsCreating(true);
     const res = await dispatch(
-      createHealthId({ txnId: transactionId, healthId })
+      createHealthId({ txnId: transactionId, patientId, healthId })
     );
     if (res.status === 200) {
       Notify.Success({ msg: "Health ID created" });

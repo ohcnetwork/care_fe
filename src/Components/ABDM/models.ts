@@ -7,6 +7,7 @@ export interface ICreateHealthIdRequest {
   // password: string;
   // profilePhoto: string;
   txnId: string;
+  patientId: string;
 }
 
 export interface ICreateHealthIdResponse {
