@@ -11,6 +11,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import ButtonV2 from "../Common/components/ButtonV2";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -118,7 +119,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2">
+    <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle
         title="Update Middleware"
         crumbsReplacements={{
@@ -129,7 +130,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="mt-2 grid gap-4 grid-cols-1">
                 <div>
                   <TextInputFieldV2
                     name="middleware_address"
@@ -139,20 +140,23 @@ export const UpdateFacilityMiddleware = (props: any) => {
                   />
                 </div>
               </div>
-              <div className="sm:flex sm:justify-between mt-4">
-                <div>
-                  <ButtonV2
-                    variant="secondary"
-                    onClick={() => navigate(`/facility/${facilityId}`)}
-                  >
-                    Cancel
-                  </ButtonV2>
-                </div>
-                <div>
-                  <ButtonV2 variant="primary" onClick={(e) => handleSubmit(e)}>
-                    Update
-                  </ButtonV2>
-                </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+                <ButtonV2
+                  variant="secondary"
+                  onClick={() => navigate(`/facility/${facilityId}`)}
+                  className="flex justify-center gap-1"
+                >
+                  <CareIcon className="care-l-times-circle h-5" />
+                  <p>Cancel</p>
+                </ButtonV2>
+                <ButtonV2
+                  variant="primary"
+                  onClick={(e) => handleSubmit(e)}
+                  className="flex justify-center gap-1"
+                >
+                  <CareIcon className="care-l-check-circle h-5" />
+                  <p>Update</p>
+                </ButtonV2>
               </div>
             </CardContent>
           </form>

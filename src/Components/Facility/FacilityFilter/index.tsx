@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { navigate } from "raviger";
 import { SelectField } from "../../Common/HelperInputFields";
 import { CircularProgress } from "@material-ui/core";
 import { FACILITY_TYPES, KASP_STRING } from "../../../Common/constants";
@@ -6,15 +7,7 @@ import { getStates, getDistrictByState } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useAbortableEffect, statusType } from "../../../Common/utils";
 import LocalBodySelect from "./LocalBodySelect";
-import { navigate } from "raviger";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-
-  return [state, setMergedState];
-}
+import useMergeState from "../../../Common/hooks/useMergeState";
 
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
