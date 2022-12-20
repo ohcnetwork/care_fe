@@ -19,11 +19,13 @@ type StatelessSidebarProps =
       shrinkable: true;
       shrinked: boolean;
       setShrinked: (state: boolean) => void;
+      setOpenCB?: undefined;
     }
   | {
       shrinkable?: false;
       shrinked?: false;
       setShrinked?: undefined;
+      setOpenCB: (open: boolean) => void;
     };
 
 const NavItems = [
@@ -46,6 +48,7 @@ const StatelessSidebar = ({
   shrinkable = false,
   shrinked = false,
   setShrinked,
+  setOpenCB,
 }: StatelessSidebarProps) => {
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
@@ -101,7 +104,7 @@ const StatelessSidebar = ({
     } else {
       indicatorRef.current.style.display = "none";
     }
-  }, [activeLink]);
+  }, [activeLink, lastIndicatorPosition]);
 
   return (
     <nav
@@ -123,7 +126,7 @@ const StatelessSidebar = ({
             ref={indicatorRef}
             className={`absolute left-2 w-1 hidden md:block
             bg-primary-400 rounded z-10 transition-all`}
-           />
+          />
           {NavItems.map((i) => {
             return (
               <Item
@@ -131,6 +134,7 @@ const StatelessSidebar = ({
                 {...i}
                 icon={<CareIcon className={`${i.icon} h-5`} />}
                 selected={i.to === activeLink}
+                do={() => setOpenCB && setOpenCB(false)}
               />
             );
           })}
@@ -220,7 +224,7 @@ export const MobileSidebar = ({ open, setOpen }: MobileSidebarProps) => {
                 leaveTo="-translate-x-full"
               >
                 <Dialog.Panel className="pointer-events-auto w-screen max-w-fit">
-                  <StatelessSidebar />
+                  <StatelessSidebar setOpenCB={setOpen} />
                 </Dialog.Panel>
               </Transition.Child>
             </div>
