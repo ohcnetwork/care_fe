@@ -11,7 +11,7 @@ import withScrolling from "react-dnd-scrolling";
 import { formatFilter } from "./Commons";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
-import useExport from "../../Common/hooks/useExport";
+import { ExportButton } from "../Common/Export";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -29,7 +29,6 @@ export default function BoardView() {
   });
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [isLoading] = useState(false);
-  const { ExportButton } = useExport();
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
