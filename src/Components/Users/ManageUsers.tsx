@@ -339,13 +339,14 @@ export default function ManageUsers() {
 
   users &&
     users.length &&
-    (userList = users.map((user: any) => {
+    (userList = users.map((user: any, idx) => {
       const cur_online = moment()
         .subtract(5, "minutes")
         .isBefore(user.last_login);
       return (
         <div
           key={`usr_${user.id}`}
+          id={`usr_${idx}`}
           className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
         >
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
@@ -353,7 +354,10 @@ export default function ManageUsers() {
               <div className="px-6 py-4">
                 <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
                   {user.username && (
-                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit">
+                    <div
+                      id="username"
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit"
+                    >
                       {user.username}
                     </div>
                   )}
@@ -384,7 +388,7 @@ export default function ManageUsers() {
                     )}
                   </div>
                 </div>
-                <div className="font-bold text-2xl capitalize mt-2">
+                <div id="name" className="font-bold text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && cur_online ? (
@@ -413,7 +417,7 @@ export default function ManageUsers() {
                 >
                   {user.user_type && (
                     <div className="col-span-2">
-                      <UserDetails title="Role">
+                      <UserDetails id="role" title="Role">
                         <div className="font-semibold break-all">
                           {user.user_type}
                         </div>
@@ -422,7 +426,7 @@ export default function ManageUsers() {
                   )}
                   {user.district_object && (
                     <div className="col-span-2">
-                      <UserDetails title="District">
+                      <UserDetails id="district" title="District">
                         <div className="font-semibold">
                           {user.district_object.name}
                         </div>
@@ -431,7 +435,7 @@ export default function ManageUsers() {
                   )}
                 </div>
                 {user.local_body_object && (
-                  <UserDetails title="Location">
+                  <UserDetails id="local_body" title="Location">
                     <div className="font-semibold">
                       {user.local_body_object.name}
                     </div>
@@ -446,33 +450,16 @@ export default function ManageUsers() {
                 >
                   {user.created_by && (
                     <div className="col-span-2">
-                      <UserDetails title="Created by">
+                      <UserDetails id="created_by" title="Created by">
                         <div className="font-semibold break-all">
                           {user.created_by}
                         </div>
                       </UserDetails>
                     </div>
                   )}
-                  {user.phone_number && (
-                    <div className="mt-2 bg-gray-50 border-t px-6 py-2 col-span-2">
-                      <div className="flex py-4 justify-between">
-                        <div>
-                          <div className="text-gray-500 leading-relaxed">
-                            Phone:
-                          </div>
-                          <a
-                            href={`tel:${user.phone_number}`}
-                            className="font-semibold"
-                          >
-                            {user.phone_number || "-"}
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                   {user.username && (
                     <div className="col-span-2">
-                      <UserDetails title="Home Facility">
+                      <UserDetails id="home_facility" title="Home Facility">
                         <span className="font-semibold block">
                           {user.home_facility_object?.name ||
                             "No Home Facility"}
@@ -482,7 +469,7 @@ export default function ManageUsers() {
                   )}
                   {user.username && user.facilities && (
                     <div className="col-span-4">
-                      <UserDetails title="Linked Facilities">
+                      <UserDetails id="facilities" title="Linked Facilities">
                         {showFacilities(user.username, user.facilities)}
                       </UserDetails>
                     </div>
@@ -553,7 +540,10 @@ export default function ManageUsers() {
                   <CircularProgress className="text-primary-500" />
                 </dd>
               ) : (
-                <dd className="mt-4 text-5xl lg:text-5xl md:text-4xl leading-9 font-semibold text-gray-900">
+                <dd
+                  id="count"
+                  className="mt-4 text-5xl lg:text-5xl md:text-4xl leading-9 font-semibold text-gray-900"
+                >
                   {totalCount}
                 </dd>
               )}
