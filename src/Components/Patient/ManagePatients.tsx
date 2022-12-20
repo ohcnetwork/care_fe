@@ -468,8 +468,7 @@ export const PatientManager = (props: any) => {
                 )}
                 <div className="flex w-full">
                   <div className="flex flex-wrap gap-2 flex-row justify-start">
-                    {/* TODO: Re-enable Review Missed | Temporary Hack for Launch */}
-                    {/* {patient.review_time &&
+                    {patient.review_time &&
                       !patient.last_consultation?.discharge_date &&
                       Number(patient.last_consultation?.review_interval) > 0 &&
                       moment().isAfter(patient.review_time) && (
@@ -478,7 +477,7 @@ export const PatientManager = (props: any) => {
                           startIcon="clock"
                           text="Review Missed"
                         />
-                      )} */}
+                      )}
                     {patient.allow_transfer ? (
                       <Chip
                         color="yellow"

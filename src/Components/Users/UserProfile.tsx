@@ -14,7 +14,6 @@ import { ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
-import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
@@ -104,7 +103,6 @@ export default function UserProfile() {
   });
 
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
-  const [updateBtnText, setUpdateBtnText] = React.useState<string>("Update");
 
   const [isLoading, setIsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
@@ -274,29 +272,6 @@ export default function UserProfile() {
     }
   };
 
-  const checkForNewBuildVersion = async () => {
-    const [isLatestBundle, newVersion] = await checkIfLatestBundle();
-
-    if (!isLatestBundle) {
-      setUpdateBtnText("updating...");
-      localStorage.setItem("build_meta_version", newVersion);
-
-      if ("caches" in window) {
-        // Service worker cache should be cleared with caches.delete()
-        caches.keys().then((names) => {
-          for (const name of names) {
-            caches.delete(name);
-          }
-
-          window.location.reload();
-        });
-      }
-    } else {
-      setUpdateBtnText("You already have the latest version!");
-
-      setTimeout(() => setUpdateBtnText("Update"), 1000);
-    }
-  };
   if (isLoading) {
     return <Loading />;
   }
@@ -669,22 +644,6 @@ export default function UserProfile() {
           <div className="mt-5 md:mt-0 md:col-span-2">
             <LanguageSelector className="bg-white w-full" />
           </div>
-        </div>
-
-        <div className="mt-10">
-          <div className="text-lg font-medium leading-6 text-gray-900">
-            Check for software updates
-            <p className="mt-1 text-sm leading-5 text-gray-600">
-              Click the update button to see if you have the latest
-              &quot;care&quot; version.
-            </p>
-          </div>
-          <button
-            className="bg-white text-sm hover:bg-gray-100 text-gray-800 py-2 px-4 border border-gray-400 rounded shadow text-center outline-none mt-3"
-            onClick={() => checkForNewBuildVersion()}
-          >
-            {updateBtnText}
-          </button>
         </div>
       </div>
     </div>
