@@ -111,7 +111,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       value={option}
                     >
                       {({ active }) => (
-                        <div className="flex flex-col">
+                        <div className="flex flex-col gap-2">
                           <div className="flex justify-between">
                             {option.label}
                             {(option.icon || option.isSelected) &&
@@ -123,7 +123,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                           </div>
                           {option.description && (
                             <p
-                              className={`mt-2 font-normal ${
+                              className={`font-normal ${
                                 active ? "text-primary-200" : "text-gray-700"
                               }`}
                             >

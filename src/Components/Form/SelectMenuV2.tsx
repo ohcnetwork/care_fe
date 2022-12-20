@@ -108,15 +108,19 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                       className={dropdownOptionClassNames}
                       value={option}
                     >
-                      {({ active }) => (
-                        <div className="flex flex-col">
+                      {({ active, selected }) => (
+                        <div className="flex flex-col gap-2">
                           <div className="flex justify-between">
                             {option.label}
-                            {option.icon}
+                            {props.optionIcon
+                              ? option.icon
+                              : selected && (
+                                  <CareIcon className="care-l-check text-lg" />
+                                )}
                           </div>
                           {option.description && (
                             <p
-                              className={`mt-2 ${
+                              className={`font-normal ${
                                 active ? "text-primary-200" : "text-gray-700"
                               }`}
                             >

@@ -137,13 +137,11 @@ export const AutocompleteMutliSelect = <T, V>(
                   value={option}
                 >
                   {({ selected }) => (
-                    <div className="flex flex-col">
-                      <div className="flex justify-between">
-                        <p>{option.label}</p>
-                        {selected && (
-                          <CareIcon className="care-l-check text-lg" />
-                        )}
-                      </div>
+                    <div className="flex justify-between">
+                      {option.label}
+                      {selected && (
+                        <CareIcon className="care-l-check text-lg" />
+                      )}
                     </div>
                   )}
                 </Combobox.Option>

@@ -100,24 +100,10 @@ export const AutocompleteV2 = <T, V>(props: AutocompleteProps<T, V>) => {
                   className={dropdownOptionClassNames}
                   value={option}
                 >
-                  {({ selected, active }) => (
-                    <div className="flex flex-col">
-                      <div className="flex justify-between">
-                        <p className={selected ? "font-semibold" : ""}>
-                          {option.label}
-                        </p>
-                        {option.icon && (
-                          <div
-                            className={`transition-all duration-100 ease-in-out ${
-                              active ? "text-white" : "text-primary-500"
-                            }`}
-                          >
-                            {option.icon}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  <div className="flex justify-between">
+                    {option.label}
+                    {option.icon}
+                  </div>
                 </Combobox.Option>
               ))}
             </Combobox.Options>
