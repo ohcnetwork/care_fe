@@ -3,6 +3,7 @@ import { Combobox } from "@headlessui/react";
 import { debounce } from "lodash";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
 
 interface Props {
   name?: string;
@@ -65,10 +66,10 @@ const AutoCompleteAsync = (props: Props) => {
         multiple={multiple as any}
       >
         <div className="relative mt-1">
-          <div className="w-full py-1 flex rounded bg-white disabled:bg-secondary-100 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 ring-primary-400 transition-all duration-200 ease-in-out">
+          <div className="flex">
             <Combobox.Input
               name={name}
-              className="w-full border-none text-sm leading-5 text-secondary-700 placeholder:text-secondary-400 font-medium placeholder:font-normal focus:ring-0 bg-inherit shadow-none pr-16 truncate"
+              className="cui-input-base pr-16 truncate"
               placeholder={
                 multiple && hasSelection
                   ? `${selected.length} selected`
@@ -103,32 +104,16 @@ const AutoCompleteAsync = (props: Props) => {
                 data?.map((item: any) => (
                   <Combobox.Option
                     key={item.id}
-                    className={({ active }) =>
-                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                        active ? "text-white bg-primary-500" : "text-gray-900"
-                      }`
-                    }
+                    className={dropdownOptionClassNames}
                     value={item}
                   >
-                    {({ selected, active }) => (
-                      <>
-                        <span
-                          className={`block truncate ${
-                            selected ? "font-medium" : "font-normal"
-                          }`}
-                        >
-                          {optionLabel(item)}
-                        </span>
-                        {selected ? (
-                          <span
-                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                              active ? "text-white" : "text-primary-500"
-                            }`}
-                          >
-                            <CareIcon className="care-l-check text-lg" />
-                          </span>
-                        ) : null}
-                      </>
+                    {({ selected }) => (
+                      <div className="flex justify-between">
+                        {optionLabel(item)}
+                        {selected && (
+                          <CareIcon className="care-l-check text-lg" />
+                        )}
+                      </div>
                     )}
                   </Combobox.Option>
                 ))
