@@ -22,6 +22,13 @@ type Props<T, V = T> = {
   onChange: OptionCallback<V[]>;
 };
 
+/**
+ * Avoid using this component directly. Use `MultiSelectFormField` instead as
+ * its API is easier to use and compliant with `FormField` based components.
+ *
+ * Use this only when you want to hack into the design and get more
+ * customizability.
+ */
 const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
   const options = props.options.map((option) => {
     const label = props.optionLabel(option);
@@ -100,15 +107,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                     <Listbox.Option
                       id={`${props.id}-option-${index}`}
                       key={index}
-                      className={({ active, selected }) =>
-                        classNames(
-                          "cursor-default select-none relative p-4 text-sm",
-                          active && "text-white bg-primary-500",
-                          !active && selected && "text-primary-500",
-                          !active && !selected && "text-gray-900",
-                          selected ? "font-semibold" : "font-normal"
-                        )
-                      }
+                      className={dropdownOptionClassNames}
                       value={option}
                     >
                       {({ active }) => (
@@ -154,7 +153,7 @@ interface MultiSelectOptionChipProps {
 
 export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
   return (
-    <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-600 rounded-full text-xs px-3">
+    <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-700 rounded-full text-xs px-3">
       <p className="py-1.5">{props.label}</p>
       {props.onRemove && (
         <p
@@ -165,5 +164,23 @@ export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
         </p>
       )}
     </span>
+  );
+};
+
+interface OptionRenderPropArg {
+  active: boolean;
+  selected: boolean;
+}
+
+export const dropdownOptionClassNames = ({
+  active,
+  selected,
+}: OptionRenderPropArg) => {
+  return classNames(
+    "cursor-default select-none relative p-4 text-sm",
+    active && "text-white bg-primary-500",
+    !active && selected && "text-primary-500",
+    !active && !selected && "text-gray-900",
+    selected ? "font-semibold" : "font-normal"
   );
 };

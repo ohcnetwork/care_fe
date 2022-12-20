@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -28,6 +29,13 @@ type AutocompleteProps<T, V = T> = {
     }
 );
 
+/**
+ * Avoid using this component directly. Use `AutocompleteFormField` instead as
+ * its API is easier to use and compliant with `FormField` based components.
+ *
+ * Use this only when you want to hack into the design and get more
+ * customizability.
+ */
 export const AutocompleteV2 = <T, V>(props: AutocompleteProps<T, V>) => {
   const [query, setQuery] = useState(""); // Ensure lower case
 
@@ -67,15 +75,15 @@ export const AutocompleteV2 = <T, V>(props: AutocompleteProps<T, V>) => {
         onChange={(selection: any) => props.onChange(selection.value)}
       >
         <div className="relative">
-          <div className="w-full py-1 flex rounded bg-white disabled:bg-secondary-100 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 ring-primary-400 transition-all duration-200 ease-in-out">
+          <div className="flex">
             <Combobox.Input
-              className="w-full border-none text-sm leading-5 text-secondary-700 placeholder:text-secondary-400 font-medium placeholder:font-normal focus:ring-0 bg-inherit shadow-none pr-16 truncate"
+              className="cui-input-base pr-16 truncate"
               placeholder={placeholder}
               displayValue={props.optionLabel}
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-secondary-900">
+              <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-gray-900">
                 {props.chevronIcon || (
                   <CareIcon className="care-l-angle-down -mb-1.5" />
                 )}
@@ -89,11 +97,7 @@ export const AutocompleteV2 = <T, V>(props: AutocompleteProps<T, V>) => {
                 <Combobox.Option
                   id={`${props.id}-option-${option.value}`}
                   key={index}
-                  className={({ active }) =>
-                    `cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
-                      active ? "text-white bg-primary-500" : "text-gray-900"
-                    }`
-                  }
+                  className={dropdownOptionClassNames}
                   value={option}
                 >
                   {({ selected, active }) => (

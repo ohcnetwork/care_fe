@@ -2,7 +2,7 @@ import React from "react";
 import { Listbox } from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
+import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -32,8 +32,11 @@ type SelectMenuProps<T, V = T> = {
 );
 
 /**
- * Do not use this component directly! Use `SelectFormField` instead as it API
+ * Avoid using this component directly. Use `SelectFormField` instead as its API
  * is easier to use and compliant with `FormField` based components.
+ *
+ * Use this only when you want to hack into the design and get more
+ * customizability.
  */
 const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const valueOptions = props.options.map((option) => {
@@ -102,15 +105,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                     <Listbox.Option
                       id={`${props.id}-option-${option.value}`}
                       key={index}
-                      className={({ active, selected }) =>
-                        classNames(
-                          "cursor-default select-none relative p-4 text-sm",
-                          active && "text-white bg-primary-500",
-                          !active && selected && "text-primary-500",
-                          !active && !selected && "text-gray-900",
-                          selected ? "font-semibold" : "font-normal"
-                        )
-                      }
+                      className={dropdownOptionClassNames}
                       value={option}
                     >
                       {({ active }) => (

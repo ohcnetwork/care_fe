@@ -669,7 +669,7 @@ export const PhoneNumberField = (props: any) => {
       {label && <InputLabel>{label}</InputLabel>}
       <div className="relative flex items-center">
         <PhoneInput
-          inputClass="bg-white py-3 pr-10 text-sm border border-secondary-300 shadow-none focus:border-primary-400 w-full tracking-widest"
+          inputClass="cui-input-base pl-14 pr-10 py-4 tracking-widest"
           countryCodeEditable={countryCodeEditable}
           value={value}
           placeholder={placeholder}
