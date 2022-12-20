@@ -229,7 +229,9 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         <div className="mt-4 shadow-md rounded bg-white">
           <form
             onSubmit={(e) => {
-              handleSubmit(e);
+              !id && !isLastOptionType
+                ? handleSubmit(e, "Save and Exit")
+                : handleSubmit(e);
             }}
           >
             <div className="p-4">
@@ -268,6 +270,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                 <div className="flex flex-row w-full sm:w-auto gap-4">
                   <ButtonV2
                     id="doctor-cancel"
+                    type="button"
                     variant="secondary"
                     className="w-full sm:w-auto"
                     onClick={() => goBack(!id && `/facility/${facilityId}`)}
