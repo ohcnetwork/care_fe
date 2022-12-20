@@ -162,14 +162,14 @@ const AssetManage = (props: AssetManageProps) => {
 
   const detailBlock = (item: any) =>
     item.hide ? null : (
-      <div className="flex flex-col">
+      <div className="flex flex-col grow-0 md:w-[200px]">
         <div className="flex flex-start items-center">
           <div className="w-8">
             <CareIcon className={`care-l-${item.icon} h-5 fill-gray-700`} />
           </div>
           <div className="text-gray-700 break-words">{item.label}</div>
         </div>
-        <div className="font-semibold text-lg ml-8 break-words">
+        <div className="font-semibold text-lg ml-8 break-words grow-0">
           {item.content || "--"}
         </div>
       </div>
