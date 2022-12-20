@@ -2,6 +2,7 @@ import React from "react";
 import { Listbox } from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { classNames } from "../../Utils/utils";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -39,7 +40,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       value,
       isSelected: props.value?.includes(value as any) ?? false,
       displayChip: (
-        <div className="px-2 bg-secondary-100 rounded-full text-xs text-secondary-900 border border-secondary-400">
+        <div className="px-2 bg-secondary-100 rounded-full text-xs text-gray-900 border border-secondary-400">
           {selectedLabel}
         </div>
       ),
@@ -54,7 +55,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
     if (props.renderSelectedOptions)
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
     return (
-      <span className="text-secondary-700">{`${selectedOptions.length} item(s) selected`}</span>
+      <span className="text-gray-800">{`${selectedOptions.length} item(s) selected`}</span>
     );
   };
 
@@ -70,19 +71,19 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       >
         {({ open }) => (
           <>
-            <Listbox.Label className="sr-only">
+            <Listbox.Label className="sr-only !relative">
               {props.placeholder}
             </Listbox.Label>
             <div className="relative">
               <div>
-                <Listbox.Button className="w-full flex rounded bg-white disabled:bg-secondary-100 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 ring-primary-400 transition-all duration-200 ease-in-out">
+                <Listbox.Button className="cui-input-base w-full flex rounded">
                   <div className="relative z-0 flex items-center w-full">
-                    <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
-                      <p className="ml-2.5 text-sm font-normal text-gray-500">
+                    <div className="relative flex-1 flex items-center pr-4 focus:z-10">
+                      <p className="ml-2.5 text-sm font-normal text-gray-600">
                         <Placeholder />
                       </p>
                     </div>
-                    <CareIcon className="-mb-0.5 mr-2 care-l-angle-down text-lg text-secondary-900" />
+                    <CareIcon className="-mb-0.5 care-l-angle-down text-lg text-gray-900" />
                   </div>
                 </Listbox.Button>
                 {selectedOptions.length !== 0 && (
@@ -99,45 +100,32 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                     <Listbox.Option
                       id={`${props.id}-option-${index}`}
                       key={index}
-                      className={({ active }) =>
-                        `cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
-                          active
-                            ? "text-white bg-primary-500"
-                            : "text-secondary-900"
-                        }`
+                      className={({ active, selected }) =>
+                        classNames(
+                          "cursor-default select-none relative p-4 text-sm",
+                          active && "text-white bg-primary-500",
+                          !active && selected && "text-primary-500",
+                          !active && !selected && "text-gray-900",
+                          selected ? "font-semibold" : "font-normal"
+                        )
                       }
                       value={option}
                     >
-                      {({ selected, active }) => (
+                      {({ active }) => (
                         <div className="flex flex-col">
                           <div className="flex justify-between">
-                            <p
-                              className={
-                                selected ? "font-semibold" : "font-normal"
-                              }
-                            >
-                              {option.label}
-                            </p>
-                            {(option.icon || option.isSelected) && (
-                              <span
-                                className={`transition-all duration-100 ease-in-out ${
-                                  active ? "text-white" : "text-primary-500"
-                                }`}
-                              >
-                                {option.isSelected ? (
-                                  <i className="fa-solid fa-check" />
-                                ) : (
-                                  option.icon
-                                )}
-                              </span>
-                            )}
+                            {option.label}
+                            {(option.icon || option.isSelected) &&
+                              (option.isSelected ? (
+                                <CareIcon className="care-l-check text-lg" />
+                              ) : (
+                                option.icon
+                              ))}
                           </div>
                           {option.description && (
                             <p
-                              className={`mt-2 ${
-                                active
-                                  ? "text-primary-200"
-                                  : "text-secondary-500"
+                              className={`mt-2 font-normal ${
+                                active ? "text-primary-200" : "text-gray-700"
                               }`}
                             >
                               {option.description}

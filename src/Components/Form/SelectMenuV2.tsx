@@ -2,6 +2,7 @@ import React from "react";
 import { Listbox } from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { classNames } from "../../Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -50,12 +51,10 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
 
   const showChevronIcon = props.showChevronIcon ?? true;
 
-  const placeholder = props.placeholder ?? "Select";
+  const placeholder = props.placeholder || "Select";
   const defaultOption = {
     label: placeholder,
-    selectedLabel: (
-      <p className="font-normal text-secondary-400">{placeholder}</p>
-    ),
+    selectedLabel: <p className="font-normal text-gray-600">{placeholder}</p>,
     description: undefined,
     icon: undefined,
     value: undefined,
@@ -80,18 +79,20 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
               {props.placeholder}
             </Listbox.Label>
             <div className="relative">
-              <Listbox.Button className="w-full flex rounded bg-white disabled:bg-secondary-100 border border-secondary-300 focus:border-primary-400 outline-none ring-0 focus:ring-1 ring-primary-400 transition-all duration-200 ease-in-out">
+              <Listbox.Button className="w-full flex rounded cui-input-base">
                 <div className="relative z-0 flex items-center w-full">
-                  <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10 text-secondary-700">
+                  <div className="relative flex-1 flex items-center focus:z-10">
                     {props.showIconWhenSelected && value?.icon && (
-                      <div className="ml-2 text-sm">{value.icon}</div>
+                      <div className="ml-2 text-sm text-gray-700">
+                        {value.icon}
+                      </div>
                     )}
                     <p className="ml-2.5 text-sm font-medium">
                       {value.selectedLabel}
                     </p>
                   </div>
                   {showChevronIcon && (
-                    <CareIcon className="-mb-0.5 mr-2 care-l-angle-down text-lg text-secondary-900" />
+                    <CareIcon className="-mb-0.5 care-l-angle-down text-lg text-gray-900" />
                   )}
                 </div>
               </Listbox.Button>
@@ -101,35 +102,27 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                     <Listbox.Option
                       id={`${props.id}-option-${option.value}`}
                       key={index}
-                      className={({ active }) =>
-                        `cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
-                          active ? "text-white bg-primary-500" : "text-gray-900"
-                        }`
+                      className={({ active, selected }) =>
+                        classNames(
+                          "cursor-default select-none relative p-4 text-sm",
+                          active && "text-white bg-primary-500",
+                          !active && selected && "text-primary-500",
+                          !active && !selected && "text-gray-900",
+                          selected ? "font-semibold" : "font-normal"
+                        )
                       }
                       value={option}
                     >
-                      {({ selected, active }) => (
+                      {({ active }) => (
                         <div className="flex flex-col">
                           <div className="flex justify-between">
-                            <p className={selected ? "font-semibold" : ""}>
-                              {option.label}
-                            </p>
-                            {option.icon && (
-                              <span
-                                className={`transition-all duration-100 ease-in-out ${
-                                  active ? "text-white" : "text-primary-500"
-                                }`}
-                              >
-                                {option.icon}
-                              </span>
-                            )}
+                            {option.label}
+                            {option.icon}
                           </div>
                           {option.description && (
                             <p
                               className={`mt-2 ${
-                                active
-                                  ? "text-primary-200"
-                                  : "text-secondary-500"
+                                active ? "text-primary-200" : "text-gray-700"
                               }`}
                             >
                               {option.description}
