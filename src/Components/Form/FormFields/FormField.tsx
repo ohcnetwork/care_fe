@@ -14,7 +14,7 @@ export const FieldLabel = (props: LabelProps) => {
   return (
     <label
       id={props.id}
-      className={`mb-2 block text-secondary-800 text-base font-normal ${props.className}`}
+      className={`mb-2 block text-gray-900 text-base font-normal ${props.className}`}
       htmlFor={props.htmlFor}
     >
       {props.children}
@@ -31,7 +31,7 @@ export const FieldErrorText = ({ error, className }: ErrorProps) => {
   return (
     <span
       className={classNames(
-        "font-medium tracking-wide text-red-500 text-xs mt-2 ml-1 transition-opacity duration-300",
+        "font-medium tracking-wide text-danger-500 text-xs mt-2 ml-1 transition-opacity duration-300",
         error ? "opacity-100" : "opacity-0",
         className
       )}
