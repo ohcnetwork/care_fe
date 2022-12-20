@@ -45,9 +45,9 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
         props.removeDefaultClasses
           ? props.className
           : classNames(
-              "peer text-sm block w-full rounded shadow-none bg-white disabled:bg-secondary-100 text-secondary-900 disabled:text-secondary-400 placeholder:text-secondary-400 border focus:border-primary-400 invalid:border-danger-500 outline-none ring-0 focus:ring-1 transition-all duration-200 ease-in-out",
-              hasIcon ? "py-3 px-8" : "p-3",
-              error ? "border-red-500" : "border-secondary-300",
+              "cui-input-base peer",
+              hasIcon && "px-8",
+              error && "border-danger-500",
               props.className
             )
       }
