@@ -35,7 +35,6 @@ import CoverImageEditModal from "./CoverImageEditModal";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import Table from "../Common/components/Table";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ContactLink from "../Common/components/ContactLink";
 import Chip from "../../CAREUI/display/Chip";
@@ -556,7 +555,7 @@ export const FacilityHome = (props: any) => {
                 className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
-                <PatientIcon className="w-4 h-4 fill-current mr-2" />
+                <CareIcon className="care-l-user-injured" />
                 <span>View Patients</span>
               </ButtonV2>
             </div>
