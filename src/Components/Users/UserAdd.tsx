@@ -544,7 +544,7 @@ export const UserAdd = (props: UserProps) => {
         email: state.form.email,
         state: state.form.state,
         district: state.form.district,
-        local_body: state.form.local_body,
+        local_body: showLocalbody ? state.form.local_body : null,
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
         )?.format("E.164"),
@@ -964,7 +964,7 @@ export const UserAdd = (props: UserProps) => {
                 </div>
               )}
             </div>
-            <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
+            <div className="flex flex-col md:flex-row gap-2 justify-between mt-8">
               <ButtonV2 variant="secondary" onClick={() => goBack()}>
                 Cancel
               </ButtonV2>
