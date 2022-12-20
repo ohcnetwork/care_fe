@@ -200,10 +200,10 @@ const AssetCreate = (props: AssetProps) => {
       setManufacturer(asset.manufacturer);
       asset.warranty_amc_end_of_validity &&
         setWarrantyAmcEndOfValidity(
-          moment(asset.warranty_amc_end_of_validity).format("YYYY-MM-DD")
+          moment(asset.warranty_amc_end_of_validity).toDate()
         );
       asset.last_serviced_on &&
-        setLastServicedOn(moment(asset.last_serviced_on).format("YYYY-MM-DD"));
+        setLastServicedOn(moment(asset.last_serviced_on).toDate());
       setNotes(asset.notes);
     }
   }, [asset]);
