@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
@@ -21,11 +21,15 @@ import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
-import ButtonV2 from "../Common/components/ButtonV2";
 import AssetImportModal from "./AssetImportModal";
 import { FacilityModel } from "../Facility/models";
-import { USER_TYPES } from "../../Common/constants";
+import { DropdownItem } from "../Common/components/Menu";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
+import AuthorizeFor from "../../Utils/AuthorizeFor";
+import ButtonV2 from "../Common/components/ButtonV2";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import useExport from "../../Common/hooks/useExport";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -50,6 +54,12 @@ const AssetsList = () => {
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
+  const [showFacilityDialog, setShowFacilityDialog] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
+    name: "",
+  });
+  const { exportJSON, ExportMenu } = useExport();
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -151,15 +161,6 @@ const AssetsList = () => {
     }
   };
 
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-
-  const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
-
-  const showAssetImportExport =
-    USER_TYPES.findIndex((type) => type == currentUser.data.user_type) >=
-    DISTRICT_ADMIN_LEVEL;
-
   const checkValidAssetId = async (assetId: any) => {
     const assetData: any = await dispatch(getAsset(assetId));
     try {
@@ -175,32 +176,16 @@ const AssetsList = () => {
     }
   };
 
-  const downloadJSON = (data: JSON) => {
-    const a = document.createElement("a");
-    const blob = new Blob([JSON.stringify(data)], {
-      type: "application/json",
-    });
-    a.href = URL.createObjectURL(blob);
-    a.download = `assets_${facility?.name}_${new Date().toISOString()}.json`;
-    a.click();
-  };
+  const authorizedForImportExport = useIsAuthorized(
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+  );
 
-  const handleDownload = async () => {
-    if (totalCount == 0) {
-      Notification.Error({
-        msg: "No assets to export",
-      });
-    }
-    const filters = {
-      ...qParams,
-      json: true,
-      limit: totalCount,
-    };
-    const res = await dispatch(listAssets(filters));
-    if (res && res.data && res.status === 200) {
-      downloadJSON(res.data.results);
-    }
-  };
+  const exportAssets = () =>
+    authorizedForImportExport &&
+    exportJSON(
+      `assets_${facility?.name}`,
+      listAssets({ ...qParams, json: true, limit: totalCount })
+    );
 
   if (isScannerActive)
     return (
@@ -238,12 +223,15 @@ const AssetsList = () => {
           <div
             key={asset.id}
             className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
-            onClick={() => navigate(`/assets/${asset.id}`)}
+            onClick={() =>
+              navigate(
+                `facility/${asset?.location_object.facility.id}/assets/${asset.id}`
+              )
+            }
           >
             <div className="md:flex">
               <p className="text-xl flex font-medium capitalize break-words">
                 <span className="mr-2 text-primary-500">
-                  {" "}
                   <i
                     className={`fas fa-${
                       (
@@ -287,7 +275,35 @@ const AssetsList = () => {
 
   return (
     <div className="px-6">
-      <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
+      <div className="flex justify-between items-center">
+        <PageTitle title="Assets" breadcrumbs={false} hideBack />
+        {authorizedForImportExport && (
+          <div className="tooltip">
+            {!facility && (
+              <span className="tooltip-text tooltip-left flex flex-col items-end">
+                <p>Select a facility from the Facilities page and</p>
+                <p>click 'View Assets' from the Manage Facility dropdown</p>
+              </span>
+            )}
+            {/* TODO: ask for facility select dialog instead of disabling */}
+            <ExportMenu disabled={!facility} label="Import/Export">
+              <DropdownItem
+                icon={<CareIcon className="care-l-import" />}
+                onClick={() => setImportAssetModalOpen(true)}
+              >
+                Import Assets
+              </DropdownItem>
+              <DropdownItem
+                disabled={totalCount === 0}
+                icon={<CareIcon className="care-l-export" />}
+                onClick={exportAssets}
+              >
+                Export Assets
+              </DropdownItem>
+            </ExportMenu>
+          </div>
+        )}
+      </div>
       <div className="lg:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
@@ -323,44 +339,21 @@ const AssetsList = () => {
                 setShowFilters={() => advancedFilter.setShow(true)}
               />
             </div>
-            <button
-              className="btn btn-primary w-full"
+            <ButtonV2
+              className="w-full"
               onClick={() => setIsScannerActive(true)}
             >
               <i className="fas fa-search mr-1"></i> Scan Asset QR
-            </button>
+            </ButtonV2>
           </div>
-          {showAssetImportExport && (
-            <div className="w-full tooltip flex flex-col md:flex-row gap-2">
-              {!facility ? (
-                <span className="tooltip-text tooltip-left">
-                  <p className="self-end text-sm italic ">
-                    * Select a facility
-                  </p>
-                </span>
-              ) : (
-                ""
-              )}
-              <ButtonV2
-                className="w-1/2 flex gap-2 items-center"
-                disabled={!facility}
-                onClick={() => {
-                  setImportAssetModalOpen(true);
-                }}
-              >
-                <CareIcon className="care-l-import text-lg" />
-                <span>Import Assets</span>
-              </ButtonV2>
-              <ButtonV2
-                className="w-1/2 flex gap-2 items-center"
-                disabled={!facility}
-                onClick={handleDownload}
-              >
-                <CareIcon className="care-l-export text-lg" />
-                <span>Export Assets</span>
-              </ButtonV2>
-            </div>
-          )}
+          <div className="flex flex-col md:flex-row w-full">
+            <ButtonV2
+              className="w-full inline-flex items-center justify-center"
+              onClick={() => setShowFacilityDialog(true)}
+            >
+              <CareIcon className="care-l-plus-circle h-5 mr-1" /> Create Asset
+            </ButtonV2>
+          </div>
         </div>
       </div>
       <div>
@@ -398,6 +391,16 @@ const AssetsList = () => {
           facility={facility}
         />
       )}
+      <FacilitiesSelectDialogue
+        show={showFacilityDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() => navigate(`facility/${selectedFacility.id}/assets/new`)}
+        handleCancel={() => {
+          setShowFacilityDialog(false);
+          setSelectedFacility({ name: "" });
+        }}
+      />
     </div>
   );
 };

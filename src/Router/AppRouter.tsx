@@ -321,14 +321,18 @@ const routes = {
   "/facility/:facilityId/assets/new": ({ facilityId }: any) => (
     <AssetCreate facilityId={facilityId} />
   ),
-  "/facility/:facilityId/assets/:assetId": ({ facilityId, assetId }: any) => (
-    <AssetCreate facilityId={facilityId} assetId={assetId} />
-  ),
+  "/facility/:facilityId/assets/:assetId/update": ({
+    facilityId,
+    assetId,
+  }: any) => <AssetCreate facilityId={facilityId} assetId={assetId} />,
   "/assets": () => <AssetsList />,
-  "/assets/:assetId": ({ assetId }: any) => <AssetManage assetId={assetId} />,
-  "/assets/:assetId/configure": ({ assetId }: any) => (
-    <AssetConfigure assetId={assetId} />
+  "/facility/:facilityId/assets/:assetId": ({ assetId, facilityId }: any) => (
+    <AssetManage assetId={assetId} facilityId={facilityId} />
   ),
+  "/facility/:facilityId/assets/:assetId/configure": ({
+    assetId,
+    facilityId,
+  }: any) => <AssetConfigure assetId={assetId} facilityId={facilityId} />,
 
   "/shifting": () =>
     localStorage.getItem("defaultShiftView") === "list" ? (
