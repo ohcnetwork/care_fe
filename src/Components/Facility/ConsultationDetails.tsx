@@ -50,6 +50,7 @@ import { formatDate } from "../../Utils/utils";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import ButtonV2 from "../Common/components/ButtonV2";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -1178,8 +1179,9 @@ export const ConsultationDetails = (props: any) => {
                 breadcrumbs={false}
               />
               <div className="pt-6">
-                <button
-                  className="btn btn-primary w-full"
+                <ButtonV2
+                  disabled={!patientData.is_active}
+                  variant="primary"
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
@@ -1187,7 +1189,7 @@ export const ConsultationDetails = (props: any) => {
                   }
                 >
                   <i className="fas fa-plus w-4 mr-3"></i> Log Lab Result
-                </button>
+                </ButtonV2>
               </div>
             </div>
             <ViewInvestigations
