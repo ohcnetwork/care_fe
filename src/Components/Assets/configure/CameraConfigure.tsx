@@ -7,8 +7,7 @@ import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { getCameraConfig } from "../../../Utils/transformUtils";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { Submit } from "../../Common/components/ButtonV2";
 
 interface CameraConfigureProps {
   asset: AssetData;
@@ -64,10 +63,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
               </div>
             </div>
             <div className="flex justify-between mt-4">
-              <ButtonV2 type="submit">
-                <CareIcon className="care-l-check-circle text-lg" />
-                <span>Add Preset</span>
-              </ButtonV2>
+              <Submit label="Add Preset" />
             </div>
           </CardContent>
         </form>

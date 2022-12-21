@@ -1,3 +1,4 @@
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 import { classNames } from "../../../Utils/utils";
@@ -96,3 +97,42 @@ const ButtonV2 = ({
 };
 
 export default ButtonV2;
+
+// Common buttons
+
+type CommonButtonProps = ButtonProps & { label?: string; icon?: string };
+
+export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
+  return (
+    <ButtonV2
+      type="submit"
+      className="w-full md:w-auto"
+      // Voluntarily setting children this way, so that it's overridable when using.
+      children={
+        <>
+          <CareIcon className="care-l-check-circle text-lg" />
+          <span>{label}</span>
+        </>
+      }
+      {...props}
+    />
+  );
+};
+
+export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
+  return (
+    <ButtonV2
+      type="button"
+      variant="secondary"
+      className="w-full md:w-auto"
+      // Voluntarily setting children this way, so that it's overridable when using.
+      children={
+        <>
+          <CareIcon className="care-l-times-circle text-lg" />
+          <span>{label}</span>
+        </>
+      }
+      {...props}
+    />
+  );
+};

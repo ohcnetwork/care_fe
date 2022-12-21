@@ -8,8 +8,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
 import { goBack } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -195,26 +194,8 @@ export const SetInventoryForm = (props: any) => {
                 </div>
               </div>
               <div className="sm:flex sm:justify-between mt-4">
-                <div>
-                  <button
-                    color="default"
-                    type="button"
-                    onClick={() => goBack()}
-                    className="w-full sm:w-fit rounded-md p-2 px-6 mt-2 bg-gray-400 hover:bg-gray-500"
-                  >
-                    Cancel
-                  </button>
-                </div>
-                <div>
-                  <ButtonV2
-                    type="submit"
-                    className="w-full sm:w-fit"
-                    onClick={handleSubmit}
-                  >
-                    <CareIcon className="care-l-check-circle text-lg" />
-                    <span>Set</span>
-                  </ButtonV2>
-                </div>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} label="Set" />
               </div>
             </CardContent>
           </form>

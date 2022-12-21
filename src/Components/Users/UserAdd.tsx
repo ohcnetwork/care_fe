@@ -38,8 +38,7 @@ import {
 import { FacilityModel } from "../Facility/models";
 
 import { classNames, goBack } from "../../Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -941,17 +940,8 @@ export const UserAdd = (props: UserProps) => {
               )}
             </div>
             <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-              <ButtonV2 variant="secondary" onClick={() => goBack()}>
-                Cancel
-              </ButtonV2>
-              <ButtonV2
-                className="w-full md:w-auto"
-                type="submit"
-                onClick={handleSubmit}
-              >
-                <CareIcon className="care-l-check-circle text-lg" />
-                <span>{buttonText}</span>
-              </ButtonV2>
+              <Cancel onClick={() => goBack()} />
+              <Submit onClick={handleSubmit} label={buttonText} />
             </div>
           </form>
         </CardContent>

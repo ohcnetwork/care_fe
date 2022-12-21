@@ -31,8 +31,7 @@ import {
   FormControlLabel,
 } from "@material-ui/core";
 import { goBack } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -373,13 +372,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <ButtonV2 variant="secondary" onClick={() => goBack()}>
-                  Cancel
-                </ButtonV2>
-                <ButtonV2 type="submit" onClick={handleSubmit}>
-                  <CareIcon className="care-l-check-circle text-lg" />
-                  <span>Submit</span>
-                </ButtonV2>
+                <Cancel variant="secondary" onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} />
               </div>
             </div>
           </CardContent>

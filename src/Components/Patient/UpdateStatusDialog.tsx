@@ -18,8 +18,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { createUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 
 interface Props {
   sample: SampleTestModel;
@@ -237,14 +236,14 @@ const UpdateStatusDialog = (props: Props) => {
                 )}
               </div>
               <div className="flex justify-end col-start-2 col-span-2">
-                <ButtonV2
+                <Submit
                   type="submit"
                   onClick={handleUpload}
                   disabled={uploadDone}
                 >
                   <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   <span>Upload</span>
-                </ButtonV2>
+                </Submit>
               </div>
             </>
           )}
@@ -261,13 +260,12 @@ const UpdateStatusDialog = (props: Props) => {
         </div>
       </DialogContent>
       <DialogActions style={{ justifyContent: "space-between" }}>
-        <ButtonV2 variant="secondary" onClick={cancelClicked}>
-          Cancel
-        </ButtonV2>
-        <ButtonV2 onClick={okClicked} disabled={state.form.disabled}>
-          <CareIcon className="care-l-check-circle text-lg" />
-          Update Status
-        </ButtonV2>
+        <Cancel onClick={cancelClicked} />
+        <Submit
+          onClick={okClicked}
+          disabled={state.form.disabled}
+          label="Update Status"
+        />
       </DialogActions>
     </Dialog>
   );

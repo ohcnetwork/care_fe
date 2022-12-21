@@ -30,7 +30,7 @@ import { phonePreg } from "../../Common/validation";
 
 import { createShift, getPatient } from "../../Redux/actions";
 import { goBack } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -429,12 +429,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div className="md:col-span-2 flex justify-between mt-4">
-                <ButtonV2 variant="secondary" onClick={() => goBack()}>
-                  Cancel
-                </ButtonV2>
-                <ButtonV2 type="submit" onClick={handleSubmit}>
-                  Submit
-                </ButtonV2>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} />
               </div>
             </div>
           </CardContent>

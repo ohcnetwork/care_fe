@@ -10,8 +10,7 @@ import {
   InputLabel,
 } from "@material-ui/core";
 import { useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { DupPatientModel } from "./models";
 
 interface Props {
@@ -26,8 +25,6 @@ const tdClass = "border border-gray-400 p-2 text-left";
 const DuplicatePatientDialog = (props: Props) => {
   const { patientList, handleOk, handleCancel, isNew } = props;
   const [action, setAction] = useState("");
-
-  const text = isNew ? "registration" : "update";
 
   return (
     <Dialog open={true} maxWidth={"sm"}>
@@ -112,13 +109,15 @@ const DuplicatePatientDialog = (props: Props) => {
         </div>
       </DialogContent>
       <DialogActions className="justify-between flex flex-col md:flex-row md:px-6">
-        <ButtonV2 variant="secondary" onClick={handleCancel}>
-          Cancel {text}
-        </ButtonV2>
-        <ButtonV2 onClick={() => handleOk(action)} disabled={!action}>
-          <CareIcon className="care-l-check-circle text-lg" />
-          <span>Continue</span>
-        </ButtonV2>
+        <Cancel
+          onClick={handleCancel}
+          label={`Cancel ${isNew ? "Registration" : "Update"}`}
+        />
+        <Submit
+          onClick={() => handleOk(action)}
+          disabled={!action}
+          label="Continue"
+        />
       </DialogActions>
     </Dialog>
   );

@@ -14,8 +14,7 @@ import { TextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
 import { goBack } from "../../Utils/utils";
 import DateInputV2 from "../Common/DateInputV2";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -335,21 +334,8 @@ export const TriageForm = (props: triageFormProps) => {
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <ButtonV2
-                  variant="secondary"
-                  className="w-full md:w-auto"
-                  onClick={() => goBack()}
-                >
-                  Cancel
-                </ButtonV2>
-                <ButtonV2
-                  className="w-full md:w-auto"
-                  onClick={handleSubmit}
-                  data-testid="add-patient-button"
-                >
-                  <CareIcon className="care-l-check-circle text-lg" />
-                  <span>{buttonText}</span>
-                </ButtonV2>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} label={buttonText} />
               </div>
             </CardContent>
           </form>

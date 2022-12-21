@@ -16,8 +16,7 @@ import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { Submit } from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -539,10 +538,7 @@ export default function UserProfile() {
                       </div>
                     </div>
                     <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
-                      <ButtonV2 type="submit" onClick={handleSubmit}>
-                        <CareIcon className="care-l-check-circle text-lg" />
-                        <span>Update</span>
-                      </ButtonV2>
+                      <Submit onClick={handleSubmit} label="Update" />
                     </div>
                   </div>
                 </form>
@@ -600,10 +596,10 @@ export default function UserProfile() {
                       </div>
                     </div>
                     <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
-                      <ButtonV2 type="submit" onClick={changePassword}>
-                        <CareIcon className="care-l-check-circle text-lg" />
-                        <span>Change Password</span>
-                      </ButtonV2>
+                      <Submit
+                        onClick={changePassword}
+                        label="Change Password"
+                      />
                     </div>
                   </div>
                 </form>

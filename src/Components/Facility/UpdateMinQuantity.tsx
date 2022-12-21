@@ -11,8 +11,7 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
 import { goBack } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -167,21 +166,8 @@ export const UpdateMinQuantity = (props: any) => {
                 </div>
               </div>
               <div className="sm:flex sm:justify-between mt-4">
-                <ButtonV2
-                  variant="secondary"
-                  className="w-full sm:w-fit mt-2"
-                  onClick={() => goBack()}
-                >
-                  Cancel
-                </ButtonV2>
-                <ButtonV2
-                  className="w-full sm:w-fit mt-2"
-                  type="submit"
-                  onClick={handleSubmit}
-                >
-                  <CareIcon className="care-l-check-circle text-lg" />
-                  <span>Set</span>
-                </ButtonV2>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} label="Set" />
               </div>
             </CardContent>
           </form>

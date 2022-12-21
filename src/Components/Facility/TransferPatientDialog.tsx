@@ -14,8 +14,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, SelectField } from "../Common/HelperInputFields";
 import { DupPatientModel } from "./models";
 import { OptionsType } from "../../Common/constants";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 
 interface Props {
   patientList: Array<DupPatientModel>;
@@ -183,17 +182,12 @@ const TransferPatientDialog = (props: Props) => {
         </div>
       </DialogContent>
       <DialogActions className="justify-between flex flex-col md:flex-row">
-        <ButtonV2
+        <Cancel onClick={handleCancel} disabled={isLoading} />
+        <Submit
           disabled={isLoading}
-          variant="secondary"
-          onClick={handleCancel}
-        >
-          Cancel
-        </ButtonV2>
-        <ButtonV2 disabled={isLoading} onClick={handleSubmit} variant="primary">
-          <CareIcon className="care-l-check-circle text-lg" />
-          <span>Transfer Suspect / Patient</span>
-        </ButtonV2>
+          onClick={handleSubmit}
+          label="Transfer Suspect / Patient"
+        />
       </DialogActions>
     </Dialog>
   );

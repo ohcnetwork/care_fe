@@ -1,6 +1,5 @@
 import { useCallback, useState, useReducer } from "react";
 import {
-  Button,
   CardContent,
   CircularProgress,
   InputLabel,
@@ -22,8 +21,7 @@ import {
 import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { goBack } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -326,23 +324,8 @@ export default function UpdateResult(props: any) {
             </div>
           </div>
           <div className="flex flex-col md:flex-row gap-2 justify-end mt-4">
-            <Button
-              color="default"
-              variant="contained"
-              type="button"
-              className="w-full md:w-auto"
-              onClick={() => goBack()}
-            >
-              Cancel
-            </Button>
-            <ButtonV2
-              type="submit"
-              onClick={(e) => handleSubmit(e)}
-              className="w-full md:w-auto"
-            >
-              <CareIcon className="care-l-check-circle text-lg" />
-              <span>Submit</span>
-            </ButtonV2>
+            <Cancel onClick={() => goBack()} />
+            <Submit onClick={handleSubmit} />
           </div>
         </form>
       </CardContent>

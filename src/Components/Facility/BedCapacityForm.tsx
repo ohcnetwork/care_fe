@@ -16,8 +16,7 @@ import { CapacityModal, OptionsType } from "./models";
 import { goBack } from "../../Utils/utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../../Components/Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -281,37 +280,19 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             <div className="p-4">
               <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
                 <div className="w-full md:w-auto">
-                  <ButtonV2
-                    id="bed-capacity-cancel"
-                    className="w-full md:w-auto"
-                    type="submit"
-                    variant="secondary"
+                  <Cancel
                     onClick={() => goBack(!id && `/facility/${facilityId}`)}
-                  >
-                    Cancel
-                  </ButtonV2>
+                  />
                 </div>
                 <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                  {!isLastOptionType && headerText === "Add Bed Capacity" && (
-                    <ButtonV2
-                      id="bed-capacity-save-and-exit"
-                      className="w-full md:w-auto"
-                      type="submit"
-                      onClick={(e) => handleSubmit(e, "Save and Exit")}
-                    >
-                      <CareIcon className="care-l-check-circle text-lg" />
-                      <span>Save Bed Capacity</span>
-                    </ButtonV2>
-                  )}
-                  <ButtonV2
-                    id="bed-capacity-save"
-                    className="w-full md:w-auto"
-                    type="submit"
-                    onClick={(e) => handleSubmit(e)}
-                  >
-                    <CareIcon className="care-l-check-circle text-lg" />
-                    <span>{buttonText}</span>
-                  </ButtonV2>
+                  <Submit
+                    hidden={
+                      !(!isLastOptionType && headerText === "Add Bed Capacity")
+                    }
+                    onClick={(e) => handleSubmit(e, "Save and Exit")}
+                    label="Save Bed Capacity"
+                  />
+                  <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
                 </div>
               </div>
             </div>

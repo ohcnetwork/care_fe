@@ -17,8 +17,7 @@ import {
 } from "../Common/HelperInputFields";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -91,6 +90,11 @@ export const AddBedForm = (props: BedFormProps) => {
 
     return isValid;
   };
+
+  const handleCancel = () =>
+    navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
+      replace: true,
+    });
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -211,22 +215,8 @@ export const AddBedForm = (props: BedFormProps) => {
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                  <ButtonV2
-                    variant="secondary"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/location/${locationId}/beds`,
-                        { replace: true }
-                      )
-                    }
-                  >
-                    <CareIcon className="care-l-times text-lg" />
-                    Cancel
-                  </ButtonV2>
-                  <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
-                    <CareIcon className="care-l-check-circle text-lg" />
-                    {buttonText}
-                  </ButtonV2>
+                  <Cancel onClick={handleCancel} />
+                  <Submit onClick={handleSubmit} label={buttonText} />
                 </div>
               </div>
             </CardContent>

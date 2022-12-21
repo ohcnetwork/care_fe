@@ -14,8 +14,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
 import { goBack } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -267,37 +266,17 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             <div className="p-4">
               <div className="flex justify-between flex-col md:flex-row">
                 <div className="flex flex-row w-full sm:w-auto gap-4">
-                  <ButtonV2
-                    id="doctor-cancel"
-                    type="button"
-                    variant="secondary"
-                    className="w-full sm:w-auto"
+                  <Cancel
                     onClick={() => goBack(!id && `/facility/${facilityId}`)}
-                  >
-                    Cancel
-                  </ButtonV2>
+                  />
                 </div>
                 <div className="flex flex-row w-full sm:w-auto flex-wrap">
-                  {!id && !isLastOptionType && (
-                    <ButtonV2
-                      id="doctor-save-and-exit"
-                      className="w-full sm:w-auto"
-                      type="submit"
-                      onClick={(e) => handleSubmit(e, "Save and Exit")}
-                    >
-                      <CareIcon className="care-l-check-circle text-lg" />
-                      <span>Save Doctor Capacity</span>
-                    </ButtonV2>
-                  )}
-                  <ButtonV2
-                    id="doctor-save"
-                    className="w-full sm:w-auto"
-                    type="submit"
-                    onClick={(e) => handleSubmit(e)}
-                  >
-                    <CareIcon className="care-l-check-circle text-lg" />
-                    <span>{buttonText}</span>
-                  </ButtonV2>
+                  <Submit
+                    hidden={!(!id && !isLastOptionType)}
+                    onClick={(e) => handleSubmit(e, "Save and Exit")}
+                    label="Save Doctor Capacity"
+                  />
+                  <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
                 </div>
               </div>
             </div>

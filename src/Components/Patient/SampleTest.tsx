@@ -21,8 +21,7 @@ import { SampleTestModel, FacilityNameModel } from "./models";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
 import { goBack } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -498,13 +497,8 @@ export const SampleTest = (props: any) => {
                 </div>
               </div>
               <div className="flex justify-between mt-4">
-                <ButtonV2 variant="secondary" onClick={() => goBack()}>
-                  Cancel
-                </ButtonV2>
-                <ButtonV2 type="submit" onClick={handleSubmit}>
-                  <CareIcon className="care-l-check-circle text-lg" />
-                  <span>{buttonText}</span>
-                </ButtonV2>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} label={buttonText} />
               </div>
             </form>
           </CardContent>

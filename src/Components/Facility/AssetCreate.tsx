@@ -29,8 +29,7 @@ import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -882,31 +881,18 @@ const AssetCreate = (props: AssetProps) => {
 
                 <div />
 
-                <div className="mt-12 flex justify-end gap-x-4 gap-y-2 flex-wrap">
-                  <ButtonV2
-                    className="w-full md:w-auto"
-                    id="asset-create"
-                    type="submit"
+                <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                  <Submit
                     onClick={(e) => handleSubmit(e, false)}
-                  >
-                    <CareIcon className="care-l-check-circle text-lg" />
-                    <span>{assetId ? "Update" : "Create Asset"}</span>
-                  </ButtonV2>
+                    label={assetId ? "Update" : "Create Asset"}
+                  />
                   {!assetId && (
-                    <ButtonV2
-                      className="w-full md:w-auto"
-                      id="asset-create"
-                      type="submit"
+                    <Submit
                       onClick={(e) => handleSubmit(e, true)}
-                    >
-                      <CareIcon className="care-l-check-circle text-lg" />
-                      <span>Create & Add More</span>
-                    </ButtonV2>
+                      label="Create & Add More"
+                    />
                   )}
-                  <ButtonV2
-                    id="asset-cancel"
-                    variant="secondary"
-                    className="w-full md:w-auto"
+                  <Cancel
                     onClick={() =>
                       navigate(
                         assetId
@@ -914,10 +900,7 @@ const AssetCreate = (props: AssetProps) => {
                           : `/facility/${facilityId}`
                       )
                     }
-                  >
-                    <CareIcon className="care-l-check-circle text-lg" />
-                    <span>Cancel</span>
-                  </ButtonV2>
+                  />
                 </div>
               </div>
             </form>

@@ -14,8 +14,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Submit, Cancel } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -106,7 +105,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
       />
       <div className="mt-10">
         <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
+          <form onSubmit={handleSubmit}>
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1">
                 <div>
@@ -137,20 +136,14 @@ export const AddLocationForm = (props: LocationFormProps) => {
                 </div>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-between mt-4">
-                <ButtonV2
+                <Cancel
                   onClick={() =>
                     navigate(`/facility/${facilityId}/location`, {
                       replace: true,
                     })
                   }
-                  variant="secondary"
-                >
-                  <span>Cancel</span>
-                </ButtonV2>
-                <ButtonV2 type="submit" onClick={handleSubmit}>
-                  <CareIcon className="care-l-check-circle text-lg" />
-                  <span>{buttonText}</span>
-                </ButtonV2>
+                />
+                <Submit onClick={handleSubmit} label={buttonText} />
               </div>
             </CardContent>
           </form>

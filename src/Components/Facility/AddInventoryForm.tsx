@@ -13,8 +13,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
 import { goBack } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -222,7 +221,7 @@ export const AddInventoryForm = (props: any) => {
       />
       <div className="mt-4">
         <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
+          <form onSubmit={handleSubmit}>
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
@@ -288,17 +287,8 @@ export const AddInventoryForm = (props: any) => {
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <ButtonV2
-                  variant="secondary"
-                  onClick={() => goBack()}
-                  className="w-full sm:w-fit"
-                >
-                  Cancel
-                </ButtonV2>
-                <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
-                  <CareIcon className="care-l-check-circle text-lg" />
-                  <span>Add/Update Inventory</span>
-                </ButtonV2>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} label="Add/Update Inventory" />
               </div>
             </CardContent>
           </form>
