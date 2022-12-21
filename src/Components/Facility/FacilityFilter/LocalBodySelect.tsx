@@ -14,8 +14,6 @@ interface LocalBodySelectProps {
   district?: string;
   isLoading?: (loading: boolean) => void;
   setSelected: (selected: string) => void;
-  selectedLocalBodyObject: any;
-  setSelectedLocalBodyObject: (local_body: any) => void;
 }
 
 function LocalBodySelect(props: LocalBodySelectProps) {
@@ -28,14 +26,18 @@ function LocalBodySelect(props: LocalBodySelectProps) {
     setSelected,
     margin,
     district,
-    selectedLocalBodyObject,
-    setSelectedLocalBodyObject,
   } = props;
   const [loadBodyLoading, isLocalBodyLoading] = useState(false);
+  const [selectedObject, setSelectedObject] = useState(null);
   const [hasSearchText, setHasSearchText] = useState(false);
   const [districtLocalBodies, setDistrictLocalBodies] = useState([]);
   const [localBodyList, setLocalBodyList] = useState([]);
   const dispatchAction: any = useDispatch();
+
+  const handleValueChange = (local_body: any) => {
+    setSelectedObject(local_body);
+    setSelected(local_body?.id);
+  };
 
   const handleSearch = (e: any) => {
     const searchTerm = e.target.value;
@@ -61,7 +63,7 @@ function LocalBodySelect(props: LocalBodySelectProps) {
           setLocalBodyList(res.data);
 
           if (selected) {
-            setSelectedLocalBodyObject(
+            setSelectedObject(
               res.data.find((local_body: any) => local_body.id == selected) ||
                 null
             );
@@ -76,7 +78,7 @@ function LocalBodySelect(props: LocalBodySelectProps) {
     isLocalBodyLoading(true);
     fetchLocalbodies();
     isLocalBodyLoading(false);
-  }, [dispatchAction, district, selected, setSelectedLocalBodyObject]);
+  }, [dispatchAction, district, selected]);
 
   return (
     <AutoCompleteAsyncField
@@ -84,13 +86,10 @@ function LocalBodySelect(props: LocalBodySelectProps) {
       multiple={multiple}
       variant="outlined"
       margin={margin}
-      value={selectedLocalBodyObject}
+      value={selectedObject}
       options={localBodyList}
       onSearch={handleSearch}
-      onChange={(e: any, selected: any) => {
-        setSelectedLocalBodyObject(selected);
-        setSelected(selected?.id);
-      }}
+      onChange={(e: any, selected: any) => handleValueChange(selected)}
       loading={loadBodyLoading}
       placeholder="Enter local body name"
       noOptionsText={

@@ -21,7 +21,6 @@ function FacilityFilter(props: any) {
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
-  const [selectedLocalBodyObject, setSelectedLocalBodyObject] = useState(null);
   const [filterState, setFilterState] = useMergeState({
     state: filter.state || "",
     district: filter.district || "",
@@ -113,14 +112,7 @@ function FacilityFilter(props: any) {
         <button
           className="btn btn-default mt-1"
           onClick={(_) => {
-            setFilterState({
-              state: "",
-              district: "",
-              local_body: "",
-              facility_type: "",
-              kasp_empanelled: "",
-            });
-            setSelectedLocalBodyObject(null);
+            closeFilter();
             navigate("/facility");
           }}
         >
@@ -182,8 +174,6 @@ function FacilityFilter(props: any) {
               selected={filterState.local_body}
               setSelected={handleLocalBodyChange}
               margin="dense"
-              selectedLocalBodyObject={selectedLocalBodyObject}
-              setSelectedLocalBodyObject={setSelectedLocalBodyObject}
             />
           </div>
         </div>
