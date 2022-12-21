@@ -100,7 +100,7 @@ export default ButtonV2;
 
 // Common buttons
 
-type CommonButtonProps = ButtonProps & { label?: string; icon?: string };
+type CommonButtonProps = ButtonProps & { label?: string; };
 
 export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
   return (
