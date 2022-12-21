@@ -665,7 +665,7 @@ export const PhoneNumberField = (props: any) => {
     formattedValue: string
   ) => {
     onChangeHandler(formattedValue);
-    setMaxLength(() => (value.slice(2, 7) === "18001" ? 16 : 15));
+    setMaxLength(() => (value.slice(2, 6) === "1800" ? 16 : 15));
   };
 
   return (
