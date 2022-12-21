@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getDistrict } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
@@ -11,13 +11,7 @@ import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { USER_TYPE_OPTIONS } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-
-const useMergeState = (initialState: any) => {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-};
+import useMergeState from "../../Common/hooks/useMergeState";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import {
@@ -32,13 +32,7 @@ import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import { DateRange } from "../Common/DateRangeInputV2";
 import FilterButtons from "../Common/FilterButtons";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-
-const useMergeState = (initialState: any) => {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-};
+import useMergeState from "../../Common/hooks/useMergeState";
 
 const getDate = (value: any) =>
   value && moment(value).isValid() && moment(value).toDate();
