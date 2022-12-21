@@ -1171,16 +1171,17 @@ export const ConsultationDetails = (props: any) => {
                 breadcrumbs={false}
               />
               <div className="pt-6">
-                <button
-                  className="btn btn-primary w-full"
+                <ButtonV2
+                  disabled={!patientData.is_active}
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
                     )
                   }
                 >
-                  <i className="fas fa-plus w-4 mr-3"></i> Log Lab Result
-                </button>
+                  <CareIcon className="care-l-plus" />
+                  <span>Log Lab Result</span>
+                </ButtonV2>
               </div>
             </div>
             <ViewInvestigations
