@@ -242,7 +242,6 @@ const AssetCreate = (props: AssetProps) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
-          console.log("Phone String: ", support_phone);
           // eslint-disable-next-line no-case-declarations
 
           const supportPhoneSimple = support_phone
@@ -793,7 +792,6 @@ const AssetCreate = (props: AssetProps) => {
                     </label>
 
                     <PhoneNumberField
-
                       id="support_phone"
                       enableTollFree
                       value={support_phone}
