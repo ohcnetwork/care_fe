@@ -10,6 +10,7 @@ import * as Sentry from "@sentry/browser";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 
 import "./style/index.css";
+import UpdatableApp from "./Components/Common/UpdatableApp";
 
 const store = createStore(reducer, applyMiddleware(thunk));
 if (process.env.NODE_ENV === "production") {
@@ -30,7 +31,9 @@ const theme = createMuiTheme({
 ReactDOM.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
-      <App />
+      <UpdatableApp>
+        <App />
+      </UpdatableApp>
     </ThemeProvider>
   </Provider>,
   document.getElementById("root")

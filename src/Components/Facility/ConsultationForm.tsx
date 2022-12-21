@@ -478,6 +478,17 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
+
+        case "verified_by":
+          if (
+            !state.form[field].replace(/\s/g, "").length
+          ) {
+            errors[field] = "Please fill verified by";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+
         default:
           return;
       }
@@ -955,7 +966,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="verified_by-div">
-                <InputLabel id="exam-details-label">Verified By</InputLabel>
+                <InputLabel id="exam-details-label">Verified By *</InputLabel>
                 <MultilineInputField
                   rows={3}
                   name="verified_by"
@@ -969,6 +980,7 @@ export const ConsultationForm = (props: any) => {
                   value={state.form.verified_by}
                   onChange={handleChange}
                   errors={state.errors.verified_by}
+                  required
                 />
               </div>
               <div id="provisional-diagnosis-div" className="mt-4">

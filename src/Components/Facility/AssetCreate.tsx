@@ -237,18 +237,28 @@ const AssetCreate = (props: AssetProps) => {
             invalidForm = true;
           }
           return;
-        case "support_phone":
+        case "support_phone": {
           if (!support_phone) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumberFromString(support_phone);
-          if (!phoneNumber?.isPossible()) {
+          const supportPhoneSimple = support_phone
+            .replace(/[^0-9]/g, "")
+            .slice(2);
+          const checkTollFree = supportPhoneSimple.startsWith("1800");
+          if (supportPhoneSimple.length > 10 && !checkTollFree) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          } else if (supportPhoneSimple.length > 11 && checkTollFree) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          } else if (supportPhoneSimple.length < 10) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }
           return;
+        }
         case "support_email":
           if (support_email && !validateEmailAddress(support_email)) {
             errors[field] = "Please enter valid email id";
@@ -775,6 +785,7 @@ const AssetCreate = (props: AssetProps) => {
                       Customer Support Number *{" "}
                     </label>
                     <PhoneNumberField
+                      enableTollFree
                       value={support_phone}
                       onChange={setSupportPhone}
                       errors={state.errors.support_phone}
@@ -906,7 +917,7 @@ const AssetCreate = (props: AssetProps) => {
                     onClick={() =>
                       navigate(
                         assetId
-                          ? `/assets/${assetId}`
+                          ? `/facility/${facilityId}/assets/${assetId}`
                           : `/facility/${facilityId}`
                       )
                     }
