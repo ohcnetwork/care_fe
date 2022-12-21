@@ -3,17 +3,35 @@ import { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
 interface IUseAsyncOptionsArgs {
-  uniqueKey?: string;
   debounceInterval?: number;
 }
 
-export function useAsyncOptions<T>({
-  uniqueKey = "id",
-  debounceInterval = 300,
-}: IUseAsyncOptionsArgs = {}) {
+/**
+ * Hook to implement async autocompletes with ease and typesafety.
+ *
+ * See `DiagnosisSelectFormField` for usage.
+ *
+ * **Example usage:**
+ * ```jsx
+ * const { fetchOptions, isLoading, options } = useAsyncOptions<Model>("id");
+ *
+ * return (
+ *   <AutocompleteMultiselect
+ *     ...
+ *     options={options(props.value)}
+ *     isLoading={isLoading}
+ *     onQuery={(query) => fetchOptions(action({ query }))}
+ *     optionValue={(option) => option}
+ *     ...
+ *   />
+ * );
+ * ```
+ */
+export function useAsyncOptions<T extends Record<string, unknown>>(
+  uniqueKey: keyof T,
+  args?: IUseAsyncOptionsArgs
+) {
   const dispatch = useDispatch<any>();
-
-  const [selectedOptions, setSelectedOptions] = useState<T[]>([]);
   const [queryOptions, setQueryOptions] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -24,23 +42,68 @@ export function useAsyncOptions<T>({
         const res = await dispatch(action);
         if (res?.data) setQueryOptions(res.data as T[]);
         setIsLoading(false);
-      }, debounceInterval),
-    [dispatch, debounceInterval]
+      }, args?.debounceInterval ?? 300),
+    [dispatch, args?.debounceInterval]
   );
 
-  const options = [
-    ...selectedOptions,
-    ...queryOptions.filter(
-      (obj: any) =>
-        !selectedOptions.some((s: any) => s[uniqueKey] === obj[uniqueKey])
-    ),
-  ];
+  const mergeValueWithQueryOptions = (selected?: T[]) => {
+    if (!selected?.length) return queryOptions;
+
+    return [
+      ...queryOptions,
+      ...selected.filter(
+        (obj) => !queryOptions.some((s) => s[uniqueKey] === obj[uniqueKey])
+      ),
+    ];
+  };
 
   return {
+    /**
+     * Merges query options and selected options.
+     *
+     * **Example usage:**
+     * ```jsx
+     * const { isLoading } = useAsyncOptions<Model>("id");
+     *
+     * <AutocompleteMultiselect
+     *   ...
+     *   isLoading={isLoading}
+     *   ...
+     * />
+     * ```
+     */
     fetchOptions,
+
+    /**
+     * Merges query options and selected options.
+     *
+     * **Example usage:**
+     * ```jsx
+     * const { options } = useAsyncOptions<Model>("id");
+     *
+     * <AutocompleteMultiselect
+     *   ...
+     *   onQuery={(query) => fetchOptions(action({ query }))}
+     *   ...
+     * />
+     * ```
+     */
     isLoading,
-    options,
-    selectedOptions,
-    setSelectedOptions,
+
+    /**
+     * Merges query options and selected options.
+     *
+     * **Example usage:**
+     * ```jsx
+     * const { options } = useAsyncOptions<Model>("id");
+     *
+     * <AutocompleteMultiselect
+     *   ...
+     *   options={options(props.value)}
+     *   ...
+     * />
+     * ```
+     */
+    options: mergeValueWithQueryOptions,
   };
 }
