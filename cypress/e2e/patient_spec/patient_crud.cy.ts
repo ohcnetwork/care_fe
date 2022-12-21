@@ -25,8 +25,8 @@ describe("Patient Creation", () => {
           const homeFacility = $elem.text();
           cy.visit("/patients");
           cy.get("button")
-            .should("contain", "Add Details of a Patient")
-            .contains("Add Details of a Patient")
+            .should("contain", "Add Patient Details")
+            .contains("Add Patient Details")
             .click({ force: true });
           cy.wait("@getFacilities");
           cy.get("input[name='facilities']").type(homeFacility);
@@ -34,8 +34,8 @@ describe("Patient Creation", () => {
         });
       } else {
         cy.get("button")
-          .should("contain", "Add Details of a Patient")
-          .contains("Add Details of a Patient")
+          .should("contain", "Add Patient Details")
+          .contains("Add Patient Details")
           .click({ force: true });
         cy.wait("@getFacilities");
       }
