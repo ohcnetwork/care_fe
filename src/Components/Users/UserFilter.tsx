@@ -91,6 +91,7 @@ export default function UserFilter(props: any) {
         onClear={() => {
           navigate("/users");
           setFilterState(clearFilterState);
+          closeFilter();
         }}
       />
 
