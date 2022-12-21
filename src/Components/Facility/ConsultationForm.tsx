@@ -56,7 +56,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { DiagnosisSelectFormField } from "../Common/DiagnosisAutocompleteFormField";
+import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import DateFormField from "../Form/FormFields/DateFormField";
 
@@ -292,6 +292,8 @@ export const ConsultationForm = (props: any) => {
     [dispatch, fetchData]
   );
 
+  if (isLoading) return <Loading />;
+
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
@@ -469,7 +471,6 @@ export const ConsultationForm = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const [validForm, error_div] = validateForm();
-    console.log(validForm);
 
     if (!validForm) {
       scrollTo(error_div);
@@ -596,10 +597,6 @@ export const ConsultationForm = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   const field = (name: string) => {
     return {
       id: name,
@@ -618,8 +615,6 @@ export const ConsultationForm = (props: any) => {
       optionDescription: (option: any) => option.desc,
     };
   };
-
-  console.log(state.form.symptoms_onset_date);
 
   return (
     <div ref={topRef}>
