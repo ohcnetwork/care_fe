@@ -86,13 +86,14 @@ const DateInputV2: React.FC<Props> = ({
   };
 
   const setDateValue = (date: number) => () => {
-    onChange(
-      new Date(
-        datePickerHeaderDate.getFullYear(),
-        datePickerHeaderDate.getMonth(),
-        date
-      )
-    );
+    isDateWithinConstraints(date) &&
+      onChange(
+        new Date(
+          datePickerHeaderDate.getFullYear(),
+          datePickerHeaderDate.getMonth(),
+          date
+        )
+      );
   };
 
   const getDayCount = (date: Date) => {
@@ -126,7 +127,9 @@ const DateInputV2: React.FC<Props> = ({
     year = datePickerHeaderDate.getFullYear()
   ) => {
     const date = new Date(year, month, day);
-    return !(min! > date) && !(date > max!);
+    if (min) if (date < min) return false;
+    if (max) if (date > max) return false;
+    return true;
   };
 
   const isSelectedMonth = (month: number) =>

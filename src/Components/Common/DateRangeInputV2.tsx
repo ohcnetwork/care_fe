@@ -22,6 +22,7 @@ const DateRangeInputV2 = ({ value, onChange, className, disabled }: Props) => {
           className={className}
           value={start}
           onChange={(start) => onChange({ start, end })}
+          max={end}
           position="RIGHT"
           placeholder="Start date"
           disabled={disabled}
@@ -32,6 +33,7 @@ const DateRangeInputV2 = ({ value, onChange, className, disabled }: Props) => {
           className={className}
           value={end}
           onChange={(end) => onChange({ start, end })}
+          min={start}
           position="CENTER"
           disabled={disabled || !start}
           placeholder="End date"
