@@ -7,7 +7,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import { RoleButton } from "../Common/RoleButton";
 import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
-import { Button } from "@material-ui/core";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -80,9 +80,15 @@ export default function MinQuantityList(props: any) {
               {inventoryItem.item_object?.name}
             </p>
           </div>
-          <Button
+          <ButtonV2
+            ghost={true}
+            className="sm:hidden hover:bg-gray-200 w-full"
             onClick={() => {
-              alert(3);
+              setSelectedItem({
+                id: inventoryItem.id,
+                item_id: inventoryItem.item_object?.id,
+              });
+              setShowMinQuantityRequiredModal(true);
             }}
           >
             <div className="sm:hidden flex justify-between items-center w-full">
@@ -113,7 +119,7 @@ export default function MinQuantityList(props: any) {
                 </svg>
               </div>
             </div>
-          </Button>
+          </ButtonV2>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm sm:flex hidden w-full justify-between">
           <p className="text-gray-900 whitespace-nowrap lowercase mt-2">
