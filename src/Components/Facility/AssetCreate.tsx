@@ -929,7 +929,7 @@ const AssetCreate = (props: AssetProps) => {
                     onClick={() =>
                       navigate(
                         assetId
-                          ? `/assets/${assetId}`
+                          ? `/facility/${facilityId}/assets/${assetId}`
                           : `/facility/${facilityId}`
                       )
                     }
