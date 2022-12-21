@@ -262,36 +262,38 @@ export default function ManageUsers() {
       );
     }
     return (
-      <div className="sm:col-start-2 col-span-full sm:col-span-3">
-        <div className="mb-2">
-          {facilities.map((facility, i) => (
-            <div
-              key={`facility_${i}`}
-              className="border-2 font-gbold inline-block rounded-md pl-3 py-1 mr-3 mt-2"
-            >
-              <div className="flex items-center  space-x-1">
-                <div className="font-semibold">{facility.name}</div>
-                <i
-                  className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
-                  onClick={() => updateHomeFacility(username, facility)}
-                ></i>
-                <IconButton
-                  size="small"
-                  color="secondary"
-                  disabled={isFacilityLoading}
-                  onClick={() =>
-                    setUnlinkFacilityData({
-                      show: true,
-                      facility: facility,
-                      userName: username,
-                    })
-                  }
-                >
-                  <CloseIcon />
-                </IconButton>
+      <div>
+        <div className="sm:col-start-2 col-span-full sm:col-span-3 max-h-36 overflow-scroll">
+          <div className="mb-2">
+            {facilities.map((facility, i) => (
+              <div
+                key={`facility_${i}`}
+                className="border-2 font-gbold inline-block rounded-md pl-3 py-1 mr-3 mt-2"
+              >
+                <div className="flex items-center  space-x-1">
+                  <div className="font-semibold">{facility.name}</div>
+                  <i
+                    className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
+                    onClick={() => updateHomeFacility(username, facility)}
+                  ></i>
+                  <IconButton
+                    size="small"
+                    color="secondary"
+                    disabled={isFacilityLoading}
+                    onClick={() =>
+                      setUnlinkFacilityData({
+                        show: true,
+                        facility: facility,
+                        userName: username,
+                      })
+                    }
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
         {showLinkFacility(username)}
       </div>
@@ -491,25 +493,25 @@ export default function ManageUsers() {
                       </UserDetails>
                     </div>
                   )}
-                  {user.username && user.facilities && (
+                  {user.username && (
                     <div className="col-span-4">
-                      <UserDetails title="Linked Facilities">
-                        {showFacilities(user.username, user.facilities)}
-                      </UserDetails>
-                      <div
-                        className="hover:text-blue-500"
-                        onClick={() => hideFacilities(user.username)}
-                      >
-                        Hide Linked Facilities
+                      <div className="flex gap-2 text-gray-600">
+                        Linked Facilities:{" "}
+                        <i
+                          className={
+                            "fa fa-eye flex items-center fa fa-eye hover:text-primary"
+                          }
+                          onClick={() => loadFacilities(user.username)}
+                        ></i>
+                        <i
+                          className={
+                            "fa-solid fa-eye-slash flex items-center hover:text-primary"
+                          }
+                          onClick={() => hideFacilities(user.username)}
+                        ></i>
                       </div>
-                    </div>
-                  )}
-                  {user.username && !user.facilities && (
-                    <div
-                      onClick={() => loadFacilities(user.username)}
-                      className={`col-span-4 mt-2 ${facilityClassname}`}
-                    >
-                      Click here to show linked facilities
+                      {user.facilities &&
+                        showFacilities(user.username, user.facilities)}
                     </div>
                   )}
                 </div>
