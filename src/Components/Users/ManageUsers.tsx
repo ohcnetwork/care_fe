@@ -263,7 +263,7 @@ export default function ManageUsers() {
     }
     return (
       <div>
-        <div className="sm:col-start-2 col-span-full sm:col-span-3 max-h-36 overflow-scroll">
+        <div className="sm:col-start-2 col-span-full sm:col-span-3 max-h-48 overflow-scroll mb-2">
           <div className="mb-2">
             {facilities.map((facility, i) => (
               <div
@@ -495,7 +495,7 @@ export default function ManageUsers() {
                   )}
                   {user.username && (
                     <div className="col-span-4">
-                      <div className="flex gap-2 text-gray-600">
+                      <div className="flex gap-2 text-gray-800">
                         Linked Facilities:{" "}
                         <i
                           className={`${
