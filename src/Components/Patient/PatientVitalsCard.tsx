@@ -83,9 +83,7 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
           setWsUrl(
             (prev) =>
               prev ||
-              `wss://${
-                middlewareHostname || asset?.meta?.middleware_hostname
-              }/observations/${asset?.meta?.local_ip_address}`
+              `wss://${middlewareHostname}/observations/${asset?.meta?.local_ip_address}`
           );
         }
       }

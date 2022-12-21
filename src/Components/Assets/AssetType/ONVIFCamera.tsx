@@ -69,7 +69,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       const data = {
         meta: {
           asset_type: "CAMERA",
-          middleware_hostname: middlewareHostname,
+          middleware_hostname: middlewareHostname, // TODO: remove this infavour of facility.middleware_address
           local_ip_address: cameraAddress,
           camera_access_key: cameraAccessKey,
         },
@@ -100,13 +100,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       preset_name: newPreset,
     };
     try {
-      // TODO: change middleware_hostname here
       const presetData = await axios.get(
-        `https://${
-          facilityMiddlewareHostname || asset?.meta?.middleware_hostname
-        }/status?hostname=${config.hostname}&port=${config.port}&username=${
-          config.username
-        }&password=${config.password}`
+        `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
       const res: any = await Promise.resolve(
         dispatch(
@@ -219,6 +214,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           setNewPreset={setNewPreset}
           addPreset={addPreset}
           refreshPresetsHash={refreshPresetsHash}
+          facilityMiddlewareHostname={facilityMiddlewareHostname}
         />
       ) : null}
     </div>

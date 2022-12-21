@@ -39,7 +39,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
       const data = {
         meta: {
           asset_type: assetType,
-          middleware_hostname: middlewareHostname,
+          middleware_hostname: middlewareHostname, // TODO: remove this infavour of facility.middleware_address
           local_ip_address: localipAddress,
         },
       };

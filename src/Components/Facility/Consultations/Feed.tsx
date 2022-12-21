@@ -117,14 +117,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           };
 
           if (bedAssets?.data?.results?.length) {
-            const { camera_access_key, middleware_hostname } =
+            const { camera_access_key } =
               bedAssets.data.results[0].asset_object.meta;
             const config = camera_access_key.split(":");
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
               accessKey: config[2] || "",
             });
-            setCameraMiddlewareHostname((prev) => prev || middleware_hostname); // facility.middleware_address || asset.meta.middleware_hostname
             setCameraConfig(bedAssets.data.results[0].meta);
             setCameraState({
               ...bedAssets.data.results[0].meta.position,
