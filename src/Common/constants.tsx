@@ -114,6 +114,10 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 850, text: "General hospitals" },
   { id: 860, text: "District Hospitals" },
   { id: 870, text: "Govt Medical College Hospitals" },
+
+  { id: 900, text: "Co-operative hospitals" },
+  { id: 910, text: "Autonomous healthcare facility" },
+
   { id: 950, text: "Corona Testing Labs" },
   { id: 1000, text: "Corona Care Centre" },
   // { id: 1010, text: "COVID-19 Domiciliary Care Center" },

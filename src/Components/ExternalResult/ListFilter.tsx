@@ -8,13 +8,7 @@ import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "raviger";
 import moment from "moment";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-}
+import useMergeState from "../../Common/hooks/useMergeState";
 
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter, dataList } = props;
