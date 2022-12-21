@@ -52,8 +52,8 @@ type AutocompleteMutliSelectProps<T, V = T> = {
   optionValue?: OptionCallback<T, V>;
   className?: string;
   onChange: OptionCallback<V[], void>;
-  dropdownIcon?: React.ReactNode | undefined;
   onQuery?: (query: string) => void;
+  isLoading?: boolean;
 };
 
 /**
@@ -106,7 +106,9 @@ export const AutocompleteMutliSelect = <T, V>(
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
               <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-gray-900">
-                {props.dropdownIcon || (
+                {props.isLoading ? (
+                  <CareIcon className="care-l-spinner animate-spin" />
+                ) : (
                   <CareIcon className="care-l-angle-down -mb-1.5" />
                 )}
               </div>
@@ -129,27 +131,45 @@ export const AutocompleteMutliSelect = <T, V>(
 
           <DropdownTransition>
             <Combobox.Options className="cui-dropdown-base top-12 absolute z-10 mt-0.5">
-              {filteredOptions.map((option, index) => (
-                <Combobox.Option
-                  id={`${props.id}-option-${option.value}`}
-                  key={index}
-                  className={dropdownOptionClassNames}
-                  value={option}
-                >
-                  {({ selected }) => (
-                    <div className="flex justify-between">
-                      {option.label}
-                      {selected && (
-                        <CareIcon className="care-l-check text-lg" />
-                      )}
-                    </div>
-                  )}
-                </Combobox.Option>
-              ))}
+              {props.isLoading ? (
+                <Searching />
+              ) : filteredOptions.length ? (
+                filteredOptions.map((option, index) => (
+                  <Combobox.Option
+                    id={`${props.id}-option-${option.value}`}
+                    key={index}
+                    className={dropdownOptionClassNames}
+                    value={option}
+                  >
+                    {({ selected }) => (
+                      <div className="flex justify-between">
+                        {option.label}
+                        {selected && (
+                          <CareIcon className="care-l-check text-lg" />
+                        )}
+                      </div>
+                    )}
+                  </Combobox.Option>
+                ))
+              ) : (
+                <span className="flex items-center justify-center gap-2 py-6">
+                  {!query && <CareIcon className="care-l-search text-lg" />}
+                  {query ? "No results" : "Type to search"}
+                </span>
+              )}
             </Combobox.Options>
           </DropdownTransition>
         </div>
       </Combobox>
+    </div>
+  );
+};
+
+const Searching = () => {
+  return (
+    <div className="flex items-center justify-center gap-2 py-6">
+      <CareIcon className="care-l-spinner animate-spin text-xl" />
+      <span>Searching...</span>
     </div>
   );
 };
