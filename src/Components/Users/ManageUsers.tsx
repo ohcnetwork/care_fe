@@ -498,15 +498,14 @@ export default function ManageUsers() {
                       <div className="flex gap-2 text-gray-600">
                         Linked Facilities:{" "}
                         <i
-                          className={
-                            "fa fa-eye flex items-center fa fa-eye hover:text-primary"
-                          }
+                          className={`${
+                            user.facilities ? "hidden" : ""
+                          } fa fa-eye flex items-center fa fa-eye hover:text-primary`}
                           onClick={() => loadFacilities(user.username)}
                         ></i>
                         <i
-                          className={
-                            "fa-solid fa-eye-slash flex items-center hover:text-primary"
-                          }
+                          className={`${user.facilities ? "" : "hidden"}
+                            fa-solid fa-eye-slash flex items-center hover:text-primary`}
                           onClick={() => hideFacilities(user.username)}
                         ></i>
                       </div>
