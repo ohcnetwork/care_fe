@@ -499,14 +499,17 @@ export default function ManageUsers() {
                         Linked Facilities:{" "}
                         <i
                           className={`${
-                            user.facilities ? "hidden" : ""
-                          } fa fa-eye flex items-center fa fa-eye hover:text-primary`}
-                          onClick={() => loadFacilities(user.username)}
-                        ></i>
-                        <i
-                          className={`${user.facilities ? "" : "hidden"}
-                            fa-solid fa-eye-slash flex items-center hover:text-primary`}
-                          onClick={() => hideFacilities(user.username)}
+                            !user.facilities
+                              ? "fa fa-eye"
+                              : "fa-solid fa-eye-slash"
+                          } flex items-center hover:text-primary`}
+                          onClick={() => {
+                            if (!user.facilities) {
+                              loadFacilities(user.username);
+                            } else {
+                              hideFacilities(user.username);
+                            }
+                          }}
                         ></i>
                       </div>
                       {user.facilities &&
