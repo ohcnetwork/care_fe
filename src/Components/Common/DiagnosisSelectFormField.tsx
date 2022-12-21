@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
 import { listICD11Diagnosis } from "../../Redux/actions";
 import { ICD11DiagnosisModel } from "../Facility/models";
@@ -11,24 +9,15 @@ import {
 } from "../Form/FormFields/Utils";
 
 type Props =
-  // | ({ multiple?: false | undefined } & FormFieldBaseProps<string>) // uncomment when single select form field is required and implemented.
+  // | ({ multiple?: false | undefined } & FormFieldBaseProps<ICD11DiagnosisModel>) // uncomment when single select form field is required and implemented.
   { multiple: true } & FormFieldBaseProps<ICD11DiagnosisModel[]>;
 
 export function DiagnosisSelectFormField(props: Props) {
   const { name } = props;
   const handleChange = resolveFormFieldChangeEventHandler(props);
 
-  const {
-    fetchOptions,
-    isLoading,
-    selectedOptions,
-    options,
-    setSelectedOptions,
-  } = useAsyncOptions<ICD11DiagnosisModel>();
-
-  useEffect(() => {
-    handleChange({ name, value: selectedOptions });
-  }, [selectedOptions]);
+  const { fetchOptions, isLoading, options } =
+    useAsyncOptions<ICD11DiagnosisModel>("id");
 
   if (!props.multiple) {
     return (
@@ -43,17 +32,13 @@ export function DiagnosisSelectFormField(props: Props) {
       <AutocompleteMutliSelect
         id={props.id}
         disabled={props.disabled}
-        value={selectedOptions}
-        options={options}
+        value={props.value || []}
+        options={options(props.value)}
         optionLabel={(option) => option.label}
         optionValue={(option) => option}
         onQuery={(query) => fetchOptions(listICD11Diagnosis({ query }, ""))}
-        dropdownIcon={
-          isLoading && (
-            <CareIcon className="care-l-spinner animate-spin -mb-1.5" />
-          )
-        }
-        onChange={setSelectedOptions}
+        isLoading={isLoading}
+        onChange={(value) => handleChange({ name, value })}
       />
     </FormField>
   );

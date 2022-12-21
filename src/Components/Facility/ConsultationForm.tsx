@@ -78,9 +78,7 @@ type FormDetails = {
   admission_date?: Date;
   discharge_date: null;
   referred_to: string;
-  icd11_diagnoses: string[];
   icd11_diagnoses_object: ICD11DiagnosisModel[];
-  icd11_provisional_diagnoses: string[];
   icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
   verified_by: string;
   is_kasp: BooleanStrings;
@@ -121,9 +119,7 @@ const initForm: FormDetails = {
   admission_date: new Date(),
   discharge_date: null,
   referred_to: "",
-  icd11_diagnoses: [],
   icd11_diagnoses_object: [],
-  icd11_provisional_diagnoses: [],
   icd11_provisional_diagnoses_object: [],
   verified_by: "",
   is_kasp: "false",
@@ -496,8 +492,9 @@ export const ConsultationForm = (props: any) => {
         prescribed_medication: state.form.prescribed_medication,
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
-        icd11_diagnoses: state.form.icd11_diagnoses,
-        icd11_provisional_diagnoses: state.form.icd11_provisional_diagnoses,
+        icd11_diagnoses: state.form.icd11_diagnoses_object.map((o) => o.id),
+        icd11_provisional_diagnoses:
+          state.form.icd11_provisional_diagnoses_object.map((o) => o.id),
         verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
         prn_prescription: PRNAdvice,
@@ -773,13 +770,13 @@ export const ConsultationForm = (props: any) => {
         />
 
         <DiagnosisSelectFormField
-          {...field("icd11_provisional_diagnoses")}
+          {...field("icd11_provisional_diagnoses_object")}
           multiple
           label="Provisional Diagnosis"
         />
 
         <DiagnosisSelectFormField
-          {...field("icd11_diagnoses")}
+          {...field("icd11_diagnoses_object")}
           multiple
           label="Diagnosis"
         />
