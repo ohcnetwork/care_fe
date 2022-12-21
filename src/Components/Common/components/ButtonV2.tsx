@@ -105,6 +105,7 @@ type CommonButtonProps = ButtonProps & { label?: string; icon?: string };
 export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
   return (
     <ButtonV2
+      id="submit"
       type="submit"
       className="w-full md:w-auto"
       // Voluntarily setting children this way, so that it's overridable when using.
@@ -122,6 +123,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
 export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
   return (
     <ButtonV2
+      id="cancel"
       type="button"
       variant="secondary"
       className="w-full md:w-auto"

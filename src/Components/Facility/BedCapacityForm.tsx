@@ -285,14 +285,18 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                   />
                 </div>
                 <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                  {!isLastOptionType && headerText === "Add Bed Capacity" && (
+                    <Submit
+                      id="bed-capacity-save-and-exit"
+                      onClick={(e) => handleSubmit(e, "Save and Exit")}
+                      label="Save Bed Capacity"
+                    />
+                  )}
                   <Submit
-                    hidden={
-                      !(!isLastOptionType && headerText === "Add Bed Capacity")
-                    }
-                    onClick={(e) => handleSubmit(e, "Save and Exit")}
-                    label="Save Bed Capacity"
+                    id="bed-capacity-save"
+                    onClick={(e) => handleSubmit(e)}
+                    label={buttonText}
                   />
-                  <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
                 </div>
               </div>
             </div>

@@ -276,7 +276,11 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     onClick={(e) => handleSubmit(e, "Save and Exit")}
                     label="Save Doctor Capacity"
                   />
-                  <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
+                  <Submit
+                    id="doctor-save"
+                    onClick={(e) => handleSubmit(e)}
+                    label={buttonText}
+                  />
                 </div>
               </div>
             </div>
