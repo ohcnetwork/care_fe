@@ -79,11 +79,10 @@ describe("User management", () => {
     cy.get("[name='username']").type(username, { force: true });
     cy.wait("@getUsers");
     cy.wait(500);
-    const linkFacilityClassNameString = "fa fa-eye";
+    const linkFacilityString = "Linked Facilities";
     cy.get("div")
+      .should("include", linkFacilityString)
       .find("i")
-      .should("have.attr", "className")
-      .should("include", linkFacilityClassNameString)
       .click({ force: true })
       .then(() => {
         cy.get("a")
