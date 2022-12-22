@@ -1,12 +1,10 @@
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   InputLabel,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useReducer, useState } from "react";
@@ -16,6 +14,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, SelectField } from "../Common/HelperInputFields";
 import { DupPatientModel } from "./models";
 import { OptionsType } from "../../Common/constants";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 
 interface Props {
   patientList: Array<DupPatientModel>;
@@ -183,22 +182,12 @@ const TransferPatientDialog = (props: Props) => {
         </div>
       </DialogContent>
       <DialogActions className="justify-between flex flex-col md:flex-row">
-        <Button
-          disabled={isLoading}
-          color="secondary"
-          onClick={() => handleCancel()}
-        >
-          Cancel
-        </Button>
-        <Button
+        <Cancel onClick={handleCancel} disabled={isLoading} />
+        <Submit
           disabled={isLoading}
           onClick={handleSubmit}
-          color="primary"
-          variant="contained"
-          startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-        >
-          Transfer Suspect / Patient
-        </Button>
+          label="Transfer Suspect / Patient"
+        />
       </DialogActions>
     </Dialog>
   );

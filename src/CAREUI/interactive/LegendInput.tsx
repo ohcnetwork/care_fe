@@ -144,7 +144,7 @@ export default function LegendInput(props: InputProps) {
             onClick={() => setShowPassword(!showPassword)}
           >
             <CareIcon
-              className={`care-l-eye${showPassword ? "" : "-slash"} h-5`}
+              className={`care-l-eye${showPassword ? "" : "-slash"} text-lg`}
             />
           </button>
         )}

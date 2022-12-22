@@ -48,8 +48,7 @@ import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
 import { ICD11DiagnosisModel } from "./models";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -886,19 +885,15 @@ export const ConsultationForm = (props: any) => {
         {/* End of Telemedicine fields */}
 
         <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
-          <ButtonV2
-            variant="secondary"
-            type="button"
+          <Cancel
             onClick={() =>
               navigate(`/facility/${facilityId}/patient/${patientId}`)
             }
-          >
-            Cancel
-          </ButtonV2>
-          <ButtonV2 variant="primary" type="submit" onClick={handleSubmit}>
-            <CareIcon className="care-l-check-circle text-lg" />
-            {isUpdate ? "Update Consultation" : "Create Consultation"}
-          </ButtonV2>
+          />
+          <Submit
+            onClick={handleSubmit}
+            label={isUpdate ? "Update Consultation" : "Create Consultation"}
+          />
         </div>
       </form>
 

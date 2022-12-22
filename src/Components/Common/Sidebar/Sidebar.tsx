@@ -139,7 +139,7 @@ const StatelessSidebar = ({
           <Item
             text="Dashboard"
             to={DASHBOARD}
-            icon={<CareIcon className="care-l-dashboard h-5" />}
+            icon={<CareIcon className="care-l-dashboard text-lg" />}
             external
           />
         </div>

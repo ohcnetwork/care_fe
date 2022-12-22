@@ -43,7 +43,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import RadioInputsV2 from "../Common/components/RadioInputsV2";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -970,23 +970,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                   : " flex justify-between "
               } mt-2 gap-2 `}
             >
-              <ButtonV2
-                variant="secondary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  goBack();
-                }}
-              >
-                Cancel
-              </ButtonV2>
-              <ButtonV2
-                id="facility-save"
-                variant="primary"
-                type="submit"
-                onClick={(e) => handleSubmit(e)}
-              >
-                <i className="fa-regular fa-circle-check"></i> {buttonText}
-              </ButtonV2>
+              <Cancel onClick={() => goBack()} />
+              <Submit onClick={handleSubmit} label={buttonText} />
             </div>
           </form>
         </CardContent>

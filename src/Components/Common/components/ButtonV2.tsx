@@ -1,3 +1,4 @@
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 import { classNames } from "../../../Utils/utils";
@@ -81,7 +82,7 @@ const ButtonV2 = ({
       {...props}
       disabled={disabled || !isAuthorized || loading}
       className={classNames(
-        "font-medium h-min flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
+        "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
         `button-size-${size}`,
         `button-shape-${circle ? "circle" : "square"}`,
         ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
@@ -96,3 +97,44 @@ const ButtonV2 = ({
 };
 
 export default ButtonV2;
+
+// Common buttons
+
+type CommonButtonProps = ButtonProps & { label?: string };
+
+export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
+  return (
+    <ButtonV2
+      id="submit"
+      type="submit"
+      className="w-full md:w-auto"
+      // Voluntarily setting children this way, so that it's overridable when using.
+      children={
+        <>
+          <CareIcon className="care-l-check-circle text-lg" />
+          <span>{label}</span>
+        </>
+      }
+      {...props}
+    />
+  );
+};
+
+export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
+  return (
+    <ButtonV2
+      id="cancel"
+      type="button"
+      variant="secondary"
+      className="w-full md:w-auto"
+      // Voluntarily setting children this way, so that it's overridable when using.
+      children={
+        <>
+          <CareIcon className="care-l-times-circle text-lg" />
+          <span>{label}</span>
+        </>
+      }
+      {...props}
+    />
+  );
+};
