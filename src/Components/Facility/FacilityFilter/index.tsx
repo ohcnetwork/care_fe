@@ -7,22 +7,14 @@ import { getStates, getDistrictByState } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useAbortableEffect, statusType } from "../../../Common/utils";
 import LocalBodySelect from "./LocalBodySelect";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-
-  return [state, setMergedState];
-}
+import useMergeState from "../../../Common/hooks/useMergeState";
 
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
-function FacillityFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+function FacilityFilter(props: any) {
+  const { filter, onChange, closeFilter } = props;
   const dispatchAction: any = useDispatch();
 
   const [isStateLoading, setIsStateLoading] = useState(false);
@@ -222,4 +214,4 @@ function FacillityFilter(props: any) {
   );
 }
 
-export default FacillityFilter;
+export default FacilityFilter;

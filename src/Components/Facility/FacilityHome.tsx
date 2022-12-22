@@ -46,7 +46,7 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
   return typeof feature.icon === "string" ? (
-    <CareIcon className={`care-l-${feature.icon} h-5`} />
+    <CareIcon className={`care-l-${feature.icon} text-lg`} />
   ) : (
     feature.icon
   );
@@ -459,13 +459,13 @@ export const FacilityHome = (props: any) => {
               <DropdownMenu
                 id="manage-facility-dropdown"
                 title="Manage Facility"
-                icon={<CareIcon className="care-l-setting h-5" />}
+                icon={<CareIcon className="care-l-setting text-lg" />}
               >
                 <DropdownItem
                   id="update-facility"
                   onClick={() => navigate(`/facility/${facilityId}/update`)}
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon className="care-l-edit-alt h-5" />}
+                  icon={<CareIcon className="care-l-edit-alt text-lg" />}
                 >
                   Update Facility
                 </DropdownItem>
@@ -475,7 +475,7 @@ export const FacilityHome = (props: any) => {
                     navigate(`/facility/${facilityId}/middleware/update`)
                   }
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon className="care-l-setting h-5" />}
+                  icon={<CareIcon className="care-l-setting text-lg" />}
                 >
                   Configure Facility
                 </DropdownItem>
@@ -490,7 +490,7 @@ export const FacilityHome = (props: any) => {
                   id="location-management"
                   onClick={() => navigate(`/facility/${facilityId}/location`)}
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon className="care-l-location-point h-5" />}
+                  icon={<CareIcon className="care-l-location-point text-lg" />}
                 >
                   Location Management
                 </DropdownItem>
@@ -499,26 +499,26 @@ export const FacilityHome = (props: any) => {
                     navigate(`/facility/${facilityId}/resource/new`)
                   }
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon className="care-l-gold h-5" />}
+                  icon={<CareIcon className="care-l-gold text-lg" />}
                 >
                   Resource Request
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon className="care-l-plus-circle h-5" />}
+                  icon={<CareIcon className="care-l-plus-circle text-lg" />}
                 >
                   Create Asset
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => navigate(`/assets?facility=${facilityId}`)}
-                  icon={<CareIcon className="care-l-medkit h-5" />}
+                  icon={<CareIcon className="care-l-medkit text-lg" />}
                 >
                   View Assets
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => navigate(`/facility/${facilityId}/users`)}
-                  icon={<CareIcon className="care-l-users-alt h-5" />}
+                  icon={<CareIcon className="care-l-users-alt text-lg" />}
                 >
                   View Users
                 </DropdownItem>
@@ -526,7 +526,7 @@ export const FacilityHome = (props: any) => {
                   variant="danger"
                   onClick={() => setOpenDeleteDialog(true)}
                   className="flex gap-3 items-center"
-                  icon={<CareIcon className="care-l-trash-alt h-5" />}
+                  icon={<CareIcon className="care-l-trash-alt text-lg" />}
                   authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
                 >
                   Delete Facility
@@ -542,7 +542,7 @@ export const FacilityHome = (props: any) => {
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >
-                <CareIcon className="care-l-plus h-5" />
+                <CareIcon className="care-l-plus text-lg" />
                 <span className="text-sm">Add Details of a Patient</span>
               </ButtonV2>
               <ButtonV2

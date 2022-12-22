@@ -17,7 +17,7 @@ import loadable from "@loadable/component";
 import { FacilityModel } from "./models";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import FacillityFilter from "./FacilityFilter";
+import FacilityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
@@ -308,7 +308,7 @@ export const HospitalList = () => {
       <div>
         <SlideOver {...advancedFilter}>
           <div className="bg-white min-h-screen p-4">
-            <FacillityFilter {...advancedFilter} />
+            <FacilityFilter {...advancedFilter} />
           </div>
         </SlideOver>
       </div>

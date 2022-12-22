@@ -139,10 +139,10 @@ export default function PRNPrescriptionBuilder(
                   <div className="w-full md:w-[160px] flex gap-2 shrink-0">
                     <div>
                       Dosage
-                      <div className="flex gap-1 mt-[2px] h-12">
+                      <div className="flex gap-1">
                         <input
                           type="number"
-                          className="text-gray-700 bg-gray-200 w-full focus:border-primary-400 block border rounded px-4 text-sm"
+                          className="cui-input-base py-0"
                           value={prescription.dosage?.split(" ")[0]}
                           placeholder="Dosage"
                           min={0}
@@ -186,7 +186,7 @@ export default function PRNPrescriptionBuilder(
                 Indicator
                 <input
                   type="text"
-                  className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-3 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                  className="cui-input-base"
                   value={prescription.indicator}
                   placeholder="Indicator"
                   onChange={(e) => {
@@ -206,7 +206,7 @@ export default function PRNPrescriptionBuilder(
                   <div className="flex gap-1">
                     <input
                       type="number"
-                      className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                      className="cui-input-base py-2"
                       value={prescription.max_dosage?.split(" ")[0]}
                       placeholder="Dosage"
                       min={0}

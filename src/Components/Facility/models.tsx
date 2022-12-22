@@ -76,8 +76,7 @@ export type PatientCategory =
   | "Comfort Care"
   | "Stable"
   | "Slightly Abnormal"
-  | "Critical"
-  | "unknown";
+  | "Critical";
 
 export interface ConsultationModel {
   admission_date?: string;
@@ -202,8 +201,10 @@ export interface CurrentBed {
   meta: Record<string, any>;
 }
 
-export interface ICD11DiagnosisModel {
+// Voluntarily made as `type` for it to achieve type-safety when used with
+// `useAsyncOptions<ICD11DiagnosisModel>`
+export type ICD11DiagnosisModel = {
   id: string;
   label: string;
   parentId: string | null;
-}
+};

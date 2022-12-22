@@ -15,8 +15,7 @@ import CameraConfigure from "../configure/CameraConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { Submit } from "../../Common/components/ButtonV2";
 import { SyntheticEvent } from "react";
 
 interface ONVIFCameraProps {
@@ -191,14 +190,11 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
               </div>
 
               <div className="flex justify-between mt-4">
-                <ButtonV2
-                  type="submit"
+                <Submit
                   className="w-full md:w-auto ml-auto"
                   onClick={handleSubmit}
-                >
-                  <CareIcon className="care-l-check-circle text-lg" />
-                  Set Configuration
-                </ButtonV2>
+                  label="Set Configuration"
+                />
               </div>
             </CardContent>
           </form>
