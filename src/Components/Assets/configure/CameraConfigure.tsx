@@ -62,7 +62,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-end mt-4">
               <Submit label="Add Preset" />
             </div>
           </CardContent>
