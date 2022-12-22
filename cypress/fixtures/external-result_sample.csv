@@ -1,0 +1,3 @@
+id,name,age,age_in,result,srf_id,gender,address,district,local_body,local_body_type,ward,mobile_number,is_repeat,patient_status,sample_type,test_type,sample_collection_date,result_date,lab_name,source,patient_category
+1,Test 1,38,years,Negative,165/EKM/202010122,F,"CSN HQ
+Kochi, Kerala",Ernakulam,Karukutty,Grama Panchayath,7,9207054148,NO,Symptomatic,Nasopharyngeal swab/Nasal swab/Oropharyngeal swab/Throat swab/Sputum/BAL/ETA/ Nasopharyngeal Orophar,4,2020-10-14,2020-10-10,Gh Muvattupuzha,,Cat 17: All individuals who wish to get themselves tested

@@ -12,6 +12,7 @@ interface CSVLinkProps {
 }
 
 interface ExportMenuProps {
+  id?: string;
   disabled?: boolean | undefined;
   label?: string;
   children: JSX.Element | JSX.Element[];
@@ -71,6 +72,7 @@ export default function useExport() {
   const _CSVLink = () => <CSVLink hidden target="_blank" {...csvLinkProps} />;
 
   const ExportMenu = ({
+    id,
     label = "Export",
     disabled,
     children,
@@ -79,6 +81,7 @@ export default function useExport() {
       <>
         <_CSVLink />
         <DropdownMenu
+          id={id}
           disabled={isExporting || disabled}
           title={isExporting ? "Exporting..." : label}
           icon={<CareIcon className="care-l-import" />}

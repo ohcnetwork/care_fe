@@ -46,6 +46,8 @@
     "*.bs.js",
     "*.gen.tsx",
     "*.res",
-    "*.css"
+    "*.css",
+    "*.csv",
+    "*.stories.mdx"
   ]
 }

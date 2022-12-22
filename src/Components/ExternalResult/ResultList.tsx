@@ -143,10 +143,10 @@ export default function ResultList() {
 
   let resultList: any[] = [];
   if (data && data.length) {
-    resultList = data.map((result: any) => {
+    resultList = data.map((result: any, idx) => {
       const resultUrl = `/external_results/${result.id}`;
       return (
-        <tr key={`usr_${result.id}`} className="bg-white">
+        <tr key={`usr_${result.id}`} id={`usr_${idx}`} className="bg-white">
           <td
             onClick={() => navigate(resultUrl)}
             className="px-6 py-4 whitespace-nowrap text-md leading-5 text-gray-900"
@@ -236,7 +236,7 @@ export default function ResultList() {
       />
       <div className="flex items-center justify-between">
         <PageTitle title="External Results" hideBack breadcrumbs={false} />
-        <ExportMenu label="Import/Export">
+        <ExportMenu id="export-menu" label="Import/Export">
           <DropdownItem
             icon={<CareIcon className="care-l-import" />}
             onClick={() => navigate("/external_results/upload")}

@@ -12,7 +12,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResultItem(props: any) {
   const dispatch: any = useDispatch();
-  let initialData: any = {};
+  const initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
@@ -75,6 +75,7 @@ export default function ResultItem(props: any) {
       <div className="mx-3 md:mx-8 mb-10 mt-4">
         <div className="flex flex-col md:flex-row gap-2 justify-end">
           <button
+            id="update"
             className="btn-primary btn mr-2 w-full md:w-auto"
             onClick={() => navigate(`/external_results/${data.id}/update`)}
           >
@@ -82,6 +83,7 @@ export default function ResultItem(props: any) {
             Update Record
           </button>
           <button
+            id="delete"
             className="btn btn-danger w-full md:w-auto"
             onClick={() => setShowDeleteAlert(true)}
           >
