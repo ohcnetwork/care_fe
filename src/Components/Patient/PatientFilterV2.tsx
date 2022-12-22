@@ -361,6 +361,7 @@ export default function PatientFilterV2(props: any) {
         onClear={() => {
           navigate("/patients");
           setFilterState(clearFilterState);
+          closeFilter();
         }}
       />
       <div className="w-full flex-none pt-20">
