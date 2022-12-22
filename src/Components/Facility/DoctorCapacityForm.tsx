@@ -270,7 +270,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     onClick={() => goBack(!id && `/facility/${facilityId}`)}
                   />
                 </div>
-                <div className="flex flex-row w-full sm:w-auto flex-wrap">
+                <div className="flex flex-row w-full sm:w-auto flex-wrap gap-2">
                   <Submit
                     hidden={!(!id && !isLastOptionType)}
                     onClick={(e) => handleSubmit(e, "Save and Exit")}
