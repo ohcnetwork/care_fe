@@ -280,9 +280,10 @@ const AssetsList = () => {
         {authorizedForImportExport && (
           <div className="tooltip">
             {!facility && (
-              <span className="tooltip-text tooltip-left flex flex-col items-end">
-                <p>Select a facility from the Facilities page and</p>
-                <p>click 'View Assets' from the Manage Facility dropdown</p>
+              <span className="tooltip-text tooltip-bottom -translate-x-2/3 flex flex-col items-center">
+                <p>Select a facility from the Facilities</p>
+                <p>page and click 'View Assets' from the</p>
+                <p>Manage Facility dropdown</p>
               </span>
             )}
             {/* TODO: ask for facility select dialog instead of disabling */}
@@ -333,7 +334,7 @@ const AssetsList = () => {
           />
         </div>
         <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
-          <div className="flex flex-col md:flex-row gap-2">
+          <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
             <div className="w-full">
               <AdvancedFilterButton
                 setShowFilters={() => advancedFilter.setShow(true)}
