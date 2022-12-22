@@ -334,7 +334,7 @@ const AssetsList = () => {
           />
         </div>
         <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
-          <div className="flex flex-col md:flex-row gap-2">
+          <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
             <div className="w-full">
               <AdvancedFilterButton
                 setShowFilters={() => advancedFilter.setShow(true)}
