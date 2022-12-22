@@ -37,12 +37,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import InputLabel from "@material-ui/core/InputLabel";
-import {
-  TextInputField,
-  SelectField,
-  MultilineInputField,
-} from "../Common/HelperInputFields";
+import { TextInputField } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
 import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
@@ -50,6 +45,11 @@ import { formatDate } from "../../Utils/utils";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import DialogModal from "../Common/Dialog";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 import ButtonV2 from "../Common/components/ButtonV2";
 interface PreDischargeFormInterface {
   discharge_reason: string;
@@ -384,84 +384,76 @@ export const ConsultationDetails = (props: any) => {
         </DialogActions>
       </Dialog>
 
-      <Dialog
-        fullWidth={true}
-        open={openDischargeDialog}
+      <DialogModal
+        title={
+          <div>
+            <p>Discharge patient from CARE</p>
+            <span className="mt-1 flex gap-1 text-sm text-secondary-500 font-medium">
+              <CareIcon className="care-l-exclamation-triangle text-base" />
+              <p>Caution: this action is irreversible.</p>
+            </span>
+          </div>
+        }
+        show={openDischargeDialog}
         onClose={handleDischargeClose}
       >
-        <DialogTitle>
-          <i className="text-red-500 fas fa-exclamation-triangle"></i>
-          &nbsp;Discharge Patient From Care
-        </DialogTitle>
-        <DialogContent>
-          <div className="flex flex-col gap-4">
-            <div className="sm:w-1/2" id="discharge-reason-div">
-              <InputLabel id="discharge-reason-label">
-                Discharge Reason*
-              </InputLabel>
-              <SelectField
-                name="discharge_reason"
-                variant="standard"
-                value={preDischargeForm.discharge_reason}
-                options={[{ id: "", text: "Select" }, ...DISCHARGE_REASONS]}
-                onChange={(e) =>
-                  setPreDischargeForm((prev) => ({
-                    ...prev,
-                    discharge_reason: e.target.value,
-                  }))
-                }
-                errors={errors?.discharge_reason}
-              />
-            </div>
-
-            <div id="discharge-notes-div">
-              <InputLabel id="refered-label">
-                {preDischargeForm.discharge_reason == "EXP"
-                  ? "Cause of death *"
-                  : "Discharge notes"}
-              </InputLabel>
-              <MultilineInputField
-                name="discharge_notes"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                rows={2}
-                InputLabelProps={{ shrink: !!preDischargeForm.discharge_notes }}
-                value={preDischargeForm.discharge_notes}
-                onChange={(e) =>
-                  setPreDischargeForm((prev) => ({
-                    ...prev,
-                    discharge_notes: e.target.value,
-                  }))
-                }
-                errors={errors?.discharge_notes}
-              />
-            </div>
+        <div className="mt-6 flex flex-col">
+          <div>
+            <FieldLabel required>Reason</FieldLabel>
+            <SelectMenuV2
+              required
+              id="discharge_reason"
+              value={preDischargeForm.discharge_reason}
+              options={DISCHARGE_REASONS}
+              optionValue={({ id }) => id}
+              optionLabel={({ text }) => text}
+              onChange={(value) =>
+                setPreDischargeForm((prev) => ({
+                  ...prev,
+                  discharge_reason: value,
+                }))
+              }
+            />
+            <FieldErrorText error={errors?.discharge_reason} />
           </div>
-        </DialogContent>
-        <DialogActions className="flex justify-between mt-5 px-5 border-t">
-          <Button
-            variant="outlined"
-            className="bg-gray-200 hover:bg-gray-400"
-            onClick={handleDischargeClose}
-          >
+
+          <TextAreaFormField
+            required={preDischargeForm.discharge_reason == "EXP"}
+            label={
+              preDischargeForm.discharge_reason == "EXP"
+                ? "Cause of death"
+                : "Notes"
+            }
+            name="discharge_notes"
+            value={preDischargeForm.discharge_notes}
+            onChange={(e) =>
+              setPreDischargeForm((prev) => ({
+                ...prev,
+                discharge_notes: e.value,
+              }))
+            }
+            error={errors?.discharge_notes}
+          />
+        </div>
+
+        <div className="flex gap-2 justify-end">
+          <ButtonV2 variant="secondary" onClick={handleDischargeClose}>
             Cancel
-          </Button>
+          </ButtonV2>
 
           {isSendingDischargeApi ? (
             <CircularProgress size={20} />
           ) : (
-            <Button
-              variant="contained"
-              color="primary"
+            <ButtonV2
+              variant="primary"
               onClick={() => handlePatientDischarge(false)}
               autoFocus
             >
-              Discharge
-            </Button>
+              Confirm Discharge
+            </ButtonV2>
           )}
-        </DialogActions>
-      </Dialog>
+        </div>
+      </DialogModal>
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap relative">
           <PageTitle
@@ -1181,14 +1173,14 @@ export const ConsultationDetails = (props: any) => {
               <div className="pt-6">
                 <ButtonV2
                   disabled={!patientData.is_active}
-                  variant="primary"
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
                     )
                   }
                 >
-                  <i className="fas fa-plus w-4 mr-3"></i> Log Lab Result
+                  <CareIcon className="care-l-plus" />
+                  <span>Log Lab Result</span>
                 </ButtonV2>
               </div>
             </div>

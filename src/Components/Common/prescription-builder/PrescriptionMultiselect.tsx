@@ -61,7 +61,7 @@ export function PrescriptionMultiDropdown(props: {
 
       <input
         placeholder={props.placeholder}
-        className="w-full relative focus:ring-primary-500 focus:border-primary-500 border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+        className="cui-input-base py-2"
         onClick={() => setOpen(!open)}
         value={value}
         onChange={(e) => setValue(e.target.value)}

@@ -23,7 +23,6 @@ function LocalBodySelect(props: LocalBodySelectProps) {
     className,
     multiple,
     selected,
-    searchAll,
     setSelected,
     margin,
     district,
@@ -79,7 +78,7 @@ function LocalBodySelect(props: LocalBodySelectProps) {
     isLocalBodyLoading(true);
     fetchLocalbodies();
     isLocalBodyLoading(false);
-  }, [dispatchAction, district]);
+  }, [dispatchAction, district, selected]);
 
   return (
     <AutoCompleteAsyncField

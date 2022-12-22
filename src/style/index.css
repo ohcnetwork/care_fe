@@ -361,7 +361,7 @@ label {
 }
 
 input {
-  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300 !important;
+  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300;
 }
 
 input:disabled,
@@ -1041,14 +1041,6 @@ button:disabled,
       background-size: 200%;
     }
   }
-}
-
-.field-label {
-  @apply mb-2 block text-gray-900 text-base font-normal
-}
-
-.field-error {
-  @apply font-medium tracking-wide text-red-500 text-xs mt-2 ml-1
 }
 
 .button-primary-default { 

@@ -127,7 +127,7 @@ export default function LegendInput(props: InputProps) {
           required={props.required}
           autoComplete={props.autoComplete}
           className={classNames(
-            "w-full bg-gray-50 focus:bg-gray-100 cui-input",
+            "w-full border-gray-300 rounded-md shadow-sm bg-gray-50 focus:bg-gray-100 cui-input",
             props.size === "small" && "text-xs px-3 py-2",
             (!props.size || !["small", "large"].includes(props.size)) &&
               "px-4 py-3",
