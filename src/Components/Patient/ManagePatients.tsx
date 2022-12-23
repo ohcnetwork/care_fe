@@ -636,13 +636,13 @@ export const PatientManager = (props: any) => {
               disabled={!isExportAllowed}
               exportItems={[
                 {
-                  exportLabel:
+                  label:
                     tabValue === 0 ? "Live patients" : "Discharged patients",
-                  exportFunction: exportPatients(true),
+                  action: exportPatients(true),
                 },
                 {
-                  exportLabel: "All patients",
-                  exportFunction: exportPatients(false),
+                  label: "All patients",
+                  action: exportPatients(false),
                 },
               ]}
             />
