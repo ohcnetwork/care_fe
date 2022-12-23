@@ -35,14 +35,11 @@ const getVital = (
 
 export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
   const { patient, socketUrl, facilityId } = props;
-
   const wsClient = useRef<WebSocket>();
-
   const [waveforms, setWaveForms] = useState<WaveformType[] | null>(null);
-
   const dispatch: any = useDispatch();
   const [middlewareHostname, setMiddlewareHostname] = useState("");
-  const [wsUrl, setWsUrl] = useState(socketUrl);
+  const [wsUrl, setWsUrl] = useState("");
   const [patientObservations, setPatientObservations] = React.useState<any>();
   const [stats, setStats] = React.useState(false);
 
@@ -116,12 +113,12 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
   };
 
   useEffect(() => {
-    if (wsUrl) connectWs(wsUrl);
+    if (socketUrl || wsUrl) connectWs(socketUrl || wsUrl);
 
     return () => {
       wsClient.current?.close();
     };
-  }, [wsUrl]);
+  }, [wsUrl, socketUrl]);
 
   useEffect(() => {
     return () => {
