@@ -8,8 +8,9 @@ import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import Card from "../../../CAREUI/display/Card";
 import TextInputFieldV2 from "../../Common/components/TextInputFieldV2";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import { Submit } from "../../Common/components/ButtonV2";
 import PatientVitalsCard from "../../Patient/PatientVitalsCard";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -83,11 +84,10 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                   error={ipadrdress_error}
                 />
               </div>
-
-              <ButtonV2 type="submit" className="w-full">
-                <i className="fas fa-save" />
-                Save Configuration
-              </ButtonV2>
+              <Submit className="w-full">
+                <CareIcon className="care-l-save" />
+                <span>Save Configuration</span>
+              </Submit>
             </form>
           </Card>
           <Card className="">

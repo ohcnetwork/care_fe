@@ -7,8 +7,6 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import CancelOutlineIcon from "@material-ui/icons/CancelOutlined";
 import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -30,6 +28,7 @@ import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import DateInputV2 from "../Common/DateInputV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -902,38 +901,18 @@ const AssetCreate = (props: AssetProps) => {
 
                 <div />
 
-                <div className="mt-12 flex justify-end gap-x-4 gap-y-2 flex-wrap">
-                  <button
-                    className="primary-button w-full md:w-auto flex justify-center"
-                    id="asset-create"
-                    type="submit"
+                <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                  <Submit
                     onClick={(e) => handleSubmit(e, false)}
-                  >
-                    <div className="flex items-center justify-start gap-2">
-                      <CheckCircleOutlineIcon className="text-base">
-                        save
-                      </CheckCircleOutlineIcon>
-                      {assetId ? "Update" : "Create Asset"}
-                    </div>
-                  </button>
+                    label={assetId ? "Update" : "Create Asset"}
+                  />
                   {!assetId && (
-                    <button
-                      className="primary-button w-full md:w-auto flex justify-center"
-                      id="asset-create"
-                      type="submit"
+                    <Submit
                       onClick={(e) => handleSubmit(e, true)}
-                    >
-                      <div className="flex items-center justify-start gap-2">
-                        <CheckCircleOutlineIcon className="text-base">
-                          save
-                        </CheckCircleOutlineIcon>
-                        Create & Add More
-                      </div>
-                    </button>
+                      label="Create & Add More"
+                    />
                   )}
-                  <button
-                    id="asset-cancel"
-                    className="secondary-button w-full md:w-auto flex justify-center"
+                  <Cancel
                     onClick={() =>
                       navigate(
                         assetId
@@ -941,14 +920,7 @@ const AssetCreate = (props: AssetProps) => {
                           : `/facility/${facilityId}`
                       )
                     }
-                  >
-                    <div className="flex items-center justify-start gap-2">
-                      <CancelOutlineIcon className="text-base">
-                        cancel
-                      </CancelOutlineIcon>
-                      Cancel
-                    </div>
-                  </button>
+                  />
                 </div>
               </div>
             </form>

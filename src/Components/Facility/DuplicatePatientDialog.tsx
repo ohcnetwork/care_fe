@@ -1,5 +1,4 @@
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -10,8 +9,8 @@ import {
   RadioGroup,
   InputLabel,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useState } from "react";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { DupPatientModel } from "./models";
 
 interface Props {
@@ -26,8 +25,6 @@ const tdClass = "border border-gray-400 p-2 text-left";
 const DuplicatePatientDialog = (props: Props) => {
   const { patientList, handleOk, handleCancel, isNew } = props;
   const [action, setAction] = useState("");
-
-  const text = isNew ? "registration" : "update";
 
   return (
     <Dialog open={true} maxWidth={"sm"}>
@@ -112,22 +109,15 @@ const DuplicatePatientDialog = (props: Props) => {
         </div>
       </DialogContent>
       <DialogActions className="justify-between flex flex-col md:flex-row md:px-6">
-        <Button
-          className="capitalize"
-          color="secondary"
-          onClick={() => handleCancel()}
-        >
-          Cancel {text}
-        </Button>
-        <Button
+        <Cancel
+          onClick={handleCancel}
+          label={`Cancel ${isNew ? "Registration" : "Update"}`}
+        />
+        <Submit
           onClick={() => handleOk(action)}
-          color="primary"
-          variant="contained"
           disabled={!action}
-          startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-        >
-          Continue
-        </Button>
+          label="Continue"
+        />
       </DialogActions>
     </Dialog>
   );

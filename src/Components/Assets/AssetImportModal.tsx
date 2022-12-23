@@ -5,7 +5,7 @@ import { sleep } from "../../Utils/utils";
 import { FacilityModel } from "../Facility/models";
 import { AssetData } from "./AssetTypes";
 import * as Notification from "../../Utils/Notifications.js";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { listFacilityAssetLocation } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { Link } from "raviger";
@@ -272,25 +272,21 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                   </label>
                 </div>
                 <div className="sm:flex-1" />
-                <ButtonV2
-                  variant="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
+                <Cancel
+                  onClick={() => {
                     closeModal();
                     dragProps.setFileDropError("");
                   }}
                   disabled={isImporting}
-                >
-                  Cancel
-                </ButtonV2>
-                <ButtonV2 onClick={handleUpload} disabled={isImporting}>
+                />
+                <Submit onClick={handleUpload} disabled={isImporting}>
                   {isImporting ? (
                     <i className="fa-solid fa-spinner animate-spin" />
                   ) : (
                     <i className="fa-solid fa-file-import" />
                   )}
                   <span>{isImporting ? "Importing..." : "Import"}</span>
-                </ButtonV2>
+                </Submit>
               </div>
             </>
           )}

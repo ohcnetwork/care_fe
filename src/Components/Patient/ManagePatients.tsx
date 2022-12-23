@@ -19,8 +19,8 @@ import NavTabs from "../Common/NavTabs";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
+  PATIENT_CATEGORIES,
   TELEMEDICINE_ACTIONS,
-  PatientCategoryTailwindClass,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
@@ -66,7 +66,6 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   Stable: "STABLE",
   "Slightly Abnormal": "ABNORMAL",
   Critical: "CRITICAL",
-  unknown: "UNKNOWN",
 };
 
 export const PatientManager = (props: any) => {
@@ -380,9 +379,11 @@ export const PatientManager = (props: any) => {
         patientUrl = `/patient/${patient.id}`;
       }
 
-      const category: PatientCategory =
-        patient?.last_consultation?.category || "unknown";
-      const categoryClass = PatientCategoryTailwindClass[category];
+      const category: PatientCategory | undefined =
+        patient?.last_consultation?.category;
+      const categoryClass = category
+        ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
+        : "patient-unknown";
 
       return (
         <Link
@@ -394,7 +395,7 @@ export const PatientManager = (props: any) => {
             className={`rounded-l-lg absolute top-0 bottom-0 left-0 h-full w-1 group-hover:w-5 transition-all duration-200 ease-in-out flex items-center ${categoryClass}`}
           >
             <span className="absolute -left-32 -right-32 top-0 bottom-0 flex justify-center items-center text-center transform -rotate-90 text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out">
-              {PatientCategoryDisplayText[category]}
+              {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
             </span>
           </div>
           <div className="flex gap-4 items-start">
@@ -707,7 +708,6 @@ export const PatientManager = (props: any) => {
                   Search by Primary Number
                 </div>
                 <PhoneNumberField
-                  bgColor="bg-white"
                   value={qParams.phone_number || "+91"}
                   onChange={(value: string) => {
                     if (value !== "+91") {
@@ -725,7 +725,6 @@ export const PatientManager = (props: any) => {
                   Search by Emergency Number
                 </div>
                 <PhoneNumberField
-                  bgColor="bg-white"
                   value={qParams.emergency_phone_number || "+91"}
                   onChange={(value: string) => {
                     if (value !== "+91") {
