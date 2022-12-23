@@ -81,9 +81,7 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
         const asset: AssetData = bedAssets.data.results[0].asset_object;
         if (asset?.meta?.local_ip_address) {
           setWsUrl(
-            (prev) =>
-              prev ||
-              `wss://${middlewareHostname}/observations/${asset?.meta?.local_ip_address}`
+            `wss://${middlewareHostname}/observations/${asset?.meta?.local_ip_address}`
           );
         }
       }
@@ -91,7 +89,11 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
 
     if (patient?.last_consultation?.current_bed?.bed_object?.id)
       fetchAssetData();
-  });
+  }, [
+    dispatch,
+    middlewareHostname,
+    patient?.last_consultation?.current_bed?.bed_object?.id,
+  ]);
 
   const connectWs = (url: string) => {
     wsClient.current = new WebSocket(url);
