@@ -366,7 +366,7 @@ export default function PatientFilterV2(props: any) {
       />
       <div className="w-full flex-none pt-20">
         <div className="mb-3 text-md flex items-center text-gray-700 gap-2">
-          <CareIcon className="care-l-sort h-5" />
+          <CareIcon className="care-l-sort text-lg" />
           <p>Ordering</p>
         </div>
         <SelectMenuV2
@@ -389,7 +389,7 @@ export default function PatientFilterV2(props: any) {
         />
       </div>
       <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-        <CareIcon className="care-l-filter h-5" />
+        <CareIcon className="care-l-filter text-lg" />
         <p>Filter by</p>
       </div>
       <div className="flex flex-wrap gap-4">
@@ -448,7 +448,7 @@ export default function PatientFilterV2(props: any) {
             onChange={(v) =>
               setFilterState({ ...filterState, facility_type: v })
             }
-            optionIcon={() => <CareIcon className="care-l-hospital h-5" />}
+            optionIcon={() => <CareIcon className="care-l-hospital text-lg" />}
           />
         </div>
 

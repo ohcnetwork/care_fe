@@ -151,7 +151,7 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="flex flex-col">
         <div className="flex flex-start items-center">
           <div className="w-8">
-            <CareIcon className={`care-l-${item.icon} h-5 fill-gray-700`} />
+            <CareIcon className={`care-l-${item.icon} text-lg fill-gray-700`} />
           </div>
           <div className="text-gray-700 break-words">{item.label}</div>
         </div>
@@ -266,7 +266,7 @@ const AssetManage = (props: AssetManageProps) => {
                 }
                 id="update-asset"
               >
-                <CareIcon className="care-l-pen h-4" />
+                <CareIcon className="care-l-pen" />
                 <span>Update</span>
               </ButtonV2>
               {asset?.asset_class && (
@@ -278,7 +278,7 @@ const AssetManage = (props: AssetManageProps) => {
                   }
                   id="configure-asset"
                 >
-                  <CareIcon className="care-l-setting h-4" />
+                  <CareIcon className="care-l-setting" />
                   <span>Configure</span>
                 </ButtonV2>
               )}

@@ -99,12 +99,12 @@ describe("User management", () => {
   it("Next/Previous Page", () => {
     // only works for desktop mode
     cy.get("button")
-      .should("contain", ">")
-      .contains(">")
+      .should("contain", "Next")
+      .contains("Next")
       .click({ force: true });
     cy.get("button")
-      .should("contain", "<")
-      .contains("<")
+      .should("contain", "Previous")
+      .contains("Previous")
       .click({ force: true });
   });
 
@@ -130,7 +130,7 @@ describe("Edit Profile Testing", () => {
 
   it("Empty First-Name field of " + username, () => {
     cy.get("input[name=firstName]").clear().trigger("change", { force: true });
-    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("form").get("button[type='submit']").contains("Update").click();
     cy.get(".error-text").contains("Field is required");
   });
 
@@ -139,13 +139,13 @@ describe("Edit Profile Testing", () => {
       .clear()
       .type("User 1")
       .trigger("change", { force: true });
-    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("form").get("button[type='submit']").contains("Update").click();
     cy.get("dt").contains("First Name").siblings().first().contains("User 1");
   });
 
   it("Empty Last-Name field of " + username, () => {
     cy.get("input[name=lastName]").clear().trigger("change", { force: true });
-    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("form").get("button[type='submit']").contains("Update").click();
     cy.get(".error-text").contains("Field is required");
   });
 
@@ -154,7 +154,7 @@ describe("Edit Profile Testing", () => {
       .clear()
       .type("User 1")
       .trigger("change", { force: true });
-    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("form").get("button[type='submit']").contains("Update").click();
     cy.get("dt").contains("Last Name").siblings().first().contains("User 1");
   });
 
@@ -171,7 +171,7 @@ describe("Edit Profile Testing", () => {
     cy.wait(1000);
     cy.get("form")
       .get("button[type='submit']")
-      .contains("UPDATE")
+      .contains("Update")
       .click()
       .then(() => {
         cy.get(".error-text").contains("Please enter valid mobile number");
@@ -189,7 +189,7 @@ describe("Edit Profile Testing", () => {
       .trigger("change", { force: true })
       .should("have.attr", "value", `+91 ${whatsapp_num}`);
     cy.wait(1000);
-    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("form").get("button[type='submit']").contains("Update").click();
     cy.get("dt")
       .contains("Whatsapp No")
       .siblings()
@@ -210,7 +210,7 @@ describe("Edit Profile Testing", () => {
     cy.wait(1000);
     cy.get("form")
       .get("button[type='submit']")
-      .contains("UPDATE")
+      .contains("Update")
       .click()
       .then(() => {
         cy.get(".error-text").contains("Please enter valid phone number");
@@ -228,7 +228,7 @@ describe("Edit Profile Testing", () => {
       .trigger("change", { force: true })
       .should("have.attr", "value", `+91 ${phone_num}`);
     cy.wait(1000);
-    cy.get("form").get("button[type='submit']").contains("UPDATE").click();
+    cy.get("form").get("button[type='submit']").contains("Update").click();
     cy.get("dt")
       .contains("Contact No")
       .siblings()
