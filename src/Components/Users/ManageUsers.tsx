@@ -29,6 +29,8 @@ import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { classNames } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -495,14 +497,13 @@ export default function ManageUsers() {
                   )}
                   {user.username && (
                     <div className="col-span-4">
-                      <div className="flex gap-2 text-gray-800">
-                        Linked Facilities:{" "}
-                        <i
-                          className={`${
-                            !user.facilities
-                              ? "fa fa-eye"
-                              : "fa-solid fa-eye-slash"
-                          } flex items-center hover:text-primary`}
+                      <div className="flex text-gray-800">
+                        <p className="flex items-center">Linked Facilities: </p>
+                        <ButtonV2
+                          ghost
+                          circle
+                          variant="secondary"
+                          className="tooltip flex items-center"
                           onClick={() => {
                             if (!user.facilities) {
                               loadFacilities(user.username);
@@ -510,7 +511,19 @@ export default function ManageUsers() {
                               hideFacilities(user.username);
                             }
                           }}
-                        ></i>
+                        >
+                          <CareIcon
+                            className={`${
+                              !user.facilities
+                                ? "care-l-eye"
+                                : "care-l-eye-slash"
+                            } text-xl`}
+                          />
+                          <span className="tooltip-text tooltip-bottom">
+                            {!user.facilities ? "View" : "Hide"} Linked
+                            Facilties
+                          </span>
+                        </ButtonV2>
                       </div>
                       {user.facilities &&
                         showFacilities(user.username, user.facilities)}
