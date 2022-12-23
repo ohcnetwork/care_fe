@@ -10,7 +10,7 @@ class facility {
       latitude: 800,
       longitude: 500,
     });
-    cy.get("[id=facility-save]").should("exist").click();
+    cy.get("[id=submit]").should("exist").click();
     cy.verifyNotification("Facility added successfully");
   }
 
@@ -25,7 +25,7 @@ class facility {
       latitude: 900,
       longitude: 600,
     });
-    cy.get("[id=facility-save]").should("exist").click();
+    cy.get("[id=submit]").should("exist").click();
     cy.verifyNotification("Facility updated successfully");
   }
 
@@ -161,7 +161,7 @@ describe("Facility", () => {
     cy.verifyNotification("Bed capacity added successfully");
 
     cy.url().should("include", "bed");
-    cy.get("[id=bed-capacity-cancel]").click();
+    cy.get("[id=cancel]").click();
 
     // add doctor information
     cy.get("button")
@@ -175,7 +175,7 @@ describe("Facility", () => {
     cy.get("[id=doctor-save").click();
     cy.verifyNotification("Doctor count added successfully");
     cy.url().should("include", "doctor");
-    cy.get("[id=doctor-cancel").click();
+    cy.get("[id=cancel").click();
     cy.url().then((url) => {
       current_url = url;
     });

@@ -40,10 +40,10 @@ const DialogModal = (props: DialogProps) => {
               >
                 <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title
-                    as="h3"
+                    as="h4"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    {title}
+                    <h4>{title}</h4>
                   </Dialog.Title>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">{description}</p>

@@ -81,6 +81,7 @@ export default function UserFilter(props: any) {
           onClick={(_) => {
             navigate("/sample");
             setFilterState(clearFilterState);
+            closeFilter();
           }}
         >
           <i className="fas fa-times mr-2" />

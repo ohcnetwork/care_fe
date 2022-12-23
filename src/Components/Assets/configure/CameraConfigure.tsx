@@ -1,13 +1,13 @@
 import { Fragment } from "react";
 import React from "react";
 import { AssetData } from "../AssetTypes";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { Card, CardContent, InputLabel, Button } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import { TextInputField } from "../../Common/HelperInputFields";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { getCameraConfig } from "../../../Utils/transformUtils";
+import { Submit } from "../../Common/components/ButtonV2";
 
 interface CameraConfigureProps {
   asset: AssetData;
@@ -62,16 +62,8 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-4">
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-              >
-                Add Preset
-              </Button>
+            <div className="flex justify-end mt-4">
+              <Submit label="Add Preset" />
             </div>
           </CardContent>
         </form>

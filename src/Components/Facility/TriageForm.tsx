@@ -1,6 +1,5 @@
 import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -15,6 +14,7 @@ import { TextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
 import { goBack } from "../../Utils/utils";
 import DateInputV2 from "../Common/DateInputV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -334,21 +334,8 @@ export const TriageForm = (props: triageFormProps) => {
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <button
-                  className="btn btn-default bg-gray-300 hover:bg-gray-400 btn-large mr-4 w-full md:w-auto"
-                  type="button"
-                  onClick={() => goBack()}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="btn btn-large btn-primary mr-4 w-full md:w-auto flex gap-2"
-                  onClick={(e) => handleSubmit(e)}
-                  data-testid="add-patient-button"
-                >
-                  <CheckCircleOutlineIcon />
-                  {buttonText}
-                </button>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} label={buttonText} />
               </div>
             </CardContent>
           </form>
