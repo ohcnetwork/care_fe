@@ -59,6 +59,7 @@ jobs:
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max_old_space_size=4096
 
       - name: Remove cypress failed label on success 🏷️
         uses: actions-ecosystem/action-remove-labels@v1
