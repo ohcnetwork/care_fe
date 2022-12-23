@@ -10,7 +10,7 @@ import withScrolling from "react-dnd-scrolling";
 import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
 import useFilters from "../../Common/hooks/useFilters";
-import useExport from "../../Common/hooks/useExport";
+import { ExportButton } from "../Common/Export";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -25,7 +25,6 @@ export default function BoardView() {
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(false);
-  const { ExportButton } = useExport();
   const appliedFilters = formatFilter(qParams);
 
   const onListViewBtnClick = () => {

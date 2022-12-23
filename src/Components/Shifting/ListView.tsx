@@ -16,7 +16,7 @@ import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import BadgesList from "./BadgesList";
-import useExport from "../../Common/hooks/useExport";
+import { ExportButton } from "../Common/Export";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -38,7 +38,6 @@ export default function ListView() {
     externalId: undefined,
     loading: false,
   });
-  const { ExportButton } = useExport();
 
   const handleTransferComplete = (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
