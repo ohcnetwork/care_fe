@@ -521,7 +521,7 @@ export default function ManageUsers() {
                           />
                           <span className="tooltip-text tooltip-bottom">
                             {!user.facilities ? "View" : "Hide"} Linked
-                            Facilties
+                            Facilities
                           </span>
                         </ButtonV2>
                       </div>

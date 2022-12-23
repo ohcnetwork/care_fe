@@ -69,20 +69,8 @@ describe("User management", () => {
   });
 
   it("link facility for user", () => {
-    cy.contains("Advanced Filters").click();
-    cy.get("[name='first_name']").type("Cypress Test");
-    cy.get("[name='last_name']").type("Tester");
-    cy.get("[placeholder='Phone Number']").type(phone_number);
-    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
-    cy.contains("Apply").click();
-    cy.intercept(/\/api\/v1\/users/).as("getUsers");
-    cy.get("[name='username']").type(username, { force: true });
-    cy.wait("@getUsers");
-    cy.wait(500);
     const linkFacilityString = "View Linked Facilities";
-    cy.get("div")
-      .should("contain", linkFacilityString)
-      .contains(linkFacilityString)
+    cy.contains(linkFacilityString)
       .click({ force: true })
       .then(() => {
         cy.get("a")
@@ -94,6 +82,16 @@ describe("User management", () => {
     cy.get("[name='facility']").type("test").wait("@getFacilities");
     cy.get("[name='facility']").type("{downarrow}{enter}");
     cy.get("button > span").contains("Add").click({ force: true }).wait(1000);
+    cy.wait(500);
+    cy.contains("Advanced Filters").click();
+    cy.get("[name='first_name']").type("Cypress Test");
+    cy.get("[name='last_name']").type("Tester");
+    cy.get("[placeholder='Phone Number']").type(phone_number);
+    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
+    cy.contains("Apply").click();
+    cy.intercept(/\/api\/v1\/users/).as("getUsers");
+    cy.get("[name='username']").type(username, { force: true });
+    cy.wait("@getUsers");
   });
 
   it("Next/Previous Page", () => {
