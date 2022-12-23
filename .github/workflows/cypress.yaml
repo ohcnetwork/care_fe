@@ -21,7 +21,6 @@ jobs:
         with:
           repository: coronasafe/care
           path: care
-          ref: prebuilt
 
       - name: Run docker compose up on care 🐳
         run: cd care && touch .env && make docker_config_file=docker-compose.pre-built.yaml up && cd .. && sleep 30s
