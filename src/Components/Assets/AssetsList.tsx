@@ -283,24 +283,25 @@ const AssetsList = () => {
               label="Import/Export"
               exportItems={[
                 {
-                  exportLabel: "Import Assets",
-                  exportFunction: () => setImportAssetModalOpen(true),
-                  dropdownOptions: {
+                  label: "Import Assets",
+                  action: () => setImportAssetModalOpen(true),
+                  options: {
                     icon: <CareIcon className="care-l-import" />,
                   },
                 },
                 {
-                  exportLabel: "Export Assets",
-                  exportFunction: () =>
+
+                  label: "Export Assets",
+                  action: () =>
                     authorizedForImportExport &&
                     listAssets({
                       ...qParams,
                       json: true,
                       limit: totalCount,
                     }),
-                  exportType: "json",
-                  exportFilePrefix: `assets_${facility?.name}`,
-                  dropdownOptions: {
+                  type: "json",
+                  filePrefix: `assets_${facility?.name}`,
+                  options: {
                     icon: <CareIcon className="care-l-export" />,
                     disabled: totalCount === 0 || !authorizedForImportExport,
                   },

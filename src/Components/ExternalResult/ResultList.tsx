@@ -233,21 +233,21 @@ export default function ResultList() {
           label="Import/Export"
           exportItems={[
             {
-              exportLabel: "Import Results",
-              exportFunction: () => navigate("/external_results/upload"),
-              dropdownOptions: {
+              label: "Import Results",
+              action: () => navigate("/external_results/upload"),
+              options: {
                 icon: <CareIcon className="care-l-import" />,
               },
             },
             {
-              exportLabel: "Export Results",
-              exportFunction: () =>
+              label: "Export Results",
+              action: () =>
                 externalResultList(
                   { ...qParams, csv: true },
                   "externalResultList"
                 ),
-              exportFilePrefix: "external_results",
-              dropdownOptions: {
+              filePrefix: "external_results",
+              options: {
                 icon: <CareIcon className="care-l-export" />,
               },
             },

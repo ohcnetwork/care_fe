@@ -7,11 +7,11 @@ import ButtonV2 from "../../Components/Common/components/ButtonV2";
 import useExport from "../../Common/hooks/useExport";
 
 interface ExportItem {
-  dropdownOptions?: DropdownItemProps;
-  exportType?: "csv" | "json";
-  exportFilePrefix?: string;
-  exportLabel: string;
-  exportFunction: any;
+  options?: DropdownItemProps;
+  type?: "csv" | "json";
+  filePrefix?: string;
+  label: string;
+  action: any;
 }
 
 interface ExportMenuProps {
@@ -47,16 +47,10 @@ export const ExportMenu = ({
       >
         {exportItems.map((item) => (
           <DropdownItem
-            onClick={() =>
-              exportFile(
-                item.exportFunction,
-                item.exportFilePrefix,
-                item.exportType
-              )
-            }
-            {...item.dropdownOptions}
+            onClick={() => exportFile(item.action, item.filePrefix, item.type)}
+            {...item.options}
           >
-            {item.exportLabel}
+            {item.label}
           </DropdownItem>
         ))}
       </DropdownMenu>

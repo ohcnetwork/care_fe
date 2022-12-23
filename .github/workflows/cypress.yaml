@@ -22,16 +22,12 @@ jobs:
           repository: coronasafe/care
           path: care
 
-      - name: Docker Layer Caching 🍥
-        uses: satackey/action-docker-layer-caching@v0.0.11
-
       - name: Run docker compose up on care 🐳
-        run: cd care && touch .env && make build && make up && cd .. && sleep 30s
+        run: cd care && touch .env && make docker_config_file=docker-compose.pre-built.yaml up && cd .. && sleep 30s
         # Voluntarily kept 30 seconds delay to wait for migrations to complete.
 
       - name: Run Django collectstatic and load dummy data on care 🐍
         run: |
-          docker exec care python manage.py collectstatic
           docker exec care python manage.py load_dummy_data
 
       - name: Check care is up ♻
@@ -59,6 +55,7 @@ jobs:
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max_old_space_size=4096
 
       - name: Remove cypress failed label on success 🏷️
         uses: actions-ecosystem/action-remove-labels@v1

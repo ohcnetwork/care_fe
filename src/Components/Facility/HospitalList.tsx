@@ -215,24 +215,24 @@ export const HospitalList = () => {
         <ExportMenu
           exportItems={[
             {
-              exportLabel: "Facilities",
-              exportFunction: downloadFacility,
-              exportFilePrefix: "facilities",
+              label: "Facilities",
+              action: downloadFacility,
+              filePrefix: "facilities",
             },
             {
-              exportLabel: "Capacities",
-              exportFunction: downloadFacilityCapacity,
-              exportFilePrefix: "capacities",
+              label: "Capacities",
+              action: downloadFacilityCapacity,
+              filePrefix: "capacities",
             },
             {
-              exportLabel: "Doctors",
-              exportFunction: downloadFacilityDoctors,
-              exportFilePrefix: "doctors",
+              label: "Doctors",
+              action: downloadFacilityDoctors,
+              filePrefix: "doctors",
             },
             {
-              exportLabel: "Triages",
-              exportFunction: downloadFacilityTriage,
-              exportFilePrefix: "triages",
+              label: "Triages",
+              action: downloadFacilityTriage,
+              filePrefix: "triages",
             },
           ]}
         />
