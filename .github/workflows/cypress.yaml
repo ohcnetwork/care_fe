@@ -22,11 +22,8 @@ jobs:
           repository: coronasafe/care
           path: care
 
-      - name: Docker Layer Caching 🍥
-        uses: satackey/action-docker-layer-caching@v0.0.11
-
       - name: Run docker compose up on care 🐳
-        run: cd care && touch .env && make build && make up && cd .. && sleep 30s
+        run: cd care && touch .env && make docker_config_file=docker-compose.pre-built.yaml up && cd .. && sleep 30s
         # Voluntarily kept 30 seconds delay to wait for migrations to complete.
 
       - name: Run Django collectstatic and load dummy data on care 🐍
