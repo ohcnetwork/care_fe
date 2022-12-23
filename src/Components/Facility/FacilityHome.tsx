@@ -140,6 +140,9 @@ export const FacilityHome = (props: any) => {
     return <Loading />;
   }
   let capacityList: any = null;
+  let percentage = 0.0;
+  let totalBedCount = 0;
+  let totalOccupiedBedCount = 0;
   if (!capacityData || !capacityData.length) {
     capacityList = (
       <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
@@ -147,6 +150,12 @@ export const FacilityHome = (props: any) => {
       </h5>
     );
   } else {
+    capacityData.forEach((x) => {
+      totalBedCount += x.total_capacity ? x.total_capacity : 0;
+      totalOccupiedBedCount += x.current_capacity ? x.current_capacity : 0;
+    });
+    percentage = (totalOccupiedBedCount * 100) / totalBedCount;
+
     capacityList = (
       <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
         {BED_TYPES.map((x) => {
@@ -602,6 +611,25 @@ export const FacilityHome = (props: any) => {
             Add More Bed Types
           </ButtonV2>
         </div>
+        {totalBedCount !== 0 && (
+          <div>
+            <div className="flex gap-1 text-md text-gray-600 font-semibold">
+              <p>Total Beds: </p>
+              <p className="text-black">
+                {totalOccupiedBedCount} / {totalBedCount}
+              </p>
+            </div>
+            <p className="text-xs">Total Occupied Beds / Total Beds</p>
+            <div className="rounded-full w-full bg-[#EDEEF0] mt-2">
+              <div
+                className="p-[6px] rounded-full bg-primary transition-all duration-500 ease-out"
+                style={{
+                  width: `${percentage}%`,
+                }}
+              ></div>
+            </div>
+          </div>
+        )}
         <div>{capacityList}</div>
       </div>
       <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
