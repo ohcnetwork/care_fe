@@ -659,7 +659,7 @@ export const PhoneNumberField = (props: any) => {
   const onChangeHandler = debounce(onChange, 500);
 
   useEffect(() => {
-    setMaxLength(() => (value.slice(2, 6) === "1800" ? 16 : 15));
+    setMaxLength(() => (value.slice(4, 8) === "1800" ? 16 : 15));
   }, [value]);
 
   const handleChange = (
