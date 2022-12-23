@@ -60,7 +60,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
               [assetId]: { name: asset?.name },
             }}
           />
-          <HL7Monitor asset={asset} assetId={assetId} />
+          <HL7Monitor asset={asset} assetId={assetId} facilityId={facilityId} />
         </>
       ) : (
         <>
