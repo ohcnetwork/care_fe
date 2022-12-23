@@ -21,6 +21,7 @@ jobs:
         with:
           repository: coronasafe/care
           path: care
+          ref: prebuilt
 
       - name: Run docker compose up on care 🐳
         run: cd care && touch .env && make docker_config_file=docker-compose.pre-built.yaml up && cd .. && sleep 30s
@@ -28,7 +29,6 @@ jobs:
 
       - name: Run Django collectstatic and load dummy data on care 🐍
         run: |
-          docker exec care python manage.py collectstatic
           docker exec care python manage.py load_dummy_data
 
       - name: Check care is up ♻
