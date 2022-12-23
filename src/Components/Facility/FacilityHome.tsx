@@ -612,7 +612,7 @@ export const FacilityHome = (props: any) => {
           </ButtonV2>
         </div>
         {totalBedCount !== 0 && (
-          <div>
+          <div className="mb-8">
             <div className="flex gap-1 text-md text-gray-600 font-semibold">
               <p>Total Beds: </p>
               <p className="text-black">
