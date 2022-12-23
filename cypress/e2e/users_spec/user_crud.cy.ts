@@ -80,7 +80,7 @@ describe("User management", () => {
     cy.wait("@getUsers");
     cy.wait(500);
     const linkFacilityString = "View Linked Facilities";
-    cy.get("span")
+    cy.get("div")
       .should("contain", linkFacilityString)
       .contains(linkFacilityString)
       .click({ force: true })
