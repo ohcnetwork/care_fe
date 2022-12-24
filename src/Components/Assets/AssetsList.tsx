@@ -290,6 +290,7 @@ const AssetsList = () => {
                   },
                 },
                 {
+
                   label: "Export Assets",
                   action: () =>
                     authorizedForImportExport &&

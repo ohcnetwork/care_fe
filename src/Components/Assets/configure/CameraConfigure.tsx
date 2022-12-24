@@ -17,6 +17,7 @@ interface CameraConfigureProps {
   newPreset: string;
   setNewPreset(preset: string): void;
   refreshPresetsHash: number;
+  facilityMiddlewareHostname: string;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
   const {
@@ -27,6 +28,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     newPreset,
     setNewPreset,
     refreshPresetsHash,
+    facilityMiddlewareHostname,
   } = props;
 
   return (
@@ -71,7 +73,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
       <Card>
         <CardContent>
           <LiveFeed
-            middlewareHostname={asset?.meta?.middleware_hostname}
+            middlewareHostname={facilityMiddlewareHostname}
             asset={getCameraConfig(asset)}
             showRefreshButton={true}
             refreshPresetsHash={refreshPresetsHash}
