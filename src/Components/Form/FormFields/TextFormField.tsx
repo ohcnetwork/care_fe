@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { classNames } from "../../../Utils/utils";
 import FormField from "./FormField";
 import {
   FormFieldBaseProps,
@@ -13,7 +14,6 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   autoComplete?: string;
   type?: "email" | "password" | "search" | "text" | "number";
   className?: string | undefined;
-  removeDefaultClasses?: true | undefined;
   leading?: React.ReactNode | undefined;
   trailing?: React.ReactNode | undefined;
   leadingFocused?: React.ReactNode | undefined;
@@ -25,13 +25,11 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
 const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
-  const borderColor = error ? "border-red-500" : "border-gray-200";
 
   const { leading, trailing } = props;
   const leadingFocused = props.leadingFocused || props.leading;
   const trailingFocused = props.trailingFocused || props.trailing;
   const hasIcon = !!(leading || trailing || leadingFocused || trailingFocused);
-  const padding = `py-3 ${hasIcon ? "px-8" : "px-3"}`;
   const [showPassword, setShowPassword] = useState(false);
 
   const getPasswordFieldType = () => {
@@ -42,11 +40,12 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
     <input
       ref={ref as any}
       id={props.id}
-      className={
-        props.removeDefaultClasses
-          ? props.className
-          : `peer text-sm block ${padding} w-full rounded placeholder:text-gray-500 bg-gray-200 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out ${borderColor} ${props.className}`
-      }
+      className={classNames(
+        "cui-input-base peer",
+        hasIcon && "px-10",
+        error && "border-danger-500",
+        props.className
+      )}
       disabled={props.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}
       placeholder={props.placeholder}
