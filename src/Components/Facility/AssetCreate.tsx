@@ -326,9 +326,9 @@ const AssetCreate = (props: AssetProps) => {
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
         manufacturer: manufacturer,
-        warranty_amc_end_of_validity: moment(
-          warranty_amc_end_of_validity
-        ).format("YYYY-MM-DD"),
+        warranty_amc_end_of_validity: warranty_amc_end_of_validity
+          ? moment(warranty_amc_end_of_validity).format("YYYY-MM-DD")
+          : null,
         last_serviced_on: last_serviced_on
           ? moment(last_serviced_on).format("YYYY-MM-DD")
           : last_serviced_on,
