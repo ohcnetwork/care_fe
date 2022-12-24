@@ -26,8 +26,12 @@ import imageCompression from "browser-image-compression";
 import { formatDate } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import HeadedTabs from "../Common/HeadedTabs";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -568,7 +572,7 @@ export const FileUpload = (props: FileUploadProps) => {
                             download={item.name}
                             className="Button outline-offset-1 button-size-default button-shape-square button-primary-default m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
                           >
-                            <i className="fa-solid fa-circle-arrow-down mr-2"></i>{" "}
+                            <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
                             DOWNLOAD
                           </a>
                           {item?.uploaded_by?.username ===
@@ -587,8 +591,8 @@ export const FileUpload = (props: FileUploadProps) => {
                                 }}
                                 className="m-1 sm:w-auto w-full"
                               >
-                                <i className="fa-solid fa-pencil mr-2"></i>EDIT
-                                FILE NAME
+                                <CareIcon className="care-l-pen text-lg" />
+                                EDIT FILE NAME
                               </ButtonV2>
                             </>
                           ) : (
@@ -610,7 +614,7 @@ export const FileUpload = (props: FileUploadProps) => {
                                 }}
                                 className="m-1 sm:w-auto w-full"
                               >
-                                <i className="fa-solid fa-box-archive mr-2 "></i>
+                                <CareIcon className="care-l-archive text-lg" />
                                 ARCHIVE
                               </ButtonV2>
                             </>
@@ -661,14 +665,14 @@ export const FileUpload = (props: FileUploadProps) => {
                   </div>
                   <div className="flex flex-wrap items-center">
                     <ButtonV2
-                      variant="primary"
                       onClick={() => {
                         loadFile(item.id);
                       }}
                       className="m-1 sm:w-auto w-full"
                     >
                       {" "}
-                      <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
+                      <CareIcon className="care-l-eye text-lg" />
+                      PREVIEW FILE
                     </ButtonV2>
                     {item?.uploaded_by?.username === currentuser_username ||
                     currentuser_type === "DistrictAdmin" ||
@@ -683,8 +687,8 @@ export const FileUpload = (props: FileUploadProps) => {
                           }}
                           className="m-1 sm:w-auto w-full"
                         >
-                          <i className="fa-solid fa-pencil mr-2"></i> EDIT FILE
-                          NAME
+                          <CareIcon className="care-l-pen text-lg" />
+                          EDIT FILE NAME
                         </ButtonV2>
                       </>
                     ) : (
@@ -702,7 +706,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           }}
                           className="m-1 sm:w-auto w-full"
                         >
-                          <i className="fa-solid fa-box-archive mr-2"></i>
+                          <CareIcon className="care-l-archive text-lg" />
                           ARCHIVE
                         </ButtonV2>
                       </>
@@ -789,7 +793,8 @@ export const FileUpload = (props: FileUploadProps) => {
                     className="m-1 sm:w-auto w-full"
                   >
                     {" "}
-                    <i className="fa-solid fa-eye-slash mr-2"></i> FILE ARCHIVED
+                    <CareIcon className="care-l-eye-slash text-lg" /> FILE
+                    ARCHIVED
                   </ButtonV2>
                   <ButtonV2
                     onClick={() => {
@@ -803,8 +808,8 @@ export const FileUpload = (props: FileUploadProps) => {
                     }}
                     className="m-1 sm:w-auto w-full"
                   >
-                    <i className="fa-solid fa-circle-question mr-2 "></i>MORE
-                    DETAILS
+                    <CareIcon className="care-l-question-circle text-lg" />
+                    MORE DETAILS
                   </ButtonV2>
                 </div>
               </div>
@@ -1125,8 +1130,8 @@ export const FileUpload = (props: FileUploadProps) => {
         show={modalOpenForEdit}
         title={
           <div className="flex flex-row">
-            <div className="rounded-full bg-primary-100">
-              <i className="fa-solid fa-2x fa-file-pen m-3 text-primary-500"></i>{" "}
+            <div className="rounded-full bg-primary-100 py-4 px-5">
+              <CareIcon className="care-l-edit-alt text-primary-500 text-lg" />
             </div>
             <div className="m-4">
               <h1 className="text-black text-xl "> Edit File Name</h1>
@@ -1144,44 +1149,22 @@ export const FileUpload = (props: FileUploadProps) => {
           className="flex flex-col w-full"
         >
           <div>
-            <InputLabel
+            <FieldLabel
               className="text-md text-gray-500"
               id="editfilenamelabel"
             >
               Please enter the file name
-            </InputLabel>
-            <TextInputField
+            </FieldLabel>
+            <TextFormField
               name="editFileName"
-              variant="outlined"
-              margin="dense"
               value={editFileName}
-              onChange={(e) => setEditFileName(e.target.value)}
-              errors={editFileNameError}
+              onChange={(e) => setEditFileName(e.value)}
+              error={editFileNameError}
             />
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-            <ButtonV2
-              variant="primary"
-              type="submit"
-              disabled={btnloader}
-              className="mr-2 w-full md:w-auto"
-            >
-              <i
-                className={`fa-solid fa-spinner mr-2 animate-spin ${
-                  !btnloader ? " hidden " : " "
-                }`}
-              ></i>
-              Proceed
-            </ButtonV2>
-            <ButtonV2
-              variant="secondary"
-              type="button"
-              className="mr-2 w-full md:w-auto"
-              disabled={btnloader}
-              onClick={() => setModalOpenForEdit(false)}
-            >
-              Cancel
-            </ButtonV2>
+            <Cancel type="button" onClick={() => setModalOpenForEdit(false)} />
+            <Submit disabled={btnloader} label={"Proceed"} />
           </div>
         </form>
       </DialogModal>
@@ -1189,8 +1172,8 @@ export const FileUpload = (props: FileUploadProps) => {
         show={modalOpenForArchive}
         title={
           <div className="flex flex-row">
-            <div className="text-center my-1 mr-3 rounded-full bg-red-100">
-              <i className="fa-solid fa-2x m-3 fa-triangle-exclamation text-red-500"></i>
+            <div className="text-center my-1 mr-3 rounded-full bg-red-100 py-4 px-5">
+              <CareIcon className="care-l-exclamation-triangle text-lg text-red-500 " />
             </div>
             <div className="text-sm text-grey-200">
               <h1 className="text-xl text-black">Archive File</h1>
@@ -1210,48 +1193,26 @@ export const FileUpload = (props: FileUploadProps) => {
           className="flex flex-col w-full my-4 mx-2"
         >
           <div>
-            <InputLabel
-              className="text-md text-black text-center"
-              id="archivereasonlabel"
-            >
+            <FieldLabel className="text-md text-black" id="archivereasonlabel">
               Please state the reason for archiving <b>{modalDetails?.name}</b>{" "}
               file?
-            </InputLabel>
-            <TextInputField
+            </FieldLabel>
+            <TextAreaFormField
               name="editFileName"
-              variant="outlined"
               rows={6}
-              multiline
               required
-              className="w-full border p-2 max-h-64"
               placeholder="Type the reason..."
-              margin="dense"
               value={archiveReason}
-              onChange={(e) => setArchiveReason(e.target.value)}
-              errors={archiveReasonError}
+              onChange={(e) => setArchiveReason(e.value)}
+              error={archiveReasonError}
             />
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-            <ButtonV2
-              type="submit"
-              className="mr-2 w-full md:w-auto"
-              disabled={btnloader}
-            >
-              <i
-                className={`fa-solid fa-spinner mr-2 animate-spin ${
-                  !btnloader ? " hidden " : " "
-                }`}
-              ></i>
-              Proceed
-            </ButtonV2>
-            <ButtonV2
+            <Cancel
               type="button"
-              variant="secondary"
-              className="mr-2 w-full md:w-auto"
-              onClick={(_) => setModalOpenForArchive(false)}
-            >
-              Cancel
-            </ButtonV2>
+              onClick={() => setModalOpenForArchive(false)}
+            />
+            <Submit disabled={btnloader} label={"Proceed"} />
           </div>
         </form>
       </DialogModal>
@@ -1259,8 +1220,8 @@ export const FileUpload = (props: FileUploadProps) => {
         show={modalOpenForMoreDetails}
         title={
           <div className="flex flex-row">
-            <div className="text-center my-1 mr-3 rounded-full bg-primary-100">
-              <i className="fa-solid fa-2x m-3 fa-file-circle-xmark text-primary-500"></i>
+            <div className="text-center my-1 mr-3 px-5 py-4 rounded-full bg-primary-100">
+              <CareIcon className="care-l-question-circle text-lg text-primary-500 " />
             </div>
             <div className="text-sm text-grey-200">
               <h1 className="text-xl text-black">File Details</h1>
@@ -1288,14 +1249,10 @@ export const FileUpload = (props: FileUploadProps) => {
             </div>
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-            <ButtonV2
+            <Cancel
               type="button"
-              variant="danger"
-              className="mr-2 w-full md:w-auto"
               onClick={(_) => setModalOpenForMoreDetails(false)}
-            >
-              Close
-            </ButtonV2>
+            />
           </div>
         </div>
       </DialogModal>
