@@ -93,9 +93,9 @@ const ButtonV2 = ({
         ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
         border && `button-${variant}-border`,
         shadow && "shadow enabled:hover:shadow-lg",
-        className,
-      ].join(" ")}
-      id={`${id || ""}`}
+        className
+      )}
+      id={id}
     >
       {children}
     </button>
