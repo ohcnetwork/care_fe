@@ -154,7 +154,11 @@ export default function ListFilter(props: any) {
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
-        <Link href="/resource" className="btn btn-default hover:text-gray-900">
+        <Link
+          href="/resource"
+          className="btn btn-default hover:text-gray-900"
+          onClick={closeFilter}
+        >
           <i className="fas fa-times mr-2" />
           Clear Filters
         </Link>

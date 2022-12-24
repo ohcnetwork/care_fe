@@ -13,7 +13,7 @@ const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
 
-function FacillityFilter(props: any) {
+function FacilityFilter(props: any) {
   const { filter, onChange, closeFilter } = props;
   const dispatchAction: any = useDispatch();
 
@@ -214,4 +214,4 @@ function FacillityFilter(props: any) {
   );
 }
 
-export default FacillityFilter;
+export default FacilityFilter;

@@ -1,12 +1,10 @@
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
 } from "@material-ui/core";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
@@ -20,6 +18,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { createUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 
 interface Props {
   sample: SampleTestModel;
@@ -237,18 +236,14 @@ const UpdateStatusDialog = (props: Props) => {
                 )}
               </div>
               <div className="flex justify-end col-start-2 col-span-2">
-                <Button
-                  color="primary"
-                  variant="contained"
+                <Submit
                   type="submit"
-                  startIcon={
-                    <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                  }
                   onClick={handleUpload}
                   disabled={uploadDone}
                 >
-                  Upload
-                </Button>
+                  <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
+                  <span>Upload</span>
+                </Submit>
               </div>
             </>
           )}
@@ -265,16 +260,12 @@ const UpdateStatusDialog = (props: Props) => {
         </div>
       </DialogContent>
       <DialogActions style={{ justifyContent: "space-between" }}>
-        <Button onClick={cancelClicked}>Cancel</Button>
-        <Button
+        <Cancel onClick={cancelClicked} />
+        <Submit
           onClick={okClicked}
-          color="primary"
-          variant="contained"
           disabled={state.form.disabled}
-          startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-        >
-          Update Status
-        </Button>
+          label="Update Status"
+        />
       </DialogActions>
     </Dialog>
   );

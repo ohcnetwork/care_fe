@@ -361,7 +361,7 @@ label {
 }
 
 input {
-  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300 !important;
+  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300;
 }
 
 input:disabled,
@@ -960,7 +960,7 @@ button:disabled,
 }
 
 .login-hero{
-  background: linear-gradient(to bottom right, rgba(4, 78, 55, 0.466), rgba(2, 54, 40, 0.521)), url('../../public/images/wave_scene_square.svg');
+  background: linear-gradient(to bottom right, rgba(4, 78, 55, 0.466), rgba(2, 54, 40, 0.521)), url('../../public/images/wave_scene_square.png');
   background-size: cover;
   background-position: center;
   animation: alternate-reverse 30s linear infinite herobg;
@@ -974,7 +974,7 @@ button:disabled,
   right: 0px;
   width: 200px;
   z-index: 2;
-  background: url('../../public/images/wave_long_2.svg');
+  background: url('../../public/images/wave_long_2.png');
   background-position: top right;
   transition: 0.2s;
   animation: 120s linear infinite wave alternate-reverse;
@@ -989,7 +989,7 @@ button:disabled,
   right: 10px;
   width: 200px;
   z-index: 1;
-  background: url('../../public/images/wave_long.svg');
+  background: url('../../public/images/wave_long.png');
   opacity: 0.5;
   background-position: bottom right;
   animation: 120s linear infinite wave_2 alternate-reverse;
@@ -1041,14 +1041,6 @@ button:disabled,
       background-size: 200%;
     }
   }
-}
-
-.field-label {
-  @apply mb-2 block text-gray-900 text-base font-normal
-}
-
-.field-error {
-  @apply font-medium tracking-wide text-red-500 text-xs mt-2 ml-1
 }
 
 .button-primary-default { 
