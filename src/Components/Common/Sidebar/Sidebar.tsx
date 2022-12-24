@@ -104,7 +104,7 @@ const StatelessSidebar = ({
     } else {
       indicatorRef.current.style.display = "none";
     }
-  }, [activeLink, lastIndicatorPosition]);
+  }, [activeLink]);
 
   return (
     <nav
