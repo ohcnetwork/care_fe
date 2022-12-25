@@ -563,7 +563,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         <div className="flex flex-wrap">
                           <a
                             href={url[item.id]}
-                            download={true}
+                            download={item.name}
                             className="btn btn-primary m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
                           >
                             <i className="fa-solid fa-circle-arrow-down mr-2"></i>{" "}
@@ -1072,7 +1072,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 {downloadURL && downloadURL.length > 0 && (
                   <a
                     href={downloadURL}
-                    download
+                    download={file_state.name}
                     className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
                   >
                     <i className="fas fa-download mr-2" />

@@ -13,7 +13,7 @@ import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
 import { formatDate } from "../../Utils/utils";
 import useFilters from "../../Common/hooks/useFilters";
-import useExport from "../../Common/hooks/useExport";
+import { ExportButton } from "../Common/Export";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -25,7 +25,6 @@ export default function ListView() {
   const [data, setData] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const { ExportButton } = useExport();
 
   const onBoardViewBtnClick = () =>
     navigate("/resource/board-view", { query: qParams });

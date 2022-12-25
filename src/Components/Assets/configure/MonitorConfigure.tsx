@@ -10,7 +10,7 @@ import {
 } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import { Submit } from "../../Common/components/ButtonV2";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const saveLink = (assetId: string, bedId: string, dispatch: Dispatch<any>) => {
   dispatch(createAssetBed({}, assetId, bedId));
@@ -90,10 +90,10 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
             className="w-full"
           />
         </div>
-        <ButtonV2 className="shrink-0 w-full" variant="primary" type="submit">
+        <Submit className="shrink-0 w-full">
           <i className="fas fa-bed-pulse" />
           {updateLink ? "Update Bed" : "Save Bed"}
-        </ButtonV2>
+        </Submit>
       </div>
     </form>
   );

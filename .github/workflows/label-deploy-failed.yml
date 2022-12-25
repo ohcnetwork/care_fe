@@ -5,17 +5,19 @@ permissions:
 
 on:
   issue_comment:
-    types: [created, edited]
+    types:
+      - created
+      - edited
 
 jobs:
   auto-label-deploy-failed:
     runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, 'Deploy Preview')
     steps:
       - name: Add 'Deploy-Failed'
-        if: |
-          github.event.issue.pull_request && 
-          contains(github.event.comment.body, 'Deploy Preview') && 
-          contains(github.event.comment.body, 'failed')
+        if: contains(github.event.comment.body, 'failed')
         uses: actions/github-script@v6
         with:
           script: |
@@ -27,10 +29,7 @@ jobs:
             })
 
       - name: Remove 'Deploy-Failed' label
-        if: |
-          github.event.issue.pull_request && 
-          contains(github.event.comment.body, 'Deploy Preview') && 
-          contains(github.event.comment.body, 'ready')
+        if: contains(github.event.comment.body, 'ready')
         uses: actions/github-script@v6
         with:
           script: |

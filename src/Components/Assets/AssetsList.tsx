@@ -23,13 +23,12 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import AssetImportModal from "./AssetImportModal";
 import { FacilityModel } from "../Facility/models";
-import { DropdownItem } from "../Common/components/Menu";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
 import AuthorizeFor from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import useExport from "../../Common/hooks/useExport";
+import ExportMenu from "../Common/Export";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -58,7 +57,6 @@ const AssetsList = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
-  const { exportJSON, ExportMenu } = useExport();
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -180,13 +178,6 @@ const AssetsList = () => {
     AuthorizeFor(["DistrictAdmin", "StateAdmin"])
   );
 
-  const exportAssets = () =>
-    authorizedForImportExport &&
-    exportJSON(
-      `assets_${facility?.name}`,
-      listAssets({ ...qParams, json: true, limit: totalCount })
-    );
-
   if (isScannerActive)
     return (
       <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
@@ -280,27 +271,43 @@ const AssetsList = () => {
         {authorizedForImportExport && (
           <div className="tooltip">
             {!facility && (
-              <span className="tooltip-text tooltip-left flex flex-col items-end">
-                <p>Select a facility from the Facilities page and</p>
-                <p>click 'View Assets' from the Manage Facility dropdown</p>
+              <span className="tooltip-text tooltip-bottom -translate-x-2/3 flex flex-col items-center">
+                <p>Select a facility from the Facilities</p>
+                <p>page and click 'View Assets' from the</p>
+                <p>Manage Facility dropdown</p>
               </span>
             )}
             {/* TODO: ask for facility select dialog instead of disabling */}
-            <ExportMenu disabled={!facility} label="Import/Export">
-              <DropdownItem
-                icon={<CareIcon className="care-l-import" />}
-                onClick={() => setImportAssetModalOpen(true)}
-              >
-                Import Assets
-              </DropdownItem>
-              <DropdownItem
-                disabled={totalCount === 0}
-                icon={<CareIcon className="care-l-export" />}
-                onClick={exportAssets}
-              >
-                Export Assets
-              </DropdownItem>
-            </ExportMenu>
+            <ExportMenu
+              disabled={!facility}
+              label="Import/Export"
+              exportItems={[
+                {
+                  label: "Import Assets",
+                  action: () => setImportAssetModalOpen(true),
+                  options: {
+                    icon: <CareIcon className="care-l-import" />,
+                  },
+                },
+                {
+
+                  label: "Export Assets",
+                  action: () =>
+                    authorizedForImportExport &&
+                    listAssets({
+                      ...qParams,
+                      json: true,
+                      limit: totalCount,
+                    }),
+                  type: "json",
+                  filePrefix: `assets_${facility?.name}`,
+                  options: {
+                    icon: <CareIcon className="care-l-export" />,
+                    disabled: totalCount === 0 || !authorizedForImportExport,
+                  },
+                },
+              ]}
+            />
           </div>
         )}
       </div>
@@ -333,7 +340,7 @@ const AssetsList = () => {
           />
         </div>
         <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
-          <div className="flex flex-col md:flex-row gap-2">
+          <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
             <div className="w-full">
               <AdvancedFilterButton
                 setShowFilters={() => advancedFilter.setShow(true)}
@@ -351,7 +358,8 @@ const AssetsList = () => {
               className="w-full inline-flex items-center justify-center"
               onClick={() => setShowFacilityDialog(true)}
             >
-              <CareIcon className="care-l-plus-circle h-5 mr-1" /> Create Asset
+              <CareIcon className="care-l-plus-circle text-lg" />
+              <span>Create Asset</span>
             </ButtonV2>
           </div>
         </div>

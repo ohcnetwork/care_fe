@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import {
@@ -32,13 +32,7 @@ import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import { DateRange } from "../Common/DateRangeInputV2";
 import FilterButtons from "../Common/FilterButtons";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-
-const useMergeState = (initialState: any) => {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-};
+import useMergeState from "../../Common/hooks/useMergeState";
 
 const getDate = (value: any) =>
   value && moment(value).isValid() && moment(value).toDate();
@@ -367,11 +361,12 @@ export default function PatientFilterV2(props: any) {
         onClear={() => {
           navigate("/patients");
           setFilterState(clearFilterState);
+          closeFilter();
         }}
       />
       <div className="w-full flex-none pt-20">
         <div className="mb-3 text-md flex items-center text-gray-700 gap-2">
-          <CareIcon className="care-l-sort h-5" />
+          <CareIcon className="care-l-sort text-lg" />
           <p>Ordering</p>
         </div>
         <SelectMenuV2
@@ -394,7 +389,7 @@ export default function PatientFilterV2(props: any) {
         />
       </div>
       <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-        <CareIcon className="care-l-filter h-5" />
+        <CareIcon className="care-l-filter text-lg" />
         <p>Filter by</p>
       </div>
       <div className="flex flex-wrap gap-4">
@@ -453,7 +448,7 @@ export default function PatientFilterV2(props: any) {
             onChange={(v) =>
               setFilterState({ ...filterState, facility_type: v })
             }
-            optionIcon={() => <CareIcon className="care-l-hospital h-5" />}
+            optionIcon={() => <CareIcon className="care-l-hospital text-lg" />}
           />
         </div>
 
