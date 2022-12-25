@@ -289,8 +289,9 @@ export const SampleTest = (props: any) => {
                   </div>
                   {state.form.sample_type === "OTHER TYPE" && (
                     <div>
-                      <FieldLabel>Sample Test Type Details*</FieldLabel>
                       <TextAreaFormField
+                        label="Sample Test Type Details"
+                        required
                         rows={4}
                         name="sample_type_other"
                         value={state.form.sample_type_other}
@@ -345,7 +346,7 @@ export const SampleTest = (props: any) => {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <FieldLabel>Label*</FieldLabel>
+                    <FieldLabel required>Label</FieldLabel>
                     <TextInputField
                       name="icmr_label"
                       variant="outlined"
@@ -381,8 +382,8 @@ export const SampleTest = (props: any) => {
                   </div>
                   {state.form.isFastTrack && (
                     <div>
-                      <FieldLabel>
-                        Provide reasons for fast-track testing*
+                      <FieldLabel required>
+                        Provide reasons for fast-track testing
                       </FieldLabel>
                       <TextAreaFormField
                         rows={4}
@@ -417,8 +418,9 @@ export const SampleTest = (props: any) => {
                 </div>
                 {state.form.is_atypical_presentation && (
                   <div>
-                    <FieldLabel>Atypical presentation details*</FieldLabel>
                     <TextAreaFormField
+                      required
+                      label="Atypical presentation details"
                       rows={4}
                       name="atypical_presentation"
                       value={state.form.atypical_presentation}
@@ -428,8 +430,8 @@ export const SampleTest = (props: any) => {
                   </div>
                 )}
                 <div>
-                  <FieldLabel>Diagnosis</FieldLabel>
                   <TextAreaFormField
+                    label="Diagnosis"
                     rows={4}
                     name="diagnosis"
                     value={state.form.diagnosis}
@@ -438,8 +440,8 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div>
-                  <FieldLabel>Etiology identified</FieldLabel>
                   <TextAreaFormField
+                    label="Etiology identified"
                     rows={4}
                     name="etiology_identified"
                     value={state.form.etiology_identified}
@@ -448,8 +450,8 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div>
-                  <FieldLabel>Differential diagnosis</FieldLabel>
                   <TextAreaFormField
+                    label="Differential diagnosis"
                     rows={4}
                     name="diff_diagnosis"
                     value={state.form.diff_diagnosis}
