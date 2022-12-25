@@ -23,13 +23,14 @@ import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
 import moment from "moment";
-import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import DateInputV2 from "../Common/DateInputV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -508,11 +509,12 @@ const AssetCreate = (props: AssetProps) => {
 
                   {/* Asset Name */}
                   <div className="col-span-6" ref={fieldRef["name"]}>
-                    <TextInputFieldV2
+                    <TextFormField
                       id="asset-name"
+                      name="asset_name"
                       label="Asset Name"
                       value={name}
-                      onValueChange={setName}
+                      onChange={(e) => setName(e.value)}
                       error={state.errors.name}
                       required
                     />
@@ -733,12 +735,13 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["manufacturer"]}
                   >
-                    <TextInputFieldV2
+                    <TextFormField
                       id="manufacturer"
+                      name="manufacturer"
                       label="Manufacturer"
                       value={manufacturer}
                       placeholder="Eg. XYZ"
-                      onValueChange={setManufacturer}
+                      onChange={(e) => setManufacturer(e.value)}
                       error={state.errors.manufacturer}
                     />
                   </div>
@@ -777,12 +780,13 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["support_name"]}
                   >
-                    <TextInputFieldV2
+                    <TextFormField
                       id="support-name"
+                      name="support_name"
                       label="Customer Support Name"
                       placeholder="Eg. ABC"
                       value={support_name}
-                      onValueChange={setSupportName}
+                      onChange={(e) => setSupportName(e.value)}
                       error={state.errors.support_name}
                     />
                   </div>
@@ -808,12 +812,13 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["support_email"]}
                   >
-                    <TextInputFieldV2
+                    <TextFormField
                       id="support-email"
+                      name="support_email"
                       label="Customer Support Email"
                       placeholder="Eg. mail@example.com"
                       value={support_email}
-                      onValueChange={setSupportEmail}
+                      onChange={(e) => setSupportEmail(e.value)}
                       error={state.errors.support_email}
                     />
                   </div>
@@ -825,12 +830,13 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["vendor_name"]}
                   >
-                    <TextInputFieldV2
-                      label="Vendor Name"
+                    <TextFormField
                       id="vendor-name"
+                      name="vendor_name"
+                      label="Vendor Name"
                       value={vendor_name}
                       placeholder="Eg. XYZ"
-                      onValueChange={setVendorName}
+                      onChange={(e) => setVendorName(e.value)}
                       error={state.errors.vendor_name}
                     />
                   </div>
@@ -840,11 +846,12 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["serial_number"]}
                   >
-                    <TextInputFieldV2
-                      label="Serial Number"
+                    <TextFormField
                       id="serial-number"
+                      name="serial_number"
+                      label="Serial Number"
                       value={serial_number}
-                      onValueChange={setSerialNumber}
+                      onChange={(e) => setSerialNumber(e.value)}
                       error={state.errors.serial_number}
                     />
                   </div>

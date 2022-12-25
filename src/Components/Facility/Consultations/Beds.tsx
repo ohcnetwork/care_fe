@@ -9,10 +9,12 @@ import * as Notification from "../../../Utils/Notifications.js";
 import Loading from "../../Common/Loading";
 import { BedModel, CurrentBed } from "../models";
 import { BedSelect } from "../../Common/BedSelect";
-import { Button, InputLabel } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { TextInputField } from "../../Common/HelperInputFields";
 import { formatDate } from "../../../Utils/utils";
+import { FieldLabel } from "../../Form/FormFields/FormField";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import DateFormField from "../../Form/FormFields/DateFormField";
+import moment from "moment";
 
 const formatDateTime: () => string = () => {
   const current = new Date();
@@ -105,6 +107,9 @@ const Beds = (props: BedsProps) => {
     return <Loading />;
   }
 
+  const getDate = (value: any) =>
+    value && moment(value).isValid() && moment(value).toDate();
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -124,44 +129,38 @@ const Beds = (props: BedsProps) => {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
             <div>
-              <InputLabel id="asset-type">Bed</InputLabel>
+              <FieldLabel id="asset-type">Bed</FieldLabel>
               <BedSelect
                 name="bed"
                 setSelected={(selected) => setBed(selected as BedModel)}
                 selected={bed}
-                errors=""
+                error=""
                 multiple={false}
-                margin="dense"
                 facility={facilityId}
               />
             </div>
             <div>
-              <InputLabel htmlFor="date_declared_positive">
+              <FieldLabel htmlFor="date_declared_positive">
                 Date of Shift
-              </InputLabel>
-              <TextInputField
-                name="date_declared_positive"
+              </FieldLabel>
+              <DateFormField
                 id="date_declared_positive"
-                variant="outlined"
-                margin="dense"
-                type="datetime-local"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                errors=""
+                name="date_declared_positive"
+                value={getDate(startDate)}
+                onChange={(e) =>
+                  setStartDate(moment(e.value).format("YYYY-MM-DD"))
+                }
+                maxDate={new Date()}
+                error=""
               />
             </div>
           </div>
           <div className="flex flex-row justify-center mt-4">
             <div>
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                startIcon={<i className="fas fa-bed" />}
-              >
+              <ButtonV2 variant="primary" type="submit">
+                <i className="fas fa-bed" />
                 Move to bed
-              </Button>
+              </ButtonV2>
             </div>
           </div>
         </form>
