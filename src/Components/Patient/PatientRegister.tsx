@@ -1007,7 +1007,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               <div>
                 <div className="my-4">
                   <FieldLabel htmlFor="care-external-results-id" required>
-                    {" "}
                     Enter Care External Results Id
                   </FieldLabel>
                   <TextInputField
