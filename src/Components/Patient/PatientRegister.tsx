@@ -1148,7 +1148,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 id="is_antenatal"
                                 htmlFor="is_antenatal"
                               >
-                                Is antenatal ?{" "}
+                                Is antenatal ?
                               </FieldLabel>
                               <RadioGroup
                                 aria-label="is_antenatal"
