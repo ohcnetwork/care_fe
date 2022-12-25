@@ -1,4 +1,4 @@
-import { Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent } from "@material-ui/core";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import { useReducer, useCallback, useState, useEffect } from "react";
@@ -13,7 +13,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   CheckboxField,
-  MultilineInputField,
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
@@ -22,6 +21,8 @@ import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -242,6 +243,12 @@ export const SampleTest = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleTextAreaChange = (e: any) => {
+    const form = { ...state.form };
+    form[e.name] = e.value;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleCheckboxFieldChange = (e: any) => {
     const form = { ...state.form };
     const { checked, name } = e.target;
@@ -268,7 +275,7 @@ export const SampleTest = (props: any) => {
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div className="space-y-4">
                   <div>
-                    <InputLabel>Sample Test Type*</InputLabel>
+                    <FieldLabel>Sample Test Type*</FieldLabel>
                     <SelectField
                       name="sample_type"
                       variant="outlined"
@@ -282,23 +289,20 @@ export const SampleTest = (props: any) => {
                   </div>
                   {state.form.sample_type === "OTHER TYPE" && (
                     <div>
-                      <InputLabel>Sample Test Type Details*</InputLabel>
-                      <MultilineInputField
+                      <FieldLabel>Sample Test Type Details*</FieldLabel>
+                      <TextAreaFormField
                         rows={4}
                         name="sample_type_other"
-                        variant="outlined"
-                        margin="dense"
-                        type="text"
                         value={state.form.sample_type_other}
-                        onChange={handleChange}
-                        errors={state.errors.sample_type_other}
+                        onChange={handleTextAreaChange}
+                        error={state.errors.sample_type_other}
                       />
                     </div>
                   )}
                 </div>
                 <div className="row-span-3 space-y-4">
                   <div>
-                    <InputLabel>ICMR Category (for COVID Test)</InputLabel>
+                    <FieldLabel>ICMR Category (for COVID Test)</FieldLabel>
                     <SelectField
                       name="icmr_category"
                       variant="outlined"
@@ -311,9 +315,9 @@ export const SampleTest = (props: any) => {
                     />
                   </div>
                   <Container>
-                    <InputLabel>
+                    <FieldLabel>
                       Reference below to know more about ICMR Categories
-                    </InputLabel>
+                    </FieldLabel>
                     <Typography>
                       <li>
                         Cat 0 - Repeat Sample of Positive Case / Follow Up case
@@ -341,7 +345,7 @@ export const SampleTest = (props: any) => {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <InputLabel>Label*</InputLabel>
+                    <FieldLabel>Label*</FieldLabel>
                     <TextInputField
                       name="icmr_label"
                       variant="outlined"
@@ -352,7 +356,7 @@ export const SampleTest = (props: any) => {
                     />
                   </div>
                   <div className="mt-4 w-full">
-                    <InputLabel>Testing Facility Name</InputLabel>
+                    <FieldLabel>Testing Facility Name</FieldLabel>
                     <SelectField
                       name="testing_facility"
                       variant="outlined"
@@ -377,19 +381,15 @@ export const SampleTest = (props: any) => {
                   </div>
                   {state.form.isFastTrack && (
                     <div>
-                      <InputLabel>
+                      <FieldLabel>
                         Provide reasons for fast-track testing*
-                      </InputLabel>
-                      <MultilineInputField
+                      </FieldLabel>
+                      <TextAreaFormField
                         rows={4}
                         name="fast_track"
-                        variant="outlined"
-                        margin="dense"
-                        type="text"
-                        InputLabelProps={{ shrink: !!state.form.fast_track }}
                         value={state.form.fast_track}
-                        onChange={handleChange}
-                        errors={state.errors.fast_track}
+                        onChange={handleTextAreaChange}
+                        error={state.errors.fast_track}
                       />
                     </div>
                   )}
@@ -397,7 +397,7 @@ export const SampleTest = (props: any) => {
               </div>
               <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
-                  <InputLabel>Doctor's Name</InputLabel>
+                  <FieldLabel>Doctor's Name</FieldLabel>
                   <TextInputField
                     name="doctor_name"
                     variant="outlined"
@@ -417,56 +417,44 @@ export const SampleTest = (props: any) => {
                 </div>
                 {state.form.is_atypical_presentation && (
                   <div>
-                    <InputLabel>Atypical presentation details*</InputLabel>
-                    <MultilineInputField
+                    <FieldLabel>Atypical presentation details*</FieldLabel>
+                    <TextAreaFormField
                       rows={4}
                       name="atypical_presentation"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
                       value={state.form.atypical_presentation}
-                      onChange={handleChange}
-                      errors={state.errors.atypical_presentation}
+                      onChange={handleTextAreaChange}
+                      error={state.errors.atypical_presentation}
                     />
                   </div>
                 )}
                 <div>
-                  <InputLabel>Diagnosis</InputLabel>
-                  <MultilineInputField
+                  <FieldLabel>Diagnosis</FieldLabel>
+                  <TextAreaFormField
                     rows={4}
                     name="diagnosis"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
                     value={state.form.diagnosis}
-                    onChange={handleChange}
-                    errors={state.errors.diagnosis}
+                    onChange={handleTextAreaChange}
+                    error={state.errors.diagnosis}
                   />
                 </div>
                 <div>
-                  <InputLabel>Etiology identified</InputLabel>
-                  <MultilineInputField
+                  <FieldLabel>Etiology identified</FieldLabel>
+                  <TextAreaFormField
                     rows={4}
                     name="etiology_identified"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
                     value={state.form.etiology_identified}
-                    onChange={handleChange}
-                    errors={state.errors.etiology_identified}
+                    onChange={handleTextAreaChange}
+                    error={state.errors.etiology_identified}
                   />
                 </div>
                 <div>
-                  <InputLabel>Differential diagnosis</InputLabel>
-                  <MultilineInputField
+                  <FieldLabel>Differential diagnosis</FieldLabel>
+                  <TextAreaFormField
                     rows={4}
                     name="diff_diagnosis"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
                     value={state.form.diff_diagnosis}
-                    onChange={handleChange}
-                    errors={state.errors.diff_diagnosis}
+                    onChange={handleTextAreaChange}
+                    error={state.errors.diff_diagnosis}
                   />
                 </div>
               </div>
