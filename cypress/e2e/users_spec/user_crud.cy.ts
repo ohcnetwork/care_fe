@@ -39,8 +39,10 @@ describe("User management", () => {
     cy.get("[id='localbody'] > div > button").click();
     cy.get("div").contains("Aikaranad").click();
     cy.intercept(/\/api\/v1\/facility/).as("facility");
-    cy.get("[name='facilities']").type("Mysore").wait("@facility");
-    cy.get("[name='facilities']").type("{downarrow}{enter}");
+    cy.get("[name='facilities']")
+      .type("cypress_testing_facility")
+      .wait("@facility");
+    cy.get("[name='facilities']").type("{enter}");
     cy.wait(1000);
     cy.get("input[type='checkbox']").click();
     cy.wait(1000);
@@ -50,11 +52,11 @@ describe("User management", () => {
       force: true,
     });
     cy.intercept(/users/).as("check_availability");
-    cy.get("[name='username']").type(username, { force: true });
     cy.get("[id='date_of_birth']").click();
     cy.get("div").contains("20").click();
     cy.get("[id='year-0']").click();
     cy.get("[id='date-1']").click();
+    cy.get("[name='username']").type(username, { force: true });
     cy.wait("@check_availability").its("response.statusCode").should("eq", 200);
     cy.get("[name='password']").type("#@Cypress_test123");
     cy.get("[name='c_password']").type("#@Cypress_test123");
@@ -89,19 +91,19 @@ describe("User management", () => {
     cy.wait(1000);
     cy.get("dd[id='count']").contains(/^1$/).click();
     cy.get("div[id='usr_0']").within(() => {
+      cy.intercept(`/api/v1/users/${username}/get_facilities/`).as(
+        "userFacility"
+      );
       cy.get("div[id='role']").contains(/^WardAdmin$/);
       cy.get("div[id='name']").contains("Cypress Test Tester");
       cy.get("div[id='district']").contains(/^Ernakulam$/);
       cy.get("div[id='local_body']").contains("Aikaranad");
       cy.get("div[id='created_by']").contains(/^devdistrictadmin$/);
       cy.get("div[id='home_facility']").contains("No Home Facility");
-      cy.get("div").contains("Click").click({
-        force: true,
+      cy.get("div[id='facilities'] > div > button").click().wait(1000);
+      cy.wait("@userFacility").then(() => {
+        cy.get("div").contains("cypress_testing_facility");
       });
-      cy.intercept(`/api/v1/users/${username}/get_facilities/`).as("facility");
-      cy.get("div[id='facilities'] > div:nth-child(2) > div").contains(
-        "(Test) Mysore"
-      );
     });
   });
 

@@ -483,7 +483,7 @@ export default function ManageUsers() {
                     </div>
                   )}
                   {user.username && (
-                    <div className="col-span-4">
+                    <div id="facilities" className="col-span-4">
                       <div className="flex text-gray-800">
                         <p className="flex items-center">Linked Facilities: </p>
                         <ButtonV2
