@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_NAMES } from "../../Locale/config";
-import clsx from "clsx";
+import { classNames } from "../../Utils/utils";
 
 export const LanguageSelectorLogin = () => {
   const { i18n } = useTranslation();
@@ -27,10 +27,10 @@ export const LanguageSelectorLogin = () => {
           <button
             key={e}
             onClick={() => handleLanguage(e)}
-            className={clsx({
-              "text-primary-600 underline": i18n.language === e,
-              "text-primary-400 hover:text-primary-600": true,
-            })}
+            className={classNames(
+              "text-primary-400 hover:text-primary-600",
+              i18n.language === e && "text-primary-600 underline"
+            )}
           >
             {LANGUAGE_NAMES[e]}
           </button>

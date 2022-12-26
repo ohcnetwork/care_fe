@@ -203,7 +203,7 @@ export default function InvestigationBuilder(
                   Notes
                   <input
                     type="text"
-                    className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                    className="cui-input-base py-2"
                     placeholder="Notes"
                     value={investigation.notes || ""}
                     onChange={(e) => {

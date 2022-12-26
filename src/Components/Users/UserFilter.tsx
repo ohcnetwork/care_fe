@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getDistrict } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
@@ -10,13 +10,8 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { USER_TYPE_OPTIONS } from "../../Common/constants";
-
-const useMergeState = (initialState: any) => {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-};
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import useMergeState from "../../Common/hooks/useMergeState";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
@@ -96,11 +91,12 @@ export default function UserFilter(props: any) {
         onClear={() => {
           navigate("/users");
           setFilterState(clearFilterState);
+          closeFilter();
         }}
       />
 
       <div className="pt-20 text-md my-6 flex items-center text-gray-700 gap-2">
-        <i className="uil uil-filter" />
+        <CareIcon className="care-l-filter text-lg" />
         <p>Filter by</p>
       </div>
 

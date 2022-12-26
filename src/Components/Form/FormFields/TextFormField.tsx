@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { classNames } from "../../../Utils/utils";
 import FormField from "./FormField";
 import {
   FormFieldBaseProps,
@@ -10,40 +12,47 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
   value?: string | number;
   autoComplete?: string;
-  type?: "email" | "password" | "search" | "text";
+  type?: "email" | "password" | "search" | "text" | "number";
   className?: string | undefined;
-  removeDefaultClasses?: true | undefined;
   leading?: React.ReactNode | undefined;
   trailing?: React.ReactNode | undefined;
   leadingFocused?: React.ReactNode | undefined;
   trailingFocused?: React.ReactNode | undefined;
+  min?: string | number;
+  max?: string | number;
 };
 
 const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
-  const borderColor = error ? "border-red-500" : "border-gray-200";
 
   const { leading, trailing } = props;
   const leadingFocused = props.leadingFocused || props.leading;
   const trailingFocused = props.trailingFocused || props.trailing;
   const hasIcon = !!(leading || trailing || leadingFocused || trailingFocused);
-  const padding = `py-3 ${hasIcon ? "px-8" : "px-3"}`;
+  const [showPassword, setShowPassword] = useState(false);
+
+  const getPasswordFieldType = () => {
+    return showPassword ? "text" : "password";
+  };
 
   let child = (
     <input
       ref={ref as any}
       id={props.id}
-      className={
-        props.removeDefaultClasses
-          ? props.className
-          : `peer text-sm block ${padding} w-full rounded placeholder:text-gray-500 bg-gray-200 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out ${borderColor} ${props.className}`
-      }
+      className={classNames(
+        "cui-input-base peer",
+        hasIcon && "px-10",
+        error && "border-danger-500",
+        props.className
+      )}
       disabled={props.disabled}
-      type={props.type || "text"}
+      type={props.type === "password" ? getPasswordFieldType() : props.type}
       placeholder={props.placeholder}
       name={props.name}
       value={props.value}
+      min={props.min}
+      max={props.max}
       autoComplete={props.autoComplete}
       required={props.required}
       onChange={(event) => {
@@ -52,6 +61,21 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
       }}
     />
   );
+
+  if (props.type === "password") {
+    child = (
+      <div className="relative">
+        {child}
+        <button
+          type="button"
+          className="absolute right-0 top-0 h-full flex items-center px-3 z-10 text-xl"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          <CareIcon className={`care-l-eye${showPassword ? "" : "-slash"}`} />
+        </button>
+      </div>
+    );
+  }
 
   if (hasIcon) {
     const _leading =

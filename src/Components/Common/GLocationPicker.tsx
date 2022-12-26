@@ -2,10 +2,10 @@ import React from "react";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { deepEqual } from "../../Common/utils";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
-import CloseIcon from "@material-ui/icons/Close";
 import PersonPinIcon from "@material-ui/icons/PersonPin";
 import { GMAPS_API_KEY } from "../../Common/env";
 import Spinner from "./Spinner";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const render = (status: Status) => {
   if (status === "LOADING") {
@@ -20,7 +20,9 @@ interface GLocationPickerProps {
   lng: number;
   handleOnChange: (location: google.maps.LatLng) => void;
   handleOnClose?: () => void;
-  handleOnSelectCurrentLocation?: () => void;
+  handleOnSelectCurrentLocation?: (
+    setCenter: (lat: number, lng: number) => void
+  ) => void;
 }
 
 const GLocationPicker = ({
@@ -87,7 +89,9 @@ interface MapProps extends google.maps.MapOptions {
   onIdle?: (map: google.maps.Map) => void;
   handleOnChange?: (location: google.maps.LatLng) => void;
   handleOnClose?: () => void;
-  handleOnSelectCurrentLocation?: () => void;
+  handleOnSelectCurrentLocation?: (
+    setCenter: (lat: number, lng: number) => void
+  ) => void;
   children?: React.ReactNode;
 }
 
@@ -203,7 +207,7 @@ const Map: React.FC<MapProps> = ({
             ref={mapCloseRef}
             onClick={handleOnClose}
           >
-            <CloseIcon />
+            <CareIcon className="care-l-times-circle text-lg" />
           </div>
         )}
         {handleOnSelectCurrentLocation && (
@@ -211,7 +215,11 @@ const Map: React.FC<MapProps> = ({
             id="current-loaction-select"
             className="bg-white m-[10px] p-2 rounded cursor-pointer"
             ref={currentLocationSelectRef}
-            onClick={handleOnSelectCurrentLocation}
+            onClick={() =>
+              handleOnSelectCurrentLocation((lat: number, lng: number) =>
+                map?.setCenter(new window.google.maps.LatLng(lat, lng))
+              )
+            }
           >
             <PersonPinIcon />
           </div>
