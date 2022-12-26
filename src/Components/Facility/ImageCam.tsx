@@ -12,17 +12,20 @@ interface ImageCamProps {
 const ImageCam = forwardRef((props: ImageCamProps, ref) => {
   const DEFAULT_CAMERA = { video: true };
   const FRONT_CAMERA = { video: { facingMode: "user" } };
-  const [camPos, setCamPos] = useState<any>(DEFAULT_CAMERA);
+  const [camPos, setCamPos] = useState<number>(0);
   const videoRef = useRef<any>(null);
   const photoRef = useRef<any>(null);
   const [camStream, setCamStream] = useState<any>();
   useEffect(() => {
     getVideo();
   }, [videoRef]);
+  useEffect(() => {
+    console.log(camPos, "jj");
+  }, [camPos]);
 
   const getVideo = () => {
     navigator.mediaDevices
-      .getUserMedia(camPos)
+      .getUserMedia(camPos === 0 ? DEFAULT_CAMERA : FRONT_CAMERA)
       .then((stream) => {
         console.log(stream);
         setCamStream(stream);
@@ -57,11 +60,14 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
       return data;
     },
     switchCamera() {
-      if (camPos === DEFAULT_CAMERA) {
-        setCamPos(FRONT_CAMERA);
+      console.log("ll");
+      console.log(camPos, "kk");
+      if (camPos === 0) {
+        setCamPos(1);
       } else {
-        setCamPos(DEFAULT_CAMERA);
+        setCamPos(0);
       }
+      getVideo();
     },
     stopCamera() {
       const tracks = camStream.getTracks();
