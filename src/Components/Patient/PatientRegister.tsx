@@ -54,7 +54,11 @@ import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
 import { InfoOutlined } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { goBack } from "../../Utils/utils";
+import {
+  getPincodeDetails,
+  goBack,
+  includesIgnoreCase,
+} from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -159,7 +163,6 @@ const initialState = {
 };
 
 const initialStates = [{ id: 0, name: "Choose State" }];
-const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody", number: 0 }];
 const initialWard = [{ id: 0, name: "Choose Ward", number: 0 }];
@@ -218,6 +221,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   useEffect(() => {
     if (extId) {
@@ -230,14 +234,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const buttonText = !id ? "Add Patient" : "Save Details";
 
   const fetchDistricts = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
+    async (id: number) => {
+      if (id > 0) {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
-        setDistricts([...initialDistricts, ...districtList.data]);
+        if (districtList) {
+          setDistricts([...districtList.data]);
+        }
         setIsDistrictLoading(false);
-      } else {
-        setDistricts(selectStates);
+        return districtList ? [...districtList.data] : [];
       }
     },
     [dispatchAction]
@@ -655,6 +660,43 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
     dispatch({ type: "set_error", errors });
     return [!invalidForm, error_div];
+  };
+
+  const handlePincodeChange = async (e: any) => {
+    handleChange(e);
+
+    if (!validatePincode(e.target.value)) return;
+
+    const pincodeDetails = await getPincodeDetails(e.target.value);
+    if (!pincodeDetails) return;
+
+    const matchedState = states.find((state) => {
+      return includesIgnoreCase(state.name, pincodeDetails.statename);
+    });
+    if (!matchedState) return;
+
+    const fetchedDistricts = await fetchDistricts(matchedState.id);
+    if (!fetchedDistricts) return;
+
+    const matchedDistrict = fetchedDistricts.find((district) => {
+      return includesIgnoreCase(district.name, pincodeDetails.district);
+    });
+    if (!matchedDistrict) return;
+
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        state: matchedState.id,
+        district: matchedDistrict.id,
+        pincode: e.value,
+      },
+    });
+
+    setShowAutoFilledPincode(true);
+    setTimeout(() => {
+      setShowAutoFilledPincode(false);
+    }, 2000);
   };
 
   const handleSubmit = async (e: any) => {
@@ -1246,9 +1288,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             margin="dense"
                             type="text"
                             value={state.form.pincode}
-                            onChange={handleChange}
+                            onChange={handlePincodeChange}
                             errors={state.errors.pincode}
                           />
+                          {showAutoFilledPincode && (
+                            <div>
+                              <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
+                              <span className="text-primary-500 text-sm">
+                                State and District auto-filled from Pincode
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div id="village-div">
                           <InputLabel htmlFor="village" id="name-label">
@@ -1307,7 +1357,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   optionValue="name"
                                   onChange={(e) => [
                                     handleChange(e),
-                                    fetchDistricts(String(e.target.value)),
+                                    fetchDistricts(e.target.value),
                                   ]}
                                   errors={state.errors.state}
                                 />

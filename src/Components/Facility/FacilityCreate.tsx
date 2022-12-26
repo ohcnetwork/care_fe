@@ -588,6 +588,31 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
               <div>
                 <FieldLabel
+                  htmlFor="facility-pincode"
+                  className="mb-2"
+                  required={true}
+                >
+                  Pincode
+                </FieldLabel>
+                <TextFormField
+                  id="facility-pincode"
+                  name="pincode"
+                  required
+                  onChange={handlePincodeChange}
+                  value={state.form.pincode}
+                  error={state.errors.pincode}
+                />
+                {showAutoFilledPincode && (
+                  <div>
+                    <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
+                    <span className="text-primary-500 text-sm">
+                      State and district auto-filled from pincode
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div>
+                <FieldLabel
                   htmlFor="facility-state"
                   className="mb-2"
                   required={true}
@@ -618,7 +643,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </>
                 )}
               </div>
-
               <div>
                 <FieldLabel
                   htmlFor="facility-district"
@@ -685,7 +709,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </>
                 )}
               </div>
-              <div className="md:col-span-2">
+              <div>
                 <FieldLabel
                   htmlFor="facility-ward"
                   className="mb-2"
@@ -719,7 +743,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 )}
               </div>
 
-              <div className="md:col-span-2">
+              <div>
                 <FieldLabel
                   htmlFor="facility-address"
                   className="mb-2"
@@ -735,31 +759,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                   value={state.form.address}
                   error={state.errors.address}
                 />
-              </div>
-              <div>
-                <FieldLabel
-                  htmlFor="facility-pincode"
-                  className="mb-2"
-                  required={true}
-                >
-                  Pincode
-                </FieldLabel>
-                <TextFormField
-                  id="facility-pincode"
-                  name="pincode"
-                  required
-                  onChange={handlePincodeChange}
-                  value={state.form.pincode}
-                  error={state.errors.pincode}
-                />
-                {showAutoFilledPincode && (
-                  <div>
-                    <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
-                    <span className="text-primary-500 text-sm">
-                      State and District auto-filled from Pincode
-                    </span>
-                  </div>
-                )}
               </div>
               <div>
                 <FieldLabel
