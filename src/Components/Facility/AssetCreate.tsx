@@ -748,7 +748,7 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["warranty_amc_end_of_validity"]}
                   >
-                    <label>Warranty / AMC Expiry</label>
+                    <label className="mb-2">Warranty / AMC Expiry</label>
                     <DateInputV2
                       className="border-1 border-gray-200"
                       value={warranty_amc_end_of_validity}
