@@ -3,7 +3,6 @@ import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   TextInputField,
-  MultilineInputField,
   ErrorHelperText,
   PhoneNumberField,
   SelectField,
@@ -20,7 +19,6 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
   Card,
   CardContent,
-  InputLabel,
   Radio,
   RadioGroup,
   Box,
@@ -31,6 +29,8 @@ import { phonePreg } from "../../Common/validation";
 import { createShift, getPatient } from "../../Redux/actions";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -171,6 +171,13 @@ export const ShiftCreate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleTextAreaChange = (e: any) => {
+    const form = { ...state.form };
+    const { name, value } = e;
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleValueChange = (value: any, name: string) => {
     const form = { ...state.form };
     form[name] = value;
@@ -240,7 +247,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <InputLabel>Contact person at the facility*</InputLabel>
+                <FieldLabel>Contact person at the facility*</FieldLabel>
                 <TextInputField
                   fullWidth
                   name="refering_facility_contact_name"
@@ -265,7 +272,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>Name of shifting approving facility*</InputLabel>
+                <FieldLabel>Name of shifting approving facility*</FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   facilityType={1300}
@@ -279,9 +286,9 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>
+                <FieldLabel>
                   What facility would you like to assign the patient to
-                </InputLabel>
+                </FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   name="assigned_facility"
@@ -294,7 +301,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>Is this an emergency?</InputLabel>
+                <FieldLabel>Is this an emergency?</FieldLabel>
                 <RadioGroup
                   aria-label="emergency"
                   name="emergency"
@@ -319,7 +326,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>Is this an upshift?</InputLabel>
+                <FieldLabel>Is this an upshift?</FieldLabel>
                 <RadioGroup
                   aria-label="is it upshift"
                   name="is_up_shift"
@@ -342,21 +349,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 </RadioGroup>
                 <ErrorHelperText error={state.errors.is_up_shift} />
               </div>
-
-              {/* <div>
-                                <InputLabel>Vehicle preference</InputLabel>
-                                <TextInputField
-                                    fullWidth
-                                    name="vehicle_preference"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.vehicle_preference}
-                                    onChange={handleChange}
-                                    errors={state.errors.vehicle_preference}
-                                />
-                            </div> */}
               <div className="md:col-span-1">
-                <InputLabel>Preferred Vehicle*</InputLabel>
+                <FieldLabel>Preferred Vehicle*</FieldLabel>
                 <SelectField
                   name="preferred_vehicle_choice"
                   variant="outlined"
@@ -370,7 +364,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>Preferred Facility Type*</InputLabel>
+                <FieldLabel>Preferred Facility Type*</FieldLabel>
                 <SelectField
                   name="assigned_facility_type"
                   variant="outlined"
@@ -384,7 +378,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>Severity of Breathlessness*</InputLabel>
+                <FieldLabel>Severity of Breathlessness*</FieldLabel>
                 <SelectField
                   name="breathlessness_level"
                   variant="outlined"
@@ -399,32 +393,26 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Reason for shift*</InputLabel>
-                <MultilineInputField
+                <TextAreaFormField
                   rows={5}
                   name="reason"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
+                  label="Reason for shift*"
                   placeholder="Type your reason here"
                   value={state.form.reason}
-                  onChange={handleChange}
-                  errors={state.errors.reason}
+                  onChange={handleTextAreaChange}
+                  error={state.errors.reason}
                 />
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Any other comments</InputLabel>
-                <MultilineInputField
+                <TextAreaFormField
                   rows={5}
                   name="comments"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
+                  label="Any other comments"
                   placeholder="type any extra comments here"
                   value={state.form.comments}
-                  onChange={handleChange}
-                  errors={state.errors.comments}
+                  onChange={handleTextAreaChange}
+                  error={state.errors.comments}
                 />
               </div>
 
