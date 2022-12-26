@@ -9,6 +9,8 @@ import {
 
 type Props = FormFieldBaseProps<Date> & {
   placeholder?: string;
+  maxDate?: Date;
+  minDate?: Date;
   position?: DatePickerPosition;
 };
 
@@ -20,9 +22,11 @@ const DateFormField = ({ position = "RIGHT", ...props }: Props) => {
   return (
     <FormField props={props}>
       <DateInputV2
-        className={classNames(error && "border-red-500")}
+        className={classNames(error && "border-danger-500")}
         value={props.value}
         onChange={(value) => handleChange({ name, value })}
+        max={props.maxDate}
+        min={props.minDate}
         position={position}
         disabled={props.disabled}
         placeholder={props.placeholder}
