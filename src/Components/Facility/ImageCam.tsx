@@ -22,7 +22,7 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
 
   const getVideo = () => {
     navigator.mediaDevices
-      .getUserMedia(FRONT_CAMERA)
+      .getUserMedia(camPos)
       .then((stream) => {
         console.log(stream);
         setCamStream(stream);
