@@ -8,7 +8,10 @@ import {
 } from "./Utils";
 
 type Props = FormFieldBaseProps<DateRange> & {
-  placeholder?: string;
+  max?: Date;
+  min?: Date;
+  disableFuture?: boolean;
+  disablePast?: boolean;
 };
 
 const DateRangeFormField = (props: Props) => {
@@ -22,6 +25,8 @@ const DateRangeFormField = (props: Props) => {
         className={classNames(error && "border-red-500")}
         value={props.value}
         onChange={(value) => handleChange({ name, value })}
+        min={props.min || (props.disableFuture ? new Date() : undefined)}
+        max={props.max || (props.disablePast ? new Date() : undefined)}
         disabled={props.disabled}
       />
     </FormField>

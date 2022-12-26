@@ -9,11 +9,27 @@ import {
 
 type Props = FormFieldBaseProps<Date> & {
   placeholder?: string;
-  maxDate?: Date;
-  minDate?: Date;
+  max?: Date;
+  min?: Date;
   position?: DatePickerPosition;
+  disableFuture?: boolean;
+  disablePast?: boolean;
 };
 
+/**
+ * A FormField to pick date.
+ *
+ * Example usage:
+ *
+ * ```jsx
+ * <DateFormField
+ *   {...field("user_date_of_birth")}
+ *   label="Date of birth"
+ *   required
+ *   disableFuture // equivalent to max={new Date()}
+ * />
+ * ```
+ */
 const DateFormField = ({ position = "RIGHT", ...props }: Props) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
@@ -25,8 +41,8 @@ const DateFormField = ({ position = "RIGHT", ...props }: Props) => {
         className={classNames(error && "border-danger-500")}
         value={props.value}
         onChange={(value) => handleChange({ name, value })}
-        max={props.maxDate}
-        min={props.minDate}
+        max={props.max || (props.disableFuture ? new Date() : undefined)}
+        min={props.min || (props.disablePast ? new Date() : undefined)}
         position={position}
         disabled={props.disabled}
         placeholder={props.placeholder}
