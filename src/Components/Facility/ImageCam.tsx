@@ -10,7 +10,7 @@ interface ImageCamProps {
   facingMode?: string;
 }
 const ImageCam = forwardRef((props: ImageCamProps, ref) => {
-  const DEFAULT_CAMERA = { video: true };
+  const DEFAULT_CAMERA = { video: { facingMode: { exact: "environment" } } };
   const FRONT_CAMERA = { video: { facingMode: "user" } };
   const [camPos, setCamPos] = useState<number>(0);
   const videoRef = useRef<any>(null);
@@ -24,6 +24,7 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
   }, [camPos]);
 
   const getVideo = () => {
+    console.log("new stream", camPos);
     navigator.mediaDevices
       .getUserMedia(camPos === 0 ? DEFAULT_CAMERA : FRONT_CAMERA)
       .then((stream) => {
@@ -35,6 +36,11 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
       })
       .catch((err) => {
         console.error("error:", err);
+        if (camPos === 0) {
+          setCamPos(1);
+        } else {
+          setCamPos(0);
+        }
       });
   };
 
