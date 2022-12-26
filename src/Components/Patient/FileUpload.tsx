@@ -29,7 +29,6 @@ import HeadedTabs from "../Common/HeadedTabs";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { FieldLabel } from "../Form/FormFields/FormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 
@@ -1149,22 +1148,17 @@ export const FileUpload = (props: FileUploadProps) => {
           className="flex flex-col w-full"
         >
           <div>
-            <FieldLabel
-              className="text-md text-gray-500"
-              id="editfilenamelabel"
-            >
-              Please enter the file name
-            </FieldLabel>
             <TextFormField
               name="editFileName"
+              label="Enter the file name"
               value={editFileName}
               onChange={(e) => setEditFileName(e.value)}
               error={editFileNameError}
             />
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-            <Cancel type="button" onClick={() => setModalOpenForEdit(false)} />
-            <Submit disabled={btnloader} label={"Proceed"} />
+            <Cancel onClick={() => setModalOpenForEdit(false)} />
+            <Submit disabled={btnloader} label="Proceed" />
           </div>
         </form>
       </DialogModal>
@@ -1173,7 +1167,7 @@ export const FileUpload = (props: FileUploadProps) => {
         title={
           <div className="flex flex-row">
             <div className="text-center my-1 mr-3 rounded-full bg-red-100 py-4 px-5">
-              <CareIcon className="care-l-exclamation-triangle text-lg text-red-500 " />
+              <CareIcon className="care-l-exclamation-triangle text-lg text-danger-500 " />
             </div>
             <div className="text-sm text-grey-200">
               <h1 className="text-xl text-black">Archive File</h1>
@@ -1193,12 +1187,14 @@ export const FileUpload = (props: FileUploadProps) => {
           className="flex flex-col w-full my-4 mx-2"
         >
           <div>
-            <FieldLabel className="text-md text-black" id="archivereasonlabel">
-              Please state the reason for archiving <b>{modalDetails?.name}</b>{" "}
-              file?
-            </FieldLabel>
             <TextAreaFormField
               name="editFileName"
+              label={
+                <span>
+                  State the reason for archiving <b>{modalDetails?.name}</b>{" "}
+                  file?
+                </span>
+              }
               rows={6}
               required
               placeholder="Type the reason..."
@@ -1208,11 +1204,8 @@ export const FileUpload = (props: FileUploadProps) => {
             />
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-            <Cancel
-              type="button"
-              onClick={() => setModalOpenForArchive(false)}
-            />
-            <Submit disabled={btnloader} label={"Proceed"} />
+            <Cancel onClick={() => setModalOpenForArchive(false)} />
+            <Submit disabled={btnloader} label="Proceed" />
           </div>
         </form>
       </DialogModal>
@@ -1249,10 +1242,7 @@ export const FileUpload = (props: FileUploadProps) => {
             </div>
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-            <Cancel
-              type="button"
-              onClick={(_) => setModalOpenForMoreDetails(false)}
-            />
+            <Cancel onClick={(_) => setModalOpenForMoreDetails(false)} />
           </div>
         </div>
       </DialogModal>
