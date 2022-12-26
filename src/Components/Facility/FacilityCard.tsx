@@ -200,7 +200,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     border
                     ghost
                     onClick={() =>
-                      navigate(`/facility/${facility.id}/patients`)
+                      navigate(`/patients?facility=${facility.id}`)
                     }
                   >
                     <i className="fas fa-user-injured"></i>
