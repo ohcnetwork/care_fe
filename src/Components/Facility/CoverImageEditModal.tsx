@@ -2,7 +2,6 @@ import { Modal } from "@material-ui/core";
 import axios from "axios";
 import { ChangeEventHandler, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import { deleteFacilityCoverImage } from "../../Redux/actions";
 import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
@@ -35,9 +34,6 @@ const CoverImageEditModal = ({
   const [previewImage, setPreviewImage] = useState(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
-  const { width } = useWindowDimensions();
-  const backCamerabreakpoint = 820;
-  const enableBackCamera = width <= backCamerabreakpoint ? true : false;
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
@@ -266,10 +262,7 @@ const CoverImageEditModal = ({
             <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
               {!previewImage ? (
                 <>
-                  <ImageCam
-                    ref={webRef}
-                    facingMode={enableBackCamera ? "environment" : "user"}
-                  />
+                  <ImageCam ref={webRef} />
                 </>
               ) : (
                 <>
@@ -277,7 +270,7 @@ const CoverImageEditModal = ({
                 </>
               )}
             </div>
-            <div className="flex flex-col sm:flex-row p-4 gap-2">
+            <div className="flex  p-4 gap-2">
               <div>
                 {!previewImage ? (
                   <>
@@ -289,6 +282,16 @@ const CoverImageEditModal = ({
                         }}
                       >
                         <i className="fa-solid fa-camera" /> Capture
+                      </ButtonV2>
+                    </div>
+                    <div>
+                      <ButtonV2
+                        variant="primary"
+                        onClick={() => {
+                          webRef.current.switchCamera();
+                        }}
+                      >
+                        <i className="fa-solid fa-camera" /> Switch Camera
                       </ButtonV2>
                     </div>
                   </>
