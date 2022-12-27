@@ -22,7 +22,7 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
      { video: { facingMode: environment } } - Back Camera
      { video: { facingMode: "user" } } - Front Camera
    */
-  const [camPos, setCamPos] = useState<number>(0);
+  const [camPos, setCamPos] = useState<any>(FRONT_CAMERA);
   const videoRef = useRef<any>(null);
   const photoRef = useRef<any>(null);
   const [camStream, setCamStream] = useState<any>();
@@ -33,7 +33,7 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
   const getVideo = () => {
     console.log("new stream", camPos);
     navigator.mediaDevices
-      .getUserMedia(camPos === 0 ? FRONT_CAMERA : DEFAULT_CAMERA)
+      .getUserMedia(camPos)
       .then((stream) => {
         console.log(stream);
         setCamStream(stream);
@@ -71,11 +71,13 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
       console.log("ll");
       console.log(camPos, "kk");
       if (camPos === 0) {
-        setCamPos(1);
+        setCamPos(DEFAULT_CAMERA);
         getVideo();
+        paintToCanvas();
       } else {
-        setCamPos(0);
+        setCamPos(FRONT_CAMERA);
         getVideo();
+        paintToCanvas();
       }
     },
     stopCamera() {

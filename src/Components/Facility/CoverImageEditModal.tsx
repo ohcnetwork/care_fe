@@ -1,13 +1,19 @@
 import { Modal } from "@material-ui/core";
 import axios from "axios";
-import { ChangeEventHandler, useEffect, useRef, useState } from "react";
+import {
+  ChangeEventHandler,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch } from "react-redux";
 import { deleteFacilityCoverImage } from "../../Redux/actions";
 import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
-import ImageCam from "./ImageCam";
+import Webcam from "react-webcam";
 import { FacilityModel } from "./models";
 
 interface Props {
@@ -34,6 +40,22 @@ const CoverImageEditModal = ({
   const [previewImage, setPreviewImage] = useState(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
+  const FACING_MODE_USER = "user";
+  const FACING_MODE_ENVIRONMENT = "environment";
+  const [facingMode, setFacingMode] = useState(FACING_MODE_USER);
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode: "user",
+  };
+
+  const handleSwitchCamera = useCallback(() => {
+    setFacingMode((prevState) =>
+      prevState === FACING_MODE_USER
+        ? FACING_MODE_ENVIRONMENT
+        : FACING_MODE_USER
+    );
+  }, []);
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
@@ -262,7 +284,14 @@ const CoverImageEditModal = ({
             <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
               {!previewImage ? (
                 <>
-                  <ImageCam ref={webRef} />
+                  <Webcam
+                    audio={false}
+                    height={720}
+                    screenshotFormat="image/jpeg"
+                    width={1280}
+                    ref={webRef}
+                    videoConstraints={{ ...videoConstraints, facingMode }}
+                  />
                 </>
               ) : (
                 <>
@@ -285,12 +314,7 @@ const CoverImageEditModal = ({
                       </ButtonV2>
                     </div>
                     <div>
-                      <ButtonV2
-                        variant="primary"
-                        onClick={() => {
-                          webRef.current.switchCamera();
-                        }}
-                      >
+                      <ButtonV2 variant="primary" onClick={handleSwitchCamera}>
                         <i className="fa-solid fa-camera" /> Switch Camera
                       </ButtonV2>
                     </div>
