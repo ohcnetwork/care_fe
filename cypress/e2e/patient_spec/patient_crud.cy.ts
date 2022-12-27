@@ -113,6 +113,26 @@ describe("Patient Creation", () => {
     cy.verifyNotification("Note added successfully");
   });
 
+  it("Create consultation", () => {
+    cy.awaitUrl(patient_url + "/consultation");
+    cy.get("div[role='button']").select("COUGH");
+    cy.get("div[role='button']").select("FEVER");
+    cy.get("input#date-picker-dialog").click();
+    cy.get("textarea[placeholder='Consultation Notes...'").type(
+      "Test Consultation Note"
+    );
+    cy.get("input[name='ip_no']").type("1234567890");
+    cy.get("button[type='submit']").click();
+  });
+
+  // it("Create log update", () => {
+  //   cy.awaitUrl(patient_url + "/logs");
+  //   cy.get("button").contains("Add Log").click({ force: true });
+  //   cy.get("textarea").type("Test Log");
+  //   cy.get("button").contains("Post Log").click({ force: true });
+  //   cy.verifyNotification("Log added successfully");
+  // });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
