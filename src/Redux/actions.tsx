@@ -1,5 +1,8 @@
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
+export const getConfig = () => {
+  return fireRequestForFiles("config");
+};
 // User
 export const postLogin = (params: object) => {
   return fireRequest("login", [], params);

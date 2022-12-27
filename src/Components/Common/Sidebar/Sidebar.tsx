@@ -5,10 +5,9 @@ import NotificationItem from "../../Notifications/NotificationsList";
 import { Dialog, Transition } from "@headlessui/react";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import useConfig from "../../../Common/hooks/useConfig";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
-
-const DASHBOARD = process.env.REACT_APP_DASHBOARD_URL ?? "";
 
 const LOGO = process.env.REACT_APP_LIGHT_LOGO;
 const LOGO_COLLAPSE =
@@ -49,6 +48,7 @@ const StatelessSidebar = ({
 }: StatelessSidebarProps) => {
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
+  const { dashboard_url } = useConfig();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
@@ -138,7 +138,7 @@ const StatelessSidebar = ({
           <NotificationItem shrinked={shrinked} />
           <Item
             text="Dashboard"
-            to={DASHBOARD}
+            to={dashboard_url}
             icon={<CareIcon className="care-l-dashboard text-lg" />}
             external
           />
