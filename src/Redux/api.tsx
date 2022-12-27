@@ -9,6 +9,12 @@ interface Routes {
 }
 
 const routes: Routes = {
+  config: {
+    path: process.env.REACT_APP_CONFIG || "/config.json",
+    method: "GET",
+    noAuth: true,
+  },
+
   // Auth Endpoints
   login: {
     path: "/api/v1/auth/login/",

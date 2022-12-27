@@ -361,7 +361,7 @@ label {
 }
 
 input {
-  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300 !important;
+  @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300;
 }
 
 input:disabled,
@@ -960,7 +960,7 @@ button:disabled,
 }
 
 .login-hero{
-  background: linear-gradient(to bottom right, rgba(4, 78, 55, 0.466), rgba(2, 54, 40, 0.521)), url('../../public/images/wave_scene_square.svg');
+  background: linear-gradient(to bottom right, rgba(4, 78, 55, 0.466), rgba(2, 54, 40, 0.521)), url('../../public/images/wave_scene_square.png');
   background-size: cover;
   background-position: center;
   animation: alternate-reverse 30s linear infinite herobg;
@@ -974,7 +974,7 @@ button:disabled,
   right: 0px;
   width: 200px;
   z-index: 2;
-  background: url('../../public/images/wave_long_2.svg');
+  background: url('../../public/images/wave_long_2.png');
   background-position: top right;
   transition: 0.2s;
   animation: 120s linear infinite wave alternate-reverse;
@@ -989,7 +989,7 @@ button:disabled,
   right: 10px;
   width: 200px;
   z-index: 1;
-  background: url('../../public/images/wave_long.svg');
+  background: url('../../public/images/wave_long.png');
   opacity: 0.5;
   background-position: bottom right;
   animation: 120s linear infinite wave_2 alternate-reverse;
@@ -1043,59 +1043,47 @@ button:disabled,
   }
 }
 
-.field-label {
-  @apply mb-2 block text-gray-900 text-base font-normal
-}
-
-.field-error {
-  @apply font-medium tracking-wide text-red-500 text-xs mt-2 ml-1
-}
-
-.Button { 
-  @apply font-medium h-min flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500
-}
-
 .button-primary-default { 
-  @apply accent-primary-500 bg-primary-500 hover:bg-primary-400 text-white
+  @apply accent-primary-500 bg-primary-500 enabled:hover:bg-primary-400 text-white
 }
 .button-primary-ghost { 
-  @apply accent-primary-500 hover:bg-primary-100 text-primary-500
+  @apply accent-primary-500 enabled:hover:bg-primary-100 text-primary-500
 }
 .button-primary-border {
   @apply border border-primary-500
 }
 .button-secondary-default { 
-  @apply accent-secondary-200 bg-secondary-100 hover:bg-secondary-200 text-secondary-700
+  @apply accent-secondary-200 bg-secondary-100 enabled:hover:bg-secondary-200 text-secondary-700
 }
 .button-secondary-ghost { 
-  @apply accent-secondary-200 hover:bg-secondary-200 text-secondary-700
+  @apply accent-secondary-200 enabled:hover:bg-secondary-200 text-secondary-700
 }
 .button-secondary-border {
   @apply border border-secondary-300
 }
 .button-danger-default { 
-  @apply accent-danger-500 bg-danger-500 hover:bg-danger-400 text-white
+  @apply accent-danger-500 bg-danger-500 enabled:hover:bg-danger-400 text-white
 }
 .button-danger-ghost { 
-  @apply accent-danger-500 hover:bg-danger-100 text-danger-500
+  @apply accent-danger-500 enabled:hover:bg-danger-100 text-danger-500
 }
 .button-danger-border {
   @apply border border-danger-500
 }
 .button-warning-default { 
-  @apply accent-warning-500 bg-warning-500 hover:bg-warning-400 text-white
+  @apply accent-warning-500 bg-warning-500 enabled:hover:bg-warning-400 text-white
 }
 .button-warning-ghost { 
-  @apply accent-warning-500 hover:bg-warning-100 text-warning-500
+  @apply accent-warning-500 enabled:hover:bg-warning-100 text-warning-500
 }
 .button-warning-border {
   @apply border border-warning-500
 }
 .button-alert-default { 
-  @apply accent-alert-600 bg-alert-600 hover:bg-alert-500 text-white
+  @apply accent-alert-600 bg-alert-600 enabled:hover:bg-alert-500 text-white
 }
 .button-alert-ghost { 
-  @apply accent-alert-600 hover:bg-alert-100 text-alert-600
+  @apply accent-alert-600 enabled:hover:bg-alert-100 text-alert-600
 }
 .button-alert-border {
   @apply border border-alert-600
@@ -1119,9 +1107,6 @@ button:disabled,
   @apply py-3 px-5 text-base
 }
 
-.dropdown-item { 
-  @apply rounded m-2 px-4 py-2 text-sm border-0 flex gap-3 items-center justify-start font-normal transition-all duration-200 ease-in-out
-}
 .dropdown-item-primary { 
   @apply accent-primary-500 hover:bg-primary-100 text-black hover:text-primary-500
 }

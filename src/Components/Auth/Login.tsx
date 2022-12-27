@@ -330,7 +330,10 @@ export const Login = (props: { forgot?: boolean }) => {
               type="button"
               className="text-sm text-primary-400 hover:text-primary-500 mb-4"
             >
-              <CareIcon className="care-l-arrow-left h-5" /> Back to login
+              <div className="flex justify-center">
+                <CareIcon className="care-l-arrow-left text-lg" />
+                <span>Back to login</span>
+              </div>
             </button>
             <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
               {t("forget_password")}

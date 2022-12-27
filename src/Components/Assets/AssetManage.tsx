@@ -17,7 +17,7 @@ import { formatDate } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { USER_TYPES } from "../../Common/constants";
+import { UserRole, USER_TYPES } from "../../Common/constants";
 import moment from "moment";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
@@ -28,8 +28,8 @@ interface AssetManageProps {
 }
 
 const checkAuthority = (type: string, cutoff: string) => {
-  const userAuthority = USER_TYPES.indexOf(type);
-  const cutoffAuthority = USER_TYPES.indexOf(cutoff);
+  const userAuthority = USER_TYPES.indexOf(type as UserRole);
+  const cutoffAuthority = USER_TYPES.indexOf(cutoff as UserRole);
   return userAuthority >= cutoffAuthority;
 };
 
@@ -165,7 +165,7 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="flex flex-col grow-0 md:w-[200px]">
         <div className="flex flex-start items-center">
           <div className="w-8">
-            <CareIcon className={`care-l-${item.icon} h-5 fill-gray-700`} />
+            <CareIcon className={`care-l-${item.icon} text-lg fill-gray-700`} />
           </div>
           <div className="text-gray-700 break-words">{item.label}</div>
         </div>

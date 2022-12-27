@@ -15,8 +15,27 @@ export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
 export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
 export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
+export type UserRole =
+  | "Pharmacist"
+  | "Volunteer"
+  | "StaffReadOnly"
+  | "Staff"
+  | "Doctor"
+  | "WardAdmin"
+  | "LocalBodyAdmin"
+  | "DistrictLabAdmin"
+  | "DistrictReadOnlyAdmin"
+  | "DistrictAdmin"
+  | "StateLabAdmin"
+  | "StateReadOnlyAdmin"
+  | "StateAdmin";
+
 const readOnly = true;
-export const USER_TYPE_OPTIONS = [
+export const USER_TYPE_OPTIONS: {
+  id: UserRole;
+  role: string;
+  readOnly?: true | undefined;
+}[] = [
   { id: "Pharmacist", role: "Pharmacist" },
   { id: "Volunteer", role: "Volunteer" },
   { id: "StaffReadOnly", role: "Staff", readOnly },
@@ -95,6 +114,10 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 850, text: "General hospitals" },
   { id: 860, text: "District Hospitals" },
   { id: 870, text: "Govt Medical College Hospitals" },
+
+  { id: 900, text: "Co-operative hospitals" },
+  { id: 910, text: "Autonomous healthcare facility" },
+
   { id: 950, text: "Corona Testing Labs" },
   { id: 1000, text: "Corona Care Centre" },
   // { id: 1010, text: "COVID-19 Domiciliary Care Center" },
@@ -187,20 +210,20 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
-  { id: 30, text: "30 minutes" },
-  { id: 60, text: "1 hour" },
-  { id: 120, text: "2 hours" },
-  { id: 180, text: "3 hours" },
-  { id: 240, text: "4 hours" },
-  { id: 360, text: "6 hours" },
-  { id: 480, text: "8 hours" },
-  { id: 720, text: "12 hours" },
-  { id: 1440, text: "24 hours" },
-  { id: 2160, text: "36 hours" },
-  { id: 2880, text: "48 hours" },
+  { id: 30, text: "30 mins" },
+  { id: 60, text: "1 hr" },
+  { id: 120, text: "2 hr" },
+  { id: 180, text: "3 hr" },
+  { id: 240, text: "4 hr" },
+  { id: 360, text: "6 hr" },
+  { id: 480, text: "8 hr" },
+  { id: 720, text: "12 hr" },
+  { id: 1440, text: "24 hr" },
+  { id: 2160, text: "36 hr" },
+  { id: 2880, text: "48 hr" },
 ];
 
-export const SYMPTOM_CHOICES: Array<OptionsType> = [
+export const SYMPTOM_CHOICES = [
   { id: 1, text: "ASYMPTOMATIC" },
   { id: 2, text: "FEVER" },
   { id: 3, text: "SORE THROAT" },
@@ -264,20 +287,18 @@ export const ADMITTED_TO = [
   { id: "7", text: "Regular" },
 ];
 
-export const PATIENT_CATEGORIES = [
-  { id: "Comfort", text: "Comfort Care" },
-  { id: "Stable", text: "Stable" },
-  { id: "Moderate", text: "Slightly Abnormal" },
-  { id: "Critical", text: "Critical" },
-];
+export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
 
-export const PatientCategoryTailwindClass: Record<PatientCategory, string> = {
-  "Comfort Care": "patient-comfort",
-  Stable: "patient-stable",
-  "Slightly Abnormal": "patient-abnormal",
-  Critical: "patient-critical",
-  unknown: "patient-unknown",
-};
+export const PATIENT_CATEGORIES: {
+  id: PatientCategoryID;
+  text: PatientCategory;
+  twClass: string;
+}[] = [
+  { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
+  { id: "Stable", text: "Stable", twClass: "patient-stable" },
+  { id: "Moderate", text: "Slightly Abnormal", twClass: "patient-abnormal" },
+  { id: "Critical", text: "Critical", twClass: "patient-critical" },
+];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 

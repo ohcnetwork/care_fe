@@ -389,7 +389,7 @@ export default function NotificationsList({
       <Item
         text="Notifications"
         do={() => setShowNotifications(!showNotifications)}
-        icon={<CareIcon className="care-l-bell h-5" />}
+        icon={<CareIcon className="care-l-bell text-lg" />}
         badgeCount={unreadCount}
       />
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
