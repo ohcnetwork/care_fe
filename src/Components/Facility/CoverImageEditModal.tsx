@@ -15,6 +15,7 @@ import { sleep } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Webcam from "react-webcam";
 import { FacilityModel } from "./models";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 interface Props {
   open: boolean;
@@ -48,18 +49,10 @@ const CoverImageEditModal = ({
     height: 720,
     facingMode: "user",
   };
-  const [devices, setDevices] = useState<any>([]);
+  const { width } = useWindowDimensions();
+  const LaptopScreenBreakpoint = 640;
+  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
 
-  const handleDevices = useCallback(
-    (mediaDevices: any[]) =>
-      setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput")),
-    [setDevices]
-  );
-
-  useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then(handleDevices);
-  }, [handleDevices]);
-  console.log(devices, "ll");
   const handleSwitchCamera = useCallback(() => {
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
@@ -161,7 +154,7 @@ const CoverImageEditModal = ({
 
   return (
     <Modal open={open} onClose={closeModal}>
-      <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+      <div className="h-full w-full absolute flex items-center justify-center bg-modal overflow-y-auto">
         {!isCameraOpen ? (
           <form className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-screen overflow-auto flex flex-col shadow">
             <div className="px-6 py-6 flex flex-col bg-gray-300">
@@ -310,12 +303,13 @@ const CoverImageEditModal = ({
                 </>
               )}
             </div>
-            <div className="flex m-4">
-              <ButtonV2 variant="primary" onClick={handleSwitchCamera}>
-                <i className="fa-solid fa-camera-rotate" /> Switch Camera
-              </ButtonV2>
-            </div>
-            <div className="flex  p-4 gap-2">
+            {/* buttons for mobile screens */}
+            <div className="flex justify-evenly m-4 sm:hidden ">
+              <div>
+                <ButtonV2 variant="primary" onClick={handleSwitchCamera}>
+                  <i className="fa-solid fa-camera-rotate" />
+                </ButtonV2>
+              </div>
               <div>
                 {!previewImage ? (
                   <>
@@ -326,7 +320,7 @@ const CoverImageEditModal = ({
                           captureImage();
                         }}
                       >
-                        <i className="fa-solid fa-camera" /> Capture
+                        <i className="fa-solid fa-camera" />
                       </ButtonV2>
                     </div>
                   </>
@@ -339,7 +333,7 @@ const CoverImageEditModal = ({
                           setPreviewImage(null);
                         }}
                       >
-                        Retake
+                        <i className="fa-solid fa-rotate-right"></i>
                       </ButtonV2>
                       <ButtonV2 variant="primary" onClick={handleUpload}>
                         {isCaptureImgBeingUploaded ? (
@@ -366,23 +360,102 @@ const CoverImageEditModal = ({
                         ) : (
                           <></>
                         )}{" "}
-                        Submit
+                        <i className="fa-solid fa-check-double"></i>
                       </ButtonV2>
                     </div>
                   </>
                 )}
               </div>
-              <div className="sm:flex-1" />
-              <ButtonV2
-                variant="danger"
-                onClick={() => {
-                  setPreviewImage(null);
-                  setIsCameraOpen(false);
-                  webRef.current.stopCamera();
-                }}
-              >
-                Close Camera
-              </ButtonV2>
+              <div className="sm:flex-1">
+                <ButtonV2
+                  variant="danger"
+                  onClick={() => {
+                    setPreviewImage(null);
+                    setIsCameraOpen(false);
+                    webRef.current.stopCamera();
+                  }}
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </ButtonV2>
+              </div>
+            </div>
+            {/* buttons for laptop screens */}
+            <div className={`${isLaptopScreen ? " " : " hidden "}`}>
+              <div className="flex m-4">
+                <ButtonV2 variant="primary" onClick={handleSwitchCamera}>
+                  <i className="fa-solid fa-camera-rotate" /> Switch Camera
+                </ButtonV2>
+              </div>
+
+              <div className="flex  p-4 gap-2">
+                <div>
+                  {!previewImage ? (
+                    <>
+                      <div>
+                        <ButtonV2
+                          variant="primary"
+                          onClick={() => {
+                            captureImage();
+                          }}
+                        >
+                          <i className="fa-solid fa-camera" /> Capture
+                        </ButtonV2>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex space-x-2">
+                        <ButtonV2
+                          variant="primary"
+                          onClick={() => {
+                            setPreviewImage(null);
+                          }}
+                        >
+                          Retake
+                        </ButtonV2>
+                        <ButtonV2 variant="primary" onClick={handleUpload}>
+                          {isCaptureImgBeingUploaded ? (
+                            <svg
+                              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                          ) : (
+                            <></>
+                          )}{" "}
+                          Submit
+                        </ButtonV2>
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="sm:flex-1" />
+                <ButtonV2
+                  variant="danger"
+                  onClick={() => {
+                    setPreviewImage(null);
+                    setIsCameraOpen(false);
+                    webRef.current.stopCamera();
+                  }}
+                >
+                  Close Camera
+                </ButtonV2>
+              </div>
             </div>
           </div>
         )}
