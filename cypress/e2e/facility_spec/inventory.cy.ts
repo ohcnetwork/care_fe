@@ -9,11 +9,9 @@ describe("Inventory Management Section", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/");
-    cy.get("a")
-      .should("contain", "Facility")
-      .contains("Facility")
-      .click({ force: true });
-    cy.contains("Manage Inventory").click();
+    cy.get("[name='facility-details']").first().click();
+    cy.get("[id=manage-facility-dropdown]").should("exist").click();
+    cy.get("[id=inventory-management]").click();
   });
 
   it("Adds Inventory", () => {

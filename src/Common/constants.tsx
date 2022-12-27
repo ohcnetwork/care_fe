@@ -15,8 +15,27 @@ export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
 export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
 export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
+export type UserRole =
+  | "Pharmacist"
+  | "Volunteer"
+  | "StaffReadOnly"
+  | "Staff"
+  | "Doctor"
+  | "WardAdmin"
+  | "LocalBodyAdmin"
+  | "DistrictLabAdmin"
+  | "DistrictReadOnlyAdmin"
+  | "DistrictAdmin"
+  | "StateLabAdmin"
+  | "StateReadOnlyAdmin"
+  | "StateAdmin";
+
 const readOnly = true;
-export const USER_TYPE_OPTIONS = [
+export const USER_TYPE_OPTIONS: {
+  id: UserRole;
+  role: string;
+  readOnly?: true | undefined;
+}[] = [
   { id: "Pharmacist", role: "Pharmacist" },
   { id: "Volunteer", role: "Volunteer" },
   { id: "StaffReadOnly", role: "Staff", readOnly },
@@ -95,6 +114,10 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 850, text: "General hospitals" },
   { id: 860, text: "District Hospitals" },
   { id: 870, text: "Govt Medical College Hospitals" },
+
+  { id: 900, text: "Co-operative hospitals" },
+  { id: 910, text: "Autonomous healthcare facility" },
+
   { id: 950, text: "Corona Testing Labs" },
   { id: 1000, text: "Corona Care Centre" },
   // { id: 1010, text: "COVID-19 Domiciliary Care Center" },
@@ -258,22 +281,10 @@ export const CONSULTATION_SUGGESTION = [
 ];
 
 export const ADMITTED_TO = [
-  "Home Isolation",
-  "Isolation Room",
-  "Bed with Oxygen Support",
-  "ICU",
-  "ICU with Oxygen Support",
-  "ICU with Non Invasive Ventilator",
-  "ICU with Invasive Ventilator",
-  "Gynaecology Ward",
-  "Paediatric Ward",
-];
-
-export const PATIENT_FILTER_ADMITTED_TO = [
-  { id: "0", text: "Not admitted" },
-  { id: "1", text: "Isolation Room" },
-  { id: "6", text: "Bed with Oxygen Support" },
+  { id: "1", text: "Isolation" },
   { id: "2", text: "ICU" },
+  { id: "6", text: "Bed with oxygen support" },
+  { id: "7", text: "Regular" },
 ];
 
 export const PATIENT_CATEGORIES = [

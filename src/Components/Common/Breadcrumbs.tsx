@@ -1,5 +1,6 @@
 import { usePath, Link } from "raviger";
 import { useState } from "react";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 
 const MENU_TAGS: { [key: string]: string } = {
@@ -54,7 +55,7 @@ export default function Breadcrumbs(props: any) {
           <li>
             <div>
               <Link href="/" className="text-gray-500 hover:text-gray-700">
-                <i className="uil uil-estate mr-1 text-lg"></i>
+                <CareIcon className="care-l-estate mr-1 text-lg" />
                 <span className="sr-only">Home</span>
               </Link>
             </div>

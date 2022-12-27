@@ -43,7 +43,7 @@ describe("User management", () => {
     cy.get("[name='facilities']").type("{downarrow}{enter}");
     cy.intercept(/users/).as("checkUsername");
     cy.get("[name='username']").type(username, { force: true });
-    cy.wait("@checkUsername").its("response.statusCode").should("eq", 404);
+    cy.wait("@checkUsername").its("response.statusCode").should("eq", 200);
     cy.get("[name='dob']").type("02/03/2001");
     cy.get("[name='password']").type("#@Cypress_test123");
     cy.get("[name='c_password']").type("#@Cypress_test123");
@@ -64,7 +64,7 @@ describe("User management", () => {
     cy.get("[placeholder='Phone Number']").type(phone_number);
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
-    cy.get("[name='search']").type(username, { force: true });
+    cy.get("[name='username']").type(username, { force: true });
     // TODO: some verify task
   });
 
@@ -76,11 +76,11 @@ describe("User management", () => {
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
     cy.intercept(/\/api\/v1\/users/).as("getUsers");
-    cy.get("[name='search']").type(username, { force: true });
+    cy.get("[name='username']").type(username, { force: true });
     cy.wait("@getUsers");
     cy.wait(500);
     const linkFacilityString = "Click here to show linked facilities";
-    cy.get("a")
+    cy.get("div")
       .should("contain", linkFacilityString)
       .contains(linkFacilityString)
       .click({ force: true })
@@ -136,7 +136,8 @@ describe("Edit Profile Testing", () => {
 
   it("Valid First-Name field of " + username, () => {
     cy.get("input[name=firstName]")
-      .type(backspace + "User 1")
+      .clear()
+      .type("User 1")
       .trigger("change", { force: true });
     cy.get("form").get("button[type='submit']").contains("UPDATE").click();
     cy.get("dt").contains("First Name").siblings().first().contains("User 1");
@@ -150,7 +151,8 @@ describe("Edit Profile Testing", () => {
 
   it("Valid Last-Name field of " + username, () => {
     cy.get("input[name=lastName]")
-      .type(backspace + "User 1")
+      .clear()
+      .type("User 1")
       .trigger("change", { force: true });
     cy.get("form").get("button[type='submit']").contains("UPDATE").click();
     cy.get("dt").contains("Last Name").siblings().first().contains("User 1");
@@ -192,7 +194,7 @@ describe("Edit Profile Testing", () => {
       .contains("Whatsapp No")
       .siblings()
       .first()
-      .contains(`+91 ${whatsapp_num}`);
+      .contains(`+91 ${whatsapp_num}`.replace(/[ -]/g, ""));
   });
 
   it("Invalid Phone Number of " + username, () => {
@@ -231,7 +233,7 @@ describe("Edit Profile Testing", () => {
       .contains("Contact No")
       .siblings()
       .first()
-      .contains(`+91 ${phone_num}`);
+      .contains(`+91 ${phone_num}`.replace(/[ -]/g, ""));
   });
 
   afterEach(() => {
@@ -243,7 +245,7 @@ describe("Delete User", () => {
   it("deletes user", () => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.awaitUrl("/user");
-    cy.get("[name='search']").type(username);
+    cy.get("[name='username']").type(username);
     cy.get("button").should("contain", "Delete").contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
   });

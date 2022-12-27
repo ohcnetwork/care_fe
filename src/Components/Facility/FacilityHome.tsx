@@ -142,29 +142,35 @@ export const FacilityHome = (props: any) => {
   let capacityList: any = null;
   if (!capacityData || !capacityData.length) {
     capacityList = (
-      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+      <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
         No Bed Types Found
       </h5>
     );
   } else {
-    capacityList = BED_TYPES.map((x) => {
-      const res = capacityData.find((data) => {
-        return data.room_type === x.id;
-      });
-      if (res) {
-        const removeCurrentBedType = (bedTypeId: number | undefined) => {
-          setCapacityData((state) => state.filter((i) => i.id !== bedTypeId));
-        };
-        return (
-          <BedTypeCard
-            facilityId={facilityId}
-            key={`bed_${res.id}`}
-            {...res}
-            removeBedType={removeCurrentBedType}
-          />
-        );
-      }
-    });
+    capacityList = (
+      <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
+        {BED_TYPES.map((x) => {
+          const res = capacityData.find((data) => {
+            return data.room_type === x.id;
+          });
+          if (res) {
+            const removeCurrentBedType = (bedTypeId: number | undefined) => {
+              setCapacityData((state) =>
+                state.filter((i) => i.id !== bedTypeId)
+              );
+            };
+            return (
+              <BedTypeCard
+                facilityId={facilityId}
+                key={`bed_${res.id}`}
+                {...res}
+                removeBedType={removeCurrentBedType}
+              />
+            );
+          }
+        })}
+      </div>
+    );
   }
 
   let doctorList: any = null;
@@ -175,22 +181,26 @@ export const FacilityHome = (props: any) => {
       </h5>
     );
   } else {
-    doctorList = doctorData.map((data: DoctorModal) => {
-      const removeCurrentDoctorData = (doctorId: number | undefined) => {
-        setDoctorData((state) =>
-          state.filter((i: DoctorModal) => i.id !== doctorId)
-        );
-      };
+    doctorList = (
+      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
+        {doctorData.map((data: DoctorModal) => {
+          const removeCurrentDoctorData = (doctorId: number | undefined) => {
+            setDoctorData((state) =>
+              state.filter((i: DoctorModal) => i.id !== doctorId)
+            );
+          };
 
-      return (
-        <DoctorsCountCard
-          facilityId={facilityId}
-          key={`bed_${data.id}`}
-          {...data}
-          removeDoctor={removeCurrentDoctorData}
-        />
-      );
-    });
+          return (
+            <DoctorsCountCard
+              facilityId={facilityId}
+              key={`bed_${data.id}`}
+              {...data}
+              removeDoctor={removeCurrentDoctorData}
+            />
+          );
+        })}
+      </div>
+    );
   }
 
   const stats: (string | JSX.Element)[][] = [];
@@ -208,6 +218,7 @@ export const FacilityHome = (props: any) => {
       <ButtonV2
         variant="secondary"
         ghost
+        border
         onClick={() =>
           navigate(`/facility/${facilityId}/triage/${patientStatsData[i].id}`)
         }
@@ -291,7 +302,7 @@ export const FacilityHome = (props: any) => {
         onDelete={() => window.location.reload()}
         facility={facilityData}
       />
-      {hasCoverImage && (
+      {hasCoverImage ? (
         <div
           className={`group relative overflow-clip w-full rounded-t bg-gray-200 h-48 md:h-0 opacity-100 md:opacity-0 transition-all duration-200 ease-in-out ${
             hasPermissionToEditCoverImage && "cursor-pointer"
@@ -301,6 +312,21 @@ export const FacilityHome = (props: any) => {
           }
         >
           <CoverImage />
+          {editCoverImageTooltip}
+        </div>
+      ) : (
+        <div
+          className={`group md:hidden flex w-full self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0 ${
+            hasPermissionToEditCoverImage && "cursor-pointer"
+          }`}
+          onClick={() =>
+            hasPermissionToEditCoverImage && setEditCoverImage(true)
+          }
+        >
+          <i
+            className="fas fa-hospital text-4xl block text-gray-500 p-10"
+            aria-hidden="true"
+          ></i>
           {editCoverImageTooltip}
         </div>
       )}
@@ -431,10 +457,12 @@ export const FacilityHome = (props: any) => {
           <div className="flex flex-col justify-between mt-4">
             <div className="w-full md:w-auto">
               <DropdownMenu
+                id="manage-facility-dropdown"
                 title="Manage Facility"
                 icon={<CareIcon className="care-l-setting h-5" />}
               >
                 <DropdownItem
+                  id="update-facility"
                   onClick={() => navigate(`/facility/${facilityId}/update`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon className="care-l-edit-alt h-5" />}
@@ -442,12 +470,24 @@ export const FacilityHome = (props: any) => {
                   Update Facility
                 </DropdownItem>
                 <DropdownItem
+                  id="configure-facility"
+                  onClick={() =>
+                    navigate(`/facility/${facilityId}/middleware/update`)
+                  }
+                  authorizeFor={NonReadOnlyUsers}
+                  icon={<CareIcon className="care-l-setting h-5" />}
+                >
+                  Configure Facility
+                </DropdownItem>
+                <DropdownItem
+                  id="inventory-management"
                   onClick={() => navigate(`/facility/${facilityId}/inventory`)}
                   icon={<CareIcon className="care-l-clipboard-alt w-5 " />}
                 >
                   Inventory Management
                 </DropdownItem>
                 <DropdownItem
+                  id="location-management"
                   onClick={() => navigate(`/facility/${facilityId}/location`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon className="care-l-location-point h-5" />}
@@ -497,7 +537,8 @@ export const FacilityHome = (props: any) => {
               <ButtonV2
                 variant="primary"
                 ghost
-                className="mt-2 w-full md:w-auto"
+                border
+                className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >
@@ -507,11 +548,12 @@ export const FacilityHome = (props: any) => {
               <ButtonV2
                 variant="primary"
                 ghost
-                className="mt-2 w-full md:w-auto py-3"
+                border
+                className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
-                <PatientIcon className="w-4 h-4 fill-current" />
-                View Patients
+                <PatientIcon className="w-4 h-4 fill-current mr-2" />
+                <span>View Patients</span>
               </ButtonV2>
             </div>
           </div>
@@ -560,9 +602,7 @@ export const FacilityHome = (props: any) => {
             Add More Bed Types
           </ButtonV2>
         </div>
-        <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
-          {capacityList}
-        </div>
+        <div>{capacityList}</div>
       </div>
       <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
         <div className="md:flex justify-between md:pb-2">
@@ -577,9 +617,7 @@ export const FacilityHome = (props: any) => {
             Add Doctor Types
           </ButtonV2>
         </div>
-        <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
-          {doctorList}
-        </div>
+        <div className="mt-4">{doctorList}</div>
       </div>
       <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
         <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
