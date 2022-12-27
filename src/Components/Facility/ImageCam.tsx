@@ -43,11 +43,6 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
       })
       .catch((err) => {
         console.error("error:", err);
-        if (camPos === 0) {
-          setCamPos(1);
-        } else {
-          setCamPos(0);
-        }
       });
   };
 
