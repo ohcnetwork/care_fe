@@ -12,7 +12,7 @@ interface ImageCamProps {
 }
 const ImageCam = forwardRef((props: ImageCamProps, ref) => {
   const DEFAULT_CAMERA = useMemo(
-    () => ({ video: { facingMode: { exact: "environment" } } }),
+    () => ({ video: { facingMode: "environment" } }),
     []
   );
   const FRONT_CAMERA = useMemo(() => ({ video: { facingMode: "user" } }), []);
@@ -86,27 +86,12 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
 
   return (
     <div>
-      {camPos === 0 ? (
-        <>
-          <video
-            className="hidden"
-            onCanPlay={() => paintToCanvas()}
-            ref={videoRef}
-            id="FRONT"
-          />
-          <canvas ref={photoRef} />
-        </>
-      ) : (
-        <>
-          <video
-            className="hidden"
-            onCanPlay={() => paintToCanvas()}
-            ref={videoRef}
-            id="Default"
-          />
-          <canvas ref={photoRef} />
-        </>
-      )}
+      <video
+        className="hidden"
+        onCanPlay={() => paintToCanvas()}
+        ref={videoRef}
+      />
+      <canvas ref={photoRef} />
     </div>
   );
 });
