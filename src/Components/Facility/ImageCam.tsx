@@ -2,6 +2,7 @@ import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -10,8 +11,17 @@ interface ImageCamProps {
   facingMode?: string;
 }
 const ImageCam = forwardRef((props: ImageCamProps, ref) => {
-  const DEFAULT_CAMERA = { video: { facingMode: { exact: "environment" } } };
-  const FRONT_CAMERA = { video: { facingMode: "user" } };
+  const DEFAULT_CAMERA = useMemo(
+    () => ({ video: { facingMode: { exact: "environment" } } }),
+    []
+  );
+  const FRONT_CAMERA = useMemo(() => ({ video: { facingMode: "user" } }), []);
+  // Use useMemo to avoid unexpected behaviour while rerendering
+  /*
+     { video: true } - Default Camera View
+     { video: { facingMode: environment } } - Back Camera
+     { video: { facingMode: "user" } } - Front Camera
+   */
   const [camPos, setCamPos] = useState<number>(0);
   const videoRef = useRef<any>(null);
   const photoRef = useRef<any>(null);
@@ -83,12 +93,27 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
 
   return (
     <div>
-      <video
-        className="hidden"
-        onCanPlay={() => paintToCanvas()}
-        ref={videoRef}
-      />
-      <canvas ref={photoRef} />
+      {camPos === 0 ? (
+        <>
+          <video
+            className="hidden"
+            onCanPlay={() => paintToCanvas()}
+            ref={videoRef}
+            id="default"
+          />
+          <canvas ref={photoRef} />
+        </>
+      ) : (
+        <>
+          <video
+            className="hidden"
+            onCanPlay={() => paintToCanvas()}
+            ref={videoRef}
+            id="front"
+          />
+          <canvas ref={photoRef} />
+        </>
+      )}
     </div>
   );
 });
