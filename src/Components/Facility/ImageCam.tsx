@@ -29,14 +29,11 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
   useEffect(() => {
     getVideo();
   }, [videoRef]);
-  useEffect(() => {
-    console.log(camPos, "jj");
-  }, [camPos]);
 
   const getVideo = () => {
     console.log("new stream", camPos);
     navigator.mediaDevices
-      .getUserMedia(camPos === 0 ? DEFAULT_CAMERA : FRONT_CAMERA)
+      .getUserMedia(camPos === 0 ? FRONT_CAMERA : DEFAULT_CAMERA)
       .then((stream) => {
         console.log(stream);
         setCamStream(stream);
@@ -80,10 +77,11 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
       console.log(camPos, "kk");
       if (camPos === 0) {
         setCamPos(1);
+        getVideo();
       } else {
         setCamPos(0);
+        getVideo();
       }
-      getVideo();
     },
     stopCamera() {
       const tracks = camStream.getTracks();
@@ -99,7 +97,7 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
             className="hidden"
             onCanPlay={() => paintToCanvas()}
             ref={videoRef}
-            id="default"
+            id="FRONT"
           />
           <canvas ref={photoRef} />
         </>
@@ -109,7 +107,7 @@ const ImageCam = forwardRef((props: ImageCamProps, ref) => {
             className="hidden"
             onCanPlay={() => paintToCanvas()}
             ref={videoRef}
-            id="front"
+            id="Default"
           />
           <canvas ref={photoRef} />
         </>
