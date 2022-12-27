@@ -9,23 +9,19 @@ import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
 import { formatDate } from "../../../Utils/utils";
 import { PatientCategory } from "../models";
-import { PatientCategoryTailwindClass } from "../../../Common/constants";
+import { PATIENT_CATEGORIES } from "../../../Common/constants";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
-export type PatientCategoryBadgeProps = {
-  category?: PatientCategory;
-};
-
-export const PatientCategoryBadge = ({
-  category,
-}: PatientCategoryBadgeProps) => {
-  const categoryClass = PatientCategoryTailwindClass[category || "unknown"];
+export const PatientCategoryBadge = (props: { category?: PatientCategory }) => {
+  const categoryClass = props.category
+    ? PATIENT_CATEGORIES.find((c) => c.text === props.category)?.twClass
+    : "patient-unknown";
   return (
     <span
       className={`px-2 py-1 text-sm rounded-full ${categoryClass} font-medium`}
     >
-      {category}
+      {props.category}
     </span>
   );
 };

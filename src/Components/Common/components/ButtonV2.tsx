@@ -1,5 +1,7 @@
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
+import { classNames } from "../../../Utils/utils";
 
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
@@ -45,6 +47,10 @@ export type ButtonProps = RawButtonProps &
     /** If set, removes the background to give a simple text button. */
     ghost?: boolean | undefined;
     /**
+     * If set, applies border to the button.
+     */
+    border?: boolean | undefined;
+    /**
      * Whether the button is disabled or not.
      * This is overriden to `true` if `loading` is `true`.
      */
@@ -62,6 +68,7 @@ const ButtonV2 = ({
   circle,
   shadow,
   ghost,
+  border,
   className,
   disabled,
   loading,
@@ -74,14 +81,15 @@ const ButtonV2 = ({
     <button
       {...props}
       disabled={disabled || !isAuthorized || loading}
-      className={[
-        "Button outline-offset-1",
+      className={classNames(
+        "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
         `button-size-${size}`,
         `button-shape-${circle ? "circle" : "square"}`,
-        `button-${variant}-${ghost ? "ghost" : "default"}`,
+        ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
+        border && `button-${variant}-border`,
         shadow && "shadow enabled:hover:shadow-lg",
-        className,
-      ].join(" ")}
+        className
+      )}
     >
       {children}
     </button>
@@ -89,3 +97,44 @@ const ButtonV2 = ({
 };
 
 export default ButtonV2;
+
+// Common buttons
+
+type CommonButtonProps = ButtonProps & { label?: string };
+
+export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
+  return (
+    <ButtonV2
+      id="submit"
+      type="submit"
+      className="w-full md:w-auto"
+      // Voluntarily setting children this way, so that it's overridable when using.
+      children={
+        <>
+          <CareIcon className="care-l-check-circle text-lg" />
+          <span>{label}</span>
+        </>
+      }
+      {...props}
+    />
+  );
+};
+
+export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
+  return (
+    <ButtonV2
+      id="cancel"
+      type="button"
+      variant="secondary"
+      className="w-full md:w-auto"
+      // Voluntarily setting children this way, so that it's overridable when using.
+      children={
+        <>
+          <CareIcon className="care-l-times-circle text-lg" />
+          <span>{label}</span>
+        </>
+      }
+      {...props}
+    />
+  );
+};

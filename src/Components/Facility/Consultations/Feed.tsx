@@ -17,6 +17,7 @@ import {
   getConsultation,
   listAssetBeds,
   partialUpdateAssetBed,
+  getPermittedFacility,
 } from "../../../Redux/actions";
 import Loading from "../../Common/Loading";
 import { ConsultationModel } from "../models";
@@ -36,7 +37,7 @@ interface IFeedProps {
 }
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
-export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
+export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
@@ -51,8 +52,19 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
-
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
+
+  useEffect(() => {
+    const fetchFacility = async () => {
+      const res = await dispatch(getPermittedFacility(facilityId));
+
+      if (res.status === 200 && res.data) {
+        setCameraMiddlewareHostname(res.data.middleware_address);
+      }
+    };
+
+    if (facilityId) fetchFacility();
+  }, [dispatch, facilityId]);
 
   useEffect(() => {
     if (cameraState) {
@@ -105,14 +117,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           };
 
           if (bedAssets?.data?.results?.length) {
-            const { camera_access_key, middleware_hostname } =
+            const { camera_access_key } =
               bedAssets.data.results[0].asset_object.meta;
             const config = camera_access_key.split(":");
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
               accessKey: config[2] || "",
             });
-            setCameraMiddlewareHostname(middleware_hostname);
             setCameraConfig(bedAssets.data.results[0].meta);
             setCameraState({
               ...bedAssets.data.results[0].meta.position,

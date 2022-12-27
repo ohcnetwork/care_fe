@@ -4,16 +4,9 @@ import { PatientModel } from "./models";
 import { Modal } from "@material-ui/core";
 import Beds from "../Facility/Consultations/Beds";
 import { useState } from "react";
-import { PatientCategoryTailwindClass } from "../../Common/constants";
 import { PatientCategory } from "../Facility/models";
-
-const PatientCategoryDisplayText: Record<PatientCategory, string> = {
-  "Comfort Care": "COMFORT CARE",
-  Stable: "STABLE",
-  "Slightly Abnormal": "SLIGHTLY ABNORMAL",
-  Critical: "CRITICAL",
-  unknown: "UNKNOWN",
-};
+import { PATIENT_CATEGORIES } from "../../Common/constants";
+import moment from "moment";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -25,9 +18,11 @@ export default function PatientInfoCard(props: {
   const patient = props.patient;
   const ip_no = props.ip_no;
 
-  const category: PatientCategory =
-    patient?.last_consultation?.category || "unknown";
-  const categoryClass = PatientCategoryTailwindClass[category];
+  const category: PatientCategory | undefined =
+    patient?.last_consultation?.category;
+  const categoryClass = category
+    ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
+    : "patient-unknown";
 
   return (
     <section className="flex items-center lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 justify-between">
@@ -84,11 +79,11 @@ export default function PatientInfoCard(props: {
               </div>
             )}
           </div>
-          {category !== "unknown" && (
+          {category && (
             <div
               className={`text-xs font-bold rounded-b w-24 text-center pb-1 px-2 ${categoryClass}`}
             >
-              {PatientCategoryDisplayText[category]}
+              {category.toUpperCase()}
             </div>
           )}
           <button
@@ -107,8 +102,7 @@ export default function PatientInfoCard(props: {
             {patient.name}
           </div>
           <div>
-            {/* TODO: Re-enable Review Missed | Temporary Hack for Launch */}
-            {/* {patient.review_time &&
+            {patient.review_time &&
               !patient.last_consultation?.discharge_date &&
               Number(patient.last_consultation?.review_interval) > 0 && (
                 <div
@@ -125,7 +119,7 @@ export default function PatientInfoCard(props: {
                     : "Review Missed: ") +
                     moment(patient.review_time).format("lll")}
                 </div>
-              )} */}
+              )}
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-1 lg:mb-2">
             <Link

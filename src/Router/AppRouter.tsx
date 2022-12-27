@@ -25,7 +25,6 @@ import InventoryLog from "../Components/Facility/InventoryLog";
 import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
 import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
 import MinQuantityList from "../Components/Facility/MinQuantityList";
-import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
 import { ShiftCreate } from "../Components/Patient/ShiftCreate";
 import UserProfile from "../Components/Users/UserProfile";
 import ShiftBoardView from "../Components/Shifting/BoardView";
@@ -307,28 +306,21 @@ const routes = {
     facilityId,
     inventoryId,
   }: any) => <InventoryLog facilityId={facilityId} inventoryId={inventoryId} />,
-  "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({
-    facilityId,
-    inventoryId,
-    itemId,
-  }: any) => (
-    <UpdateMinQuantity
-      facilityId={facilityId}
-      inventoryId={inventoryId}
-      itemId={itemId}
-    />
-  ),
   "/facility/:facilityId/assets/new": ({ facilityId }: any) => (
     <AssetCreate facilityId={facilityId} />
   ),
-  "/facility/:facilityId/assets/:assetId": ({ facilityId, assetId }: any) => (
-    <AssetCreate facilityId={facilityId} assetId={assetId} />
-  ),
+  "/facility/:facilityId/assets/:assetId/update": ({
+    facilityId,
+    assetId,
+  }: any) => <AssetCreate facilityId={facilityId} assetId={assetId} />,
   "/assets": () => <AssetsList />,
-  "/assets/:assetId": ({ assetId }: any) => <AssetManage assetId={assetId} />,
-  "/assets/:assetId/configure": ({ assetId }: any) => (
-    <AssetConfigure assetId={assetId} />
+  "/facility/:facilityId/assets/:assetId": ({ assetId, facilityId }: any) => (
+    <AssetManage assetId={assetId} facilityId={facilityId} />
   ),
+  "/facility/:facilityId/assets/:assetId/configure": ({
+    assetId,
+    facilityId,
+  }: any) => <AssetConfigure assetId={assetId} facilityId={facilityId} />,
 
   "/shifting": () =>
     localStorage.getItem("defaultShiftView") === "list" ? (

@@ -107,7 +107,7 @@ const StatelessSidebar = ({
     <nav
       className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
-      } transition-all duration-300 ease-in-out overflow-auto`}
+      } transition-all duration-300 ease-in-out overflow-y-auto overflow-x-hidden`}
     >
       <div className="h-3" /> {/* flexible spacing */}
       <img
@@ -139,7 +139,7 @@ const StatelessSidebar = ({
           <Item
             text="Dashboard"
             to={dashboard_url}
-            icon={<CareIcon className="care-l-dashboard h-5" />}
+            icon={<CareIcon className="care-l-dashboard text-lg" />}
             external
           />
         </div>

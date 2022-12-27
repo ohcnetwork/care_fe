@@ -48,13 +48,13 @@ export const updateUserPnconfig = (params: object, pathParams: object) => {
 export const createFacility = (params: object) => {
   return fireRequest("createFacility", [], params);
 };
-export const updateFacility = (id: number, params: object) => {
+export const updateFacility = (id: string, params: object) => {
   return fireRequest("updateFacility", [id], params);
 };
-export const partialUpdateFacility = (id: number, params: object) => {
+export const partialUpdateFacility = (id: string, params: object) => {
   return fireRequest("partialUpdateFacility", [id], params);
 };
-export const deleteFacility = (id: number) => {
+export const deleteFacility = (id: string) => {
   return fireRequest("deleteFacility", [id], {});
 };
 export const deleteFacilityCoverImage = (id: string) => {
@@ -88,7 +88,7 @@ export const getAllFacilities = (params: object) => {
   return fireRequest("getAllFacilities", [], params);
 };
 
-export const getPermittedFacility = (id: number, key?: string) => {
+export const getPermittedFacility = (id: string, key?: string) => {
   return fireRequest("getPermittedFacility", [], {}, { id: id }, key);
 };
 

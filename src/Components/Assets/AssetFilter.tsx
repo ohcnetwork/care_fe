@@ -123,7 +123,7 @@ function AssetFilter(props: any) {
       />
       <div className="w-full flex-none pt-14">
         <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-          <CareIcon className="care-l-filter h-5" />
+          <CareIcon className="care-l-filter text-lg" />
           <p>Filter by</p>
         </div>
 
