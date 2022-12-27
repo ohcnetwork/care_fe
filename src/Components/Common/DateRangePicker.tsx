@@ -22,6 +22,9 @@ interface IDateRangePickerProps {
 export const getDate = (value: any) =>
   value && moment(value).isValid() ? moment(value) : null;
 
+/**
+ * Deprecated. Use `DateRangeFormField` or `DateFormField` instead.
+ */
 export const DateRangePicker: React.FC<IDateRangePickerProps> = ({
   label,
   endDateId = "end_date",

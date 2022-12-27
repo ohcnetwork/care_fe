@@ -1,5 +1,4 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import { useReducer, useCallback, useState, useEffect } from "react";
@@ -22,6 +21,7 @@ import { SampleTestModel, FacilityNameModel } from "./models";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
 import { goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -148,9 +148,9 @@ export const SampleTest = (props: any) => {
   }, [dispatchAction, patientId]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "fast_track":
           if (state.form.isFastTrack && !state.form[field]) {
@@ -158,12 +158,6 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
-        // case "icmr_category":
-        //   if (!state.form[field]) {
-        //     errors[field] = "Please Choose a category";
-        //     invalidForm = true;
-        //   }
-        //   break;
         case "icmr_label":
           if (!state.form[field]) {
             errors[field] = "Please specify the label";
@@ -182,12 +176,6 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
-        // case "testing_facility":
-        //   if (!state.form[field]) {
-        //     errors[field] = "Please Choose a testing facility";
-        //     invalidForm = true;
-        //   }
-        //   break;
         default:
           return;
       }
@@ -509,28 +497,8 @@ export const SampleTest = (props: any) => {
                 </div>
               </div>
               <div className="flex justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={() => goBack()}
-                >
-                  {" "}
-                  Cancel{" "}
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  {" "}
-                  {buttonText}{" "}
-                </Button>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} label={buttonText} />
               </div>
             </form>
           </CardContent>

@@ -331,7 +331,7 @@ export const Login = (props: { forgot?: boolean }) => {
               className="text-sm text-primary-400 hover:text-primary-500 mb-4"
             >
               <div className="flex justify-center">
-                <CareIcon className="care-l-arrow-left h-5" />
+                <CareIcon className="care-l-arrow-left text-lg" />
                 <span>Back to login</span>
               </div>
             </button>

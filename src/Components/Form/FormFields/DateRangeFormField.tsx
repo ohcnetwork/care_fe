@@ -1,3 +1,4 @@
+import { classNames } from "../../../Utils/utils";
 import DateRangeInputV2, { DateRange } from "../../Common/DateRangeInputV2";
 import FormField from "./FormField";
 import {
@@ -13,16 +14,12 @@ type Props = FormFieldBaseProps<DateRange> & {
 const DateRangeFormField = (props: Props) => {
   const handleChange = resolveFormFieldChangeEventHandler(props);
   const error = resolveFormFieldError(props);
-
-  const bgColor = error ? "bg-red-50" : "bg-gray-200";
-  const borderColor = error ? "border-red-500" : "border-gray-200";
-
   const name = props.name;
 
   return (
     <FormField props={props}>
       <DateRangeInputV2
-        className={`${bgColor} ${borderColor}`}
+        className={classNames(error && "border-red-500")}
         value={props.value}
         onChange={(value) => handleChange({ name, value })}
         disabled={props.disabled}
