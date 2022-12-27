@@ -41,16 +41,27 @@ const CoverImageEditModal = ({
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
   const FACING_MODE_USER = "user";
-  const FACING_MODE_ENVIRONMENT = "environment";
-  const [facingMode, setFacingMode] = useState(FACING_MODE_USER);
+  const FACING_MODE_ENVIRONMENT = { exact: "environment" };
+  const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
   const videoConstraints = {
     width: 1280,
     height: 720,
     facingMode: "user",
   };
+  const [devices, setDevices] = useState<any>([]);
 
+  const handleDevices = useCallback(
+    (mediaDevices: any[]) =>
+      setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput")),
+    [setDevices]
+  );
+
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then(handleDevices);
+  }, [handleDevices]);
+  console.log(devices, "ll");
   const handleSwitchCamera = useCallback(() => {
-    setFacingMode((prevState) =>
+    setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
         ? FACING_MODE_ENVIRONMENT
         : FACING_MODE_USER
@@ -299,6 +310,11 @@ const CoverImageEditModal = ({
                 </>
               )}
             </div>
+            <div className="flex m-4">
+              <ButtonV2 variant="primary" onClick={handleSwitchCamera}>
+                <i className="fa-solid fa-camera-rotate" /> Switch Camera
+              </ButtonV2>
+            </div>
             <div className="flex  p-4 gap-2">
               <div>
                 {!previewImage ? (
@@ -311,11 +327,6 @@ const CoverImageEditModal = ({
                         }}
                       >
                         <i className="fa-solid fa-camera" /> Capture
-                      </ButtonV2>
-                    </div>
-                    <div>
-                      <ButtonV2 variant="primary" onClick={handleSwitchCamera}>
-                        <i className="fa-solid fa-camera" /> Switch Camera
                       </ButtonV2>
                     </div>
                   </>
