@@ -25,7 +25,7 @@ import UpdateStatusDialog from "./UpdateStatusDialog";
 import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
-import useExport from "../../Common/hooks/useExport";
+import { ExportButton } from "../Common/Export";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -56,7 +56,6 @@ export default function SampleViewAdmin() {
   const { currentUser } = state;
   const userType: "Staff" | "DistrictAdmin" | "StateLabAdmin" =
     currentUser.data.user_type;
-  const { ExportButton } = useExport();
 
   useEffect(() => {
     async function fetchData() {
