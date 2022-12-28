@@ -1,4 +1,14 @@
-import { Card, CardContent, InputLabel } from "@material-ui/core";
+
+import {
+  Button,
+  Card,
+  CardContent,
+  InputLabel,
+  Modal,
+} from "@material-ui/core";
+
+
+
 import loadable from "@loadable/component";
 import moment from "moment";
 import { useCallback, useReducer, useState, useEffect } from "react";
@@ -8,11 +18,13 @@ import {
   createTriageForm,
   getTriageDetails,
   getAnyFacility,
+  getTriageInfo,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
 import { goBack } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
 import DateInputV2 from "../Common/DateInputV2";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -57,12 +69,17 @@ const triageFormReducer = (state = initialState, action: any) => {
 };
 
 export const TriageForm = (props: triageFormProps) => {
+  const dispatchTriageData: any = useDispatch();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(triageFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
-
+  const [patientStatsData, setPatientStatsData] = useState<
+    Array<PatientStatsModel>
+  >([]);
+  const [openModalForExistingTriage, setOpenModalForExistingTriage] =
+    useState<boolean>(false);
   const headerText = !id ? "Add Triage" : "Edit Triage";
   const buttonText = !id ? "Save Triage" : "Update Triage";
 
@@ -102,6 +119,33 @@ export const TriageForm = (props: triageFormProps) => {
       fetchData(status);
     },
     [dispatch, fetchData, id]
+  );
+
+  // this will fetch all triage data of the facility
+  const fetchTriageData = useCallback(
+    async (status: statusType) => {
+      const [triageRes] = await Promise.all([
+        dispatchTriageData(getTriageInfo({ facilityId })),
+      ]);
+      if (!status.aborted) {
+        if (
+          triageRes &&
+          triageRes.data &&
+          triageRes.data.results &&
+          triageRes.data.results.length
+        ) {
+          setPatientStatsData(triageRes.data.results);
+        }
+      }
+    },
+    [dispatchTriageData, facilityId]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchTriageData(status);
+    },
+    [dispatch, fetchTriageData]
   );
 
   useEffect(() => {
@@ -145,12 +189,22 @@ export const TriageForm = (props: triageFormProps) => {
     dispatch({ type: "set_error", errors });
     return true;
   };
+  const isTriageExist = (data: any) => {
+    if (
+      patientStatsData.filter(
+        (triageData) => triageData.entry_date === data.entry_date
+      ).length === 1
+    ) {
+      return true;
+    }
+    return false;
+  };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setOpenModalForExistingTriage(false);
     const validForm = validateForm();
     if (validForm) {
-      setIsLoading(true);
       const data = {
         entry_date: `${moment(state.form.entry_date).format("YYYY-MM-DD")}`,
         num_patients_visited: Number(state.form.num_patients_visited),
@@ -163,21 +217,33 @@ export const TriageForm = (props: triageFormProps) => {
           state.form.num_patient_confirmed_positive
         ),
       };
-
-      const res = await dispatchAction(createTriageForm(data, { facilityId }));
-      setIsLoading(false);
-      if (res && res.data) {
-        dispatch({ type: "set_form", form: initForm });
-        if (id) {
-          Notification.Success({
-            msg: "Triage updated successfully",
-          });
-        } else {
-          Notification.Success({
-            msg: "Triage created successfully",
-          });
+      //proceed if the triage does not exist or proceed has allowed to proceed after seeing the modal or it's a edit feature of the same date
+      if (
+        !isTriageExist(data) ||
+        e.target.id === "triageConfirm" ||
+        buttonText === "Update Triage"
+      ) {
+        setOpenModalForExistingTriage(false);
+        setIsLoading(true);
+        const res = await dispatchAction(
+          createTriageForm(data, { facilityId })
+        );
+        setIsLoading(false);
+        if (res && res.data) {
+          dispatch({ type: "set_form", form: initForm });
+          if (id) {
+            Notification.Success({
+              msg: "Triage updated successfully",
+            });
+          } else {
+            Notification.Success({
+              msg: "Triage created successfully",
+            });
+          }
+          goBack();
         }
-        goBack();
+      } else {
+        setOpenModalForExistingTriage(true);
       }
     }
   };
@@ -223,6 +289,49 @@ export const TriageForm = (props: triageFormProps) => {
           },
         }}
       />
+
+      <Modal
+        open={openModalForExistingTriage}
+        aria-labelledby="Triage Check"
+        aria-describedby=""
+        className=""
+      >
+        <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+          <div className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content">
+            <div className="mb-4">
+              <i className="fa-solid fa-triangle-exclamation text-red-500 fa-4x"></i>
+              <h1 className="sm:text-xl text-sm">
+                A Triage already exist on this date
+              </h1>
+              <p className="text-base">
+                If you wish to proceed then the existing triage will be over
+                written!
+              </p>
+            </div>
+            <div></div>
+            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+              <ButtonV2
+                variant="secondary"
+                onClick={() => {
+                  setOpenModalForExistingTriage(false);
+                }}
+              >
+                Cancel
+              </ButtonV2>
+              <ButtonV2
+                variant="danger"
+                id="triageConfirm"
+                onClick={(e) => {
+                  handleSubmit(e);
+                }}
+              >
+                Proceed
+              </ButtonV2>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
