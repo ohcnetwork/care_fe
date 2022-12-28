@@ -203,6 +203,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         border
                         ghost
                         className="h-[38px]"
+                        name="facility-details"
                       >
                         <CareIcon className="care-l-hospital text-lg" />
                         <span className="hidden md:inline">
