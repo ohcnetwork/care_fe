@@ -433,7 +433,7 @@ export const ConsultationDetails = (props: any) => {
           />
         </div>
 
-        <div className="flex gap-2 justify-end">
+        <div className="flex flex-col md:flex-row gap-2 md:justify-end">
           <Cancel onClick={handleDischargeClose} />
           {isSendingDischargeApi ? (
             <CircularProgress size={20} />
