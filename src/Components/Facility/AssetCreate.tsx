@@ -902,6 +902,15 @@ const AssetCreate = (props: AssetProps) => {
                 <div />
 
                 <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                  <Cancel
+                    onClick={() =>
+                      navigate(
+                        assetId
+                          ? `/facility/${facilityId}/assets/${assetId}`
+                          : `/facility/${facilityId}`
+                      )
+                    }
+                  />
                   <Submit
                     onClick={(e) => handleSubmit(e, false)}
                     label={assetId ? "Update" : "Create Asset"}
@@ -912,15 +921,6 @@ const AssetCreate = (props: AssetProps) => {
                       label="Create & Add More"
                     />
                   )}
-                  <Cancel
-                    onClick={() =>
-                      navigate(
-                        assetId
-                          ? `/facility/${facilityId}/assets/${assetId}`
-                          : `/facility/${facilityId}`
-                      )
-                    }
-                  />
                 </div>
               </div>
             </form>
