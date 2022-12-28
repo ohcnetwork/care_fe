@@ -10,6 +10,8 @@ import { listFacilityAssetLocation } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { Link } from "raviger";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import readXlsxFile from "read-excel-file";
+import { XLSXAssetImportSchema } from "../../Common/constants";
 
 interface Props {
   open: boolean;
@@ -41,17 +43,39 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     });
   }, []);
 
+  // window["parsePhone"] = parsePhoneNumberFromString;
+
   useEffect(() => {
     const readFile = async () => {
       try {
         if (selectedFile) {
-          const parsedData = JSON.parse(await selectedFile.text());
-          setPreview(parsedData);
+          switch (selectedFile.name.split(".").pop()) {
+            case "xlsx": {
+              const parsedData = await readXlsxFile(selectedFile, {
+                schema: XLSXAssetImportSchema,
+              });
+              if (parsedData.errors.length) {
+                parsedData.errors.map((error: any) => {
+                  Notification.Error({
+                    msg: `Please check the row ${error.row} of column ${error.column}`,
+                  });
+                });
+              } else {
+                setPreview(parsedData.rows as AssetData[]);
+              }
+              break;
+            }
+            default: {
+              const parsedData = JSON.parse(await selectedFile.text());
+              setPreview(parsedData);
+            }
+          }
         }
       } catch (e) {
         setPreview(undefined);
+        console.log(e);
         Notification.Error({
-          msg: "Invalid JSON file",
+          msg: "Invalid file",
         });
       }
     };
@@ -249,7 +273,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                       : "Drag & drop JSON file to upload"}
                   </p>
                   <p className="mt-4 text-gray-700 font-medium text-center">
-                    Upload the JSON file exported from Care.
+                    Upload a JSON or XLSX file.
                   </p>
                 </div>
               )}
@@ -262,7 +286,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                     <input
                       title="changeFile"
                       type="file"
-                      accept="application/json"
+                      accept=".json, .xlsx"
                       className="hidden"
                       onChange={onSelectFile}
                       onClick={() => {
