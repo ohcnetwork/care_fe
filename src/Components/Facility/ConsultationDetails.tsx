@@ -45,12 +45,11 @@ import { formatDate } from "../../Utils/utils";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -398,25 +397,23 @@ export const ConsultationDetails = (props: any) => {
         onClose={handleDischargeClose}
       >
         <div className="mt-6 flex flex-col">
-          <div>
-            <FieldLabel required>Reason</FieldLabel>
-            <SelectMenuV2
-              required
-              id="discharge_reason"
-              value={preDischargeForm.discharge_reason}
-              options={DISCHARGE_REASONS}
-              optionValue={({ id }) => id}
-              optionLabel={({ text }) => text}
-              onChange={(value) =>
-                setPreDischargeForm((prev) => ({
-                  ...prev,
-                  discharge_reason: value,
-                }))
-              }
-            />
-            <FieldErrorText error={errors?.discharge_reason} />
-          </div>
-
+          <SelectFormField
+            required
+            label="Reason"
+            name="discharge_reason"
+            id="discharge_reason"
+            value={preDischargeForm.discharge_reason}
+            options={DISCHARGE_REASONS}
+            optionValue={({ id }) => id}
+            optionLabel={({ text }) => text}
+            onChange={(e) =>
+              setPreDischargeForm((prev) => ({
+                ...prev,
+                discharge_reason: e.value,
+              }))
+            }
+            error={errors?.discharge_reason}
+          />
           <TextAreaFormField
             required={preDischargeForm.discharge_reason == "EXP"}
             label={
@@ -436,21 +433,16 @@ export const ConsultationDetails = (props: any) => {
           />
         </div>
 
-        <div className="flex gap-2 justify-end">
-          <ButtonV2 variant="secondary" onClick={handleDischargeClose}>
-            Cancel
-          </ButtonV2>
-
+        <div className="flex flex-col md:flex-row gap-2 md:justify-end">
+          <Cancel onClick={handleDischargeClose} />
           {isSendingDischargeApi ? (
             <CircularProgress size={20} />
           ) : (
-            <ButtonV2
-              variant="primary"
+            <Submit
               onClick={() => handlePatientDischarge(false)}
+              label="Confirm Discharge"
               autoFocus
-            >
-              Confirm Discharge
-            </ButtonV2>
+            />
           )}
         </div>
       </DialogModal>
@@ -674,7 +666,10 @@ export const ConsultationDetails = (props: any) => {
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
               {!consultationData.discharge_date && (
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                  <PatientVitalsCard patient={patientData} />
+                  <PatientVitalsCard
+                    patient={patientData}
+                    facilityId={facilityId}
+                  />
                 </section>
               )}
               <div className="grid lg:grid-cols-2 gap-4 mt-4">

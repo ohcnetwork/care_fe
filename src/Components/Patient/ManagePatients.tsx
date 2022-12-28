@@ -32,8 +32,7 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { DropdownItem } from "../Common/components/Menu";
-import useExport from "../../Common/hooks/useExport";
+import { ExportMenu } from "../Common/Export";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -75,7 +74,6 @@ export const PatientManager = (props: any) => {
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const { exportCSV, ExportMenu } = useExport();
   const {
     qParams,
     updateQuery,
@@ -196,10 +194,10 @@ export const PatientManager = (props: any) => {
 
   let managePatients: any = null;
 
-  const exportPatients = async (isFiltered: boolean) => {
+  const exportPatients = (isFiltered: boolean) => {
     const filters = { ...params, csv: true, facility: facilityId };
     if (!isFiltered) delete filters.is_active;
-    exportCSV("patients", getAllPatient(filters, "downloadPatients"));
+    return () => getAllPatient(filters, "downloadPatients");
   };
 
   useEffect(() => {
@@ -635,14 +633,20 @@ export const PatientManager = (props: any) => {
             <span>Advanced Filters</span>
           </button>
           <div className="tooltip">
-            <ExportMenu disabled={!isExportAllowed}>
-              <DropdownItem onClick={() => exportPatients(true)}>
-                {tabValue === 0 ? "Live patients" : "Discharged patients"}
-              </DropdownItem>
-              <DropdownItem onClick={() => exportPatients(false)}>
-                All patients
-              </DropdownItem>
-            </ExportMenu>
+            <ExportMenu
+              disabled={!isExportAllowed}
+              exportItems={[
+                {
+                  label:
+                    tabValue === 0 ? "Live patients" : "Discharged patients",
+                  action: exportPatients(true),
+                },
+                {
+                  label: "All patients",
+                  action: exportPatients(false),
+                },
+              ]}
+            />
             {!isExportAllowed && (
               <span className="tooltip-text tooltip-bottom -translate-x-1/2">
                 Select a seven day period

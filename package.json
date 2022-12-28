@@ -246,7 +246,7 @@
   "lint-staged": {
     "**/*": [
       "prettier --write --ignore-unknown",
-      "eslint --fix --ignore-pattern '*.stories.mdx' --ignore-pattern 'Dockerfile'",
+      "eslint --fix --ignore-pattern '*.stories.mdx' --ignore-pattern 'Dockerfile' --ignore-pattern 'netlify.toml'",
       "git update-index --again"
     ]
   },

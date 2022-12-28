@@ -9,6 +9,12 @@ interface Routes {
 }
 
 const routes: Routes = {
+  config: {
+    path: process.env.REACT_APP_CONFIG || "/config.json",
+    method: "GET",
+    noAuth: true,
+  },
+
   // Auth Endpoints
   login: {
     path: "/api/v1/auth/login/",
@@ -743,6 +749,10 @@ const routes: Routes = {
   getAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "GET",
+  },
+  deleteAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "DELETE",
   },
   updateAsset: {
     path: "/api/v1/asset/{external_id}/",

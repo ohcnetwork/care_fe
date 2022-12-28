@@ -326,9 +326,9 @@ const AssetCreate = (props: AssetProps) => {
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
         manufacturer: manufacturer,
-        warranty_amc_end_of_validity: moment(
-          warranty_amc_end_of_validity
-        ).format("YYYY-MM-DD"),
+        warranty_amc_end_of_validity: warranty_amc_end_of_validity
+          ? moment(warranty_amc_end_of_validity).format("YYYY-MM-DD")
+          : null,
         last_serviced_on: last_serviced_on
           ? moment(last_serviced_on).format("YYYY-MM-DD")
           : last_serviced_on,
@@ -748,7 +748,7 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["warranty_amc_end_of_validity"]}
                   >
-                    <label>Warranty / AMC Expiry</label>
+                    <label className="mb-2">Warranty / AMC Expiry</label>
                     <DateInputV2
                       className="border-1 border-gray-200"
                       value={warranty_amc_end_of_validity}
@@ -902,6 +902,15 @@ const AssetCreate = (props: AssetProps) => {
                 <div />
 
                 <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                  <Cancel
+                    onClick={() =>
+                      navigate(
+                        assetId
+                          ? `/facility/${facilityId}/assets/${assetId}`
+                          : `/facility/${facilityId}`
+                      )
+                    }
+                  />
                   <Submit
                     onClick={(e) => handleSubmit(e, false)}
                     label={assetId ? "Update" : "Create Asset"}
@@ -912,15 +921,6 @@ const AssetCreate = (props: AssetProps) => {
                       label="Create & Add More"
                     />
                   )}
-                  <Cancel
-                    onClick={() =>
-                      navigate(
-                        assetId
-                          ? `/facility/${facilityId}/assets/${assetId}`
-                          : `/facility/${facilityId}`
-                      )
-                    }
-                  />
                 </div>
               </div>
             </form>
