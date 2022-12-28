@@ -869,7 +869,7 @@ export const XLSXAssetImportSchema = {
     prop: "support_email",
     type: String,
     parse: (email: string) => {
-      const isValid = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
+      const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
 
       if (!isValid) {
         throw new Error("Invalid Support Email");
