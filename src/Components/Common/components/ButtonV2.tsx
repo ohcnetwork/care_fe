@@ -68,6 +68,10 @@ export type ButtonProps = RawButtonProps &
      * Link target. Only applicable if `href` is set.
      */
     target?: string | undefined;
+    /**
+     * Whether the button should be having a Id.
+     */
+    id?: string | undefined;
   };
 
 const ButtonV2 = ({
@@ -81,6 +85,7 @@ const ButtonV2 = ({
   className,
   disabled,
   loading,
+  id,
   children,
   href,
   target,
@@ -120,6 +125,7 @@ const ButtonV2 = ({
         shadow && "shadow enabled:hover:shadow-lg",
         className
       )}
+      id={id}
     >
       {children}
     </button>

@@ -750,6 +750,10 @@ const routes: Routes = {
     path: "/api/v1/asset/{external_id}/",
     method: "GET",
   },
+  deleteAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "DELETE",
+  },
   updateAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "PUT",
