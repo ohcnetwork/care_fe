@@ -277,11 +277,15 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                   >
                     {dragProps.fileDropError !== ""
                       ? dragProps.fileDropError
-                      : "Drag & drop JSON file to upload"}
+                      : "Drag & drop JSON / Excel (xlsx, csv)  file to upload"}
                   </p>
-                  <p className="mt-4 text-gray-700 font-medium text-center">
-                    Upload a JSON or XLSX file.
-                  </p>
+                  <a
+                    className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    href="https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=11JaEhNHdyCHth4YQs_44YaRlP77Rrqe81VSEfg1glko&exportFormat=xlsx"
+                  >
+                    <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
+                    <span>Sample Format</span>
+                  </a>
                 </div>
               )}
 
