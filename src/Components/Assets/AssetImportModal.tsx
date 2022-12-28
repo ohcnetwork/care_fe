@@ -12,6 +12,7 @@ import { Link } from "raviger";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import readXlsxFile from "read-excel-file";
 import { XLSXAssetImportSchema } from "../../Common/constants";
+import { parseCsvFile } from "../../Utils/utils";
 
 interface Props {
   open: boolean;
@@ -43,8 +44,6 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     });
   }, []);
 
-  // window["parsePhone"] = parsePhoneNumberFromString;
-
   useEffect(() => {
     const readFile = async () => {
       try {
@@ -63,6 +62,14 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               } else {
                 setPreview(parsedData.rows as AssetData[]);
               }
+              break;
+            }
+            case "csv": {
+              const parsedData = await parseCsvFile(
+                selectedFile,
+                XLSXAssetImportSchema
+              );
+              setPreview(parsedData);
               break;
             }
             default: {
@@ -286,7 +293,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                     <input
                       title="changeFile"
                       type="file"
-                      accept=".json, .xlsx"
+                      accept=".json, .xlsx, .csv"
                       className="hidden"
                       onChange={onSelectFile}
                       onClick={() => {
