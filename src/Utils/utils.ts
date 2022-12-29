@@ -140,6 +140,56 @@ export const classNames = (...classes: (string | boolean | undefined)[]) => {
   return classes.filter(Boolean).join(" ");
 };
 
+interface ISchema {
+  [key: string]: {
+    prop: string;
+    oneOf?: string[];
+    parse?: (value: any) => any;
+    type?: any;
+    required?: boolean;
+  };
+}
+
+export const parseCsvFile = async (
+  file: File,
+  schema: ISchema | undefined = undefined
+) => {
+  const parseWithSchema: any = (schema: any, data: any) =>
+    Object.keys(schema).reduce((acc, key) => {
+      if (schema[key]?.oneOf && !schema[key].oneOf.includes(data[key]))
+        throw new Error(`${key} should be one of the ${schema[key].oneOf}`);
+
+      const value =
+        typeof schema[key]?.type === "object"
+          ? parseWithSchema(schema[key]?.type, data)
+          : schema[key]?.parse?.(data[key]) ?? data[key];
+
+      if (schema[key]?.required && (value === undefined || value === null))
+        throw new Error(`${key} is required`);
+
+      return value === undefined || value === null
+        ? acc
+        : {
+            ...acc,
+            [schema[key]?.prop]: value,
+          };
+    }, {});
+
+  const csvData = (await file.text())
+    .trim()
+    .split("\n")
+    .map((row: string) => row.split(","));
+
+  const parsed = csvData
+    .map((row: string[]) =>
+      row.reduce((acc, val, i) => ({ ...acc, [csvData[0][i]]: val }), {})
+    )
+    .splice(1)
+    .map((csvMap: any) => (schema ? parseWithSchema(schema, csvMap) : csvMap));
+
+  return parsed;
+};
+
 export const getPincodeDetails = async (pincode: string) => {
   const response = await fetch(
     `https://api.data.gov.in/resource/5c2f62fe-5afa-4119-a499-fec9d604d5bd?api-key=${GOV_DATA_API_KEY}&format=json&filters[pincode]=${pincode}&limit=1`
@@ -155,4 +205,3 @@ export const includesIgnoreCase = (str1: string, str2: string) => {
     lowerCaseStr1.includes(lowerCaseStr2) ||
     lowerCaseStr2.includes(lowerCaseStr1)
   );
-};
