@@ -205,3 +205,4 @@ export const includesIgnoreCase = (str1: string, str2: string) => {
     lowerCaseStr1.includes(lowerCaseStr2) ||
     lowerCaseStr2.includes(lowerCaseStr1)
   );
+};
