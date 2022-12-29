@@ -7,7 +7,6 @@ import {
   MultilineInputField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -30,9 +29,9 @@ import {
   RadioGroup,
   Box,
   FormControlLabel,
-  Button,
 } from "@material-ui/core";
 import { goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -373,27 +372,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  onClick={() => goBack()}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  fullWidth
-                  className="w-full md:w-auto"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  onClick={handleSubmit}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
-                >
-                  Submit
-                </Button>
+                <Cancel variant="secondary" onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} />
               </div>
             </div>
           </CardContent>

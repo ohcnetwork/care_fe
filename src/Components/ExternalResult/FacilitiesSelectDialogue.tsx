@@ -1,5 +1,5 @@
 import React from "react";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
@@ -31,16 +31,12 @@ const FacilitiesSelectDialog = (props: Props) => {
         multiple={false}
       />
       <div className="mt-4 flex justify-between">
-        <ButtonV2 onClick={handleCancel} variant="secondary">
-          Cancel
-        </ButtonV2>
-        <ButtonV2
+        <Cancel onClick={handleCancel} />
+        <Submit
           onClick={handleOk}
-          variant="primary"
           disabled={!selectedFacility.id}
-        >
-          Continue
-        </ButtonV2>
+          label="Select"
+        />
       </div>
     </DialogModal>
   );

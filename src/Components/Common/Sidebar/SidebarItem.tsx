@@ -10,7 +10,7 @@ type SidebarItemProps = {
   external?: true | undefined;
   badgeCount?: number | undefined;
   selected?: boolean | undefined;
-} & ({ to: string; do?: undefined } | { to?: undefined; do: () => void });
+} & ({ to: string; do?: undefined } | { to?: string; do: () => void });
 
 type SidebarItemBaseProps = SidebarItemProps & { shrinked?: boolean };
 const SidebarItemBase = ({
@@ -50,7 +50,7 @@ const SidebarItemBase = ({
           {t(props.text)}
         </span>
         {external && !shrinked && (
-          <CareIcon className="care-l-external-link-alt h-5" />
+          <CareIcon className="care-l-external-link-alt text-lg" />
         )}
       </div>
 

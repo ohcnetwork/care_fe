@@ -5,10 +5,9 @@ import NotificationItem from "../../Notifications/NotificationsList";
 import { Dialog, Transition } from "@headlessui/react";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import useConfig from "../../../Common/hooks/useConfig";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
-
-const DASHBOARD = process.env.REACT_APP_DASHBOARD_URL ?? "";
 
 const LOGO = process.env.REACT_APP_LIGHT_LOGO;
 const LOGO_COLLAPSE =
@@ -19,11 +18,13 @@ type StatelessSidebarProps =
       shrinkable: true;
       shrinked: boolean;
       setShrinked: (state: boolean) => void;
+      setOpenCB?: undefined;
     }
   | {
       shrinkable?: false;
       shrinked?: false;
       setShrinked?: undefined;
+      setOpenCB: (open: boolean) => void;
     };
 
 const NavItems = [
@@ -46,9 +47,11 @@ const StatelessSidebar = ({
   shrinkable = false,
   shrinked = false,
   setShrinked,
+  setOpenCB,
 }: StatelessSidebarProps) => {
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
+  const { dashboard_url } = useConfig();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
@@ -107,7 +110,7 @@ const StatelessSidebar = ({
     <nav
       className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
-      } transition-all duration-300 ease-in-out overflow-auto`}
+      } transition-all duration-300 ease-in-out overflow-y-auto overflow-x-hidden`}
     >
       <div className="h-3" /> {/* flexible spacing */}
       <img
@@ -123,7 +126,7 @@ const StatelessSidebar = ({
             ref={indicatorRef}
             className={`absolute left-2 w-1 hidden md:block
             bg-primary-400 rounded z-10 transition-all`}
-           />
+          />
           {NavItems.map((i) => {
             return (
               <Item
@@ -131,6 +134,7 @@ const StatelessSidebar = ({
                 {...i}
                 icon={<CareIcon className={`${i.icon} h-5`} />}
                 selected={i.to === activeLink}
+                do={() => setOpenCB && setOpenCB(false)}
               />
             );
           })}
@@ -138,8 +142,8 @@ const StatelessSidebar = ({
           <NotificationItem shrinked={shrinked} />
           <Item
             text="Dashboard"
-            to={DASHBOARD}
-            icon={<CareIcon className="care-l-dashboard h-5" />}
+            to={dashboard_url}
+            icon={<CareIcon className="care-l-dashboard text-lg" />}
             external
           />
         </div>
@@ -220,7 +224,7 @@ export const MobileSidebar = ({ open, setOpen }: MobileSidebarProps) => {
                 leaveTo="-translate-x-full"
               >
                 <Dialog.Panel className="pointer-events-auto w-screen max-w-fit">
-                  <StatelessSidebar />
+                  <StatelessSidebar setOpenCB={setOpen} />
                 </Dialog.Panel>
               </Transition.Child>
             </div>

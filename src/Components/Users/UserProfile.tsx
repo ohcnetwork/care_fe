@@ -1,7 +1,5 @@
 import loadable from "@loadable/component";
 import React, { useState, useCallback, useReducer } from "react";
-import { Button } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,11 +12,11 @@ import { ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
-import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import { Submit } from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -104,7 +102,6 @@ export default function UserProfile() {
   });
 
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
-  const [updateBtnText, setUpdateBtnText] = React.useState<string>("Update");
 
   const [isLoading, setIsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
@@ -274,29 +271,6 @@ export default function UserProfile() {
     }
   };
 
-  const checkForNewBuildVersion = async () => {
-    const [isLatestBundle, newVersion] = await checkIfLatestBundle();
-
-    if (!isLatestBundle) {
-      setUpdateBtnText("updating...");
-      localStorage.setItem("build_meta_version", newVersion);
-
-      if ("caches" in window) {
-        // Service worker cache should be cleared with caches.delete()
-        caches.keys().then((names) => {
-          for (const name of names) {
-            caches.delete(name);
-          }
-
-          window.location.reload();
-        });
-      }
-    } else {
-      setUpdateBtnText("You already have the latest version!");
-
-      setTimeout(() => setUpdateBtnText("Update"), 1000);
-    }
-  };
   if (isLoading) {
     return <Loading />;
   }
@@ -563,20 +537,8 @@ export default function UserProfile() {
                         </div>
                       </div>
                     </div>
-                    <div className="px-4 pb-3 bg-gray-50 text-right sm:px-6">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        style={{ marginLeft: "auto" }}
-                        startIcon={
-                          <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                        }
-                        onClick={(e) => handleSubmit(e)}
-                      >
-                        {" "}
-                        UPDATE{" "}
-                      </Button>
+                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                      <Submit onClick={handleSubmit} label="Update" />
                     </div>
                   </div>
                 </form>
@@ -633,20 +595,11 @@ export default function UserProfile() {
                         </div>
                       </div>
                     </div>
-                    <div className="px-4 pb-3 bg-gray-50 text-right sm:px-6">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        style={{ marginLeft: "auto" }}
-                        startIcon={
-                          <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                        }
-                        onClick={(e) => changePassword(e)}
-                      >
-                        {" "}
-                        CHANGE PASSWORD{" "}
-                      </Button>
+                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                      <Submit
+                        onClick={changePassword}
+                        label="Change Password"
+                      />
                     </div>
                   </div>
                 </form>
@@ -669,22 +622,6 @@ export default function UserProfile() {
           <div className="mt-5 md:mt-0 md:col-span-2">
             <LanguageSelector className="bg-white w-full" />
           </div>
-        </div>
-
-        <div className="mt-10">
-          <div className="text-lg font-medium leading-6 text-gray-900">
-            Check for software updates
-            <p className="mt-1 text-sm leading-5 text-gray-600">
-              Click the update button to see if you have the latest
-              &quot;care&quot; version.
-            </p>
-          </div>
-          <button
-            className="bg-white text-sm hover:bg-gray-100 text-gray-800 py-2 px-4 border border-gray-400 rounded shadow text-center outline-none mt-3"
-            onClick={() => checkForNewBuildVersion()}
-          >
-            {updateBtnText}
-          </button>
         </div>
       </div>
     </div>
