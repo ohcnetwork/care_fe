@@ -280,18 +280,18 @@ const AssetsList = () => {
             )}
             {/* TODO: ask for facility select dialog instead of disabling */}
             <ExportMenu
-              disabled={!facility}
-              label="Import/Export"
+              disabled={!facility || importAssetModalOpen}
+              label={importAssetModalOpen ? "Importing..." : "Import/Export"}
               exportItems={[
                 {
                   label: "Import Assets",
-                  action: () => setImportAssetModalOpen(true),
+                  // action: () => setImportAssetModalOpen(true),
                   options: {
                     icon: <CareIcon className="care-l-import" />,
+                    onClick: () => setImportAssetModalOpen(true),
                   },
                 },
                 {
-
                   label: "Export Assets",
                   action: () =>
                     authorizedForImportExport &&

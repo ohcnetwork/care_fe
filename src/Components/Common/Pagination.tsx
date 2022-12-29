@@ -71,6 +71,12 @@ const Pagination = (props: PaginationProps) => {
   const goToPage = (page: number) => {
     setCurrentPage(page);
     onChange(page, rowsPerPage);
+    const pageContainer = window.document.getElementById("pages");
+    pageContainer?.scroll({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
   };
 
   const NavButtons = {

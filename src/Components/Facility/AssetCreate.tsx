@@ -754,24 +754,24 @@ const AssetCreate = (props: AssetProps) => {
                   >
                     <label>Warranty / AMC Expiry</label>
                     <div id="warranty-expiry">
-                    <DateInputV2
-                      className="border-1 border-gray-200"
-                      value={warranty_amc_end_of_validity}
-                      onChange={(date) => {
-                        if (
-                          moment(date).format("YYYY-MM-DD") <
-                          new Date().toLocaleDateString("en-ca")
-                        ) {
-                          Notification.Error({
-                            msg: "Warranty / AMC Expiry date can't be in past",
-                          });
-                        } else {
-                          setWarrantyAmcEndOfValidity(moment(date).toDate());
-                        }
-                      }}
-                      position="LEFT"
-                      min={yesterday}
-                    />
+                      <DateInputV2
+                        className="border-1 border-gray-200"
+                        value={warranty_amc_end_of_validity}
+                        onChange={(date) => {
+                          if (
+                            moment(date).format("YYYY-MM-DD") <
+                            new Date().toLocaleDateString("en-ca")
+                          ) {
+                            Notification.Error({
+                              msg: "Warranty / AMC Expiry date can't be in past",
+                            });
+                          } else {
+                            setWarrantyAmcEndOfValidity(moment(date).toDate());
+                          }
+                        }}
+                        position="LEFT"
+                        min={yesterday}
+                      />
                     </div>
 
                     <ErrorHelperText
@@ -867,26 +867,26 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["last_serviced_on"]}
                   >
                     <label htmlFor="last-serviced-on">Last Serviced On</label>
-                  <div id="last-serviced-on">
-                    <DateInputV2
-                      className="border-1 border-gray-200"
-                      value={last_serviced_on}
-                      onChange={(date) => {
-                        if (
-                          moment(date).format("YYYY-MM-DD") >
-                          new Date().toLocaleDateString("en-ca")
-                        ) {
-                          Notification.Error({
-                            msg: "Last Serviced date can't be in future",
-                          });
-                        } else {
-                          setLastServicedOn(moment(date).toDate());
-                        }
-                      }}
-                      position="LEFT"
-                      max={new Date()}
-                    />
-                   </div>
+                    <div id="last-serviced-on">
+                      <DateInputV2
+                        className="border-1 border-gray-200"
+                        value={last_serviced_on}
+                        onChange={(date) => {
+                          if (
+                            moment(date).format("YYYY-MM-DD") >
+                            new Date().toLocaleDateString("en-ca")
+                          ) {
+                            Notification.Error({
+                              msg: "Last Serviced date can't be in future",
+                            });
+                          } else {
+                            setLastServicedOn(moment(date).toDate());
+                          }
+                        }}
+                        position="LEFT"
+                        max={new Date()}
+                      />
+                    </div>
                     <ErrorHelperText error={state.errors.last_serviced_on} />
                   </div>
 
@@ -913,6 +913,15 @@ const AssetCreate = (props: AssetProps) => {
                 <div />
 
                 <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                  <Cancel
+                    onClick={() =>
+                      navigate(
+                        assetId
+                          ? `/facility/${facilityId}/assets/${assetId}`
+                          : `/facility/${facilityId}`
+                      )
+                    }
+                  />
                   <Submit
                     onClick={(e) => handleSubmit(e, false)}
                     label={assetId ? "Update" : "Create Asset"}
@@ -924,15 +933,6 @@ const AssetCreate = (props: AssetProps) => {
                       label="Create & Add More"
                     />
                   )}
-                  <Cancel
-                    onClick={() =>
-                      navigate(
-                        assetId
-                          ? `/facility/${facilityId}/assets/${assetId}`
-                          : `/facility/${facilityId}`
-                      )
-                    }
-                  />
                 </div>
               </div>
             </form>

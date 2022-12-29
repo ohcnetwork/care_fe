@@ -53,6 +53,8 @@ export default function useExport() {
   };
 
   const exportFile = (action: any, filePrefix = "export", type = "csv") => {
+    if (!action) return;
+
     switch (type) {
       case "csv":
         exportCSV(filePrefix, action());
