@@ -10,6 +10,9 @@ import { listFacilityAssetLocation } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { Link } from "raviger";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import readXlsxFile from "read-excel-file";
+import { XLSXAssetImportSchema } from "../../Common/constants";
+import { parseCsvFile } from "../../Utils/utils";
 
 interface Props {
   open: boolean;
@@ -45,13 +48,41 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     const readFile = async () => {
       try {
         if (selectedFile) {
-          const parsedData = JSON.parse(await selectedFile.text());
-          setPreview(parsedData);
+          switch (selectedFile.name.split(".").pop()) {
+            case "xlsx": {
+              const parsedData = await readXlsxFile(selectedFile, {
+                schema: XLSXAssetImportSchema,
+              });
+              if (parsedData.errors.length) {
+                parsedData.errors.map((error: any) => {
+                  Notification.Error({
+                    msg: `Please check the row ${error.row} of column ${error.column}`,
+                  });
+                });
+              } else {
+                setPreview(parsedData.rows as AssetData[]);
+              }
+              break;
+            }
+            case "csv": {
+              const parsedData = await parseCsvFile(
+                selectedFile,
+                XLSXAssetImportSchema
+              );
+              setPreview(parsedData);
+              break;
+            }
+            default: {
+              const parsedData = JSON.parse(await selectedFile.text());
+              setPreview(parsedData);
+            }
+          }
         }
       } catch (e) {
         setPreview(undefined);
+        console.log(e);
         Notification.Error({
-          msg: "Invalid JSON file",
+          msg: "Invalid file",
         });
       }
     };
@@ -246,11 +277,15 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                   >
                     {dragProps.fileDropError !== ""
                       ? dragProps.fileDropError
-                      : "Drag & drop JSON file to upload"}
+                      : "Drag & drop JSON / Excel (xlsx, csv)  file to upload"}
                   </p>
-                  <p className="mt-4 text-gray-700 font-medium text-center">
-                    Upload the JSON file exported from Care.
-                  </p>
+                  <a
+                    className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    href="https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=11JaEhNHdyCHth4YQs_44YaRlP77Rrqe81VSEfg1glko&exportFormat=xlsx"
+                  >
+                    <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
+                    <span>Sample Format</span>
+                  </a>
                 </div>
               )}
 
@@ -262,7 +297,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                     <input
                       title="changeFile"
                       type="file"
-                      accept="application/json"
+                      accept=".json, .xlsx, .csv"
                       className="hidden"
                       onChange={onSelectFile}
                       onClick={() => {
