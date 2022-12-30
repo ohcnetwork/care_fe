@@ -39,6 +39,7 @@ import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ContactLink from "../Common/components/ContactLink";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { BedCapacityModal } from "./BedCapacityModal";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -65,6 +66,7 @@ export const FacilityHome = (props: any) => {
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
+  const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -595,7 +597,7 @@ export const FacilityHome = (props: any) => {
           <div className="font-semibold text-xl mb-2">Bed Capacity</div>
           <ButtonV2
             className="w-full md:w-auto"
-            onClick={() => navigate(`/facility/${facilityId}/bed`)}
+            onClick={() => setBedCapacityModalOpen(true)}
             authorizeFor={NonReadOnlyUsers}
           >
             <i className="fas fa-bed text-white mr-2" />
@@ -656,6 +658,21 @@ export const FacilityHome = (props: any) => {
           </div>
         </div>
       </div>
+      {bedCapacityModalOpen && (
+        <BedCapacityModal
+          facilityId={facilityId}
+          show={bedCapacityModalOpen}
+          handleClose={() => setBedCapacityModalOpen(false)}
+          handleUpdate={async () => {
+            const capacityRes = await dispatch(
+              listCapacity({}, { facilityId })
+            );
+            if (capacityRes && capacityRes.data) {
+              setCapacityData(capacityRes.data.results);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
