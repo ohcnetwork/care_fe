@@ -76,13 +76,13 @@ const CoverImageEditModal = ({
         Success({ msg: "Cover image updated." });
       } else {
         Notification.Error({
-          msg: "Something went wrong",
+          msg: "Something went wrong!",
         });
         setIsUploading(false);
       }
     } catch (e) {
       Notification.Error({
-        msg: "Something went wrong",
+        msg: "Network Failure. Please check your internet connectivity.",
       });
       setIsUploading(false);
     }
