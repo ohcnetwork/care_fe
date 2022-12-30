@@ -16,7 +16,9 @@ import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import { handleSignOut } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -321,16 +323,18 @@ export default function UserProfile() {
               <h3 className="text-lg font-medium leading-6 text-gray-900">
                 Personal Information
               </h3>
-              <p className="mt-1 text-sm leading-5 text-gray-600">
+              <p className="mt-1 text-sm leading-5 text-gray-600 mb-1">
                 Local Body, District and State are Non Editable Settings.
               </p>
-              <button
-                onClick={(_) => setShowEdit(!showEdit)}
-                type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
-              >
-                {showEdit ? "Cancel" : "Edit User Profile"}
-              </button>
+              <div className="flex flex-col gap-2">
+                <ButtonV2 onClick={(_) => setShowEdit(!showEdit)} type="button">
+                  {showEdit ? "Cancel" : "Edit User Profile"}
+                </ButtonV2>
+                <ButtonV2 variant="danger" onClick={(_) => handleSignOut(true)}>
+                  <CareIcon className="care-l-sign-out-alt" />
+                  Sign out
+                </ButtonV2>
+              </div>
             </div>
           </div>
           <div className="mt-5 lg:mt-0 lg:col-span-2">
