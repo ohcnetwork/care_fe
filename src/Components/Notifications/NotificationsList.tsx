@@ -396,46 +396,60 @@ export default function NotificationsList({
         <div className="bg-white h-full">
           <div className="w-full bg-gray-100 border-b sticky top-0 z-30 px-4 pb-1 lg:px-8">
             <div className="flex flex-col pt-4 py-2">
-              <div className="gap-2 grid grid-cols-1 sm:grid-cols-3">
-                <button
-                  onClick={(_) => {
-                    setReload(!reload);
-                    setData([]);
-                    setUnreadCount(0);
-                    setOffset(0);
-                  }}
-                  className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
-                >
-                  <i className="fa-fw fas fa-sync cursor-pointer mr-2" /> Reload
-                </button>
-                <button
-                  onClick={(_) => setShowNotifications(false)}
-                  className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
-                >
-                  <i className="fa-fw fas fa-times cursor-pointer mr-2" /> Close
-                </button>
-                <button
-                  onClick={handleSubscribeClick}
-                  className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
-                  disabled={isSubscribing}
-                >
-                  {isSubscribing && <Spinner />}
-                  {getButtonText()}
-                </button>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                <div className="justify-self-start">
+                  <button
+                    onClick={(_) => {
+                      setReload(!reload);
+                      setData([]);
+                      setUnreadCount(0);
+                      setOffset(0);
+                    }}
+                    className="font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
+                  >
+                    <i className="fa-fw fas fa-sync cursor-pointer mr-2" />{" "}
+                    Reload
+                  </button>
+                </div>
+                <div className="justify-self-end sm:justify-self-start">
+                  <button
+                    onClick={(_) => setShowNotifications(false)}
+                    className="font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
+                  >
+                    <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
+                    Close
+                  </button>
+                </div>
+                <div className="justify-self-start">
+                  <button
+                    onClick={handleSubscribeClick}
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
+                    disabled={isSubscribing}
+                  >
+                    {isSubscribing && <Spinner />}
+                    {getButtonText()}
+                  </button>
+                </div>
               </div>
-              <div className="flex justify-between items-center">
+
+              <div className="flex gap-1 justify-between items-baseline">
                 <div className="font-bold text-xl mt-4">Notifications</div>
                 <button
-                  className="inline-flex items-center font-semibold mt-4 p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                  className="font-semibold mt-2 p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
                   disabled={isMarkingAllAsRead}
                   onClick={handleMarkAllAsRead}
                 >
-                  {isMarkingAllAsRead ? (
-                    <Spinner />
-                  ) : (
-                    <i className="fa-solid fa-check-double mr-2 text-primary-500" />
-                  )}
-                  Mark All as Read
+                  <div className="flex items-center">
+                    {isMarkingAllAsRead ? (
+                      <Spinner />
+                    ) : (
+                      <i className="fa-solid fa-check-double mr-2 text-primary-500" />
+                    )}
+                    <div className="flex flex-col sm:flex-row">
+                      <p>Mark All</p>
+                      <p>&nbsp;as Read</p>
+                    </div>
+                  </div>
                 </button>
               </div>
             </div>
