@@ -306,9 +306,17 @@ const CoverImageEditModal = ({
             {/* buttons for mobile screens */}
             <div className="flex justify-evenly m-4 sm:hidden ">
               <div>
-                <ButtonV2 variant="primary" onClick={handleSwitchCamera}>
-                  <i className="fa-solid fa-camera-rotate" />
-                </ButtonV2>
+                {!previewImage ? (
+                  <ButtonV2
+                    variant="primary"
+                    onClick={handleSwitchCamera}
+                    className="m-2"
+                  >
+                    Switch
+                  </ButtonV2>
+                ) : (
+                  <></>
+                )}
               </div>
               <div>
                 {!previewImage ? (
@@ -319,8 +327,9 @@ const CoverImageEditModal = ({
                         onClick={() => {
                           captureImage();
                         }}
+                        className="m-2"
                       >
-                        <i className="fa-solid fa-camera" />
+                        Capture
                       </ButtonV2>
                     </div>
                   </>
@@ -332,10 +341,15 @@ const CoverImageEditModal = ({
                         onClick={() => {
                           setPreviewImage(null);
                         }}
+                        className="m-2"
                       >
-                        <i className="fa-solid fa-rotate-right"></i>
+                        Retake
                       </ButtonV2>
-                      <ButtonV2 variant="primary" onClick={handleUpload}>
+                      <ButtonV2
+                        variant="primary"
+                        onClick={handleUpload}
+                        className="m-2"
+                      >
                         {isCaptureImgBeingUploaded ? (
                           <svg
                             className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -360,7 +374,7 @@ const CoverImageEditModal = ({
                         ) : (
                           <></>
                         )}{" "}
-                        <i className="fa-solid fa-check-double"></i>
+                        Submit
                       </ButtonV2>
                     </div>
                   </>
@@ -368,26 +382,27 @@ const CoverImageEditModal = ({
               </div>
               <div className="sm:flex-1">
                 <ButtonV2
-                  variant="danger"
+                  variant="secondary"
                   onClick={() => {
                     setPreviewImage(null);
                     setIsCameraOpen(false);
                     webRef.current.stopCamera();
                   }}
+                  className="m-2"
                 >
-                  <i className="fa-solid fa-xmark"></i>
+                  Close
                 </ButtonV2>
               </div>
             </div>
             {/* buttons for laptop screens */}
             <div className={`${isLaptopScreen ? " " : " hidden "}`}>
-              <div className="flex m-4">
+              <div className="flex m-4 lg:hidden">
                 <ButtonV2 variant="primary" onClick={handleSwitchCamera}>
                   <i className="fa-solid fa-camera-rotate" /> Switch Camera
                 </ButtonV2>
               </div>
 
-              <div className="flex  p-4 gap-2">
+              <div className="flex justify-end  p-4 gap-2">
                 <div>
                   {!previewImage ? (
                     <>
@@ -446,7 +461,7 @@ const CoverImageEditModal = ({
                 </div>
                 <div className="sm:flex-1" />
                 <ButtonV2
-                  variant="danger"
+                  variant="secondary"
                   onClick={() => {
                     setPreviewImage(null);
                     setIsCameraOpen(false);
