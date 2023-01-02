@@ -376,7 +376,7 @@ const AssetCreate = (props: AssetProps) => {
         return;
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       Notification.Error({ msg: err });
     }
     Notification.Error({ msg: "Invalid Asset Id" });

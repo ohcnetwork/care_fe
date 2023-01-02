@@ -113,8 +113,6 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
 
   const filteredOptions = valueOptions.filter((o) => o.search.includes(query));
 
-  console.log(value);
-
   return (
     <div className={props.className} id={props.id}>
       <Combobox
