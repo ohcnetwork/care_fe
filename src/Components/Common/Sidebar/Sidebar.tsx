@@ -1,7 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
-import NotificationItem from "../../Notifications/NotificationsList";
 import { Dialog, Transition } from "@headlessui/react";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
@@ -19,11 +18,17 @@ type StatelessSidebarProps =
       shrinkable: true;
       shrinked: boolean;
       setShrinked: (state: boolean) => void;
+      notificationsListOpen: boolean;
+      setNotificationsListOpenCB: (state: boolean) => void;
+      unreadNotificationsCount: number;
     }
   | {
       shrinkable?: false;
       shrinked?: false;
       setShrinked?: undefined;
+      notificationsListOpen: boolean;
+      setNotificationsListOpenCB: (state: boolean) => void;
+      unreadNotificationsCount: number;
     };
 
 const NavItems = [
@@ -46,6 +51,9 @@ const StatelessSidebar = ({
   shrinkable = false,
   shrinked = false,
   setShrinked,
+  notificationsListOpen,
+  setNotificationsListOpenCB,
+  unreadNotificationsCount,
 }: StatelessSidebarProps) => {
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
@@ -135,7 +143,12 @@ const StatelessSidebar = ({
             );
           })}
 
-          <NotificationItem shrinked={shrinked} />
+          <Item
+            text="Notifications"
+            do={() => setNotificationsListOpenCB(!notificationsListOpen)}
+            icon={<CareIcon className="care-l-bell text-lg" />}
+            badgeCount={unreadNotificationsCount}
+          />
           <Item
             text="Dashboard"
             to={DASHBOARD}
@@ -165,7 +178,17 @@ const StatelessSidebar = ({
   );
 };
 
-export const DesktopSidebar = () => {
+interface DesktopSidebarProps {
+  notificationsListOpen: boolean;
+  setNotificationsListOpenCB: (state: boolean) => void;
+  unreadNotificationsCount: number;
+}
+
+export const DesktopSidebar = ({
+  notificationsListOpen,
+  setNotificationsListOpenCB,
+  unreadNotificationsCount,
+}: DesktopSidebarProps) => {
   const [shrinked, setShrinked] = useState(
     () => localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true"
   );
@@ -182,6 +205,9 @@ export const DesktopSidebar = () => {
       shrinked={shrinked}
       setShrinked={setShrinked}
       shrinkable
+      notificationsListOpen={notificationsListOpen}
+      setNotificationsListOpenCB={setNotificationsListOpenCB}
+      unreadNotificationsCount={unreadNotificationsCount}
     />
   );
 };
@@ -189,9 +215,18 @@ export const DesktopSidebar = () => {
 interface MobileSidebarProps {
   open: boolean;
   setOpen: (state: boolean) => void;
+  notificationsListOpen: boolean;
+  setNotificationsListOpenCB: (state: boolean) => void;
+  unreadNotificationsCount: number;
 }
 
-export const MobileSidebar = ({ open, setOpen }: MobileSidebarProps) => {
+export const MobileSidebar = ({
+  open,
+  setOpen,
+  notificationsListOpen,
+  setNotificationsListOpenCB,
+  unreadNotificationsCount,
+}: MobileSidebarProps) => {
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={setOpen}>
@@ -220,7 +255,11 @@ export const MobileSidebar = ({ open, setOpen }: MobileSidebarProps) => {
                 leaveTo="-translate-x-full"
               >
                 <Dialog.Panel className="pointer-events-auto w-screen max-w-fit">
-                  <StatelessSidebar />
+                  <StatelessSidebar
+                    notificationsListOpen={notificationsListOpen}
+                    setNotificationsListOpenCB={setNotificationsListOpenCB}
+                    unreadNotificationsCount={unreadNotificationsCount}
+                  />
                 </Dialog.Panel>
               </Transition.Child>
             </div>

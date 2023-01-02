@@ -68,6 +68,7 @@ import {
 } from "../Components/Common/Sidebar/Sidebar";
 import { BLACKLISTED_PATHS } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
+import NotificationsList from "../Components/Notifications/NotificationsList";
 
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -401,6 +402,8 @@ export default function AppRouter() {
   const pages = useRoutes(routes) || <Error404 />;
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notificationsListOpen, setNotificationsListOpen] = useState(false);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -420,12 +423,28 @@ export default function AppRouter() {
     <div className="absolute inset-0 h-screen flex overflow-hidden bg-gray-100">
       <>
         <div className="block md:hidden">
-          <MobileSidebar open={sidebarOpen} setOpen={setSidebarOpen} />{" "}
+          <MobileSidebar
+            open={sidebarOpen}
+            setOpen={setSidebarOpen}
+            notificationsListOpen={notificationsListOpen}
+            setNotificationsListOpenCB={setNotificationsListOpen}
+            unreadNotificationsCount={unreadNotificationsCount}
+          />{" "}
         </div>
         <div className="md:block hidden">
-          <DesktopSidebar />
+          <DesktopSidebar
+            notificationsListOpen={notificationsListOpen}
+            setNotificationsListOpenCB={setNotificationsListOpen}
+            unreadNotificationsCount={unreadNotificationsCount}
+          />
         </div>
       </>
+
+      <NotificationsList
+        notificationsListOpen={notificationsListOpen}
+        setNotificationsListOpenCB={setNotificationsListOpen}
+        setUnreadNotificationsCountCB={setUnreadNotificationsCount}
+      />
 
       <div className="flex flex-col w-full flex-1 overflow-hidden">
         <div className="flex md:hidden relative z-10 shrink-0 h-16 bg-white shadow">
