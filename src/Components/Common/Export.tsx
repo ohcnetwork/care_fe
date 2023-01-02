@@ -11,7 +11,7 @@ interface ExportItem {
   type?: "csv" | "json";
   filePrefix?: string;
   label: string;
-  action: any;
+  action?: any;
 }
 
 interface ExportMenuProps {
@@ -25,7 +25,7 @@ interface ExportButtonProps {
   tooltip?: string | undefined;
   tooltipClassName?: string;
   type?: "csv" | "json";
-  action: any;
+  action?: any;
   filenamePrefix: string;
 }
 

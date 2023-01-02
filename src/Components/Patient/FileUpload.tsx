@@ -26,6 +26,11 @@ import imageCompression from "browser-image-compression";
 import { formatDate } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import HeadedTabs from "../Common/HeadedTabs";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import DialogModal from "../Common/Dialog";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import TextFormField from "../Form/FormFields/TextFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -564,9 +569,9 @@ export const FileUpload = (props: FileUploadProps) => {
                           <a
                             href={url[item.id]}
                             download={item.name}
-                            className="btn btn-primary m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
+                            className="Button outline-offset-1 button-size-default button-shape-square button-primary-default m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
                           >
-                            <i className="fa-solid fa-circle-arrow-down mr-2"></i>{" "}
+                            <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
                             DOWNLOAD
                           </a>
                           {item?.uploaded_by?.username ===
@@ -574,7 +579,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           currentuser_type === "DistrictAdmin" ||
                           currentuser_type === "StateAdmin" ? (
                             <>
-                              <label
+                              <ButtonV2
                                 onClick={() => {
                                   setModalDetails({
                                     name: item.name,
@@ -583,11 +588,11 @@ export const FileUpload = (props: FileUploadProps) => {
                                   setEditFileName(item?.name);
                                   setModalOpenForEdit(true);
                                 }}
-                                className="btn btn-primary m-1 sm:w-auto w-full"
+                                className="m-1 sm:w-auto w-full"
                               >
-                                <i className="fa-solid fa-pencil mr-2"></i>EDIT
-                                FILE NAME
-                              </label>
+                                <CareIcon className="care-l-pen text-lg" />
+                                EDIT FILE NAME
+                              </ButtonV2>
                             </>
                           ) : (
                             <></>
@@ -597,7 +602,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           currentuser_type === "DistrictAdmin" ||
                           currentuser_type === "StateAdmin" ? (
                             <>
-                              <label
+                              <ButtonV2
                                 onClick={() => {
                                   setArchiveReason("");
                                   setModalDetails({
@@ -606,11 +611,11 @@ export const FileUpload = (props: FileUploadProps) => {
                                   });
                                   setModalOpenForArchive(true);
                                 }}
-                                className="btn btn-primary m-1 sm:w-auto w-full"
+                                className="m-1 sm:w-auto w-full"
                               >
-                                <i className="fa-solid fa-box-archive mr-2 "></i>
+                                <CareIcon className="care-l-archive text-lg" />
                                 ARCHIVE
-                              </label>
+                              </ButtonV2>
                             </>
                           ) : (
                             <></>
@@ -658,31 +663,32 @@ export const FileUpload = (props: FileUploadProps) => {
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center">
-                    <label
+                    <ButtonV2
                       onClick={() => {
                         loadFile(item.id);
                       }}
-                      className="btn btn-primary m-1 sm:w-auto w-full"
+                      className="m-1 sm:w-auto w-full"
                     >
                       {" "}
-                      <i className="fa-solid fa-eye mr-2"></i> PREVIEW FILE
-                    </label>
+                      <CareIcon className="care-l-eye text-lg" />
+                      PREVIEW FILE
+                    </ButtonV2>
                     {item?.uploaded_by?.username === currentuser_username ||
                     currentuser_type === "DistrictAdmin" ||
                     currentuser_type === "StateAdmin" ? (
                       <>
                         {" "}
-                        <label
+                        <ButtonV2
                           onClick={() => {
                             setModalDetails({ name: item.name, id: item.id });
                             setEditFileName(item?.name);
                             setModalOpenForEdit(true);
                           }}
-                          className="btn btn-primary m-1 sm:w-auto w-full"
+                          className="m-1 sm:w-auto w-full"
                         >
-                          <i className="fa-solid fa-pencil mr-2"></i> EDIT FILE
-                          NAME
-                        </label>
+                          <CareIcon className="care-l-pen text-lg" />
+                          EDIT FILE NAME
+                        </ButtonV2>
                       </>
                     ) : (
                       <></>
@@ -691,17 +697,17 @@ export const FileUpload = (props: FileUploadProps) => {
                     currentuser_type === "DistrictAdmin" ||
                     currentuser_type === "StateAdmin" ? (
                       <>
-                        <label
+                        <ButtonV2
                           onClick={() => {
                             setArchiveReason("");
                             setModalDetails({ name: item.name, id: item.id });
                             setModalOpenForArchive(true);
                           }}
-                          className="btn btn-primary m-1 sm:w-auto w-full"
+                          className="m-1 sm:w-auto w-full"
                         >
-                          <i className="fa-solid fa-box-archive mr-2 "></i>
+                          <CareIcon className="care-l-archive text-lg" />
                           ARCHIVE
-                        </label>
+                        </ButtonV2>
                       </>
                     ) : (
                       <></>
@@ -781,11 +787,15 @@ export const FileUpload = (props: FileUploadProps) => {
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center">
-                  <label className="btn btn-primary disabled m-1 sm:w-auto w-full">
+                  <ButtonV2
+                    variant="secondary"
+                    className="m-1 sm:w-auto w-full"
+                  >
                     {" "}
-                    <i className="fa-solid fa-eye-slash mr-2"></i> FILE ARCHIVED
-                  </label>
-                  <label
+                    <CareIcon className="care-l-eye-slash text-lg" /> FILE
+                    ARCHIVED
+                  </ButtonV2>
+                  <ButtonV2
                     onClick={() => {
                       setModalDetails({
                         name: item.name,
@@ -795,11 +805,11 @@ export const FileUpload = (props: FileUploadProps) => {
                       });
                       setModalOpenForMoreDetails(true);
                     }}
-                    className="btn btn-primary m-1 sm:w-auto w-full"
+                    className="m-1 sm:w-auto w-full"
                   >
-                    <i className="fa-solid fa-circle-question mr-2 "></i>MORE
-                    DETAILS
-                  </label>
+                    <CareIcon className="care-l-question-circle text-lg" />
+                    MORE DETAILS
+                  </ButtonV2>
                 </div>
               </div>
             </>
@@ -1115,183 +1125,127 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         )}
       </Modal>
-      <Modal open={modalOpenForEdit}>
-        <div className="h-screen w-full absolute flex items-center justify-center ">
-          <form
-            onSubmit={(event: any) => {
-              event.preventDefault();
-              setbtnloader(true);
-              partialupdateFileName(modalDetails?.id, editFileName);
-            }}
-            className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content"
-          >
-            <div>
-              <InputLabel className="text-xl" id="editfilenamelabel">
-                Please enter the file name
-              </InputLabel>
-              <TextInputField
-                name="editFileName"
-                variant="outlined"
-                margin="dense"
-                value={editFileName}
-                onChange={(e) => setEditFileName(e.target.value)}
-                errors={editFileNameError}
-              />
+      <DialogModal
+        show={modalOpenForEdit}
+        title={
+          <div className="flex flex-row">
+            <div className="rounded-full bg-primary-100 py-4 px-5">
+              <CareIcon className="care-l-edit-alt text-primary-500 text-lg" />
             </div>
-            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-              <button
-                type="submit"
-                disabled={modalDetails?.name === editFileName || btnloader}
-                className="btn-primary btn mr-2 w-full md:w-auto"
-              >
-                <svg
-                  className={`animate-spin -ml-1 mr-3 h-5 w-5 text-primary ${
-                    !btnloader ? " hidden " : " "
-                  }`}
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Proceed
-              </button>
-              <button
-                type="button"
-                className="btn-danger btn mr-2 w-full md:w-auto"
-                disabled={btnloader}
-                onClick={(_) => setModalOpenForEdit(false)}
-              >
-                Cancel
-              </button>
+            <div className="m-4">
+              <h1 className="text-black text-xl "> Edit File Name</h1>
             </div>
-          </form>
-        </div>
-      </Modal>
-      <Modal open={modalOpenForArchive}>
-        <div className="h-screen w-full absolute flex items-center justify-center ">
-          <form
-            onSubmit={(event: any) => {
-              event.preventDefault();
-              setbtnloader(true);
-              archiveFile(modalDetails?.id, archiveReason);
-            }}
-            className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content"
-          >
-            <div className="text-center m-2">
-              <i className="fa-solid fa-5x fa-triangle-exclamation text-red-500"></i>
+          </div>
+        }
+        onClose={() => setModalOpenForEdit(false)}
+      >
+        <form
+          onSubmit={(event: any) => {
+            event.preventDefault();
+            setbtnloader(true);
+            partialupdateFileName(modalDetails?.id, editFileName);
+          }}
+          className="flex flex-col w-full"
+        >
+          <div>
+            <TextFormField
+              name="editFileName"
+              label="Enter the file name"
+              value={editFileName}
+              onChange={(e) => setEditFileName(e.value)}
+              error={editFileNameError}
+            />
+          </div>
+          <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+            <Cancel onClick={() => setModalOpenForEdit(false)} />
+            <Submit disabled={btnloader} label="Proceed" />
+          </div>
+        </form>
+      </DialogModal>
+      <DialogModal
+        show={modalOpenForArchive}
+        title={
+          <div className="flex flex-row">
+            <div className="text-center my-1 mr-3 rounded-full bg-red-100 py-4 px-5">
+              <CareIcon className="care-l-exclamation-triangle text-lg text-danger-500 " />
             </div>
-            <div className="text-xl text-center text-black m-2">
+            <div className="text-sm text-grey-200">
+              <h1 className="text-xl text-black">Archive File</h1>
               This action is irreversible. Once a file is archived it cannot be
               unarchived.
             </div>
-            <div>
-              <InputLabel
-                className="text-md text-black text-center"
-                id="archivereasonlabel"
-              >
-                Please state the reason for archiving{" "}
-                <b>{modalDetails?.name}</b> file?
-              </InputLabel>
-              <TextInputField
-                name="editFileName"
-                variant="outlined"
-                rows={6}
-                multiline
-                required
-                className="w-full border p-2 max-h-64"
-                placeholder="Type the reason..."
-                margin="dense"
-                value={archiveReason}
-                onChange={(e) => setArchiveReason(e.target.value)}
-                errors={archiveReasonError}
-              />
+          </div>
+        }
+        onClose={() => setModalOpenForArchive(false)}
+      >
+        <form
+          onSubmit={(event: any) => {
+            event.preventDefault();
+            setbtnloader(true);
+            archiveFile(modalDetails?.id, archiveReason);
+          }}
+          className="flex flex-col w-full my-4 mx-2"
+        >
+          <div>
+            <TextAreaFormField
+              name="editFileName"
+              label={
+                <span>
+                  State the reason for archiving <b>{modalDetails?.name}</b>{" "}
+                  file?
+                </span>
+              }
+              rows={6}
+              required
+              placeholder="Type the reason..."
+              value={archiveReason}
+              onChange={(e) => setArchiveReason(e.value)}
+              error={archiveReasonError}
+            />
+          </div>
+          <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+            <Cancel onClick={() => setModalOpenForArchive(false)} />
+            <Submit disabled={btnloader} label="Proceed" />
+          </div>
+        </form>
+      </DialogModal>
+      <DialogModal
+        show={modalOpenForMoreDetails}
+        title={
+          <div className="flex flex-row">
+            <div className="text-center my-1 mr-3 px-5 py-4 rounded-full bg-primary-100">
+              <CareIcon className="care-l-question-circle text-lg text-primary-500 " />
             </div>
-            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-              <button
-                type="submit"
-                className="btn-primary btn mr-2 w-full md:w-auto"
-              >
-                <svg
-                  className={`animate-spin -ml-1 mr-3 h-5 w-5 text-white ${
-                    !btnloader ? " hidden " : " "
-                  } `}
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Proceed
-              </button>
-              <button
-                type="button"
-                className="btn-danger btn mr-2 w-full md:w-auto"
-                onClick={(_) => setModalOpenForArchive(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      </Modal>
-      <Modal open={modalOpenForMoreDetails}>
-        <div className="h-screen w-full absolute flex items-center justify-center">
-          <div className="bg-white rounded shadow p-8 m-4 max-h-full flex flex-col max-w-lg w-2/3 min-w-max-content">
-            <div>
-              <div className="text-center">
-                <i className="fa-solid fa-file-circle-xmark my-2 fa-4x text-primary-500"></i>
-              </div>
-              <div className="text-md text-center m-2">
-                <b>{modalDetails?.name} file is archived.</b>
-              </div>
-              <div className="text-md text-center">
-                <b>Reason:</b> {modalDetails?.reason}
-              </div>
-              <div className="text-md text-center">
-                <b>Archived_by:</b> {modalDetails?.userArchived}
-              </div>
-              <div className="text-md text-center">
-                <b>Time of Archive:</b>
-                {formatDate(modalDetails?.archiveTime)}
-              </div>
-            </div>
-            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-              <button
-                type="button"
-                className="btn-danger btn mr-2 w-full md:w-auto"
-                onClick={(_) => setModalOpenForMoreDetails(false)}
-              >
-                Close
-              </button>
+            <div className="text-sm text-grey-200">
+              <h1 className="text-xl text-black">File Details</h1>
+              This file is archived. Once a file is archived it cannot be
+              unarchived.
             </div>
           </div>
+        }
+        onClose={() => setModalOpenForMoreDetails(false)}
+      >
+        <div className="flex flex-col">
+          <div>
+            <div className="text-md text-center m-2">
+              <b>{modalDetails?.name}</b> file is archived.
+            </div>
+            <div className="text-md text-center">
+              <b>Reason:</b> {modalDetails?.reason}
+            </div>
+            <div className="text-md text-center">
+              <b>Archived_by:</b> {modalDetails?.userArchived}
+            </div>
+            <div className="text-md text-center">
+              <b>Time of Archive:</b>
+              {formatDate(modalDetails?.archiveTime)}
+            </div>
+          </div>
+          <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+            <Cancel onClick={(_) => setModalOpenForMoreDetails(false)} />
+          </div>
         </div>
-      </Modal>
+      </DialogModal>
       <PageTitle
         title={`${UPLOAD_HEADING[type]}`}
         hideBack={hideBack}

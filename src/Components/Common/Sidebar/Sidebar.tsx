@@ -4,10 +4,9 @@ import SidebarUserCard from "./SidebarUserCard";
 import { Dialog, Transition } from "@headlessui/react";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import useConfig from "../../../Common/hooks/useConfig";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
-
-const DASHBOARD = process.env.REACT_APP_DASHBOARD_URL ?? "";
 
 const LOGO = process.env.REACT_APP_LIGHT_LOGO;
 const LOGO_COLLAPSE =
@@ -21,6 +20,7 @@ type StatelessSidebarProps =
       notificationsListOpen: boolean;
       setNotificationsListOpenCB: (state: boolean) => void;
       unreadNotificationsCount: number;
+      setOpenCB?: undefined;
     }
   | {
       shrinkable?: false;
@@ -29,6 +29,7 @@ type StatelessSidebarProps =
       notificationsListOpen: boolean;
       setNotificationsListOpenCB: (state: boolean) => void;
       unreadNotificationsCount: number;
+      setOpenCB: (open: boolean) => void;
     };
 
 const NavItems = [
@@ -54,9 +55,11 @@ const StatelessSidebar = ({
   notificationsListOpen,
   setNotificationsListOpenCB,
   unreadNotificationsCount,
+  setOpenCB,
 }: StatelessSidebarProps) => {
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
+  const { dashboard_url } = useConfig();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
@@ -139,6 +142,7 @@ const StatelessSidebar = ({
                 {...i}
                 icon={<CareIcon className={`${i.icon} h-5`} />}
                 selected={i.to === activeLink}
+                do={() => setOpenCB && setOpenCB(false)}
               />
             );
           })}
@@ -151,7 +155,7 @@ const StatelessSidebar = ({
           />
           <Item
             text="Dashboard"
-            to={DASHBOARD}
+            to={dashboard_url}
             icon={<CareIcon className="care-l-dashboard text-lg" />}
             external
           />
@@ -259,6 +263,7 @@ export const MobileSidebar = ({
                     notificationsListOpen={notificationsListOpen}
                     setNotificationsListOpenCB={setNotificationsListOpenCB}
                     unreadNotificationsCount={unreadNotificationsCount}
+                    setOpenCB={setOpen}
                   />
                 </Dialog.Panel>
               </Transition.Child>

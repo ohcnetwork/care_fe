@@ -260,7 +260,7 @@
 //         <div className="my-15 w-full h-1 bg-gray-300"></div>
 
 //         <div>
-//             <div className="text-3xl font-bold">{str("Limp Response")}</div>
+//             <div className="text-3xl font-bold">{str("Limb Response")}</div>
 //             <div>
 //                 {limps|>Array.map((x) => {
 //                 <>
