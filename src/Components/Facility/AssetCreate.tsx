@@ -31,6 +31,8 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import DateInputV2 from "../Common/DateInputV2";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -511,13 +513,13 @@ const AssetCreate = (props: AssetProps) => {
 
                   {/* Asset Name */}
                   <div className="col-span-6" ref={fieldRef["name"]}>
-                    <TextInputFieldV2
-                      id="asset-name"
+                    <TextFormField
+                      name="name"
                       label="Asset Name"
-                      value={name}
-                      onValueChange={setName}
-                      error={state.errors.name}
                       required
+                      value={name}
+                      onChange={({ value }) => setName(value)}
+                      error={state.errors.name}
                     />
                   </div>
 
@@ -590,23 +592,14 @@ const AssetCreate = (props: AssetProps) => {
 
                   {/* Description */}
                   <div className="col-span-6">
-                    <label htmlFor="asset-description">
-                      Describe the asset
-                    </label>
-                    <textarea
-                      id="asset-description"
-                      className={
-                        "mt-2 block w-full input" +
-                        ((state.errors.description && " border-red-500") || "")
-                      }
-                      name="asset-description"
-                      placeholder="Eg. Details about the equipment"
+                    <TextAreaFormField
+                      name="asset_description"
+                      label="Description"
+                      placeholder="Details about the equipment"
                       value={description}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                        setDescription(e.target.value)
-                      }
+                      onChange={({ value }) => setDescription(value)}
+                      error={state.errors.description}
                     />
-                    <ErrorHelperText error={state.errors.description} />
                   </div>
 
                   {/* Divider */}
