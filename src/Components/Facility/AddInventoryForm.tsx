@@ -1,6 +1,5 @@
 import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -14,6 +13,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
 import { goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -51,7 +51,7 @@ export const AddInventoryForm = (props: any) => {
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
+  const [offset, _setOffset] = useState(0);
   const [stockError, setStockError] = useState("");
   const [inventory, setInventory] = useState<any>([]);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
@@ -204,7 +204,7 @@ export const AddInventoryForm = (props: any) => {
     }
   };
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -221,7 +221,7 @@ export const AddInventoryForm = (props: any) => {
       />
       <div className="mt-4">
         <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
+          <form onSubmit={handleSubmit}>
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
@@ -287,25 +287,8 @@ export const AddInventoryForm = (props: any) => {
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <button
-                  color="default"
-                  type="button"
-                  onClick={() => goBack()}
-                  className="w-full sm:w-fit bg-gray-400 hover:bg-gray-500 rounded-md p-2 px-6 mt-2"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  color="primary"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  className="bg-green-500 hover:bg-green-700 w-full text-white sm:w-fit mt-2 rounded-md px-6 font-bold p-2"
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  <CheckCircleOutlineIcon></CheckCircleOutlineIcon> Add/Update
-                  Inventory
-                </button>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} label="Add/Update Inventory" />
               </div>
             </CardContent>
           </form>

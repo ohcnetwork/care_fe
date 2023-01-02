@@ -4,7 +4,6 @@ import {
   CardContent,
   CircularProgress,
   FormControlLabel,
-  InputLabel,
   Radio,
   RadioGroup,
 } from "@material-ui/core";
@@ -42,7 +41,6 @@ import AlertDialog from "../Common/AlertDialog";
 import {
   CheckboxField,
   DateInputField,
-  MultilineInputField,
   PhoneNumberField,
   SelectField,
   TextInputField,
@@ -62,6 +60,10 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 import AccordionV2 from "../Common/components/AccordionV2";
 import CollapseV2 from "../Common/components/CollapseV2";
 import { debounce } from "lodash";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -849,6 +851,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleTextAreaChange = (e: any) => {
+    const form = { ...state.form };
+    form[e.name] = e.value;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleValueChange = (value: any, name: string) => {
     const form = { ...state.form };
     form[name] = value;
@@ -925,16 +933,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         </div>
         {state.form.medical_history.includes(id) && (
           <div className="mx-4">
-            <MultilineInputField
+            <TextAreaFormField
               placeholder="Details"
               rows={2}
               name={textField}
-              variant="outlined"
-              margin="dense"
-              type="text"
               value={state.form[textField]}
-              onChange={handleChange}
-              errors={state.errors[textField]}
+              onChange={handleTextAreaChange}
+              error={state.errors[textField]}
             />
           </div>
         )}
@@ -1001,10 +1006,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             <div className="p-4">
               <div>
                 <div className="my-4">
-                  <InputLabel htmlFor="care-external-results-id" required>
-                    {" "}
+                  <FieldLabel htmlFor="care-external-results-id" required>
                     Enter Care External Results Id
-                  </InputLabel>
+                  </FieldLabel>
                   <TextInputField
                     id="care-external-results-id"
                     name="care-external-results-id"
@@ -1035,17 +1039,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ) : (
             <>
               <>
+                <ButtonV2
+                  className="mb-8 mx-4 flex gap-2 items-center"
+                  onClick={(_) => {
+                    setShowImport(true);
+                    setQuery({ extId: "" }, { replace: true });
+                  }}
+                >
+                  <CareIcon className="care-l-import text-lg" />
+                  Import From External Results
+                </ButtonV2>
                 <form onSubmit={(e) => handleSubmit(e)}>
-                  <button
-                    className="btn btn-primary mb-8 mx-4"
-                    onClick={(_) => {
-                      setShowImport(true);
-                      setQuery({ extId: "" }, { replace: true });
-                    }}
-                  >
-                    {" "}
-                    Import From External Results
-                  </button>
                   <Card elevation={0} className="mb-8 rounded">
                     <CardContent>
                       <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
@@ -1080,9 +1084,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
                         </div>
                         <div data-testid="name" id="name-div">
-                          <InputLabel htmlFor="name" id="name-label" required>
+                          <FieldLabel htmlFor="name" id="name-label" required>
                             Name
-                          </InputLabel>
+                          </FieldLabel>
                           <TextInputField
                             id="name"
                             name="name"
@@ -1096,13 +1100,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
                         </div>
                         <div data-testid="date-of-birth" id="date_of_birth-div">
-                          <InputLabel
+                          <FieldLabel
                             htmlFor="date_of_birth"
                             id="date_of_birth-label"
                             required
                           >
                             Date of birth
-                          </InputLabel>
+                          </FieldLabel>
                           <DateInputField
                             fullWidth={true}
                             id="date_of_birth"
@@ -1118,13 +1122,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
                         </div>
                         <div data-testid="Gender" id="gender-div">
-                          <InputLabel
+                          <FieldLabel
                             htmlFor="gender"
                             id="gender-label"
                             required
                           >
                             Gender
-                          </InputLabel>
+                          </FieldLabel>
                           <SelectField
                             labelId="gender"
                             name="gender"
@@ -1140,12 +1144,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <CollapseV2 opened={String(state.form.gender) === "2"}>
                           {
                             <div id="is_antenatal-div" className="col-span-2">
-                              <InputLabel
+                              <FieldLabel
                                 id="is_antenatal"
                                 htmlFor="is_antenatal"
                               >
-                                Is antenatal ?{" "}
-                              </InputLabel>
+                                Is antenatal ?
+                              </FieldLabel>
                               <RadioGroup
                                 aria-label="is_antenatal"
                                 id="is_antenatal"
@@ -1171,45 +1175,38 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           }
                         </CollapseV2>
                         <div data-testid="current-address" id="address-div">
-                          <InputLabel
+                          <FieldLabel
                             id="address-label"
                             htmlFor="address"
                             required
                           >
                             Current Address
-                          </InputLabel>
-                          <MultilineInputField
-                            rows={3}
+                          </FieldLabel>
+                          <TextAreaFormField
                             id="address"
                             name="address"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
                             placeholder="Enter the current address"
                             value={state.form.address}
-                            onChange={handleChange}
-                            errors={state.errors.address}
+                            onChange={handleTextAreaChange}
+                            error={state.errors.address}
                           />
                         </div>
                         <div
                           data-testid="permanent-address"
                           id="permanent_address-div"
                         >
-                          <InputLabel
+                          <FieldLabel
                             htmlFor="permanent_address"
                             id="permanent-address-label"
                             required
                           >
                             Permanent Address
-                          </InputLabel>
+                          </FieldLabel>
 
-                          <MultilineInputField
+                          <TextAreaFormField
                             rows={3}
                             id="permanent_address"
                             name="permanent_address"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
                             disabled={sameAddress}
                             placeholder="Enter the permanent address"
                             value={
@@ -1217,8 +1214,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 ? state.form.address
                                 : state.form.permanent_address
                             }
-                            onChange={handleChange}
-                            errors={state.errors.permanent_address}
+                            onChange={handleTextAreaChange}
+                            error={state.errors.permanent_address}
                           />
 
                           <CheckboxField
@@ -1230,13 +1227,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </div>
 
                         <div data-testid="pincode" id="pincode-div">
-                          <InputLabel
+                          <FieldLabel
                             htmlFor="pincode"
                             id="name-label"
                             required
                           >
                             Pincode
-                          </InputLabel>
+                          </FieldLabel>
                           <TextInputField
                             id="pincode"
                             name="pincode"
@@ -1249,9 +1246,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
                         </div>
                         <div id="village-div">
-                          <InputLabel htmlFor="village" id="name-label">
+                          <FieldLabel htmlFor="village" id="name-label">
                             Village
-                          </InputLabel>
+                          </FieldLabel>
                           <TextInputField
                             id="village"
                             name="village"
@@ -1264,12 +1261,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
                         </div>
                         <div id="nationality-div">
-                          <InputLabel
+                          <FieldLabel
                             id="nationality-label"
                             htmlFor="nationality"
                           >
                             Nationality
-                          </InputLabel>
+                          </FieldLabel>
                           <SelectField
                             labelId="nationality"
                             name="nationality"
@@ -1285,13 +1282,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         {state.form.nationality === "India" ? (
                           <>
                             <div data-testid="state" id="state-div">
-                              <InputLabel
+                              <FieldLabel
                                 htmlFor="state"
                                 id="state-label"
                                 required
                               >
                                 State
-                              </InputLabel>
+                              </FieldLabel>
                               {isStateLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
@@ -1313,9 +1310,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             </div>
 
                             <div data-testid="district" id="district-div">
-                              <InputLabel id="district-label" required>
+                              <FieldLabel id="district-label" required>
                                 District
-                              </InputLabel>
+                              </FieldLabel>
                               {isDistrictLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
@@ -1337,13 +1334,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             </div>
 
                             <div data-testid="localbody" id="local_body-div">
-                              <InputLabel
+                              <FieldLabel
                                 htmlFor="local_body"
                                 id="local_body-label"
                                 required
                               >
                                 Localbody
-                              </InputLabel>
+                              </FieldLabel>
                               {isLocalbodyLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
@@ -1367,13 +1364,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               data-testid="ward-respective-lsgi"
                               id="ward-div"
                             >
-                              <InputLabel
+                              <FieldLabel
                                 htmlFor="ward"
                                 id="ward-label"
                                 required
                               >
                                 Ward/Division of respective LSGI
-                              </InputLabel>
+                              </FieldLabel>
                               {isWardLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
@@ -1400,13 +1397,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </>
                         ) : (
                           <div id="passport_no-div">
-                            <InputLabel
+                            <FieldLabel
                               htmlFor="passport_no"
                               id="passport-label"
                               required
                             >
                               Passport Number
-                            </InputLabel>
+                            </FieldLabel>
                             <TextInputField
                               id="passport_no"
                               name="passport_no"
@@ -1434,13 +1431,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       <div>
                         <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2 w-full mt-5">
                           <div id="test_type-div">
-                            <InputLabel
+                            <FieldLabel
                               id="test_type-label"
                               htmlFor="test_type"
                               required
                             >
                               COVID Test Type
-                            </InputLabel>
+                            </FieldLabel>
                             <SelectField
                               labelId="test_type"
                               name="test_type"
@@ -1454,9 +1451,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                           <div id="srf_id-div">
-                            <InputLabel id="srf_id-label" htmlFor="srf_id">
+                            <FieldLabel id="srf_id-label" htmlFor="srf_id">
                               SRF Id for COVID Test
-                            </InputLabel>
+                            </FieldLabel>
                             <TextInputField
                               id="srf_id"
                               name="srf_id"
@@ -1469,12 +1466,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                           <div id="is_declared_positive-div">
-                            <InputLabel
+                            <FieldLabel
                               id="is_declared_positive"
                               htmlFor="is_declared_positive"
                             >
                               Is patient declared covid postive by state?
-                            </InputLabel>
+                            </FieldLabel>
                             <RadioGroup
                               aria-label="is_declared_positive"
                               id="is_declared_positive"
@@ -1504,9 +1501,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               className="mt-4"
                             >
                               <div id="date_declared_positive-div">
-                                <InputLabel id="date_declared_positive-label">
+                                <FieldLabel id="date_declared_positive-label">
                                   Date Patient is Declared Positive for COVID
-                                </InputLabel>
+                                </FieldLabel>
                                 <DateInputField
                                   fullWidth={true}
                                   value={state.form.date_declared_positive}
@@ -1526,12 +1523,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
 
                           <div id="is_vaccinated-div">
-                            <InputLabel
+                            <FieldLabel
                               id="is_vaccinated"
                               htmlFor="is_vaccinated"
                             >
                               Is patient Vaccinated against COVID?
-                            </InputLabel>
+                            </FieldLabel>
                             <RadioGroup
                               aria-label="is_vaccinated"
                               id="is_vaccinated"
@@ -1560,12 +1557,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             {
                               <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                                 <div id="covin_id-div">
-                                  <InputLabel
+                                  <FieldLabel
                                     id="covin_id-label"
                                     htmlFor="covin_id"
                                   >
                                     COWIN ID
-                                  </InputLabel>
+                                  </FieldLabel>
                                   <TextInputField
                                     id="covin_id"
                                     name="covin_id"
@@ -1578,12 +1575,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 </div>
                                 <div id="number_of_doses-div">
-                                  <InputLabel
+                                  <FieldLabel
                                     id="doses-label"
                                     htmlFor="number_of_doses"
                                   >
                                     Number of doses
-                                  </InputLabel>
+                                  </FieldLabel>
                                   <RadioGroup
                                     aria-label="number_of_doses"
                                     id="number_of_doses"
@@ -1612,13 +1609,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   </RadioGroup>
                                 </div>
                                 <div id="vaccine_name-div">
-                                  <InputLabel
+                                  <FieldLabel
                                     id="vaccine-name-label"
                                     htmlFor="vaccine_name"
                                     required
                                   >
                                     Vaccine Name
-                                  </InputLabel>
+                                  </FieldLabel>
                                   <SelectField
                                     labelId="vaccine_name"
                                     name="vaccine_name"
@@ -1632,13 +1629,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 </div>
                                 <div id="last_vaccinated_date-div">
-                                  <InputLabel
+                                  <FieldLabel
                                     id="last_vaccinated_date-label"
                                     htmlFor="last_vaccinated_date"
                                     required
                                   >
                                     Last Date of Vaccination
-                                  </InputLabel>
+                                  </FieldLabel>
                                   <DateInputField
                                     id="last_vaccinated_date"
                                     fullWidth={true}
@@ -1660,9 +1657,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             }
                           </CollapseV2>
                           <div id="contact_with_confirmed_carrier-div">
-                            <InputLabel htmlFor="contact_with_confirmed_carrier">
+                            <FieldLabel htmlFor="contact_with_confirmed_carrier">
                               Contact with confirmed Covid patient?
-                            </InputLabel>
+                            </FieldLabel>
                             <RadioGroup
                               aria-label="contact_with_confirmed_carrier"
                               id="contact_with_confirmed_carrier"
@@ -1687,9 +1684,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
 
                           <div id="contact_with_suspected_carrier-div">
-                            <InputLabel htmlFor="contact_with_suspected_carrier">
+                            <FieldLabel htmlFor="contact_with_suspected_carrier">
                               Contact with Covid suspect?
-                            </InputLabel>
+                            </FieldLabel>
                             <RadioGroup
                               aria-label="contact_with_suspected_carrier"
                               id="contact_with_suspected_carrier"
@@ -1724,13 +1721,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                               <div id="estimated_contact_date-div">
-                                <InputLabel
+                                <FieldLabel
                                   id="estimated_contact_date-label"
                                   htmlFor="estimated_contact_date"
                                   required
                                 >
                                   Estimate date of contact
-                                </InputLabel>
+                                </FieldLabel>
                                 <DateInputField
                                   fullWidth={true}
                                   id="estimated_contact_date"
@@ -1749,13 +1746,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               </div>
 
                               <div id="cluster_name-div">
-                                <InputLabel
+                                <FieldLabel
                                   htmlFor="cluster_name"
                                   id="cluster_name-label"
                                   required
                                 >
                                   Name / Cluster of Contact
-                                </InputLabel>
+                                </FieldLabel>
                                 <TextInputField
                                   id="cluster_name"
                                   name="cluster_name"
@@ -1774,13 +1771,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             data-testid="disease-status"
                             id="disease_status-div"
                           >
-                            <InputLabel
+                            <FieldLabel
                               htmlFor="disease_status"
                               id="disease_status-label"
                               required
                             >
                               COVID Disease Status
-                            </InputLabel>
+                            </FieldLabel>
                             <SelectField
                               labelId="disease_status"
                               name="disease_status"
@@ -1794,12 +1791,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                           <div id="date_of_test-div">
-                            <InputLabel
+                            <FieldLabel
                               id="date_of_birth-label"
                               htmlFor="date_of_test"
                             >
                               Date of Sample given for COVID Test
-                            </InputLabel>
+                            </FieldLabel>
                             <DateInputField
                               fullWidth={true}
                               id="date_of_test"
@@ -1814,12 +1811,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                           <div id="date_of_result-div">
-                            <InputLabel
+                            <FieldLabel
                               htmlFor="date_of_result"
                               id="date_of_result-label"
                             >
                               Date of Result for COVID Test
-                            </InputLabel>
+                            </FieldLabel>
                             <DateInputField
                               fullWidth={true}
                               id="date_of_result"
@@ -1836,12 +1833,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
 
                           <div id="number_of_primary_contacts-div">
-                            <InputLabel
+                            <FieldLabel
                               id="number_of_primary_contacts-label"
                               htmlFor="number_of_primary_contacts"
                             >
                               Number Of Primary Contacts for COVID
-                            </InputLabel>
+                            </FieldLabel>
                             <TextInputField
                               id="number_of_primary_contacts"
                               name="number_of_primary_contacts"
@@ -1854,12 +1851,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                           <div id="number_of_secondary_contacts-div">
-                            <InputLabel
+                            <FieldLabel
                               id="number_of_secondary_contacts-label"
                               htmlFor="number_of_secondary_contacts"
                             >
                               Number Of Secondary Contacts for COVID
-                            </InputLabel>
+                            </FieldLabel>
                             <TextInputField
                               id="number_of_secondary_contacts"
                               name="number_of_secondary_contacts"
@@ -1873,12 +1870,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
 
                           <div id="number_of_aged_dependents-div">
-                            <InputLabel
+                            <FieldLabel
                               id="number_of_aged_dependents-label"
                               htmlFor="number_of_aged_dependents"
                             >
                               Number Of Aged Dependents (Above 60)
-                            </InputLabel>
+                            </FieldLabel>
                             <TextInputField
                               id="number_of_aged_dependents"
                               name="number_of_aged_dependents"
@@ -1892,12 +1889,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
 
                           <div id="number_of_chronic_diseased_dependents-div">
-                            <InputLabel
+                            <FieldLabel
                               htmlFor="number_of_chronic_diseased_dependents"
                               id="number_of_chronic_diseased_dependents-label"
                             >
                               Number Of Chronic Diseased Dependents
-                            </InputLabel>
+                            </FieldLabel>
                             <TextInputField
                               id="number_of_chronic_diseased_dependents"
                               name="number_of_chronic_diseased_dependents"
@@ -1925,50 +1922,44 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </h1>
                       <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                         <div id="present_health-div">
-                          <InputLabel
+                          <FieldLabel
                             id="present_health-label"
                             htmlFor="present_health"
                           >
                             Present Health Condition
-                          </InputLabel>
-                          <MultilineInputField
+                          </FieldLabel>
+                          <TextAreaFormField
                             rows={3}
                             id="present_health"
                             name="present_health"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
                             placeholder="Optional Information"
                             value={state.form.present_health}
-                            onChange={handleChange}
-                            errors={state.errors.present_health}
+                            onChange={handleTextAreaChange}
+                            error={state.errors.present_health}
                           />
                         </div>
 
                         <div id="ongoing_medication-div">
-                          <InputLabel
+                          <FieldLabel
                             htmlFor="ongoing_medication"
                             id="ongoing_medication-label"
                           >
                             Ongoing Medication
-                          </InputLabel>
-                          <MultilineInputField
+                          </FieldLabel>
+                          <TextAreaFormField
                             rows={3}
                             id="ongoing_medication"
                             name="ongoing_medication"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
                             placeholder="Optional Information"
                             value={state.form.ongoing_medication}
-                            onChange={handleChange}
-                            errors={state.errors.ongoing_medication}
+                            onChange={handleTextAreaChange}
+                            error={state.errors.ongoing_medication}
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <InputLabel id="med-history-label">
+                          <FieldLabel id="med-history-label">
                             Any medical history? (Optional Information)
-                          </InputLabel>
+                          </FieldLabel>
                           <div className="flex flex-wrap">
                             {medicalHistoryTypes.map((i) => {
                               return renderMedicalHistory(i.id, i.text);
@@ -1977,31 +1968,28 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </div>
 
                         <div id="allergies-div">
-                          <InputLabel htmlFor="allergies" id="allergies_label">
+                          <FieldLabel htmlFor="allergies" id="allergies_label">
                             Allergies
-                          </InputLabel>
-                          <MultilineInputField
+                          </FieldLabel>
+                          <TextAreaFormField
                             rows={1}
                             id="allergies"
                             name="allergies"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
                             placeholder="Optional Information"
                             value={state.form.allergies}
-                            onChange={handleChange}
-                            errors={state.errors.allergies}
+                            onChange={handleTextAreaChange}
+                            error={state.errors.allergies}
                           />
                         </div>
 
                         <div data-testid="blood-group" id="blood_group-div">
-                          <InputLabel
+                          <FieldLabel
                             id="blood_group-label"
                             htmlFor="blood_group"
                             required
                           >
                             Blood Group
-                          </InputLabel>
+                          </FieldLabel>
                           <SelectField
                             labelId="blood_group"
                             name="blood_group"

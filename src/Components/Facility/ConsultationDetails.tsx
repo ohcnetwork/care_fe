@@ -29,9 +29,7 @@ import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
-import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
-import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
-import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
+import DoctorVideoSlideover from "./DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
 import Dialog from "@material-ui/core/Dialog";
@@ -39,17 +37,19 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import InputLabel from "@material-ui/core/InputLabel";
-import {
-  TextInputField,
-  SelectField,
-  MultilineInputField,
-} from "../Common/HelperInputFields";
+import { TextInputField } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
 import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
 import { formatDate } from "../../Utils/utils";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
+import PatientInfoCard from "../Patient/PatientInfoCard";
+import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import DialogModal from "../Common/Dialog";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -162,6 +162,18 @@ export const ConsultationDetails = (props: any) => {
       setErrors({
         ...errors,
         discharge_reason: "Please select a reason for discharge",
+      });
+      setIsSendingDischargeApi(false);
+      return;
+    }
+
+    if (
+      preDischargeForm.discharge_reason == "EXP" &&
+      !preDischargeForm.discharge_notes.trim()
+    ) {
+      setErrors({
+        ...errors,
+        discharge_notes: "Please enter the cause of death",
       });
       setIsSendingDischargeApi(false);
       return;
@@ -371,80 +383,69 @@ export const ConsultationDetails = (props: any) => {
         </DialogActions>
       </Dialog>
 
-      <Dialog
-        fullWidth={true}
-        open={openDischargeDialog}
+      <DialogModal
+        title={
+          <div>
+            <p>Discharge patient from CARE</p>
+            <span className="mt-1 flex gap-1 text-sm text-secondary-500 font-medium">
+              <CareIcon className="care-l-exclamation-triangle text-base" />
+              <p>Caution: this action is irreversible.</p>
+            </span>
+          </div>
+        }
+        show={openDischargeDialog}
         onClose={handleDischargeClose}
       >
-        <DialogTitle>
-          <i className="text-red-500 fas fa-exclamation-triangle"></i>
-          &nbsp;Discharge Patient From Care
-        </DialogTitle>
-        <DialogContent>
-          <div className="flex flex-col gap-4">
-            <div className="sm:w-1/2" id="discharge-reason-div">
-              <InputLabel id="discharge-reason-label">
-                Discharge Reason*
-              </InputLabel>
-              <SelectField
-                name="discharge_reason"
-                variant="standard"
-                value={preDischargeForm.discharge_reason}
-                options={[{ id: "", text: "Select" }, ...DISCHARGE_REASONS]}
-                onChange={(e) =>
-                  setPreDischargeForm((prev) => ({
-                    ...prev,
-                    discharge_reason: e.target.value,
-                  }))
-                }
-                errors={errors?.discharge_reason}
-              />
-            </div>
+        <div className="mt-6 flex flex-col">
+          <SelectFormField
+            required
+            label="Reason"
+            name="discharge_reason"
+            id="discharge_reason"
+            value={preDischargeForm.discharge_reason}
+            options={DISCHARGE_REASONS}
+            optionValue={({ id }) => id}
+            optionLabel={({ text }) => text}
+            onChange={(e) =>
+              setPreDischargeForm((prev) => ({
+                ...prev,
+                discharge_reason: e.value,
+              }))
+            }
+            error={errors?.discharge_reason}
+          />
+          <TextAreaFormField
+            required={preDischargeForm.discharge_reason == "EXP"}
+            label={
+              preDischargeForm.discharge_reason == "EXP"
+                ? "Cause of death"
+                : "Notes"
+            }
+            name="discharge_notes"
+            value={preDischargeForm.discharge_notes}
+            onChange={(e) =>
+              setPreDischargeForm((prev) => ({
+                ...prev,
+                discharge_notes: e.value,
+              }))
+            }
+            error={errors?.discharge_notes}
+          />
+        </div>
 
-            <div id="discharge-notes-div">
-              <InputLabel id="refered-label">Discharge Notes</InputLabel>
-              <MultilineInputField
-                name="discharge_notes"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                rows={2}
-                InputLabelProps={{ shrink: !!preDischargeForm.discharge_notes }}
-                value={preDischargeForm.discharge_notes}
-                onChange={(e) =>
-                  setPreDischargeForm((prev) => ({
-                    ...prev,
-                    discharge_notes: e.target.value,
-                  }))
-                }
-                errors={errors?.discharge_notes}
-              />
-            </div>
-          </div>
-        </DialogContent>
-        <DialogActions className="flex justify-between mt-5 px-5 border-t">
-          <Button
-            variant="outlined"
-            className="bg-gray-200 hover:bg-gray-400"
-            onClick={handleDischargeClose}
-          >
-            Cancel
-          </Button>
-
+        <div className="flex flex-col md:flex-row gap-2 md:justify-end">
+          <Cancel onClick={handleDischargeClose} />
           {isSendingDischargeApi ? (
             <CircularProgress size={20} />
           ) : (
-            <Button
-              variant="contained"
-              color="primary"
+            <Submit
               onClick={() => handlePatientDischarge(false)}
+              label="Confirm Discharge"
               autoFocus
-            >
-              Discharge
-            </Button>
+            />
           )}
-        </DialogActions>
-      </Dialog>
+        </div>
+      </DialogModal>
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap relative">
           <PageTitle
@@ -500,7 +501,7 @@ export const ConsultationDetails = (props: any) => {
         </nav>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black w-full">
-            <TeleICUPatientInfoCard
+            <PatientInfoCard
               patient={patientData}
               ip_no={consultationData.ip_no}
               fetchPatientData={fetchData}
@@ -578,7 +579,7 @@ export const ConsultationDetails = (props: any) => {
                       Verified By:{" "}
                     </span>
                     {consultationData.verified_by}
-                    <i className="fas fa-check-circle fill-current text-lg text-green-500 ml-2"></i>
+                    <i className="fas fa-check fill-current text-lg text-green-500 ml-2"></i>
                   </div>
                 )}
               </div>
@@ -665,10 +666,10 @@ export const ConsultationDetails = (props: any) => {
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
               {!consultationData.discharge_date && (
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                  <TeleICUPatientVitalsCard patient={patientData} />
-                  {/*<TeleICUPatientVitalsGraphCard
-                  consultationId={patientData.last_consultation?.id}
-                />*/}
+                  <PatientVitalsCard
+                    patient={patientData}
+                    facilityId={facilityId}
+                  />
                 </section>
               )}
               <div className="grid lg:grid-cols-2 gap-4 mt-4">
@@ -1165,16 +1166,17 @@ export const ConsultationDetails = (props: any) => {
                 breadcrumbs={false}
               />
               <div className="pt-6">
-                <button
-                  className="btn btn-primary w-full"
+                <ButtonV2
+                  disabled={!patientData.is_active}
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
                     )
                   }
                 >
-                  <i className="fas fa-plus w-4 mr-3"></i> Log Lab Result
-                </button>
+                  <CareIcon className="care-l-plus" />
+                  <span>Log Lab Result</span>
+                </ButtonV2>
               </div>
             </div>
             <ViewInvestigations

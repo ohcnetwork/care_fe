@@ -11,10 +11,11 @@ import ONVIFCamera from "./AssetType/ONVIFCamera";
 
 interface AssetConfigureProps {
   assetId: string;
+  facilityId: string;
 }
 
 const AssetConfigure = (props: AssetConfigureProps) => {
-  const { assetId } = props;
+  const { assetId, facilityId } = props;
   const [asset, setAsset] = React.useState<AssetData>();
   const [isLoading, setIsLoading] = React.useState(true);
   const [assetType, setAssetType] = React.useState("");
@@ -53,17 +54,29 @@ const AssetConfigure = (props: AssetConfigureProps) => {
         <>
           <PageTitle
             title={`Configure HL7 Monitor: ${asset?.name}`}
-            crumbsReplacements={{ [assetId]: { name: asset?.name } }}
+            crumbsReplacements={{
+              [facilityId]: { name: asset?.location_object.facility.name },
+              assets: { uri: `/assets?facility=${facilityId}` },
+              [assetId]: { name: asset?.name },
+            }}
           />
-          <HL7Monitor asset={asset} assetId={assetId} />
+          <HL7Monitor asset={asset} assetId={assetId} facilityId={facilityId} />
         </>
       ) : (
         <>
           <PageTitle
             title={`Configure ONVIF Camera: ${asset?.name}`}
-            crumbsReplacements={{ [assetId]: { name: asset?.name } }}
+            crumbsReplacements={{
+              [facilityId]: { name: asset?.location_object.facility.name },
+              assets: { uri: `/assets?facility=${facilityId}` },
+              [assetId]: { name: asset?.name },
+            }}
           />
-          <ONVIFCamera asset={asset} assetId={assetId} />
+          <ONVIFCamera
+            asset={asset}
+            assetId={assetId}
+            facilityId={facilityId}
+          />
         </>
       )}
     </div>

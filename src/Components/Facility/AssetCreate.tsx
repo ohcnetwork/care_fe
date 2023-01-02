@@ -7,8 +7,6 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import CancelOutlineIcon from "@material-ui/icons/CancelOutlined";
 import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -17,7 +15,6 @@ import {
   ActionTextInputField,
   PhoneNumberField,
   ErrorHelperText,
-  DateInputField,
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
@@ -31,25 +28,43 @@ import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import DateInputV2 from "../Common/DateInputV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
-const initError = {
-  name: "",
-  asset_type: "",
-  asset_class: "",
-  description: "",
-  is_working: "",
-  serial_number: "",
-  location: "",
-  vendor_name: "",
-  support_name: "",
-  support_phone: "",
-  support_email: "",
-  manufacturer: "",
-  warranty_amc_end_of_validity: "",
-  last_serviced_on: "",
-  notes: "",
-};
+const formErrorKeys = [
+  "name",
+  "asset_type",
+  "asset_class",
+  "description",
+  "is_working",
+  "serial_number",
+  "location",
+  "vendor_name",
+  "support_name",
+  "support_phone",
+  "support_email",
+  "manufacturer",
+  "warranty_amc_end_of_validity",
+  "last_serviced_on",
+  "notes",
+];
+
+const initError = formErrorKeys.reduce(
+  (acc: { [key: string]: string }, key) => {
+    acc[key] = "";
+    return acc;
+  },
+  {}
+);
+
+const fieldRef = formErrorKeys.reduce(
+  (acc: { [key: string]: React.RefObject<any> }, key) => {
+    acc[key] = React.createRef();
+    return acc;
+  },
+  {}
+);
 
 const initialState = {
   errors: { ...initError },
@@ -184,10 +199,10 @@ const AssetCreate = (props: AssetProps) => {
       setManufacturer(asset.manufacturer);
       asset.warranty_amc_end_of_validity &&
         setWarrantyAmcEndOfValidity(
-          moment(asset.warranty_amc_end_of_validity).format("YYYY-MM-DD")
+          moment(asset.warranty_amc_end_of_validity).toDate()
         );
       asset.last_serviced_on &&
-        setLastServicedOn(moment(asset.last_serviced_on).format("YYYY-MM-DD"));
+        setLastServicedOn(moment(asset.last_serviced_on).toDate());
       setNotes(asset.notes);
     }
   }, [asset]);
@@ -221,18 +236,28 @@ const AssetCreate = (props: AssetProps) => {
             invalidForm = true;
           }
           return;
-        case "support_phone":
+        case "support_phone": {
           if (!support_phone) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumberFromString(support_phone);
-          if (!phoneNumber?.isPossible()) {
+          const supportPhoneSimple = support_phone
+            .replace(/[^0-9]/g, "")
+            .slice(2);
+          const checkTollFree = supportPhoneSimple.startsWith("1800");
+          if (supportPhoneSimple.length > 10 && !checkTollFree) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          } else if (supportPhoneSimple.length > 11 && checkTollFree) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          } else if (supportPhoneSimple.length < 10) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }
           return;
+        }
         case "support_email":
           if (support_email && !validateEmailAddress(support_email)) {
             errors[field] = "Please enter valid email id";
@@ -245,6 +270,13 @@ const AssetCreate = (props: AssetProps) => {
     });
     if (invalidForm) {
       dispatch({ type: "set_error", errors });
+      const firstError = Object.keys(errors).find((key) => errors[key]);
+      if (firstError) {
+        fieldRef[firstError].current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
       return false;
     }
     dispatch({ type: "set_error", errors });
@@ -294,8 +326,12 @@ const AssetCreate = (props: AssetProps) => {
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
         manufacturer: manufacturer,
-        warranty_amc_end_of_validity: warranty_amc_end_of_validity,
-        last_serviced_on: last_serviced_on,
+        warranty_amc_end_of_validity: warranty_amc_end_of_validity
+          ? moment(warranty_amc_end_of_validity).format("YYYY-MM-DD")
+          : null,
+        last_serviced_on: last_serviced_on
+          ? moment(last_serviced_on).format("YYYY-MM-DD")
+          : last_serviced_on,
         notes: notes,
       };
       if (!assetId) {
@@ -421,6 +457,9 @@ const AssetCreate = (props: AssetProps) => {
     );
   };
 
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
   return (
     <div className="pb-2 relative flex flex-col">
       <PageTitle
@@ -468,7 +507,7 @@ const AssetCreate = (props: AssetProps) => {
                   {sectionTitle("General Details")}
 
                   {/* Asset Name */}
-                  <div className="col-span-6">
+                  <div className="col-span-6" ref={fieldRef["name"]}>
                     <TextInputFieldV2
                       id="asset-name"
                       label="Asset Name"
@@ -481,7 +520,7 @@ const AssetCreate = (props: AssetProps) => {
 
                   <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
                     {/* Location */}
-                    <div>
+                    <div ref={fieldRef["location"]}>
                       <label htmlFor="asset-location">Location *</label>
                       <div className="mt-2">
                         <SelectMenuV2
@@ -508,7 +547,7 @@ const AssetCreate = (props: AssetProps) => {
                     </div>
 
                     {/* Asset Type */}
-                    <div>
+                    <div ref={fieldRef["asset_type"]}>
                       <label htmlFor="asset-type">Asset Type *</label>
                       <div className="mt-2">
                         <SelectMenuV2
@@ -542,7 +581,7 @@ const AssetCreate = (props: AssetProps) => {
                     </div>
 
                     {/* Asset Class */}
-                    <div>
+                    <div ref={fieldRef["asset_class"]}>
                       <label htmlFor="asset-class">Asset Class</label>
                       <div className="mt-2">
                         <SelectMenuV2
@@ -602,28 +641,30 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Working Status */}
-                  <SwitchV2
-                    className="col-span-6"
-                    required
-                    name="is_working"
-                    label="Working Status"
-                    options={["true", "false"]}
-                    optionLabel={(option) => {
-                      return (
-                        {
-                          true: "Working",
-                          false: "Not Working",
-                        }[option] || "undefined"
-                      );
-                    }}
-                    optionClassName={(option) =>
-                      option === "false" &&
-                      "bg-error text-white border-error focus:ring-error"
-                    }
-                    value={is_working}
-                    onChange={setIsWorking}
-                    error={state.errors.is_working}
-                  />
+                  <div ref={fieldRef["is_working"]} className="col-span-6">
+                    <SwitchV2
+                      className="col-span-6"
+                      required
+                      name="is_working"
+                      label="Working Status"
+                      options={["true", "false"]}
+                      optionLabel={(option) => {
+                        return (
+                          {
+                            true: "Working",
+                            false: "Not Working",
+                          }[option] || "undefined"
+                        );
+                      }}
+                      optionClassName={(option) =>
+                        option === "false" &&
+                        "bg-danger-500 text-white border-danger-500 focus:ring-danger-500"
+                      }
+                      value={is_working}
+                      onChange={setIsWorking}
+                      error={state.errors.is_working}
+                    />
+                  </div>
 
                   {/* Not Working Reason */}
                   <div
@@ -688,7 +729,10 @@ const AssetCreate = (props: AssetProps) => {
                   {sectionTitle("Warranty Details")}
 
                   {/* Manufacturer */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["manufacturer"]}
+                  >
                     <TextInputFieldV2
                       id="manufacturer"
                       label="Manufacturer"
@@ -700,20 +744,28 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Warranty / AMC Expiry */}
-                  <div className="col-span-6 sm:col-span-3">
-                    <label htmlFor="warranty-expiry">
-                      Warranty / AMC Expiry
-                    </label>
-                    <DateInputField
-                      className="w-56"
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["warranty_amc_end_of_validity"]}
+                  >
+                    <label className="mb-2">Warranty / AMC Expiry</label>
+                    <DateInputV2
+                      className="border-1 border-gray-200"
                       value={warranty_amc_end_of_validity}
-                      onChange={(date) =>
-                        setWarrantyAmcEndOfValidity(
-                          moment(date).format("YYYY-MM-DD")
-                        )
-                      }
-                      errors={state.errors.warranty_amc_end_of_validity}
-                      InputLabelProps={{ shrink: true }}
+                      onChange={(date) => {
+                        if (
+                          moment(date).format("YYYY-MM-DD") <
+                          new Date().toLocaleDateString("en-ca")
+                        ) {
+                          Notification.Error({
+                            msg: "Warranty / AMC Expiry date can't be in past",
+                          });
+                        } else {
+                          setWarrantyAmcEndOfValidity(moment(date).toDate());
+                        }
+                      }}
+                      position="LEFT"
+                      min={yesterday}
                     />
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
@@ -721,7 +773,10 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Customer Support Name */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["support_name"]}
+                  >
                     <TextInputFieldV2
                       id="support-name"
                       label="Customer Support Name"
@@ -733,11 +788,15 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Customer Support Number */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["support_phone"]}
+                  >
                     <label htmlFor="support-name">
                       Customer Support Number *{" "}
                     </label>
                     <PhoneNumberField
+                      enableTollFree
                       value={support_phone}
                       onChange={setSupportPhone}
                       errors={state.errors.support_phone}
@@ -745,7 +804,10 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Customer Support Email */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["support_email"]}
+                  >
                     <TextInputFieldV2
                       id="support-email"
                       label="Customer Support Email"
@@ -759,10 +821,14 @@ const AssetCreate = (props: AssetProps) => {
                   <div className="sm:col-span-3" />
 
                   {/* Vendor Name */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["vendor_name"]}
+                  >
                     <TextInputFieldV2
                       label="Vendor Name"
                       id="vendor-name"
+                      value={vendor_name}
                       placeholder="Eg. XYZ"
                       onValueChange={setVendorName}
                       error={state.errors.vendor_name}
@@ -770,7 +836,10 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Serial Number */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["serial_number"]}
+                  >
                     <TextInputFieldV2
                       label="Serial Number"
                       id="serial-number"
@@ -784,23 +853,34 @@ const AssetCreate = (props: AssetProps) => {
                   {sectionTitle("Service Details")}
 
                   {/* Last serviced on */}
-                  <div className="col-span-6 sm:col-span-3">
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["last_serviced_on"]}
+                  >
                     <label htmlFor="last-serviced-on">Last Serviced On</label>
-                    <DateInputField
-                      className="w-56"
+                    <DateInputV2
+                      className="border-1 border-gray-200"
                       value={last_serviced_on}
-                      onChange={(date) =>
-                        setLastServicedOn(moment(date).format("YYYY-MM-DD"))
-                      }
-                      disableFuture={true}
-                      errors={state.errors.last_serviced_on}
-                      InputLabelProps={{ shrink: true }}
+                      onChange={(date) => {
+                        if (
+                          moment(date).format("YYYY-MM-DD") >
+                          new Date().toLocaleDateString("en-ca")
+                        ) {
+                          Notification.Error({
+                            msg: "Last Serviced date can't be in future",
+                          });
+                        } else {
+                          setLastServicedOn(moment(date).toDate());
+                        }
+                      }}
+                      position="LEFT"
+                      max={new Date()}
                     />
                     <ErrorHelperText error={state.errors.last_serviced_on} />
                   </div>
 
                   {/* Notes */}
-                  <div className="col-span-6 mt-6">
+                  <div className="col-span-6 mt-6" ref={fieldRef["notes"]}>
                     <label htmlFor="notes">Notes</label>
                     <textarea
                       id="notes"
@@ -821,53 +901,26 @@ const AssetCreate = (props: AssetProps) => {
 
                 <div />
 
-                <div className="mt-12 flex justify-end gap-x-4 gap-y-2 flex-wrap">
-                  <button
-                    className="primary-button w-full md:w-auto flex justify-center"
-                    id="asset-create"
-                    type="submit"
-                    onClick={(e) => handleSubmit(e, false)}
-                  >
-                    <div className="flex items-center justify-start gap-2">
-                      <CheckCircleOutlineIcon className="text-base">
-                        save
-                      </CheckCircleOutlineIcon>
-                      {assetId ? "Update" : "Create Asset"}
-                    </div>
-                  </button>
-                  {!assetId && (
-                    <button
-                      className="primary-button w-full md:w-auto flex justify-center"
-                      id="asset-create"
-                      type="submit"
-                      onClick={(e) => handleSubmit(e, true)}
-                    >
-                      <div className="flex items-center justify-start gap-2">
-                        <CheckCircleOutlineIcon className="text-base">
-                          save
-                        </CheckCircleOutlineIcon>
-                        Create & Add More
-                      </div>
-                    </button>
-                  )}
-                  <button
-                    id="asset-cancel"
-                    className="secondary-button w-full md:w-auto flex justify-center"
+                <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                  <Cancel
                     onClick={() =>
                       navigate(
                         assetId
-                          ? `/assets/${assetId}`
+                          ? `/facility/${facilityId}/assets/${assetId}`
                           : `/facility/${facilityId}`
                       )
                     }
-                  >
-                    <div className="flex items-center justify-start gap-2">
-                      <CancelOutlineIcon className="text-base">
-                        cancel
-                      </CancelOutlineIcon>
-                      Cancel
-                    </div>
-                  </button>
+                  />
+                  <Submit
+                    onClick={(e) => handleSubmit(e, false)}
+                    label={assetId ? "Update" : "Create Asset"}
+                  />
+                  {!assetId && (
+                    <Submit
+                      onClick={(e) => handleSubmit(e, true)}
+                      label="Create & Add More"
+                    />
+                  )}
                 </div>
               </div>
             </form>

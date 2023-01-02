@@ -1,5 +1,6 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export type SidebarIcon = React.ReactNode;
 
@@ -9,7 +10,7 @@ type SidebarItemProps = {
   external?: true | undefined;
   badgeCount?: number | undefined;
   selected?: boolean | undefined;
-} & ({ to: string; do?: undefined } | { to?: undefined; do: () => void });
+} & ({ to: string; do?: undefined } | { to?: string; do: () => void });
 
 type SidebarItemBaseProps = SidebarItemProps & { shrinked?: boolean };
 const SidebarItemBase = ({
@@ -48,7 +49,9 @@ const SidebarItemBase = ({
         >
           {t(props.text)}
         </span>
-        {external && !shrinked && <i className="uil uil-external-link-alt" />}
+        {external && !shrinked && (
+          <CareIcon className="care-l-external-link-alt text-lg" />
+        )}
       </div>
 
       {!!props.badgeCount && (

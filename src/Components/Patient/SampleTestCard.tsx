@@ -5,11 +5,13 @@ import { SampleTestModel } from "./models";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { patchSample } from "../../Redux/actions";
-import { RoleButton } from "../Common/RoleButton";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import _ from "lodash";
 import { formatDate } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -80,97 +82,112 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               `/facility/${facilityId}/patient/${patientId}/sample/${itemData.id}`
             )
           }
-          className="grid gap-4 grid-cols-1 md:grid-cols-2"
+          className="grid gap-4 grid-cols-1 md:grid-cols-4 ml-2 mt-2"
         >
           <div>
-            <span className="text-gray-700">Status: </span>
-            {_.startCase(_.camelCase(itemData.status))}
+            <div className="sm:col-span-1">
+              <div className="text-sm leading-5 font-semibold text-zinc-400">
+                Status{" "}
+              </div>
+              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                {_.startCase(_.camelCase(itemData.status))}
+              </div>
+            </div>
           </div>
           <div>
-            <span className="text-gray-700">Result: </span>
-            {_.startCase(_.camelCase(itemData.result))}
-          </div>
-          <div>
-            <span className="text-gray-700">Sample Type: </span>
-            {itemData.sample_type !== "OTHER TYPE"
-              ? itemData.sample_type
-              : itemData.sample_type_other}
+            <div className="sm:col-span-1">
+              <div className="text-sm leading-5 font-semibold text-zinc-400">
+                Sample Type{" "}
+              </div>
+              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                {itemData.sample_type !== "OTHER TYPE"
+                  ? itemData.sample_type
+                  : itemData.sample_type_other}
+              </div>
+            </div>
           </div>
           {itemData.fast_track && (
             <div>
-              <span className="text-gray-700">Fast-Track:</span>{" "}
-              {itemData.fast_track}
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-semibold text-zinc-400">
+                  Fast-Track{" "}
+                </div>
+                <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                  {itemData.fast_track}
+                </div>
+              </div>
             </div>
           )}
-        </div>
-
-        <div className="mt-4 flex flex-col md:flex-row justify-between gap-4">
           <div>
-            <div className="text-gray-600 text-sm font-bold">
-              <span className="text-gray-800">Date of Sample:</span>{" "}
+            <div className="sm:col-span-1">
+              <div className="text-sm leading-5 font-semibold text-zinc-400">
+                Result{" "}
+              </div>
+              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                {_.startCase(_.camelCase(itemData.result))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-col md:flex-row justify-between gap-4 ml-2">
+          <div>
+            <div className="text-gray-700 text-sm mb-2">
+              <span className="text-black font-medium">Date of Sample:</span>{" "}
               {itemData.date_of_sample
                 ? formatDate(itemData.date_of_sample)
                 : "Not Available"}
             </div>
-
-            <div className="text-gray-600 text-sm font-bold">
-              <span className="text-gray-800">Date of Result:</span>{" "}
+            <div className="text-gray-700 text-sm">
+              <span className="text-black font-medium">Date of Result:</span>{" "}
               {itemData.date_of_result
                 ? formatDate(itemData.date_of_result)
                 : "Not Available"}
             </div>
           </div>
         </div>
-        <div className="flex flex-col mt-6 gap-2">
+        <div className="flex flex-col mt-6 gap-2 ml-2">
           {
-            <div className="text-sm text-gray-700">
-              <b>Created</b> on{" "}
-              {itemData.created_date && formatDate(itemData.created_date)}{" "}
-              {itemData.created_by && (
-                <span>
-                  by{" "}
-                  {`${itemData.created_by?.first_name} ${itemData.created_by?.last_name} @${itemData.created_by?.username} (${itemData.created_by?.user_type})`}
-                </span>
-              )}
+            <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
+              Created:{" "}
+              <RelativeDateUserMention
+                actionDate={itemData.created_date}
+                user={itemData.created_by}
+              />
             </div>
           }
-          <div className="text-sm text-gray-700">
-            <b>Last Modified</b> on{" "}
-            {itemData.modified_date && formatDate(itemData.modified_date)}{" "}
-            {itemData.last_edited_by && (
-              <span>
-                by{" "}
-                {`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name} @${itemData.last_edited_by?.username} (${itemData.last_edited_by?.user_type})`}
-              </span>
-            )}
+          <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
+            Last Modified:{" "}
+            <RelativeDateUserMention
+              actionDate={itemData.modified_date}
+              user={itemData.last_edited_by}
+            />
           </div>
         </div>
-        <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between w-full">
+        <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between mx-2">
           {itemData.status === "APPROVED" && (
-            <button
+            <ButtonV2
               onClick={(e) => {
                 e.stopPropagation();
                 handleApproval(4, itemData);
               }}
-              className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
+              className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
             >
               Send to Collection Centre
-            </button>
+            </ButtonV2>
           )}
-          <RoleButton
-            handleClickCB={() => showUpdateStatus(itemData)}
-            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-            disableFor="readOnly"
-            buttonType="html"
+          <ButtonV2
+            onClick={() => showUpdateStatus(itemData)}
+            className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+            authorizeFor={NonReadOnlyUsers}
           >
-            UPDATE SAMPLE TEST STATUS
-          </RoleButton>
-          <button
-            onClick={(e) => navigate(`/sample/${itemData.id}`)}
-            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center w-full md:w-fit my-1"
+            Update Sample Test Status
+          </ButtonV2>
+          <ButtonV2
+            onClick={(_e) => navigate(`/sample/${itemData.id}`)}
+            className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
           >
             Sample Report
-          </button>
+          </ButtonV2>
         </div>
       </CardContent>
       {statusDialog.show && (

@@ -29,9 +29,11 @@ import {
 } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { debounce } from "lodash";
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import PhoneInput, { ICountryData } from "react-phone-input-2";
 import "react-phone-input-2/lib/high-res.css";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "./components/ButtonV2";
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, "onChange"> {
   options: Array<any>;
@@ -86,6 +88,7 @@ interface DateInputFieldProps extends DatePickerProps {
   ) => void;
   label?: string;
   min?: string;
+  max?: string;
   errors: string;
   inputVariant?: "standard" | "outlined" | "filled";
   disabled?: boolean;
@@ -219,6 +222,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
     label,
     errors,
     min,
+    max,
     // variant,
     disabled,
     margin,
@@ -234,6 +238,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
         value={value}
         onChange={onChange}
         minDate={min}
+        maxDate={max}
         disabled={disabled}
         KeyboardButtonProps={{
           "aria-label": "change date",
@@ -646,9 +651,18 @@ export const PhoneNumberField = (props: any) => {
     value,
     turnOffAutoFormat,
     disabled,
+    enableTollFree,
+    countryCodeEditable = false,
   } = props;
+  const [maxLength, setMaxLength] = useState(15);
+
   const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
   const onChangeHandler = debounce(onChange, 500);
+
+  useEffect(() => {
+    setMaxLength(() => (value.slice(4, 8) === "1800" ? 16 : 15));
+  }, [value]);
+
   const handleChange = (
     value: string,
     data: Partial<ICountryData>,
@@ -657,27 +671,34 @@ export const PhoneNumberField = (props: any) => {
   ) => {
     onChangeHandler(formattedValue);
   };
+
   return (
     <>
       {label && <InputLabel>{label}</InputLabel>}
-      <div className="flex items-center">
+      <div className="relative flex items-center">
         <PhoneInput
-          inputClass="bg-gray-200 py-3 text-sm border-gray-200 shadow-none focus:border-primary-400"
-          countryCodeEditable={false}
+          inputClass="cui-input-base pl-14 pr-10 py-4 tracking-widest"
+          countryCodeEditable={countryCodeEditable}
           value={value}
           placeholder={placeholder}
           onChange={handleChange}
           country="in"
           disabled={disabled}
           autoFormat={!turnOffAutoFormat}
+          enableLongNumbers={enableTollFree}
+          inputProps={{
+            maxLength,
+          }}
           {...countryRestriction}
         />
-        <div
-          className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-          onClick={(_) => onChange("+91")}
+        <ButtonV2
+          className="absolute right-0 mt-1 max-h-10"
+          variant="secondary"
+          ghost
+          onClick={() => onChange("+91")}
         >
-          <i className="fas fa-times text-red-600" />
-        </div>
+          <CareIcon className="care-l-multiply" />
+        </ButtonV2>
       </div>
       <ErrorHelperText error={errors} />
     </>

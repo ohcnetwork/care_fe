@@ -3,23 +3,38 @@ import { useState, useCallback, useEffect, ReactElement } from "react";
 import loadable from "@loadable/component";
 import { assetClassProps, AssetData, AssetTransaction } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useDispatch } from "react-redux";
-import { getAsset, listAssetTransaction } from "../../Redux/actions";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  deleteAsset,
+  getAsset,
+  listAssetTransaction,
+} from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
 import { formatDate } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { UserRole, USER_TYPES } from "../../Common/constants";
+import moment from "moment";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface AssetManageProps {
   assetId: string;
+  facilityId: string;
 }
 
+const checkAuthority = (type: string, cutoff: string) => {
+  const userAuthority = USER_TYPES.indexOf(type as UserRole);
+  const cutoffAuthority = USER_TYPES.indexOf(cutoff as UserRole);
+  return userAuthority >= cutoffAuthority;
+};
+
 const AssetManage = (props: AssetManageProps) => {
-  const { assetId } = props;
+  const { assetId, facilityId } = props;
   const [asset, setAsset] = useState<AssetData>();
   const [isPrintMode, setIsPrintMode] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,6 +47,8 @@ const AssetManage = (props: AssetManageProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch<any>();
   const limit = 14;
+  const { currentUser }: any = useSelector((state) => state);
+  const user_type = currentUser.data.user_type;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -145,34 +162,80 @@ const AssetManage = (props: AssetManageProps) => {
 
   const detailBlock = (item: any) =>
     item.hide ? null : (
-      <div className="flex flex-col">
+      <div className="flex flex-col grow-0 md:w-[200px]">
         <div className="flex flex-start items-center">
           <div className="w-8">
-            <i className={`uil uil-${item.icon} text-gray-700 text-lg`}></i>
+            <CareIcon className={`care-l-${item.icon} text-lg fill-gray-700`} />
           </div>
           <div className="text-gray-700 break-words">{item.label}</div>
         </div>
-        <div className="font-semibold text-lg ml-8 break-words">
+        <div className="font-semibold text-lg ml-8 break-words grow-0">
           {item.content || "--"}
         </div>
       </div>
     );
 
+  const downloadJSON = (data: AssetData) => {
+    const a = document.createElement("a");
+    const blob = new Blob([JSON.stringify([data])], {
+      type: "application/json",
+    });
+    a.href = URL.createObjectURL(blob);
+    a.download = `asset_${data.id}.json`;
+    a.click();
+  };
+
+  const handleDownload = async () => {
+    if (asset) downloadJSON(asset);
+  };
+
+  const handleDelete = async () => {
+    const confirm = window.confirm(
+      "Are you sure you want to delete this asset?"
+    );
+    if (asset && confirm) {
+      const response = await dispatch(deleteAsset(asset.id));
+      if (response && response.status === 204) {
+        navigate("/assets");
+      }
+    }
+  };
+
   return (
     <div className="px-2 pb-2">
       <PageTitle
         title="Asset Details"
-        crumbsReplacements={{ [assetId]: { name: asset?.name } }}
+        crumbsReplacements={{
+          [facilityId]: { name: asset?.location_object.facility.name },
+          assets: { uri: `/assets?facility=${facilityId}` },
+          [assetId]: {
+            name: asset?.name,
+          },
+        }}
       />
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col xl:flex-row gap-8">
         <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
-          <div className="w-full md:p-8 p-6 flex flex-col justify-between gap-6">
+          <div className="w-full md:p-8 md:pt-6 p-6 pt-4 flex flex-col justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 justify-between w-full">
-                <span className="text-2xl md:text-3xl font-bold break-words">
-                  {asset?.name}
-                </span>
-                <div className=" flex flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl md:text-3xl font-bold break-words">
+                    {asset?.name}
+                  </span>
+                  <ButtonV2
+                    onClick={handleDownload}
+                    className="tooltip p-4"
+                    variant="secondary"
+                    ghost
+                    circle
+                  >
+                    <CareIcon className="care-l-export text-lg" />
+                    <span className="tooltip-text tooltip-bottom -translate-x-16">
+                      Export as JSON
+                    </span>
+                  </ButtonV2>
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {asset?.status === "ACTIVE" ? (
                     <Chip color="green" text="Active" startIcon="check" />
                   ) : (
@@ -220,31 +283,44 @@ const AssetManage = (props: AssetManageProps) => {
               ].map(detailBlock)}
             </div>
             <div className="flex flex-col md:flex-row gap-1">
-              <button
+              <ButtonV2
+                className="flex gap-2"
                 onClick={() =>
                   navigate(
-                    `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
+                    `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/update`
                   )
                 }
                 id="update-asset"
-                className="primary-button"
               >
-                <i className="uil uil-pen text-white mr-4" />
+                <CareIcon className="care-l-pen h-4 mr-1" />
                 Update
-              </button>
+              </ButtonV2>
               {asset?.asset_class && (
-                <button
-                  onClick={() => navigate(`/assets/${asset?.id}/configure`)}
+                <ButtonV2
+                  onClick={() =>
+                    navigate(
+                      `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/configure`
+                    )
+                  }
                   id="configure-asset"
-                  className="primary-button"
                 >
-                  <i className="uil uil-setting text-white mr-4"></i>
+                  <CareIcon className="care-l-setting h-4" />
                   Configure
-                </button>
+                </ButtonV2>
+              )}
+              {checkAuthority(user_type, "DistrictAdmin") && (
+                <ButtonV2
+                  onClick={handleDelete}
+                  variant={"danger"}
+                  className="inline-flex"
+                >
+                  <CareIcon className="care-l-trash h-4" />
+                  <span className="md:hidden">Delete</span>
+                </ButtonV2>
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 flex-shrink-0">
+          <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 shrink-0">
             <div>
               <div className="font-bold text-lg mb-5">Service Details</div>
               <div className="flex flex-col gap-6">
@@ -254,7 +330,7 @@ const AssetManage = (props: AssetManageProps) => {
                     icon: "wrench",
                     content:
                       asset?.last_serviced_on &&
-                      formatDate(asset?.last_serviced_on),
+                      moment(asset?.last_serviced_on).format("DD MMM YYYY"),
                   },
                   {
                     label: "Notes",
@@ -267,15 +343,17 @@ const AssetManage = (props: AssetManageProps) => {
 
             <div className="text-xs text-gray-900 break-words">
               <i className="text-gray-700">Created: </i>
-              {asset?.created_date && formatDate(asset?.created_date)}
+              {asset?.created_date &&
+                moment(asset?.created_date).format("DD/MM/YYYY LT")}
               <br />
               <i className="text-gray-700">Last Modified: </i>
-              {asset?.modified_date && formatDate(asset?.modified_date)}
+              {asset?.modified_date &&
+                moment(asset?.created_date).format("DD/MM/YYYY LT")}
             </div>
           </div>
         </div>
         {asset && (
-          <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col md:flex-row lg:flex-col transition-all duration-200 ease-in">
+          <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col md:flex-row xl:flex-col transition-all duration-200 ease-in">
             <AssetWarrantyCard asset={asset} />
           </div>
         )}

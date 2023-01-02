@@ -4,8 +4,11 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
-import clsx from "clsx";
 import { UserModel } from "../Users/models";
+import { classNames } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "./components/ButtonV2";
+import { FieldLabel } from "../Form/FormFields/FormField";
 
 type UserFetchState = {
   loading: boolean;
@@ -29,6 +32,14 @@ const initialState: UserFetchState = {
   searchFieldRef: React.createRef<HTMLInputElement>(),
 };
 
+/**
+ * This component consists temperory design hacks made to look identical to a
+ * form field during the consultation form redesign.
+ *
+ * However to make the design and functionallity consistent, this component is
+ * to be converted to use `AutocompleteFormField` along with `useAsyncOptions`
+ * hook and `prefixIcon` for the online state of the users.
+ */
 export const OnlineUsersSelect = (props: Props) => {
   const dispatchAction: any = useDispatch();
   const { selectedUser, userId, onSelect, user_type, outline } = props;
@@ -73,12 +84,7 @@ export const OnlineUsersSelect = (props: Props) => {
   return (
     <div className="pb-2">
       <div className="space-y-1">
-        <label
-          id="listbox-label"
-          className="block text-sm leading-5 font-medium text-gray-700"
-        >
-          Assigned to
-        </label>
+        <FieldLabel>Assigned to</FieldLabel>
         <div className="relative">
           <div className="relative flex-1">
             <span className="flex w-full rounded-md flex-col md:flex-row">
@@ -90,11 +96,12 @@ export const OnlineUsersSelect = (props: Props) => {
                 aria-haspopup="listbox"
                 aria-expanded="true"
                 aria-labelledby="listbox-label"
-                className={clsx(
-                  "border-2 h-14 cursor-default relative w-full rounded-md pl-3 pr-10 py-2 text-left transition ease-in-out duration-150 sm:text-sm sm:leading-5",
-                  isDropdownExpanded &&
+                className={classNames(
+                  "border border-gray-400 cursor-default relative w-full rounded-md pl-3 pr-10 text-left transition ease-in-out duration-150 sm:text-sm sm:leading-5",
+                  (isDropdownExpanded &&
                     outline &&
-                    "ring-primary-500 border-primary-500"
+                    "ring-primary-500 border-primary-500 py-0.5") ||
+                    "py-3"
                 )}
               >
                 <input
@@ -102,8 +109,8 @@ export const OnlineUsersSelect = (props: Props) => {
                   name="searchTerm"
                   type="text"
                   placeholder="Search by name or username"
-                  className={clsx(
-                    "py-2 pl-3 w-full outline-none focus:ring-gray-200 border-none",
+                  className={classNames(
+                    "pl-3 w-full outline-none border-0",
                     !isDropdownExpanded && "hidden"
                   )}
                   value={searchTerm}
@@ -116,9 +123,10 @@ export const OnlineUsersSelect = (props: Props) => {
                   onKeyUp={(e) => e.preventDefault()}
                 />
                 <div
-                  className={clsx("flex items-center justify-between", {
-                    hidden: isDropdownExpanded,
-                  })}
+                  className={classNames(
+                    "flex items-center justify-between",
+                    isDropdownExpanded && "hidden"
+                  )}
                 >
                   <div className="space-x-3 flex items-center overflow-hidden">
                     <span
@@ -234,21 +242,21 @@ export const OnlineUsersSelect = (props: Props) => {
               </div>
             )}
           </div>
-          <div
-            className={
-              !isDropdownExpanded
-                ? "z-50  absolute right-10 top-[14px]"
-                : "hidden"
-            }
+          <ButtonV2
+            type="button"
+            variant="secondary"
+            ghost
+            circle
+            className={`p-1 absolute right-8 top-1/2 -translate-y-1/2 ${
+              isDropdownExpanded && "hidden"
+            }`}
             onClick={(_) => {
               onSelect(null);
               setDropdownExpand(false);
             }}
           >
-            <div className="px-2 rounded-lg hover:bg-gray-100 cursor-pointer bg-white">
-              <i className="fa-solid fa-xmark text-lg text-gray-600"></i>
-            </div>
-          </div>
+            <CareIcon className="care-l-times text-gray-600" />
+          </ButtonV2>
         </div>
       </div>
     </div>

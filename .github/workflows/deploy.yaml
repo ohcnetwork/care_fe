@@ -257,3 +257,129 @@ jobs:
           cd kube/deployments/
           sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
           kubectl apply -f care-fe.yaml
+
+  deploy-production-karnataka:
+    needs: build-production
+    name: Deploy to GKE Karnataka
+    runs-on: ubuntu-latest
+    environment:
+      name: Production-Karnataka
+      url: https://karnataka.care
+    steps:
+      - name: Checkout Kube Config
+        uses: actions/checkout@v3
+        with:
+          repository: coronasafe/ka-care-infra
+          token: ${{ secrets.GIT_ACCESS_TOKEN  }}
+          path: kube
+          ref: main
+
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
+        with:
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      # Get the GKE credentials so we can deploy to the cluster
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GKE_SA_KEY }}
+
+      - name: install kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: "v1.23.6"
+        id: install
+
+      - name: Deploy Care Fe Production
+        run: |
+          mkdir -p $HOME/.kube/
+          cd kube/deployments/
+          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
+          kubectl apply -f care-fe.yaml
+
+  deploy-production-sikkim:
+    needs: build-production
+    name: Deploy to GKE Sikkim
+    runs-on: ubuntu-latest
+    environment:
+      name: Production-Sikkim
+      url: https://care.sikkim.gov.in
+    steps:
+      - name: Checkout Kube Config
+        uses: actions/checkout@v3
+        with:
+          repository: coronasafe/sk-care-infra
+          token: ${{ secrets.GIT_ACCESS_TOKEN  }}
+          path: kube
+          ref: main
+
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
+        with:
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      # Get the GKE credentials so we can deploy to the cluster
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GKE_SA_KEY }}
+
+      - name: install kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: "v1.23.6"
+        id: install
+
+      - name: Deploy Care Fe Production
+        run: |
+          mkdir -p $HOME/.kube/
+          cd kube/deployments/
+          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
+          kubectl apply -f care-fe.yaml
+
+  deploy-production-assam:
+    needs: build-production
+    name: Deploy to GKE Assam
+    runs-on: ubuntu-latest
+    environment:
+      name: Production-Assam
+      url: https://care.assam.gov.in
+    steps:
+      - name: Checkout Kube Config
+        uses: actions/checkout@v3
+        with:
+          repository: coronasafe/as-care-infra
+          token: ${{ secrets.GIT_ACCESS_TOKEN  }}
+          path: kube
+          ref: main
+
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
+        with:
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      # Get the GKE credentials so we can deploy to the cluster
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GKE_SA_KEY }}
+
+      - name: install kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: "v1.23.6"
+        id: install
+
+      - name: Deploy Care Fe Production
+        run: |
+          mkdir -p $HOME/.kube/
+          cd kube/deployments/
+          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
+          kubectl apply -f care-fe.yaml

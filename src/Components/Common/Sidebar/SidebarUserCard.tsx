@@ -2,6 +2,7 @@ import { get } from "lodash";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { handleSignOut } from "../../../Utils/utils";
 
 const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
@@ -14,18 +15,20 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
 
   return (
     <div
-      className={`flex ${
+      className={`flex my-2 ${
         shrinked ? "mx-auto" : "mx-5"
       } transition-all duration-200 ease-in-out`}
     >
       <Link href="/user/profile" className="flex-none">
-        <i className="text-white text-3xl uil uil-user-circle" />
+        <CareIcon className="care-l-user-circle text-3xl text-white" />
       </Link>
-      <div className={`${shrinked ? "hidden" : "grow"} pl-3 flex flex-col`}>
-        <div className="h-6 flex items-center">
+      <div
+        className={`${shrinked ? "hidden" : "grow"} pl-3 flex flex-col min-w-0`}
+      >
+        <div className="min-h-6 flex items-center">
           <Link
             href="/user/profile"
-            className="font-semibold text-white flex-nowrap overflow-hidden truncate"
+            className="font-semibold text-white flex-nowrap overflow-hidden break-words"
           >
             {profileName}
           </Link>

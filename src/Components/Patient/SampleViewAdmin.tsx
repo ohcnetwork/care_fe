@@ -2,10 +2,9 @@ import { CircularProgress } from "@material-ui/core";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
-import { navigate, useQueryParams } from "raviger";
-import moment from "moment";
+import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import React, { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
@@ -21,33 +20,34 @@ import {
   getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
 import UpdateStatusDialog from "./UpdateStatusDialog";
-import { CSVLink } from "react-csv";
-import GetAppIcon from "@material-ui/icons/GetApp";
 import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
+import useFilters from "../../Common/hooks/useFilters";
+import { ExportButton } from "../Common/Export";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function SampleViewAdmin() {
-  const [qParams, setQueryParams] = useQueryParams();
+  const {
+    qParams,
+    updateQuery,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({
+    limit: 10,
+  });
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageSamples: any = null;
   const [sample, setSample] = useState<Array<SampleTestModel>>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
-  const [downloadFile, setDownloadFile] = useState("");
   const [fetchFlag, callFetchData] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [facilityName, setFacilityName] = useState("");
-  // state to change download button to loading while file is not ready
-  const [downloadLoading, setDownloadLoading] = useState(false);
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
     sample: SampleTestModel;
@@ -57,17 +57,11 @@ export default function SampleViewAdmin() {
   const userType: "Staff" | "DistrictAdmin" | "StateLabAdmin" =
     currentUser.data.user_type;
 
-  const limit = 10;
-
   useEffect(() => {
     async function fetchData() {
-      if (qParams.facility) {
-        const res = await dispatch(getAnyFacility(qParams.facility));
-
-        setFacilityName(res?.data?.name);
-      } else {
-        setFacilityName("");
-      }
+      if (!qParams.facility) return setFacilityName("");
+      const res = await dispatch(getAnyFacility(qParams.facility));
+      setFacilityName(res?.data?.name);
     }
     fetchData();
   }, [dispatch, qParams.facility]);
@@ -77,8 +71,8 @@ export default function SampleViewAdmin() {
       setIsLoading(true);
       const res = await dispatch(
         getTestList({
-          limit,
-          offset,
+          limit: resultsPerPage,
+          offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
           patient_name: qParams.patient_name || undefined,
           district_name: qParams.district_name || undefined,
           status: qParams.status || undefined,
@@ -97,9 +91,9 @@ export default function SampleViewAdmin() {
     },
     [
       dispatch,
-      offset,
-      qParams.district_name,
+      qParams.page,
       qParams.patient_name,
+      qParams.district_name,
       qParams.status,
       qParams.result,
       qParams.facility,
@@ -107,47 +101,12 @@ export default function SampleViewAdmin() {
     ]
   );
 
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(downloadSampleTests({ ...qParams }));
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById("download-sample-tests")?.click();
-  };
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
-
   useAbortableEffect(
     (status: statusType) => {
       fetchData(status);
     },
     [fetchData, fetchFlag]
   );
-
-  const updateQuery = (params: any) => {
-    const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
-
-  const searchByName = async (patient_name: string) => {
-    updateQuery({ patient_name, page: 1 });
-  };
-
-  const searchByDistrict = async (district_name: string) => {
-    updateQuery({ district_name, page: 1 });
-  };
 
   const handleApproval = async (
     sample: SampleTestModel,
@@ -335,16 +294,7 @@ export default function SampleViewAdmin() {
     manageSamples = (
       <>
         {sampleList}
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
-        )}
+        <Pagination totalCount={totalCount} />
       </>
     );
   } else if (sample && sample.length === 0) {
@@ -356,29 +306,6 @@ export default function SampleViewAdmin() {
       </div>
     );
   }
-
-  const removeFilter = (paramKey: any) => {
-    updateQuery({
-      ...qParams,
-      [paramKey]: "",
-    });
-  };
-
-  const badge = (key: string, value: any, paramKey: string) => {
-    return (
-      value && (
-        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={() => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
-  };
 
   return (
     <div className="px-6">
@@ -395,14 +322,10 @@ export default function SampleViewAdmin() {
         hideBack={true}
         breadcrumbs={false}
         componentRight={
-          downloadLoading ? (
-            <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
-          ) : (
-            <GetAppIcon
-              className="cursor-pointer mt-2 ml-2"
-              onClick={triggerDownload}
-            />
-          )
+          <ExportButton
+            action={() => downloadSampleTests({ ...qParams })}
+            filenamePrefix="samples"
+          />
         }
       />
       <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
@@ -427,15 +350,15 @@ export default function SampleViewAdmin() {
 
           <div className="w-full flex flex-col gap-3 p-2">
             <SearchInput
-              name="patient_name"
+              name="patient_name_search"
               value={qParams.patient_name}
-              onChange={({ value }) => searchByName(value)}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search patient"
             />
             <SearchInput
-              name="district_name"
+              name="district_name_search"
               value={qParams.district_name}
-              onChange={({ value }) => searchByDistrict(value)}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search by district"
               secondary
             />
@@ -445,7 +368,7 @@ export default function SampleViewAdmin() {
             <div className="flex items-start mt-2 mb-2 ">
               <button
                 className="btn btn-primary-ghost md:mt-7 w-full"
-                onClick={() => setShowFilters((show) => !show)}
+                onClick={() => advancedFilter.setShow(true)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -479,58 +402,44 @@ export default function SampleViewAdmin() {
                 <span>Advanced Filters</span>
               </button>
             </div>
-            <SlideOver show={showFilters} setShow={setShowFilters}>
+            <SlideOver {...advancedFilter}>
               <div className="bg-white min-h-screen p-4">
-                <SampleFilter
-                  filter={qParams}
-                  onChange={applyFilter}
-                  closeFilter={() => setShowFilters(false)}
-                />
+                <SampleFilter {...advancedFilter} />
               </div>
             </SlideOver>
           </div>
         </div>
-        <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
-          {badge("Patient Name", qParams.patient_name, "patient_name")}
-          {badge("District Name", qParams.district_name, "district_name")}
-          {badge(
-            "Status",
-            SAMPLE_TEST_STATUS.find(
-              (status) => status.id == qParams.status
-            )?.text.replaceAll("_", " "),
-            "status"
-          )}
-          {badge(
-            "Result",
-            SAMPLE_TEST_RESULT.find((result) => result.id == qParams.result)
-              ?.text,
-            "result"
-          )}
-          {badge(
-            "Sample Test Type",
-            SAMPLE_TYPE_CHOICES.find(
-              (type) => type.id.toString() === qParams.sample_type
-            )?.text,
-            "sample_type"
-          )}
-          {qParams.facility &&
-            sample[0] &&
-            sample[0].facility_object &&
-            badge("Facility", sample[0].facility_object.name, "facility")}
-          {badge("Facility", facilityName, "facility")}
-        </div>
+        <FilterBadges
+          badges={({ badge, value }) => [
+            badge("Patient Name", "patient_name"),
+            badge("District Name", "district_name"),
+            value(
+              "Status",
+              "status",
+              SAMPLE_TEST_STATUS.find(
+                (status) => status.id == qParams.status
+              )?.text.replaceAll("_", " ") || ""
+            ),
+            value(
+              "Result",
+              "result",
+              SAMPLE_TEST_RESULT.find((result) => result.id == qParams.result)
+                ?.text || ""
+            ),
+            value(
+              "Sample Test Type",
+              "sample_type",
+              SAMPLE_TYPE_CHOICES.find(
+                (type) => type.id.toString() === qParams.sample_type
+              )?.text || ""
+            ),
+            value("Facility", "facility", facilityName),
+          ]}
+        />
       </div>
       <div className="md:px-2">
         <div className="flex flex-wrap md:-mx-2 lg:-mx-6">{manageSamples}</div>
       </div>
-
-      <CSVLink
-        data={downloadFile}
-        filename={`shift-requests--${now}.csv`}
-        target="_blank"
-        className="hidden"
-        id={"download-sample-tests"}
-      />
     </div>
   );
 }

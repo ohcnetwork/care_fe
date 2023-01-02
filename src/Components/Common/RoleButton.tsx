@@ -24,6 +24,11 @@ const getDisableButton: (userType: string, disableFor: roleType) => boolean = (
   }
 };
 
+/**
+ * **Deprecated.**
+ *
+ * Use `ButtonV2` and set `authorizedFor` prop with desired access control.
+ */
 export function RoleButton(props: {
   id?: string;
   className?: string;

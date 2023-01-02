@@ -84,6 +84,11 @@ export const formatDate = (date: string | Date) => {
   return moment(date).format("hh:mm A; DD/MM/YYYY");
 };
 
+export const relativeDate = (date: string | Date) => {
+  const momentDate = moment(date);
+  return `${momentDate.fromNow()} at ${momentDate.format("hh:mm A")}`;
+};
+
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const handleSignOut = (forceReload: boolean) => {
@@ -120,3 +125,66 @@ function _isAppleDevice() {
  * `true` if device is iOS, else `false`
  */
 export const isAppleDevice = _isAppleDevice();
+
+/**
+ * Conditionally concatenate classes. An alternate replacement for `clsx`.
+ *
+ * **Example Usage:**
+ * ```tsx
+ * <div className={classNames("md:flex", true && "p-0", false && "p-10")} />
+ * // "md:flex p-0"
+ * ```
+ */
+export const classNames = (...classes: (string | boolean | undefined)[]) => {
+  return classes.filter(Boolean).join(" ");
+};
+
+interface ISchema {
+  [key: string]: {
+    prop: string;
+    oneOf?: string[];
+    parse?: (value: any) => any;
+    type?: any;
+    required?: boolean;
+  };
+}
+
+export const parseCsvFile = async (
+  file: File,
+  schema: ISchema | undefined = undefined
+) => {
+  const parseWithSchema: any = (schema: any, data: any) =>
+    Object.keys(schema).reduce((acc, key) => {
+      if (schema[key]?.oneOf && !schema[key].oneOf.includes(data[key]))
+        throw new Error(`${key} should be one of the ${schema[key].oneOf}`);
+
+      const value =
+        typeof schema[key]?.type === "object"
+          ? parseWithSchema(schema[key]?.type, data)
+          : schema[key]?.parse?.(data[key]) ?? data[key];
+
+      if (schema[key]?.required && (value === undefined || value === null))
+        throw new Error(`${key} is required`);
+
+      return value === undefined || value === null
+        ? acc
+        : {
+            ...acc,
+            [schema[key]?.prop]: value,
+          };
+    }, {});
+
+  const csvData = (await file.text())
+    .trim()
+    .split("\n")
+    .map((row: string) => row.split(","));
+
+  const parsed = csvData
+    .map((row: string[]) =>
+      row.reduce((acc, val, i) => ({ ...acc, [csvData[0][i]]: val }), {})
+    )
+    .splice(1)
+    .map((csvMap: any) => (schema ? parseWithSchema(schema, csvMap) : csvMap));
+
+  return parsed;
+};

@@ -1,5 +1,6 @@
-import clsx from "clsx";
-import { RefObject, useRef, useState } from "react";
+import CareIcon from "../icons/CareIcon";
+import { classNames } from "../../Utils/utils";
+import { RefObject, useRef, useState, useEffect } from "react";
 
 type InputProps = {
   id?: string;
@@ -32,11 +33,42 @@ export default function LegendInput(props: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const ref = props.ref || inputRef;
+
   const legendRef = useRef<HTMLLabelElement>(null);
   const [focused, setFocused] = useState(false);
 
+  const getAutofill = (element: Element) => {
+    let hasValue;
+    try {
+      hasValue = element.matches(":autofill");
+    } catch (err) {
+      try {
+        hasValue = element.matches(":-webkit-autofill");
+      } catch (er) {
+        hasValue = false;
+      }
+    }
+    hasValue && setFocused(true);
+  };
+
+  const detectAutofill = (element: Element) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(getAutofill(element));
+      }, 600);
+    });
+  };
+
+  const testAutoFill = async (element: Element) => {
+    await detectAutofill(element);
+  };
+
+  useEffect(() => {
+    ref.current && testAutoFill(ref.current);
+  }, [ref.current]);
+
   return (
-    <div className={clsx([props.outerClassName])}>
+    <div className={props.outerClassName}>
       {props.label && (
         <label
           htmlFor={props.name}
@@ -50,21 +82,23 @@ export default function LegendInput(props: InputProps) {
           <label
             htmlFor={props.id || props.name}
             ref={legendRef}
-            className={clsx({
-              "absolute flex items-center z-10 transition-all font-semibold cursor-text":
-                true,
-              "top-0 h-full": !(focused || ref.current?.value),
-              "h-auto cui-input-legend": focused || ref.current?.value,
-              "left-4": !props.size || !["small", "large"].includes(props.size),
-              "text-xs left-3": props.size === "small",
-              "left-5": props.size === "large",
-              "-top-2.5":
-                (focused || ref.current?.value) &&
-                (!props.size || props.size !== "small"),
-              "-top-[7px]":
-                (focused || ref.current?.value) && props.size === "small",
-              "text-red-500": props.error,
-            })}
+            className={classNames(
+              "absolute flex items-center z-10 transition-all font-semibold cursor-text",
+              focused || ref.current?.value
+                ? "h-auto cui-input-legend"
+                : "top-0 h-full",
+              (!props.size || !["small", "large"].includes(props.size)) &&
+                "left-4",
+              props.size === "small" && "text-xs left-3",
+              props.size === "large" && "left-5",
+              (focused || ref.current?.value) &&
+                (!props.size || props.size !== "small") &&
+                "-top-2.5",
+              (focused || ref.current?.value) &&
+                props.size === "small" &&
+                "-top-[7px]",
+              props.error && "text-red-500"
+            )}
           >
             {props.legend}
           </label>
@@ -72,9 +106,7 @@ export default function LegendInput(props: InputProps) {
 
         <input
           ref={ref}
-          type={
-            props.type === "PASSWORD" && !showPassword ? "password" : "text"
-          }
+          type={props.type === "PASSWORD" && showPassword ? "text" : props.type}
           name={props.name}
           id={props.id || props.name}
           placeholder={props.placeholder}
@@ -94,18 +126,16 @@ export default function LegendInput(props: InputProps) {
           disabled={props.disabled}
           required={props.required}
           autoComplete={props.autoComplete}
-          className={clsx([
-            "w-full bg-gray-50 focus:bg-gray-100 cui-input",
-            { "text-xs px-3 py-2": props.size === "small" },
-            {
-              "px-4 py-3":
-                !props.size || !["small", "large"].includes(props.size),
-            },
-            { "text-lg px-5 py-4": props.size === "large" },
-            { "pr-10": props.type === "PASSWORD" },
-            { "border-red-500": props.error },
-            props.className,
-          ])}
+          className={classNames(
+            "w-full border-gray-300 rounded-md shadow-sm bg-gray-50 focus:bg-gray-100 cui-input",
+            props.size === "small" && "text-xs px-3 py-2",
+            (!props.size || !["small", "large"].includes(props.size)) &&
+              "px-4 py-3",
+            props.size === "large" && "text-lg px-5 py-4",
+            props.type === "PASSWORD" && "pr-10",
+            props.error && "border-red-500",
+            props.className
+          )}
         />
         {props.type === "PASSWORD" && (
           <button
@@ -113,7 +143,9 @@ export default function LegendInput(props: InputProps) {
             className="absolute right-0 top-0 h-full flex items-center px-3 z-10 text-xl"
             onClick={() => setShowPassword(!showPassword)}
           >
-            <i className={`uil uil-eye${showPassword ? "" : "-slash"}`} />
+            <CareIcon
+              className={`care-l-eye${showPassword ? "" : "-slash"} text-lg`}
+            />
           </button>
         )}
       </div>

@@ -1,11 +1,9 @@
 import {
-  Button,
   Card,
   CardContent,
   CircularProgress,
   InputLabel,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
 import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
@@ -38,9 +36,9 @@ import {
   CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
-import clsx from "clsx";
 
-import { goBack } from "../../Utils/utils";
+import { classNames, goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -141,7 +139,7 @@ export const UserAdd = (props: UserProps) => {
     idle: 0,
     checking: 1,
     exists: 2,
-    avaliable: 3,
+    available: 3,
   };
 
   const [usernameExists, setUsernameExists] = useState<number>(0);
@@ -154,7 +152,7 @@ export const UserAdd = (props: UserProps) => {
     if (usernameCheck === undefined || usernameCheck.status === 409)
       setUsernameExists(userExistsEnums.exists);
     else if (usernameCheck.status === 200)
-      setUsernameExists(userExistsEnums.avaliable);
+      setUsernameExists(userExistsEnums.available);
     else
       Notification.Error({
         msg: "Some error checking username availabality. Please try again later.",
@@ -408,7 +406,7 @@ export const UserAdd = (props: UserProps) => {
             errors[field] =
               "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
-          } else if (usernameExists !== userExistsEnums.avaliable) {
+          } else if (usernameExists !== userExistsEnums.available) {
             errors[field] = "This username already exists";
             invalidForm = true;
           }
@@ -510,15 +508,19 @@ export const UserAdd = (props: UserProps) => {
     return true;
   };
 
-  const validateRule = (valid: boolean, content: JSX.Element | string) => {
+  const validateRule = (condition: boolean, content: JSX.Element | string) => {
     return (
       <div>
-        {valid ? (
-          <i className="fas fa-circle-xmark text-red-500" />
-        ) : (
+        {condition ? (
           <i className="fas fa-circle-check text-green-500" />
+        ) : (
+          <i className="fas fa-circle-xmark text-red-500" />
         )}{" "}
-        <span className={clsx(valid ? "text-red-500" : "text-primary-500")}>
+        <span
+          className={classNames(
+            condition ? "text-primary-500" : "text-red-500"
+          )}
+        >
           {content}
         </span>
       </div>
@@ -610,7 +612,6 @@ export const UserAdd = (props: UserProps) => {
                   name="facilities"
                   selected={selectedFacility}
                   setSelected={setFacility}
-                  district={currentUser.data.district}
                   errors={state.errors.facilities}
                   showAll={false}
                 />
@@ -710,23 +711,38 @@ export const UserAdd = (props: UserProps) => {
                               <i className="fas fa-circle-dot" /> checking...
                             </span>
                           ) : (
-                            validateRule(
-                              usernameExists === userExistsEnums.exists,
-                              "Username should not be taken"
-                            )
+                            <>
+                              {usernameExists === userExistsEnums.exists ? (
+                                <div>
+                                  {" "}
+                                  <i className="fas fa-circle-xmark text-red-500" />
+                                  <span className="text-red-500">
+                                    Username is not available
+                                  </span>
+                                </div>
+                              ) : (
+                                <div>
+                                  {" "}
+                                  <i className="fas fa-circle-check text-green-500" />
+                                  <span className="text-primary-500">
+                                    Username is available
+                                  </span>
+                                </div>
+                              )}
+                            </>
                           )}
                         </>
                       )}
                     </div>
                     <div>
                       {validateRule(
-                        state.form.username?.length < 2,
+                        state.form.username?.length >= 2,
                         "Username should be atleast 2 characters long"
                       )}
                     </div>
                     <div>
                       {validateRule(
-                        !/[^.@+_-]/.test(
+                        /[^.@+_-]/.test(
                           state.form.username[state.form.username?.length - 1]
                         ),
                         "Username can't end with ^ . @ + _ -"
@@ -769,19 +785,19 @@ export const UserAdd = (props: UserProps) => {
                 {passwordInputInFocus && (
                   <div className="pl-2 text-small text-gray-500">
                     {validateRule(
-                      state.form.password?.length < 8,
+                      state.form.password?.length >= 8,
                       "Password should be atleast 8 characters long"
                     )}
                     {validateRule(
-                      state.form.password === state.form.password.toUpperCase(),
+                      state.form.password !== state.form.password.toUpperCase(),
                       "Password should contain at least 1 lowercase letter"
                     )}
                     {validateRule(
-                      state.form.password === state.form.password.toLowerCase(),
+                      state.form.password !== state.form.password.toLowerCase(),
                       "Password should contain at least 1 uppercase letter"
                     )}
                     {validateRule(
-                      !/\d/.test(state.form.password),
+                      /\d/.test(state.form.password),
                       "Password should contain at least 1 number"
                     )}
                   </div>
@@ -805,7 +821,7 @@ export const UserAdd = (props: UserProps) => {
                 {confirmPasswordInputInFocus &&
                   state.form.c_password.length > 0 &&
                   validateRule(
-                    state.form.c_password !== state.form.password,
+                    state.form.c_password === state.form.password,
                     "Confirm password should match the entered password"
                   )}
               </div>
@@ -924,27 +940,8 @@ export const UserAdd = (props: UserProps) => {
               )}
             </div>
             <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-              <Button
-                color="default"
-                variant="contained"
-                onClick={() => goBack()}
-              >
-                Cancel
-              </Button>
-              <Button
-                color="primary"
-                fullWidth
-                className="w-full md:w-auto"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                onClick={(e) => handleSubmit(e)}
-                startIcon={
-                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                }
-              >
-                {buttonText}
-              </Button>
+              <Cancel onClick={() => goBack()} />
+              <Submit onClick={handleSubmit} label={buttonText} />
             </div>
           </form>
         </CardContent>

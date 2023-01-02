@@ -10,10 +10,9 @@ import {
 } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
 import { getAsset } from "../../Redux/actions";
-import React, { useState, useCallback, useEffect } from "react";
-import { navigate, useQueryParams } from "raviger";
+import { useState, useCallback, useEffect } from "react";
+import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
@@ -21,53 +20,57 @@ import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
+import useFilters from "../../Common/hooks/useFilters";
+import AssetImportModal from "./AssetImportModal";
+import { FacilityModel } from "../Facility/models";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
+import AuthorizeFor from "../../Utils/AuthorizeFor";
+import ButtonV2 from "../Common/components/ButtonV2";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import ExportMenu from "../Common/Export";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
-interface qParamModel {
-  search?: string;
-  facility?: string;
-  asset_type?: string;
-  location?: string;
-  status?: string;
-}
-
 const AssetsList = () => {
-  const [qParams, setQueryParams] = useQueryParams();
-  const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [offset, setOffset] = useState<number>(0);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [showFilters, setShowFilters] = useState<boolean>(false);
-  const [facilityName, setFacilityName] = useState<string>();
+  const {
+    qParams,
+    updateQuery,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({
+    limit: 21,
+  });
+  const [assets, setAssets] = useState([{} as AssetData]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isScannerActive, setIsScannerActive] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
-  const limit = 21;
+  const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
+  const [showFacilityDialog, setShowFacilityDialog] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
+    name: "",
+  });
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const params = qParams.search
-        ? {
-            limit,
-            offset,
-            search_text: qParams.search,
-            facility: qParams.facility,
-            asset_type: qParams.asset_type,
-            location: qParams.location,
-            status: qParams.status,
-          }
-        : {
-            limit,
-            offset,
-            facility: qParams.facility,
-            asset_type: qParams.asset_type,
-            location: qParams.location,
-            status: qParams.status,
-          };
+      const params = {
+        limit: resultsPerPage,
+        page: qParams.page,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+        search_text: qParams.search || "",
+        facility: qParams.facility,
+        asset_type: qParams.asset_type,
+        location: qParams.location,
+        status: qParams.status,
+      };
       const { data }: any = await dispatch(listAssets(params));
       if (!status.aborted) {
         setIsLoading(false);
@@ -83,7 +86,7 @@ const AssetsList = () => {
     },
     [
       dispatch,
-      offset,
+      qParams.page,
       qParams.search,
       qParams.facility,
       qParams.asset_type,
@@ -103,36 +106,28 @@ const AssetsList = () => {
     [dispatch, fetchData]
   );
 
-  const fetchFacilityName = useCallback(
+  const fetchFacility = useCallback(
     async (status: statusType) => {
-      if (qParams.facility) {
-        setIsLoading(true);
-
-        const res = await dispatch(getAnyFacility(qParams.facility));
-
-        if (!status.aborted) {
-          setFacilityName(res?.data?.name);
-          setIsLoading(false);
-        }
-      } else {
-        setFacilityName("");
+      if (!qParams.facility) return setFacility(undefined);
+      setIsLoading(true);
+      const res = await dispatch(getAnyFacility(qParams.facility));
+      if (!status.aborted) {
+        setFacility(res?.data);
+        setIsLoading(false);
       }
     },
     [dispatch, qParams.facility]
   );
   const fetchLocationName = useCallback(
     async (status: statusType) => {
-      if (qParams.location) {
-        setIsLoading(true);
-        const res = await dispatch(
-          getFacilityAssetLocation(qParams.facility, qParams.location)
-        );
-        if (!status.aborted) {
-          setLocationName(res?.data?.name);
-          setIsLoading(false);
-        }
-      } else {
-        setLocationName("");
+      if (!qParams.location) return setLocationName("");
+      setIsLoading(true);
+      const res = await dispatch(
+        getFacilityAssetLocation(qParams.facility, qParams.location)
+      );
+      if (!status.aborted) {
+        setLocationName(res?.data?.name);
+        setIsLoading(false);
       }
     },
     [dispatch, qParams.facility, qParams.location]
@@ -140,59 +135,11 @@ const AssetsList = () => {
 
   useAbortableEffect(
     (status: statusType) => {
-      fetchFacilityName(status);
+      fetchFacility(status);
       fetchLocationName(status);
     },
-    [fetchFacilityName, fetchLocationName]
+    [fetchFacility, fetchLocationName]
   );
-
-  const badge = (key: string, value: any, paramKey: string[]) => {
-    return (
-      value && (
-        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={() => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
-  };
-
-  const removeFilter = (paramKey: string[]) => {
-    const emptyObj: qParamModel = { ...qParams };
-    paramKey.forEach((p) => ((emptyObj as any)[p] = ""));
-    updateQuery({
-      ...emptyObj,
-    });
-  };
-
-  const onSearchSuspects = (search: string) => {
-    if (search !== "")
-      setQueryParams({ ...qParams, search }, { replace: true });
-    else setQueryParams({ ...qParams, search: "" }, { replace: true });
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
-
-  const updateQuery = (params: any) => {
-    const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
-    console.log(qParams);
-  };
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
 
   const getAssetIdFromQR = async (assetUrl: string) => {
     try {
@@ -226,6 +173,10 @@ const AssetsList = () => {
       });
     }
   };
+
+  const authorizedForImportExport = useIsAuthorized(
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+  );
 
   if (isScannerActive)
     return (
@@ -263,12 +214,15 @@ const AssetsList = () => {
           <div
             key={asset.id}
             className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
-            onClick={() => navigate(`/assets/${asset.id}`)}
+            onClick={() =>
+              navigate(
+                `facility/${asset?.location_object.facility.id}/assets/${asset.id}`
+              )
+            }
           >
             <div className="md:flex">
               <p className="text-xl flex font-medium capitalize break-words">
                 <span className="mr-2 text-primary-500">
-                  {" "}
                   <i
                     className={`fas fa-${
                       (
@@ -312,7 +266,51 @@ const AssetsList = () => {
 
   return (
     <div className="px-6">
-      <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
+      <div className="flex justify-between items-center">
+        <PageTitle title="Assets" breadcrumbs={false} hideBack />
+        {authorizedForImportExport && (
+          <div className="tooltip">
+            {!facility && (
+              <span className="tooltip-text tooltip-bottom -translate-x-2/3 flex flex-col items-center">
+                <p>Select a facility from the Facilities</p>
+                <p>page and click 'View Assets' from the</p>
+                <p>Manage Facility dropdown</p>
+              </span>
+            )}
+            {/* TODO: ask for facility select dialog instead of disabling */}
+            <ExportMenu
+              disabled={!facility || importAssetModalOpen}
+              label={importAssetModalOpen ? "Importing..." : "Import/Export"}
+              exportItems={[
+                {
+                  label: "Import Assets",
+                  // action: () => setImportAssetModalOpen(true),
+                  options: {
+                    icon: <CareIcon className="care-l-import" />,
+                    onClick: () => setImportAssetModalOpen(true),
+                  },
+                },
+                {
+                  label: "Export Assets",
+                  action: () =>
+                    authorizedForImportExport &&
+                    listAssets({
+                      ...qParams,
+                      json: true,
+                      limit: totalCount,
+                    }),
+                  type: "json",
+                  filePrefix: `assets_${facility?.name}`,
+                  options: {
+                    icon: <CareIcon className="care-l-export" />,
+                    disabled: totalCount === 0 || !authorizedForImportExport,
+                  },
+                },
+              ]}
+            />
+          </div>
+        )}
+      </div>
       <div className="lg:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
@@ -337,30 +335,39 @@ const AssetsList = () => {
           <SearchInput
             name="search"
             value={qParams.search}
-            onChange={({ value }) => onSearchSuspects(value)}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder="Search assets"
           />
         </div>
-        <div className="flex flex-col md:flex-row lg:ml-2 justify-start items-start gap-2">
-          <div className="w-full">
-            <AdvancedFilterButton setShowFilters={setShowFilters} />
+        <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
+          <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
+            <div className="w-full">
+              <AdvancedFilterButton
+                setShowFilters={() => advancedFilter.setShow(true)}
+              />
+            </div>
+            <ButtonV2
+              className="w-full"
+              onClick={() => setIsScannerActive(true)}
+            >
+              <i className="fas fa-search mr-1"></i> Scan Asset QR
+            </ButtonV2>
           </div>
-          <button
-            className="btn btn-primary w-full"
-            onClick={() => setIsScannerActive(true)}
-          >
-            <i className="fas fa-search mr-1"></i> Scan Asset QR
-          </button>
+          <div className="flex flex-col md:flex-row w-full">
+            <ButtonV2
+              className="w-full inline-flex items-center justify-center"
+              onClick={() => setShowFacilityDialog(true)}
+            >
+              <CareIcon className="care-l-plus-circle text-lg" />
+              <span>Create Asset</span>
+            </ButtonV2>
+          </div>
         </div>
       </div>
       <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
+        <SlideOver {...advancedFilter}>
           <div className="bg-white min-h-screen p-4">
-            <AssetFilter
-              filter={qParams}
-              onChange={applyFilter}
-              closeFilter={() => setShowFilters(false)}
-            />
+            <AssetFilter {...advancedFilter} />
           </div>
         </SlideOver>
       </div>
@@ -368,30 +375,40 @@ const AssetsList = () => {
         <Loading />
       ) : (
         <>
-          <div className="flex mt-2 flex-wrap w-full col-span-3">
-            {badge("Facility", facilityName, ["facility", "location"])}
-            {badge("Asset Name", qParams.search, ["search"])}
-            {badge("Location", locationName, ["location"])}
-            {badge("Asset Type", asset_type, ["asset_type"])}
-            {badge("Status", qParams.status, ["status"])}
-          </div>
+          <FilterBadges
+            badges={({ badge, value }) => [
+              value("Facility", ["facility", "location"], facility?.name || ""),
+              badge("Name", "search"),
+              value("Asset Type", "asset_type", asset_type || ""),
+              badge("Status", "status"),
+              value("Location", "location", locationName || ""),
+            ]}
+          />
           <div className="grow">
             <div className="py-8 md:px-5">
               {manageAssets}
-              {totalCount > limit && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Pagination
-                    cPage={currentPage}
-                    defaultPerPage={limit}
-                    data={{ totalCount }}
-                    onChange={handlePagination}
-                  />
-                </div>
-              )}
+              <Pagination totalCount={totalCount} />
             </div>
           </div>
         </>
       )}
+      {facility && (
+        <AssetImportModal
+          open={importAssetModalOpen}
+          onClose={() => setImportAssetModalOpen(false)}
+          facility={facility}
+        />
+      )}
+      <FacilitiesSelectDialogue
+        show={showFacilityDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() => navigate(`facility/${selectedFacility.id}/assets/new`)}
+        handleCancel={() => {
+          setShowFacilityDialog(false);
+          setSelectedFacility({ name: "" });
+        }}
+      />
     </div>
   );
 };

@@ -108,7 +108,7 @@ const Beds = (props: BedsProps) => {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <div className="text-2xl font-bold">
+        <div className="font-bold text-secondary-500">
           {!discharged ? "Move to bed:" : "Bed History"}
         </div>
         {props.setState && (

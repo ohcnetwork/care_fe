@@ -9,6 +9,12 @@ interface Routes {
 }
 
 const routes: Routes = {
+  config: {
+    path: process.env.REACT_APP_CONFIG || "/config.json",
+    method: "GET",
+    noAuth: true,
+  },
+
   // Auth Endpoints
   login: {
     path: "/api/v1/auth/login/",
@@ -23,6 +29,11 @@ const routes: Routes = {
 
   token_verify: {
     path: "/api/v1/auth/token/verify",
+    method: "POST",
+  },
+
+  checkResetToken: {
+    path: "/api/v1/password_reset/check/",
     method: "POST",
   },
 
@@ -193,6 +204,10 @@ const routes: Routes = {
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "DELETE",
+  },
+  operateAsset: {
+    path: "/api/v1/asset/{external_id}/operate_assets/",
+    method: "POST",
   },
 
   // Facility Beds
@@ -734,6 +749,10 @@ const routes: Routes = {
   getAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "GET",
+  },
+  deleteAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "DELETE",
   },
   updateAsset: {
     path: "/api/v1/asset/{external_id}/",

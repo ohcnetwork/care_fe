@@ -1,10 +1,10 @@
 import { createRef, useEffect, useState } from "react";
 import useKeyboardShortcut from "use-keyboard-shortcut";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import { isAppleDevice } from "../../Utils/utils";
 import TextFormField, { TextFormFieldProps } from "./FormFields/TextFormField";
 
 type SearchInputProps = TextFormFieldProps & {
-  className?: string | undefined;
   debouncePeriod?: number;
   secondary?: true | undefined;
 } & (
@@ -26,23 +26,24 @@ const SearchInput = ({
   ...props
 }: SearchInputProps) => {
   // Debounce related
-  const [value, setValue] = useState(() => props.value || "");
+  const [value, setValue] = useState(() => props.value);
+  useEffect(() => setValue(props.value), [props.value]);
   useEffect(() => {
-    const timeoutId = setTimeout(
-      () => onChange && onChange({ name, value: value || "" }),
-      debouncePeriod
-    );
-    return () => clearTimeout(timeoutId);
-  }, [value, debouncePeriod, name, onChange]);
+    if (value !== props.value) {
+      const timeoutId = setTimeout(
+        () => onChange && onChange({ name, value: value || "" }),
+        debouncePeriod
+      );
+      return () => clearTimeout(timeoutId);
+    }
+  }, [value, debouncePeriod, name, onChange, props.value]);
 
   // Focus hotkey related
   const ref = createRef<HTMLInputElement>();
   useKeyboardShortcut(
     props.hotkey || [isAppleDevice ? "Meta" : "Control", "K"],
     () => !props.secondary && ref.current?.focus(),
-    {
-      overrideSystem: !props.secondary,
-    }
+    { overrideSystem: !props.secondary }
   );
 
   const shortcutKeyIcon =
@@ -57,7 +58,7 @@ const SearchInput = ({
     ));
 
   // Escape hotkey to clear related
-  useKeyboardShortcut(["Escape"], () => setValue(""), {
+  useKeyboardShortcut(["Escape"], () => value && setValue(""), {
     ignoreInputFields: false,
   });
 
@@ -71,9 +72,11 @@ const SearchInput = ({
       validate={undefined}
       type="search"
       ref={ref}
-      className={`${className} enabled:bg-white`}
+      className={className}
       leading={
-        props.leading || <i className="text-gray-600 uil uil-search-alt" />
+        props.leading || (
+          <CareIcon className="text-gray-600 care-l-search-alt" />
+        )
       }
       trailing={
         props.trailing ||
@@ -92,7 +95,7 @@ const SearchInput = ({
           </kbd>
         </div>
       }
-      value={value}
+      value={value || ""}
       onChange={({ value }) => setValue(value)}
     />
   );

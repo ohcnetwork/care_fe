@@ -91,7 +91,21 @@ const LiveFeed = (props: any) => {
       middlewareHostname,
       ...cameraAsset,
     },
+    dispatch,
   });
+
+  const fetchCameraPresets = () =>
+    getPresets({
+      onSuccess: (resp) => {
+        setPresets(resp);
+      },
+      onError: (resp) => {
+        resp instanceof AxiosError &&
+          Notification.Error({
+            msg: "Camera is offline",
+          });
+      },
+    });
 
   const getBedPresets = async (id: any) => {
     const bedAssets = await dispatch(
@@ -145,7 +159,7 @@ const LiveFeed = (props: any) => {
       Notification.Error({ msg: "Something Went Wrong" });
     }
     getBedPresets(cameraAsset?.id);
-    getPresets({});
+    fetchCameraPresets();
     setToUpdate(null);
   };
 
@@ -158,15 +172,7 @@ const LiveFeed = (props: any) => {
 
   useEffect(() => {
     if (cameraAsset?.hostname) {
-      getPresets({
-        onSuccess: (resp) => setPresets(resp.data),
-        onError: (resp) => {
-          resp instanceof AxiosError &&
-            Notification.Error({
-              msg: "Camera is offline",
-            });
-        },
-      });
+      fetchCameraPresets();
     }
   }, []);
 
@@ -182,8 +188,8 @@ const LiveFeed = (props: any) => {
     }
   }, [page.offset, cameraAsset.id, refreshPresetsHash]);
 
-  const viewOptions = (page: number) =>
-    presets
+  const viewOptions = (page: number) => {
+    return presets
       ? Object.entries(presets)
           .map(([key, value]) => ({ label: key, value }))
           .slice(page, page + 10)
@@ -191,7 +197,7 @@ const LiveFeed = (props: any) => {
           label: "Monitor " + (i + 1),
           value: i + 1,
         }));
-
+  };
   useEffect(() => {
     let tId: any;
     if (streamStatus !== StreamStatus.Playing) {
@@ -229,16 +235,13 @@ const LiveFeed = (props: any) => {
         onError: () => setStreamStatus(StreamStatus.Offline),
       });
     },
-    stop: () => {
-      // NEED ID TO STOP STREAM
-    },
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       screenfull.request(liveFeedPlayerRef.current);
     },
     updatePreset: (option) => {
       getCameraStatus({
-        onSuccess: async ({ data }) => {
+        onSuccess: async (data) => {
           console.log({ currentPreset, data });
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
@@ -259,7 +262,7 @@ const LiveFeed = (props: any) => {
             if (response && response.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               getBedPresets(cameraAsset?.id);
-              getPresets({});
+              fetchCameraPresets();
             }
             setLoading(undefined);
           }
@@ -552,7 +555,7 @@ const LiveFeed = (props: any) => {
                             gotoBedPreset(preset);
                             setCurrentPreset(preset);
                             getBedPresets(cameraAsset?.id);
-                            getPresets({});
+                            fetchCameraPresets();
                           }}
                         >
                           <span className="justify-start text-xs font-semibold">
@@ -597,7 +600,7 @@ const LiveFeed = (props: any) => {
                   </button>
                   <button
                     className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                    disabled={presetsPage >= presets.length}
+                    disabled={presetsPage >= presets?.length}
                     onClick={() => {
                       setPresetsPage(presetsPage + 10);
                     }}
@@ -632,13 +635,7 @@ const LiveFeed = (props: any) => {
                   className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full"
                   onClick={() => {
                     getBedPresets(cameraAsset?.id);
-                    getPresets({
-                      onError: () => {
-                        Notification.Error({
-                          msg: "Camera is offline",
-                        });
-                      },
-                    });
+                    fetchCameraPresets();
                   }}
                 >
                   <RefreshIcon /> Refresh

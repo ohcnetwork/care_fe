@@ -15,8 +15,8 @@ jobs:
           stale-issue-message: "Hi, @gigincg, @nihal467, @khavinshankar, @mathew-alex, @aparnacoronasafe, This issue has been automatically marked as stale because it has not had any recent activity."
           stale-pr-message: "Hi, This pr has been automatically marked as stale because it has not had any recent activity. It will be automatically closed if no further activity occurs for 7 more days. Thank you for your contributions."
           close-pr-message: "Hi, @gigincg, @nihal467, @khavinshankar, @mathew-alex, This pr has been automatically closed because it has not had any recent activity. Thank you for your contributions. Feel free to repopen the pr."
-          exempt-issue-labels: "blocked,waiting for related PR,waiting for back end,help wanted"
-          exempt-pr-labels: "tested,needs testing,need Review,waiting for related PR,waiting for back end,help wanted,blocked"
+          exempt-issue-labels: "blocked,waiting for related PR,waiting for back end,help wanted,work-in-progress,In Progress,wishlist,EPIC"
+          exempt-pr-labels: "tested,needs testing,need Review,waiting for related PR,waiting for back end,help wanted,blocked,work-in-progress,In Progress"
           days-before-issue-stale: 14
           days-before-pr-stale: 7
           days-before-issue-close: -1
