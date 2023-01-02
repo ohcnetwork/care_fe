@@ -27,9 +27,10 @@ import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
-import SelectMenuV2 from "../Form/SelectMenuV2";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import DateInputV2 from "../Common/DateInputV2";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -113,7 +114,9 @@ const AssetCreate = (props: AssetProps) => {
   const [support_email, setSupportEmail] = useState("");
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [locations, setLocations] = useState<any>([]);
+  const [locations, setLocations] = useState<{ name: string; id: string }[]>(
+    []
+  );
   const [asset, setAsset] = useState<AssetData>();
   const [facilityName, setFacilityName] = useState("");
   const [qrCodeId, setQrCodeId] = useState("");
@@ -518,92 +521,70 @@ const AssetCreate = (props: AssetProps) => {
                     />
                   </div>
 
-                  <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
-                    {/* Location */}
-                    <div ref={fieldRef["location"]}>
-                      <label htmlFor="asset-location">Location *</label>
-                      <div className="mt-2">
-                        <SelectMenuV2
-                          required
-                          options={[
-                            {
-                              title: "Select",
-                              description: "Select the location",
-                              value: "0",
-                            },
-                            ...locations.map((location: any) => ({
-                              title: location.name,
-                              description: location.facility.name,
-                              value: location.id,
-                            })),
-                          ]}
-                          optionLabel={(o) => o.title}
-                          optionValue={(o) => o.value}
-                          value={location}
-                          onChange={(e) => setLocation(e)}
-                        />
-                      </div>
-                      <ErrorHelperText error={state.errors.location} />
-                    </div>
+                  {/* Location */}
+                  <div ref={fieldRef["location"]} className="col-span-6">
+                    <AutocompleteFormField
+                      name="location"
+                      label="Location"
+                      required
+                      placeholder="Select the location of the asset"
+                      options={locations}
+                      optionLabel={({ name }) => name}
+                      optionValue={({ id }) => id}
+                      value={location}
+                      onChange={({ value }) => setLocation(value)}
+                      error={state.errors.location}
+                    />
+                  </div>
 
+                  <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
                     {/* Asset Type */}
-                    <div ref={fieldRef["asset_type"]}>
-                      <label htmlFor="asset-type">Asset Type *</label>
-                      <div className="mt-2">
-                        <SelectMenuV2
-                          required
-                          options={[
-                            {
-                              title: "Internal",
-                              description:
-                                "Asset is inside the facility premises.",
-                              value: "INTERNAL",
-                            },
-                            {
-                              title: "External",
-                              description:
-                                "Asset is outside the facility premises.",
-                              value: "EXTERNAL",
-                            },
-                          ]}
-                          value={asset_type}
-                          placeholder="Select"
-                          optionLabel={(o) => o.title}
-                          optionValue={(o) =>
-                            o.value === "INTERNAL"
-                              ? AssetType.INTERNAL
-                              : AssetType.EXTERNAL
-                          }
-                          onChange={(e) => setAssetType(e)}
-                        />
-                      </div>
-                      <ErrorHelperText error={state.errors.asset_type} />
+                    <div ref={fieldRef["asset_type"]} className="flex-1">
+                      <SelectFormField
+                        label="Asset Type"
+                        name="asset_type"
+                        required
+                        options={[
+                          {
+                            title: "Internal",
+                            description:
+                              "Asset is inside the facility premises.",
+                            value: AssetType.INTERNAL,
+                          },
+                          {
+                            title: "External",
+                            description:
+                              "Asset is outside the facility premises.",
+                            value: AssetType.EXTERNAL,
+                          },
+                        ]}
+                        value={asset_type}
+                        optionLabel={({ title }) => title}
+                        optionDescription={({ description }) => description}
+                        optionValue={({ value }) => value}
+                        onChange={({ value }) => setAssetType(value)}
+                        error={state.errors.asset_type}
+                      />
                     </div>
 
                     {/* Asset Class */}
-                    <div ref={fieldRef["asset_class"]}>
-                      <label htmlFor="asset-class">Asset Class</label>
-                      <div className="mt-2">
-                        <SelectMenuV2
-                          options={[
-                            { title: "ONVIF Camera", value: "ONVIF" },
-                            {
-                              title: "HL7 Vitals Monitor",
-                              value: "HL7MONITOR",
-                            },
-                          ]}
-                          value={asset_class}
-                          placeholder="Select"
-                          optionLabel={(o) => o.title}
-                          optionValue={(o) =>
-                            o.value === "ONVIF"
-                              ? AssetClass.ONVIF
-                              : AssetClass.HL7MONITOR
-                          }
-                          onChange={(e) => setAssetClass(e)}
-                        />
-                      </div>
-                      <ErrorHelperText error={state.errors.asset_class} />
+                    <div ref={fieldRef["asset_class"]} className="flex-1">
+                      <SelectFormField
+                        name="asset_class"
+                        label="Asset Class"
+                        value={asset_class}
+                        options={[
+                          { title: "ONVIF Camera", value: AssetClass.ONVIF },
+                          {
+                            title: "HL7 Vitals Monitor",
+                            value: AssetClass.HL7MONITOR,
+                          },
+                        ]}
+                        optionLabel={({ title }) => title}
+                        optionValue={({ value }) => value}
+                        onChange={({ value }) => setAssetClass(value)}
+                        error={state.errors.asset_class}
+                      />
                     </div>
                   </div>
 
