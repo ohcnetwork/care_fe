@@ -1,6 +1,5 @@
 import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import { CapacityModal } from "./models";
-import { navigate } from "raviger";
 import { BED_TYPES } from "../../Common/constants";
 import moment from "moment";
 import { RoleButton } from "../Common/RoleButton";
@@ -15,9 +14,11 @@ import {
 } from "@material-ui/core";
 import { deleteCapacity } from "../../Redux/actions";
 import useVisibility from "../../Utils/useVisibility";
+import { BedCapacityModal } from "./BedCapacityModal";
 
 interface BedTypeProps extends CapacityModal {
   facilityId: number;
+  handleUpdate: () => void;
   removeBedType: (bedTypeId: number | undefined) => void;
 }
 
@@ -28,6 +29,8 @@ const BedTypeCard = (props: BedTypeProps) => {
   const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [isVisible, elementRef] = useVisibility();
+  const [open, setOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<number>(-1);
   const firstUpdate = useRef(true);
   const handleDeleteSubmit = async () => {
     if (props.room_type) {
@@ -82,16 +85,17 @@ const BedTypeCard = (props: BedTypeProps) => {
           Currently Occupied / Total Capacity
         </div>
         <div className="flex items-end justify-between mt-3">
-          <div className="text-xs text-gray-600 font-[400] italic">
+          <div className="text-xs text-gray-600 font-[400] italic p-1">
             {/* <i className="fas fa-history text-sm pr-2"></i> */}
             Last Updated;{" "}
             {props.modified_date && moment(props.modified_date).fromNow()}
           </div>
           <div className="flex justify-evenly gap-2 relative">
             <RoleButton
-              handleClickCB={() =>
-                navigate(`/facility/${props.facilityId}/bed/${props.room_type}`)
-              }
+              handleClickCB={() => {
+                setSelectedId(props.room_type || 0);
+                setOpen(true);
+              }}
               disableFor="readOnly"
               buttonType="html"
             >
@@ -158,6 +162,20 @@ const BedTypeCard = (props: BedTypeProps) => {
           </button>
         </DialogActions>
       </Dialog>
+      {open && (
+        <BedCapacityModal
+          show={open}
+          facilityId={props.facilityId}
+          handleClose={() => {
+            setOpen(false);
+          }}
+          handleUpdate={() => {
+            props.handleUpdate();
+            setOpen(false);
+          }}
+          id={selectedId}
+        />
+      )}
     </div>
   );
 };

@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../Components/Facility/TreatmentSummary";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
-import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
 import { FacilityCreate } from "../Components/Facility/FacilityCreate";
 import { FacilityHome } from "../Components/Facility/FacilityHome";
 import { HospitalList } from "../Components/Facility/HospitalList";
@@ -107,9 +106,6 @@ const routes = {
   "/facility/:facilityId/triage": ({ facilityId }: any) => (
     <TriageForm facilityId={facilityId} />
   ),
-  "/facility/:facilityId/doctor": ({ facilityId }: any) => (
-    <DoctorCapacityForm facilityId={facilityId} />
-  ),
   "/facility/:facilityId/patients": ({ facilityId }: any) => (
     <PatientManager facilityId={facilityId} />
   ),
@@ -149,9 +145,6 @@ const routes = {
   ),
   "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
     <TriageForm facilityId={facilityId} id={id} />
-  ),
-  "/facility/:facilityId/doctor/:id": ({ facilityId, id }: any) => (
-    <DoctorCapacityForm facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,

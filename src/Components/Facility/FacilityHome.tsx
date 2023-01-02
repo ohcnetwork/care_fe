@@ -40,6 +40,7 @@ import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ContactLink from "../Common/components/ContactLink";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { BedCapacityModal } from "./BedCapacityModal";
+import { DoctorCapacityModal } from "./DoctorCapacityModal";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -67,6 +68,7 @@ export const FacilityHome = (props: any) => {
     Array<PatientStatsModel>
   >([]);
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
+  const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -167,6 +169,14 @@ export const FacilityHome = (props: any) => {
                 key={`bed_${res.id}`}
                 {...res}
                 removeBedType={removeCurrentBedType}
+                handleUpdate={async () => {
+                  const capacityRes = await dispatch(
+                    listCapacity({}, { facilityId })
+                  );
+                  if (capacityRes && capacityRes.data) {
+                    setCapacityData(capacityRes.data.results);
+                  }
+                }}
               />
             );
           }
@@ -196,6 +206,14 @@ export const FacilityHome = (props: any) => {
             <DoctorsCountCard
               facilityId={facilityId}
               key={`bed_${data.id}`}
+              handleUpdate={async () => {
+                const doctorRes = await dispatch(
+                  listDoctor({}, { facilityId })
+                );
+                if (doctorRes && doctorRes.data) {
+                  setDoctorData(doctorRes.data.results);
+                }
+              }}
               {...data}
               removeDoctor={removeCurrentDoctorData}
             />
@@ -611,7 +629,7 @@ export const FacilityHome = (props: any) => {
           <div className="font-bold text-xl mb-2">Doctors List</div>
           <ButtonV2
             className="w-full md:w-auto"
-            onClick={() => navigate(`/facility/${facilityId}/doctor`)}
+            onClick={() => setDoctorCapacityModalOpen(true)}
             disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
             authorizeFor={NonReadOnlyUsers}
           >
@@ -669,6 +687,19 @@ export const FacilityHome = (props: any) => {
             );
             if (capacityRes && capacityRes.data) {
               setCapacityData(capacityRes.data.results);
+            }
+          }}
+        />
+      )}
+      {doctorCapacityModalOpen && (
+        <DoctorCapacityModal
+          facilityId={facilityId}
+          show={doctorCapacityModalOpen}
+          handleClose={() => setDoctorCapacityModalOpen(false)}
+          handleUpdate={async () => {
+            const doctorRes = await dispatch(listDoctor({}, { facilityId }));
+            if (doctorRes && doctorRes.data) {
+              setDoctorData(doctorRes.data.results);
             }
           }}
         />

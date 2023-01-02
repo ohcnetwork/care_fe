@@ -270,6 +270,7 @@ export const BedCapacityModal = (props: BedCapacityProps) => {
                 value={state.form.totalCapacity}
                 onChange={handleChange}
                 error={state.errors.totalCapacity}
+                min={0}
               />
             </div>
             <div className="w-full">
@@ -283,10 +284,11 @@ export const BedCapacityModal = (props: BedCapacityProps) => {
                 value={state.form.currentOccupancy}
                 onChange={handleChange}
                 error={state.errors.currentOccupancy}
+                min={0}
               />
             </div>
           </div>
-          <div className="p-4">
+          <div className="p-2">
             <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
               <div className="w-full md:w-auto">
                 <Cancel onClick={handleClose} />
