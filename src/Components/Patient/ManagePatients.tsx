@@ -14,7 +14,6 @@ import {
   getLocalBody,
   getAnyFacility,
 } from "../../Redux/actions";
-import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
 import {
   ADMITTED_TO,
@@ -33,6 +32,8 @@ import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
+import { PhoneNumberFormField } from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -93,6 +94,44 @@ export const PatientManager = (props: any) => {
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
   const [facilityCrumbName, setFacilityCrumbName] = useState("");
+  const [phone_number, setPhoneNumber] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
+  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
+    useState("");
+
+  useEffect(() => {
+    if (phone_number.length === 15) {
+      setPhoneNumberError("");
+      updateQuery({ phone_number });
+      return;
+    }
+
+    if (phone_number === "+91" || phone_number === "") {
+      setPhoneNumberError("");
+      updateQuery({ phone_number: "" });
+      return;
+    }
+
+    setPhoneNumberError("Enter a valid number");
+  }, [phone_number]);
+
+  useEffect(() => {
+    if (emergency_phone_number.length === 15) {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number });
+      return;
+    }
+
+    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number: "" });
+      return;
+    }
+
+    setEmergencyPhoneNumberError("Enter a valid number");
+  }, [emergency_phone_number]);
+
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
   const params = {
@@ -566,6 +605,15 @@ export const PatientManager = (props: any) => {
     );
   }
 
+  const queryField = <T,>(name: string, defaultValue?: T) => {
+    return {
+      name,
+      value: qParams[name] || defaultValue,
+      onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
+      className: "grow lg:max-w-sm w-full mb-2",
+    };
+  };
+
   return (
     <div className="px-6">
       <FacilitiesSelectDialogue
@@ -684,63 +732,35 @@ export const PatientManager = (props: any) => {
             <div>
               <div>
                 <div className="md:flex md:gap-4 mt-1">
-                  <div className="grow lg:max-w-sm w-full mb-2">
-                    <SearchInput
-                      label="Search by Name"
-                      name="name"
-                      onChange={(e) => updateQuery({ [e.name]: e.value })}
-                      value={qParams.name}
-                      placeholder="Search patient"
-                    />
-                  </div>
-                  <div className="grow lg:max-w-sm w-full mb-2">
-                    <SearchInput
-                      label="Search by IP Number"
-                      name="ip_no"
-                      onChange={(e) => updateQuery({ [e.name]: e.value })}
-                      value={qParams.ip_no}
-                      placeholder="Search IP Number"
-                      secondary
-                    />
-                  </div>
+                  <SearchInput
+                    label="Search by Patient"
+                    placeholder="Enter patient name"
+                    {...queryField("name")}
+                  />
+                  <SearchInput
+                    label="Search by IP Number"
+                    placeholder="Enter IP Number"
+                    secondary
+                    {...queryField("ip_no")}
+                  />
                 </div>
               </div>
             </div>
             <div className="md:flex md:gap-4">
-              <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-medium">
-                  Search by Primary Number
-                </div>
-                <PhoneNumberField
-                  value={qParams.phone_number || "+91"}
-                  onChange={(value: string) => {
-                    if (value !== "+91") {
-                      updateQuery({ phone_number: value });
-                    } else {
-                      updateQuery({ phone_number: "" });
-                    }
-                  }}
-                  turnOffAutoFormat={false}
-                  errors=""
-                />
-              </div>
-              <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-medium">
-                  Search by Emergency Number
-                </div>
-                <PhoneNumberField
-                  value={qParams.emergency_phone_number || "+91"}
-                  onChange={(value: string) => {
-                    if (value !== "+91") {
-                      updateQuery({ emergency_phone_number: value });
-                    } else {
-                      updateQuery({ emergency_phone_number: "" });
-                    }
-                  }}
-                  turnOffAutoFormat={false}
-                  errors=""
-                />
-              </div>
+              <PhoneNumberFormField
+                label="Search by Primary Number"
+                {...queryField("phone_number", "+91")}
+                value={phone_number}
+                onChange={(e) => setPhoneNumber(e.value)}
+                error={phoneNumberError}
+              />
+              <PhoneNumberFormField
+                label="Search by Emergency Number"
+                {...queryField("emergency_phone_number", "+91")}
+                value={emergency_phone_number}
+                onChange={(e) => setEmergencyPhoneNumber(e.value)}
+                error={emergencyPhoneNumberError}
+              />
             </div>
           </div>
         </div>
