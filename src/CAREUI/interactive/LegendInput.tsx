@@ -1,6 +1,6 @@
-import { RefObject, useRef, useState } from "react";
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
+import { RefObject, useRef, useState, useEffect } from "react";
 
 type InputProps = {
   id?: string;
@@ -33,8 +33,39 @@ export default function LegendInput(props: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const ref = props.ref || inputRef;
+
   const legendRef = useRef<HTMLLabelElement>(null);
   const [focused, setFocused] = useState(false);
+
+  const getAutofill = (element: Element) => {
+    let hasValue;
+    try {
+      hasValue = element.matches(":autofill");
+    } catch (err) {
+      try {
+        hasValue = element.matches(":-webkit-autofill");
+      } catch (er) {
+        hasValue = false;
+      }
+    }
+    hasValue && setFocused(true);
+  };
+
+  const detectAutofill = (element: Element) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(getAutofill(element));
+      }, 600);
+    });
+  };
+
+  const testAutoFill = async (element: Element) => {
+    await detectAutofill(element);
+  };
+
+  useEffect(() => {
+    ref.current && testAutoFill(ref.current);
+  }, [ref.current]);
 
   return (
     <div className={props.outerClassName}>
@@ -96,7 +127,7 @@ export default function LegendInput(props: InputProps) {
           required={props.required}
           autoComplete={props.autoComplete}
           className={classNames(
-            "w-full bg-gray-50 focus:bg-gray-100 cui-input",
+            "w-full border-gray-300 rounded-md shadow-sm bg-gray-50 focus:bg-gray-100 cui-input focus:border-2 focus:border-primary-500 focus:ring-0 focus:outline-none",
             props.size === "small" && "text-xs px-3 py-2",
             (!props.size || !["small", "large"].includes(props.size)) &&
               "px-4 py-3",
@@ -113,7 +144,7 @@ export default function LegendInput(props: InputProps) {
             onClick={() => setShowPassword(!showPassword)}
           >
             <CareIcon
-              className={`care-l-eye${showPassword ? "" : "-slash"} h-5`}
+              className={`care-l-eye${showPassword ? "" : "-slash"} text-lg`}
             />
           </button>
         )}

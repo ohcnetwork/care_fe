@@ -21,7 +21,7 @@ const frequencyTips = {
   qwk: "Once a week",
 };
 export const routes = ["Oral", "IV", "IM", "S/C"];
-export const units = ["mg", "ml", "drops", "ampule", "tsp"];
+export const units = ["mg", "g", "ml", "drops", "ampule", "tsp"];
 
 export type PrescriptionType = {
   medicine?: string;
@@ -174,7 +174,7 @@ export default function PrescriptionBuilder(
                   <div className="flex gap-1">
                     <input
                       type="number"
-                      className="text-gray-700 bg-gray-200 w-full focus:border-primary-400 block border rounded px-4 text-sm"
+                      className="cui-input-base py-0"
                       value={prescription.dosage_new?.split(" ")[0]}
                       placeholder="Dosage"
                       min={0}
@@ -211,7 +211,7 @@ export default function PrescriptionBuilder(
                   Days
                   <input
                     type="number"
-                    className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                    className="cui-input-base py-2"
                     value={prescription.days}
                     placeholder="Days"
                     min={0}
@@ -237,7 +237,7 @@ export default function PrescriptionBuilder(
                 Notes
                 <input
                   type="text"
-                  className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                  className="cui-input-base py-2"
                   value={prescription.notes}
                   placeholder="Notes"
                   onChange={(e) => {

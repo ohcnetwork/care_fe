@@ -7,8 +7,6 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import CancelOutlineIcon from "@material-ui/icons/CancelOutlined";
 import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -17,7 +15,6 @@ import {
   ActionTextInputField,
   PhoneNumberField,
   ErrorHelperText,
-  DateInputField,
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
@@ -31,6 +28,8 @@ import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import DateInputV2 from "../Common/DateInputV2";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -200,10 +199,10 @@ const AssetCreate = (props: AssetProps) => {
       setManufacturer(asset.manufacturer);
       asset.warranty_amc_end_of_validity &&
         setWarrantyAmcEndOfValidity(
-          moment(asset.warranty_amc_end_of_validity).format("YYYY-MM-DD")
+          moment(asset.warranty_amc_end_of_validity).toDate()
         );
       asset.last_serviced_on &&
-        setLastServicedOn(moment(asset.last_serviced_on).format("YYYY-MM-DD"));
+        setLastServicedOn(moment(asset.last_serviced_on).toDate());
       setNotes(asset.notes);
     }
   }, [asset]);
@@ -237,18 +236,28 @@ const AssetCreate = (props: AssetProps) => {
             invalidForm = true;
           }
           return;
-        case "support_phone":
+        case "support_phone": {
           if (!support_phone) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumberFromString(support_phone);
-          if (!phoneNumber?.isPossible()) {
+          const supportPhoneSimple = support_phone
+            .replace(/[^0-9]/g, "")
+            .slice(2);
+          const checkTollFree = supportPhoneSimple.startsWith("1800");
+          if (supportPhoneSimple.length > 10 && !checkTollFree) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          } else if (supportPhoneSimple.length > 11 && checkTollFree) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          } else if (supportPhoneSimple.length < 10) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }
           return;
+        }
         case "support_email":
           if (support_email && !validateEmailAddress(support_email)) {
             errors[field] = "Please enter valid email id";
@@ -317,8 +326,12 @@ const AssetCreate = (props: AssetProps) => {
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
         manufacturer: manufacturer,
-        warranty_amc_end_of_validity: warranty_amc_end_of_validity,
-        last_serviced_on: last_serviced_on,
+        warranty_amc_end_of_validity: warranty_amc_end_of_validity
+          ? moment(warranty_amc_end_of_validity).format("YYYY-MM-DD")
+          : null,
+        last_serviced_on: last_serviced_on
+          ? moment(last_serviced_on).format("YYYY-MM-DD")
+          : last_serviced_on,
         notes: notes,
       };
       if (!assetId) {
@@ -443,6 +456,9 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
   };
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
 
   return (
     <div className="pb-2 relative flex flex-col">
@@ -732,19 +748,24 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["warranty_amc_end_of_validity"]}
                   >
-                    <label htmlFor="warranty-expiry">
-                      Warranty / AMC Expiry
-                    </label>
-                    <DateInputField
-                      className="w-56"
+                    <label className="mb-2">Warranty / AMC Expiry</label>
+                    <DateInputV2
+                      className="border-1 border-gray-200"
                       value={warranty_amc_end_of_validity}
-                      onChange={(date) =>
-                        setWarrantyAmcEndOfValidity(
-                          moment(date).format("YYYY-MM-DD")
-                        )
-                      }
-                      errors={state.errors.warranty_amc_end_of_validity}
-                      InputLabelProps={{ shrink: true }}
+                      onChange={(date) => {
+                        if (
+                          moment(date).format("YYYY-MM-DD") <
+                          new Date().toLocaleDateString("en-ca")
+                        ) {
+                          Notification.Error({
+                            msg: "Warranty / AMC Expiry date can't be in past",
+                          });
+                        } else {
+                          setWarrantyAmcEndOfValidity(moment(date).toDate());
+                        }
+                      }}
+                      position="LEFT"
+                      min={yesterday}
                     />
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
@@ -775,6 +796,7 @@ const AssetCreate = (props: AssetProps) => {
                       Customer Support Number *{" "}
                     </label>
                     <PhoneNumberField
+                      enableTollFree
                       value={support_phone}
                       onChange={setSupportPhone}
                       errors={state.errors.support_phone}
@@ -836,15 +858,23 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["last_serviced_on"]}
                   >
                     <label htmlFor="last-serviced-on">Last Serviced On</label>
-                    <DateInputField
-                      className="w-56"
+                    <DateInputV2
+                      className="border-1 border-gray-200"
                       value={last_serviced_on}
-                      onChange={(date) =>
-                        setLastServicedOn(moment(date).format("YYYY-MM-DD"))
-                      }
-                      disableFuture={true}
-                      errors={state.errors.last_serviced_on}
-                      InputLabelProps={{ shrink: true }}
+                      onChange={(date) => {
+                        if (
+                          moment(date).format("YYYY-MM-DD") >
+                          new Date().toLocaleDateString("en-ca")
+                        ) {
+                          Notification.Error({
+                            msg: "Last Serviced date can't be in future",
+                          });
+                        } else {
+                          setLastServicedOn(moment(date).toDate());
+                        }
+                      }}
+                      position="LEFT"
+                      max={new Date()}
                     />
                     <ErrorHelperText error={state.errors.last_serviced_on} />
                   </div>
@@ -871,53 +901,26 @@ const AssetCreate = (props: AssetProps) => {
 
                 <div />
 
-                <div className="mt-12 flex justify-end gap-x-4 gap-y-2 flex-wrap">
-                  <button
-                    className="primary-button w-full md:w-auto flex justify-center"
-                    id="asset-create"
-                    type="submit"
-                    onClick={(e) => handleSubmit(e, false)}
-                  >
-                    <div className="flex items-center justify-start gap-2">
-                      <CheckCircleOutlineIcon className="text-base">
-                        save
-                      </CheckCircleOutlineIcon>
-                      {assetId ? "Update" : "Create Asset"}
-                    </div>
-                  </button>
-                  {!assetId && (
-                    <button
-                      className="primary-button w-full md:w-auto flex justify-center"
-                      id="asset-create"
-                      type="submit"
-                      onClick={(e) => handleSubmit(e, true)}
-                    >
-                      <div className="flex items-center justify-start gap-2">
-                        <CheckCircleOutlineIcon className="text-base">
-                          save
-                        </CheckCircleOutlineIcon>
-                        Create & Add More
-                      </div>
-                    </button>
-                  )}
-                  <button
-                    id="asset-cancel"
-                    className="secondary-button w-full md:w-auto flex justify-center"
+                <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                  <Cancel
                     onClick={() =>
                       navigate(
                         assetId
-                          ? `/assets/${assetId}`
+                          ? `/facility/${facilityId}/assets/${assetId}`
                           : `/facility/${facilityId}`
                       )
                     }
-                  >
-                    <div className="flex items-center justify-start gap-2">
-                      <CancelOutlineIcon className="text-base">
-                        cancel
-                      </CancelOutlineIcon>
-                      Cancel
-                    </div>
-                  </button>
+                  />
+                  <Submit
+                    onClick={(e) => handleSubmit(e, false)}
+                    label={assetId ? "Update" : "Create Asset"}
+                  />
+                  {!assetId && (
+                    <Submit
+                      onClick={(e) => handleSubmit(e, true)}
+                      label="Create & Add More"
+                    />
+                  )}
                 </div>
               </div>
             </form>

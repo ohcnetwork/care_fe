@@ -1,11 +1,9 @@
 import {
-  Button,
   Card,
   CardContent,
   CircularProgress,
   InputLabel,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
 import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
@@ -40,6 +38,7 @@ import {
 import { FacilityModel } from "../Facility/models";
 
 import { classNames, goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -140,7 +139,7 @@ export const UserAdd = (props: UserProps) => {
     idle: 0,
     checking: 1,
     exists: 2,
-    avaliable: 3,
+    available: 3,
   };
 
   const [usernameExists, setUsernameExists] = useState<number>(0);
@@ -153,7 +152,7 @@ export const UserAdd = (props: UserProps) => {
     if (usernameCheck === undefined || usernameCheck.status === 409)
       setUsernameExists(userExistsEnums.exists);
     else if (usernameCheck.status === 200)
-      setUsernameExists(userExistsEnums.avaliable);
+      setUsernameExists(userExistsEnums.available);
     else
       Notification.Error({
         msg: "Some error checking username availabality. Please try again later.",
@@ -407,7 +406,7 @@ export const UserAdd = (props: UserProps) => {
             errors[field] =
               "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
-          } else if (usernameExists !== userExistsEnums.avaliable) {
+          } else if (usernameExists !== userExistsEnums.available) {
             errors[field] = "This username already exists";
             invalidForm = true;
           }
@@ -712,10 +711,25 @@ export const UserAdd = (props: UserProps) => {
                               <i className="fas fa-circle-dot" /> checking...
                             </span>
                           ) : (
-                            validateRule(
-                              usernameExists !== userExistsEnums.exists,
-                              "Username is available"
-                            )
+                            <>
+                              {usernameExists === userExistsEnums.exists ? (
+                                <div>
+                                  {" "}
+                                  <i className="fas fa-circle-xmark text-red-500" />
+                                  <span className="text-red-500">
+                                    Username is not available
+                                  </span>
+                                </div>
+                              ) : (
+                                <div>
+                                  {" "}
+                                  <i className="fas fa-circle-check text-green-500" />
+                                  <span className="text-primary-500">
+                                    Username is available
+                                  </span>
+                                </div>
+                              )}
+                            </>
                           )}
                         </>
                       )}
@@ -926,27 +940,8 @@ export const UserAdd = (props: UserProps) => {
               )}
             </div>
             <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-              <Button
-                color="default"
-                variant="contained"
-                onClick={() => goBack()}
-              >
-                Cancel
-              </Button>
-              <Button
-                color="primary"
-                fullWidth
-                className="w-full md:w-auto"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                onClick={(e) => handleSubmit(e)}
-                startIcon={
-                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                }
-              >
-                {buttonText}
-              </Button>
+              <Cancel onClick={() => goBack()} />
+              <Submit onClick={handleSubmit} label={buttonText} />
             </div>
           </form>
         </CardContent>

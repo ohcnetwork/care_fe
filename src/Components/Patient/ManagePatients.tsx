@@ -19,8 +19,8 @@ import NavTabs from "../Common/NavTabs";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
+  PATIENT_CATEGORIES,
   TELEMEDICINE_ACTIONS,
-  PatientCategoryTailwindClass,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
@@ -32,8 +32,7 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { DropdownItem } from "../Common/components/Menu";
-import useExport from "../../Common/hooks/useExport";
+import { ExportMenu } from "../Common/Export";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -66,7 +65,6 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   Stable: "STABLE",
   "Slightly Abnormal": "ABNORMAL",
   Critical: "CRITICAL",
-  unknown: "UNKNOWN",
 };
 
 export const PatientManager = (props: any) => {
@@ -76,7 +74,6 @@ export const PatientManager = (props: any) => {
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const { exportCSV, ExportMenu } = useExport();
   const {
     qParams,
     updateQuery,
@@ -197,10 +194,10 @@ export const PatientManager = (props: any) => {
 
   let managePatients: any = null;
 
-  const exportPatients = async (isFiltered: boolean) => {
+  const exportPatients = (isFiltered: boolean) => {
     const filters = { ...params, csv: true, facility: facilityId };
     if (!isFiltered) delete filters.is_active;
-    exportCSV("patients", getAllPatient(filters, "downloadPatients"));
+    return () => getAllPatient(filters, "downloadPatients");
   };
 
   useEffect(() => {
@@ -380,9 +377,11 @@ export const PatientManager = (props: any) => {
         patientUrl = `/patient/${patient.id}`;
       }
 
-      const category: PatientCategory =
-        patient?.last_consultation?.category || "unknown";
-      const categoryClass = PatientCategoryTailwindClass[category];
+      const category: PatientCategory | undefined =
+        patient?.last_consultation?.category;
+      const categoryClass = category
+        ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
+        : "patient-unknown";
 
       return (
         <Link
@@ -394,7 +393,7 @@ export const PatientManager = (props: any) => {
             className={`rounded-l-lg absolute top-0 bottom-0 left-0 h-full w-1 group-hover:w-5 transition-all duration-200 ease-in-out flex items-center ${categoryClass}`}
           >
             <span className="absolute -left-32 -right-32 top-0 bottom-0 flex justify-center items-center text-center transform -rotate-90 text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out">
-              {PatientCategoryDisplayText[category]}
+              {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
             </span>
           </div>
           <div className="flex gap-4 items-start">
@@ -468,8 +467,7 @@ export const PatientManager = (props: any) => {
                 )}
                 <div className="flex w-full">
                   <div className="flex flex-wrap gap-2 flex-row justify-start">
-                    {/* TODO: Re-enable Review Missed | Temporary Hack for Launch */}
-                    {/* {patient.review_time &&
+                    {patient.review_time &&
                       !patient.last_consultation?.discharge_date &&
                       Number(patient.last_consultation?.review_interval) > 0 &&
                       moment().isAfter(patient.review_time) && (
@@ -478,7 +476,7 @@ export const PatientManager = (props: any) => {
                           startIcon="clock"
                           text="Review Missed"
                         />
-                      )} */}
+                      )}
                     {patient.allow_transfer ? (
                       <Chip
                         color="yellow"
@@ -635,14 +633,20 @@ export const PatientManager = (props: any) => {
             <span>Advanced Filters</span>
           </button>
           <div className="tooltip">
-            <ExportMenu disabled={!isExportAllowed}>
-              <DropdownItem onClick={() => exportPatients(true)}>
-                {tabValue === 0 ? "Live patients" : "Discharged patients"}
-              </DropdownItem>
-              <DropdownItem onClick={() => exportPatients(false)}>
-                All patients
-              </DropdownItem>
-            </ExportMenu>
+            <ExportMenu
+              disabled={!isExportAllowed}
+              exportItems={[
+                {
+                  label:
+                    tabValue === 0 ? "Live patients" : "Discharged patients",
+                  action: exportPatients(true),
+                },
+                {
+                  label: "All patients",
+                  action: exportPatients(false),
+                },
+              ]}
+            />
             {!isExportAllowed && (
               <span className="tooltip-text tooltip-bottom -translate-x-1/2">
                 Select a seven day period
@@ -708,7 +712,6 @@ export const PatientManager = (props: any) => {
                   Search by Primary Number
                 </div>
                 <PhoneNumberField
-                  bgColor="bg-white"
                   value={qParams.phone_number || "+91"}
                   onChange={(value: string) => {
                     if (value !== "+91") {
@@ -726,7 +729,6 @@ export const PatientManager = (props: any) => {
                   Search by Emergency Number
                 </div>
                 <PhoneNumberField
-                  bgColor="bg-white"
                   value={qParams.emergency_phone_number || "+91"}
                   onChange={(value: string) => {
                     if (value !== "+91") {

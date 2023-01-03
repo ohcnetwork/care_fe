@@ -13,9 +13,8 @@ import { PhoneNumberField } from "../Common/HelperInputFields";
 import parsePhoneNumberFromString from "libphonenumber-js";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
-import { DropdownItem } from "../Common/components/Menu";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import useExport from "../../Common/hooks/useExport";
+import ExportMenu from "../Common/Export";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -25,7 +24,6 @@ export default function ResultList() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const { ExportMenu, exportCSV } = useExport();
   const {
     qParams,
     updateQuery,
@@ -40,6 +38,7 @@ export default function ResultList() {
   });
   const [resultId, setResultId] = useState(-1);
   const [dataList, setDataList] = useState({ lsgList: [], wardList: [] });
+
   let manageResults: any = null;
   useEffect(() => {
     setIsLoading(true);
@@ -111,12 +110,6 @@ export default function ResultList() {
 
   const lsgWardData = (lsgs: any, wards: any) =>
     setDataList({ lsgList: lsgs, wardList: wards });
-
-  const exportResults = () =>
-    exportCSV(
-      "external_results",
-      externalResultList({ ...qParams, csv: true }, "externalResultList")
-    );
 
   const lsgWardBadge = (key: string, value: any, paramKey: string) => {
     return (
@@ -236,20 +229,30 @@ export default function ResultList() {
       />
       <div className="flex items-center justify-between">
         <PageTitle title="External Results" hideBack breadcrumbs={false} />
-        <ExportMenu label="Import/Export">
-          <DropdownItem
-            icon={<CareIcon className="care-l-import" />}
-            onClick={() => navigate("/external_results/upload")}
-          >
-            Import Results
-          </DropdownItem>
-          <DropdownItem
-            icon={<CareIcon className="care-l-export" />}
-            onClick={exportResults}
-          >
-            Export Results
-          </DropdownItem>
-        </ExportMenu>
+        <ExportMenu
+          label="Import/Export"
+          exportItems={[
+            {
+              label: "Import Results",
+              action: () => navigate("/external_results/upload"),
+              options: {
+                icon: <CareIcon className="care-l-import" />,
+              },
+            },
+            {
+              label: "Export Results",
+              action: () =>
+                externalResultList(
+                  { ...qParams, csv: true },
+                  "externalResultList"
+                ),
+              filePrefix: "external_results",
+              options: {
+                icon: <CareIcon className="care-l-export" />,
+              },
+            },
+          ]}
+        />
       </div>
       <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">

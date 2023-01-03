@@ -36,20 +36,25 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
 import GLocationPicker from "../Common/GLocationPicker";
-import { goBack } from "../../Utils/utils";
+import {
+  includesIgnoreCase as includesIgnoreCase,
+  getPincodeDetails,
+  goBack,
+} from "../../Utils/utils";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import RadioInputsV2 from "../Common/components/RadioInputsV2";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface FacilityProps {
-  facilityId?: number;
+  facilityId?: string;
 }
 
 interface StateObj {
@@ -153,6 +158,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
   const [ward, setWard] = useState<WardObj[]>([]);
   const { width } = useWindowDimensions();
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
@@ -170,6 +176,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           setDistricts([...districtList.data]);
         }
         setIsDistrictLoading(false);
+        return districtList ? [...districtList.data] : [];
       }
     },
     [dispatchAction]
@@ -294,6 +301,43 @@ export const FacilityCreate = (props: FacilityProps) => {
         },
       });
     }
+  };
+
+  const handlePincodeChange = async (e: FieldChangeEvent<string>) => {
+    handleChange(e);
+
+    if (!validatePincode(e.value)) return;
+
+    const pincodeDetails = await getPincodeDetails(e.value);
+    if (!pincodeDetails) return;
+
+    const matchedState = states.find((state) => {
+      return includesIgnoreCase(state.name, pincodeDetails.statename);
+    });
+    if (!matchedState) return;
+
+    const fetchedDistricts = await fetchDistricts(matchedState.id);
+    if (!fetchedDistricts) return;
+
+    const matchedDistrict = fetchedDistricts.find((district) => {
+      return includesIgnoreCase(district.name, pincodeDetails.district);
+    });
+    if (!matchedDistrict) return;
+
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        state: matchedState.id,
+        district: matchedDistrict.id,
+        pincode: e.value,
+      },
+    });
+
+    setShowAutoFilledPincode(true);
+    setTimeout(() => {
+      setShowAutoFilledPincode(false);
+    }, 2000);
   };
 
   const handleValueChange = (value: any, field: string) => {
@@ -492,10 +536,13 @@ export const FacilityCreate = (props: FacilityProps) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <label htmlFor="facility-type" className="mb-2">
+                <FieldLabel
+                  htmlFor="facility-type"
+                  className="mb-2"
+                  required={true}
+                >
                   Facility Type
-                  <span className="text-red-500">{" *"}</span>
-                </label>
+                </FieldLabel>
                 <SelectMenuV2
                   id="facility-type"
                   required
@@ -508,10 +555,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <ErrorHelperText error={state.errors.facility_type} />
               </div>
               <div>
-                <label htmlFor="facility-name" className="mb-2">
+                <FieldLabel
+                  htmlFor="facility-name"
+                  className="mb-2"
+                  required={true}
+                >
                   Facility Name
-                  <span className="text-red-500">{" *"}</span>
-                </label>
+                </FieldLabel>
                 <TextFormField
                   id="facility-name"
                   name="name"
@@ -522,9 +572,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
               <div>
-                <label htmlFor="facility-features" className="mb-2">
+                <FieldLabel htmlFor="facility-features" className="mb-2">
                   Features
-                </label>
+                </FieldLabel>
                 <MultiSelectMenuV2
                   id="facility-features"
                   placeholder="Features"
@@ -537,10 +587,38 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <ErrorHelperText error={state.errors.features} />
               </div>
               <div>
-                <label htmlFor="facility-state" className="mb-2">
+                <FieldLabel
+                  htmlFor="facility-pincode"
+                  className="mb-2"
+                  required={true}
+                >
+                  Pincode
+                </FieldLabel>
+                <TextFormField
+                  id="facility-pincode"
+                  name="pincode"
+                  required
+                  onChange={handlePincodeChange}
+                  value={state.form.pincode}
+                  error={state.errors.pincode}
+                />
+                {showAutoFilledPincode && (
+                  <div>
+                    <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
+                    <span className="text-primary-500 text-sm">
+                      State and district auto-filled from pincode
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div>
+                <FieldLabel
+                  htmlFor="facility-state"
+                  className="mb-2"
+                  required={true}
+                >
                   State
-                  <span className="text-red-500">{" *"}</span>
-                </label>
+                </FieldLabel>
                 {isStateLoading ? (
                   <CircularProgress size={20} />
                 ) : (
@@ -565,12 +643,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </>
                 )}
               </div>
-
               <div>
-                <label htmlFor="facility-district" className="mb-2">
+                <FieldLabel
+                  htmlFor="facility-district"
+                  className="mb-2"
+                  required={true}
+                >
                   District
-                  <span className="text-red-500">{" *"}</span>
-                </label>
+                </FieldLabel>
 
                 {isDistrictLoading ? (
                   <CircularProgress size={20} />
@@ -598,10 +678,13 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
 
               <div>
-                <label htmlFor="facility-localbody" className="mb-2">
+                <FieldLabel
+                  htmlFor="facility-localbody"
+                  className="mb-2"
+                  required={true}
+                >
                   LocalBody
-                  <span className="text-red-500">{" *"}</span>
-                </label>
+                </FieldLabel>
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
                 ) : (
@@ -626,11 +709,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </>
                 )}
               </div>
-              <div className="md:col-span-2">
-                <label htmlFor="facility-ward" className="mb-2">
+              <div>
+                <FieldLabel
+                  htmlFor="facility-ward"
+                  className="mb-2"
+                  required={true}
+                >
                   Ward
-                  <span className="text-red-500">{" *"}</span>
-                </label>
+                </FieldLabel>
                 {isWardLoading ? (
                   <CircularProgress size={20} />
                 ) : (
@@ -657,11 +743,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                 )}
               </div>
 
-              <div className="md:col-span-2">
-                <label htmlFor="facility-address" className="mb-2">
+              <div>
+                <FieldLabel
+                  htmlFor="facility-address"
+                  className="mb-2"
+                  required={true}
+                >
                   Address
-                  <span className="text-red-500">{" *"}</span>
-                </label>
+                </FieldLabel>
                 <TextAreaFormField
                   id="facility-address"
                   name="address"
@@ -672,24 +761,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
               <div>
-                <label htmlFor="facility-pincode" className="mb-2">
-                  Pincode
-                  <span className="text-red-500">{" *"}</span>
-                </label>
-                <TextFormField
-                  id="facility-pincode"
-                  name="pincode"
-                  required
-                  onChange={handleChange}
-                  value={state.form.pincode}
-                  error={state.errors.pincode}
-                />
-              </div>
-              <div>
-                <label htmlFor="facility-tel" className="mb-1">
+                <FieldLabel
+                  htmlFor="facility-tel"
+                  className="mb-1"
+                  required={true}
+                >
                   Emergency Contact Number
-                  <span className="text-red-500">{" *"}</span>
-                </label>
+                </FieldLabel>
                 <PhoneNumberField
                   value={state.form.phone_number}
                   onChange={(value: string) =>
@@ -703,10 +781,12 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div className="md:col-span-2 grid grid-cols-1 xl:grid-cols-2 gap-4 py-4">
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
-                    <label htmlFor="facility-oxygen_capacity" className="mb-2">
+                    <FieldLabel
+                      htmlFor="facility-oxygen_capacity"
+                      className="mb-2"
+                    >
                       Liquid Oxygen Capacity
-                      <span className="text-red-500">{" *"}</span>
-                    </label>
+                    </FieldLabel>
                     <TextFormField
                       id="facility-oxygen_capacity"
                       name="oxygen_capacity"
@@ -718,13 +798,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                     />
                   </div>
                   <div>
-                    <label
+                    <FieldLabel
                       htmlFor="facility-expected_oxygen_requirement"
                       className="mb-2"
                     >
                       Expected Burn Rate
-                      <span className="text-red-500">{" *"}</span>
-                    </label>
+                    </FieldLabel>
                     <TextFormField
                       id="facility-expected_oxygen_requirement"
                       name="expected_oxygen_requirement"
@@ -740,10 +819,12 @@ export const FacilityCreate = (props: FacilityProps) => {
 
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
-                    <label htmlFor="facility-type_b_cylinders" className="mb-2">
+                    <FieldLabel
+                      htmlFor="facility-type_b_cylinders"
+                      className="mb-2"
+                    >
                       B Type Cylinders
-                      <span className="text-red-500">{" *"}</span>
-                    </label>
+                    </FieldLabel>
                     <TextFormField
                       id="facility-type_b_cylinders"
                       name="type_b_cylinders"
@@ -755,13 +836,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                     />
                   </div>
                   <div>
-                    <label
+                    <FieldLabel
                       htmlFor="facility-expected_type_b_cylinders"
                       className="mb-2"
                     >
                       Expected Burn Rate
-                      <span className="text-red-500">{" *"}</span>
-                    </label>
+                    </FieldLabel>
                     <TextFormField
                       id="facility-expected_type_b_cylinders"
                       name="expected_type_b_cylinders"
@@ -777,10 +857,12 @@ export const FacilityCreate = (props: FacilityProps) => {
 
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
-                    <label htmlFor="facility-type_c_cylinders" className="mb-2">
+                    <FieldLabel
+                      htmlFor="facility-type_c_cylinders"
+                      className="mb-2"
+                    >
                       C Type Cylinders
-                      <span className="text-red-500">{" *"}</span>
-                    </label>
+                    </FieldLabel>
                     <TextFormField
                       id="facility-type_c_cylinders"
                       name="type_c_cylinders"
@@ -792,13 +874,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                     />
                   </div>
                   <div>
-                    <label
+                    <FieldLabel
                       htmlFor="facility-expected_type_c_cylinders"
                       className="mb-2"
                     >
                       Expected Burn Rate
-                      <span className="text-red-500">{" *"}</span>
-                    </label>
+                    </FieldLabel>
                     <TextFormField
                       id="facility-expected_type_c_cylinders"
                       name="expected_type_c_cylinders"
@@ -814,10 +895,12 @@ export const FacilityCreate = (props: FacilityProps) => {
 
                 <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
                   <div>
-                    <label htmlFor="facility-type_d_cylinders" className="mb-2">
+                    <FieldLabel
+                      htmlFor="facility-type_d_cylinders"
+                      className="mb-2"
+                    >
                       D Type Cylinders
-                      <span className="text-red-500">{" *"}</span>
-                    </label>
+                    </FieldLabel>
                     <TextFormField
                       id="facility-type_d_cylinders"
                       name="type_d_cylinders"
@@ -829,13 +912,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                     />
                   </div>
                   <div>
-                    <label
+                    <FieldLabel
                       htmlFor="facility-expected_type_d_cylinders"
                       className="mb-2"
                     >
                       Expected Burn Rate
-                      <span className="text-red-500">{" *"}</span>
-                    </label>
+                    </FieldLabel>
                     <TextFormField
                       id="facility-expected_type_d_cylinders"
                       name="expected_type_d_cylinders"
@@ -852,9 +934,12 @@ export const FacilityCreate = (props: FacilityProps) => {
 
               {KASP_ENABLED && (
                 <div>
-                  <label htmlFor="facility-kasp_empanelled" className="mb-2">
+                  <FieldLabel
+                    htmlFor="facility-kasp_empanelled"
+                    className="mb-2"
+                  >
                     Is this facility {KASP_STRING} empanelled?
-                  </label>
+                  </FieldLabel>
                   <RadioInputsV2
                     name="kasp_empanelled"
                     selected={state.form.kasp_empanelled}
@@ -878,7 +963,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               } -mx-2`}
             >
               <div className="flex-1 px-2">
-                <label className="mb-2">Location</label>
+                <FieldLabel className="mb-2">Location</FieldLabel>
                 <TextFormField
                   name="latitude"
                   placeholder="Latitude"
@@ -918,7 +1003,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 </Popover>
               </div>
               <div className="flex-1 px-2">
-                <label className="mb-1">&nbsp;</label>
+                <FieldLabel className="mb-1">&nbsp;</FieldLabel>
                 <TextFormField
                   name="longitude"
                   placeholder="Longitude"
@@ -935,23 +1020,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                   : " flex justify-between "
               } mt-2 gap-2 `}
             >
-              <ButtonV2
-                variant="secondary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  goBack();
-                }}
-              >
-                Cancel
-              </ButtonV2>
-              <ButtonV2
-                id="facility-save"
-                variant="primary"
-                type="submit"
-                onClick={(e) => handleSubmit(e)}
-              >
-                <i className="fa-regular fa-circle-check"></i> {buttonText}
-              </ButtonV2>
+              <Cancel onClick={() => goBack()} />
+              <Submit onClick={handleSubmit} label={buttonText} />
             </div>
           </form>
         </CardContent>

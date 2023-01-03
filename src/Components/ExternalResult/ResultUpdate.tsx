@@ -1,6 +1,5 @@
 import { useCallback, useState, useReducer } from "react";
 import {
-  Button,
   CardContent,
   CircularProgress,
   InputLabel,
@@ -9,7 +8,6 @@ import {
   Box,
   FormControlLabel,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -23,6 +21,7 @@ import {
 import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -325,26 +324,8 @@ export default function UpdateResult(props: any) {
             </div>
           </div>
           <div className="flex flex-col md:flex-row gap-2 justify-end mt-4">
-            <Button
-              color="default"
-              variant="contained"
-              type="button"
-              className="w-full md:w-auto"
-              onClick={() => goBack()}
-            >
-              Cancel
-            </Button>
-            <Button
-              color="primary"
-              variant="contained"
-              type="submit"
-              startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-              onClick={(e) => handleSubmit(e)}
-              data-testid="submit-button"
-              className="w-full md:w-auto"
-            >
-              Submit
-            </Button>
+            <Cancel onClick={() => goBack()} />
+            <Submit onClick={handleSubmit} />
           </div>
         </form>
       </CardContent>
