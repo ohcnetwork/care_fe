@@ -1053,7 +1053,7 @@ button:disabled,
   @apply border border-primary-500
 }
 .button-secondary-default { 
-  @apply accent-secondary-200 bg-secondary-100 enabled:hover:bg-secondary-200 text-secondary-700
+  @apply accent-secondary-200 bg-secondary-300 enabled:hover:bg-secondary-400 text-secondary-800
 }
 .button-secondary-ghost { 
   @apply accent-secondary-200 enabled:hover:bg-secondary-200 text-secondary-700
