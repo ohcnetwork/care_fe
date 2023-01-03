@@ -14,7 +14,8 @@ import {
 } from "@material-ui/core";
 import { deleteCapacity } from "../../Redux/actions";
 import useVisibility from "../../Utils/useVisibility";
-import { BedCapacityModal } from "./BedCapacityModal";
+import { BedCapacity } from "./BedCapacity";
+import DialogModal from "../Common/Dialog";
 
 interface BedTypeProps extends CapacityModal {
   facilityId: number;
@@ -163,18 +164,24 @@ const BedTypeCard = (props: BedTypeProps) => {
         </DialogActions>
       </Dialog>
       {open && (
-        <BedCapacityModal
+        <DialogModal
           show={open}
-          facilityId={props.facilityId}
-          handleClose={() => {
-            setOpen(false);
-          }}
-          handleUpdate={() => {
-            props.handleUpdate();
-            setOpen(false);
-          }}
-          id={selectedId}
-        />
+          onClose={() => setOpen(false)}
+          title="Update Bed Capacity"
+          className="max-w-lg md:min-w-[650px]"
+        >
+          <BedCapacity
+            facilityId={props.facilityId}
+            handleClose={() => {
+              setOpen(false);
+            }}
+            handleUpdate={() => {
+              props.handleUpdate();
+              setOpen(false);
+            }}
+            id={selectedId}
+          />
+        </DialogModal>
       )}
     </div>
   );

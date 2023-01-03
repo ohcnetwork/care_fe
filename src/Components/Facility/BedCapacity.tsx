@@ -14,12 +14,10 @@ import { CapacityModal, OptionsType } from "./models";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
 import { FieldLabel } from "../Form/FormFields/FormField";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: number;
-  show: boolean;
   handleClose: () => void;
   handleUpdate: () => void;
   id?: number;
@@ -57,9 +55,9 @@ const bedCountReducer = (state = initialState, action: any) => {
   }
 };
 
-export const BedCapacityModal = (props: BedCapacityProps) => {
+export const BedCapacity = (props: BedCapacityProps) => {
   const dispatchAction: any = useDispatch();
-  const { facilityId, show, handleClose, handleUpdate, id } = props;
+  const { facilityId, handleClose, handleUpdate, id } = props;
   const [state, dispatch] = useReducer(bedCountReducer, initialState);
   const [isLastOptionType, setIsLastOptionType] = useState(false);
   const [bedTypes, setBedTypes] = useState<Array<OptionsType>>(initBedTypes);
@@ -211,12 +209,7 @@ export const BedCapacityModal = (props: BedCapacityProps) => {
   };
 
   return (
-    <DialogModal
-      show={show}
-      onClose={handleClose}
-      title={headerText}
-      className="max-w-lg md:min-w-[650px]"
-    >
+    <div>
       {isLoading ? (
         <div className="flex justify-center items-center p-4">
           <div role="status">
@@ -311,6 +304,6 @@ export const BedCapacityModal = (props: BedCapacityProps) => {
           </div>
         </div>
       )}
-    </DialogModal>
+    </div>
   );
 };

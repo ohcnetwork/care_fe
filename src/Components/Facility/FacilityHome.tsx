@@ -39,8 +39,9 @@ import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ContactLink from "../Common/components/ContactLink";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { BedCapacityModal } from "./BedCapacityModal";
-import { DoctorCapacityModal } from "./DoctorCapacityModal";
+import { BedCapacity } from "./BedCapacity";
+import { DoctorCapacity } from "./DoctorCapacity";
+import DialogModal from "../Common/Dialog";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -677,32 +678,45 @@ export const FacilityHome = (props: any) => {
         </div>
       </div>
       {bedCapacityModalOpen && (
-        <BedCapacityModal
-          facilityId={facilityId}
+        <DialogModal
           show={bedCapacityModalOpen}
-          handleClose={() => setBedCapacityModalOpen(false)}
-          handleUpdate={async () => {
-            const capacityRes = await dispatch(
-              listCapacity({}, { facilityId })
-            );
-            if (capacityRes && capacityRes.data) {
-              setCapacityData(capacityRes.data.results);
-            }
-          }}
-        />
+          onClose={() => setBedCapacityModalOpen(false)}
+          title="Add Bed Capacity"
+          className="max-w-lg md:min-w-[650px]"
+        >
+          <BedCapacity
+            facilityId={facilityId}
+            handleClose={() => setBedCapacityModalOpen(false)}
+            handleUpdate={async () => {
+              const capacityRes = await dispatch(
+                listCapacity({}, { facilityId })
+              );
+              if (capacityRes && capacityRes.data) {
+                setCapacityData(capacityRes.data.results);
+              }
+            }}
+          />
+        </DialogModal>
       )}
       {doctorCapacityModalOpen && (
-        <DoctorCapacityModal
-          facilityId={facilityId}
+        <DialogModal
           show={doctorCapacityModalOpen}
-          handleClose={() => setDoctorCapacityModalOpen(false)}
-          handleUpdate={async () => {
-            const doctorRes = await dispatch(listDoctor({}, { facilityId }));
-            if (doctorRes && doctorRes.data) {
-              setDoctorData(doctorRes.data.results);
-            }
-          }}
-        />
+          onClose={() => setDoctorCapacityModalOpen(false)}
+          title="Add Doctor Capacity"
+          className="max-w-lg md:min-w-[650px]"
+        >
+          <DoctorCapacity
+            facilityId={facilityId}
+            show={doctorCapacityModalOpen}
+            handleClose={() => setDoctorCapacityModalOpen(false)}
+            handleUpdate={async () => {
+              const doctorRes = await dispatch(listDoctor({}, { facilityId }));
+              if (doctorRes && doctorRes.data) {
+                setDoctorData(doctorRes.data.results);
+              }
+            }}
+          />
+        </DialogModal>
       )}
     </div>
   );

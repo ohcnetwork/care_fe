@@ -12,7 +12,6 @@ import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
-import DialogModal from "../Common/Dialog";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: number;
@@ -53,9 +52,9 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
   }
 };
 
-export const DoctorCapacityModal = (props: DoctorCapacityProps) => {
+export const DoctorCapacity = (props: DoctorCapacityProps) => {
   const dispatchAction: any = useDispatch();
-  const { facilityId, show, handleClose, handleUpdate, id } = props;
+  const { facilityId, handleClose, handleUpdate, id } = props;
   const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
   const [isLastOptionType, setIsLastOptionType] = useState(false);
@@ -194,12 +193,7 @@ export const DoctorCapacityModal = (props: DoctorCapacityProps) => {
   };
 
   return (
-    <DialogModal
-      show={show}
-      onClose={handleClose}
-      title={headerText}
-      className="max-w-lg md:min-w-[650px]"
-    >
+    <div>
       {isLoading ? (
         <div className="flex justify-center items-center p-4">
           <div role="status">
@@ -286,6 +280,6 @@ export const DoctorCapacityModal = (props: DoctorCapacityProps) => {
           </form>
         </div>
       )}
-    </DialogModal>
+    </div>
   );
 };

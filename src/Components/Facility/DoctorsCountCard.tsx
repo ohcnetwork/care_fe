@@ -13,7 +13,8 @@ import {
   DialogTitle,
 } from "@material-ui/core";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
-import { DoctorCapacityModal } from "./DoctorCapacityModal";
+import { DoctorCapacity } from "./DoctorCapacity";
+import DialogModal from "../Common/Dialog";
 
 interface DoctorsCountProps extends DoctorModal {
   facilityId: number;
@@ -116,18 +117,24 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
         </Dialog>
       </div>
       {open && (
-        <DoctorCapacityModal
+        <DialogModal
           show={open}
-          facilityId={props.facilityId}
-          handleClose={() => {
-            setOpen(false);
-          }}
-          handleUpdate={() => {
-            props.handleUpdate();
-            setOpen(false);
-          }}
-          id={selectedId}
-        />
+          onClose={() => setOpen(false)}
+          title="Update Doctor Capacity"
+        >
+          <DoctorCapacity
+            show={open}
+            facilityId={props.facilityId}
+            handleClose={() => {
+              setOpen(false);
+            }}
+            handleUpdate={() => {
+              props.handleUpdate();
+              setOpen(false);
+            }}
+            id={selectedId}
+          />
+        </DialogModal>
       )}
     </div>
   );
