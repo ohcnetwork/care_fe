@@ -9,6 +9,7 @@ import { PatientCategory } from "../Facility/models";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
+import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
@@ -25,6 +26,7 @@ export default function PatientInfoCard(props: {
 }) {
   const [open, setOpen] = useState(false);
   const [showLinkABHANumber, setShowLinkABHANumber] = useState(false);
+  const [showABHAProfile, setShowABHAProfile] = useState(false);
 
   const patient = props.patient;
   const ip_no = props.ip_no;
@@ -227,8 +229,22 @@ export default function PatientInfoCard(props: {
               </Link>
             )
         )}
-        {/* TODO: hide if already linked */}
-        {!patient.abha_number && (
+        {patient.abha_number ? (
+          <>
+            <ButtonV2
+              className="hover:text-white flex gap-3 justify-start font-semibold"
+              onClick={() => setShowABHAProfile(true)}
+            >
+              <CareIcon className="care-l-user-square" />
+              <p>Show ABHA Profile</p>
+            </ButtonV2>
+            <ABHAProfileModal
+              abha={patient.abha_number_object}
+              show={showABHAProfile}
+              onClose={() => setShowABHAProfile(false)}
+            />
+          </>
+        ) : (
           <>
             <ButtonV2
               className="hover:text-white flex gap-3 justify-start font-semibold"

@@ -23,6 +23,19 @@ export interface AssignedToObjectModel {
   user_type: string;
 }
 
+export interface AbhaObject {
+  id: number;
+  created_date: string;
+  modified_date: string;
+  abha_number: string;
+  email: string | null;
+  first_name: string;
+  health_id: string | null;
+  last_name: string;
+  middle_name: string;
+  profile_photo: string;
+}
+
 export interface PatientModel {
   test_id?: string;
   id?: number;
@@ -117,6 +130,7 @@ export interface PatientModel {
 
   // ABDM related
   abha_number?: string;
+  abha_number_object?: AbhaObject;
 }
 
 export interface SampleTestModel {
