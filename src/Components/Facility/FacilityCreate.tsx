@@ -36,7 +36,11 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
 import GLocationPicker from "../Common/GLocationPicker";
-import { goBack } from "../../Utils/utils";
+import {
+  includesIgnoreCase as includesIgnoreCase,
+  getPincodeDetails,
+  goBack,
+} from "../../Utils/utils";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -159,6 +163,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [createdFacilityId, setCreatedFacilityId] = useState("");
   const { width } = useWindowDimensions();
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
@@ -176,6 +181,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           setDistricts([...districtList.data]);
         }
         setIsDistrictLoading(false);
+        return districtList ? [...districtList.data] : [];
       }
     },
     [dispatchAction]
@@ -337,6 +343,43 @@ export const FacilityCreate = (props: FacilityProps) => {
         },
       });
     }
+  };
+
+  const handlePincodeChange = async (e: FieldChangeEvent<string>) => {
+    handleChange(e);
+
+    if (!validatePincode(e.value)) return;
+
+    const pincodeDetails = await getPincodeDetails(e.value);
+    if (!pincodeDetails) return;
+
+    const matchedState = states.find((state) => {
+      return includesIgnoreCase(state.name, pincodeDetails.statename);
+    });
+    if (!matchedState) return;
+
+    const fetchedDistricts = await fetchDistricts(matchedState.id);
+    if (!fetchedDistricts) return;
+
+    const matchedDistrict = fetchedDistricts.find((district) => {
+      return includesIgnoreCase(district.name, pincodeDetails.district);
+    });
+    if (!matchedDistrict) return;
+
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        state: matchedState.id,
+        district: matchedDistrict.id,
+        pincode: e.value,
+      },
+    });
+
+    setShowAutoFilledPincode(true);
+    setTimeout(() => {
+      setShowAutoFilledPincode(false);
+    }, 2000);
   };
 
   const handleValueChange = (value: any, field: string) => {
@@ -635,6 +678,31 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </div>
                   <div>
                     <FieldLabel
+                      htmlFor="facility-pincode"
+                      className="mb-2"
+                      required={true}
+                    >
+                      Pincode
+                    </FieldLabel>
+                    <TextFormField
+                      id="facility-pincode"
+                      name="pincode"
+                      required
+                      onChange={handlePincodeChange}
+                      value={state.form.pincode}
+                      error={state.errors.pincode}
+                    />
+                    {showAutoFilledPincode && (
+                      <div>
+                        <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
+                        <span className="text-primary-500 text-sm">
+                          State and district auto-filled from pincode
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <FieldLabel
                       htmlFor="facility-state"
                       className="mb-2"
                       required={true}
@@ -665,7 +733,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                       </>
                     )}
                   </div>
-
                   <div>
                     <FieldLabel
                       htmlFor="facility-district"
@@ -732,7 +799,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                       </>
                     )}
                   </div>
-                  <div className="md:col-span-2">
+                  <div>
                     <FieldLabel
                       htmlFor="facility-ward"
                       className="mb-2"
@@ -769,7 +836,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     )}
                   </div>
 
-                  <div className="md:col-span-2">
+                  <div>
                     <FieldLabel
                       htmlFor="facility-address"
                       className="mb-2"
@@ -784,23 +851,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                       onChange={handleChange}
                       value={state.form.address}
                       error={state.errors.address}
-                    />
-                  </div>
-                  <div>
-                    <FieldLabel
-                      htmlFor="facility-pincode"
-                      className="mb-2"
-                      required={true}
-                    >
-                      Pincode
-                    </FieldLabel>
-                    <TextFormField
-                      id="facility-pincode"
-                      name="pincode"
-                      required
-                      onChange={handleChange}
-                      value={state.form.pincode}
-                      error={state.errors.pincode}
                     />
                   </div>
                   <div>
