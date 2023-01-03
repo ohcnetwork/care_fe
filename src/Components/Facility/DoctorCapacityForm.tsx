@@ -14,11 +14,11 @@ import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
 import { goBack } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 
 const Loading = loadable(() => import("../../Components/Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -151,7 +151,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   const validateData = () => {
     const errors = { ...initForm };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, _i) => {
+    Object.keys(state.form).forEach((field) => {
       if (!state.form[field]) {
         errors[field] = "Field is required";
         invalidForm = true;
@@ -165,9 +165,8 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     return true;
   };
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    form[e.name] = e.value;
+  const handleFormFieldChange: FieldChangeEventHandler<unknown> = (event) => {
+    const form = { ...state.form, [event.name]: event.value };
     dispatch({ type: "set_form", form });
   };
 
@@ -244,63 +243,44 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                 options={doctorTypes.filter((type) => !type.disabled)}
                 optionLabel={(option) => option.text}
                 onChange={(e) =>
-                  handleChange({ name: "area", value: (e && e.id) || "" })
+                  handleFormFieldChange({
+                    name: "area",
+                    value: (e && e.id) || "",
+                  })
                 }
                 disabled={!!id}
               />
               <ErrorHelperText error={state.errors.area} />
             </div>
             <div className="p-4">
-              <FieldLabel htmlFor="count" required={true} className="mb-2">
-                Count
-              </FieldLabel>
               <TextFormField
                 id="count"
+                label="Count"
                 name="count"
                 type="number"
                 value={state.form.count}
-                onChange={(e) =>
-                  handleChange({ name: "count", value: e.value })
-                }
+                onChange={handleFormFieldChange}
                 error={state.errors.count}
               />
             </div>
             <div className="p-4">
               <div className="flex justify-between flex-col md:flex-row">
                 <div className="flex flex-row w-full sm:w-auto gap-4">
-                  <ButtonV2
-                    id="doctor-cancel"
-                    type="button"
-                    variant="secondary"
-                    className="w-full sm:w-auto"
+                  <Cancel
                     onClick={() => goBack(!id && `/facility/${facilityId}`)}
-                  >
-                    Cancel
-                  </ButtonV2>
+                  />
                 </div>
-                <div className="flex flex-row w-full sm:w-auto flex-wrap">
-                  {!id && !isLastOptionType && (
-                    <ButtonV2
-                      id="doctor-save-and-exit"
-                      color="primary"
-                      className="w-full sm:w-auto mt-2 md:mt-0 md:mr-2"
-                      type="submit"
-                      onClick={(e) => handleSubmit(e, "Save and Exit")}
-                    >
-                      <CareIcon className="care-l-check-circle text-lg"></CareIcon>{" "}
-                      Save Doctor Capacity
-                    </ButtonV2>
-                  )}
-                  <ButtonV2
+                <div className="flex flex-row w-full sm:w-auto flex-wrap gap-2">
+                  <Submit
+                    hidden={!(!id && !isLastOptionType)}
+                    onClick={(e) => handleSubmit(e, "Save and Exit")}
+                    label="Save Doctor Capacity"
+                  />
+                  <Submit
                     id="doctor-save"
-                    color="primary"
-                    className="w-full sm:w-auto mt-2 md:mt-0"
-                    type="submit"
                     onClick={(e) => handleSubmit(e)}
-                  >
-                    <CareIcon className="care-l-check-circle text-lg"></CareIcon>{" "}
-                    {buttonText}
-                  </ButtonV2>
+                    label={buttonText}
+                  />
                 </div>
               </div>
             </div>

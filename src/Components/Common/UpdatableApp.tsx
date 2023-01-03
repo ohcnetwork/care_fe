@@ -58,10 +58,8 @@ const UpdatableApp = ({ children }: UpdatableAppProps) => {
   useEffect(() => {
     if (!appUpdated) return;
 
-    setTimeout(() => {
-      localStorage.removeItem(APP_UPDATED_KEY);
-      setAppUpdated(false);
-    }, 5000);
+    localStorage.removeItem(APP_UPDATED_KEY);
+    setTimeout(() => setAppUpdated(false), 5000);
   }, [appUpdated]);
 
   const updateApp = async () => {

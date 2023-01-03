@@ -1,4 +1,6 @@
 import { PatientCategory } from "../Components/Facility/models";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import moment from "moment";
 
 export const KeralaLogo = "images/kerala-logo.png";
 
@@ -210,20 +212,20 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
-  { id: 30, text: "30 minutes" },
-  { id: 60, text: "1 hour" },
-  { id: 120, text: "2 hours" },
-  { id: 180, text: "3 hours" },
-  { id: 240, text: "4 hours" },
-  { id: 360, text: "6 hours" },
-  { id: 480, text: "8 hours" },
-  { id: 720, text: "12 hours" },
-  { id: 1440, text: "24 hours" },
-  { id: 2160, text: "36 hours" },
-  { id: 2880, text: "48 hours" },
+  { id: 30, text: "30 mins" },
+  { id: 60, text: "1 hr" },
+  { id: 120, text: "2 hr" },
+  { id: 180, text: "3 hr" },
+  { id: 240, text: "4 hr" },
+  { id: 360, text: "6 hr" },
+  { id: 480, text: "8 hr" },
+  { id: 720, text: "12 hr" },
+  { id: 1440, text: "24 hr" },
+  { id: 2160, text: "36 hr" },
+  { id: 2880, text: "48 hr" },
 ];
 
-export const SYMPTOM_CHOICES: Array<OptionsType> = [
+export const SYMPTOM_CHOICES = [
   { id: 1, text: "ASYMPTOMATIC" },
   { id: 2, text: "FEVER" },
   { id: 3, text: "SORE THROAT" },
@@ -287,20 +289,18 @@ export const ADMITTED_TO = [
   { id: "7", text: "Regular" },
 ];
 
-export const PATIENT_CATEGORIES = [
-  { id: "Comfort", text: "Comfort Care" },
-  { id: "Stable", text: "Stable" },
-  { id: "Moderate", text: "Slightly Abnormal" },
-  { id: "Critical", text: "Critical" },
-];
+export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
 
-export const PatientCategoryTailwindClass: Record<PatientCategory, string> = {
-  "Comfort Care": "patient-comfort",
-  Stable: "patient-stable",
-  "Slightly Abnormal": "patient-abnormal",
-  Critical: "patient-critical",
-  unknown: "patient-unknown",
-};
+export const PATIENT_CATEGORIES: {
+  id: PatientCategoryID;
+  text: PatientCategory;
+  twClass: string;
+}[] = [
+  { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
+  { id: "Stable", text: "Stable", twClass: "patient-stable" },
+  { id: "Moderate", text: "Slightly Abnormal", twClass: "patient-abnormal" },
+  { id: "Critical", text: "Critical", twClass: "patient-critical" },
+];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 
@@ -828,3 +828,120 @@ export const BLACKLISTED_PATHS: RegExp[] = [
   /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/pressure_sore+/i,
   /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/dialysis+/i,
 ];
+
+export const XLSXAssetImportSchema = {
+  Name: { prop: "name", type: String },
+  Type: {
+    prop: "asset_type",
+    type: String,
+    oneOf: ["INTERNAL", "EXTERNAL"],
+    required: true,
+  },
+  Class: {
+    prop: "asset_class",
+    type: String,
+    oneOf: ["HL7MONITOR", "ONVIF"],
+  },
+  Description: { prop: "description", type: String },
+  "Working Status": {
+    prop: "is_working",
+    type: Boolean,
+    parse: (status: string) => {
+      if (status === "WORKING") {
+        return true;
+      } else if (status === "NOT WORKING") {
+        return false;
+      } else {
+        throw new Error("Invalid Working Status");
+      }
+    },
+    required: true,
+  },
+  "Not Working Reason": {
+    prop: "not_working_reason",
+    type: String,
+  },
+  "QR Code ID": { prop: "qr_code_id", type: String },
+  Manufacturer: { prop: "manufacturer", type: String },
+  "Vendor Name": { prop: "vendor_name", type: String },
+  "Support Name": { prop: "support_name", type: String },
+  "Support Email": {
+    prop: "support_email",
+    type: String,
+    parse: (email: string) => {
+      const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
+
+      if (!isValid) {
+        throw new Error("Invalid Support Email");
+      }
+
+      return email;
+    },
+  },
+  "Support Phone Number": {
+    prop: "support_phone",
+    type: String,
+    parse: (phone: number | string) => {
+      const parsed = parsePhoneNumberFromString(String(phone), "IN");
+
+      if (!parsed?.isValid()) {
+        throw new Error("Invalid Support Phone Number");
+      }
+
+      return parsed?.format("E.164");
+    },
+    required: true,
+  },
+  "Warrenty End Date": {
+    prop: "warranty_amc_end_of_validity",
+    type: String,
+    parse: (date: string) => {
+      const parsed = new Date(date);
+
+      if (String(parsed) === "Invalid Date") {
+        throw new Error("Invalid Warrenty End Date");
+      }
+
+      return moment(parsed).format("YYYY-MM-DD");
+    },
+  },
+  "Last Service Date": {
+    prop: "last_serviced_on",
+    type: String,
+    parse: (date: string) => {
+      const parsed = new Date(date);
+
+      if (String(parsed) === "Invalid Date") {
+        throw new Error("Invalid Last Service Date");
+      }
+
+      return moment(parsed).format("YYYY-MM-DD");
+    },
+  },
+  Notes: { prop: "notes", type: String },
+  META: {
+    prop: "meta",
+    type: {
+      "Config - IP Address": {
+        prop: "local_ip_address",
+        type: String,
+        parse: (ip: string) => {
+          const isValid =
+            /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+              ip
+            );
+
+          if (!isValid) {
+            throw new Error("Invalid Config IP Address");
+          }
+
+          return ip;
+        },
+      },
+      "Config: Camera Access Key": {
+        prop: "camera_access_key",
+        type: String,
+      },
+    },
+  },
+};

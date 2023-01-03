@@ -2,10 +2,10 @@ import React from "react";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { deepEqual } from "../../Common/utils";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
-import CloseIcon from "@material-ui/icons/Close";
 import PersonPinIcon from "@material-ui/icons/PersonPin";
 import { GMAPS_API_KEY } from "../../Common/env";
 import Spinner from "./Spinner";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const render = (status: Status) => {
   if (status === "LOADING") {
@@ -207,7 +207,7 @@ const Map: React.FC<MapProps> = ({
             ref={mapCloseRef}
             onClick={handleOnClose}
           >
-            <CloseIcon />
+            <CareIcon className="care-l-times-circle text-lg" />
           </div>
         )}
         {handleOnSelectCurrentLocation && (

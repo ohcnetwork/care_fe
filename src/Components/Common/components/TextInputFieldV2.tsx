@@ -41,9 +41,7 @@ const TextInputFieldV2 = (props: Props) => {
       )}
       <input
         id={props.id}
-        className={
-          "block w-full input" + ((props.error && "border-danger-500") || "")
-        }
+        className={`cui-input-base ${props.error ? "border-danger-500" : ""}`}
         type={props.type || "text"}
         name={props.name || props.id}
         autoComplete={props.autoComplete || props.name || props.id}

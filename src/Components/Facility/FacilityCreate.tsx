@@ -36,21 +36,25 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
 import GLocationPicker from "../Common/GLocationPicker";
-import { goBack } from "../../Utils/utils";
+import {
+  includesIgnoreCase as includesIgnoreCase,
+  getPincodeDetails,
+  goBack,
+} from "../../Utils/utils";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import RadioInputsV2 from "../Common/components/RadioInputsV2";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface FacilityProps {
-  facilityId?: number;
+  facilityId?: string;
 }
 
 interface StateObj {
@@ -154,6 +158,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
   const [ward, setWard] = useState<WardObj[]>([]);
   const { width } = useWindowDimensions();
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
@@ -171,6 +176,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           setDistricts([...districtList.data]);
         }
         setIsDistrictLoading(false);
+        return districtList ? [...districtList.data] : [];
       }
     },
     [dispatchAction]
@@ -295,6 +301,43 @@ export const FacilityCreate = (props: FacilityProps) => {
         },
       });
     }
+  };
+
+  const handlePincodeChange = async (e: FieldChangeEvent<string>) => {
+    handleChange(e);
+
+    if (!validatePincode(e.value)) return;
+
+    const pincodeDetails = await getPincodeDetails(e.value);
+    if (!pincodeDetails) return;
+
+    const matchedState = states.find((state) => {
+      return includesIgnoreCase(state.name, pincodeDetails.statename);
+    });
+    if (!matchedState) return;
+
+    const fetchedDistricts = await fetchDistricts(matchedState.id);
+    if (!fetchedDistricts) return;
+
+    const matchedDistrict = fetchedDistricts.find((district) => {
+      return includesIgnoreCase(district.name, pincodeDetails.district);
+    });
+    if (!matchedDistrict) return;
+
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        state: matchedState.id,
+        district: matchedDistrict.id,
+        pincode: e.value,
+      },
+    });
+
+    setShowAutoFilledPincode(true);
+    setTimeout(() => {
+      setShowAutoFilledPincode(false);
+    }, 2000);
   };
 
   const handleValueChange = (value: any, field: string) => {
@@ -545,6 +588,31 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
               <div>
                 <FieldLabel
+                  htmlFor="facility-pincode"
+                  className="mb-2"
+                  required={true}
+                >
+                  Pincode
+                </FieldLabel>
+                <TextFormField
+                  id="facility-pincode"
+                  name="pincode"
+                  required
+                  onChange={handlePincodeChange}
+                  value={state.form.pincode}
+                  error={state.errors.pincode}
+                />
+                {showAutoFilledPincode && (
+                  <div>
+                    <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
+                    <span className="text-primary-500 text-sm">
+                      State and district auto-filled from pincode
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div>
+                <FieldLabel
                   htmlFor="facility-state"
                   className="mb-2"
                   required={true}
@@ -575,7 +643,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </>
                 )}
               </div>
-
               <div>
                 <FieldLabel
                   htmlFor="facility-district"
@@ -642,7 +709,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </>
                 )}
               </div>
-              <div className="md:col-span-2">
+              <div>
                 <FieldLabel
                   htmlFor="facility-ward"
                   className="mb-2"
@@ -676,7 +743,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 )}
               </div>
 
-              <div className="md:col-span-2">
+              <div>
                 <FieldLabel
                   htmlFor="facility-address"
                   className="mb-2"
@@ -691,23 +758,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                   onChange={handleChange}
                   value={state.form.address}
                   error={state.errors.address}
-                />
-              </div>
-              <div>
-                <FieldLabel
-                  htmlFor="facility-pincode"
-                  className="mb-2"
-                  required={true}
-                >
-                  Pincode
-                </FieldLabel>
-                <TextFormField
-                  id="facility-pincode"
-                  name="pincode"
-                  required
-                  onChange={handleChange}
-                  value={state.form.pincode}
-                  error={state.errors.pincode}
                 />
               </div>
               <div>
@@ -970,23 +1020,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                   : " flex justify-between "
               } mt-2 gap-2 `}
             >
-              <ButtonV2
-                variant="secondary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  goBack();
-                }}
-              >
-                Cancel
-              </ButtonV2>
-              <ButtonV2
-                id="facility-save"
-                variant="primary"
-                type="submit"
-                onClick={(e) => handleSubmit(e)}
-              >
-                <i className="fa-regular fa-circle-check"></i> {buttonText}
-              </ButtonV2>
+              <Cancel onClick={() => goBack()} />
+              <Submit onClick={handleSubmit} label={buttonText} />
             </div>
           </form>
         </CardContent>

@@ -1,29 +1,11 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import DropdownMenu from "../../Components/Common/components/Menu";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { CSVLink } from "react-csv";
-import ButtonV2 from "../../Components/Common/components/ButtonV2";
 
 interface CSVLinkProps {
   id: string;
   filename: string;
   data: string;
-}
-
-interface ExportMenuProps {
-  disabled?: boolean | undefined;
-  label?: string;
-  children: JSX.Element | JSX.Element[];
-}
-
-interface ExportButtonProps {
-  disabled?: boolean | undefined;
-  tooltip?: string | undefined;
-  tooltipClassName?: string;
-  type?: "csv" | "json";
-  action: any;
-  filenamePrefix: string;
 }
 
 export default function useExport() {
@@ -34,6 +16,8 @@ export default function useExport() {
     filename: "",
     data: "",
   });
+
+  const _CSVLink = () => <CSVLink hidden target="_blank" {...csvLinkProps} />;
 
   const getTimestamp = () => new Date().toISOString();
 
@@ -68,69 +52,28 @@ export default function useExport() {
     setIsExporting(false);
   };
 
-  const _CSVLink = () => <CSVLink hidden target="_blank" {...csvLinkProps} />;
+  const exportFile = (action: any, filePrefix = "export", type = "csv") => {
+    if (!action) return;
 
-  const ExportMenu = ({
-    label = "Export",
-    disabled,
-    children,
-  }: ExportMenuProps) => {
-    return (
-      <>
-        <_CSVLink />
-        <DropdownMenu
-          disabled={isExporting || disabled}
-          title={isExporting ? "Exporting..." : label}
-          icon={<CareIcon className="care-l-import" />}
-          className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
-        >
-          {children}
-        </DropdownMenu>
-      </>
-    );
-  };
-
-  const ExportButton = ({
-    tooltipClassName = "tooltip-bottom -translate-x-7",
-    type = "csv",
-    ...props
-  }: ExportButtonProps) => {
-    const exportFile = () => {
-      if (type === "csv") exportCSV(props.filenamePrefix, props.action());
-      if (type === "json") exportJSON(props.filenamePrefix, props.action());
-    };
-
-    return (
-      <>
-        <_CSVLink />
-        <ButtonV2
-          disabled={isExporting || props.disabled}
-          onClick={exportFile}
-          className="mx-2 tooltip p-4 text-lg text-secondary-800 disabled:text-secondary-500 disabled:bg-transparent"
-          variant="secondary"
-          ghost
-          circle
-        >
-          {isExporting ? (
-            <CareIcon className="care-l-spinner-alt animate-spin" />
-          ) : (
-            <CareIcon className="care-l-export" />
-          )}
-          <span className={`tooltip-text ${tooltipClassName}`}>
-            {props.tooltip || "Export"}
-          </span>
-        </ButtonV2>
-      </>
-    );
+    switch (type) {
+      case "csv":
+        exportCSV(filePrefix, action());
+        break;
+      case "json":
+        exportJSON(filePrefix, action());
+        break;
+      default:
+        exportCSV(filePrefix, action());
+    }
   };
 
   return {
     isExporting,
 
-    ExportMenu,
-    ExportButton,
+    _CSVLink,
 
     exportCSV,
     exportJSON,
+    exportFile,
   };
 }

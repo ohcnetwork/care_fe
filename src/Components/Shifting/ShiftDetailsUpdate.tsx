@@ -1,13 +1,10 @@
 import { useReducer, useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
-
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   MultilineInputField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate, useQueryParams } from "raviger";
@@ -32,9 +29,9 @@ import {
   RadioGroup,
   Box,
   FormControlLabel,
-  Button,
 } from "@material-ui/core";
 import { goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -452,27 +449,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  className="w-full md:w-auto"
-                  onClick={() => goBack()}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  className="w-full md:w-auto"
-                  style={{ marginLeft: "auto" }}
-                  onClick={handleSubmit}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
-                >
-                  Submit
-                </Button>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} />
               </div>
             </div>
           </CardContent>
