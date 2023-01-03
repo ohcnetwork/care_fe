@@ -9,12 +9,10 @@ import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import CancelOutlineIcon from "@material-ui/icons/CancelOutlined";
-import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
-  ActionTextInputField,
   PhoneNumberField,
   ErrorHelperText,
   DateInputField,
@@ -23,7 +21,6 @@ import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
 import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
-import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
 import moment from "moment";
 import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
@@ -31,6 +28,7 @@ import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import QRScanner from "../Common/QRScanner";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -124,7 +122,6 @@ const AssetCreate = (props: AssetProps) => {
   const [last_serviced_on, setLastServicedOn] = useState<any>(null);
   const [notes, setNotes] = useState("");
   const dispatchAction: any = useDispatch();
-  const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
 
   const [currentSection, setCurrentSection] =
     useState<AssetFormSection>("General Details");
@@ -350,21 +347,18 @@ const AssetCreate = (props: AssetProps) => {
   };
 
   const parseAssetId = (assetUrl: string) => {
+    if (!assetUrl) return;
+
     try {
       const params = parseQueryParams(assetUrl);
-      // QR Maybe searchParams "asset" or "assetQR"
       const assetId = params.asset || params.assetQR;
-      if (assetId) {
-        setQrCodeId(assetId);
-        setIsScannerActive(false);
-        return;
-      }
+
+      if (assetId) return assetId;
     } catch (err) {
       console.log(err);
       Notification.Error({ msg: err });
     }
     Notification.Error({ msg: "Invalid Asset Id" });
-    setIsScannerActive(false);
   };
 
   if (isLoading) return <Loading />;
@@ -400,29 +394,6 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
   }
-
-  if (isScannerActive)
-    return (
-      <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
-        <button
-          onClick={() => setIsScannerActive(false)}
-          className="btn btn-default mb-2"
-        >
-          <i className="fas fa-times mr-2"></i> Close Scanner
-        </button>
-        <QrReader
-          delay={300}
-          onScan={(assetId: any) => (assetId ? parseAssetId(assetId) : null)}
-          onError={(e: any) =>
-            Notification.Error({
-              msg: e.message,
-            })
-          }
-          style={{ width: "100%" }}
-        />
-        <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
-      </div>
-    );
 
   const sectionId = (section: AssetFormSection) =>
     section.toLowerCase().replace(" ", "-");
@@ -691,23 +662,13 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Asset QR ID */}
-                  <div className="col-span-6">
-                    <label htmlFor="asset-qr-id">Asset QR ID</label>
-                    <ActionTextInputField
-                      id="qr_code_id"
-                      fullWidth
-                      name="qr_code_id"
-                      placeholder=""
-                      variant="outlined"
-                      margin="dense"
-                      value={qrCodeId}
-                      onChange={(e) => setQrCodeId(e.target.value)}
-                      actionIcon={<CropFreeIcon className="cursor-pointer" />}
-                      action={() => setIsScannerActive(true)}
-                      errors={state.errors.qr_code_id}
-                    />
-                    <ErrorHelperText error={state.errors.qr_id} />
-                  </div>
+                  <QRScanner
+                    value={qrCodeId}
+                    onChange={(value) => setQrCodeId(value)}
+                    error={state.errors.qr_code_id}
+                    className="col-span-6"
+                    parse={parseAssetId}
+                  />
                 </div>
                 <div className="grid grid-cols-6 gap-x-6">
                   {sectionTitle("Warranty Details")}

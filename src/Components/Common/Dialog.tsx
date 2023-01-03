@@ -7,10 +7,11 @@ type DialogProps = {
   show: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  className?: string;
 };
 
 const DialogModal = (props: DialogProps) => {
-  const { title, description, show, onClose, children } = props;
+  const { title, description, show, onClose, children, className = "" } = props;
   return (
     <div>
       <Transition appear show={show} as={React.Fragment}>
@@ -38,7 +39,12 @@ const DialogModal = (props: DialogProps) => {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel
+                  className={
+                    "w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all " +
+                    className
+                  }
+                >
                   <Dialog.Title
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
