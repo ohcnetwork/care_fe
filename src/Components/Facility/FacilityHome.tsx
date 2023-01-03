@@ -707,7 +707,6 @@ export const FacilityHome = (props: any) => {
         >
           <DoctorCapacity
             facilityId={facilityId}
-            show={doctorCapacityModalOpen}
             handleClose={() => setDoctorCapacityModalOpen(false)}
             handleUpdate={async () => {
               const doctorRes = await dispatch(listDoctor({}, { facilityId }));

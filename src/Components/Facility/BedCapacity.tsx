@@ -1,4 +1,3 @@
-import { navigate } from "raviger";
 import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BED_TYPES } from "../../Common/constants";
@@ -17,7 +16,7 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 
 interface BedCapacityProps extends CapacityModal {
-  facilityId: number;
+  facilityId: string;
   handleClose: () => void;
   handleUpdate: () => void;
   id?: number;
@@ -79,9 +78,8 @@ export const BedCapacity = (props: BedCapacityProps) => {
         if (!status.aborted) {
           if (capacityRes && capacityRes.data) {
             const existingData = capacityRes.data.results;
-            // redirect to listing page if all options are diabled
+            // if all options are diabled
             if (existingData.length === BED_TYPES.length) {
-              navigate(`/facility/${facilityId}`);
               return;
             }
             // disable existing bed types
@@ -191,16 +189,10 @@ export const BedCapacity = (props: BedCapacityProps) => {
           Notification.Success({
             msg: "Bed capacity added successfully",
           });
-          if (btnType == "Save and Exit") {
-            navigate(`/facility/${facilityId}`);
-          } else if (isLastOptionType) {
-            navigate(`/facility/${facilityId}/doctor`);
-          }
         } else {
           Notification.Success({
             msg: "Bed capacity updated successfully",
           });
-          navigate(`/facility/${facilityId}`);
         }
         handleUpdate();
       }

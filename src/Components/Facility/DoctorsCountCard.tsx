@@ -17,7 +17,7 @@ import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
 
 interface DoctorsCountProps extends DoctorModal {
-  facilityId: number;
+  facilityId: string;
   removeDoctor: (doctorId: number | undefined) => void;
   handleUpdate: () => void;
 }
@@ -123,7 +123,6 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
           title="Update Doctor Capacity"
         >
           <DoctorCapacity
-            show={open}
             facilityId={props.facilityId}
             handleClose={() => {
               setOpen(false);

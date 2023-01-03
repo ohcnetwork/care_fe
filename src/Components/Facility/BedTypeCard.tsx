@@ -18,7 +18,7 @@ import { BedCapacity } from "./BedCapacity";
 import DialogModal from "../Common/Dialog";
 
 interface BedTypeProps extends CapacityModal {
-  facilityId: number;
+  facilityId: string;
   handleUpdate: () => void;
   removeBedType: (bedTypeId: number | undefined) => void;
 }

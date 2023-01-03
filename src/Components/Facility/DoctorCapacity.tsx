@@ -1,4 +1,3 @@
-import { navigate } from "raviger";
 import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
@@ -14,8 +13,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 
 interface DoctorCapacityProps extends DoctorModal {
-  facilityId: number;
-  show: boolean;
+  facilityId: string;
   handleClose: () => void;
   handleUpdate: () => void;
   id?: number;
@@ -75,9 +73,8 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         if (!status.aborted) {
           if (doctorRes && doctorRes.data) {
             const existingData = doctorRes.data.results;
-            // redirect to listing page if all options are diabled
+            //  if all options are diabled
             if (existingData.length === DOCTOR_SPECIALIZATION.length) {
-              navigate(`/facility/${facilityId}`);
               return;
             }
             // disable existing doctor types
@@ -105,8 +102,6 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
             type: "set_form",
             form: { area: res.data.area, count: res.data.count },
           });
-        } else {
-          navigate(`/facility/${facilityId}`);
         }
       }
       setIsLoading(false);
@@ -177,14 +172,10 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
           Notification.Success({
             msg: "Doctor count added successfully",
           });
-          if (btnType === "Save and Exit" || isLastOptionType) {
-            navigate(`/facility/${facilityId}`);
-          }
         } else {
           Notification.Success({
             msg: "Doctor count updated successfully",
           });
-          navigate(`/facility/${facilityId}`);
         }
       }
       handleUpdate();
