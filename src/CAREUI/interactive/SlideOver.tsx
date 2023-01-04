@@ -77,9 +77,11 @@ export default function SlideOver({
           leaveTo={directionClasses[slideFrom].animateStart + " opacity-0"}
         >
           <Dialog.Panel
-            className={`fixed pointer-events-auto ${
-              directionClasses[slideFrom].stick
-            } ${onlyChild || "md:p-2"}`}
+            className={classNames(
+              "fixed pointer-events-auto",
+              directionClasses[slideFrom].stick,
+              !onlyChild && "md:p-2"
+            )}
           >
             {onlyChild ? (
               children
