@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   getNotifications,
@@ -8,22 +8,22 @@ import {
   updateUserPnconfig,
   getPublicKey,
 } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
-import { SelectField } from "../Common/HelperInputFields";
 import { useSelector } from "react-redux";
-import { Button, CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
 import { classNames } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-
 import * as Sentry from "@sentry/browser";
 import { formatDate } from "../../Utils/utils";
 import {
   ShrinkedSidebarItem,
   SidebarItem,
 } from "../Common/Sidebar/SidebarItem";
+import SlideOver from "../../CAREUI/interactive/SlideOver";
+import ButtonV2 from "../Common/components/ButtonV2";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 
 const RESULT_LIMIT = 14;
 
@@ -99,10 +99,11 @@ const NotificationTile = ({
       </div>
       <div className="text-sm py-1">{result.message}</div>
       <div className="flex justify-between items-end">
-        <button
-          className={`${
+        <ButtonV2
+          className={classNames(
+            "font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border text-xs flex-shrink-0",
             result.read_at && "invisible"
-          } h-min inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0`}
+          )}
           disabled={isMarkingAsRead}
           onClick={(event) => {
             event.stopPropagation();
@@ -115,15 +116,20 @@ const NotificationTile = ({
             <i className="fa-solid fa-check mr-2 text-primary-500" />
           )}
           Mark as Read
-        </button>
+        </ButtonV2>
         <div>
           <div className="text-xs text-right py-1">
             {formatDate(result.created_date)}
           </div>
           <div className="mt-2 text-right min-h-min">
-            <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
+            <ButtonV2
+              className="font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0"
+              ghost
+              shadow
+              border
+            >
               <i className="fas fa-eye mr-2 text-primary-500" /> Visit Link
-            </button>
+            </ButtonV2>
           </div>
         </div>
       </div>
@@ -148,7 +154,7 @@ export default function NotificationsList({
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [open, setOpen] = useState(false);
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
@@ -159,12 +165,12 @@ export default function NotificationsList({
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setShowNotifications(false);
+        setOpen(false);
       }
     }
-    if (showNotifications) document.addEventListener("keydown", handleKeyDown);
+    if (open) document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [showNotifications]);
+  }, [open]);
 
   const intialSubscriptionState = async () => {
     try {
@@ -333,7 +339,7 @@ export default function NotificationsList({
         setOffset((prev) => prev - RESULT_LIMIT);
       });
     intialSubscriptionState();
-  }, [dispatch, reload, showNotifications, offset, eventFilter, isSubscribed]);
+  }, [dispatch, reload, open, offset, eventFilter, isSubscribed]);
 
   if (!offset && isLoading) {
     manageResults = (
@@ -349,7 +355,7 @@ export default function NotificationsList({
             key={result.id}
             notification={result}
             onClickCB={onClickCB}
-            setShowNotifications={setShowNotifications}
+            setShowNotifications={setOpen}
           />
         ))}
         {isLoading && (
@@ -359,17 +365,14 @@ export default function NotificationsList({
         )}
         {totalCount > RESULT_LIMIT && offset < totalCount - RESULT_LIMIT && (
           <div className="mt-4 flex w-full justify-center py-5 px-4 lg:px-8">
-            <Button
+            <ButtonV2
+              className="w-full"
               disabled={isLoading}
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={() => {
-                setOffset((prev) => prev + RESULT_LIMIT);
-              }}
+              shadow
+              onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
             >
               {isLoading ? "Loading..." : "Load More"}
-            </Button>
+            </ButtonV2>
           </div>
         )}
       </>
@@ -388,91 +391,72 @@ export default function NotificationsList({
     <>
       <Item
         text="Notifications"
-        do={() => setShowNotifications(!showNotifications)}
-        icon={<CareIcon className="care-l-bell text-lg" />}
+        do={() => setOpen(!open)}
+        icon={<CareIcon className="care-l-bell h-5" />}
         badgeCount={unreadCount}
       />
-      <SlideOver show={showNotifications} setShow={setShowNotifications}>
-        <div className="bg-white h-full">
-          <div className="w-full bg-gray-100 border-b sticky top-0 z-30 px-4 pb-1 lg:px-8">
-            <div className="flex flex-col pt-4 py-2">
-              <div className="grid grid-cols-3">
-                <div>
-                  <button
-                    onClick={(_) => {
-                      setReload(!reload);
-                      setData([]);
-                      setUnreadCount(0);
-                      setOffset(0);
-                    }}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
-                  >
-                    <i className="fa-fw fas fa-sync cursor-pointer mr-2" />{" "}
-                    Reload
-                  </button>
-                </div>
-                <div>
-                  <button
-                    onClick={(_) => setShowNotifications(false)}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
-                  >
-                    <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
-                    Close
-                  </button>
-                </div>
-                <div>
-                  <button
-                    onClick={handleSubscribeClick}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
-                    disabled={isSubscribing}
-                  >
-                    {isSubscribing && <Spinner />}
-                    {getButtonText()}
-                  </button>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="font-bold text-xl mt-4">Notifications</div>
-                <button
-                  className="inline-flex items-center font-semibold mt-4 p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
-                  disabled={isMarkingAllAsRead}
-                  onClick={handleMarkAllAsRead}
-                >
-                  {isMarkingAllAsRead ? (
-                    <Spinner />
-                  ) : (
-                    <i className="fa-solid fa-check-double mr-2 text-primary-500" />
-                  )}
-                  Mark All as Read
-                </button>
-              </div>
-            </div>
+      <SlideOver
+        open={open}
+        setOpen={setOpen}
+        slideFrom="right"
+        title="Notifications"
+        dialogClass="md:w-[350px]"
+      >
+        <div className="flex flex-col">
+          <div className="flex gap-2 flex-wrap mb-2">
+            <ButtonV2
+              className="text-xs"
+              ghost
+              variant="secondary"
+              onClick={(_) => {
+                setReload(!reload);
+                setData([]);
+                setUnreadCount(0);
+                setOffset(0);
+              }}
+            >
+              <i className="fa-fw fas fa-sync cursor-pointer mr-2" /> Reload
+            </ButtonV2>
 
-            <div>
-              <div className="w-2/3">
-                <span className="text-sm font-semibold">
-                  Filter by category
-                </span>
-                <SelectField
-                  name="event_filter"
-                  variant="outlined"
-                  margin="dense"
-                  value={eventFilter}
-                  options={[
-                    { id: "", text: "Show All" },
-                    ...NOTIFICATION_EVENTS.map((i) => {
-                      if (i.id === "MESSAGE") return { ...i, text: "Notices" };
-                      return i;
-                    }),
-                  ]}
-                  onChange={(e: any) => setEventFilter(e.target.value)}
-                />
-              </div>
-            </div>
+            <ButtonV2
+              onClick={handleSubscribeClick}
+              className="text-xs"
+              ghost
+              variant="secondary"
+              disabled={isSubscribing}
+            >
+              {isSubscribing && <Spinner />}
+              {getButtonText()}
+            </ButtonV2>
+            <ButtonV2
+              className="text-xs"
+              ghost
+              variant="secondary"
+              disabled={isMarkingAllAsRead}
+              onClick={handleMarkAllAsRead}
+            >
+              {isMarkingAllAsRead ? (
+                <Spinner />
+              ) : (
+                <i className="fa-solid fa-check-double mr-2 text-primary-500" />
+              )}
+              Mark All as Read
+            </ButtonV2>
           </div>
 
-          <div>{manageResults}</div>
+          <SelectMenuV2
+            className="mb-2"
+            placeholder="Filter by category"
+            options={NOTIFICATION_EVENTS}
+            value={eventFilter}
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
+            optionIcon={(o) => <i className={`${o.icon} `} />}
+            onChange={(v) => setEventFilter(v || "")}
+          />
         </div>
+
+        <div>{manageResults}</div>
       </SlideOver>
     </>
   );
