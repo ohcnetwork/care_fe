@@ -105,7 +105,7 @@ const NotificationTile = ({
         <div className="flex justify-end gap-2">
           <ButtonV2
             className={classNames(
-              "font-semibold p-2 md:py-1 bg-white hover:bg-secondary-300",
+              "font-semibold px-2 py-1 bg-white hover:bg-secondary-300",
               result.read_at && "invisible"
             )}
             variant="secondary"
@@ -129,7 +129,7 @@ const NotificationTile = ({
           <ButtonV2
             border
             ghost
-            className="font-semibold p-2 md:py-1 bg-white hover:bg-secondary-300 flex-shrink-0"
+            className="font-semibold px-2 py-1 bg-white hover:bg-secondary-300 flex-shrink-0"
           >
             <CareIcon className="care-l-envelope-open" />
             <span className="text-xs">Open</span>
@@ -406,6 +406,7 @@ export default function NotificationsList({
         slideFrom="right"
         title="Notifications"
         dialogClass="md:w-[400px]"
+        onCloseClick={onClickCB}
       >
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap">

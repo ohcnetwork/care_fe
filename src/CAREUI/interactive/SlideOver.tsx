@@ -13,6 +13,7 @@ export type SlideOverProps = {
   dialogClass?: string;
   title?: string;
   onlyChild?: boolean;
+  onCloseClick?: () => void;
 };
 
 export default function SlideOver({
@@ -23,6 +24,7 @@ export default function SlideOver({
   dialogClass,
   title,
   onlyChild = false,
+  onCloseClick,
 }: SlideOverProps) {
   const directionClasses = {
     left: {
@@ -92,7 +94,10 @@ export default function SlideOver({
                 <div className="flex items-center p-2 gap-2 pt-4">
                   <button
                     className="w-8 h-8 rounded-lg flex justify-center items-center text-2xl hover:bg-black/20"
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      setOpen(false);
+                      onCloseClick && onCloseClick();
+                    }}
                   >
                     <CareIcon className="care-l-arrow-left" />
                   </button>

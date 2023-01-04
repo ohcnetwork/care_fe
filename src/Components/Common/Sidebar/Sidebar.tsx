@@ -139,7 +139,10 @@ const StatelessSidebar = ({
             );
           })}
 
-          <NotificationItem shrinked={shrinked} />
+          <NotificationItem
+            shrinked={shrinked}
+            onClickCB={() => onItemClick && onItemClick(false)}
+          />
           <Item
             text="Dashboard"
             to={dashboard_url}
