@@ -13,7 +13,9 @@ import * as Notify from "../../Utils/Notifications";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
+import QRScanner from "../Common/QRScanner";
 import TextFormField from "../Form/FormFields/TextFormField";
+import * as Notification from "../../Utils/Notifications.js";
 
 interface Props {
   patientId: string;
@@ -22,7 +24,11 @@ interface Props {
   onClose: () => void;
 }
 
-type Step = "AadhaarVerification" | "MobileVerification" | "HealthIDCreation";
+type Step =
+  | "ScanExistingQR"
+  | "AadhaarVerification"
+  | "MobileVerification"
+  | "HealthIDCreation";
 
 export default function LinkABHANumberModal({
   // patientId,
@@ -42,11 +48,22 @@ export default function LinkABHANumberModal({
   return (
     <DialogModal title={title} {...props}>
       <div className="p-4">
-        {currentStep == "AadhaarVerification" && (
+        {currentStep === "ScanExistingQR" && (
+          <ScanABHAQRSection
+            onSignup={() => {
+              setCurrentStep("AadhaarVerification");
+            }}
+          />
+        )}
+
+        {currentStep === "AadhaarVerification" && (
           <VerifyAadhaarSection
             onVerified={(transactionId) => {
               setTransactionId(transactionId);
               setCurrentStep("MobileVerification");
+            }}
+            onSignin={() => {
+              setCurrentStep("ScanExistingQR");
             }}
           />
         )}
@@ -74,11 +91,61 @@ export default function LinkABHANumberModal({
   );
 }
 
-interface VerifyAadhaarSectionProps {
-  onVerified: (transactionId: string) => void;
+interface ScanABHAQRSectionProps {
+  onSignup: () => void;
 }
 
-const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
+const ScanABHAQRSection = ({ onSignup }: ScanABHAQRSectionProps) => {
+  const [qrValue, setQrValue] = useState("");
+  return (
+    <div>
+      <QRScanner
+        label="Enter ABHA Number"
+        value={qrValue}
+        onChange={setQrValue}
+        parse={(value: string) => {
+          if (!value) return;
+
+          console.log(value);
+          try {
+            const abha = JSON.parse(value);
+            return abha?.hidn;
+          } catch (e) {
+            console.log(e);
+            Notification.Error({ msg: "Invalid ABHA QR" });
+          }
+        }}
+      />
+
+      <div className="flex gap-2 items-center justify-between mt-4">
+        <span
+          onClick={onSignup}
+          className="text-sm text-blue-800 cursor-pointer"
+        >
+          Don't have an ABHA Number
+        </span>
+        <>
+          <ButtonV2
+            disabled={!qrValue} // TODO: validate it
+            onClick={() => console.log(`linking ${qrValue}`)}
+          >
+            Link
+          </ButtonV2>
+        </>
+      </div>
+    </div>
+  );
+};
+
+interface VerifyAadhaarSectionProps {
+  onVerified: (transactionId: string) => void;
+  onSignin: () => void;
+}
+
+const VerifyAadhaarSection = ({
+  onVerified,
+  onSignin,
+}: VerifyAadhaarSectionProps) => {
   const dispatch = useDispatch<any>();
 
   const [aadhaarNumber, setAadhaarNumber] = useState("");
@@ -220,22 +287,30 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
         />
       )}
 
-      <div className="flex gap-2 items-center justify-end mt-4">
-        <ButtonV2
-          disabled={isSendingOtp}
-          onClick={otpSent ? resendOtp : sendOtp}
-          variant={otpSent ? "secondary" : "primary"}
+      <div className="flex gap-2 items-center justify-between mt-4">
+        <span
+          onClick={onSignin}
+          className="text-sm text-blue-800 cursor-pointer"
         >
-          {(isSendingOtp && "Sending OTP...") ||
-            (otpSent ? "Resend OTP" : "Send OTP")}
-        </ButtonV2>
-
-        {otpSent && (
-          <ButtonV2 disabled={isVerifyingOtp} onClick={verifyOtp}>
-            {(verified && "Verified") ||
-              (isVerifyingOtp ? "Verifying..." : "Verify")}
+          Already have an ABHA number
+        </span>
+        <>
+          <ButtonV2
+            disabled={isSendingOtp}
+            onClick={otpSent ? resendOtp : sendOtp}
+            variant={otpSent ? "secondary" : "primary"}
+          >
+            {(isSendingOtp && "Sending OTP...") ||
+              (otpSent ? "Resend OTP" : "Send OTP")}
           </ButtonV2>
-        )}
+
+          {otpSent && (
+            <ButtonV2 disabled={isVerifyingOtp} onClick={verifyOtp}>
+              {(verified && "Verified") ||
+                (isVerifyingOtp ? "Verifying..." : "Verify")}
+            </ButtonV2>
+          )}
+        </>
       </div>
     </div>
   );

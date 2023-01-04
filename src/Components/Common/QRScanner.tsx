@@ -50,6 +50,7 @@ interface IProps {
   parse?: (scannedValue: any) => any;
   className?: string;
   error?: string;
+  label?: string;
 }
 
 const QRScanner = ({
@@ -58,12 +59,13 @@ const QRScanner = ({
   parse,
   className = "",
   error = "",
+  label = "QR Code",
 }: IProps) => {
   const [showScanner, setShowScanner] = useState(false);
 
   return (
     <div className={className}>
-      <label htmlFor="asset-qr-id">Asset QR ID</label>
+      <label htmlFor="asset-qr-id">{label}</label>
       <ActionTextInputField
         id="qr_code_id"
         fullWidth
