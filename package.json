@@ -91,6 +91,7 @@
     "react-redux": "^8.0.4",
     "react-swipeable-views": "^0.13.9",
     "react-transition-group": "^4.4.5",
+    "read-excel-file": "^5.5.3",
     "redux": "^4.1.0",
     "redux-thunk": "^2.3.0",
     "rescript-material-ui": "^2.1.2",
@@ -247,7 +248,7 @@
   "lint-staged": {
     "**/*": [
       "prettier --write --ignore-unknown",
-      "eslint --fix --ignore-pattern '*.stories.mdx' --ignore-pattern 'Dockerfile' --ignore-pattern 'netlify.toml'",
+      "eslint --fix --ignore-pattern '*.md' --ignore-pattern '*.stories.mdx' --ignore-pattern 'Dockerfile' --ignore-pattern 'netlify.toml'",
       "git update-index --again"
     ]
   },
