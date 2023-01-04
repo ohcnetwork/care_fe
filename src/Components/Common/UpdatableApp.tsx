@@ -71,9 +71,7 @@ const UpdatableApp = ({ children }: UpdatableAppProps) => {
     if (!newVersion) return;
 
     // Service worker cache should be cleared with caches.delete()
-    if ("caches" in window) {
-      caches.keys().then((names) => names.forEach(caches.delete));
-    }
+    caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
 
     // A second of delay to appreciate the update animation.
     setTimeout(() => {
