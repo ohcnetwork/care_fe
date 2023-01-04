@@ -41,6 +41,7 @@ import AlertDialog from "../Common/AlertDialog";
 import {
   CheckboxField,
   DateInputField,
+  ErrorHelperText,
   PhoneNumberField,
   SelectField,
   TextInputField,
@@ -80,8 +81,7 @@ interface medicalHistoryModel {
   details: string;
 }
 
-const medicalHistoryTypes = MEDICAL_HISTORY_CHOICES.filter((i) => i.id !== 1);
-const medicalHistoryChoices = medicalHistoryTypes.reduce(
+const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
   (acc: Array<{ [x: string]: string }>, cur) => [
     ...acc,
     { [`medical_history_${cur.id}`]: "" },
@@ -135,14 +135,13 @@ const initForm: any = {
   is_antenatal: "false",
   date_of_test: null,
   date_of_result: null,
+  test_id: "",
   srf_id: "",
   test_type: testType[0],
   prescribed_medication: false,
   ongoing_medication: "",
   designation_of_health_care_worker: "",
   instituion_of_health_care_worker: "",
-  number_of_aged_dependents: "",
-  number_of_chronic_diseased_dependents: "",
   cluster_name: "",
   covin_id: "",
   is_vaccinated: "false",
@@ -309,6 +308,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       form["gender"] = res.data.gender
         ? parseGenderFromExt(res.data.gender, state.form.gender)
         : state.form.gender;
+      form["test_id"] = res.data.test_id
+        ? res.data.test_id
+        : state.form.test_id;
       form["srf_id"] = res.data.srf_id ? res.data.srf_id : state.form.srf_id;
 
       form["state"] = res.data.district_object
@@ -410,17 +412,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               .contact_with_suspected_carrier
               ? String(res.data.contact_with_suspected_carrier)
               : "false",
-
-            number_of_aged_dependents: Number(
-              res.data.number_of_aged_dependents
-            )
-              ? Number(res.data.number_of_aged_dependents)
-              : "",
-            number_of_chronic_diseased_dependents: Number(
-              res.data.number_of_chronic_diseased_dependents
-            )
-              ? Number(res.data.number_of_chronic_diseased_dependents)
-              : "",
             is_vaccinated: String(res.data.is_vaccinated),
             number_of_doses: res.data.number_of_doses
               ? String(res.data.number_of_doses)
@@ -434,7 +425,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             setSameAddress(false);
           }
           res.data.medical_history.forEach((i: any) => {
-            const medicalHistory = medicalHistoryTypes.find(
+            const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
               (j: any) =>
                 String(j.text).toLowerCase() === String(i.disease).toLowerCase()
             );
@@ -653,6 +644,27 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
+        case "medical_history":
+          if (!state.form[field].length) {
+            errors[field] = "Please fill the medical history";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "disease_status":
+          if (state.form[field] === "POSITIVE") {
+            if (!state.form.date_of_test) {
+              errors["date_of_test"] = "Please fill the date of sample testing";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+            }
+            if (!state.form.date_of_result) {
+              errors["date_of_result"] = "Please fill the date of result";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+            }
+          }
+          return;
         default:
           return;
       }
@@ -708,7 +720,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       setIsLoading(true);
       const medical_history: Array<medicalHistoryModel> = [];
       state.form.medical_history.forEach((id: number) => {
-        const medData = medicalHistoryTypes.find((i) => i.id === id);
+        const medData = MEDICAL_HISTORY_CHOICES.find((i) => i.id === id);
         if (medData) {
           const details = state.form[`medical_history_${medData.id}`];
           medical_history.push({
@@ -717,9 +729,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           });
         }
       });
-      if (!medical_history.length) {
-        medical_history.push({ disease: "NO", details: "" });
-      }
+
       const data = {
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
@@ -732,7 +742,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         date_of_test: state.form.date_of_test
           ? state.form.date_of_test
           : undefined,
-
         date_of_result: state.form.date_of_result
           ? state.form.date_of_result
           : undefined,
@@ -741,6 +750,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.date_declared_positive
             ? state.form.date_declared_positive
             : null,
+        test_id: state.form.test_id,
         srf_id: state.form.srf_id,
         covin_id:
           state.form.is_vaccinated === "true" ? state.form.covin_id : undefined,
@@ -767,7 +777,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
         is_antenatal: state.form.is_antenatal,
-
         passport_no:
           state.form.nationality !== "India"
             ? state.form.passport_no
@@ -809,7 +818,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.cluster_name
             ? state.form.cluster_name
             : null,
-
         allergies: state.form.allergies,
         number_of_primary_contacts: Number(
           state.form.number_of_primary_contacts
@@ -822,28 +830,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? Number(state.form.number_of_secondary_contacts)
           : undefined,
         ongoing_medication: state.form.ongoing_medication,
-
         is_declared_positive: JSON.parse(state.form.is_declared_positive),
         designation_of_health_care_worker:
           state.form.designation_of_health_care_worker,
         instituion_of_health_care_worker:
           state.form.instituion_of_health_care_worker,
-
         blood_group: state.form.blood_group
           ? state.form.blood_group
-          : undefined,
-        number_of_aged_dependents: Number(state.form.number_of_aged_dependents)
-          ? Number(state.form.number_of_aged_dependents)
-          : undefined,
-        number_of_chronic_diseased_dependents: Number(
-          state.form.number_of_chronic_diseased_dependents
-        )
-          ? Number(state.form.number_of_chronic_diseased_dependents)
           : undefined,
         medical_history,
         is_active: true,
       };
-
       const res = await dispatchAction(
         id
           ? updatePatient(data, { id })
@@ -970,10 +967,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             checked={state.form.medical_history.includes(id)}
             onChange={(e) => handleMedicalCheckboxChange(e, id)}
             name={checkboxField}
-            label={title}
+            label={id !== 1 ? title : "NONE"}
           />
         </div>
-        {state.form.medical_history.includes(id) && (
+        {id !== 1 && state.form.medical_history.includes(id) && (
           <div className="mx-4">
             <TextAreaFormField
               placeholder="Details"
@@ -1474,104 +1471,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       expandIcon={<ExpandMoreIcon />}
                       title={
                         <h1 className="font-bold text-purple-500 text-left text-xl">
-                          Health Details
+                          COVID Details
                         </h1>
                       }
                     >
                       <div>
                         <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2 w-full mt-5">
-                          <div id="test_type-div">
-                            <FieldLabel
-                              id="test_type-label"
-                              htmlFor="test_type"
-                              required
-                            >
-                              COVID Test Type
-                            </FieldLabel>
-                            <SelectField
-                              labelId="test_type"
-                              name="test_type"
-                              variant="outlined"
-                              margin="dense"
-                              optionArray={true}
-                              value={state.form.test_type}
-                              options={testType}
-                              onChange={handleChange}
-                              errors={state.errors.test_type}
-                            />
-                          </div>
-                          <div id="srf_id-div">
-                            <FieldLabel id="srf_id-label" htmlFor="srf_id">
-                              SRF Id for COVID Test
-                            </FieldLabel>
-                            <TextInputField
-                              id="srf_id"
-                              name="srf_id"
-                              variant="outlined"
-                              margin="dense"
-                              type="text"
-                              value={state.form.srf_id}
-                              onChange={handleChange}
-                              errors={state.errors.srf_id}
-                            />
-                          </div>
-                          <div id="is_declared_positive-div">
-                            <FieldLabel
-                              id="is_declared_positive"
-                              htmlFor="is_declared_positive"
-                            >
-                              Is patient declared covid postive by state?
-                            </FieldLabel>
-                            <RadioGroup
-                              aria-label="is_declared_positive"
-                              id="is_declared_positive"
-                              name="is_declared_positive"
-                              value={state.form.is_declared_positive}
-                              onChange={handleChange}
-                              style={{ padding: "0px 5px" }}
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                            <CollapseV2
-                              opened={
-                                String(state.form.is_declared_positive) ===
-                                "true"
-                              }
-                              className="mt-4"
-                            >
-                              <div id="date_declared_positive-div">
-                                <FieldLabel id="date_declared_positive-label">
-                                  Date Patient is Declared Positive for COVID
-                                </FieldLabel>
-                                <DateInputField
-                                  fullWidth={true}
-                                  value={state.form.date_declared_positive}
-                                  onChange={(date) =>
-                                    handleDateChange(
-                                      date,
-                                      "date_declared_positive"
-                                    )
-                                  }
-                                  errors={state.errors.date_declared_positive}
-                                  inputVariant="outlined"
-                                  margin="dense"
-                                  disableFuture={true}
-                                />
-                              </div>
-                            </CollapseV2>
-                          </div>
-
                           <div id="is_vaccinated-div">
                             <FieldLabel
                               id="is_vaccinated"
@@ -1732,7 +1637,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               </Box>
                             </RadioGroup>
                           </div>
-
                           <div id="contact_with_suspected_carrier-div">
                             <FieldLabel htmlFor="contact_with_suspected_carrier">
                               Contact with Covid suspect?
@@ -1840,6 +1744,113 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               errors={state.errors.disease_status}
                             />
                           </div>
+                          <div id="test_type-div">
+                            <FieldLabel
+                              id="test_type-label"
+                              htmlFor="test_type"
+                              required
+                            >
+                              COVID Test Type
+                            </FieldLabel>
+                            <SelectField
+                              labelId="test_type"
+                              name="test_type"
+                              variant="outlined"
+                              margin="dense"
+                              optionArray={true}
+                              value={state.form.test_type}
+                              options={testType}
+                              onChange={handleChange}
+                              errors={state.errors.test_type}
+                            />
+                          </div>
+                          <div id="srf_id-div">
+                            <FieldLabel id="srf_id-label" htmlFor="srf_id">
+                              SRF Id for COVID Test
+                            </FieldLabel>
+                            <TextInputField
+                              id="srf_id"
+                              name="srf_id"
+                              variant="outlined"
+                              margin="dense"
+                              type="text"
+                              value={state.form.srf_id}
+                              onChange={handleChange}
+                              errors={state.errors.srf_id}
+                            />
+                          </div>
+                          <div id="is_declared_positive-div">
+                            <FieldLabel
+                              id="is_declared_positive"
+                              htmlFor="is_declared_positive"
+                            >
+                              Is patient declared covid postive by state?
+                            </FieldLabel>
+                            <RadioGroup
+                              aria-label="is_declared_positive"
+                              id="is_declared_positive"
+                              name="is_declared_positive"
+                              value={state.form.is_declared_positive}
+                              onChange={handleChange}
+                              style={{ padding: "0px 5px" }}
+                            >
+                              <Box display="flex" flexDirection="row">
+                                <FormControlLabel
+                                  value="true"
+                                  control={<Radio />}
+                                  label="Yes"
+                                />
+                                <FormControlLabel
+                                  value="false"
+                                  control={<Radio />}
+                                  label="No"
+                                />
+                              </Box>
+                            </RadioGroup>
+                            <CollapseV2
+                              opened={
+                                String(state.form.is_declared_positive) ===
+                                "true"
+                              }
+                              className="mt-4"
+                            >
+                              <div id="date_declared_positive-div">
+                                <FieldLabel id="date_declared_positive-label">
+                                  Date Patient is Declared Positive for COVID
+                                </FieldLabel>
+                                <DateInputField
+                                  fullWidth={true}
+                                  value={state.form.date_declared_positive}
+                                  onChange={(date) =>
+                                    handleDateChange(
+                                      date,
+                                      "date_declared_positive"
+                                    )
+                                  }
+                                  errors={state.errors.date_declared_positive}
+                                  inputVariant="outlined"
+                                  margin="dense"
+                                  disableFuture={true}
+                                />
+                              </div>
+                            </CollapseV2>
+                          </div>
+                          <div id="test_id-div">
+                            <FieldLabel id="test_id-label" htmlFor="test_id">
+                              COVID Positive ID issued by ICMR
+                            </FieldLabel>
+                            <TextInputField
+                              id="test_id"
+                              name="test_id"
+                              variant="outlined"
+                              margin="dense"
+                              type="number"
+                              value={state.form.test_id}
+                              onChange={handleChange}
+                              errors={state.errors.test_id}
+                            />
+                          </div>
+
                           <div id="date_of_test-div">
                             <FieldLabel
                               id="date_of_birth-label"
@@ -1918,49 +1929,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               errors={state.errors.number_of_secondary_contacts}
                             />
                           </div>
-
-                          <div id="number_of_aged_dependents-div">
-                            <FieldLabel
-                              id="number_of_aged_dependents-label"
-                              htmlFor="number_of_aged_dependents"
-                            >
-                              Number Of Aged Dependents (Above 60)
-                            </FieldLabel>
-                            <TextInputField
-                              id="number_of_aged_dependents"
-                              name="number_of_aged_dependents"
-                              variant="outlined"
-                              margin="dense"
-                              type="number"
-                              value={state.form.number_of_aged_dependents}
-                              onChange={handleChange}
-                              errors={state.errors.number_of_aged_dependents}
-                            />
-                          </div>
-
-                          <div id="number_of_chronic_diseased_dependents-div">
-                            <FieldLabel
-                              htmlFor="number_of_chronic_diseased_dependents"
-                              id="number_of_chronic_diseased_dependents-label"
-                            >
-                              Number Of Chronic Diseased Dependents
-                            </FieldLabel>
-                            <TextInputField
-                              id="number_of_chronic_diseased_dependents"
-                              name="number_of_chronic_diseased_dependents"
-                              variant="outlined"
-                              margin="dense"
-                              type="number"
-                              value={
-                                state.form.number_of_chronic_diseased_dependents
-                              }
-                              onChange={handleChange}
-                              errors={
-                                state.errors
-                                  .number_of_chronic_diseased_dependents
-                              }
-                            />
-                          </div>
                         </div>
                       </div>
                     </AccordionV2>
@@ -2008,13 +1976,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </div>
                         <div className="md:col-span-2">
                           <FieldLabel id="med-history-label">
-                            Any medical history? (Optional Information)
+                            Any medical history? (Comorbidities)
                           </FieldLabel>
                           <div className="flex flex-wrap">
-                            {medicalHistoryTypes.map((i) => {
+                            {MEDICAL_HISTORY_CHOICES.map((i) => {
                               return renderMedicalHistory(i.id, i.text);
                             })}
                           </div>
+                          <ErrorHelperText
+                            error={state.errors.medical_history}
+                          />
                         </div>
 
                         <div id="allergies-div">
