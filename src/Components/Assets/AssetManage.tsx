@@ -214,7 +214,7 @@ const AssetManage = (props: AssetManageProps) => {
         }}
       />
       <div className="flex flex-col xl:flex-row gap-8">
-        <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
+        <div className="bg-white rounded-lg md:rounded-xl w-full flex service-panel">
           <div className="w-full md:p-8 md:pt-6 p-6 pt-4 flex flex-col justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 justify-between w-full">
