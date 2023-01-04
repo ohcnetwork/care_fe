@@ -85,6 +85,7 @@ const ButtonV2 = ({
   className,
   disabled,
   loading,
+  name,
   id,
   children,
   href,
@@ -98,6 +99,7 @@ const ButtonV2 = ({
       <Link
         href={href}
         target={target}
+        id={name}
         className={classNames(
           "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
           `button-size-${size}`,
@@ -116,6 +118,7 @@ const ButtonV2 = ({
     <button
       {...props}
       disabled={disabled || !isAuthorized || loading}
+      name={name}
       className={classNames(
         "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
         `button-size-${size}`,
