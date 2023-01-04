@@ -92,7 +92,7 @@ const UpdatableApp = ({ children, silentlyAutoUpdate }: UpdatableAppProps) => {
     <div className="relative">
       {children}
       {newVersion && <UpdateAppPopup onUpdate={updateApp} />}
-      <AppUpdatedAlert show={appUpdated && !newVersion} />
+      <AppUpdatedAlert show={appUpdated} />
     </div>
   );
 };
