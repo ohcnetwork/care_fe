@@ -42,7 +42,7 @@ const DateFormField = ({ position = "RIGHT", ...props }: Props) => {
         value={props.value}
         onChange={(value) => handleChange({ name, value })}
         max={props.max || (props.disableFuture ? new Date() : undefined)}
-        min={props.min || (props.disablePast ? new Date() : undefined)}
+        min={props.min || (props.disablePast ? yesterday() : undefined)}
         position={position}
         disabled={props.disabled}
         placeholder={props.placeholder}
@@ -52,3 +52,9 @@ const DateFormField = ({ position = "RIGHT", ...props }: Props) => {
 };
 
 export default DateFormField;
+
+const yesterday = () => {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  return date;
+};
