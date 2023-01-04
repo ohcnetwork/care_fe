@@ -85,7 +85,7 @@ const NotificationTile = ({
         setShowNotifications(false);
       }}
       className={classNames(
-        "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer",
+        "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer",
         result.read_at && "text-gray-500"
       )}
     >
@@ -93,44 +93,47 @@ const NotificationTile = ({
         <div className="text-lg font-bold">
           {getNotificationTitle(result.event)}
         </div>
-        <div className="">
+        <div>
           <i className={`${getNotificationIcon(result.event)} fa-2x `} />
         </div>
       </div>
       <div className="text-sm py-1">{result.message}</div>
-      <div className="flex justify-between items-end">
-        <ButtonV2
-          className={classNames(
-            "font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border text-xs flex-shrink-0",
-            result.read_at && "invisible"
-          )}
-          disabled={isMarkingAsRead}
-          onClick={(event) => {
-            event.stopPropagation();
-            handleMarkAsRead();
-          }}
-        >
-          {isMarkingAsRead ? (
-            <Spinner />
-          ) : (
-            <i className="fa-solid fa-check mr-2 text-primary-500" />
-          )}
-          Mark as Read
-        </ButtonV2>
-        <div>
-          <div className="text-xs text-right py-1">
-            {formatDate(result.created_date)}
-          </div>
-          <div className="mt-2 text-right min-h-min">
-            <ButtonV2
-              className="font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0"
-              ghost
-              shadow
-              border
-            >
-              <i className="fas fa-eye mr-2 text-primary-500" /> Visit Link
-            </ButtonV2>
-          </div>
+      <div className="flex flex-col justify-end gap-2">
+        <div className="text-xs text-right py-1 text-secondary-700">
+          {formatDate(result.created_date)}
+        </div>
+        <div className="flex justify-end gap-2">
+          <ButtonV2
+            className={classNames(
+              "font-semibold p-2 md:py-1 bg-white hover:bg-secondary-300",
+              result.read_at && "invisible"
+            )}
+            variant="secondary"
+            border
+            ghost
+            disabled={isMarkingAsRead}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleMarkAsRead();
+            }}
+          >
+            <CareIcon
+              className={
+                isMarkingAsRead
+                  ? "care-l-spinner animate-spin"
+                  : "care-l-envelope-check"
+              }
+            />
+            <span className="text-xs">Mark as Read</span>
+          </ButtonV2>
+          <ButtonV2
+            border
+            ghost
+            className="font-semibold p-2 md:py-1 bg-white hover:bg-secondary-300 flex-shrink-0"
+          >
+            <CareIcon className="care-l-envelope-open" />
+            <span className="text-xs">Open</span>
+          </ButtonV2>
         </div>
       </div>
     </div>
@@ -204,22 +207,22 @@ export default function NotificationsList({
     if (status === "NotSubscribed") {
       return (
         <>
-          {" "}
-          <i className="fa-solid fa-bell mr-2"></i>Subscribe
+          <CareIcon className="care-l-bell" />
+          <span className="text-xs">Subscribe</span>
         </>
       );
     } else if (status === "SubscribedOnAnotherDevice") {
       return (
         <>
-          {" "}
-          <i className="fa-solid fa-bell mr-2"></i>Subscribe On This Device
+          <CareIcon className="care-l-bell" />
+          <span className="text-xs">Subscribe on this device</span>
         </>
       );
     } else {
       return (
         <>
-          {" "}
-          <i className="fa-solid fa-bell-slash mr-2"></i>Unsubscribe
+          <CareIcon className="care-l-bell-slash" />
+          <span className="text-xs">Unsubscribe</span>
         </>
       );
     }
@@ -368,7 +371,9 @@ export default function NotificationsList({
             <ButtonV2
               className="w-full"
               disabled={isLoading}
+              variant="secondary"
               shadow
+              border
               onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
             >
               {isLoading ? "Loading..." : "Load More"}
@@ -400,27 +405,25 @@ export default function NotificationsList({
         setOpen={setOpen}
         slideFrom="right"
         title="Notifications"
-        dialogClass="md:w-[350px]"
+        dialogClass="md:w-[400px]"
       >
-        <div className="flex flex-col">
-          <div className="flex gap-2 flex-wrap mb-2">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap">
             <ButtonV2
-              className="text-xs"
               ghost
               variant="secondary"
-              onClick={(_) => {
+              onClick={() => {
                 setReload(!reload);
                 setData([]);
                 setUnreadCount(0);
                 setOffset(0);
               }}
             >
-              <i className="fa-fw fas fa-sync cursor-pointer mr-2" /> Reload
+              <CareIcon className="care-l-sync" />
+              <span className="text-xs">Reload</span>
             </ButtonV2>
-
             <ButtonV2
               onClick={handleSubscribeClick}
-              className="text-xs"
               ghost
               variant="secondary"
               disabled={isSubscribing}
@@ -429,18 +432,19 @@ export default function NotificationsList({
               {getButtonText()}
             </ButtonV2>
             <ButtonV2
-              className="text-xs"
               ghost
               variant="secondary"
               disabled={isMarkingAllAsRead}
               onClick={handleMarkAllAsRead}
             >
-              {isMarkingAllAsRead ? (
-                <Spinner />
-              ) : (
-                <i className="fa-solid fa-check-double mr-2 text-primary-500" />
-              )}
-              Mark All as Read
+              <CareIcon
+                className={
+                  isMarkingAllAsRead
+                    ? "care-l-spinner animate-spin"
+                    : "care-l-envelope-check"
+                }
+              />
+              <span className="text-xs">Mark all as Read</span>
             </ButtonV2>
           </div>
 
