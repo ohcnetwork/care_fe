@@ -32,6 +32,11 @@ const checkForUpdate = async () => {
 
   const meta = await res.json();
 
+  if (appVersion === null) {
+    // Skip updating since the app potentially is the latest version.
+    localStorage.setItem(APP_VERSION_KEY, meta.version);
+  }
+
   if (appVersion !== meta.version) {
     // Trigger an update if key: 'app-version' not present in localStorage
     // or does not match with metaVersion.
