@@ -145,7 +145,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     <div>
                       {userType !== "Staff" ? (
                         <ButtonV2
-                          name="facility-notify"
+                          id="facility-notify"
                           ghost
                           border
                           className="h-[38px]"
@@ -201,7 +201,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     <div className="flex gap-2 ">
                       <ButtonV2
                         href={`/facility/${facility.id}`}
-                        name="facility-details"
+                        id="facility-details"
                         border
                         ghost
                         className="h-[38px]"
@@ -213,7 +213,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       </ButtonV2>
                       <ButtonV2
                         href={`/facility/${facility.id}/patients`}
-                        name="facility-patients"
+                        id="facility-patients"
                         border
                         ghost
                       >
