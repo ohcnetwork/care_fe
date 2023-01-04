@@ -771,13 +771,13 @@ export const ConsultationForm = (props: any) => {
         <DiagnosisSelectFormField
           {...field("icd11_provisional_diagnoses_object")}
           multiple
-          label="Provisional Diagnosis"
+          label="Provisional Diagnosis (as per ICD-11 recommended by WHO)"
         />
 
         <DiagnosisSelectFormField
           {...field("icd11_diagnoses_object")}
           multiple
-          label="Diagnosis"
+          label="Diagnosis (as per ICD-11 recommended by WHO)"
         />
 
         {KASP_ENABLED && (
