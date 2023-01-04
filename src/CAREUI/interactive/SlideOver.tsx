@@ -1,5 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
+import { classNames } from "../../Utils/utils";
+import CareIcon from "../icons/CareIcon";
 
 export type SlideFromEdges = "left" | "top" | "right" | "bottom";
 
@@ -81,19 +83,18 @@ export default function SlideOver({
               children
             ) : (
               <div
-                className={
-                  "bg-white md:rounded-xl flex flex-col " +
-                  directionClasses[slideFrom].proportions +
-                  " " +
+                className={classNames(
+                  "bg-white md:rounded-xl flex flex-col",
+                  directionClasses[slideFrom].proportions,
                   dialogClass
-                }
+                )}
               >
                 <div className="flex items-center p-2 gap-2 pt-4">
                   <button
                     className="w-8 h-8 rounded-lg flex justify-center items-center text-2xl hover:bg-black/20"
                     onClick={() => setOpen(false)}
                   >
-                    <i className="uil uil-arrow-left" />
+                    <CareIcon className="care-l-arrow-left" />
                   </button>
                   <div>
                     <h1 className="text-xl font-black">{title}</h1>
