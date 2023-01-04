@@ -5,6 +5,7 @@ import loadable from "@loadable/component";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import RadialCard from "../Common/components/RadialCard";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import {
@@ -154,27 +155,49 @@ export const FacilityHome = (props: any) => {
       totalBedCount += x.total_capacity ? x.total_capacity : 0;
       totalOccupiedBedCount += x.current_capacity ? x.current_capacity : 0;
     });
-    percentage = (totalOccupiedBedCount * 100) / totalBedCount;
+    // percentage = (totalOccupiedBedCount * 100) / totalBedCount;
 
     capacityList = (
       <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
+        <RadialCard
+          label={"Total Beds"}
+          bedCapacityId={0}
+          used={totalOccupiedBedCount}
+          total={totalBedCount}
+        />
         {BED_TYPES.map((x) => {
           const res = capacityData.find((data) => {
             return data.room_type === x.id;
           });
-          if (res) {
+          if (res && res.current_capacity && res.total_capacity) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
               setCapacityData((state) =>
                 state.filter((i) => i.id !== bedTypeId)
               );
             };
+            console.log(res);
             return (
-              <BedTypeCard
-                facilityId={facilityId}
-                key={`bed_${res.id}`}
-                {...res}
-                removeBedType={removeCurrentBedType}
-              />
+              <div>
+                <RadialCard
+                  facilityId={facilityId}
+                  bedCapacityId={res.id}
+                  key={`bed_${res.id}`}
+                  room_type={res.room_type}
+                  label={x.text}
+                  used={res.current_capacity}
+                  total={res.total_capacity}
+                  lastUpdated={res.modified_date}
+                  removeBedType={removeCurrentBedType}
+                />
+
+                {/* Other options */}
+              </div>
+              // <BedTypeCard
+              //   facilityId={facilityId}
+              //   key={`bed_${res.id}`}
+              //   {...res}
+              //   removeBedType={removeCurrentBedType}
+              // />
             );
           }
         })}
@@ -613,21 +636,29 @@ export const FacilityHome = (props: any) => {
         </div>
         {totalBedCount !== 0 && (
           <div className="mb-8">
-            <div className="flex gap-1 text-md text-gray-600 font-semibold">
-              <p>Total Beds: </p>
-              <p className="text-black">
-                {totalOccupiedBedCount} / {totalBedCount}
-              </p>
-            </div>
-            <p className="text-xs">Total Occupied Beds / Total Beds</p>
-            <div className="rounded-full w-full bg-[#EDEEF0] mt-2">
-              <div
-                className="p-[6px] rounded-full bg-primary transition-all duration-500 ease-out"
-                style={{
-                  width: `${percentage}%`,
-                }}
-              ></div>
-            </div>
+            {/* <RadialCard
+        // isLoading={isLoading}
+        label={"Total Beds"}
+        used={totalOccupiedBedCount}
+        total={totalBedCount}
+        // previous={"used": totalOccupiedBedCount, "total": totalBedCount}
+        reverseIndicator
+      /> */}
+            {/* <div className="flex gap-1 text-md text-gray-600 font-semibold">
+        <p>Total Beds: </p>
+        <p className="text-black">
+          {totalOccupiedBedCount} / {totalBedCount}
+        </p>
+      </div>
+      <p className="text-xs">Total Occupied Beds / Total Beds</p>
+      <div className="rounded-full w-full bg-[#EDEEF0] mt-2">
+        <div
+          className="p-[6px] rounded-full bg-primary transition-all duration-500 ease-out"
+          style={{
+            width: `${percentage}%`,
+          }}
+        ></div>
+      </div> */}
           </div>
         )}
         <div>{capacityList}</div>
