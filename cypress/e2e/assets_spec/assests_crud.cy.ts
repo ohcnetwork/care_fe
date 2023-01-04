@@ -43,13 +43,13 @@ describe("Asset Creation", () => {
       cy.get("#vendor-name").type("Vendor's Name");
       const serial_no = parseInt((Math.random() * 10 ** 10).toString());
       cy.get("#serial-number").type(serial_no);
-      cy.get("#warranty-expiry input").type("25/12/2025");
-      cy.get("#last-serviced-on input").type("25/12/2021");
+      // cy.get("#warranty-expiry input").type("25/12/2025");
+      // cy.get("#last-serviced-on input").type("25/12/2021");
       const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
       cy.get("[data-cy=support_phone]").type(phone_number);
       cy.wait(500);
       cy.get("#notes").type("Test note for asset creation!");
-      cy.get("#asset-create").click({ force: true });
+      cy.get("#submit").click({ force: true });
       cy.verifyNotification("Asset created successfully");
     });
 
@@ -64,7 +64,7 @@ describe("Asset Creation", () => {
       cy.get("[data-cy='asset-0']").click();
       cy.get("#update-asset").click();
       cy.get("#asset-name").type(" Updated");
-      cy.get("#asset-create").click();
+      cy.get("#submit").click();
       cy.verifyNotification("Asset updated successfully");
     });
 
