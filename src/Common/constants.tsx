@@ -1,4 +1,6 @@
 import { PatientCategory } from "../Components/Facility/models";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import moment from "moment";
 
 export const KeralaLogo = "images/kerala-logo.png";
 
@@ -826,3 +828,120 @@ export const BLACKLISTED_PATHS: RegExp[] = [
   /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/pressure_sore+/i,
   /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/dialysis+/i,
 ];
+
+export const XLSXAssetImportSchema = {
+  Name: { prop: "name", type: String },
+  Type: {
+    prop: "asset_type",
+    type: String,
+    oneOf: ["INTERNAL", "EXTERNAL"],
+    required: true,
+  },
+  Class: {
+    prop: "asset_class",
+    type: String,
+    oneOf: ["HL7MONITOR", "ONVIF"],
+  },
+  Description: { prop: "description", type: String },
+  "Working Status": {
+    prop: "is_working",
+    type: Boolean,
+    parse: (status: string) => {
+      if (status === "WORKING") {
+        return true;
+      } else if (status === "NOT WORKING") {
+        return false;
+      } else {
+        throw new Error("Invalid Working Status");
+      }
+    },
+    required: true,
+  },
+  "Not Working Reason": {
+    prop: "not_working_reason",
+    type: String,
+  },
+  "QR Code ID": { prop: "qr_code_id", type: String },
+  Manufacturer: { prop: "manufacturer", type: String },
+  "Vendor Name": { prop: "vendor_name", type: String },
+  "Support Name": { prop: "support_name", type: String },
+  "Support Email": {
+    prop: "support_email",
+    type: String,
+    parse: (email: string) => {
+      const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
+
+      if (!isValid) {
+        throw new Error("Invalid Support Email");
+      }
+
+      return email;
+    },
+  },
+  "Support Phone Number": {
+    prop: "support_phone",
+    type: String,
+    parse: (phone: number | string) => {
+      const parsed = parsePhoneNumberFromString(String(phone), "IN");
+
+      if (!parsed?.isValid()) {
+        throw new Error("Invalid Support Phone Number");
+      }
+
+      return parsed?.format("E.164");
+    },
+    required: true,
+  },
+  "Warrenty End Date": {
+    prop: "warranty_amc_end_of_validity",
+    type: String,
+    parse: (date: string) => {
+      const parsed = new Date(date);
+
+      if (String(parsed) === "Invalid Date") {
+        throw new Error("Invalid Warrenty End Date");
+      }
+
+      return moment(parsed).format("YYYY-MM-DD");
+    },
+  },
+  "Last Service Date": {
+    prop: "last_serviced_on",
+    type: String,
+    parse: (date: string) => {
+      const parsed = new Date(date);
+
+      if (String(parsed) === "Invalid Date") {
+        throw new Error("Invalid Last Service Date");
+      }
+
+      return moment(parsed).format("YYYY-MM-DD");
+    },
+  },
+  Notes: { prop: "notes", type: String },
+  META: {
+    prop: "meta",
+    type: {
+      "Config - IP Address": {
+        prop: "local_ip_address",
+        type: String,
+        parse: (ip: string) => {
+          const isValid =
+            /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+              ip
+            );
+
+          if (!isValid) {
+            throw new Error("Invalid Config IP Address");
+          }
+
+          return ip;
+        },
+      },
+      "Config: Camera Access Key": {
+        prop: "camera_access_key",
+        type: String,
+      },
+    },
+  },
+};

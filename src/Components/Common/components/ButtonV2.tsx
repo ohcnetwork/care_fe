@@ -1,6 +1,6 @@
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
-import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
+import AuthorizedChild from "../../../CAREUI/misc/AuthorizedChild";
+import { AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 import { classNames } from "../../../Utils/utils";
 
 export type ButtonSize = "small" | "default" | "large";
@@ -59,38 +59,51 @@ export type ButtonProps = RawButtonProps &
      * Whether the button should be disabled and show a loading animation.
      */
     loading?: boolean | undefined;
+    /**
+     * Whether the button should be having a Id.
+     */
+    id?: string | undefined;
   };
 
 const ButtonV2 = ({
-  authorizeFor = Anyone,
+  authorizeFor,
   size = "default",
   variant = "primary",
   circle,
   shadow,
   ghost,
   border,
-  className,
   disabled,
   loading,
   children,
   ...props
 }: ButtonProps) => {
-  const isAuthorized = useIsAuthorized(authorizeFor);
+  const className = classNames(
+    "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
+    `button-size-${size}`,
+    `button-shape-${circle ? "circle" : "square"}`,
+    ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
+    border && `button-${variant}-border`,
+    shadow && "shadow enabled:hover:shadow-lg",
+    props.className
+  );
+
+  if (authorizeFor) {
+    <AuthorizedChild authorizeFor={authorizeFor}>
+      {({ isAuthorized }) => (
+        <button
+          {...props}
+          disabled={disabled || !isAuthorized || loading}
+          className={className}
+        >
+          {children}
+        </button>
+      )}
+    </AuthorizedChild>;
+  }
 
   return (
-    <button
-      {...props}
-      disabled={disabled || !isAuthorized || loading}
-      className={classNames(
-        "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
-        `button-size-${size}`,
-        `button-shape-${circle ? "circle" : "square"}`,
-        ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
-        border && `button-${variant}-border`,
-        shadow && "shadow enabled:hover:shadow-lg",
-        className
-      )}
-    >
+    <button {...props} disabled={disabled || loading} className={className}>
       {children}
     </button>
   );

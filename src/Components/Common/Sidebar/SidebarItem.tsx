@@ -10,7 +10,7 @@ type SidebarItemProps = {
   external?: true | undefined;
   badgeCount?: number | undefined;
   selected?: boolean | undefined;
-} & ({ to: string; do?: undefined } | { to?: undefined; do: () => void });
+} & ({ to: string; do?: undefined } | { to?: string; do: () => void });
 
 type SidebarItemBaseProps = SidebarItemProps & { shrinked?: boolean };
 const SidebarItemBase = ({
