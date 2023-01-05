@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { sendNotificationMessages } from "../../Redux/actions";
 import { FACILITY_FEATURE_TYPES, KASP_STRING } from "../../Common/constants";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
 import { getFacilityFeatureIcon } from "./FacilityHome";
 import DialogModal from "../Common/Dialog";
@@ -156,27 +156,18 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       }}
                       className="bg-white text-center flex flex-col w-full"
                     >
-                      <div>
-                        <TextAreaFormField
-                          id="NotifyModalMessageInput"
-                          name="message"
-                          rows={6}
-                          required
-                          className="py-2"
-                          onChange={(e) => setNotifyMessage(e.value)}
-                          placeholder="Type your message..."
-                        />
-                      </div>
+                      <TextAreaFormField
+                        id="NotifyModalMessageInput"
+                        name="message"
+                        required
+                        rows={5}
+                        className="pt-4 pb-2"
+                        onChange={(e) => setNotifyMessage(e.value)}
+                        placeholder="Type your message..."
+                      />
                       <div className="flex flex-col-reverse md:flex-row gap-2 justify-between">
-                        <ButtonV2
-                          variant="secondary"
-                          onClick={() => setNotifyModalFor(undefined)}
-                        >
-                          Cancel
-                        </ButtonV2>
-                        <ButtonV2 variant="primary" type="submit">
-                          Send Notification
-                        </ButtonV2>
+                        <Cancel onClick={() => setNotifyModalFor(undefined)} />
+                        <Submit label="Notify" />
                       </div>
                     </form>
                   </DialogModal>
@@ -200,7 +191,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     border
                     ghost
                     onClick={() =>
-                      navigate(`/facility/${facility.id}/patients`)
+                      navigate(`/patients?facility=${facility.id}`)
                     }
                   >
                     <i className="fas fa-user-injured"></i>
