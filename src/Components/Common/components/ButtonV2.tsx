@@ -1,7 +1,8 @@
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
-import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
+import AuthorizedChild from "../../../CAREUI/misc/AuthorizedChild";
+import { AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 import { classNames } from "../../../Utils/utils";
 
 export type ButtonSize = "small" | "default" | "large";
@@ -75,59 +76,59 @@ export type ButtonProps = RawButtonProps &
   };
 
 const ButtonV2 = ({
-  authorizeFor = Anyone,
+  authorizeFor,
   size = "default",
   variant = "primary",
   circle,
   shadow,
   ghost,
   border,
-  className,
   disabled,
   loading,
-  id,
   children,
   href,
   target,
   ...props
 }: ButtonProps) => {
-  const isAuthorized = useIsAuthorized(authorizeFor);
+  const className = classNames(
+    "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
+    `button-size-${size}`,
+    `button-shape-${circle ? "circle" : "square"}`,
+    ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
+    border && `button-${variant}-border`,
+    shadow && "shadow enabled:hover:shadow-lg",
+    props.className
+  );
 
-  if (href && !(disabled || !isAuthorized || loading)) {
+  if (authorizeFor) {
+    <AuthorizedChild authorizeFor={authorizeFor}>
+      {({ isAuthorized }) => (
+        <button
+          {...props}
+          disabled={disabled || !isAuthorized || loading}
+          className={className}
+        >
+          {children}
+        </button>
+      )}
+    </AuthorizedChild>;
+  }
+
+  if (href && !(disabled || loading)) {
     return (
       <Link
+        {...(props as any)}
         href={href}
         target={target}
-        id={id}
-        className={classNames(
-          "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
-          `button-size-${size}`,
-          `button-shape-${circle ? "circle" : "square"}`,
-          ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
-          border && `button-${variant}-border`,
-          shadow && "shadow enabled:hover:shadow-lg",
-          className
-        )}
+        className={className}
       >
         {children}
       </Link>
     );
   }
+
   return (
-    <button
-      {...props}
-      disabled={disabled || !isAuthorized || loading}
-      className={classNames(
-        "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
-        `button-size-${size}`,
-        `button-shape-${circle ? "circle" : "square"}`,
-        ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
-        border && `button-${variant}-border`,
-        shadow && "shadow enabled:hover:shadow-lg",
-        className
-      )}
-      id={id}
-    >
+    <button {...props} disabled={disabled || loading} className={className}>
       {children}
     </button>
   );
@@ -140,6 +141,7 @@ export default ButtonV2;
 type CommonButtonProps = ButtonProps & { label?: string };
 
 export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
+  const { t } = useTranslation();
   return (
     <ButtonV2
       id="submit"
@@ -149,7 +151,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
       children={
         <>
           <CareIcon className="care-l-check-circle text-lg" />
-          <span>{label}</span>
+          <span>{t(label)}</span>
         </>
       }
       {...props}
@@ -158,6 +160,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
 };
 
 export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
+  const { t } = useTranslation();
   return (
     <ButtonV2
       id="cancel"
@@ -168,7 +171,7 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       children={
         <>
           <CareIcon className="care-l-times-circle text-lg" />
-          <span>{label}</span>
+          <span>{t(label)}</span>
         </>
       }
       {...props}
