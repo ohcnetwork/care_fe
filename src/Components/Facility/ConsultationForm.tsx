@@ -389,17 +389,21 @@ export const ConsultationForm = (props: any) => {
           return;
         case "discharge_advice": {
           let invalid = false;
+          let errorMsg = "";
           for (const f of dischargeAdvice) {
-            if (
-              !f.dosage?.replace(/\s/g, "").length ||
-              !f.medicine?.replace(/\s/g, "").length
-            ) {
+            if (!f.medicine?.replace(/\s/g, "").length) {
               invalid = true;
+              errorMsg = "Prescription Medicine field can not be empty";
+              break;
+            }
+            if (!f.dosage?.replace(/\s/g, "").length) {
+              invalid = true;
+              errorMsg = "Prescription Frequency field can not be empty";
               break;
             }
           }
           if (invalid) {
-            errors[field] = "Prescription field can not be empty";
+            errors[field] = errorMsg;
             if (!error_div) error_div = field;
             invalidForm = true;
           }

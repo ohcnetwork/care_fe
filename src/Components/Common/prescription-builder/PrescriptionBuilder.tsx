@@ -5,6 +5,7 @@ import { PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
 
 import medicines_list from "./assets/medicines.json";
 import ToolTip from "../utils/Tooltip";
+import { FieldLabel } from "../../Form/FormFields/FormField";
 
 export const medicines = medicines_list;
 
@@ -106,7 +107,7 @@ export default function PrescriptionBuilder(
           >
             <div className="flex gap-2 flex-col md:flex-row">
               <div className="w-full">
-                Medicine
+                <FieldLabel required={true}>Medicine</FieldLabel>
                 <AutoCompleteAsync
                   placeholder="Medicine"
                   selected={prescription.medicine}
@@ -124,7 +125,7 @@ export default function PrescriptionBuilder(
               </div>
               <div className="flex gap-2">
                 <div>
-                  Route
+                  <FieldLabel required={false}>Route</FieldLabel>
                   <SelectMenuV2
                     placeholder="Route"
                     options={routes}
@@ -136,7 +137,7 @@ export default function PrescriptionBuilder(
                   />
                 </div>
                 <div>
-                  Frequency
+                  <FieldLabel required={true}>Frequency</FieldLabel>
                   <SelectMenuV2
                     placeholder="Frequency"
                     options={frequency}
@@ -170,7 +171,7 @@ export default function PrescriptionBuilder(
             <div className="flex gap-2 mt-2 flex-col md:flex-row">
               <div className="w-full md:w-[260px] flex gap-2 shrink-0">
                 <div>
-                  Dosage
+                  <FieldLabel required={false}>Dosage</FieldLabel>
                   <div className="flex gap-1">
                     <input
                       type="number"
@@ -208,7 +209,7 @@ export default function PrescriptionBuilder(
                 </div>
 
                 <div className="w-[70px] shrink-0">
-                  Days
+                  <FieldLabel required={false}>Days</FieldLabel>
                   <input
                     type="number"
                     className="cui-input-base py-2"
@@ -234,7 +235,7 @@ export default function PrescriptionBuilder(
               </div>
 
               <div className="w-full">
-                Notes
+                <FieldLabel required={false}>Notes</FieldLabel>
                 <input
                   type="text"
                   className="cui-input-base py-2"
