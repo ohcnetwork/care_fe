@@ -92,7 +92,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
         <p
           className={`${
             facilityId ? "font-medium" : "font-bold"
-          } text-slate-900 text-xl mb-2 md:mb-4 text-center`}
+          } text-slate-900 text-xl mb-2 md:mb-4 text-center h-12`}
         >
           {label}
         </p>
