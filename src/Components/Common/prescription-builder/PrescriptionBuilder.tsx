@@ -255,7 +255,7 @@ export default function PrescriptionBuilder(
 
               <button
                 type="button"
-                className="text-gray-400 text-base transition hover:text-red-500"
+                className="text-gray-400 text-base transition hover:text-red-500 mt-6"
                 onClick={() => {
                   setPrescriptions(
                     prescriptions.filter((prescription, index) => i != index)
