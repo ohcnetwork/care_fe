@@ -641,6 +641,7 @@ export const ConsultationForm = (props: any) => {
         {hasSymptoms && (
           <DateFormField
             {...field("symptoms_onset_date")}
+            disableFuture
             required
             label="Date of onset of the symptoms"
           />
@@ -693,8 +694,9 @@ export const ConsultationForm = (props: any) => {
         {state.form.suggestion === "A" && (
           <>
             <DateFormField
-              required
               {...field("admission_date")}
+              disablePast
+              required
               label="Admission date"
             />
 
