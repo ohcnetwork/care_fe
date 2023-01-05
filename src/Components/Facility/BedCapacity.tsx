@@ -202,9 +202,9 @@ export const BedCapacity = (props: BedCapacityProps) => {
   };
 
   return (
-    <div className="flex justify-center">
+    <div className={className}>
       {isLoading ? (
-        <div className="flex justify-center items-center p-4">
+        <div className="flex justify-center items-center py-4">
           <div role="status">
             <svg
               aria-hidden="true"
@@ -227,7 +227,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
         </div>
       ) : (
         <div className={className}>
-          <div className="p-2">
+          <div>
             <FieldLabel htmlFor="bed-type" required={true}>
               Bed Type
             </FieldLabel>
@@ -244,7 +244,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
             />
             <ErrorHelperText error={state.errors.bedType} />
           </div>
-          <div className="flex flex-col md:flex-row gap-7 p-2">
+          <div className="flex flex-col md:flex-row gap-7">
             <div className="w-full">
               <FieldLabel htmlFor="total-capacity" required={true}>
                 Total Capacity
@@ -274,7 +274,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
               />
             </div>
           </div>
-          <div className="p-2">
+          <div>
             <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
               <div className="w-full md:w-auto">
                 <Cancel onClick={handleClose} />

@@ -185,9 +185,9 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
   };
 
   return (
-    <div className="flex justify-center">
+    <div className={className}>
       {isLoading ? (
-        <div className="flex justify-center items-center p-4">
+        <div className="flex justify-center items-center">
           <div role="status">
             <svg
               aria-hidden="true"
@@ -217,7 +217,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
                 : handleSubmit(e);
             }}
           >
-            <div className="p-2">
+            <div>
               <FieldLabel className="mb-2" required={true}>
                 Area of specialization
               </FieldLabel>
@@ -236,7 +236,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
               />
               <ErrorHelperText error={state.errors.area} />
             </div>
-            <div className="p-2">
+            <div>
               <TextFormField
                 id="count"
                 label="Count"
@@ -248,7 +248,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
                 min={0}
               />
             </div>
-            <div className="p-2">
+            <div>
               <div className="flex justify-between flex-col md:flex-row">
                 <div className="flex flex-row w-full sm:w-auto gap-4">
                   <Cancel onClick={() => handleClose()} />
