@@ -280,6 +280,7 @@ export const CONSULTATION_SUGGESTION = [
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
+  { id: "DD", text: "Declare Death" },
 ];
 
 export const ADMITTED_TO = [
