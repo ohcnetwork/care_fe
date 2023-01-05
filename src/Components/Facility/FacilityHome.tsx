@@ -568,7 +568,7 @@ export const FacilityHome = (props: any) => {
                 ghost
                 border
                 className="w-full md:w-auto flex flex-row mt-2 justify-center"
-                onClick={() => navigate(`/facility/${facilityId}/patients`)}
+                onClick={() => navigate(`/patients?facility=${facilityId}`)}
               >
                 <PatientIcon className="w-4 h-4 fill-current mr-2" />
                 <span>View Patients</span>

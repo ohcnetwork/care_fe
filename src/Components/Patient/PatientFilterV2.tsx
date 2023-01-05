@@ -378,8 +378,8 @@ export default function PatientFilterV2(props: any) {
             <CareIcon
               className={`${
                 option.order === "Ascending"
-                  ? "care-l-amount-up"
-                  : "care-l-amount-down"
+                  ? "care-l-sort-amount-up"
+                  : "care-l-sort-amount-down"
               }`}
             />
           )}

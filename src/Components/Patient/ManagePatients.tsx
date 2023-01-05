@@ -30,6 +30,7 @@ import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import FilterBadge from "../../CAREUI/display/FilterBadge";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
@@ -67,8 +68,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   Critical: "CRITICAL",
 };
 
-export const PatientManager = (props: any) => {
-  const { facilityId } = props;
+export const PatientManager = () => {
   const dispatch: any = useDispatch();
 
   const [data, setData] = useState<any[]>([]);
@@ -92,7 +92,6 @@ export const PatientManager = (props: any) => {
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
-  const [facilityCrumbName, setFacilityCrumbName] = useState("");
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
   const params = {
@@ -111,7 +110,7 @@ export const PatientManager = (props: any) => {
         )
       : undefined,
     local_body: qParams.lsgBody || undefined,
-    facility: facilityId || qParams.facility,
+    facility: qParams.facility,
     facility_type: qParams.facility_type || undefined,
     district: qParams.district || undefined,
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
@@ -195,23 +194,10 @@ export const PatientManager = (props: any) => {
   let managePatients: any = null;
 
   const exportPatients = (isFiltered: boolean) => {
-    const filters = { ...params, csv: true, facility: facilityId };
+    const filters = { ...params, csv: true, facility: qParams.facility };
     if (!isFiltered) delete filters.is_active;
     return () => getAllPatient(filters, "downloadPatients");
   };
-
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatch(getAnyFacility(facilityId));
-
-        setFacilityCrumbName(res?.data?.name || "");
-      } else {
-        setFacilityCrumbName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatch, facilityId]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -228,7 +214,6 @@ export const PatientManager = (props: any) => {
       });
   }, [
     dispatch,
-    facilityId,
     qParams.last_consultation_admission_date_before,
     qParams.last_consultation_admission_date_after,
     qParams.last_consultation_discharge_date_before,
@@ -332,24 +317,20 @@ export const PatientManager = (props: any) => {
     const badge = (key: string, value: any, id: string) => {
       return (
         value && (
-          <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-            {key}
-            {": "}
-            {value}
-            <i
-              className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-              onClick={(_) => {
-                const lcat = qParams.last_consultation_admitted_bed_type_list
-                  .split(",")
-                  .filter((x: string) => x != id)
-                  .join(",");
-                updateQuery({
-                  ...qParams,
-                  last_consultation_admitted_bed_type_list: lcat,
-                });
-              }}
-            ></i>
-          </span>
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation_admitted_to_list
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation_admitted_to_list: lcat,
+              });
+            }}
+          />
         )
       );
     };
@@ -579,18 +560,13 @@ export const PatientManager = (props: any) => {
         }}
       />
       <div className="flex justify-between items-center">
-        <PageTitle
-          title="Patients"
-          hideBack={!facilityId}
-          breadcrumbs={!!facilityId}
-          crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
-        />
+        <PageTitle title="Patients" hideBack={true} />
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
           <ButtonV2
             className="flex gap-2 items-center font-semibold"
             onClick={() => {
-              facilityId
-                ? navigate(`/facility/${facilityId}/patient`)
+              qParams.facility
+                ? navigate(`/facility/${qParams.facility}/patient`)
                 : setShowDialog(true);
             }}
           >
