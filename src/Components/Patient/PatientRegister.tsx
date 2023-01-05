@@ -145,7 +145,7 @@ const initForm: any = {
   cluster_name: "",
   covin_id: "",
   is_vaccinated: "false",
-  number_of_doses: "1",
+  number_of_doses: "0",
   vaccine_name: null,
   last_vaccinated_date: null,
   ...medicalHistoryChoices,
@@ -415,7 +415,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             is_vaccinated: String(res.data.is_vaccinated),
             number_of_doses: res.data.number_of_doses
               ? String(res.data.number_of_doses)
-              : "1",
+              : "0",
             vaccine_name: res.data.vaccine_name ? res.data.vaccine_name : null,
             last_vaccinated_date: res.data.last_vaccinated_date
               ? res.data.last_vaccinated_date
@@ -627,6 +627,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
         case "is_vaccinated":
           if (state.form.is_vaccinated === "true") {
+            console.log(state);
+            if (state.form.number_of_doses === "0") {
+              errors["number_of_doses"] =
+                "Please fill the number of doses taken";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+            }
             if (
               state.form.vaccine_name === null ||
               state.form.vaccine_name === "Select"
@@ -642,13 +649,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               if (!error_div) error_div = field;
               invalidForm = true;
             }
-          }
-          return;
-        case "medical_history":
-          if (!state.form[field].length) {
-            errors[field] = "Please fill the medical history";
-            if (!error_div) error_div = field;
-            invalidForm = true;
           }
           return;
         case "disease_status":
@@ -729,6 +729,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           });
         }
       });
+      if (!medical_history.length) {
+        medical_history.push({ disease: "NO", details: "" });
+      }
 
       const data = {
         phone_number: parsePhoneNumberFromString(
@@ -1562,6 +1565,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       />
                                     </div>
                                   </RadioGroup>
+                                  <ErrorHelperText
+                                    error={state.errors.number_of_doses}
+                                  />
                                 </div>
                                 <div id="vaccine_name-div">
                                   <FieldLabel
@@ -1975,7 +1981,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <FieldLabel id="med-history-label">
+                          <FieldLabel id="med-history-label" required>
                             Any medical history? (Comorbidities)
                           </FieldLabel>
                           <div className="flex flex-wrap">
@@ -1983,9 +1989,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               return renderMedicalHistory(i.id, i.text);
                             })}
                           </div>
-                          <ErrorHelperText
-                            error={state.errors.medical_history}
-                          />
                         </div>
 
                         <div id="allergies-div">
