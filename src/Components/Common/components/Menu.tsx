@@ -7,8 +7,8 @@ import { ButtonVariant } from "./ButtonV2";
 import { DropdownTransition } from "./HelperComponents";
 
 export default function DropdownMenu(props: {
-  title: string;
-  icon: JSX.Element;
+  title?: string;
+  icon?: JSX.Element;
   children: JSX.Element | JSX.Element[];
 }) {
   return (
@@ -17,7 +17,7 @@ export default function DropdownMenu(props: {
         <Menu.Button className="text-white flex w-full lg:justify-between justify-center items-center outline-offset-1 Button button-primary-default button-size-default button-shape-square">
           <div className="flex gap-2 items-center">
             {props.icon}
-            {props.title}
+            {props.title || "Dropdown"}
           </div>
 
           <CareIcon className="ml-2 -mr-1 care-l-angle-down h-6" />

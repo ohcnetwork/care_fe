@@ -795,6 +795,26 @@ const routes: Routes = {
     path: "/api/v1/abdm/healthid/create_health_id/",
     method: "POST",
   },
+
+  searchByHealthId: {
+    path: "/api/v1/abdm/healthid/search_by_health_id/",
+    method: "POST",
+  },
+
+  initiateAbdmAuthentication: {
+    path: "/api/v1/abdm/healthid/auth_init/",
+    method: "POST",
+  },
+
+  confirmWithAadhaarOtp: {
+    path: "/api/v1/abdm/healthid/confirm_with_aadhaar_otp/",
+    method: "POST",
+  },
+
+  confirmWithMobileOtp: {
+    path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
+    method: "POST",
+  },
 };
 
 export default routes;

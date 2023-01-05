@@ -8,6 +8,10 @@ import {
   resentAadhaarOtp,
   verifyAadhaarOtp,
   verifyMobileOtp,
+  searchByHealthId,
+  initiateAbdmAuthentication,
+  confirmWithMobileOtp,
+  confirmWithAadhaarOtp,
 } from "../../Redux/actions";
 import * as Notify from "../../Utils/Notifications";
 import { classNames } from "../../Utils/utils";
@@ -16,6 +20,7 @@ import DialogModal from "../Common/Dialog";
 import QRScanner from "../Common/QRScanner";
 import TextFormField from "../Form/FormFields/TextFormField";
 import * as Notification from "../../Utils/Notifications.js";
+import Dropdown, { DropdownItem } from "../Common/components/Menu";
 
 interface Props {
   patientId: string;
@@ -96,17 +101,26 @@ interface ScanABHAQRSectionProps {
 }
 
 const ScanABHAQRSection = ({ onSignup }: ScanABHAQRSectionProps) => {
+  const dispatch = useDispatch<any>();
+
   const [qrValue, setQrValue] = useState("");
+  const [authMethods, setAuthMethods] = useState<string[]>([]);
+  const [selectedAuthMethod, setSelectedAuthMethod] = useState("");
+  const [txnId, setTxnId] = useState("");
+  const [otp, setOtp] = useState("");
+
+  const supportedAuthMethods = ["MOBILE_OTP", "AADHAAR_OTP"];
+
   return (
     <div>
       <QRScanner
         label="Enter ABHA Number"
         value={qrValue}
+        disabled={!!authMethods.length}
         onChange={setQrValue}
         parse={(value: string) => {
           if (!value) return;
 
-          console.log(value);
           try {
             const abha = JSON.parse(value);
             return abha?.hidn;
@@ -117,6 +131,21 @@ const ScanABHAQRSection = ({ onSignup }: ScanABHAQRSectionProps) => {
         }}
       />
 
+      {txnId && (
+        <TextFormField
+          name="otp"
+          label="Enter 6-digit OTP sent to the registered mobile"
+          min={6}
+          max={6}
+          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal text-center"
+          placeholder="OTP"
+          // disabled={isVerifyingOtp}
+          value={otp}
+          onChange={({ value }) => setOtp(value)}
+          error={""} // TODO: setup otp
+        />
+      )}
+
       <div className="flex gap-2 items-center justify-between mt-4">
         <span
           onClick={onSignup}
@@ -125,12 +154,72 @@ const ScanABHAQRSection = ({ onSignup }: ScanABHAQRSectionProps) => {
           Don't have an ABHA Number
         </span>
         <>
-          <ButtonV2
-            disabled={!qrValue} // TODO: validate it
-            onClick={() => console.log(`linking ${qrValue}`)}
-          >
-            Link
-          </ButtonV2>
+          {txnId ? (
+            <ButtonV2
+              disabled={otp.length !== 6}
+              onClick={async () => {
+                let response = null;
+
+                switch (selectedAuthMethod) {
+                  case "MOBILE_OTP":
+                    response = await dispatch(confirmWithMobileOtp(txnId, otp));
+                    break;
+
+                  case "AADHAAR_OTP":
+                    response = await dispatch(
+                      confirmWithAadhaarOtp(txnId, otp)
+                    );
+                    break;
+                }
+
+                console.log(response);
+                if (response.status === 200) {
+                  location.reload(); // TODO: Fetch and update patient
+                }
+              }}
+            >
+              Link
+            </ButtonV2>
+          ) : authMethods.length ? (
+            <Dropdown title="Verify via">
+              {authMethods.map((method) => (
+                <DropdownItem
+                  onClick={async () => {
+                    const response = await dispatch(
+                      initiateAbdmAuthentication(method, qrValue)
+                    );
+
+                    if (response.status === 200 && response?.data?.txnId) {
+                      setSelectedAuthMethod(method);
+                      setTxnId(response.data.txnId);
+                    }
+                  }}
+                  className=""
+                >
+                  {method}
+                </DropdownItem>
+              ))}
+            </Dropdown>
+          ) : (
+            <ButtonV2
+              disabled={!qrValue}
+              onClick={async () => {
+                const response = await dispatch(searchByHealthId(qrValue));
+
+                if (response.status === 200 && response?.data?.authMethods) {
+                  setAuthMethods(
+                    response.data.authMethods?.filter?.((method: string) =>
+                      supportedAuthMethods.find(
+                        (supported) => supported === method
+                      )
+                    )
+                  );
+                }
+              }}
+            >
+              Verify
+            </ButtonV2>
+          )}
         </>
       </div>
     </div>

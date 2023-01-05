@@ -10,6 +10,7 @@ interface IQRScannerModalProps {
   onClose: () => void;
   onScan: (scannedValue: any) => any;
   description?: string;
+  disabled?: boolean;
 }
 
 const QRScannerModal = ({
@@ -17,11 +18,12 @@ const QRScannerModal = ({
   onClose,
   onScan,
   description,
+  disabled = false,
 }: IQRScannerModalProps) => {
   return (
     <DialogModal
       title=""
-      show={show}
+      show={!disabled && show}
       onClose={onClose}
       className="!max-w-full w-3/5"
     >
@@ -51,12 +53,14 @@ interface IProps {
   className?: string;
   error?: string;
   label?: string;
+  disabled?: boolean;
 }
 
 const QRScanner = ({
   value,
   onChange,
   parse,
+  disabled = false,
   className = "",
   error = "",
   label = "QR Code",
@@ -78,11 +82,13 @@ const QRScanner = ({
         actionIcon={<CropFreeIcon className="cursor-pointer" />}
         action={() => setShowScanner(true)}
         errors={error}
+        disabled={disabled}
       />
       <ErrorHelperText error={error} />
 
       <QRScannerModal
         show={showScanner}
+        disabled={disabled}
         onClose={() => setShowScanner(false)}
         onScan={(scannedValue: any) => {
           const parsedValue = parse?.(scannedValue) ?? null;

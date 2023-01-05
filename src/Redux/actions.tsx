@@ -819,3 +819,17 @@ export const verifyMobileOtp = (txnId: string, otp: string) =>
 
 export const createHealthId = (data: ICreateHealthIdRequest) =>
   fireRequest("createHealthId", [], data);
+
+export const searchByHealthId = (healthId: string) =>
+  fireRequest("searchByHealthId", [], { healthId });
+
+export const initiateAbdmAuthentication = (
+  authMethod: string,
+  healthid: string
+) => fireRequest("initiateAbdmAuthentication", [], { authMethod, healthid });
+
+export const confirmWithAadhaarOtp = (txnId: string, otp: string) =>
+  fireRequest("confirmWithAadhaarOtp", [], { txnId, otp });
+
+export const confirmWithMobileOtp = (txnId: string, otp: string) =>
+  fireRequest("confirmWithMobileOtp", [], { txnId, otp });
