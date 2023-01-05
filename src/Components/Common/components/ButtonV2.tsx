@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import AuthorizedChild from "../../../CAREUI/misc/AuthorizedChild";
 import { AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
@@ -116,6 +117,7 @@ export default ButtonV2;
 type CommonButtonProps = ButtonProps & { label?: string };
 
 export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
+  const { t } = useTranslation();
   return (
     <ButtonV2
       id="submit"
@@ -125,7 +127,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
       children={
         <>
           <CareIcon className="care-l-check-circle text-lg" />
-          <span>{label}</span>
+          <span>{t(label)}</span>
         </>
       }
       {...props}
@@ -134,6 +136,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
 };
 
 export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
+  const { t } = useTranslation();
   return (
     <ButtonV2
       id="cancel"
@@ -144,7 +147,7 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       children={
         <>
           <CareIcon className="care-l-times-circle text-lg" />
-          <span>{label}</span>
+          <span>{t(label)}</span>
         </>
       }
       {...props}
