@@ -27,7 +27,7 @@ interface RadialCardProps {
 }
 
 const CIRCLE_PATH =
-  "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831";
+  "M18 2.0845 a 15.9155 15.9155 0 0 1 0 25.831 a 15.9155 15.9155 0 0 1 0 -25.831";
 
 export const RadialCard: React.FC<RadialCardProps> = ({
   facilityId,
@@ -39,42 +39,6 @@ export const RadialCard: React.FC<RadialCardProps> = ({
   lastUpdated,
   removeBedType,
 }) => {
-  const isLoading = false;
-
-  //   const current_used = current.total
-  //     ? Math.round((current.used / current.total) * 100)
-  //     : 0;
-  //   const previous_used = previous.total
-  //     ? Math.round((previous.used / previous.total) * 100)
-  //     : 0;
-  //   const diff = current_used - previous_used;
-
-  //   const _p = current.total
-  //     ? Math.round((current.used / current.total) * 100)
-  //     : 0;
-
-  // const isPositive = (value: number) =>
-  //   !Number.isNaN(value) && value !== 0 && value > 0;
-
-  //   const { used, total, progress, innerProgress } = useSpring({
-  //     from: { used: 0, total: 0, progress: "0, 100", innerProgress: 0 },
-  //     to: {
-  //       used: current.used,
-  //       total: current.total,
-  //       progress: `${Number.isNaN(_p) ? 0 : _p}, 100`,
-  //       innerProgress: Number.isNaN(_p) ? 0 : _p,
-  //     },
-  //     delay: 0,
-  //     config: config.slow,
-  //   });
-
-  //   const isAvailable = !(
-  //     !current.total &&
-  //     !current.used &&
-  //     !previous.total &&
-  //     !previous.used
-  //   );
-
   const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
@@ -102,41 +66,59 @@ export const RadialCard: React.FC<RadialCardProps> = ({
     setOpenDeleteDialog(false);
   };
 
+  // animation
+  // const config = {
+  //   slow: {
+  //     tension: 280,
+  //     friction: 60,
+  //   },
+  // };
+
+  // const _p = total ? Math.round((used / total) * 100) : 0;
+
+  // const { occupied, totalCount, progress, innerProgress } = useSpring({
+  //   from: { occupied: 0, totalCount: 0, progress: "0, 100", innerProgress: 0 },
+  //   to: {
+  //     occupied: used,
+  //     totalCount: total,
+  //     progress: `${Number.isNaN(_p) ? 0 : _p}, 100`,
+  //     innerProgress: Number.isNaN(_p) ? 0 : _p,
+  //   },
+  //   delay: 0,
+  //   config: config.slow,
+  // });
+
   const percent = Math.round((used * 100) / total);
-  const isAvailable = true;
   const progress = `${Number.isNaN(percent) ? 0 : percent}, 100`;
 
   return (
     <div
-      className={clsx(
-        isLoading
-          ? "bg-slate-200 animate-pulse"
-          : "bg-white border border-slate-200 opacity-100",
-        "shadow-sm rounded-xl flex flex-col justify-between h-full"
-      )}
+      className={`${
+        facilityId
+          ? "border border-slate-200 bg-white"
+          : "border border-primary-500 bg-primary-100"
+      } opacity-100 shadow-sm rounded-xl flex flex-col justify-between h-full`}
       style={{ padding: "clamp(0.75rem,5vw,1.5rem)" }}
     >
-      <div className={isLoading ? "opacity-0" : "opacity-100"}>
+      <div className={"opacity-100"}>
         <p className="text-slate-900 font-medium text-xl mb-2 md:mb-4 text-center">
           {label}
         </p>
 
         <div className="relative">
-          <div
-            className={
-              isAvailable ? "opacity-100" : "opacity-0 pointer-events-none"
-            }
-          >
-            <div className="flex items-center justify-center">
+          <div className={"opacity-100"}>
+            <div className="flex items-center justify-center h-2/3">
               <div className="relative flex content-center justify-center m-2 w-4/5">
-                <svg viewBox="0 0 36 36" className="w-full">
+                <svg viewBox="0 0 38 32" className="w-full">
                   <path
-                    className="text-slate-200 stroke-current stroke-[4px]"
+                    className={`${
+                      facilityId ? "text-slate-200" : "text-white"
+                    } stroke-current stroke-[3px]`}
                     fill="none"
                     d={CIRCLE_PATH}
                   />
                   <animated.path
-                    className="text-primary-500 stroke-current stroke-[3px]"
+                    className="text-primary-500 stroke-current stroke-[2px]"
                     fill="none"
                     strokeDasharray={progress}
                     d={CIRCLE_PATH}
@@ -154,37 +136,20 @@ export const RadialCard: React.FC<RadialCardProps> = ({
                   {
                     <div className="mt-2 text-center">
                       <span
-                        className={
-                          "text-xl font-medium text-green-600"
-                          // reverseIndicator
-                          //   ? !isPositive(diff)
-                          //   : isPositive(diff),
-                          // "text-red-600": reverseIndicator
-                          //   ? isPositive(diff)
-                          //   : !isPositive(diff),
-                        }
-                      >
-                        {/* {diff ? (
-                          isPositive(diff) ? (
-                            <ArrowUp className="inline h-full" />
-                          ) : (
-                            <ArrowDown className="inline h-full" />
-                          )
-                        ) : null} */}
-                        {/* {Math.abs(diff)}% */}
-                      </span>
+                        className={"text-xl font-medium text-green-600"}
+                      ></span>
                     </div>
                   }
                 </div>
               </div>
             </div>
-            <div className="flex flex-col md:flex-row gap-4 text-center mt-4 justify-center items-center">
+            <div className="flex flex-col h-1/3 md:flex-row gap-4 text-center mt-4 justify-center items-center">
               <div className="w-1/2">
                 <p className="text-slate-500 font-medium text-lg xl:text-xl">
                   Used
                   <animated.span className="ml-2 text-slate-700 font-semibold text-lg  xl:text-xl">
                     {used}
-                    {/* .to((x: number) => Math.round(x)) */}
+                    {/* {occupied.to((x: number) => Math.round(x))} */}
                   </animated.span>
                 </p>
               </div>
@@ -193,12 +158,13 @@ export const RadialCard: React.FC<RadialCardProps> = ({
                   Total
                   <animated.span className="ml-2 text-slate-700 text-lg font-semibold xl:text-xl">
                     {total}
+                    {/* {totalCount.to((x: number) => Math.round(x))} */}
                   </animated.span>
                 </p>
               </div>
             </div>
             {facilityId && (
-              <div className="flex justify-between gap-2 pt-8">
+              <div className="flex justify-between gap-2 pt-6">
                 <div className="text-xs text-gray-600 font-[400] italic">
                   Last Updated: {lastUpdated && moment(lastUpdated).fromNow()}
                 </div>
@@ -248,10 +214,9 @@ export const RadialCard: React.FC<RadialCardProps> = ({
             )}
           </div>
           <p
-            className={clsx(
-              "font-bold text-xl text-slate-500 text-center my-8 w-full absolute top-1/4 left-1/2 -translate-x-1/2",
-              !isAvailable ? "opacity-100" : "opacity-0 pointer-events-none"
-            )}
+            className={
+              "font-bold text-xl text-slate-500 text-center my-8 w-full absolute top-1/4 left-1/2 -translate-x-1/2 opacity-0 pointer-events-none"
+            }
           >
             No Data Available
           </p>
