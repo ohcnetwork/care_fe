@@ -26,7 +26,7 @@ interface BedTypeCardProps {
 }
 
 const CIRCLE_PATH =
-  "M18 2.0845 a 15.9155 15.9155 0 0 1 0 25.831 a 15.9155 15.9155 0 0 1 0 -25.831";
+  "M18 2.0845 a 10.9155 10.9155 0 0 1 0 25.831 a 10.9155 10.9155 0 0 1 0 -25.831";
 
 export const BedTypeCard: React.FC<BedTypeCardProps> = ({
   facilityId,

@@ -172,7 +172,6 @@ export const FacilityHome = (props: any) => {
                 state.filter((i) => i.id !== bedTypeId)
               );
             };
-            console.log(res);
             return (
               <div>
                 <BedTypeCard
