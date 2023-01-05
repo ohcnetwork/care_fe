@@ -89,7 +89,11 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
       style={{ padding: "clamp(0.75rem,5vw,1.5rem)" }}
     >
       <div className={"opacity-100"}>
-        <p className="text-slate-900 font-medium text-xl mb-2 md:mb-4 text-center">
+        <p
+          className={`${
+            facilityId ? "font-medium" : "font-bold"
+          } text-slate-900 text-xl mb-2 md:mb-4 text-center`}
+        >
           {label}
         </p>
 
