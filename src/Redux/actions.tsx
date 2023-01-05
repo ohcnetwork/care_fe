@@ -828,8 +828,14 @@ export const initiateAbdmAuthentication = (
   healthid: string
 ) => fireRequest("initiateAbdmAuthentication", [], { authMethod, healthid });
 
-export const confirmWithAadhaarOtp = (txnId: string, otp: string) =>
-  fireRequest("confirmWithAadhaarOtp", [], { txnId, otp });
+export const confirmWithAadhaarOtp = (
+  txnId: string,
+  otp: string,
+  patientId: string
+) => fireRequest("confirmWithAadhaarOtp", [], { txnId, otp, patientId });
 
-export const confirmWithMobileOtp = (txnId: string, otp: string) =>
-  fireRequest("confirmWithMobileOtp", [], { txnId, otp });
+export const confirmWithMobileOtp = (
+  txnId: string,
+  otp: string,
+  patientId: string
+) => fireRequest("confirmWithMobileOtp", [], { txnId, otp, patientId });

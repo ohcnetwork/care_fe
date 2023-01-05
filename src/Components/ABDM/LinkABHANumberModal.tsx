@@ -36,7 +36,7 @@ type Step =
   | "HealthIDCreation";
 
 export default function LinkABHANumberModal({
-  // patientId,
+  patientId,
   patientMobile,
   ...props
 }: Props) {
@@ -58,6 +58,7 @@ export default function LinkABHANumberModal({
             onSignup={() => {
               setCurrentStep("AadhaarVerification");
             }}
+            patientId={patientId}
           />
         )}
 
@@ -88,7 +89,7 @@ export default function LinkABHANumberModal({
           <CreateHealthIDSection
             transactionId={transactionId}
             onCreateSuccess={() => props.onClose()}
-            patientId={props.patientId}
+            patientId={patientId}
           />
         )}
       </div>
@@ -98,9 +99,10 @@ export default function LinkABHANumberModal({
 
 interface ScanABHAQRSectionProps {
   onSignup: () => void;
+  patientId: string;
 }
 
-const ScanABHAQRSection = ({ onSignup }: ScanABHAQRSectionProps) => {
+const ScanABHAQRSection = ({ onSignup, patientId }: ScanABHAQRSectionProps) => {
   const dispatch = useDispatch<any>();
 
   const [qrValue, setQrValue] = useState("");
@@ -162,12 +164,14 @@ const ScanABHAQRSection = ({ onSignup }: ScanABHAQRSectionProps) => {
 
                 switch (selectedAuthMethod) {
                   case "MOBILE_OTP":
-                    response = await dispatch(confirmWithMobileOtp(txnId, otp));
+                    response = await dispatch(
+                      confirmWithMobileOtp(txnId, otp, patientId)
+                    );
                     break;
 
                   case "AADHAAR_OTP":
                     response = await dispatch(
-                      confirmWithAadhaarOtp(txnId, otp)
+                      confirmWithAadhaarOtp(txnId, otp, patientId)
                     );
                     break;
                 }
@@ -175,6 +179,10 @@ const ScanABHAQRSection = ({ onSignup }: ScanABHAQRSectionProps) => {
                 console.log(response);
                 if (response.status === 200) {
                   location.reload(); // TODO: Fetch and update patient
+                } else {
+                  Notification.Error({
+                    msg: response?.message ?? "Something went wrong!",
+                  });
                 }
               }}
             >
