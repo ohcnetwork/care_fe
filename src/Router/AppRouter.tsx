@@ -106,9 +106,6 @@ const routes = {
   "/facility/:facilityId/triage": ({ facilityId }: any) => (
     <TriageForm facilityId={facilityId} />
   ),
-  "/facility/:facilityId/patients": ({ facilityId }: any) => (
-    <PatientManager facilityId={facilityId} />
-  ),
   "/facility/:facilityId/patient": ({ facilityId }: any) => (
     <PatientRegister facilityId={facilityId} />
   ),

@@ -682,7 +682,7 @@ export const FacilityHome = (props: any) => {
           show={bedCapacityModalOpen}
           onClose={() => setBedCapacityModalOpen(false)}
           title="Add Bed Capacity"
-          className="max-w-lg md:min-w-[650px]"
+          className="max-w-md md:min-w-[600px]"
         >
           <BedCapacity
             facilityId={facilityId}
@@ -703,7 +703,7 @@ export const FacilityHome = (props: any) => {
           show={doctorCapacityModalOpen}
           onClose={() => setDoctorCapacityModalOpen(false)}
           title="Add Doctor Capacity"
-          className="max-w-lg md:min-w-[650px]"
+          className="max-w-md md:min-w-[600px]"
         >
           <DoctorCapacity
             facilityId={facilityId}

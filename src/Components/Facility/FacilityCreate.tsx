@@ -578,15 +578,18 @@ export const FacilityCreate = (props: FacilityProps) => {
             }}
           />
           <Steps steps={getSteps()} />
-          <DoctorCapacity
-            facilityId={createdFacilityId || ""}
-            handleClose={() => {
-              navigate(`/facility/${createdFacilityId}`);
-            }}
-            handleUpdate={() => {
-              return;
-            }}
-          />
+          <div className="pt-3">
+            <DoctorCapacity
+              className="max-w-3xl w-full"
+              facilityId={createdFacilityId || ""}
+              handleClose={() => {
+                navigate(`/facility/${createdFacilityId}`);
+              }}
+              handleUpdate={() => {
+                return;
+              }}
+            />
+          </div>
         </div>
       );
     case 2:
@@ -599,15 +602,18 @@ export const FacilityCreate = (props: FacilityProps) => {
             }}
           />
           <Steps steps={getSteps()} />
-          <BedCapacity
-            facilityId={createdFacilityId || ""}
-            handleClose={() => {
-              setCurrentStep(3);
-            }}
-            handleUpdate={() => {
-              return;
-            }}
-          />
+          <div className="pt-3">
+            <BedCapacity
+              className="max-w-3xl w-full"
+              facilityId={createdFacilityId || ""}
+              handleClose={() => {
+                setCurrentStep(3);
+              }}
+              handleUpdate={() => {
+                return;
+              }}
+            />
+          </div>
         </div>
       );
     case 1:

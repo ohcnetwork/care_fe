@@ -19,6 +19,7 @@ interface BedCapacityProps extends CapacityModal {
   facilityId: string;
   handleClose: () => void;
   handleUpdate: () => void;
+  className?: string;
   id?: number;
 }
 
@@ -56,7 +57,7 @@ const bedCountReducer = (state = initialState, action: any) => {
 
 export const BedCapacity = (props: BedCapacityProps) => {
   const dispatchAction: any = useDispatch();
-  const { facilityId, handleClose, handleUpdate, id } = props;
+  const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(bedCountReducer, initialState);
   const [isLastOptionType, setIsLastOptionType] = useState(false);
   const [bedTypes, setBedTypes] = useState<Array<OptionsType>>(initBedTypes);
@@ -201,7 +202,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
   };
 
   return (
-    <div>
+    <div className="flex justify-center">
       {isLoading ? (
         <div className="flex justify-center items-center p-4">
           <div role="status">
@@ -225,7 +226,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
           </div>
         </div>
       ) : (
-        <div>
+        <div className={className}>
           <div className="p-2">
             <FieldLabel htmlFor="bed-type" required={true}>
               Bed Type

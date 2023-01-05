@@ -22,9 +22,9 @@ export default function Steps(props: { steps: Step[] }) {
                 onClick={() => {
                   !step.disabled && step.onClick();
                 }}
-                className={`group flex w-full items-center cursor-pointer ${
+                className={`group flex w-full items-center ${
                   step.disabled ? "cursor-not-allowed" : "cursor-pointer"
-                }}`}
+                }`}
               >
                 <span className="flex items-center px-6 py-4 text-sm font-medium">
                   <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-600 group-hover:bg-green-800">
@@ -45,7 +45,7 @@ export default function Steps(props: { steps: Step[] }) {
                 }}
                 className={`flex items-center px-6 py-4 text-sm font-medium ${
                   step.disabled ? "cursor-not-allowed" : "cursor-pointer"
-                }}`}
+                }`}
                 aria-current="step"
               >
                 <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 border-green-600">

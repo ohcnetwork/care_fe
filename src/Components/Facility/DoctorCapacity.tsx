@@ -16,6 +16,7 @@ interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;
   handleClose: () => void;
   handleUpdate: () => void;
+  className?: string;
   id?: number;
 }
 
@@ -52,7 +53,7 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
 
 export const DoctorCapacity = (props: DoctorCapacityProps) => {
   const dispatchAction: any = useDispatch();
-  const { facilityId, handleClose, handleUpdate, id } = props;
+  const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
   const [isLastOptionType, setIsLastOptionType] = useState(false);
@@ -184,7 +185,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
   };
 
   return (
-    <div>
+    <div className="flex justify-center">
       {isLoading ? (
         <div className="flex justify-center items-center p-4">
           <div role="status">
@@ -208,7 +209,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
           </div>
         </div>
       ) : (
-        <div>
+        <div className={className}>
           <form
             onSubmit={(e) => {
               !id && !isLastOptionType
