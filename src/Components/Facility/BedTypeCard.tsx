@@ -137,7 +137,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
             <div className="flex flex-col h-1/3 md:flex-row gap-4 text-center mt-4 justify-center items-center">
               <div className="w-1/2">
                 <p className="text-slate-500 font-medium text-lg xl:text-xl">
-                  Used
+                  Used:
                   <animated.span className="ml-2 text-slate-700 font-semibold text-lg  xl:text-xl">
                     {occupied.to((x: number) => Math.round(x))}
                   </animated.span>
@@ -145,7 +145,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
               </div>
               <div className="w-1/2">
                 <p className="text-slate-500 font-medium text-lg xl:text-xl">
-                  Total
+                  Total:
                   <animated.span className="ml-2 text-slate-700 text-lg font-semibold xl:text-xl">
                     {totalCount.to((x: number) => Math.round(x))}
                   </animated.span>
