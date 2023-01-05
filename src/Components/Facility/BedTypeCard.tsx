@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import moment from "moment";
 import * as Notification from "../../Utils/Notifications";
-import { animated } from "@react-spring/web";
+import { animated, config, useSpring } from "@react-spring/web";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import {
@@ -26,7 +26,7 @@ interface BedTypeCardProps {
 }
 
 const CIRCLE_PATH =
-  "M18 2.0845 a 10.9155 10.9155 0 0 1 0 25.831 a 10.9155 10.9155 0 0 1 0 -25.831";
+  "M18 2.0845 a 10.9155 10.9155 0 0 1 0 22.831 a 10.9155 10.9155 0 0 1 0 -22.831";
 
 export const BedTypeCard: React.FC<BedTypeCardProps> = ({
   facilityId,
@@ -65,30 +65,22 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
     setOpenDeleteDialog(false);
   };
 
-  // animation
-  // const config = {
-  //   slow: {
-  //     tension: 280,
-  //     friction: 60,
-  //   },
-  // };
+  const _p = total ? Math.round((used / total) * 100) : 0;
 
-  // const _p = total ? Math.round((used / total) * 100) : 0;
+  const { occupied, totalCount, progress, innerProgress } = useSpring({
+    from: { occupied: 0, totalCount: 0, progress: "0, 100", innerProgress: 0 },
+    to: {
+      occupied: used,
+      totalCount: total,
+      progress: `${Number.isNaN(_p) ? 0 : _p}, 100`,
+      innerProgress: Number.isNaN(_p) ? 0 : _p,
+    },
+    delay: 0,
+    config: config.slow,
+  });
 
-  // const { occupied, totalCount, progress, innerProgress } = useSpring({
-  //   from: { occupied: 0, totalCount: 0, progress: "0, 100", innerProgress: 0 },
-  //   to: {
-  //     occupied: used,
-  //     totalCount: total,
-  //     progress: `${Number.isNaN(_p) ? 0 : _p}, 100`,
-  //     innerProgress: Number.isNaN(_p) ? 0 : _p,
-  //   },
-  //   delay: 0,
-  //   config: config.slow,
-  // });
-
-  const percent = Math.round((used * 100) / total);
-  const progress = `${Number.isNaN(percent) ? 0 : percent}, 100`;
+  // const percent = Math.round((used * 100) / total);
+  // const progress = `${Number.isNaN(percent) ? 0 : percent}, 100`;
 
   return (
     <div
@@ -108,7 +100,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
           <div className={"opacity-100"}>
             <div className="flex items-center justify-center h-2/3">
               <div className="relative flex content-center justify-center m-2 w-4/5">
-                <svg viewBox="0 0 38 32" className="w-full">
+                <svg viewBox="0 0 38 28" className="w-full">
                   <path
                     className={`${
                       facilityId ? "text-slate-200" : "text-white"
@@ -126,10 +118,10 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                 <div className="absolute inline-flex flex-col items-center justify-center self-center w-3/5 text-center text-sm xl:text-lg">
                   <div className="space-x-1">
                     <animated.span className="text-center text-4xl text-slate-700 font-semibold">
-                      {percent}%
-                      {/* {innerProgress.to(
+                      {/* {percent}% */}
+                      {innerProgress.to(
                         (x: number) => `${Math.round(x) || 0}%`
-                      )} */}
+                      )}
                     </animated.span>
                   </div>
                   {
@@ -147,8 +139,8 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                 <p className="text-slate-500 font-medium text-lg xl:text-xl">
                   Used
                   <animated.span className="ml-2 text-slate-700 font-semibold text-lg  xl:text-xl">
-                    {used}
-                    {/* {occupied.to((x: number) => Math.round(x))} */}
+                    {/* {used} */}
+                    {occupied.to((x: number) => Math.round(x))}
                   </animated.span>
                 </p>
               </div>
@@ -156,8 +148,8 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                 <p className="text-slate-500 font-medium text-lg xl:text-xl">
                   Total
                   <animated.span className="ml-2 text-slate-700 text-lg font-semibold xl:text-xl">
-                    {total}
-                    {/* {totalCount.to((x: number) => Math.round(x))} */}
+                    {/* {total} */}
+                    {totalCount.to((x: number) => Math.round(x))}
                   </animated.span>
                 </p>
               </div>
