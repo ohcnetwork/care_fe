@@ -693,6 +693,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       },
     });
 
+    fetchLocalBody(matchedDistrict.id);
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);
