@@ -155,7 +155,7 @@ export const FacilityHome = (props: any) => {
     });
 
     capacityList = (
-      <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
+      <div className="mt-4 grid lg:grid-cols-4 md:grid-cols-2 gap-7 w-full">
         <BedTypeCard
           label={"Total Beds"}
           bedCapacityId={0}
@@ -173,27 +173,17 @@ export const FacilityHome = (props: any) => {
               );
             };
             return (
-              <div>
-                <BedTypeCard
-                  facilityId={facilityId}
-                  bedCapacityId={res.id}
-                  key={`bed_${res.id}`}
-                  room_type={res.room_type}
-                  label={x.text}
-                  used={res.current_capacity}
-                  total={res.total_capacity}
-                  lastUpdated={res.modified_date}
-                  removeBedType={removeCurrentBedType}
-                />
-
-                {/* Other options */}
-              </div>
-              // <BedTypeCard
-              //   facilityId={facilityId}
-              //   key={`bed_${res.id}`}
-              //   {...res}
-              //   removeBedType={removeCurrentBedType}
-              // />
+              <BedTypeCard
+                facilityId={facilityId}
+                bedCapacityId={res.id}
+                key={`bed_${res.id}`}
+                room_type={res.room_type}
+                label={x.text}
+                used={res.current_capacity}
+                total={res.total_capacity}
+                lastUpdated={res.modified_date}
+                removeBedType={removeCurrentBedType}
+              />
             );
           }
         })}
