@@ -14,7 +14,7 @@ type Props = FormFieldBaseProps<string> & {
   countryCodeEditable?: boolean;
 };
 
-export const PhoneNumberFormField = (props: Props) => {
+const PhoneNumberFormField = (props: Props) => {
   const { name } = props;
   const handleChange = resolveFormFieldChangeEventHandler(props);
 
@@ -34,3 +34,5 @@ export const PhoneNumberFormField = (props: Props) => {
     </FormField>
   );
 };
+
+export default PhoneNumberFormField;
