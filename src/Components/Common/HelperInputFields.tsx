@@ -699,6 +699,7 @@ export const PhoneNumberField = (props: any) => {
         <ButtonV2
           className="absolute right-[1px] top-[1px] inset-y-0 h-[40px]"
           variant="secondary"
+          type="button"
           ghost
           onClick={() => onChange("+91")}
         >
