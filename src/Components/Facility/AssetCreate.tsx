@@ -13,7 +13,6 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
   ActionTextInputField,
-  PhoneNumberField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
@@ -33,6 +32,7 @@ import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -766,14 +766,14 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["support_phone"]}
                   >
-                    <label htmlFor="support-name">
-                      Customer Support Number *{" "}
-                    </label>
-                    <PhoneNumberField
-                      enableTollFree
+                    <PhoneNumberFormField
+                      name="support_phone"
+                      label="Customer support number"
+                      required
+                      tollFree
                       value={support_phone}
-                      onChange={setSupportPhone}
-                      errors={state.errors.support_phone}
+                      onChange={(e) => setSupportPhone(e.value)}
+                      error={state.errors.support_phone}
                     />
                   </div>
 

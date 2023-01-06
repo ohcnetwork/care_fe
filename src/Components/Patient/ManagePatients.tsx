@@ -33,7 +33,7 @@ import FilterBadge from "../../CAREUI/display/FilterBadge";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
-import { PhoneNumberFormField } from "../Form/FormFields/PhoneNumberFormField";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
