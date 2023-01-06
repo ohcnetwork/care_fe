@@ -7,6 +7,8 @@ import { useState } from "react";
 import { PatientCategory } from "../Facility/models";
 import { PATIENT_CATEGORIES } from "../../Common/constants";
 import moment from "moment";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -183,7 +185,7 @@ export default function PatientInfoCard(props: {
           [
             `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`,
             "Edit Consultation Details",
-            "pencil-alt",
+            "pen",
             patient.is_active && patient.last_consultation?.id,
           ],
           [
@@ -191,30 +193,59 @@ export default function PatientInfoCard(props: {
             "Log Update",
             "plus",
             patient.is_active && patient.last_consultation?.id,
+            [
+              !(patient.last_consultation?.facility !== patient.facility) &&
+                !(
+                  patient.last_consultation?.discharge_date ||
+                  !patient.is_active
+                ) &&
+                moment(patient.last_consultation?.modified_date).isBefore(
+                  new Date().getTime() - 24 * 60 * 60 * 1000
+                ),
+              <div className="text-center">
+                <CareIcon className="care-l-exclamation-triangle" /> No update
+                filed in the last 24 hours
+              </div>,
+            ],
           ],
           [
             `/patient/${patient.id}/investigation_reports`,
             "Investigation Summary",
-            "address-card",
+            "align-alt",
             true,
           ],
           [
             `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/treatment-summary`,
             "Treatment Summary",
-            "prescription-bottle-medical",
+            "file-medical",
             patient.last_consultation?.id,
           ],
         ].map(
-          (action, i) =>
+          (action: any, i) =>
             action[3] && (
-              <Link
-                key={i}
-                href={`${action[0]}`}
-                className="btn btn-primary hover:text-white flex justify-start"
-              >
-                <i className={`fas fa-${action[2]} w-4 mr-3`}></i>
-                <p className="font-semibold">{action[1]}</p>
-              </Link>
+              <div className="relative">
+                <ButtonV2
+                  key={i}
+                  variant={action[4] && action[4][0] ? "danger" : "primary"}
+                  href={`${action[0]}`}
+                  align="left"
+                  className="w-full"
+                >
+                  <CareIcon className={`care-l-${action[2]}`} />
+                  <p className="font-semibold">{action[1]}</p>
+                </ButtonV2>
+                {action[4] && action[4][0] && (
+                  <>
+                    <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                      <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                    </span>
+                    <p className="text-xs text-red-500 animate-pulse mt-1">
+                      {action[4][1]}
+                    </p>
+                  </>
+                )}
+              </div>
             )
         )}
       </div>
