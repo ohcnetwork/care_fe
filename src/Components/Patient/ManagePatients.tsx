@@ -93,6 +93,7 @@ export const PatientManager = () => {
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
+  const [facilityCrumbName, setFacilityCrumbName] = useState("");
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
@@ -194,6 +195,19 @@ export const PatientManager = () => {
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
   };
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (qParams.facility) {
+        const res = await dispatch(getAnyFacility(qParams.facility));
+
+        setFacilityCrumbName(res?.data?.name || "");
+      } else {
+        setFacilityCrumbName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatch, qParams.facility]);
 
   const date_range_fields = [
     [params.created_date_before, params.created_date_after],
@@ -608,7 +622,14 @@ export const PatientManager = () => {
         }}
       />
       <div className="flex justify-between items-center">
-        <PageTitle title="Patients" hideBack={true} />
+        <PageTitle
+          title="Patients"
+          hideBack={true}
+          breadcrumbs={!!qParams.facility}
+          crumbsReplacements={{
+            [qParams.facility]: { name: facilityCrumbName },
+          }}
+        />
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
           <ButtonV2
             className="flex gap-2 items-center font-semibold"
