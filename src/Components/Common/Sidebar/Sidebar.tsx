@@ -29,7 +29,7 @@ type StatelessSidebarProps =
 
 const NavItems = [
   { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
-  { text: "Patients", to: "/patients", icon: "care-l-wheelchair" },
+  { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
   { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
   { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
   { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
