@@ -244,9 +244,9 @@
     ]
   },
   "lint-staged": {
-    "**/*": [
+    "*.{ts,tsx,js,jsx}": [
       "prettier --write --ignore-unknown",
-      "eslint --fix --ignore-pattern '*.md' --ignore-pattern '*.stories.mdx' --ignore-pattern 'Dockerfile' --ignore-pattern 'netlify.toml'",
+      "eslint --fix",
       "git update-index --again"
     ]
   },
