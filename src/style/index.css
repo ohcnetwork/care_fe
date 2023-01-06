@@ -70,10 +70,6 @@ a {
   @apply text-blue-800;
 }
 
-a:hover {
-  @apply text-blue-600;
-}
-
 .bg-primary {
   background-image: linear-gradient(
     135deg,

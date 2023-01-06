@@ -1,3 +1,4 @@
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import AuthorizedChild from "../../../CAREUI/misc/AuthorizedChild";
@@ -61,6 +62,14 @@ export type ButtonProps = RawButtonProps &
      */
     loading?: boolean | undefined;
     /**
+     * A button will convert to a link if the `href` prop is set.
+     */
+    href?: string | undefined;
+    /**
+     * Link target. Only applicable if `href` is set.
+     */
+    target?: string | undefined;
+    /**
      * Whether the button should be having a Id.
      */
     id?: string | undefined;
@@ -77,6 +86,8 @@ const ButtonV2 = ({
   disabled,
   loading,
   children,
+  href,
+  target,
   ...props
 }: ButtonProps) => {
   const className = classNames(
@@ -101,6 +112,19 @@ const ButtonV2 = ({
         </button>
       )}
     </AuthorizedChild>;
+  }
+
+  if (href && !(disabled || loading)) {
+    return (
+      <Link
+        {...(props as any)}
+        href={href}
+        target={target}
+        className={className}
+      >
+        {children}
+      </Link>
+    );
   }
 
   return (
