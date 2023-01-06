@@ -27,7 +27,6 @@ import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import DateInputV2 from "../Common/DateInputV2";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -723,23 +722,25 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["warranty_amc_end_of_validity"]}
                   >
                     <label className="mb-2">Warranty / AMC Expiry</label>
-                    <DateInputV2
-                      className="border-1 border-gray-200"
+                    <TextFormField
+                      name="WarrantyAMCExpiry"
                       value={warranty_amc_end_of_validity}
                       onChange={(date) => {
                         if (
-                          moment(date).format("YYYY-MM-DD") <
+                          moment(date.value).format("YYYY-MM-DD") <
                           new Date().toLocaleDateString("en-ca")
                         ) {
                           Notification.Error({
                             msg: "Warranty / AMC Expiry date can't be in past",
                           });
                         } else {
-                          setWarrantyAmcEndOfValidity(moment(date).toDate());
+                          setWarrantyAmcEndOfValidity(
+                            moment(date.value).format("YYYY-MM-DD")
+                          );
                         }
                       }}
-                      position="LEFT"
-                      min={yesterday}
+                      type="date"
+                      min={moment(yesterday).format("YYYY-MM-DD")}
                     />
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
@@ -832,23 +833,26 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["last_serviced_on"]}
                   >
                     <label htmlFor="last-serviced-on">Last Serviced On</label>
-                    <DateInputV2
-                      className="border-1 border-gray-200"
+                    <TextFormField
+                      name="LastServicedOn"
+                      className="mt-2"
                       value={last_serviced_on}
                       onChange={(date) => {
                         if (
-                          moment(date).format("YYYY-MM-DD") >
+                          moment(date.value).format("YYYY-MM-DD") >
                           new Date().toLocaleDateString("en-ca")
                         ) {
                           Notification.Error({
                             msg: "Last Serviced date can't be in future",
                           });
                         } else {
-                          setLastServicedOn(moment(date).toDate());
+                          setLastServicedOn(
+                            moment(date.value).format("YYYY-MM-DD")
+                          );
                         }
                       }}
-                      position="LEFT"
-                      max={new Date()}
+                      type="date"
+                      max={moment(new Date()).format("YYYY-MM-DD")}
                     />
                     <ErrorHelperText error={state.errors.last_serviced_on} />
                   </div>
