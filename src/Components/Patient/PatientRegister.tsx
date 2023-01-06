@@ -42,7 +42,6 @@ import {
   CheckboxField,
   DateInputField,
   ErrorHelperText,
-  PhoneNumberField,
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
@@ -69,6 +68,8 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -894,15 +895,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleTextAreaChange = (e: any) => {
+  const handleFormFieldChange = (e: FieldChangeEvent<unknown>) => {
     const form = { ...state.form };
     form[e.name] = e.value;
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleValueChange = (value: any, name: string) => {
-    const form = { ...state.form };
-    form[name] = value;
     dispatch({ type: "set_form", form });
   };
 
@@ -981,7 +976,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               rows={2}
               name={textField}
               value={state.form[textField]}
-              onChange={handleTextAreaChange}
+              onChange={handleFormFieldChange}
               error={state.errors[textField]}
             />
           </div>
@@ -1100,30 +1095,29 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </h1>
                       <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                         <div data-testid="phone-number" id="phone_number-div">
-                          <PhoneNumberField
-                            label="Phone Number *"
+                          <PhoneNumberFormField
+                            name="phone_number"
+                            label="Phone Number"
+                            required
                             value={state.form.phone_number}
-                            onChange={(value: any) => [
-                              duplicateCheck(value),
-                              handleValueChange(value, "phone_number"),
-                            ]}
-                            errors={state.errors.phone_number}
+                            onChange={(event) => {
+                              duplicateCheck(event.value);
+                              handleFormFieldChange(event);
+                            }}
+                            error={state.errors.phone_number}
                           />
                         </div>
                         <div
                           data-testid="emergency-phone-number"
                           id="emergency_phone_number-div"
                         >
-                          <PhoneNumberField
-                            label="Emergency contact number *"
+                          <PhoneNumberFormField
+                            label="Emergency contact number"
+                            required
+                            name="emergency_phone_number"
                             value={state.form.emergency_phone_number}
-                            onChange={(value: any) => [
-                              handleValueChange(
-                                value,
-                                "emergency_phone_number"
-                              ),
-                            ]}
-                            errors={state.errors.emergency_phone_number}
+                            onChange={handleFormFieldChange}
+                            error={state.errors.emergency_phone_number}
                           />
                         </div>
                         <div data-testid="name" id="name-div">
@@ -1230,7 +1224,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             name="address"
                             placeholder="Enter the current address"
                             value={state.form.address}
-                            onChange={handleTextAreaChange}
+                            onChange={handleFormFieldChange}
                             error={state.errors.address}
                           />
                         </div>
@@ -1257,7 +1251,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 ? state.form.address
                                 : state.form.permanent_address
                             }
-                            onChange={handleTextAreaChange}
+                            onChange={handleFormFieldChange}
                             error={state.errors.permanent_address}
                           />
 
@@ -1959,7 +1953,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             name="present_health"
                             placeholder="Optional Information"
                             value={state.form.present_health}
-                            onChange={handleTextAreaChange}
+                            onChange={handleFormFieldChange}
                             error={state.errors.present_health}
                           />
                         </div>
@@ -1977,7 +1971,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             name="ongoing_medication"
                             placeholder="Optional Information"
                             value={state.form.ongoing_medication}
-                            onChange={handleTextAreaChange}
+                            onChange={handleFormFieldChange}
                             error={state.errors.ongoing_medication}
                           />
                         </div>
@@ -2002,7 +1996,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             name="allergies"
                             placeholder="Optional Information"
                             value={state.form.allergies}
-                            onChange={handleTextAreaChange}
+                            onChange={handleFormFieldChange}
                             error={state.errors.allergies}
                           />
                         </div>
