@@ -101,7 +101,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
           <div className={"opacity-100"}>
             <div className="flex items-center justify-center h-2/3">
               <div className="relative flex content-center justify-center m-2 w-4/5">
-                <svg viewBox="0 0 36 36" className="w-full">
+                <svg viewBox="0 0 38 36" className="w-full">
                   <path
                     className={`${
                       facilityId ? "text-slate-200" : "text-white"
@@ -118,7 +118,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                 </svg>
                 <div className="absolute inline-flex flex-col items-center justify-center self-center w-3/5 text-center text-sm xl:text-lg">
                   <div className="space-x-1">
-                    <animated.span className="text-center text-4xl text-slate-700 font-semibold">
+                    <animated.span className="text-center text-3xl text-slate-700 font-semibold">
                       {innerProgress.to(
                         (x: number) => `${Math.round(x) || 0}%`
                       )}
@@ -134,7 +134,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                 </div>
               </div>
             </div>
-            <div className="flex flex-col h-1/3 md:flex-row gap-4 text-center mt-4 justify-center items-center">
+            <div className="flex flex-col h-1/3 lg:flex-row gap-4 text-center mt-4 justify-center items-center">
               <div className="w-1/2">
                 <p className="text-slate-500 font-medium text-lg xl:text-xl">
                   Used:
