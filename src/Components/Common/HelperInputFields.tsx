@@ -641,6 +641,9 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
   );
 };
 
+/**
+ * Deprecated. Use `PhoneNumberFormField` instead.
+ */
 export const PhoneNumberField = (props: any) => {
   const {
     label,
