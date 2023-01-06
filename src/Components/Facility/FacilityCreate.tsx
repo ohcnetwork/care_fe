@@ -334,6 +334,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       },
     });
 
+    fetchLocalBody(matchedDistrict.id);
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);

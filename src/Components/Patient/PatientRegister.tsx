@@ -689,10 +689,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ...state.form,
         state: matchedState.id,
         district: matchedDistrict.id,
-        pincode: e.value,
+        pincode: e.target.value,
       },
     });
 
+    fetchLocalBody(matchedDistrict.id);
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);
