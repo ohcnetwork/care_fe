@@ -35,6 +35,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import useIsInitialRender from "../../Common/hooks/useIsInitialRender";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -99,6 +100,7 @@ export const PatientManager = () => {
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
   const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
     useState("");
+  const isInitialRender = useIsInitialRender();
 
   useEffect(() => {
     if (phone_number.length === 15) {
@@ -253,6 +255,8 @@ export const PatientManager = () => {
   };
 
   useEffect(() => {
+    if (isInitialRender) return;
+
     setIsLoading(true);
     dispatch(getAllPatient(params, "listPatients"))
       .then((res: any) => {
