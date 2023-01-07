@@ -202,11 +202,8 @@ const AssetCreate = (props: AssetProps) => {
       setQrCodeId(asset.qr_code_id);
       setManufacturer(asset.manufacturer);
       asset.warranty_amc_end_of_validity &&
-        setWarrantyAmcEndOfValidity(
-          moment(asset.warranty_amc_end_of_validity).toDate()
-        );
-      asset.last_serviced_on &&
-        setLastServicedOn(moment(asset.last_serviced_on).toDate());
+        setWarrantyAmcEndOfValidity(asset.warranty_amc_end_of_validity);
+      asset.last_serviced_on && setLastServicedOn(asset.last_serviced_on);
       setNotes(asset.notes);
     }
   }, [asset]);
