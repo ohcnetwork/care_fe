@@ -12,10 +12,11 @@ import { deleteFacilityCoverImage } from "../../Redux/actions";
 import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import Webcam from "react-webcam";
 import { FacilityModel } from "./models";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   open: boolean;
@@ -219,9 +220,9 @@ const CoverImageEditModal = ({
 
             <div className="flex flex-col sm:flex-row p-4 gap-2">
               <div>
-                <label className="rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center justify-center cursor-pointer transition-all">
-                  <i className="fas fa-cloud-upload-alt mr-2"></i>Upload an
-                  image
+                <label className="w-full rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center justify-center cursor-pointer transition-all">
+                  <CareIcon className="care-l-cloud-upload text-lg" />
+                  Upload an image
                   <input
                     title="changeFile"
                     type="file"
@@ -232,51 +233,39 @@ const CoverImageEditModal = ({
                 </label>
               </div>
               <div className="sm:flex-1" />
-              <button
-                type="button"
-                className="rounded-lg bg-primary-500 py-2 px-4 text-white font-medium hover:bg-primary-400 text-sm flex gap-3 items-center justify-center transition-all"
+              <ButtonV2
                 onClick={() => {
                   setIsCameraOpen(true);
                 }}
               >
                 {" "}
                 Open Camera
-              </button>
-              <button
-                type="button"
-                className="rounded-lg bg-gray-100 hover:bg-gray-300 py-2 px-4 text-slate-600 hover:text-slate-800 font-medium text-sm flex gap-1 items-center justify-center  transition-all"
+              </ButtonV2>
+              <Cancel
                 onClick={(e) => {
                   e.stopPropagation();
                   closeModal();
                   dragProps.setFileDropError("");
                 }}
                 disabled={isUploading}
-              >
-                Cancel
-              </button>
+              />
               {facility.read_cover_image_url && (
-                <button
-                  type="button"
-                  className="rounded-lg bg-danger-500 py-2 px-4 text-white font-medium text-sm flex gap-1 items-center justify-center transition-all"
+                <ButtonV2
+                  variant="danger"
                   onClick={handleDelete}
                   disabled={isUploading}
                 >
                   Delete
-                </button>
+                </ButtonV2>
               )}
-              <button
-                type="button"
-                className="rounded-lg bg-primary-500 py-2 px-4 text-white font-medium hover:bg-primary-400 text-sm flex gap-3 items-center justify-center transition-all"
-                onClick={handleUpload}
-                disabled={isUploading}
-              >
+              <ButtonV2 onClick={handleUpload} disabled={isUploading}>
                 {isUploading ? (
-                  <i className="fa-solid fa-spinner animate-spin" />
+                  <CareIcon className="care-l-spinner text-lg animate-spin" />
                 ) : (
-                  <i className="fa-solid fa-floppy-disk" />
+                  <CareIcon className="care-l-save text-lg" />
                 )}
                 <span>{isUploading ? "Uploading..." : "Save"}</span>
-              </button>
+              </ButtonV2>
             </div>
           </form>
         ) : (
@@ -307,11 +296,7 @@ const CoverImageEditModal = ({
             <div className="flex justify-evenly m-4 sm:hidden ">
               <div>
                 {!previewImage ? (
-                  <ButtonV2
-                    variant="primary"
-                    onClick={handleSwitchCamera}
-                    className="m-2"
-                  >
+                  <ButtonV2 onClick={handleSwitchCamera} className="m-2">
                     Switch
                   </ButtonV2>
                 ) : (
@@ -323,7 +308,6 @@ const CoverImageEditModal = ({
                   <>
                     <div>
                       <ButtonV2
-                        variant="primary"
                         onClick={() => {
                           captureImage();
                         }}
@@ -337,7 +321,6 @@ const CoverImageEditModal = ({
                   <>
                     <div className="flex space-x-2">
                       <ButtonV2
-                        variant="primary"
                         onClick={() => {
                           setPreviewImage(null);
                         }}
@@ -345,32 +328,9 @@ const CoverImageEditModal = ({
                       >
                         Retake
                       </ButtonV2>
-                      <ButtonV2
-                        variant="primary"
-                        onClick={handleUpload}
-                        className="m-2"
-                      >
+                      <ButtonV2 onClick={handleUpload} className="m-2">
                         {isCaptureImgBeingUploaded ? (
-                          <svg
-                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              stroke-width="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
+                          <CareIcon className="care-l-spinner text-lg animate-spin" />
                         ) : (
                           <></>
                         )}{" "}
@@ -397,8 +357,9 @@ const CoverImageEditModal = ({
             {/* buttons for laptop screens */}
             <div className={`${isLaptopScreen ? " " : " hidden "}`}>
               <div className="flex m-4 lg:hidden">
-                <ButtonV2 variant="primary" onClick={handleSwitchCamera}>
-                  <i className="fa-solid fa-camera-rotate" /> Switch Camera
+                <ButtonV2 onClick={handleSwitchCamera}>
+                  <CareIcon className="care-l-camera-change text-lg" /> Switch
+                  Camera
                 </ButtonV2>
               </div>
 
@@ -408,12 +369,12 @@ const CoverImageEditModal = ({
                     <>
                       <div>
                         <ButtonV2
-                          variant="primary"
                           onClick={() => {
                             captureImage();
                           }}
                         >
-                          <i className="fa-solid fa-camera" /> Capture
+                          <CareIcon className="care-l-capture text-lg" />{" "}
+                          Capture
                         </ButtonV2>
                       </div>
                     </>
@@ -421,40 +382,23 @@ const CoverImageEditModal = ({
                     <>
                       <div className="flex space-x-2">
                         <ButtonV2
-                          variant="primary"
                           onClick={() => {
                             setPreviewImage(null);
                           }}
                         >
                           Retake
                         </ButtonV2>
-                        <ButtonV2 variant="primary" onClick={handleUpload}>
+                        <Submit onClick={handleUpload}>
                           {isCaptureImgBeingUploaded ? (
-                            <svg
-                              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                              ></circle>
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              ></path>
-                            </svg>
+                            <>
+                              {" "}
+                              <CareIcon className="care-l-spinner text-lg animate-spin" />{" "}
+                              Submitting..{" "}
+                            </>
                           ) : (
-                            <></>
+                            <>Submit</>
                           )}{" "}
-                          Submit
-                        </ButtonV2>
+                        </Submit>
                       </div>
                     </>
                   )}
