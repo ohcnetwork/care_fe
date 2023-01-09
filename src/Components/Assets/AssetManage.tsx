@@ -19,6 +19,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { UserRole, USER_TYPES } from "../../Common/constants";
 import moment from "moment";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -49,6 +50,7 @@ const AssetManage = (props: AssetManageProps) => {
   const limit = 14;
   const { currentUser }: any = useSelector((state) => state);
   const user_type = currentUser.data.user_type;
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -190,10 +192,7 @@ const AssetManage = (props: AssetManageProps) => {
   };
 
   const handleDelete = async () => {
-    const confirm = window.confirm(
-      "Are you sure you want to delete this asset?"
-    );
-    if (asset && confirm) {
+    if (asset) {
       const response = await dispatch(deleteAsset(asset.id));
       if (response && response.status === 204) {
         navigate("/assets");
@@ -213,8 +212,16 @@ const AssetManage = (props: AssetManageProps) => {
           },
         }}
       />
+      <ConfirmDialogV2
+        title="Delete Asset"
+        description="Are you sure you want to delete this asset?"
+        action="Confirm"
+        show={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+      />
       <div className="flex flex-col xl:flex-row gap-8">
-        <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
+        <div className="bg-white rounded-lg md:rounded-xl w-full flex service-panel">
           <div className="w-full md:p-8 md:pt-6 p-6 pt-4 flex flex-col justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 justify-between w-full">
@@ -310,7 +317,7 @@ const AssetManage = (props: AssetManageProps) => {
               )}
               {checkAuthority(user_type, "DistrictAdmin") && (
                 <ButtonV2
-                  onClick={handleDelete}
+                  onClick={() => setShowDeleteDialog(true)}
                   variant={"danger"}
                   className="inline-flex"
                 >

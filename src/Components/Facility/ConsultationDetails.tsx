@@ -554,7 +554,7 @@ export const ConsultationDetails = (props: any) => {
                   diagnoses={
                     consultationData?.icd11_provisional_diagnoses_object
                   }
-                  label="Provisional Diagnosis"
+                  label="Provisional Diagnosis (as per ICD-11 recommended by WHO)"
                 />
 
                 <ShowDiagnosis
@@ -570,7 +570,7 @@ export const ConsultationDetails = (props: any) => {
                       : []),
                     ...(consultationData?.icd11_diagnoses_object || []),
                   ]}
-                  label="Diagnosis"
+                  label="Diagnosis (as per ICD-11 recommended by WHO)"
                 />
 
                 {consultationData.verified_by && (

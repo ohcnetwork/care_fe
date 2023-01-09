@@ -1,10 +1,53 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Combobox } from "@headlessui/react";
-import { DropdownTransition } from "../Common/components/HelperComponents";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
+import { DropdownTransition } from "../../Common/components/HelperComponents";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
+import {
+  FormFieldBaseProps,
+  resolveFormFieldChangeEventHandler,
+} from "./Utils";
+import FormField from "./FormField";
 
 type OptionCallback<T, R> = (option: T) => R;
+
+type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
+  placeholder?: string;
+  options: T[];
+  optionLabel: OptionCallback<T, string>;
+  optionValue?: OptionCallback<T, V>;
+  optionIcon?: OptionCallback<T, React.ReactNode>;
+  onQuery?: (query: string) => void;
+  dropdownIcon?: React.ReactNode | undefined;
+};
+
+const AutocompleteFormField = <T, V>(
+  props: AutocompleteFormFieldProps<T, V>
+) => {
+  const { name } = props;
+  const handleChange = resolveFormFieldChangeEventHandler(props);
+
+  return (
+    <FormField props={props}>
+      <Autocomplete
+        id={props.id}
+        options={props.options}
+        disabled={props.disabled}
+        value={props.value}
+        placeholder={props.placeholder}
+        optionLabel={props.optionLabel}
+        optionIcon={props.optionIcon}
+        optionValue={props.optionValue}
+        className={props.className}
+        required={props.required}
+        onQuery={props.onQuery}
+        onChange={(value: any) => handleChange({ name, value })}
+      />
+    </FormField>
+  );
+};
+
+export default AutocompleteFormField;
 
 type AutocompleteProps<T, V = T> = {
   id?: string;
@@ -15,9 +58,9 @@ type AutocompleteProps<T, V = T> = {
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
-  showIconWhenSelected?: boolean;
   className?: string;
-  chevronIcon?: React.ReactNode | undefined;
+  onQuery?: (query: string) => void;
+  isLoading?: boolean;
 } & (
   | {
       required?: false;
@@ -36,10 +79,13 @@ type AutocompleteProps<T, V = T> = {
  * Use this only when you want to hack into the design and get more
  * customizability.
  */
-export const AutocompleteV2 = <T, V>(props: AutocompleteProps<T, V>) => {
+export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   const [query, setQuery] = useState(""); // Ensure lower case
+  useEffect(() => {
+    props.onQuery && props.onQuery(query);
+  }, [query]);
 
-  const valueOptions = props.options.map((option) => {
+  const options = props.options.map((option) => {
     const label = props.optionLabel(option);
     return {
       label,
@@ -49,23 +95,8 @@ export const AutocompleteV2 = <T, V>(props: AutocompleteProps<T, V>) => {
     };
   });
 
-  const placeholder = props.placeholder ?? "Select";
-  const defaultOption = {
-    label: placeholder,
-    selectedLabel: (
-      <p className="font-normal text-secondary-400">{placeholder}</p>
-    ),
-    icon: undefined,
-    value: undefined,
-  };
-
-  const options = props.required
-    ? valueOptions
-    : [defaultOption, ...valueOptions];
-
-  const value = options.find((o) => props.value == o.value) || defaultOption;
-
-  const filteredOptions = valueOptions.filter((o) => o.search.includes(query));
+  const value = options.find((o) => props.value == o.value);
+  const filteredOptions = options.filter((o) => o.search.includes(query));
 
   return (
     <div className={props.className} id={props.id}>
@@ -78,13 +109,15 @@ export const AutocompleteV2 = <T, V>(props: AutocompleteProps<T, V>) => {
           <div className="flex">
             <Combobox.Input
               className="cui-input-base pr-16 truncate"
-              placeholder={placeholder}
-              displayValue={props.optionLabel}
+              placeholder={props.placeholder || "Select"}
+              displayValue={(value: any) => value?.label}
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
               <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-gray-900">
-                {props.chevronIcon || (
+                {props.isLoading ? (
+                  <CareIcon className="care-l-spinner animate-spin" />
+                ) : (
                   <CareIcon className="care-l-angle-down -mb-1.5" />
                 )}
               </div>

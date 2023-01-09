@@ -18,7 +18,7 @@ describe("Patient Creation", () => {
   });
 
   it("Create", () => {
-    cy.get("[name='facility-details']").first().click();
+    cy.get("[id='facility-details']").first().click();
     cy.get("button").should("contain", "Add Details of a Patient");
     cy.get("button")
       .contains("Add Details of a Patient")

@@ -212,25 +212,28 @@ export const DailyRoundsList = (props: any) => {
                   <CareIcon className="care-l-eye text-lg" />
                   <span>View Details</span>
                 </ButtonV2>
-                <ButtonV2
-                  variant="secondary"
-                  border
-                  ghost
-                  onClick={() => {
-                    if (itemData.rounds_type === "NORMAL") {
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
-                      );
-                    } else {
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
-                      );
-                    }
-                  }}
-                >
-                  <CareIcon className="care-l-pen text-lg" />
-                  <span>Update Log</span>
-                </ButtonV2>
+                {!consultationData.discharge_reason && (
+                  <ButtonV2
+                    variant="secondary"
+                    border
+                    ghost
+                    className="tooltip"
+                    onClick={() => {
+                      if (itemData.rounds_type === "NORMAL") {
+                        navigate(
+                          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
+                        );
+                      } else {
+                        navigate(
+                          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
+                        );
+                      }
+                    }}
+                  >
+                    <CareIcon className="care-l-pen text-lg" />
+                    <span>Update Log</span>
+                  </ButtonV2>
+                )}
               </div>
             </div>
           </div>
