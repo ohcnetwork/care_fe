@@ -117,6 +117,15 @@ const CoverImageEditModal = ({
       return dragProps.setFileDropError("Please drop an image file to upload!");
     setSelectedFile(dropedFile);
   };
+  const commonHint = (
+    <>
+      Max size for image uploaded should be 1mb.
+      <br />
+      Allowed formats are jpg,png,jpeg.
+      <br />
+      Recommended aspect ratio for facility cover photo is 1:1.
+    </>
+  );
 
   return (
     <Modal open={open} onClose={closeModal}>
@@ -137,11 +146,7 @@ const CoverImageEditModal = ({
                 />
               </div>
               <p className="text-gray-700 font-medium text-center">
-                Max size for image uploaded should be 1mb.
-                <br />
-                Allowed formats are jpg,png,jpeg.
-                <br />
-                Recommended aspect ratio for facility cover photo is 1:1.
+                {commonHint}
               </p>
             </>
           ) : (
@@ -187,11 +192,7 @@ const CoverImageEditModal = ({
               </p>
               <p className="mt-4 text-gray-700 font-medium text-center">
                 No cover photo uploaded for this facility. <br />
-                Max size for image uploaded should be 1mb.
-                <br />
-                Allowed formats are jpg,png,jpeg.
-                <br />
-                Recommended aspect ratio for facility cover photo is 1:1.
+                {commonHint}
               </p>
             </div>
           )}
