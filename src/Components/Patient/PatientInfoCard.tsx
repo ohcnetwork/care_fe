@@ -236,13 +236,7 @@ export default function PatientInfoCard(props: {
                 </ButtonV2>
                 {action[4] && action[4][0] && (
                   <>
-                    <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
-                      <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
-                    </span>
-                    <p className="text-xs text-red-500 animate-pulse mt-1">
-                      {action[4][1]}
-                    </p>
+                    <p className="text-xs text-red-500 mt-1">{action[4][1]}</p>
                   </>
                 )}
               </div>
