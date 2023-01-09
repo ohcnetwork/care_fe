@@ -68,9 +68,14 @@ export const fireRequest = (
     }
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
-      const qs = new URLSearchParams(omitBy(params, isEmpty)).toString();
-      if (qs !== "") {
-        request.path += `?${qs}`;
+      let qString = "";
+      Object.keys(params).forEach((param: any) => {
+        if (params[param] !== undefined && params[param] !== "") {
+          qString += `${param}=${params[param]}&`;
+        }
+      });
+      if (qString !== "") {
+        request.path += `?${qString}`;
       }
     }
     // set dynamic params in the URL
