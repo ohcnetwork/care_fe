@@ -121,6 +121,7 @@ const CoverImageEditModal = ({
     if (response.status === 200) {
       setIsCaptureImgBeingUploaded(false);
       Success({ msg: "Cover image updated." });
+      window.location.reload();
     }
     await sleep(1000);
     setIsUploading(false);
@@ -133,6 +134,7 @@ const CoverImageEditModal = ({
     const res = await dispatch(deleteFacilityCoverImage(facility.id as any));
     if (res.statusCode === 204) {
       Success({ msg: "Cover image deleted" });
+      window.location.reload();
     }
 
     onDelete && onDelete();
