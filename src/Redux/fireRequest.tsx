@@ -71,7 +71,7 @@ export const fireRequest = (
       let qString = "";
       Object.keys(params).forEach((param: any) => {
         if (params[param] !== undefined && params[param] !== "") {
-          qString += `${param}=${params[param]}&`;
+          qString += `${param}=${encodeURIComponent(params[param])}&`;
         }
       });
       if (qString !== "") {
