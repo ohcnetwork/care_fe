@@ -1,0 +1,44 @@
+import { useRef } from "react";
+import FormField from "./FormField";
+import { FormFieldBaseProps } from "./Utils";
+
+type TextAreaFormFieldProps = {
+  length?: number;
+  value: string;
+  onChange: (value: string) => void;
+} & FormFieldBaseProps<string>;
+
+const OtpFormField = ({ length = 6, ...props }: TextAreaFormFieldProps) => {
+  // const [autoFocusIndex, setAutoFocusIndex] = useState(0); // TODO: navigate using arrow keys, backspace
+  const inputs = useRef<Record<number, HTMLInputElement | null>>({});
+
+  return (
+    <FormField props={props}>
+      <div className="flex items-center justify-evenly">
+        {new Array(length).fill(null).map((_, i) => (
+          <input
+            key={i}
+            ref={(element) => (inputs.current[i] = element)}
+            className="m-2 border border-gray-600 h-10 w-10 text-center form-control rounded"
+            maxLength={1}
+            value={props.value[i]}
+            onChange={(e) => {
+              if (e.target.value === "") inputs.current[i - 1]?.focus();
+              else inputs.current[i + 1]?.focus();
+
+              let value = "";
+              Object.values(inputs.current).forEach(
+                (el) => (value += el?.value)
+              );
+              props.onChange(value);
+            }}
+            autoFocus={i === 0}
+            disabled={props.disabled}
+          />
+        ))}
+      </div>
+    </FormField>
+  );
+};
+
+export default OtpFormField;

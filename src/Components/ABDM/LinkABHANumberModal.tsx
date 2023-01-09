@@ -21,6 +21,7 @@ import QRScanner from "../Common/QRScanner";
 import TextFormField from "../Form/FormFields/TextFormField";
 import * as Notification from "../../Utils/Notifications.js";
 import Dropdown, { DropdownItem } from "../Common/components/Menu";
+import OtpFormField from "../Form/FormFields/OtpFormField";
 
 interface Props {
   patientId: string;
@@ -134,17 +135,12 @@ const ScanABHAQRSection = ({ onSignup, patientId }: ScanABHAQRSectionProps) => {
       />
 
       {txnId && (
-        <TextFormField
+        <OtpFormField
           name="otp"
-          label="Enter 6-digit OTP sent to the registered mobile"
-          min={6}
-          max={6}
-          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal text-center"
-          placeholder="OTP"
-          // disabled={isVerifyingOtp}
+          onChange={(value) => setOtp(value as string)}
           value={otp}
-          onChange={({ value }) => setOtp(value)}
-          error={""} // TODO: setup otp
+          label="Enter 6 digit OTP!"
+          error=""
         />
       )}
 
@@ -370,16 +366,12 @@ const VerifyAadhaarSection = ({
       </div>
 
       {otpSent && (
-        <TextFormField
+        <OtpFormField
           name="otp"
-          label="Enter 6-digit OTP sent to the registered mobile"
-          min={6}
-          max={6}
-          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal text-center"
-          placeholder="OTP"
-          disabled={isVerifyingOtp}
+          onChange={(value) => setOtp(value as string)}
           value={otp}
-          onChange={({ value }) => setOtp(value)}
+          label="Enter 6-digit OTP sent to the registered mobile"
+          disabled={isVerifyingOtp}
           error={otpError}
         />
       )}
@@ -523,16 +515,12 @@ const VerifyMobileSection = ({
       />
 
       {otpDispatched && (
-        <TextFormField
+        <OtpFormField
           name="otp"
           label="Enter 6-digit OTP sent to the registered mobile"
-          min={6}
-          max={6}
-          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal text-center"
-          placeholder="OTP"
           disabled={isVerifyingOtp}
           value={otp}
-          onChange={({ value }) => setOtp(value)}
+          onChange={(value) => setOtp(value as string)}
           error={otpError}
         />
       )}
