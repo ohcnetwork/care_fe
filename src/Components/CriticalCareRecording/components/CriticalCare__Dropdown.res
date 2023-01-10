@@ -72,14 +72,14 @@ let make = (~id, ~value, ~updateCB, ~placeholder, ~selectables, ~label="", ~disa
   }, [showDropdown])
 
   <div className="relative inline-block text-left w-full">
-    <label className="block font-medium text-black" hidden={label == ""}>{str(label)}</label>
+    <label className="block font-medium text-black" hidden={label == ""}> {str(label)} </label>
     <input
       id
       value
       autoComplete="off"
       onClick={_ => setShowDropdown(_ => !showDropdown)}
       onChange={e => updateCB(ReactEvent.Form.target(e)["value"])}
-      className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:ring-primary-500"
+      className="cui-input-base appearance-none h-10 mt-1 block py-2 px-4"
       disabled
       placeholder
       required=true
