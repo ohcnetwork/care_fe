@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { HTMLInputTypeAttribute, useState } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { classNames } from "../../../Utils/utils";
 import FormField from "./FormField";
@@ -12,7 +12,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
   value?: string | number;
   autoComplete?: string;
-  type?: "email" | "password" | "search" | "text" | "number";
+  type?: HTMLInputTypeAttribute;
   className?: string | undefined;
   leading?: React.ReactNode | undefined;
   trailing?: React.ReactNode | undefined;

@@ -39,6 +39,10 @@ import { FacilityModel } from "../Facility/models";
 import { classNames, goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import MonthFormField from "../Form/FormFields/Month";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -79,6 +83,9 @@ const initForm: any = {
   state: "",
   district: "",
   local_body: "",
+  doctor_qualification: undefined,
+  doctor_experience_commenced_on: undefined,
+  doctor_medical_council_registration: undefined,
 };
 
 const initError = Object.assign(
@@ -320,14 +327,6 @@ export const UserAdd = (props: UserProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleChangeHomeFacility = (e: any) => {
-    const { value, name } = e.target;
-    const newValue = value === "" ? null : value;
-    const form = { ...state.form };
-    form[name] = newValue;
-    dispatch({ type: "set_form", form });
-  };
-
   const handleDateChange = (date: any, field: string) => {
     if (moment(date).isValid()) {
       const form = { ...state.form };
@@ -340,6 +339,16 @@ export const UserAdd = (props: UserProps) => {
     const form = { ...state.form };
     form[name] = value;
     dispatch({ type: "set_form", form });
+  };
+
+  const handleFieldChange = (event: FieldChangeEvent<unknown>) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        [event.name]: event.value,
+      },
+    });
   };
 
   useAbortableEffect(() => {
@@ -554,6 +563,11 @@ export const UserAdd = (props: UserProps) => {
           ) || "",
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
+        doctor_qualification: state.form.doctor_qualification,
+        doctor_experience_commenced_on:
+          state.form.doctor_experience_commenced_on,
+        doctor_medical_council_registration:
+          state.form.doctor_medical_council_registration,
       };
 
       const res = await dispatchAction(addUser(data));
@@ -584,6 +598,35 @@ export const UserAdd = (props: UserProps) => {
   if (isLoading) {
     return <Loading />;
   }
+
+  const field = (name: string) => {
+    return {
+      name,
+      onChange: handleFieldChange,
+      value: state.form[name],
+      error: state.errors[name],
+    };
+  };
+
+  const getExperienceSuffix = (date?: Date) => {
+    if (!date) return "0 Years";
+
+    const today = new Date();
+
+    let m = (today.getFullYear() - date.getFullYear()) * 12;
+    m -= date.getMonth();
+    m += today.getMonth();
+
+    let str = "";
+
+    const years = Math.floor(m / 12);
+    const months = m % 12;
+
+    if (years) str += `${years} years `;
+    if (months) str += `${months} months`;
+
+    return <span className="ml-2 text-sm whitespace-nowrap">{str}</span>;
+  };
 
   return (
     <div className="px-2 pb-2">
@@ -617,36 +660,51 @@ export const UserAdd = (props: UserProps) => {
                 />
               </div>
 
-              <div>
-                <InputLabel>User Type*</InputLabel>
-                <SelectField
-                  showEmpty={true}
-                  name="user_type"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.user_type}
-                  options={userTypes}
-                  onChange={handleChange}
-                  errors={state.errors.user_type}
-                />
-              </div>
-              <div>
-                <InputLabel>Home Facility</InputLabel>
-                <SelectField
-                  name="home_facility"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.home_facility}
-                  options={[
-                    { id: "", name: "Select" },
-                    ...(selectedFacility ?? []),
-                  ]}
-                  optionValue="name"
-                  onChange={handleChangeHomeFacility}
-                  errors={state.errors.home_facility}
-                />
-              </div>
+              <SelectFormField
+                {...field("user_type")}
+                required
+                label="User Type"
+                options={userTypes}
+                optionLabel={(option) => option}
+                optionValue={(option) => option}
+              />
+
+              {state.form.user_type === "Doctor" && (
+                <>
+                  <TextFormField
+                    {...field("doctor_qualification")}
+                    required
+                    label="Qualification"
+                    placeholder="Qualification of the Doctor"
+                  />
+
+                  <MonthFormField
+                    {...field("doctor_experience_commenced_on")}
+                    required
+                    label="Experience commenced on"
+                    suffix={getExperienceSuffix}
+                  />
+
+                  <TextFormField
+                    {...field("doctor_medical_council_registration")}
+                    required
+                    label="Medical Council Registration"
+                    placeholder="Doctor's medical council registration number"
+                  />
+                </>
+              )}
+
+              <SelectFormField
+                name="home_facility"
+                required
+                label="Home facility"
+                options={selectedFacility || []}
+                optionValue={(option) => option.id}
+                optionLabel={(option) => option.name}
+                onChange={handleFieldChange}
+                value={state.form.home_facility}
+                error={state.errors.home_facility}
+              />
 
               <div>
                 <PhoneNumberFormField
@@ -655,9 +713,7 @@ export const UserAdd = (props: UserProps) => {
                   name="phone_number"
                   required
                   value={state.form.phone_number}
-                  onChange={(event) =>
-                    handleValueChange(event.value, event.name)
-                  }
+                  onChange={handleFieldChange}
                   error={state.errors.phone_number}
                   onlyIndia
                 />
@@ -672,20 +728,16 @@ export const UserAdd = (props: UserProps) => {
                 />
               </div>
 
-              <div>
-                <PhoneNumberFormField
-                  placeholder="WhatsApp Phone Number"
-                  label="Whatsapp Number"
-                  name="alt_phone_number"
-                  value={state.form.alt_phone_number}
-                  onChange={(event) =>
-                    handleValueChange(event.value, event.name)
-                  }
-                  disabled={phoneIsWhatsApp}
-                  error={state.errors.alt_phone_number}
-                  onlyIndia
-                />
-              </div>
+              <PhoneNumberFormField
+                placeholder="WhatsApp Phone Number"
+                label="Whatsapp Number"
+                name="alt_phone_number"
+                value={state.form.alt_phone_number}
+                onChange={handleFieldChange}
+                disabled={phoneIsWhatsApp}
+                error={state.errors.alt_phone_number}
+                onlyIndia
+              />
 
               <div>
                 <InputLabel>Username*</InputLabel>

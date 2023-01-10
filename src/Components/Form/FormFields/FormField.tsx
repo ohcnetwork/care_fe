@@ -44,6 +44,7 @@ export const FieldErrorText = ({ error, className }: ErrorProps) => {
 const FormField = (props: {
   props: FormFieldBaseProps<any>;
   children: React.ReactNode;
+  className?: string;
 }) => {
   const { id, className, required, label, labelClassName, errorClassName } =
     props.props;
@@ -56,7 +57,7 @@ const FormField = (props: {
           {label}
         </FieldLabel>
       )}
-      {props.children}
+      <div className={props.className}>{props.children}</div>
       {error && <FieldErrorText error={error} className={errorClassName} />}
     </div>
   );

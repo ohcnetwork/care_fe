@@ -20,6 +20,9 @@ export interface UserModel {
   verified?: boolean;
   last_login?: Date;
   home_facility_object?: HomeFacilityObjectModel;
+  doctor_qualification?: string;
+  doctor_experience_commenced_on?: Date;
+  doctor_medical_council_registration?: string;
 }
 
 export interface UserAssignedModel {
