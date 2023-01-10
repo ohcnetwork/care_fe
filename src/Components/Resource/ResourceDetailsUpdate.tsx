@@ -2,11 +2,7 @@ import React, { useReducer, useEffect, useState, useCallback } from "react";
 import loadable from "@loadable/component";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  TextInputField,
-  MultilineInputField,
-  ErrorHelperText,
-} from "../Common/HelperInputFields";
+import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
 
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -24,7 +20,6 @@ import { CircularProgress } from "@material-ui/core";
 import {
   Card,
   CardContent,
-  InputLabel,
   Radio,
   RadioGroup,
   Box,
@@ -32,6 +27,8 @@ import {
 } from "@material-ui/core";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -140,6 +137,13 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleTextAreaChange = (e: any) => {
+    const form = { ...state.form };
+    const { name, value } = e;
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleOnSelect = (user: any) => {
     const form = { ...state.form };
     form["assigned_to"] = user?.id;
@@ -232,7 +236,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-1">
-                <InputLabel>Status</InputLabel>
+                <FieldLabel>Status</FieldLabel>
                 <SelectField
                   name="status"
                   variant="outlined"
@@ -246,7 +250,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>Assigned To</InputLabel>
+                <FieldLabel>Assigned To</FieldLabel>
                 <div className="">
                   {assignedUserLoading ? (
                     <CircularProgress size={20} />
@@ -262,7 +266,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 </div>
               </div>
               <div>
-                <InputLabel>Name of resource approving facility</InputLabel>
+                <FieldLabel>Name of resource approving facility</FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   name="approving_facility"
@@ -276,9 +280,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
 
               <div>
-                <InputLabel>
+                <FieldLabel>
                   What facility would you like to assign the request to
-                </InputLabel>
+                </FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   name="assigned_facility"
@@ -291,7 +295,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 />
               </div>
               <div>
-                <InputLabel>Required Quantity</InputLabel>
+                <FieldLabel>Required Quantity</FieldLabel>
                 <TextInputField
                   name="requested_quantity"
                   variant="outlined"
@@ -303,7 +307,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 />
               </div>
               <div>
-                <InputLabel>Approved Quantity</InputLabel>
+                <FieldLabel>Approved Quantity</FieldLabel>
                 <TextInputField
                   name="assigned_quantity"
                   variant="outlined"
@@ -317,7 +321,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Request Title*</InputLabel>
+                <FieldLabel required>Request Title</FieldLabel>
                 <TextInputField
                   rows={5}
                   name="title"
@@ -332,22 +336,20 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Description of request*</InputLabel>
-                <MultilineInputField
+                <TextAreaFormField
                   rows={5}
                   name="reason"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
+                  label="Description of request"
                   placeholder="Type your description here"
                   value={state.form.reason}
-                  onChange={handleChange}
-                  errors={state.errors.reason}
+                  onChange={handleTextAreaChange}
+                  error={state.errors.reason}
+                  required
                 />
               </div>
 
               <div>
-                <InputLabel>Is this an emergency?</InputLabel>
+                <FieldLabel>Is this an emergency?</FieldLabel>
                 <RadioGroup
                   aria-label="emergency"
                   name="emergency"

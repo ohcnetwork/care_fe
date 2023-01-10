@@ -3,7 +3,6 @@ import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   TextInputField,
-  MultilineInputField,
   ErrorHelperText,
   SelectField,
 } from "../Common/HelperInputFields";
@@ -18,7 +17,6 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
   Card,
   CardContent,
-  InputLabel,
   Radio,
   RadioGroup,
   Box,
@@ -31,6 +29,8 @@ import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -166,6 +166,13 @@ export default function ResourceCreate(props: resourceProps) {
     dispatch({ type: "set_form", form });
   };
 
+  const handleTextAreaChange = (e: any) => {
+    const form = { ...state.form };
+    const { name, value } = e;
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleValueChange = (value: any, name: string) => {
     const form = { ...state.form };
     form[name] = value;
@@ -235,7 +242,9 @@ export default function ResourceCreate(props: resourceProps) {
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <InputLabel>Name of Contact Person at Facility*</InputLabel>
+                <FieldLabel required>
+                  Name of Contact Person at Facility
+                </FieldLabel>
                 <TextInputField
                   fullWidth
                   name="refering_facility_contact_name"
@@ -248,8 +257,8 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div>
+                <FieldLabel>Contact person phone</FieldLabel>
                 <PhoneNumberFormField
-                  label="Contact person phone"
                   name="refering_facility_contact_number"
                   required
                   onlyIndia
@@ -260,7 +269,7 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Name of approving facility*</InputLabel>
+                <FieldLabel required>Name of approving facility</FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   facilityType={1500}
@@ -274,7 +283,7 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div>
-                <InputLabel>Category</InputLabel>
+                <FieldLabel>Category</FieldLabel>
                 <SelectField
                   name="category"
                   variant="outlined"
@@ -289,7 +298,7 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div>
-                <InputLabel>Subcategory</InputLabel>
+                <FieldLabel>Subcategory</FieldLabel>
                 <SelectField
                   name="sub_category"
                   variant="outlined"
@@ -303,7 +312,7 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div className="md:col-span-1">
-                <InputLabel>Request Title*</InputLabel>
+                <FieldLabel required>Request Title</FieldLabel>
                 <TextInputField
                   rows={5}
                   name="title"
@@ -319,7 +328,7 @@ export default function ResourceCreate(props: resourceProps) {
 
               <div className="md:col-span-1">
                 <div className="w-full">
-                  <InputLabel>Required Quantity</InputLabel>
+                  <FieldLabel>Required Quantity</FieldLabel>
                   <TextInputField
                     name="requested_quantity"
                     variant="outlined"
@@ -333,22 +342,20 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Description of request*</InputLabel>
-                <MultilineInputField
+                <TextAreaFormField
                   rows={5}
                   name="reason"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
+                  label="Description of request"
                   placeholder="Type your description here"
                   value={state.form.reason}
-                  onChange={handleChange}
-                  errors={state.errors.reason}
+                  onChange={handleTextAreaChange}
+                  error={state.errors.reason}
+                  required
                 />
               </div>
 
               <div>
-                <InputLabel>Is this an emergency?</InputLabel>
+                <FieldLabel>Is this an emergency?</FieldLabel>
                 <RadioGroup
                   aria-label="emergency"
                   name="emergency"
