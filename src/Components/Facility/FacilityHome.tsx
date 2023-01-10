@@ -140,6 +140,8 @@ export const FacilityHome = (props: any) => {
     return <Loading />;
   }
   let capacityList: any = null;
+  let totalBedCount = 0;
+  let totalOccupiedBedCount = 0;
   if (!capacityData || !capacityData.length) {
     capacityList = (
       <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
@@ -147,13 +149,24 @@ export const FacilityHome = (props: any) => {
       </h5>
     );
   } else {
+    capacityData.forEach((x) => {
+      totalBedCount += x.total_capacity ? x.total_capacity : 0;
+      totalOccupiedBedCount += x.current_capacity ? x.current_capacity : 0;
+    });
+
     capacityList = (
-      <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
+      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-7 w-full">
+        <BedTypeCard
+          label={"Total Beds"}
+          bedCapacityId={0}
+          used={totalOccupiedBedCount}
+          total={totalBedCount}
+        />
         {BED_TYPES.map((x) => {
           const res = capacityData.find((data) => {
             return data.room_type === x.id;
           });
-          if (res) {
+          if (res && res.current_capacity && res.total_capacity) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
               setCapacityData((state) =>
                 state.filter((i) => i.id !== bedTypeId)
@@ -162,8 +175,13 @@ export const FacilityHome = (props: any) => {
             return (
               <BedTypeCard
                 facilityId={facilityId}
+                bedCapacityId={res.id}
                 key={`bed_${res.id}`}
-                {...res}
+                room_type={res.room_type}
+                label={x.text}
+                used={res.current_capacity}
+                total={res.total_capacity}
+                lastUpdated={res.modified_date}
                 removeBedType={removeCurrentBedType}
               />
             );
