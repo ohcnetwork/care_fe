@@ -41,7 +41,7 @@ const AssetsList = () => {
     advancedFilter,
     resultsPerPage,
   } = useFilters({
-    limit: 21,
+    limit: 18,
   });
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
