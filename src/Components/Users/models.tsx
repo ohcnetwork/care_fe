@@ -41,3 +41,14 @@ export interface UserAssignedModel {
   last_login?: Date;
   home_facility_object?: HomeFacilityObjectModel;
 }
+
+export interface SkillObjectModel {
+  id?: number;
+  name?: string;
+  description?: string;
+}
+
+export interface SkillModel {
+  id?: number;
+  skill_object: SkillObjectModel;
+}

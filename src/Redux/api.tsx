@@ -60,6 +60,10 @@ const routes: Routes = {
     path: "/api/v1/users/",
   },
 
+  userListSkill: {
+    path: "/api/v1/users/{username}/skill/",
+  },
+
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
   },
@@ -69,8 +73,18 @@ const routes: Routes = {
     method: "PUT",
   },
 
+  addUserSkill: {
+    path: "/api/v1/users/{username}/skill/",
+    method: "POST",
+  },
+
   deleteUserFacility: {
     path: "/api/v1/users/{username}/delete_facility/",
+    method: "DELETE",
+  },
+
+  deleteUserSkill: {
+    path: "/api/v1/users/{username}/skill/{id}/",
     method: "DELETE",
   },
 
@@ -115,6 +129,12 @@ const routes: Routes = {
   updateUserPnconfig: {
     path: "/api/v1/users/{username}/pnconfig/",
     method: "PATCH",
+  },
+
+  // Skill Endpoints
+
+  getAllSkills: {
+    path: "/api/v1/skill/",
   },
 
   // Facility Endpoints
