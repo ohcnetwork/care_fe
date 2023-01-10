@@ -628,7 +628,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
         case "is_vaccinated":
           if (state.form.is_vaccinated === "true") {
-            console.log(state);
             if (state.form.number_of_doses === "0") {
               errors["number_of_doses"] =
                 "Please fill the number of doses taken";
@@ -664,6 +663,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               if (!error_div) error_div = field;
               invalidForm = true;
             }
+          }
+          return;
+        case "medical_history":
+          if (!state.form[field].length) {
+            errors[field] = "Please fill the medical history";
+            if (!error_div) error_div = field;
+            invalidForm = true;
           }
           return;
         default:
@@ -731,10 +737,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           });
         }
       });
-      if (!medical_history.length) {
-        medical_history.push({ disease: "NO", details: "" });
-      }
-
       const data = {
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
@@ -1984,6 +1986,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               return renderMedicalHistory(i.id, i.text);
                             })}
                           </div>
+                          <ErrorHelperText
+                            error={state.errors.medical_history}
+                          />
                         </div>
 
                         <div id="allergies-div">
