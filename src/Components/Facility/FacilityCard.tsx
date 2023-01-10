@@ -135,7 +135,8 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   className="font-semibold tracking-wider text-sm"
                 >
                   {parsePhoneNumber(
-                    facility.phone_number as string
+                    facility.phone_number as string,
+                    "IN"
                   ).formatInternational() || "-"}
                 </a>
               </div>
