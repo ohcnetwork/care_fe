@@ -439,7 +439,7 @@ export default function ManageUsers() {
         </div>
         {showLinkSkills(username)}
       </div>
-    )
+    );
   };
 
   const addFacility = async (username: string, facility: any) => {
@@ -463,6 +463,7 @@ export default function ManageUsers() {
     hideLinkSkillModal();
     setIsSkillLoading(true);
     const res = await dispatch(addUserSkill(username, String(skill.id)));
+    console.log(res);
     if (res?.status === 201) {
       Notification.Success({
         msg: "Skill added successfully",
@@ -674,21 +675,6 @@ export default function ManageUsers() {
                       {user.facilities &&
                         showFacilities(user.username, user.facilities)}
                     </div>
-                  )}
-                  {user.username && (
-                    <div className="col-span-4">
-                      <UserDetails title="Linked Facilities">
-                        {showFacilities(user.username, user.facilities)}
-                      </UserDetails>
-                    </div>
-                  )}
-                  {user.username && !user.facilities && (
-                    <div
-                      onClick={() => loadFacilities(user.username)}
-                      className={`col-span-4 mt-2 ${modalClassname}`}
-                    >
-                      Click here to show linked facilities
-                      </div>
                   )}
                   {user.username && user.skills && (
                     <div className="col-span-4">
