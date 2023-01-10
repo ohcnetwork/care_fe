@@ -150,7 +150,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
     <ButtonV2
       id="submit"
       type="submit"
-      className="w-full md:w-auto"
+      className="w-full md:w-auto bg-primary-500 hover:bg-primary-400"
       // Voluntarily setting children this way, so that it's overridable when using.
       children={
         <>
