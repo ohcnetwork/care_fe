@@ -13,7 +13,6 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
   ActionTextInputField,
-  PhoneNumberField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
@@ -28,11 +27,11 @@ import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import DateInputV2 from "../Common/DateInputV2";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -203,11 +202,8 @@ const AssetCreate = (props: AssetProps) => {
       setQrCodeId(asset.qr_code_id);
       setManufacturer(asset.manufacturer);
       asset.warranty_amc_end_of_validity &&
-        setWarrantyAmcEndOfValidity(
-          moment(asset.warranty_amc_end_of_validity).toDate()
-        );
-      asset.last_serviced_on &&
-        setLastServicedOn(moment(asset.last_serviced_on).toDate());
+        setWarrantyAmcEndOfValidity(asset.warranty_amc_end_of_validity);
+      asset.last_serviced_on && setLastServicedOn(asset.last_serviced_on);
       setNotes(asset.notes);
     }
   }, [asset]);
@@ -723,23 +719,25 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["warranty_amc_end_of_validity"]}
                   >
                     <label className="mb-2">Warranty / AMC Expiry</label>
-                    <DateInputV2
-                      className="border-1 border-gray-200"
+                    <TextFormField
+                      name="WarrantyAMCExpiry"
                       value={warranty_amc_end_of_validity}
                       onChange={(date) => {
                         if (
-                          moment(date).format("YYYY-MM-DD") <
+                          moment(date.value).format("YYYY-MM-DD") <
                           new Date().toLocaleDateString("en-ca")
                         ) {
                           Notification.Error({
                             msg: "Warranty / AMC Expiry date can't be in past",
                           });
                         } else {
-                          setWarrantyAmcEndOfValidity(moment(date).toDate());
+                          setWarrantyAmcEndOfValidity(
+                            moment(date.value).format("YYYY-MM-DD")
+                          );
                         }
                       }}
-                      position="LEFT"
-                      min={yesterday}
+                      type="date"
+                      min={moment(yesterday).format("YYYY-MM-DD")}
                     />
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
@@ -766,14 +764,14 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["support_phone"]}
                   >
-                    <label htmlFor="support-name">
-                      Customer Support Number *{" "}
-                    </label>
-                    <PhoneNumberField
-                      enableTollFree
+                    <PhoneNumberFormField
+                      name="support_phone"
+                      label="Customer support number"
+                      required
+                      tollFree
                       value={support_phone}
-                      onChange={setSupportPhone}
-                      errors={state.errors.support_phone}
+                      onChange={(e) => setSupportPhone(e.value)}
+                      error={state.errors.support_phone}
                     />
                   </div>
 
@@ -832,23 +830,26 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["last_serviced_on"]}
                   >
                     <label htmlFor="last-serviced-on">Last Serviced On</label>
-                    <DateInputV2
-                      className="border-1 border-gray-200"
+                    <TextFormField
+                      name="LastServicedOn"
+                      className="mt-2"
                       value={last_serviced_on}
                       onChange={(date) => {
                         if (
-                          moment(date).format("YYYY-MM-DD") >
+                          moment(date.value).format("YYYY-MM-DD") >
                           new Date().toLocaleDateString("en-ca")
                         ) {
                           Notification.Error({
                             msg: "Last Serviced date can't be in future",
                           });
                         } else {
-                          setLastServicedOn(moment(date).toDate());
+                          setLastServicedOn(
+                            moment(date.value).format("YYYY-MM-DD")
+                          );
                         }
                       }}
-                      position="LEFT"
-                      max={new Date()}
+                      type="date"
+                      max={moment(new Date()).format("YYYY-MM-DD")}
                     />
                     <ErrorHelperText error={state.errors.last_serviced_on} />
                   </div>

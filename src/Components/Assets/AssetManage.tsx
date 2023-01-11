@@ -282,6 +282,11 @@ const AssetManage = (props: AssetManageProps) => {
                   content: assetClassProp.name,
                 },
                 {
+                  label: "Asset QR Code ID",
+                  icon: "qrcode-scan",
+                  content: asset?.qr_code_id,
+                },
+                {
                   label: "Not working reason",
                   icon: "exclamation-circle",
                   content: asset?.not_working_reason,

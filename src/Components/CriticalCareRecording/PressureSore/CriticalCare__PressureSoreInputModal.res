@@ -49,7 +49,7 @@ let make = (
     () => {
       let modalWidth = 350
       let modalHeight = 352
-      
+
       {
         "top": (
           innerHeight - position["y"] < modalHeight ? position["y"] - modalHeight : position["y"]
@@ -94,7 +94,7 @@ let make = (
                     value={state.width->Belt.Float.toString}
                     step={0.1}
                     placeholder="Width (cm)"
-                    className="border border-gray-300 rounded-md w-full px-2 py-1"
+                    className="cui-input-base px-2 py-1"
                     disabled={previewMode}
                     onChange={e => {
                       let value = ReactEvent.Form.target(e)["value"]->Belt.Float.fromString
@@ -114,7 +114,7 @@ let make = (
                     value={state.length->Belt.Float.toString}
                     step={0.1}
                     placeholder="Length (cm)"
-                    className="border border-gray-300 rounded-md w-full px-2 py-1"
+                    className="cui-input-base px-2 py-1"
                     disabled={previewMode}
                     onChange={e => {
                       let value = ReactEvent.Form.target(e)["value"]->Belt.Float.fromString
@@ -162,7 +162,7 @@ let make = (
                     let value = ReactEvent.Form.target(e)["value"]
                     setState(prev => {...prev, description: value})
                   }}
-                  className="border border-gray-300 rounded-md px-2 py-1 w-full"
+                  className="cui-input-base px-2 py-1"
                   disabled={previewMode}
                 />
               </div>

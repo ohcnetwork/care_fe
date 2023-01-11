@@ -85,7 +85,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     props.onQuery && props.onQuery(query);
   }, [query]);
 
-  const valueOptions = props.options.map((option) => {
+  const options = props.options.map((option) => {
     const label = props.optionLabel(option);
     return {
       label,
@@ -95,23 +95,8 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     };
   });
 
-  const placeholder = props.placeholder ?? "Select";
-  const defaultOption = {
-    label: placeholder,
-    selectedLabel: (
-      <p className="font-normal text-secondary-400">{placeholder}</p>
-    ),
-    icon: undefined,
-    value: undefined,
-  };
-
-  const options = props.required
-    ? valueOptions
-    : [defaultOption, ...valueOptions];
-
-  const value = options.find((o) => props.value == o.value) || defaultOption;
-
-  const filteredOptions = valueOptions.filter((o) => o.search.includes(query));
+  const value = options.find((o) => props.value == o.value);
+  const filteredOptions = options.filter((o) => o.search.includes(query));
 
   return (
     <div className={props.className} id={props.id}>
@@ -124,8 +109,8 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
           <div className="flex">
             <Combobox.Input
               className="cui-input-base pr-16 truncate"
-              placeholder={placeholder}
-              displayValue={(value: any) => value.label}
+              placeholder={props.placeholder || "Select"}
+              displayValue={(value: any) => value?.label}
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">

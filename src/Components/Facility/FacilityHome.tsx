@@ -35,9 +35,9 @@ import CoverImageEditModal from "./CoverImageEditModal";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import Table from "../Common/components/Table";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ContactLink from "../Common/components/ContactLink";
+import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -140,6 +140,8 @@ export const FacilityHome = (props: any) => {
     return <Loading />;
   }
   let capacityList: any = null;
+  let totalBedCount = 0;
+  let totalOccupiedBedCount = 0;
   if (!capacityData || !capacityData.length) {
     capacityList = (
       <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
@@ -147,13 +149,24 @@ export const FacilityHome = (props: any) => {
       </h5>
     );
   } else {
+    capacityData.forEach((x) => {
+      totalBedCount += x.total_capacity ? x.total_capacity : 0;
+      totalOccupiedBedCount += x.current_capacity ? x.current_capacity : 0;
+    });
+
     capacityList = (
-      <div className="mt-4 grid lg:grid-cols-3 sm:grid-cols-2 gap-7 w-full">
+      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-7 w-full">
+        <BedTypeCard
+          label={"Total Beds"}
+          bedCapacityId={0}
+          used={totalOccupiedBedCount}
+          total={totalBedCount}
+        />
         {BED_TYPES.map((x) => {
           const res = capacityData.find((data) => {
             return data.room_type === x.id;
           });
-          if (res) {
+          if (res && res.current_capacity && res.total_capacity) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
               setCapacityData((state) =>
                 state.filter((i) => i.id !== bedTypeId)
@@ -162,8 +175,13 @@ export const FacilityHome = (props: any) => {
             return (
               <BedTypeCard
                 facilityId={facilityId}
+                bedCapacityId={res.id}
                 key={`bed_${res.id}`}
-                {...res}
+                room_type={res.room_type}
+                label={x.text}
+                used={res.current_capacity}
+                total={res.total_capacity}
+                lastUpdated={res.modified_date}
                 removeBedType={removeCurrentBedType}
               />
             );
@@ -434,20 +452,23 @@ export const FacilityHome = (props: any) => {
                 )}
                 <div className="flex gap-2 flex-wrap mt-5">
                   {facilityData.features?.map(
-                    (feature, i) =>
+                    (feature: number, i: number) =>
                       FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
-                        <div
+                        <Chip
                           key={i}
-                          className="flex items-center gap-1 bg-[#F0FFF9] text-primary-500 font-medium px-3.5 py-2.5 rounded border border-primary-500 text-sm"
-                        >
-                          {getFacilityFeatureIcon(feature)}
-                          &nbsp;
-                          {
+                          size="large"
+                          text={
                             FACILITY_FEATURE_TYPES.filter(
                               (f) => f.id === feature
                             )[0]?.name
                           }
-                        </div>
+                          color="primary"
+                          startIcon={
+                            FACILITY_FEATURE_TYPES.filter(
+                              (f) => f.id === feature
+                            )[0]?.icon
+                          }
+                        />
                       )
                   )}
                 </div>
@@ -552,7 +573,7 @@ export const FacilityHome = (props: any) => {
                 className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/patients?facility=${facilityId}`)}
               >
-                <PatientIcon className="w-4 h-4 fill-current mr-2" />
+                <CareIcon className="care-l-user-injured" />
                 <span>View Patients</span>
               </ButtonV2>
             </div>
