@@ -1,4 +1,12 @@
-import { cy, describe, it, before, beforeEach, afterEach } from "local-cypress";
+import {
+  cy,
+  describe,
+  it,
+  before,
+  beforeEach,
+  afterEach,
+  expect,
+} from "local-cypress";
 
 describe("Edit Profile Testing", () => {
   before(() => {
@@ -26,7 +34,7 @@ describe("Edit Profile Testing", () => {
     cy.wait("@external_result").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
-    cy.url().should("include", "%2B91+47387-43424");
+    cy.url().should("include", "%2B914738743424");
   });
 
   it("import", () => {
@@ -37,7 +45,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("export", () => {
-    cy.intercept("/api/v1/external_result/?csv=true").as("export");
+    cy.intercept("/api/v1/external_result/?csv=true&").as("export");
     cy.contains("Import/Export").click().wait(100);
     cy.contains("Export Results").click();
     cy.wait("@export").then((interception) => {
