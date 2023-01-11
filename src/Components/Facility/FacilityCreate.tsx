@@ -34,7 +34,7 @@ import {
   getWardByLocalBody,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
+import { ErrorHelperText } from "../Common/HelperInputFields";
 import GLocationPicker from "../Common/GLocationPicker";
 import {
   includesIgnoreCase as includesIgnoreCase,
@@ -53,6 +53,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import Steps, { Step } from "../Common/Steps";
 import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -376,6 +377,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       },
     });
 
+    fetchLocalBody(matchedDistrict.id);
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);
@@ -860,20 +862,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                     />
                   </div>
                   <div>
-                    <FieldLabel
-                      htmlFor="facility-tel"
-                      className="mb-1"
-                      required={true}
-                    >
-                      Emergency Contact Number
-                    </FieldLabel>
-                    <PhoneNumberField
+                    <PhoneNumberFormField
+                      name="phone_number"
+                      label="Emergency Contact Number"
+                      required
                       value={state.form.phone_number}
-                      onChange={(value: string) =>
-                        handleValueChange(value, "phone_number")
-                      }
-                      errors={state.errors.phone_number}
-                      onlyIndia={true}
+                      onChange={handleChange}
+                      error={state.errors.phone_number}
+                      onlyIndia
                     />
                   </div>
 

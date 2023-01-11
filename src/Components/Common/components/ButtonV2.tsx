@@ -1,3 +1,5 @@
+import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import AuthorizedChild from "../../../CAREUI/misc/AuthorizedChild";
 import { AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
@@ -42,6 +44,8 @@ export type ButtonProps = RawButtonProps &
      * - `"alert"` is ideal for actions that require alert.
      */
     variant?: ButtonVariant;
+    /** Specify text alignment. Defaults to `center` */
+    align?: "left" | "center" | "right" | "between";
     /** If set, gives an elevated button with hover effects. */
     shadow?: boolean | undefined;
     /** If set, removes the background to give a simple text button. */
@@ -60,6 +64,14 @@ export type ButtonProps = RawButtonProps &
      */
     loading?: boolean | undefined;
     /**
+     * A button will convert to a link if the `href` prop is set.
+     */
+    href?: string | undefined;
+    /**
+     * Link target. Only applicable if `href` is set.
+     */
+    target?: string | undefined;
+    /**
      * Whether the button should be having a Id.
      */
     id?: string | undefined;
@@ -69,6 +81,7 @@ const ButtonV2 = ({
   authorizeFor,
   size = "default",
   variant = "primary",
+  align = "center",
   circle,
   shadow,
   ghost,
@@ -76,16 +89,19 @@ const ButtonV2 = ({
   disabled,
   loading,
   children,
+  href,
+  target,
   ...props
 }: ButtonProps) => {
   const className = classNames(
-    "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
+    props.className,
+    "font-medium h-min inline-flex items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
     `button-size-${size}`,
+    `justify-${align}`,
     `button-shape-${circle ? "circle" : "square"}`,
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
     border && `button-${variant}-border`,
-    shadow && "shadow enabled:hover:shadow-lg",
-    props.className
+    shadow && "shadow enabled:hover:shadow-lg"
   );
 
   if (authorizeFor) {
@@ -102,6 +118,19 @@ const ButtonV2 = ({
     </AuthorizedChild>;
   }
 
+  if (href && !(disabled || loading)) {
+    return (
+      <Link
+        {...(props as any)}
+        href={href}
+        target={target}
+        className={className}
+      >
+        {children}
+      </Link>
+    );
+  }
+
   return (
     <button {...props} disabled={disabled || loading} className={className}>
       {children}
@@ -116,6 +145,7 @@ export default ButtonV2;
 type CommonButtonProps = ButtonProps & { label?: string };
 
 export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
+  const { t } = useTranslation();
   return (
     <ButtonV2
       id="submit"
@@ -125,7 +155,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
       children={
         <>
           <CareIcon className="care-l-check-circle text-lg" />
-          <span>{label}</span>
+          <span>{t(label)}</span>
         </>
       }
       {...props}
@@ -134,6 +164,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
 };
 
 export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
+  const { t } = useTranslation();
   return (
     <ButtonV2
       id="cancel"
@@ -144,7 +175,7 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       children={
         <>
           <CareIcon className="care-l-times-circle text-lg" />
-          <span>{label}</span>
+          <span>{t(label)}</span>
         </>
       }
       {...props}

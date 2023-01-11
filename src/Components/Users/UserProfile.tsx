@@ -8,7 +8,7 @@ import {
   partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
-import { ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
+import { ErrorHelperText } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
@@ -19,6 +19,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import { handleSignOut } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -507,27 +508,29 @@ export default function UserProfile() {
                         </div>
 
                         <div className="col-span-6 sm:col-span-3">
-                          <PhoneNumberField
-                            label="Phone Number*"
+                          <PhoneNumberFormField
+                            label="Phone Number"
+                            required
+                            name="phoneNumber"
                             placeholder="Phone Number"
                             value={states.form.phoneNumber}
-                            onChange={(value: string) =>
-                              handleValueChange(value, "phoneNumber")
+                            onChange={(event) =>
+                              handleValueChange(event.value, event.name)
                             }
-                            errors={states.errors.phoneNumber}
+                            error={states.errors.phoneNumber}
                           />
                         </div>
 
                         <div className="col-span-6 sm:col-span-3">
-                          <PhoneNumberField
+                          <PhoneNumberFormField
                             name="altPhoneNumber"
                             label="Whatsapp Number"
                             placeholder="WhatsApp Number"
                             value={states.form.altPhoneNumber}
-                            onChange={(value: string) =>
-                              handleValueChange(value, "altPhoneNumber")
+                            onChange={(event) =>
+                              handleValueChange(event.value, event.name)
                             }
-                            errors={states.errors.altPhoneNumber}
+                            error={states.errors.altPhoneNumber}
                           />
                         </div>
                         <div className="col-span-6 sm:col-span-3">
