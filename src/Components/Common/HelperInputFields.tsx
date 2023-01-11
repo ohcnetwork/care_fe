@@ -657,6 +657,7 @@ export const PhoneNumberField = (props: any) => {
     enableTollFree,
     countryCodeEditable = false,
     className,
+    name,
   } = props;
   const [maxLength, setMaxLength] = useState(15);
 
@@ -693,6 +694,7 @@ export const PhoneNumberField = (props: any) => {
           enableLongNumbers={enableTollFree}
           inputProps={{
             maxLength,
+            name,
           }}
           {...countryRestriction}
         />

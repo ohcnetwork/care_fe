@@ -30,6 +30,7 @@ const PhoneNumberFormField = (props: Props) => {
         enableTollFree={props.tollFree}
         countryCodeEditable={!!props.countryCodeEditable}
         className="my-0"
+        name={name}
       />
     </FormField>
   );
