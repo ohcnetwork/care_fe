@@ -41,10 +41,11 @@ describe("Patient Creation", () => {
     cy.get("[data-testid=ward-respective-lsgi] select").select(
       "1: MANAKKAPADY"
     );
-    cy.get("h1").contains("Health Details").click({ force: true });
+    cy.get("h1").contains("COVID Details").click({ force: true });
     cy.get("select#test_type").select("ANTIGEN");
     cy.get("[name='is_vaccinated']").check();
     cy.get("[data-testid=pincode] input").type("159015");
+    cy.get("[name=medical_history_check_1]").check();
     cy.get("[data-testid=blood-group] select").select("O+");
     cy.get("[data-testid=emergency-phone-number] input").type(
       emergency_phone_number,
