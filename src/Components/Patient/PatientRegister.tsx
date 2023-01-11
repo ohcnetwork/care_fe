@@ -62,6 +62,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 import AccordionV2 from "../Common/components/AccordionV2";
 import CollapseV2 from "../Common/components/CollapseV2";
 import { debounce } from "lodash";
+import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -143,6 +144,7 @@ const initForm: any = {
   number_of_doses: "1",
   vaccine_name: null,
   last_vaccinated_date: null,
+  abha_number: null,
   ...medicalHistoryChoices,
 };
 
@@ -216,6 +218,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
+  const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
 
   useEffect(() => {
     if (extId) {
@@ -661,6 +664,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (!validForm) {
       scrollTo(error_div);
     } else {
+      if (!id && !state.form.abha_number) {
+        setShowLinkAbhaNumberModal(true);
+        return;
+      }
+
       setIsLoading(true);
       const medical_history: Array<medicalHistoryModel> = [];
       state.form.medical_history.forEach((id: number) => {
@@ -698,6 +706,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ? state.form.date_declared_positive
             : null,
         srf_id: state.form.srf_id,
+        abha_number: state.form.abha_number,
         covin_id:
           state.form.is_vaccinated === "true" ? state.form.covin_id : undefined,
         is_vaccinated: state.form.is_vaccinated,
@@ -948,6 +957,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   return (
     <div className="px-2 pb-2">
+      {showLinkAbhaNumberModal && (
+        <LinkABHANumberModal
+          show={showLinkAbhaNumberModal}
+          onClose={() => setShowLinkAbhaNumberModal(false)}
+          setAbha={(abha: string) => handleValueChange(abha, "abha_number")}
+        />
+      )}
       {statusDialog.show && (
         <DuplicatePatientDialog
           patientList={statusDialog.patientList}

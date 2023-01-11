@@ -24,8 +24,9 @@ import Dropdown, { DropdownItem } from "../Common/components/Menu";
 import OtpFormField from "../Form/FormFields/OtpFormField";
 
 interface Props {
-  patientId: string;
+  patientId?: string;
   patientMobile?: string | undefined;
+  setAbha?: (abha: any) => void;
   show: boolean;
   onClose: () => void;
 }
@@ -39,6 +40,7 @@ type Step =
 export default function LinkABHANumberModal({
   patientId,
   patientMobile,
+  setAbha,
   ...props
 }: Props) {
   const [currentStep, setCurrentStep] = useState<Step>("AadhaarVerification");
@@ -91,6 +93,7 @@ export default function LinkABHANumberModal({
             transactionId={transactionId}
             onCreateSuccess={() => props.onClose()}
             patientId={patientId}
+            setAbha={setAbha}
           />
         )}
       </div>
@@ -100,7 +103,7 @@ export default function LinkABHANumberModal({
 
 interface ScanABHAQRSectionProps {
   onSignup: () => void;
-  patientId: string;
+  patientId?: string;
 }
 
 const ScanABHAQRSection = ({ onSignup, patientId }: ScanABHAQRSectionProps) => {
@@ -549,13 +552,15 @@ const VerifyMobileSection = ({
 interface CreateHealthIDSectionProps {
   transactionId: string;
   onCreateSuccess: (transactionId: string) => void;
-  patientId: string;
+  patientId?: string;
+  setAbha?: (abha: any) => void;
 }
 
 const CreateHealthIDSection = ({
   transactionId,
   onCreateSuccess,
   patientId,
+  setAbha,
 }: CreateHealthIDSectionProps) => {
   const dispatch = useDispatch<any>();
   const [healthId, setHealthId] = useState("");
@@ -566,7 +571,9 @@ const CreateHealthIDSection = ({
     const res = await dispatch(
       createHealthId({ txnId: transactionId, patientId, healthId })
     );
-    if (res.status === 200) {
+    if (res.status === 200 && res.data?.abha) {
+      console.log(res);
+      setAbha?.(res.data.abha);
       Notify.Success({ msg: "Health ID created" });
       onCreateSuccess(res.data.txnId);
     } else {

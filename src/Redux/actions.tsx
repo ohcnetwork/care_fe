@@ -831,11 +831,11 @@ export const initiateAbdmAuthentication = (
 export const confirmWithAadhaarOtp = (
   txnId: string,
   otp: string,
-  patientId: string
+  patientId?: string
 ) => fireRequest("confirmWithAadhaarOtp", [], { txnId, otp, patientId });
 
 export const confirmWithMobileOtp = (
   txnId: string,
   otp: string,
-  patientId: string
+  patientId?: string
 ) => fireRequest("confirmWithMobileOtp", [], { txnId, otp, patientId });
