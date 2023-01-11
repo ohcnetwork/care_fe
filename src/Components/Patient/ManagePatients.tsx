@@ -14,7 +14,6 @@ import {
   getLocalBody,
   getAnyFacility,
 } from "../../Redux/actions";
-import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
 import {
   ADMITTED_TO,
@@ -30,9 +29,12 @@ import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import FilterBadge from "../../CAREUI/display/FilterBadge";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -67,8 +69,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   Critical: "CRITICAL",
 };
 
-export const PatientManager = (props: any) => {
-  const { facilityId } = props;
+export const PatientManager = () => {
   const dispatch: any = useDispatch();
 
   const [data, setData] = useState<any[]>([]);
@@ -92,7 +93,44 @@ export const PatientManager = (props: any) => {
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
-  const [facilityCrumbName, setFacilityCrumbName] = useState("");
+  const [phone_number, setPhoneNumber] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
+  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
+    useState("");
+
+  useEffect(() => {
+    if (phone_number.length === 15) {
+      setPhoneNumberError("");
+      updateQuery({ phone_number });
+      return;
+    }
+
+    if (phone_number === "+91" || phone_number === "") {
+      setPhoneNumberError("");
+      updateQuery({ phone_number: "" });
+      return;
+    }
+
+    setPhoneNumberError("Enter a valid number");
+  }, [phone_number]);
+
+  useEffect(() => {
+    if (emergency_phone_number.length === 15) {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number });
+      return;
+    }
+
+    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number: "" });
+      return;
+    }
+
+    setEmergencyPhoneNumberError("Enter a valid number");
+  }, [emergency_phone_number]);
+
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
   const params = {
@@ -111,7 +149,7 @@ export const PatientManager = (props: any) => {
         )
       : undefined,
     local_body: qParams.lsgBody || undefined,
-    facility: facilityId || qParams.facility,
+    facility: qParams.facility,
     facility_type: qParams.facility_type || undefined,
     district: qParams.district || undefined,
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
@@ -195,25 +233,14 @@ export const PatientManager = (props: any) => {
   let managePatients: any = null;
 
   const exportPatients = (isFiltered: boolean) => {
-    const filters = { ...params, csv: true, facility: facilityId };
+    const filters = { ...params, csv: true, facility: qParams.facility };
     if (!isFiltered) delete filters.is_active;
     return () => getAllPatient(filters, "downloadPatients");
   };
 
   useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatch(getAnyFacility(facilityId));
+    if (params.page === 1) return;
 
-        setFacilityCrumbName(res?.data?.name || "");
-      } else {
-        setFacilityCrumbName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatch, facilityId]);
-
-  useEffect(() => {
     setIsLoading(true);
     dispatch(getAllPatient(params, "listPatients"))
       .then((res: any) => {
@@ -228,7 +255,6 @@ export const PatientManager = (props: any) => {
       });
   }, [
     dispatch,
-    facilityId,
     qParams.last_consultation_admission_date_before,
     qParams.last_consultation_admission_date_after,
     qParams.last_consultation_discharge_date_before,
@@ -332,24 +358,20 @@ export const PatientManager = (props: any) => {
     const badge = (key: string, value: any, id: string) => {
       return (
         value && (
-          <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-            {key}
-            {": "}
-            {value}
-            <i
-              className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-              onClick={(_) => {
-                const lcat = qParams.last_consultation_admitted_bed_type_list
-                  .split(",")
-                  .filter((x: string) => x != id)
-                  .join(",");
-                updateQuery({
-                  ...qParams,
-                  last_consultation_admitted_bed_type_list: lcat,
-                });
-              }}
-            ></i>
-          </span>
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation_admitted_to_list
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation_admitted_to_list: lcat,
+              });
+            }}
+          />
         )
       );
     };
@@ -472,6 +494,7 @@ export const PatientManager = (props: any) => {
                       Number(patient.last_consultation?.review_interval) > 0 &&
                       moment().isAfter(patient.review_time) && (
                         <Chip
+                          size="small"
                           color="red"
                           startIcon="clock"
                           text="Review Missed"
@@ -479,24 +502,32 @@ export const PatientManager = (props: any) => {
                       )}
                     {patient.allow_transfer ? (
                       <Chip
+                        size="small"
                         color="yellow"
                         startIcon="unlock"
                         text="Transfer Allowed"
                       />
                     ) : (
                       <Chip
+                        size="small"
                         color="primary"
                         startIcon="lock"
                         text="Transfer Blocked"
                       />
                     )}
                     {patient.disease_status === "POSITIVE" && (
-                      <Chip color="red" startIcon="radiation" text="Positive" />
+                      <Chip
+                        size="small"
+                        color="red"
+                        startIcon="radiation"
+                        text="Positive"
+                      />
                     )}
                     {patient.gender === 2 &&
                       patient.is_antenatal &&
                       patient.is_active && (
                         <Chip
+                          size="small"
                           color="blue"
                           startIcon="baby-carriage"
                           text="Antenatal"
@@ -504,6 +535,7 @@ export const PatientManager = (props: any) => {
                       )}
                     {patient.is_medical_worker && patient.is_active && (
                       <Chip
+                        size="small"
                         color="blue"
                         startIcon="user-md"
                         text="Medical Worker"
@@ -511,6 +543,7 @@ export const PatientManager = (props: any) => {
                     )}
                     {patient.disease_status === "EXPIRED" && (
                       <Chip
+                        size="small"
                         color="yellow"
                         startIcon="exclamation-triangle"
                         text="Patient Expired"
@@ -523,6 +556,7 @@ export const PatientManager = (props: any) => {
                         patient.is_active)) && (
                       <span className="relative inline-flex">
                         <Chip
+                          size="small"
                           color="red"
                           startIcon="notes-medical"
                           text="No Consultation Filed"
@@ -533,6 +567,29 @@ export const PatientManager = (props: any) => {
                         </span>
                       </span>
                     )}
+                    {!(
+                      patient.last_consultation?.facility !== patient.facility
+                    ) &&
+                      !(
+                        patient.last_consultation?.discharge_date ||
+                        !patient.is_active
+                      ) &&
+                      moment(patient.last_consultation?.modified_date).isBefore(
+                        new Date().getTime() - 24 * 60 * 60 * 1000
+                      ) && (
+                        <span className="relative inline-flex">
+                          <Chip
+                            size="small"
+                            color="red"
+                            startIcon="circle-exclamation"
+                            text="No update in 24 hours"
+                          />
+                          <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                            <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                          </span>
+                        </span>
+                      )}
                   </div>
                 </div>
               </div>
@@ -566,6 +623,15 @@ export const PatientManager = (props: any) => {
     );
   }
 
+  const queryField = <T,>(name: string, defaultValue?: T) => {
+    return {
+      name,
+      value: qParams[name] || defaultValue,
+      onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
+      className: "grow lg:max-w-sm w-full mb-2",
+    };
+  };
+
   return (
     <div className="px-6">
       <FacilitiesSelectDialogue
@@ -579,18 +645,13 @@ export const PatientManager = (props: any) => {
         }}
       />
       <div className="flex justify-between items-center">
-        <PageTitle
-          title="Patients"
-          hideBack={!facilityId}
-          breadcrumbs={!!facilityId}
-          crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
-        />
+        <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
           <ButtonV2
             className="flex gap-2 items-center font-semibold"
             onClick={() => {
-              facilityId
-                ? navigate(`/facility/${facilityId}/patient`)
+              qParams.facility
+                ? navigate(`/facility/${qParams.facility}/patient`)
                 : setShowDialog(true);
             }}
           >
@@ -655,11 +716,11 @@ export const PatientManager = (props: any) => {
           </div>
         </div>
       </div>
-      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-24px]">
+      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-12px]">
         <div>
-          <div className="flex flex-col mt-2">
-            <div className="bg-white overflow-hidden shadow rounded-lg mb-2">
-              <div className="px-4 py-5 sm:p-[35px]">
+          <div className="flex flex-col mt-2 h-full">
+            <div className="bg-white overflow-hidden shadow rounded-lg mb-2 h-full">
+              <div className="px-4 py-24 sm:p-[35px]">
                 <dl>
                   <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                     Total Patients
@@ -684,68 +745,40 @@ export const PatientManager = (props: any) => {
             <div>
               <div>
                 <div className="md:flex md:gap-4 mt-1">
-                  <div className="grow lg:max-w-sm w-full mb-2">
-                    <SearchInput
-                      label="Search by Name"
-                      name="name"
-                      onChange={(e) => updateQuery({ [e.name]: e.value })}
-                      value={qParams.name}
-                      placeholder="Search patient"
-                    />
-                  </div>
-                  <div className="grow lg:max-w-sm w-full mb-2">
-                    <SearchInput
-                      label="Search by IP Number"
-                      name="ip_no"
-                      onChange={(e) => updateQuery({ [e.name]: e.value })}
-                      value={qParams.ip_no}
-                      placeholder="Search IP Number"
-                      secondary
-                    />
-                  </div>
+                  <SearchInput
+                    label="Search by Patient"
+                    placeholder="Enter patient name"
+                    {...queryField("name")}
+                  />
+                  <SearchInput
+                    label="Search by IP Number"
+                    placeholder="Enter IP Number"
+                    secondary
+                    {...queryField("ip_no")}
+                  />
                 </div>
               </div>
             </div>
             <div className="md:flex md:gap-4">
-              <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-medium">
-                  Search by Primary Number
-                </div>
-                <PhoneNumberField
-                  value={qParams.phone_number || "+91"}
-                  onChange={(value: string) => {
-                    if (value !== "+91") {
-                      updateQuery({ phone_number: value });
-                    } else {
-                      updateQuery({ phone_number: "" });
-                    }
-                  }}
-                  turnOffAutoFormat={false}
-                  errors=""
-                />
-              </div>
-              <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-medium">
-                  Search by Emergency Number
-                </div>
-                <PhoneNumberField
-                  value={qParams.emergency_phone_number || "+91"}
-                  onChange={(value: string) => {
-                    if (value !== "+91") {
-                      updateQuery({ emergency_phone_number: value });
-                    } else {
-                      updateQuery({ emergency_phone_number: "" });
-                    }
-                  }}
-                  turnOffAutoFormat={false}
-                  errors=""
-                />
-              </div>
+              <PhoneNumberFormField
+                label="Search by Primary Number"
+                {...queryField("phone_number", "+91")}
+                value={phone_number}
+                onChange={(e) => setPhoneNumber(e.value)}
+                error={phoneNumberError}
+              />
+              <PhoneNumberFormField
+                label="Search by Emergency Number"
+                {...queryField("emergency_phone_number", "+91")}
+                value={emergency_phone_number}
+                onChange={(e) => setEmergencyPhoneNumber(e.value)}
+                error={emergencyPhoneNumberError}
+              />
             </div>
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap w-full col-span-3">
+      <div className="flex flex-wrap w-full col-span-3 mt-6">
         <FilterBadges
           badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
             phoneNumber("Primary number", "phone_number"),

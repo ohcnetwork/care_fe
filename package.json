@@ -42,13 +42,14 @@
     "@material-ui/pickers": "^3.3.10",
     "@material-ui/styles": "^4.11.4",
     "@material-ui/types": "^5.1.0",
+    "@react-spring/web": "^9.6.1",
     "@rescript/react": "^0.10.3",
     "@sentry/browser": "^7.22.0",
     "@types/echarts": "^4.9.16",
     "@types/google.maps": "^3.50.4",
     "@types/loadable__component": "^5.13.3",
     "@types/lodash": "^4.14.186",
-    "@types/node": "^18.11.5",
+    "@types/node": "^18.11.18",
     "@types/prop-types": "*",
     "@types/qrcode.react": "^1.0.1",
     "@types/react": "18.0.21",
@@ -71,7 +72,6 @@
     "moment": "^2.29.4",
     "postcss-loader": "^7.0.2",
     "qrcode.react": "^1.0.1",
-    "querystring": "^0.2.1",
     "raviger": "^4.1.2",
     "react": "18.2.0",
     "react-copy-to-clipboard": "^5.0.3",
@@ -245,9 +245,9 @@
     ]
   },
   "lint-staged": {
-    "**/*": [
+    "*.{ts,tsx,js,jsx}": [
       "prettier --write --ignore-unknown",
-      "eslint --fix --ignore-pattern '*.stories.mdx' --ignore-pattern 'Dockerfile' --ignore-pattern 'netlify.toml'",
+      "eslint --fix",
       "git update-index --again"
     ]
   },
