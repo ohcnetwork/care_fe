@@ -275,7 +275,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
             </div>
           </div>
           <div>
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-end mt-4">
               <div className="w-full md:w-auto">
                 <Cancel onClick={handleClose} />
               </div>

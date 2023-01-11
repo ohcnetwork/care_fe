@@ -249,7 +249,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
               />
             </div>
             <div>
-              <div className="flex justify-between flex-col md:flex-row">
+              <div className="flex justify-between flex-col md:flex-row mt-4">
                 <div className="flex flex-row w-full sm:w-auto gap-4">
                   <Cancel onClick={() => handleClose()} />
                 </div>

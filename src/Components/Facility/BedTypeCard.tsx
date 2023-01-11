@@ -164,7 +164,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                 <div className="flex justify-evenly gap-2 relative">
                   <RoleButton
                     handleClickCB={() => {
-                      setSelectedId(props.room_type || 0);
+                      setSelectedId(room_type || 0);
                       setOpen(true);
                     }}
                     disableFor="readOnly"

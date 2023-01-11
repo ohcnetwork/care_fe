@@ -582,7 +582,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           <Steps steps={getSteps()} />
           <div className="mt-3">
             <DoctorCapacity
-              className="max-w-3xl w-full mx-auto"
+              className="max-w-2xl w-full mx-auto"
               facilityId={createdFacilityId || ""}
               handleClose={() => {
                 navigate(`/facility/${createdFacilityId}`);
@@ -606,7 +606,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           <Steps steps={getSteps()} />
           <div className="mt-3">
             <BedCapacity
-              className="max-w-3xl w-full mx-auto"
+              className="max-w-2xl w-full mx-auto"
               facilityId={createdFacilityId || ""}
               handleClose={() => {
                 setCurrentStep(3);
