@@ -519,7 +519,7 @@ export default function ManageUsers() {
                                 : "care-l-eye-slash"
                             } text-xl`}
                           />
-                          <span className="tooltip-text tooltip-bottom">
+                          <span className="tooltip-text tooltip-right">
                             {!user.facilities ? "View" : "Hide"} Linked
                             Facilities
                           </span>
