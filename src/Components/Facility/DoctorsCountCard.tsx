@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { navigate } from "raviger";
 import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { RoleButton } from "../Common/RoleButton";
@@ -14,16 +13,22 @@ import {
   DialogTitle,
 } from "@material-ui/core";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
+import { DoctorCapacity } from "./DoctorCapacity";
+import DialogModal from "../Common/Dialog";
 
 interface DoctorsCountProps extends DoctorModal {
-  facilityId: number;
+  facilityId: string;
   removeDoctor: (doctorId: number | undefined) => void;
+  handleUpdate: () => void;
 }
 
 const DoctorsCountCard = (props: DoctorsCountProps) => {
   const specialization = DOCTOR_SPECIALIZATION.find((i) => i.id === props.area);
   const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<number>(-1);
+
   const handleDeleteSubmit = async () => {
     if (props.area) {
       const res = await dispatchAction(
@@ -65,9 +70,10 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
         <div className="bg-[#FBF9FB] py-2 px-3 flex justify-end gap-8 border-t border-[#D2D6DC]">
           <RoleButton
             className="font-medium"
-            handleClickCB={() =>
-              navigate(`/facility/${props.facilityId}/doctor/${props.area}`)
-            }
+            handleClickCB={() => {
+              setSelectedId(props.area || 0);
+              setOpen(true);
+            }}
             disableFor="readOnly"
             buttonType="html"
           >
@@ -110,6 +116,25 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
           </DialogActions>
         </Dialog>
       </div>
+      {open && (
+        <DialogModal
+          show={open}
+          onClose={() => setOpen(false)}
+          title="Update Doctor Capacity"
+        >
+          <DoctorCapacity
+            facilityId={props.facilityId}
+            handleClose={() => {
+              setOpen(false);
+            }}
+            handleUpdate={() => {
+              props.handleUpdate();
+              setOpen(false);
+            }}
+            id={selectedId}
+          />
+        </DialogModal>
+      )}
     </div>
   );
 };

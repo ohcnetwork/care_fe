@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import moment from "moment";
 import * as Notification from "../../Utils/Notifications";
 import { animated, config, useSpring } from "@react-spring/web";
-import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import {
   DialogContentText,
@@ -13,9 +12,11 @@ import {
 } from "@material-ui/core";
 import { deleteCapacity } from "../../Redux/actions";
 import { RoleButton } from "../Common/RoleButton";
+import { BedCapacity } from "./BedCapacity";
+import DialogModal from "../Common/Dialog";
 
 interface BedTypeCardProps {
-  facilityId?: number;
+  facilityId?: string;
   bedCapacityId?: number;
   room_type?: number;
   label: string;
@@ -23,6 +24,7 @@ interface BedTypeCardProps {
   total: number;
   lastUpdated?: string;
   removeBedType?: (bedTypeId: number | undefined) => void;
+  handleUpdate: () => void;
 }
 
 const CIRCLE_PATH =
@@ -37,10 +39,12 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
   total,
   lastUpdated,
   removeBedType,
+  handleUpdate,
 }) => {
   const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-
+  const [open, setOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<number>(-1);
   const handleDeleteSubmit = async () => {
     if (room_type) {
       const res = await dispatchAction(
@@ -154,14 +158,15 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
             </div>
             {facilityId && (
               <div className="flex justify-between gap-2 pt-6">
-                <div className="text-xs text-gray-600 font-[400] italic">
+                <div className="text-xs text-gray-600 font-[400] italic p-1">
                   Last Updated: {lastUpdated && moment(lastUpdated).fromNow()}
                 </div>
                 <div className="flex justify-evenly gap-2 relative">
                   <RoleButton
-                    handleClickCB={() =>
-                      navigate(`/facility/${facilityId}/bed/${room_type}`)
-                    }
+                    handleClickCB={() => {
+                      setSelectedId(room_type || 0);
+                      setOpen(true);
+                    }}
                     disableFor="readOnly"
                     buttonType="html"
                   >
@@ -237,6 +242,26 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
           </button>
         </DialogActions>
       </Dialog>
+      {open && (
+        <DialogModal
+          show={open}
+          onClose={() => setOpen(false)}
+          title="Update Bed Capacity"
+          className="max-w-lg md:min-w-[650px]"
+        >
+          <BedCapacity
+            facilityId={facilityId || ""}
+            handleClose={() => {
+              setOpen(false);
+            }}
+            handleUpdate={() => {
+              handleUpdate();
+              setOpen(false);
+            }}
+            id={selectedId}
+          />
+        </DialogModal>
+      )}
     </div>
   );
 };
