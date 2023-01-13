@@ -330,11 +330,7 @@ export default function ManageUsers() {
     setIsSkillLoading(true);
     const res = await dispatch(addUserSkill(username, String(skill.id)));
     console.log(res);
-    if (res?.status === 201) {
-      Notification.Success({
-        msg: "Skill added successfully",
-      });
-    } else {
+    if (res?.status !== 201) {
       Notification.Error({
         msg: "Error while adding skill",
       });
