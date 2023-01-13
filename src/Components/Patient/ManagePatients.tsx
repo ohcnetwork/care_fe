@@ -494,6 +494,7 @@ export const PatientManager = () => {
                       Number(patient.last_consultation?.review_interval) > 0 &&
                       moment().isAfter(patient.review_time) && (
                         <Chip
+                          size="small"
                           color="red"
                           startIcon="clock"
                           text="Review Missed"
@@ -501,24 +502,32 @@ export const PatientManager = () => {
                       )}
                     {patient.allow_transfer ? (
                       <Chip
+                        size="small"
                         color="yellow"
                         startIcon="unlock"
                         text="Transfer Allowed"
                       />
                     ) : (
                       <Chip
+                        size="small"
                         color="primary"
                         startIcon="lock"
                         text="Transfer Blocked"
                       />
                     )}
                     {patient.disease_status === "POSITIVE" && (
-                      <Chip color="red" startIcon="radiation" text="Positive" />
+                      <Chip
+                        size="small"
+                        color="red"
+                        startIcon="radiation"
+                        text="Positive"
+                      />
                     )}
                     {patient.gender === 2 &&
                       patient.is_antenatal &&
                       patient.is_active && (
                         <Chip
+                          size="small"
                           color="blue"
                           startIcon="baby-carriage"
                           text="Antenatal"
@@ -526,6 +535,7 @@ export const PatientManager = () => {
                       )}
                     {patient.is_medical_worker && patient.is_active && (
                       <Chip
+                        size="small"
                         color="blue"
                         startIcon="user-md"
                         text="Medical Worker"
@@ -533,6 +543,7 @@ export const PatientManager = () => {
                     )}
                     {patient.disease_status === "EXPIRED" && (
                       <Chip
+                        size="small"
                         color="yellow"
                         startIcon="exclamation-triangle"
                         text="Patient Expired"
@@ -545,6 +556,7 @@ export const PatientManager = () => {
                         patient.is_active)) && (
                       <span className="relative inline-flex">
                         <Chip
+                          size="small"
                           color="red"
                           startIcon="notes-medical"
                           text="No Consultation Filed"
@@ -555,6 +567,29 @@ export const PatientManager = () => {
                         </span>
                       </span>
                     )}
+                    {!(
+                      patient.last_consultation?.facility !== patient.facility
+                    ) &&
+                      !(
+                        patient.last_consultation?.discharge_date ||
+                        !patient.is_active
+                      ) &&
+                      moment(patient.last_consultation?.modified_date).isBefore(
+                        new Date().getTime() - 24 * 60 * 60 * 1000
+                      ) && (
+                        <span className="relative inline-flex">
+                          <Chip
+                            size="small"
+                            color="red"
+                            startIcon="circle-exclamation"
+                            text="No update in 24 hours"
+                          />
+                          <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                            <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                          </span>
+                        </span>
+                      )}
                   </div>
                 </div>
               </div>

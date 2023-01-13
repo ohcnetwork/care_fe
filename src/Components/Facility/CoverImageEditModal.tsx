@@ -17,7 +17,7 @@ import Webcam from "react-webcam";
 import { FacilityModel } from "./models";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-
+import * as Notification from "../../Utils/Notifications.js";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -107,22 +107,34 @@ const CoverImageEditModal = ({
     formData.append("cover_image", selectedFile);
 
     setIsUploading(true);
-    const response = await axios.post(
-      `/api/v1/facility/${facility.id}/cover_image/`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: "Bearer " + localStorage.getItem("care_access_token"),
-        },
+    try {
+      const response = await axios.post(
+        `/api/v1/facility/${facility.id}/cover_image/`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization:
+              "Bearer " + localStorage.getItem("care_access_token"),
+          },
+        }
+      );
+      if (response.status === 200) {
+        Success({ msg: "Cover image updated." });
+        window.location.reload();
+      } else {
+        Notification.Error({
+          msg: "Something went wrong!",
+        });
+        setIsUploading(false);
       }
-    );
-
-    if (response.status === 200) {
-      setIsCaptureImgBeingUploaded(false);
-      Success({ msg: "Cover image updated." });
-      window.location.reload();
+    } catch (e) {
+      Notification.Error({
+        msg: "Network Failure. Please check your internet connectivity.",
+      });
+      setIsUploading(false);
     }
+
     await sleep(1000);
     setIsUploading(false);
     setIsCaptureImgBeingUploaded(false);
@@ -154,9 +166,19 @@ const CoverImageEditModal = ({
       return dragProps.setFileDropError("Please drop an image file to upload!");
     setSelectedFile(dropedFile);
   };
+  const commonHint = (
+    <>
+      Max size for image uploaded should be 1mb.
+      <br />
+      Allowed formats are jpg,png,jpeg.
+      <br />
+      Recommended aspect ratio for facility cover photo is 1:1.
+    </>
+  );
 
   return (
     <Modal open={open} onClose={closeModal}>
+
       <div className="h-full w-full absolute flex items-center justify-center bg-modal overflow-y-auto">
         {!isCameraOpen ? (
           <form className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-screen overflow-auto flex flex-col shadow">
@@ -172,13 +194,30 @@ const CoverImageEditModal = ({
                   className="w-full h-full object-cover"
                 />
               </div>
-            ) : (
-              <div
-                onDragOver={dragProps.onDragOver}
-                onDragLeave={dragProps.onDragLeave}
-                onDrop={onDrop}
-                className={`px-3 py-6 flex-1 flex flex-col m-8 rounded-lg items-center justify-center border-[3px] border-dashed ${
-                  dragProps.dragOver && "border-primary-500"
+              <p className="text-gray-700 font-medium text-center">
+                {commonHint}
+              </p>
+            </>
+          ) : (
+            <div
+              onDragOver={dragProps.onDragOver}
+              onDragLeave={dragProps.onDragLeave}
+              onDrop={onDrop}
+              className={`px-3 py-6 flex-1 flex flex-col m-8 rounded-lg items-center justify-center border-[3px] border-dashed ${
+                dragProps.dragOver && "border-primary-500"
+              } ${
+                dragProps.fileDropError !== ""
+                  ? "border-red-500"
+                  : "border-gray-500"
+              }`}
+            >
+              <svg
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 48 48"
+                aria-hidden="true"
+                className={`w-12 h-12 stroke-[2px] ${
+                  dragProps.dragOver && "text-primary-500"
                 } ${
                   dragProps.fileDropError !== ""
                     ? "border-red-500"
@@ -268,6 +307,14 @@ const CoverImageEditModal = ({
                 )}
                 <span>{isUploading ? "Uploading..." : "Save"}</span>
               </ButtonV2>
+                {dragProps.fileDropError !== ""
+                  ? dragProps.fileDropError
+                  : "Drag & drop image to upload"}
+              </p>
+              <p className="mt-4 text-gray-700 font-medium text-center">
+                No cover photo uploaded for this facility. <br />
+                {commonHint}
+              </p>
             </div>
           </form>
         ) : (

@@ -457,7 +457,7 @@ export const PatientHome = (props: any) => {
                 <p className="font-bold text-red-800">
                   <i className="fas fa-exclamation-triangle mr-2" />
                   <span className="inline">
-                    You have not created a consultation for the patient in
+                    You have not created a consultation for the patient in{" "}
                     <strong>{patientData.facility_object?.name || "-"} </strong>
                   </span>
                 </p>
@@ -649,17 +649,16 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
-                {patientData.is_vaccinated &&
-                  patientData.last_vaccinated_date && (
-                    <div className="sm:col-span-1">
-                      <div className="text-sm leading-5 font-semibold text-zinc-400">
-                        Last Vaccinated on
-                      </div>
-                      <div className="mt-1 text-sm leading-5 font-medium">
-                        {formatDate(patientData.last_vaccinated_date)}
-                      </div>
+                {patientData.is_vaccinated && patientData.last_vaccinated_date && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                      Last Vaccinated on
                     </div>
-                  )}
+                    <div className="mt-1 text-sm leading-5 font-medium">
+                      {formatDate(patientData.last_vaccinated_date)}
+                    </div>
+                  </div>
+                )}
                 {patientData.countries_travelled &&
                   !!patientData.countries_travelled.length && (
                     <div className="sm:col-span-1">

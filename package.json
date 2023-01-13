@@ -42,6 +42,7 @@
     "@material-ui/pickers": "^3.3.10",
     "@material-ui/styles": "^4.11.4",
     "@material-ui/types": "^5.1.0",
+    "@react-spring/web": "^9.6.1",
     "@rescript/react": "^0.10.3",
     "@sentry/browser": "^7.22.0",
     "@types/echarts": "^4.9.16",
