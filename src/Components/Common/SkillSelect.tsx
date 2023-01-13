@@ -13,7 +13,7 @@ interface SkillSelectProps {
   showAll?: boolean;
   showNOptions?: number;
   selected: SkillModel | SkillModel[] | null;
-  setSelected: (selected: SkillModel | SkillModel[] | null) => void;
+  setSelected: (selected: any) => void;
 }
 
 export const SkillSelect = (props: SkillSelectProps) => {

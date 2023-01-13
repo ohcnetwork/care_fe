@@ -18,16 +18,17 @@ import {
 import { navigate } from "raviger";
 import { USER_TYPES } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
-import { SkillModel } from "../Users/models";
+import { SkillModel, SkillObjectModel } from "../Users/models";
 
-import { IconButton, CircularProgress } from "@material-ui/core";
+import { IconButton, CircularProgress, Button } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import LinkFacilityDialog from "./LinkFacilityDialog";
-import LinkSkillsDialog from "./LinkSkillsDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
+import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
+import { SkillSelect } from "../Common/SkillSelect";
 import UserDetails from "../Common/UserDetails";
 
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
@@ -61,6 +62,7 @@ export default function ManageUsers() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFacilityLoading, setIsFacilityLoading] = useState(false);
   const [isSkillLoading, setIsSkillLoading] = useState(false);
+  const [expandSkillList, setExpandSkillList] = useState(false);
 
   const [totalCount, setTotalCount] = useState(0);
   const [districtName, setDistrictName] = useState<string>();
@@ -73,10 +75,6 @@ export default function ManageUsers() {
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
   const [linkFacility, setLinkFacility] = useState<{
-    show: boolean;
-    username: string;
-  }>({ show: false, username: "" });
-  const [linkSkills, setLinkSkills] = useState<{
     show: boolean;
     username: string;
   }>({ show: false, username: "" });
@@ -191,6 +189,7 @@ export default function ManageUsers() {
       return;
     }
     setIsSkillLoading(true);
+    setExpandSkillList(true);
     const res = await dispatch(getUserListSkills({ username }));
     if (res && res.data) {
       const updated = users.map((user) => {
@@ -208,13 +207,6 @@ export default function ManageUsers() {
 
   const showLinkFacilityModal = (username: string) => {
     setLinkFacility({
-      show: true,
-      username,
-    });
-  };
-
-  const showLinkSkillsModal = (username: string) => {
-    setLinkSkills({
       show: true,
       username,
     });
@@ -238,13 +230,6 @@ export default function ManageUsers() {
 
   const hideLinkFacilityModal = () => {
     setLinkFacility({
-      show: false,
-      username: "",
-    });
-  };
-
-  const hideLinkSkillModal = () => {
-    setLinkSkills({
       show: false,
       username: "",
     });
@@ -322,15 +307,58 @@ export default function ManageUsers() {
     );
   };
 
+  const [skill, setSkill] = useState<any>(null);
+
+  const addFacility = async (username: string, facility: any) => {
+    hideLinkFacilityModal();
+    setIsFacilityLoading(true);
+    const res = await dispatch(addUserFacility(username, String(facility.id)));
+    if (res?.status === 201) {
+      Notification.Success({
+        msg: "Facility linked successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while linking facility",
+      });
+    }
+    setIsFacilityLoading(false);
+    loadFacilities(username);
+  };
+
+  const addSkill = async (username: string, skill: SkillObjectModel) => {
+    setIsSkillLoading(true);
+    const res = await dispatch(addUserSkill(username, String(skill.id)));
+    console.log(res);
+    if (res?.status === 201) {
+      Notification.Success({
+        msg: "Skill added successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Error while adding skill",
+      });
+    }
+    setIsSkillLoading(false);
+    loadSkills(username);
+  };
+
   const showLinkSkills = (username: string) => {
     return (
-      <a
-        onClick={() => showLinkSkillsModal(username)}
-        className={modalClassname}
-        href="#"
-      >
-        Link new skill
-      </a>
+      <div className="flex">
+        <SkillSelect
+          multiple={false}
+          name="skill"
+          showAll={true}
+          showNOptions={8}
+          selected={skill}
+          setSelected={setSkill}
+          errors=""
+        />
+        <Button color="primary" onClick={() => addSkill(username, skill)}>
+          Add
+        </Button>
+      </div>
     );
   };
 
@@ -404,77 +432,54 @@ export default function ManageUsers() {
     if (!skills || !skills.length) {
       return (
         <>
-          <div className="font-semibold">No Skills!</div>
           {showLinkSkills(username)}
+          <div className="mb-2 mt-2">
+            <img
+              src={`${process.env.PUBLIC_URL}/images/no_skills.svg`}
+              alt="Error 404"
+              className="w-full"
+            />
+          </div>
         </>
       );
     }
     return (
       <div className="sm:col-start-2 col-span-full sm:col-span-3">
-        <div className="mb-2">
+        {showLinkSkills(username)}
+        <div className="mb-2 mt-4">
           {skills.map((skill, i) => (
             <div
               key={`facility_${i}`}
-              className="border-2 font-gbold inline-block rounded-md pl-3 py-1 mr-3 mt-2"
+              className={classNames(
+                "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer"
+              )}
             >
-              <div className="flex items-center  space-x-1">
-                <div className="font-semibold">{skill.skill_object.name}</div>
-                <IconButton
-                  size="small"
-                  color="secondary"
-                  disabled={isSkillLoading}
-                  onClick={() =>
-                    setUnlinkSkillData({
-                      show: true,
-                      skill: skill,
-                      userName: username,
-                    })
-                  }
-                >
-                  <CloseIcon />
-                </IconButton>
+              <div className="flex justify-between">
+                <div className="text-lg font-bold">
+                  {skill.skill_object.name}
+                </div>
+                <div>
+                  <IconButton
+                    size="small"
+                    color="primary"
+                    disabled={isSkillLoading}
+                    onClick={() =>
+                      setUnlinkSkillData({
+                        show: true,
+                        skill: skill,
+                        userName: username,
+                      })
+                    }
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </div>
               </div>
             </div>
           ))}
         </div>
-        {showLinkSkills(username)}
       </div>
     );
-  };
-
-  const addFacility = async (username: string, facility: any) => {
-    hideLinkFacilityModal();
-    setIsFacilityLoading(true);
-    const res = await dispatch(addUserFacility(username, String(facility.id)));
-    if (res?.status === 201) {
-      Notification.Success({
-        msg: "Facility linked successfully",
-      });
-    } else {
-      Notification.Error({
-        msg: "Error while linking facility",
-      });
-    }
-    setIsFacilityLoading(false);
-    loadFacilities(username);
-  };
-
-  const addSkill = async (username: string, skill: any) => {
-    hideLinkSkillModal();
-    setIsSkillLoading(true);
-    const res = await dispatch(addUserSkill(username, String(skill.id)));
-    console.log(res);
-    if (res?.status === 201) {
-      Notification.Success({
-        msg: "Skill added successfully",
-      });
-    } else {
-      Notification.Error({
-        msg: "Error while adding skill",
-      });
-    }
-    setIsSkillLoading(false);
-    loadSkills(username);
   };
 
   const showDelete = (user: any) => {
@@ -676,22 +681,41 @@ export default function ManageUsers() {
                         showFacilities(user.username, user.facilities)}
                     </div>
                   )}
-                  {user.username && user.skills && (
+                  {/* {user.username && user.skills && (
                     <div className="col-span-4">
                       <UserDetails title="User Skills">
                         {showSkills(user.username, user.skills)}
                       </UserDetails>
                     </div>
-                  )}
-                  {user.username && !user.skills && (
-                    <div
-                      onClick={() => loadSkills(user.username)}
-                      className={`col-span-4 mt-2 ${modalClassname}`}
-                    >
-                      Click here to show linked skills
+                  )}                                            */}
+                  {user.username && user.skills && (
+                    <div className="col-span-4">
+                      <SlideOverCustom
+                        open={expandSkillList}
+                        setOpen={setExpandSkillList}
+                        slideFrom="right"
+                        title="Skills"
+                        dialogClass="md:w-[400px]"
+                        onCloseClick={() => true}
+                      >
+                        <div>{showSkills(user.username, user.skills)}</div>
+                      </SlideOverCustom>
                     </div>
                   )}
                 </div>
+                {user.username && (
+                  <div className="mt-2">
+                    <Button
+                      className="md:ml-2 w-full"
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => loadSkills(user.username)}
+                    >
+                      linked skills
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -727,13 +751,6 @@ export default function ManageUsers() {
           username={linkFacility.username}
           handleOk={addFacility}
           handleCancel={hideLinkFacilityModal}
-        />
-      )}
-      {linkSkills.show && (
-        <LinkSkillsDialog
-          username={linkSkills.username}
-          handleOk={addSkill}
-          handleCancel={hideLinkSkillModal}
         />
       )}
 
