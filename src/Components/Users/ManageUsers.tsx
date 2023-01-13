@@ -681,13 +681,6 @@ export default function ManageUsers() {
                         showFacilities(user.username, user.facilities)}
                     </div>
                   )}
-                  {/* {user.username && user.skills && (
-                    <div className="col-span-4">
-                      <UserDetails title="User Skills">
-                        {showSkills(user.username, user.skills)}
-                      </UserDetails>
-                    </div>
-                  )}                                            */}
                   {user.username && user.skills && (
                     <div className="col-span-4">
                       <SlideOverCustom
