@@ -216,7 +216,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
 
   useEffect(() => {
     let tId: any;
-    if (streamStatus !== StreamStatus.Playing) {
+    if (
+      streamStatus !== StreamStatus.Playing &&
+      streamStatus !== StreamStatus.Offline
+    ) {
       setStreamStatus(StreamStatus.Loading);
       tId = setTimeout(() => {
         startStream({

@@ -182,6 +182,10 @@ export const useMSEMediaPlayer = ({
           function () {
             wsRef.current = new WebSocket(url);
             const ws = wsRef.current;
+            ws.onerror = function (error: any) {
+              onError?.(error);
+              ws.close();
+            };
             ws.binaryType = "arraybuffer";
             ws.onopen = function (_event) {
               console.log("Connected to ws");
