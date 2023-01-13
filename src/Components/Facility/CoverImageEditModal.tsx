@@ -178,7 +178,6 @@ const CoverImageEditModal = ({
 
   return (
     <Modal open={open} onClose={closeModal}>
-
       <div className="h-full w-full absolute flex items-center justify-center bg-modal overflow-y-auto">
         {!isCameraOpen ? (
           <form className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-screen overflow-auto flex flex-col shadow">
@@ -186,38 +185,27 @@ const CoverImageEditModal = ({
               <span className="text-xl font-medium">Edit Cover Photo</span>
               <span className="mt-1 text-gray-700">{facility.name}</span>
             </div>
+
             {hasImage ? (
-              <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
-                <img
-                  src={imgSrc}
-                  alt={facility.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <p className="text-gray-700 font-medium text-center">
-                {commonHint}
-              </p>
-            </>
-          ) : (
-            <div
-              onDragOver={dragProps.onDragOver}
-              onDragLeave={dragProps.onDragLeave}
-              onDrop={onDrop}
-              className={`px-3 py-6 flex-1 flex flex-col m-8 rounded-lg items-center justify-center border-[3px] border-dashed ${
-                dragProps.dragOver && "border-primary-500"
-              } ${
-                dragProps.fileDropError !== ""
-                  ? "border-red-500"
-                  : "border-gray-500"
-              }`}
-            >
-              <svg
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-                aria-hidden="true"
-                className={`w-12 h-12 stroke-[2px] ${
-                  dragProps.dragOver && "text-primary-500"
+              <>
+                <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
+                  <img
+                    src={imgSrc}
+                    alt={facility.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="text-gray-700 font-medium text-center">
+                  {commonHint}
+                </p>
+              </>
+            ) : (
+              <div
+                onDragOver={dragProps.onDragOver}
+                onDragLeave={dragProps.onDragLeave}
+                onDrop={onDrop}
+                className={`px-3 py-6 flex-1 flex flex-col m-8 rounded-lg items-center justify-center border-[3px] border-dashed ${
+                  dragProps.dragOver && "border-primary-500"
                 } ${
                   dragProps.fileDropError !== ""
                     ? "border-red-500"
@@ -254,7 +242,7 @@ const CoverImageEditModal = ({
                 </p>
                 <p className="mt-4 text-gray-700 font-medium text-center">
                   No cover photo uploaded for this facility. <br />
-                  Recommended aspect ratio for facility cover photo is 1:1.
+                  {commonHint}
                 </p>
               </div>
             )}
@@ -307,14 +295,6 @@ const CoverImageEditModal = ({
                 )}
                 <span>{isUploading ? "Uploading..." : "Save"}</span>
               </ButtonV2>
-                {dragProps.fileDropError !== ""
-                  ? dragProps.fileDropError
-                  : "Drag & drop image to upload"}
-              </p>
-              <p className="mt-4 text-gray-700 font-medium text-center">
-                No cover photo uploaded for this facility. <br />
-                {commonHint}
-              </p>
             </div>
           </form>
         ) : (
