@@ -117,7 +117,7 @@ function FacilityFilter(props: any) {
           }}
         >
           <i className="fas fa-times mr-2" />
-          Clear Filter
+          Clear Filters
         </button>
         <button className="btn btn-primary mt-1" onClick={applyFilter}>
           <i className="fas fa-check mr-2" />
