@@ -1,10 +1,8 @@
 import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
 import { useState, useEffect } from "react";
-import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../Components/Facility/TreatmentSummary";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
-import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
 import { FacilityCreate } from "../Components/Facility/FacilityCreate";
 import { FacilityHome } from "../Components/Facility/FacilityHome";
 import { HospitalList } from "../Components/Facility/HospitalList";
@@ -108,12 +106,6 @@ const routes = {
   "/facility/:facilityId/triage": ({ facilityId }: any) => (
     <TriageForm facilityId={facilityId} />
   ),
-  "/facility/:facilityId/bed": ({ facilityId }: any) => (
-    <BedCapacityForm facilityId={facilityId} />
-  ),
-  "/facility/:facilityId/doctor": ({ facilityId }: any) => (
-    <DoctorCapacityForm facilityId={facilityId} />
-  ),
   "/facility/:facilityId/patient": ({ facilityId }: any) => (
     <PatientRegister facilityId={facilityId} />
   ),
@@ -150,12 +142,6 @@ const routes = {
   ),
   "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
     <TriageForm facilityId={facilityId} id={id} />
-  ),
-  "/facility/:facilityId/bed/:id": ({ facilityId, id }: any) => (
-    <BedCapacityForm facilityId={facilityId} id={id} />
-  ),
-  "/facility/:facilityId/doctor/:id": ({ facilityId, id }: any) => (
-    <DoctorCapacityForm facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,
