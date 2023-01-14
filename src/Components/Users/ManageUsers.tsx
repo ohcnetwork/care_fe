@@ -698,13 +698,11 @@ export default function ManageUsers() {
                   )}
                 </div>
                 {user.username && (
-                  <div className="mt-2">
-                    <a
-                      // className="md:ml-2 w-full"
-                      onClick={() => loadSkills(user.username)}
-                    >
-                      linked skills
-                    </a>
+                  <div
+                    onClick={() => loadSkills(user.username)}
+                    className={`col-span-4 mt-2 ${modalClassname}`}
+                  >
+                    Click here to show linked skills
                   </div>
                 )}
               </div>
