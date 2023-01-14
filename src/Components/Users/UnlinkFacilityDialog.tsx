@@ -21,7 +21,7 @@ const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
     <ConfirmDialogV2
       title={<span>Unlink User Facility</span>}
       show={true}
-      action="Delete"
+      action="Unlink"
       onClose={handleCancel}
       onConfirm={handleSubmit}
       disabled={disable}
