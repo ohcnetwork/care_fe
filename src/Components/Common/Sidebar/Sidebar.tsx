@@ -7,6 +7,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
+import LiveMonitoring from "../../Hub/LiveMonitoring";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -42,7 +43,7 @@ const NavItems = [
   },
   { text: "Users", to: "/users", icon: "care-l-users-alt" },
   { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
-   { text: "Live Monitoring", to: "/live_monitoring", icon: <LiveMonitoring /> },
+  { text: "Live Monitoring", to: "/live_monitoring", icon: <LiveMonitoring /> },
 ];
 
 const StatelessSidebar = ({
