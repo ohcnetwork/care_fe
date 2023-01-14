@@ -137,13 +137,7 @@ export const AddBedForm = (props: BedFormProps) => {
     <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle
         title={headerText}
-        backButtonCB={() => {
-          navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
-            replace: true,
-          });
-
-          return 0;
-        }}
+        backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [locationId]: {

@@ -68,7 +68,7 @@ export const calculateApache2Score = (apacheParams: ApacheParams): number => {
 };
 
 /**
- * Deprecated. Use `goBack` from the `useHistory` hook instead.
+ * Deprecated. Use `goBack` from the `useAppHistory` hook instead.
  */
 export const goBack = (deltaOrUrl?: string | number | false | void) => {
   if (typeof deltaOrUrl === "number") {
