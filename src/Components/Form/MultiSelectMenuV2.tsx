@@ -1,6 +1,8 @@
 import React from "react";
 import { Listbox } from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { classNames } from "../../Utils/utils";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -15,10 +17,18 @@ type Props<T, V = T> = {
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
   className?: string;
+  disabled?: boolean;
   renderSelectedOptions?: OptionCallback<T[], React.ReactNode>;
   onChange: OptionCallback<V[]>;
 };
 
+/**
+ * Avoid using this component directly. Use `MultiSelectFormField` instead as
+ * its API is easier to use and compliant with `FormField` based components.
+ *
+ * Use this only when you want to hack into the design and get more
+ * customizability.
+ */
 const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
   const options = props.options.map((option) => {
     const label = props.optionLabel(option);
@@ -37,7 +47,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       value,
       isSelected: props.value?.includes(value as any) ?? false,
       displayChip: (
-        <div className="px-2 bg-gray-100 rounded-full text-xs text-gray-900 border border-gray-400">
+        <div className="px-2 bg-secondary-100 rounded-full text-xs text-gray-900 border border-secondary-400">
           {selectedLabel}
         </div>
       ),
@@ -52,13 +62,14 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
     if (props.renderSelectedOptions)
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
     return (
-      <span className="text-gray-700">{`${selectedOptions.length} items selected`}</span>
+      <span className="text-gray-800">{`${selectedOptions.length} item(s) selected`}</span>
     );
   };
 
   return (
-    <div className={props.className}>
+    <div className={props.className} id={props.id}>
       <Listbox
+        disabled={props.disabled}
         value={selectedOptions}
         onChange={(opts: typeof options) =>
           props.onChange(opts.map((o) => o.value) as any)
@@ -67,72 +78,53 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       >
         {({ open }) => (
           <>
-            <Listbox.Label className="sr-only">
+            <Listbox.Label className="sr-only !relative">
               {props.placeholder}
             </Listbox.Label>
             <div className="relative">
-              <div className="">
-                <Listbox.Button className="w-full flex rounded bg-gray-200 focus:border-primary-400 border-2 outline-none ring-0 transition-all duration-200 ease-in-out">
+              <div>
+                <Listbox.Button className="cui-input-base w-full flex rounded">
                   <div className="relative z-0 flex items-center w-full">
-                    <div className="relative flex-1 flex items-center py-3 pl-3 pr-4 focus:z-10">
-                      <p className="ml-2.5 text-sm font-normal text-gray-500">
+                    <div className="relative flex-1 flex items-center pr-4 focus:z-10">
+                      <p className="ml-2.5 text-sm font-normal text-gray-600">
                         <Placeholder />
                       </p>
                     </div>
-                    <i className="p-2 mr-2 text-sm fa-solid fa-chevron-down" />
+                    <CareIcon className="-mb-0.5 care-l-angle-down text-lg text-gray-900" />
                   </div>
                 </Listbox.Button>
                 {selectedOptions.length !== 0 && (
                   <div className="p-2 flex flex-wrap gap-2">
                     {selectedOptions.map((option) => (
-                      <span className="bg-gray-200 border border-gray-400 text-gray-800 rounded-full text-xs px-2 py-1">
-                        {option.selectedLabel}
-                      </span>
+                      <MultiSelectOptionChip label={option.selectedLabel} />
                     ))}
                   </div>
                 )}
               </div>
               <DropdownTransition show={open}>
-                <Listbox.Options className="top-12 absolute z-10 mt-2 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none">
+                <Listbox.Options className="cui-dropdown-base absolute top-12">
                   {options.map((option, index) => (
                     <Listbox.Option
                       id={`${props.id}-option-${index}`}
                       key={index}
-                      className={({ active }) =>
-                        `cursor-default select-none relative p-4 text-sm transition-all duration-100 ease-in-out ${
-                          active ? "text-white bg-primary-500" : "text-gray-900"
-                        }`
-                      }
+                      className={dropdownOptionClassNames}
                       value={option}
                     >
-                      {({ selected, active }) => (
-                        <div className="flex flex-col">
+                      {({ active }) => (
+                        <div className="flex flex-col gap-2">
                           <div className="flex justify-between">
-                            <p
-                              className={
-                                selected ? "font-semibold" : "font-normal"
-                              }
-                            >
-                              {option.label}
-                            </p>
-                            {(option.icon || option.isSelected) && (
-                              <span
-                                className={`transition-all duration-100 ease-in-out ${
-                                  active ? "text-white" : "text-primary-500"
-                                }`}
-                              >
-                                {option.isSelected ? (
-                                  <i className="fa-solid fa-check" />
-                                ) : (
-                                  option.icon
-                                )}
-                              </span>
-                            )}
+                            {option.label}
+                            {(option.icon || option.isSelected) &&
+                              (option.isSelected ? (
+                                <CareIcon className="care-l-check text-lg" />
+                              ) : (
+                                option.icon
+                              ))}
                           </div>
                           {option.description && (
                             <p
-                              className={`mt-2 ${
-                                active ? "text-primary-200" : "text-gray-500"
+                              className={`font-normal ${
+                                active ? "text-primary-200" : "text-gray-700"
                               }`}
                             >
                               {option.description}
@@ -153,3 +145,42 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
 };
 
 export default MultiSelectMenuV2;
+
+interface MultiSelectOptionChipProps {
+  label: React.ReactNode;
+  onRemove?: () => void;
+}
+
+export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
+  return (
+    <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-700 rounded-full text-xs px-3">
+      <p className="py-1.5">{props.label}</p>
+      {props.onRemove && (
+        <p
+          className="cursor-pointer rounded-full hover:bg-white"
+          onClick={props.onRemove}
+        >
+          <CareIcon className="care-l-times text-base" />
+        </p>
+      )}
+    </span>
+  );
+};
+
+interface OptionRenderPropArg {
+  active: boolean;
+  selected: boolean;
+}
+
+export const dropdownOptionClassNames = ({
+  active,
+  selected,
+}: OptionRenderPropArg) => {
+  return classNames(
+    "cursor-default select-none relative p-4 text-sm",
+    active && "text-white bg-primary-500",
+    !active && selected && "text-primary-500",
+    !active && !selected && "text-gray-900",
+    selected ? "font-semibold" : "font-normal"
+  );
+};

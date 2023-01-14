@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { UserSelect } from "../Common/UserSelect2";
-import { SelectField, PhoneNumberField } from "../Common/HelperInputFields";
+import { SelectField } from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
@@ -17,13 +17,9 @@ import { SHIFTING_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import parsePhoneNumberFromString from "libphonenumber-js";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-}
+import useMergeState from "../../Common/hooks/useMergeState";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
@@ -155,6 +151,13 @@ export default function ListFilter(props: any) {
     filterData[name] = value;
 
     setFilterState(filterData);
+  };
+
+  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
+    setFilterState({
+      ...filterState,
+      [event.name]: event.value === "--" ? "" : event.value,
+    });
   };
 
   const clearFilters = () => {
@@ -444,14 +447,11 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Patient Phone Number</span>
-          <PhoneNumberField
+          <PhoneNumberFormField
+            label="Patient Phone Number"
             name="patient_phone_number"
-            placeholder="Patinet phone number"
             value={filterState.patient_phone_number}
-            onChange={(value: string) => {
-              handleChange({ target: { name: "patient_phone_number", value } });
-            }}
+            onChange={handleFormFieldChange}
           />
         </div>
 

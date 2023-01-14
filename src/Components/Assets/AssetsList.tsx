@@ -21,6 +21,14 @@ import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import AssetImportModal from "./AssetImportModal";
+import { FacilityModel } from "../Facility/models";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
+import AuthorizeFor from "../../Utils/AuthorizeFor";
+import ButtonV2 from "../Common/components/ButtonV2";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import ExportMenu from "../Common/Export";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -33,17 +41,23 @@ const AssetsList = () => {
     advancedFilter,
     resultsPerPage,
   } = useFilters({
-    limit: 21,
+    limit: 18,
   });
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [facilityName, setFacilityName] = useState<string>();
+  const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
+  const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
+  const [showFacilityDialog, setShowFacilityDialog] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
+    name: "",
+  });
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -92,13 +106,13 @@ const AssetsList = () => {
     [dispatch, fetchData]
   );
 
-  const fetchFacilityName = useCallback(
+  const fetchFacility = useCallback(
     async (status: statusType) => {
-      if (!qParams.facility) return setFacilityName("");
+      if (!qParams.facility) return setFacility(undefined);
       setIsLoading(true);
       const res = await dispatch(getAnyFacility(qParams.facility));
       if (!status.aborted) {
-        setFacilityName(res?.data?.name);
+        setFacility(res?.data);
         setIsLoading(false);
       }
     },
@@ -121,10 +135,10 @@ const AssetsList = () => {
 
   useAbortableEffect(
     (status: statusType) => {
-      fetchFacilityName(status);
+      fetchFacility(status);
       fetchLocationName(status);
     },
-    [fetchFacilityName, fetchLocationName]
+    [fetchFacility, fetchLocationName]
   );
 
   const getAssetIdFromQR = async (assetUrl: string) => {
@@ -159,6 +173,10 @@ const AssetsList = () => {
       });
     }
   };
+
+  const authorizedForImportExport = useIsAuthorized(
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+  );
 
   if (isScannerActive)
     return (
@@ -196,12 +214,15 @@ const AssetsList = () => {
           <div
             key={asset.id}
             className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
-            onClick={() => navigate(`/assets/${asset.id}`)}
+            onClick={() =>
+              navigate(
+                `facility/${asset?.location_object.facility.id}/assets/${asset.id}`
+              )
+            }
           >
             <div className="md:flex">
               <p className="text-xl flex font-medium capitalize break-words">
                 <span className="mr-2 text-primary-500">
-                  {" "}
                   <i
                     className={`fas fa-${
                       (
@@ -245,7 +266,51 @@ const AssetsList = () => {
 
   return (
     <div className="px-6">
-      <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
+      <div className="flex justify-between items-center">
+        <PageTitle title="Assets" breadcrumbs={false} hideBack />
+        {authorizedForImportExport && (
+          <div className="tooltip">
+            {!facility && (
+              <span className="tooltip-text tooltip-bottom -translate-x-2/3 flex flex-col items-center">
+                <p>Select a facility from the Facilities</p>
+                <p>page and click 'View Assets' from the</p>
+                <p>Manage Facility dropdown</p>
+              </span>
+            )}
+            {/* TODO: ask for facility select dialog instead of disabling */}
+            <ExportMenu
+              disabled={!facility || importAssetModalOpen}
+              label={importAssetModalOpen ? "Importing..." : "Import/Export"}
+              exportItems={[
+                {
+                  label: "Import Assets",
+                  // action: () => setImportAssetModalOpen(true),
+                  options: {
+                    icon: <CareIcon className="care-l-import" />,
+                    onClick: () => setImportAssetModalOpen(true),
+                  },
+                },
+                {
+                  label: "Export Assets",
+                  action: () =>
+                    authorizedForImportExport &&
+                    listAssets({
+                      ...qParams,
+                      json: true,
+                      limit: totalCount,
+                    }),
+                  type: "json",
+                  filePrefix: `assets_${facility?.name}`,
+                  options: {
+                    icon: <CareIcon className="care-l-export" />,
+                    disabled: totalCount === 0 || !authorizedForImportExport,
+                  },
+                },
+              ]}
+            />
+          </div>
+        )}
+      </div>
       <div className="lg:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
@@ -274,18 +339,29 @@ const AssetsList = () => {
             placeholder="Search assets"
           />
         </div>
-        <div className="flex flex-col md:flex-row lg:ml-2 justify-start items-start gap-2">
-          <div className="w-full">
-            <AdvancedFilterButton
-              setShowFilters={() => advancedFilter.setShow(true)}
-            />
+        <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
+          <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
+            <div className="w-full">
+              <AdvancedFilterButton
+                setShowFilters={() => advancedFilter.setShow(true)}
+              />
+            </div>
+            <ButtonV2
+              className="w-full"
+              onClick={() => setIsScannerActive(true)}
+            >
+              <i className="fas fa-search mr-1"></i> Scan Asset QR
+            </ButtonV2>
           </div>
-          <button
-            className="btn btn-primary w-full"
-            onClick={() => setIsScannerActive(true)}
-          >
-            <i className="fas fa-search mr-1"></i> Scan Asset QR
-          </button>
+          <div className="flex flex-col md:flex-row w-full">
+            <ButtonV2
+              className="w-full inline-flex items-center justify-center"
+              onClick={() => setShowFacilityDialog(true)}
+            >
+              <CareIcon className="care-l-plus-circle text-lg" />
+              <span>Create Asset</span>
+            </ButtonV2>
+          </div>
         </div>
       </div>
       <div>
@@ -301,7 +377,7 @@ const AssetsList = () => {
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", ["facility", "location"], facilityName || ""),
+              value("Facility", ["facility", "location"], facility?.name || ""),
               badge("Name", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
               badge("Status", "status"),
@@ -316,6 +392,23 @@ const AssetsList = () => {
           </div>
         </>
       )}
+      {facility && (
+        <AssetImportModal
+          open={importAssetModalOpen}
+          onClose={() => setImportAssetModalOpen(false)}
+          facility={facility}
+        />
+      )}
+      <FacilitiesSelectDialogue
+        show={showFacilityDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() => navigate(`facility/${selectedFacility.id}/assets/new`)}
+        handleCancel={() => {
+          setShowFacilityDialog(false);
+          setSelectedFacility({ name: "" });
+        }}
+      />
     </div>
   );
 };

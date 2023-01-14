@@ -1,5 +1,9 @@
-import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
-import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
+import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import AuthorizedChild from "../../../CAREUI/misc/AuthorizedChild";
+import { AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
+import { classNames } from "../../../Utils/utils";
 
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
@@ -33,17 +37,23 @@ export type ButtonProps = RawButtonProps &
      */
     circle?: boolean | undefined;
     /**
-     * - `"success"` is ideal for form submissions, etc.
+     * - `"primary"` is ideal for form submissions, etc.
      * - `"secondary"` is ideal for things that have secondary importance.
      * - `"danger"` is ideal for destructive or dangerous actions, such as delete.
      * - `"warning"` is ideal for actions that require caution such as archive.
      * - `"alert"` is ideal for actions that require alert.
      */
     variant?: ButtonVariant;
+    /** Specify text alignment. Defaults to `center` */
+    align?: "left" | "center" | "right" | "between";
     /** If set, gives an elevated button with hover effects. */
     shadow?: boolean | undefined;
     /** If set, removes the background to give a simple text button. */
     ghost?: boolean | undefined;
+    /**
+     * If set, applies border to the button.
+     */
+    border?: boolean | undefined;
     /**
      * Whether the button is disabled or not.
      * This is overriden to `true` if `loading` is `true`.
@@ -53,42 +63,122 @@ export type ButtonProps = RawButtonProps &
      * Whether the button should be disabled and show a loading animation.
      */
     loading?: boolean | undefined;
+    /**
+     * A button will convert to a link if the `href` prop is set.
+     */
+    href?: string | undefined;
+    /**
+     * Link target. Only applicable if `href` is set.
+     */
+    target?: string | undefined;
+    /**
+     * Whether the button should be having a Id.
+     */
+    id?: string | undefined;
   };
 
-const shadowClasses =
-  "shadow enabled:hover:shadow-lg enabled:hover:-translate-y-1";
-
 const ButtonV2 = ({
-  authorizeFor = Anyone,
+  authorizeFor,
   size = "default",
   variant = "primary",
+  align = "center",
   circle,
   shadow,
   ghost,
-  className,
+  border,
   disabled,
   loading,
   children,
+  href,
+  target,
   ...props
 }: ButtonProps) => {
-  const isAuthorized = useIsAuthorized(authorizeFor);
+  const className = classNames(
+    props.className,
+    "font-medium h-min inline-flex items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
+    `button-size-${size}`,
+    `justify-${align}`,
+    `button-shape-${circle ? "circle" : "square"}`,
+    ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
+    border && `button-${variant}-border`,
+    shadow && "shadow enabled:hover:shadow-lg"
+  );
+
+  if (authorizeFor) {
+    <AuthorizedChild authorizeFor={authorizeFor}>
+      {({ isAuthorized }) => (
+        <button
+          {...props}
+          disabled={disabled || !isAuthorized || loading}
+          className={className}
+        >
+          {children}
+        </button>
+      )}
+    </AuthorizedChild>;
+  }
+
+  if (href && !(disabled || loading)) {
+    return (
+      <Link
+        {...(props as any)}
+        href={href}
+        target={target}
+        className={className}
+      >
+        {children}
+      </Link>
+    );
+  }
 
   return (
-    <button
-      {...props}
-      disabled={disabled || !isAuthorized || loading}
-      className={[
-        "Button outline-offset-1",
-        `button-size-${size}`,
-        `button-shape-${circle ? "circle" : "square"}`,
-        `button-${variant}-${ghost ? "ghost" : "default"}`,
-        shadow && shadowClasses,
-        className,
-      ].join(" ")}
-    >
+    <button {...props} disabled={disabled || loading} className={className}>
       {children}
     </button>
   );
 };
 
 export default ButtonV2;
+
+// Common buttons
+
+type CommonButtonProps = ButtonProps & { label?: string };
+
+export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
+  const { t } = useTranslation();
+  return (
+    <ButtonV2
+      id="submit"
+      type="submit"
+      className="w-full md:w-auto"
+      // Voluntarily setting children this way, so that it's overridable when using.
+      children={
+        <>
+          <CareIcon className="care-l-check-circle text-lg" />
+          <span>{t(label)}</span>
+        </>
+      }
+      {...props}
+    />
+  );
+};
+
+export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
+  const { t } = useTranslation();
+  return (
+    <ButtonV2
+      id="cancel"
+      type="button"
+      variant="secondary"
+      className="w-full md:w-auto"
+      // Voluntarily setting children this way, so that it's overridable when using.
+      children={
+        <>
+          <CareIcon className="care-l-times-circle text-lg" />
+          <span>{t(label)}</span>
+        </>
+      }
+      {...props}
+    />
+  );
+};

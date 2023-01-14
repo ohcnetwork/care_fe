@@ -9,13 +9,7 @@ import { CircularProgress } from "@material-ui/core";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-}
+import useMergeState from "../../Common/hooks/useMergeState";
 
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
@@ -160,7 +154,11 @@ export default function ListFilter(props: any) {
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
-        <Link href="/resource" className="btn btn-default hover:text-gray-900">
+        <Link
+          href="/resource"
+          className="btn btn-default hover:text-gray-900"
+          onClick={closeFilter}
+        >
           <i className="fas fa-times mr-2" />
           Clear Filters
         </Link>

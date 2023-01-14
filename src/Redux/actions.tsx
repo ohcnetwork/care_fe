@@ -1,5 +1,8 @@
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
+export const getConfig = () => {
+  return fireRequestForFiles("config");
+};
 // User
 export const postLogin = (params: object) => {
   return fireRequest("login", [], params);
@@ -45,10 +48,13 @@ export const updateUserPnconfig = (params: object, pathParams: object) => {
 export const createFacility = (params: object) => {
   return fireRequest("createFacility", [], params);
 };
-export const updateFacility = (id: number, params: object) => {
+export const updateFacility = (id: string, params: object) => {
   return fireRequest("updateFacility", [id], params);
 };
-export const deleteFacility = (id: number) => {
+export const partialUpdateFacility = (id: string, params: object) => {
+  return fireRequest("partialUpdateFacility", [id], params);
+};
+export const deleteFacility = (id: string) => {
   return fireRequest("deleteFacility", [id], {});
 };
 export const deleteFacilityCoverImage = (id: string) => {
@@ -82,7 +88,7 @@ export const getAllFacilities = (params: object) => {
   return fireRequest("getAllFacilities", [], params);
 };
 
-export const getPermittedFacility = (id: number, key?: string) => {
+export const getPermittedFacility = (id: string, key?: string) => {
   return fireRequest("getPermittedFacility", [], {}, { id: id }, key);
 };
 
@@ -784,6 +790,8 @@ export const createAssetUserLocation = (params: object) =>
   fireRequest("createAssetUserLocation", [], params);
 export const getAsset = (id: string) =>
   fireRequest("getAsset", [], {}, { external_id: id });
+export const deleteAsset = (id: string) =>
+  fireRequest("deleteAsset", [], {}, { external_id: id });
 export const updateAsset = (id: string, params: object) =>
   fireRequest("updateAsset", [], params, { external_id: id });
 export const partialUpdateAsset = (id: string, params: object) =>

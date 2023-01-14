@@ -9,6 +9,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { get } from "lodash";
 import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export const Login = (props: { forgot?: boolean }) => {
   const dispatch: any = useDispatch();
@@ -165,7 +166,7 @@ export const Login = (props: { forgot?: boolean }) => {
   };
 
   return (
-    <div className="flex flex-col-reverse md:flex-row md:h-screen relative">
+    <div className="flex flex-col-reverse md:flex-row md:h-screen relative overflow-hidden">
       <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
         <a
           href={"https://coronasafe.network?ref=care_login"}
@@ -329,7 +330,10 @@ export const Login = (props: { forgot?: boolean }) => {
               type="button"
               className="text-sm text-primary-400 hover:text-primary-500 mb-4"
             >
-              <i className="uil uil-arrow-left" /> Back to login
+              <div className="flex justify-center">
+                <CareIcon className="care-l-arrow-left text-lg" />
+                <span>Back to login</span>
+              </div>
             </button>
             <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
               {t("forget_password")}

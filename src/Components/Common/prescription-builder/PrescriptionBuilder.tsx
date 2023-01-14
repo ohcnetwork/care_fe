@@ -5,6 +5,7 @@ import { PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
 
 import medicines_list from "./assets/medicines.json";
 import ToolTip from "../utils/Tooltip";
+import { FieldLabel } from "../../Form/FormFields/FormField";
 
 export const medicines = medicines_list;
 
@@ -21,7 +22,7 @@ const frequencyTips = {
   qwk: "Once a week",
 };
 export const routes = ["Oral", "IV", "IM", "S/C"];
-export const units = ["mg", "ml", "drops", "ampule", "tsp"];
+export const units = ["mg", "g", "ml", "drops", "ampule", "tsp"];
 
 export type PrescriptionType = {
   medicine?: string;
@@ -106,7 +107,7 @@ export default function PrescriptionBuilder(
           >
             <div className="flex gap-2 flex-col md:flex-row">
               <div className="w-full">
-                Medicine
+                <FieldLabel required={true}>Medicine</FieldLabel>
                 <AutoCompleteAsync
                   placeholder="Medicine"
                   selected={prescription.medicine}
@@ -124,7 +125,7 @@ export default function PrescriptionBuilder(
               </div>
               <div className="flex gap-2">
                 <div>
-                  Route
+                  <FieldLabel required={false}>Route</FieldLabel>
                   <SelectMenuV2
                     placeholder="Route"
                     options={routes}
@@ -132,11 +133,11 @@ export default function PrescriptionBuilder(
                     onChange={(route) => setRoute(route || "")}
                     optionLabel={(option) => option}
                     required={false}
-                    className="mt-[2px]"
+                    className="mt-[6px]"
                   />
                 </div>
                 <div>
-                  Frequency
+                  <FieldLabel required={true}>Frequency</FieldLabel>
                   <SelectMenuV2
                     placeholder="Frequency"
                     options={frequency}
@@ -162,7 +163,7 @@ export default function PrescriptionBuilder(
                     )}
                     showIconWhenSelected={false}
                     required={false}
-                    className="mt-[2px] w-[150px]"
+                    className="mt-[6px] w-[150px]"
                   />
                 </div>
               </div>
@@ -170,11 +171,11 @@ export default function PrescriptionBuilder(
             <div className="flex gap-2 mt-2 flex-col md:flex-row">
               <div className="w-full md:w-[260px] flex gap-2 shrink-0">
                 <div>
-                  Dosage
+                  <FieldLabel required={false}>Dosage</FieldLabel>
                   <div className="flex gap-1">
                     <input
                       type="number"
-                      className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                      className="cui-input-base py-0"
                       value={prescription.dosage_new?.split(" ")[0]}
                       placeholder="Dosage"
                       min={0}
@@ -208,10 +209,10 @@ export default function PrescriptionBuilder(
                 </div>
 
                 <div className="w-[70px] shrink-0">
-                  Days
+                  <FieldLabel required={false}>Days</FieldLabel>
                   <input
                     type="number"
-                    className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                    className="cui-input-base py-2"
                     value={prescription.days}
                     placeholder="Days"
                     min={0}
@@ -234,10 +235,10 @@ export default function PrescriptionBuilder(
               </div>
 
               <div className="w-full">
-                Notes
+                <FieldLabel required={false}>Notes</FieldLabel>
                 <input
                   type="text"
-                  className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                  className="cui-input-base py-2"
                   value={prescription.notes}
                   placeholder="Notes"
                   onChange={(e) => {
@@ -254,7 +255,7 @@ export default function PrescriptionBuilder(
 
               <button
                 type="button"
-                className="text-gray-400 text-base transition hover:text-red-500"
+                className="text-gray-400 text-base transition hover:text-red-500 mt-6"
                 onClick={() => {
                   setPrescriptions(
                     prescriptions.filter((prescription, index) => i != index)

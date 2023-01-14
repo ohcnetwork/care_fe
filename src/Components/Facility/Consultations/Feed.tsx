@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
@@ -18,6 +17,7 @@ import {
   getConsultation,
   listAssetBeds,
   partialUpdateAssetBed,
+  getPermittedFacility,
 } from "../../../Redux/actions";
 import Loading from "../../Common/Loading";
 import { ConsultationModel } from "../models";
@@ -28,6 +28,7 @@ import FeedButton from "./FeedButton";
 import ReactPlayer from "react-player";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import { findDOMNode } from "react-dom";
+import { classNames } from "../../../Utils/utils";
 
 interface IFeedProps {
   facilityId: string;
@@ -36,7 +37,7 @@ interface IFeedProps {
 }
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
-export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
+export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
@@ -51,8 +52,19 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
-
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
+
+  useEffect(() => {
+    const fetchFacility = async () => {
+      const res = await dispatch(getPermittedFacility(facilityId));
+
+      if (res.status === 200 && res.data) {
+        setCameraMiddlewareHostname(res.data.middleware_address);
+      }
+    };
+
+    if (facilityId) fetchFacility();
+  }, [dispatch, facilityId]);
 
   useEffect(() => {
     if (cameraState) {
@@ -105,14 +117,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           };
 
           if (bedAssets?.data?.results?.length) {
-            const { camera_access_key, middleware_hostname } =
+            const { camera_access_key } =
               bedAssets.data.results[0].asset_object.meta;
             const config = camera_access_key.split(":");
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
               accessKey: config[2] || "",
             });
-            setCameraMiddlewareHostname(middleware_hostname);
             setCameraConfig(bedAssets.data.results[0].meta);
             setCameraState({
               ...bedAssets.data.results[0].meta.position,
@@ -296,7 +307,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     updatePreset: (option) => {
       getCameraStatus({
-        onSuccess: async ({ data }) => {
+        onSuccess: async (data) => {
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
             const response = await dispatch(
@@ -378,7 +389,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   });
                   getCameraStatus({});
                 }}
-                className={clsx(
+                className={classNames(
                   "px-4 py-2 border border-gray-500 block",
                   currentPreset === preset
                     ? "bg-primary-500 border-primary-500 text-white rounded"

@@ -21,15 +21,16 @@ import CloseIcon from "@material-ui/icons/Close";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
-import classNames from "classnames";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
-import clsx from "clsx";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
+import { classNames } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -229,11 +230,10 @@ export default function ManageUsers() {
     });
   };
 
-  const facilityClassname = classNames({
-    "align-baseline font-bold text-sm": true,
-    "text-blue-500 hover:text-blue-800": !isFacilityLoading,
-    "text-gray-500": isFacilityLoading,
-  });
+  const facilityClassname = classNames(
+    "align-baseline font-bold text-sm",
+    isFacilityLoading ? "text-gray-500" : "text-blue-500 hover:text-blue-800"
+  );
 
   const showLinkFacility = (username: string) => {
     return (
@@ -264,39 +264,52 @@ export default function ManageUsers() {
       );
     }
     return (
-      <div className="sm:col-start-2 col-span-full sm:col-span-3">
-        <div className="mb-2">
-          {facilities.map((facility, i) => (
-            <div
-              key={`facility_${i}`}
-              className="border-2 font-gbold inline-block rounded-md pl-3 py-1 mr-3 mt-2"
-            >
-              <div className="flex items-center  space-x-1">
-                <div className="font-semibold">{facility.name}</div>
-                <i
-                  className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
-                  onClick={() => updateHomeFacility(username, facility)}
-                ></i>
-                <IconButton
-                  size="small"
-                  color="secondary"
-                  disabled={isFacilityLoading}
-                  onClick={() =>
-                    setUnlinkFacilityData({
-                      show: true,
-                      facility: facility,
-                      userName: username,
-                    })
-                  }
-                >
-                  <CloseIcon />
-                </IconButton>
+      <div>
+        <div className="sm:col-start-2 col-span-full sm:col-span-3 max-h-48 overflow-scroll mb-2">
+          <div className="mb-2">
+            {facilities.map((facility, i) => (
+              <div
+                key={`facility_${i}`}
+                className="border-2 font-gbold inline-block rounded-md pl-3 py-1 mr-3 mt-2"
+              >
+                <div className="flex items-center  space-x-1">
+                  <div className="font-semibold">{facility.name}</div>
+                  <i
+                    className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
+                    onClick={() => updateHomeFacility(username, facility)}
+                  ></i>
+                  <IconButton
+                    size="small"
+                    color="secondary"
+                    disabled={isFacilityLoading}
+                    onClick={() =>
+                      setUnlinkFacilityData({
+                        show: true,
+                        facility: facility,
+                        userName: username,
+                      })
+                    }
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
         {showLinkFacility(username)}
       </div>
+    );
+  };
+
+  const hideFacilities = (username: string) => {
+    setUsers(
+      users.filter((user) => {
+        if (user.username === username) {
+          user.facilities = null;
+        }
+        return user;
+      })
     );
   };
 
@@ -372,7 +385,7 @@ export default function ManageUsers() {
                         </span>
                         <span
                           aria-label="Online"
-                          className={clsx(
+                          className={classNames(
                             "shrink-0 inline-block h-2 w-2 rounded-full",
                             cur_online ? "bg-primary-400" : "bg-gray-300"
                           )}
@@ -482,21 +495,39 @@ export default function ManageUsers() {
                       </UserDetails>
                     </div>
                   )}
-                  {user.username && user.facilities && (
+                  {user.username && (
                     <div className="col-span-4">
-                      <UserDetails title="Linked Facilities">
-                        {showFacilities(user.username, user.facilities)}
-                      </UserDetails>
+                      <div className="flex text-gray-800">
+                        <p className="flex items-center">Linked Facilities: </p>
+                        <ButtonV2
+                          ghost
+                          circle
+                          variant="secondary"
+                          className="tooltip flex items-center"
+                          onClick={() => {
+                            if (!user.facilities) {
+                              loadFacilities(user.username);
+                            } else {
+                              hideFacilities(user.username);
+                            }
+                          }}
+                        >
+                          <CareIcon
+                            className={`${
+                              !user.facilities
+                                ? "care-l-eye"
+                                : "care-l-eye-slash"
+                            } text-xl`}
+                          />
+                          <span className="tooltip-text tooltip-bottom">
+                            {!user.facilities ? "View" : "Hide"} Linked
+                            Facilities
+                          </span>
+                        </ButtonV2>
+                      </div>
+                      {user.facilities &&
+                        showFacilities(user.username, user.facilities)}
                     </div>
-                  )}
-                  {user.username && !user.facilities && (
-                    <a
-                      onClick={() => loadFacilities(user.username)}
-                      className={`col-span-4 mt-2 ${facilityClassname}`}
-                      href="#"
-                    >
-                      Click here to show linked facilities
-                    </a>
                   )}
                 </div>
               </div>

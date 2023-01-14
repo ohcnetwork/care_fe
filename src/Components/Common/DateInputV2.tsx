@@ -9,9 +9,10 @@ import {
   getDaysInMonth,
   getDay,
 } from "date-fns";
-import clsx from "clsx";
 import { DropdownTransition } from "./components/HelperComponents";
 import { Popover } from "@headlessui/react";
+import { classNames } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
@@ -19,6 +20,8 @@ export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
 interface Props {
   className?: string;
   value: Date | undefined;
+  min?: Date;
+  max?: Date;
   onChange: (date: Date) => void;
   position?: DatePickerPosition;
   disabled?: boolean;
@@ -30,6 +33,8 @@ const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const DateInputV2: React.FC<Props> = ({
   className,
   value,
+  min,
+  max,
   onChange,
   position,
   disabled,
@@ -81,13 +86,14 @@ const DateInputV2: React.FC<Props> = ({
   };
 
   const setDateValue = (date: number) => () => {
-    onChange(
-      new Date(
-        datePickerHeaderDate.getFullYear(),
-        datePickerHeaderDate.getMonth(),
-        date
-      )
-    );
+    isDateWithinConstraints(date) &&
+      onChange(
+        new Date(
+          datePickerHeaderDate.getFullYear(),
+          datePickerHeaderDate.getMonth(),
+          date
+        )
+      );
   };
 
   const getDayCount = (date: Date) => {
@@ -106,6 +112,24 @@ const DateInputV2: React.FC<Props> = ({
 
     setBlankDays(blankDaysArray);
     setDayCount(daysArray);
+  };
+
+  const getLastDay = (
+    year = datePickerHeaderDate.getFullYear(),
+    month = datePickerHeaderDate.getMonth()
+  ) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const isDateWithinConstraints = (
+    day = datePickerHeaderDate.getDate(),
+    month = datePickerHeaderDate.getMonth(),
+    year = datePickerHeaderDate.getFullYear()
+  ) => {
+    const date = new Date(year, month, day);
+    if (min) if (date < min) return false;
+    if (max) if (date > max) return false;
+    return true;
   };
 
   const isSelectedMonth = (month: number) =>
@@ -158,50 +182,52 @@ const DateInputV2: React.FC<Props> = ({
   };
 
   return (
-    <div className={disabled ? "pointer-events-none opacity-0.8" : ""}>
+    <div>
       <div className="container mx-auto text-black">
         <Popover className="relative">
-          <Popover.Button className="w-full">
+          <Popover.Button disabled={disabled} className="w-full">
             <input type="hidden" name="date" />
             <input
               type="text"
               readOnly
-              className={`text-sm block py-3 px-4 w-full rounded placeholder:text-gray-500 focus:bg-white border-2 focus:border-primary-400 outline-none !ring-0 transition-all duration-200 ease-in-out ${className}`}
-              placeholder={placeholder ? placeholder : "Select date"}
+              disabled={disabled}
+              className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
+              placeholder={placeholder || "Select date"}
               value={value && format(value, "yyyy-MM-dd")}
             />
-            <div className="cursor-pointer absolute top-1/2 right-0 p-2 -translate-y-1/2">
-              <i className="fa-regular fa-calendar text-slate-500"></i>
+            <div className="absolute top-1/2 right-0 p-2 -translate-y-1/2">
+              <CareIcon className="care-l-calendar-alt text-lg text-gray-600" />
             </div>
           </Popover.Button>
           <DropdownTransition>
             <Popover.Panel
-              className={clsx(
-                "z-10 w-72 bg-white border border-slate-300 rounded-lg shadow p-4 absolute top-[110%]",
+              className={classNames(
+                "cui-dropdown-base divide-y-0 w-72 p-4 absolute mt-0.5",
                 getPosition()
               )}
             >
               <div className="flex justify-between items-center w-full mb-4">
                 <button
                   type="button"
-                  className="transition ease-in-out duration-100 p-2 rounded inline-flex items-center justify-center aspect-square cursor-pointer  hover:bg-slate-200"
+                  disabled={!isDateWithinConstraints()}
+                  className="transition ease-in-out duration-100 p-2 rounded inline-flex items-center justify-center aspect-square cursor-pointer hover:bg-gray-300"
                   onClick={decrement}
                 >
-                  <i className="fa fa-arrow-left" />
+                  <CareIcon className="care-l-angle-left-b text-lg" />
                 </button>
 
                 <div className="flex items-center justify-center text-sm">
                   {type === "date" && (
                     <div
                       onClick={showMonthPicker}
-                      className="py-1 px-3 font-bold text-slate-900 text-center cursor-pointer hover:bg-slate-200 rounded"
+                      className="py-1 px-3 font-medium text-black text-center cursor-pointer hover:bg-gray-300 rounded"
                     >
                       {format(datePickerHeaderDate, "MMMM")}
                     </div>
                   )}
                   <div
                     onClick={showYearPicker}
-                    className="py-1 px-3 font-bold text-gray-900 cursor-pointer hover:bg-slate-200 rounded"
+                    className="py-1 px-3 font-medium text-black cursor-pointer hover:bg-gray-300 rounded"
                   >
                     <p className="text-center">
                       {type == "year"
@@ -213,21 +239,22 @@ const DateInputV2: React.FC<Props> = ({
                 <button
                   type="button"
                   disabled={
-                    type === "year" &&
-                    new Date().getFullYear() === year.getFullYear()
+                    (type === "year" &&
+                      new Date().getFullYear() === year.getFullYear()) ||
+                    !isDateWithinConstraints(getLastDay())
                   }
-                  className="transition ease-in-out duration-100 h-full p-2 rounded inline-flex items-center justify-center aspect-square cursor-pointer hover:bg-slate-200"
+                  className="transition ease-in-out duration-100 p-2 rounded inline-flex items-center justify-center aspect-square cursor-pointer hover:bg-gray-300"
                   onClick={increment}
                 >
-                  <i className="fa fa-arrow-right" />
+                  <CareIcon className="care-l-angle-right-b text-lg" />
                 </button>
               </div>
               {type === "date" && (
                 <>
-                  <div className="flex flex-wrap">
+                  <div className="flex flex-wrap mb-3">
                     {DAYS.map((day) => (
                       <div key={day} className="aspect-square w-[14.26%]">
-                        <div className="text-slate-600 font-medium text-center text-sm">
+                        <div className="text-gray-800 font-medium text-center text-sm">
                           {day}
                         </div>
                       </div>
@@ -244,11 +271,12 @@ const DateInputV2: React.FC<Props> = ({
                       <div key={i} className="aspect-square w-[14.26%]">
                         <div
                           onClick={setDateValue(d)}
-                          className={clsx(
-                            "cursor-pointer flex items-center justify-center text-center h-full text-sm rounded leading-loose transition ease-in-out duration-100 text-slate-900 hover:bg-slate-200",
-                            value &&
-                              isSelectedDate(d) &&
-                              "bg-primary-500 text-slate-100 font-bold"
+                          className={classNames(
+                            "cursor-pointer flex items-center justify-center text-center h-full text-sm rounded leading-loose transition ease-in-out duration-100 text-black",
+                            value && isSelectedDate(d)
+                              ? "bg-primary-500 text-white font-bold"
+                              : "hover:bg-gray-300",
+                            !isDateWithinConstraints(d) && "!text-gray-300"
                           )}
                         >
                           {d}
@@ -265,11 +293,11 @@ const DateInputV2: React.FC<Props> = ({
                     .map((_, i) => (
                       <div
                         key={i}
-                        className={clsx(
-                          "cursor-pointer w-1/4 font-semibold py-4 px-2 text-center text-sm rounded-lg hover:bg-slate-200",
+                        className={classNames(
+                          "cursor-pointer w-1/4 font-semibold py-4 px-2 text-center text-sm rounded-lg",
                           value && isSelectedMonth(i)
                             ? "bg-primary-500 text-white"
-                            : "text-slate-700 hover:bg-primary-600"
+                            : "text-gray-700 hover:bg-gray-300"
                         )}
                         onClick={setMonthValue(i)}
                       >
@@ -294,11 +322,11 @@ const DateInputV2: React.FC<Props> = ({
                       return (
                         <div
                           key={i}
-                          className={clsx(
-                            "cursor-pointer w-1/4 font-semibold py-4 px-2 text-center text-sm rounded-lg hover:bg-slate-200",
+                          className={classNames(
+                            "cursor-pointer w-1/4 font-semibold py-4 px-2 text-center text-sm rounded-lg",
                             value && isSelectedYear(y)
                               ? "bg-primary-500 text-white"
-                              : "text-slate-700 hover:bg-primary-600"
+                              : "text-gray-700 hover:bg-gray-300"
                           )}
                           onClick={setYearValue(y)}
                         >
@@ -318,7 +346,6 @@ const DateInputV2: React.FC<Props> = ({
 
 DateInputV2.defaultProps = {
   position: "CENTER",
-  className: "bg-gray-200 border-gray-200",
 };
 
 export default DateInputV2;

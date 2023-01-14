@@ -1,6 +1,6 @@
-import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "@material-ui/core";
+import { classNames } from "../../../Utils/utils";
 
 export function PrescriptionDropdown(props: {
   options: string[] | number[];
@@ -37,10 +37,7 @@ export function PrescriptionDropdown(props: {
       <input
         type={props.type}
         placeholder={props.placeholder}
-        className={
-          "w-full relative focus:ring-primary-500 focus:border-primary-500 border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white " +
-          (props.className || "")
-        }
+        className={`relative cui-input-base py-2 ${props.className}`}
         onClick={() => setOpen(!open)}
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -49,10 +46,10 @@ export function PrescriptionDropdown(props: {
       />
       <div
         ref={dropRef}
-        className={clsx([
+        className={classNames(
           "absolute z-40 top-[calc(100%+10px)] left-0 w-full rounded-md shadow-lg bg-white max-h-[300px] overflow-auto",
-          { hidden: !open },
-        ])}
+          !open && "hidden"
+        )}
       >
         {options.map((option, i) => {
           return (

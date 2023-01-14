@@ -1,0 +1,13 @@
+{
+    "dashboard_url": "https://dashboard.coronasafe.in",
+    "github_url": "https://github.com/coronasafe",
+    "static_header_logo": "https://cdn.coronasafe.network/header_logo.png",
+    "static_light_logo": "https://cdn.coronasafe.network/light-logo.svg",
+    "static_black_logo": "https://cdn.coronasafe.network/black-logo.svg",
+    "gmaps_api_key": "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
+    "recaptcha_site_key": "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN",
+    "kasp_enabled": false,
+    "kasp_string": "KASP",
+    "kasp_full_string": "Karunya Arogya Suraksha Padhathi",
+    "state_logo": "https://digitalpublicgoods.net/wp-content/themes/dpga/images/logo.svg"
+}

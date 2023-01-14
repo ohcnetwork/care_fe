@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getFacilityUsers } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import { UserModel } from "../Users/models";
+import { UserAssignedModel } from "../Users/models";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -11,7 +11,7 @@ export default function DoctorVideoSlideover(props: {
   setShow: (show: boolean) => void;
 }) {
   const { show, facilityId, setShow } = props;
-  const [doctors, setDoctors] = useState<UserModel[]>([]);
+  const [doctors, setDoctors] = useState<UserAssignedModel[]>([]);
 
   const dispatchAction: any = useDispatch();
   useEffect(() => {
@@ -59,12 +59,25 @@ export default function DoctorVideoSlideover(props: {
           </button>
         </div>
         {[
-          ["Doctors", "Doctor"],
-          ["Staff", "Staff"],
+          {
+            title: "Doctors",
+            user_type: "Doctor",
+            home: true,
+          },
+          {
+            title: "Staff",
+            user_type: "Staff",
+            home: true,
+          },
+          {
+            title: "TeleICU Hub",
+            user_type: "Doctor",
+            home: false,
+          },
         ].map((type, i) => (
           <div key={i} className="mb-4">
             <div>
-              <span className="text-lg font-semibold">{type[0]}</span>
+              <span className="text-lg font-semibold">{type.title}</span>
             </div>
 
             <ul
@@ -73,9 +86,15 @@ export default function DoctorVideoSlideover(props: {
               role="listbox"
             >
               {doctors
-                .filter((doc) => doc.user_type === type[1])
+                .filter((doc) => {
+                  const isHomeUser =
+                    (doc.home_facility_object?.id || "") === facilityId;
+                  return (
+                    doc.user_type === type.user_type && isHomeUser === type.home
+                  );
+                })
                 .map((doctor) => {
-                  return <UserListItem user={doctor} />;
+                  return <UserListItem key={doctor.id} user={doctor} />;
                 })}
             </ul>
           </div>
@@ -85,7 +104,7 @@ export default function DoctorVideoSlideover(props: {
   );
 }
 
-function UserListItem(props: { user: UserModel }) {
+function UserListItem(props: { user: UserAssignedModel }) {
   const user = props.user;
   const icon =
     user.user_type === "Doctor" ? "fa-user-doctor " : " fa-user-nurse";

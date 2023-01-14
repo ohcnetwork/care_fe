@@ -5,10 +5,8 @@ import {
   TextInputField,
   MultilineInputField,
   ErrorHelperText,
-  PhoneNumberField,
   SelectField,
 } from "../Common/HelperInputFields";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
@@ -25,12 +23,14 @@ import {
   RadioGroup,
   Box,
   FormControlLabel,
-  Button,
 } from "@material-ui/core";
 import { phonePreg } from "../../Common/validation";
 
 import { createResource, getAnyFacility } from "../../Redux/actions";
 import { goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -130,12 +130,12 @@ export default function ResourceCreate(props: resourceProps) {
   }, [dispatchAction, facilityId]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
+      const phoneNumber = parsePhoneNumberFromString(state.form[field]);
       switch (field) {
         case "refering_facility_contact_number":
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
@@ -172,7 +172,14 @@ export default function ResourceCreate(props: resourceProps) {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [event.name]: event.value },
+    });
+  };
+
+  const handleSubmit = async () => {
     const validForm = validateForm();
 
     if (validForm) {
@@ -241,14 +248,14 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div>
-                <PhoneNumberField
-                  label="Contact person phone*"
-                  onlyIndia={true}
+                <PhoneNumberFormField
+                  label="Contact person phone"
+                  name="refering_facility_contact_number"
+                  required
+                  onlyIndia
                   value={state.form.refering_facility_contact_number}
-                  onChange={(value: any) =>
-                    handleValueChange(value, "refering_facility_contact_number")
-                  }
-                  errors={state.errors.refering_facility_contact_number}
+                  onChange={handleFormFieldChange}
+                  error={state.errors.refering_facility_contact_number}
                 />
               </div>
 
@@ -366,29 +373,8 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  className="w-full md:w-auto"
-                  fullWidth
-                  onClick={() => goBack()}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  fullWidth
-                  className="w-full md:w-auto"
-                  style={{ marginLeft: "auto" }}
-                  onClick={(e) => handleSubmit(e)}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
-                >
-                  Submit
-                </Button>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} />
               </div>
             </div>
           </CardContent>

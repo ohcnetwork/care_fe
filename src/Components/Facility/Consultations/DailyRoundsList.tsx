@@ -9,23 +9,21 @@ import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
 import { formatDate } from "../../../Utils/utils";
 import { PatientCategory } from "../models";
-import { PatientCategoryTailwindClass } from "../../../Common/constants";
+import { PATIENT_CATEGORIES } from "../../../Common/constants";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
-export type PatientCategoryBadgeProps = {
-  category?: PatientCategory;
-};
-
-export const PatientCategoryBadge = ({
-  category,
-}: PatientCategoryBadgeProps) => {
-  const categoryClass = PatientCategoryTailwindClass[category || "unknown"];
+export const PatientCategoryBadge = (props: { category?: PatientCategory }) => {
+  const categoryClass = props.category
+    ? PATIENT_CATEGORIES.find((c) => c.text === props.category)?.twClass
+    : "patient-unknown";
   return (
     <span
       className={`px-2 py-1 text-sm rounded-full ${categoryClass} font-medium`}
     >
-      {category}
+      {props.category}
     </span>
   );
 };
@@ -116,7 +114,7 @@ export const DailyRoundsList = (props: any) => {
           <div
             className={`block border rounded-lg ${
               telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
-            } shadow cursor-pointer`}
+            } shadow`}
           >
             <div className="p-2">
               <Grid container justify="space-between" alignItems="center">
@@ -201,34 +199,41 @@ export const DailyRoundsList = (props: any) => {
                 </Grid>
               </Grid>
               <div className="mt-2 flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-2">
-                <button
-                  className="btn btn-default"
+                <ButtonV2
+                  variant="secondary"
+                  border
+                  ghost
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}`
                     )
                   }
                 >
-                  <i className="fas fa-eye mr-2" />
-                  View Details
-                </button>
-                <button
-                  className="btn btn-default"
-                  onClick={() => {
-                    if (itemData.rounds_type === "NORMAL") {
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
-                      );
-                    } else {
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
-                      );
-                    }
-                  }}
-                >
-                  <i className="fas fa-pencil-alt mr-2" />
-                  Update Log
-                </button>
+                  <CareIcon className="care-l-eye text-lg" />
+                  <span>View Details</span>
+                </ButtonV2>
+                {!consultationData.discharge_reason && (
+                  <ButtonV2
+                    variant="secondary"
+                    border
+                    ghost
+                    className="tooltip"
+                    onClick={() => {
+                      if (itemData.rounds_type === "NORMAL") {
+                        navigate(
+                          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
+                        );
+                      } else {
+                        navigate(
+                          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
+                        );
+                      }
+                    }}
+                  >
+                    <CareIcon className="care-l-pen text-lg" />
+                    <span>Update Log</span>
+                  </ButtonV2>
+                )}
               </div>
             </div>
           </div>

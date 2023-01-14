@@ -1,13 +1,14 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
-import { Dialog, Transition } from "@headlessui/react";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import useConfig from "../../../Common/hooks/useConfig";
+import SlideOver from "../../../CAREUI/interactive/SlideOver";
+import { classNames } from "../../../Utils/utils";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
-
-const DASHBOARD = process.env.REACT_APP_DASHBOARD_URL ?? "";
 
 const LOGO = process.env.REACT_APP_LIGHT_LOGO;
 const LOGO_COLLAPSE =
@@ -18,46 +19,41 @@ type StatelessSidebarProps =
       shrinkable: true;
       shrinked: boolean;
       setShrinked: (state: boolean) => void;
+      onItemClick?: undefined;
     }
   | {
       shrinkable?: false;
       shrinked?: false;
       setShrinked?: undefined;
+      onItemClick: (open: boolean) => void;
     };
 
-// Sidebar item icons.
-const Facility = () => <i className="uil uil-hospital" />;
-const Patient = () => <i className="uil uil-wheelchair" />;
-const Asset = () => <i className="uil uil-shopping-cart-alt" />;
-const SampleTest = () => <i className="uil uil-medkit" />;
-const Shifting = () => <i className="uil uil-ambulance" />;
-const Resource = () => <i className="uil uil-heart-medical" />;
-const Result = () => <i className="uil uil-clipboard-notes" />;
-const Users = () => <i className="uil uil-users-alt" />;
-const NoticeBoard = () => <i className="uil uil-meeting-board" />;
-const Dashboard = () => <i className="uil uil-dashboard" />;
-const LiveMonitoring = () => <i className="uil uil-video" />;
-
 const NavItems = [
-  { text: "Facilities", to: "/facility", icon: <Facility /> },
-  { text: "Patients", to: "/patients", icon: <Patient /> },
-  { text: "Assets", to: "/assets", icon: <Asset /> },
-  { text: "Sample Test", to: "/sample", icon: <SampleTest /> },
-  { text: "Shifting", to: "/shifting", icon: <Shifting /> },
-  { text: "Resource", to: "/resource", icon: <Resource /> },
-  { text: "External Results", to: "/external_results", icon: <Result /> },
-  { text: "Users", to: "/users", icon: <Users /> },
-  { text: "Notice Board", to: "/notice_board", icon: <NoticeBoard /> },
-  { text: "Live Monitoring", to: "/live_monitoring", icon: <LiveMonitoring /> },
+  { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
+  { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
+  { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
+  { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
+  { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
+  { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
+  {
+    text: "External Results",
+    to: "/external_results",
+    icon: "care-l-clipboard-notes",
+  },
+  { text: "Users", to: "/users", icon: "care-l-users-alt" },
+  { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
+   { text: "Live Monitoring", to: "/live_monitoring", icon: <LiveMonitoring /> },
 ];
 
 const StatelessSidebar = ({
   shrinkable = false,
   shrinked = false,
   setShrinked,
+  onItemClick,
 }: StatelessSidebarProps) => {
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
+  const { dashboard_url } = useConfig();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
@@ -74,21 +70,23 @@ const StatelessSidebar = ({
       const bottomItemOffset = 2;
 
       const indexDifference = index - lastIndicatorPosition;
-      e.style.display = "block";
+      // e.style.display = "block";
 
-      if (indexDifference > 0) {
-        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
-        e.style.bottom = "auto";
-      } else {
-        e.style.bottom =
-          itemHeight * (NavItems.length + bottomItemOffset) -
-          lastIndicatorPosition * itemHeight -
-          28 +
-          "px";
-        e.style.top = "auto";
-      }
+      // if (indexDifference > 0) {
+      //   console.log("indexDifference > 0");
+      //   e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
+      //   e.style.bottom = "auto";
+      // } else {
+      //   console.log("indexDifference < 0");
+      //   e.style.bottom =
+      //     itemHeight * (NavItems.length + bottomItemOffset) -
+      //     lastIndicatorPosition * itemHeight -
+      //     28 +
+      //     "px";
+      //   e.style.top = "auto";
+      // }
 
-      e.style.height = `${Math.abs(indexDifference) * itemHeight + 12}px`;
+      // e.style.height = `${Math.abs(indexDifference) * itemHeight + 12}px`;
       setTimeout(() => {
         if (!e) return;
         if (indexDifference > 0) {
@@ -105,16 +103,17 @@ const StatelessSidebar = ({
         e.style.height = "0.75rem";
         setLastIndicatorPosition(index);
       }, 300);
-    } else {
-      indicatorRef.current.style.display = "none";
     }
+    // else {
+    //   indicatorRef.current.style.display = "none";
+    // }
   }, [activeLink]);
 
   return (
     <nav
       className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
-      } transition-all duration-300 ease-in-out`}
+      } transition-all duration-300 ease-in-out overflow-y-auto overflow-x-hidden`}
     >
       <div className="h-3" /> {/* flexible spacing */}
       <img
@@ -124,35 +123,57 @@ const StatelessSidebar = ({
         src={shrinked ? LOGO_COLLAPSE : LOGO}
       />
       <div className="h-3" /> {/* flexible spacing */}
-      <div className="flex flex-col relative h-full md:h-auto mb-4 md:mb-0">
-        <div
-          ref={indicatorRef}
-          className={`absolute left-2 w-1 hidden md:block
-            bg-primary-400 rounded z-10 transition-all`}
-        />
-        {NavItems.map((i) => {
-          return <Item key={i.text} {...i} selected={i.to === activeLink} />;
-        })}
-
-        <NotificationItem shrinked={shrinked} />
-        <Item text="Dashboard" to={DASHBOARD} icon={<Dashboard />} external />
-      </div>
-      <div className="flex-1" />
-      <div className="relative flex justify-end">
-        {shrinkable && (
+      <div className="flex flex-col relative h-full mb-4 md:mb-0">
+        <div className="flex flex-col relative flex-1 md:flex-none">
           <div
-            className={`${
-              shrinked ? "mx-auto" : "self-end"
-            } flex self-end h-12 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
-          >
-            <ToggleShrink
-              shrinked={shrinked}
-              toggle={() => setShrinked && setShrinked(!shrinked)}
-            />
-          </div>
-        )}
+            ref={indicatorRef}
+            // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
+            className={classNames(
+              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all duration-200 ease-in-out",
+              activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
+            )}
+          />
+          {NavItems.map((i) => {
+            return (
+              <Item
+                key={i.text}
+                {...i}
+                icon={<CareIcon className={`${i.icon} h-5`} />}
+                selected={i.to === activeLink}
+                do={() => onItemClick && onItemClick(false)}
+              />
+            );
+          })}
+
+          <NotificationItem
+            shrinked={shrinked}
+            onClickCB={() => onItemClick && onItemClick(false)}
+          />
+          <Item
+            text="Dashboard"
+            to={dashboard_url}
+            icon={<CareIcon className="care-l-dashboard text-lg" />}
+            external
+          />
+        </div>
+        <div className="hidden md:block md:flex-1" />
+
+        <div className="relative flex justify-end">
+          {shrinkable && (
+            <div
+              className={`${
+                shrinked ? "mx-auto" : "self-end"
+              } flex self-end h-12 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
+            >
+              <ToggleShrink
+                shrinked={shrinked}
+                toggle={() => setShrinked && setShrinked(!shrinked)}
+              />
+            </div>
+          )}
+        </div>
+        <SidebarUserCard shrinked={shrinked} />
       </div>
-      <SidebarUserCard shrinked={shrinked} />
     </nav>
   );
 };
@@ -183,43 +204,11 @@ interface MobileSidebarProps {
   setOpen: (state: boolean) => void;
 }
 
-export const MobileSidebar = ({ open, setOpen }: MobileSidebarProps) => {
+export const MobileSidebar = (props: MobileSidebarProps) => {
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={setOpen}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-in-out duration-500"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in-out duration-500"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-all" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="pointer-events-none fixed inset-y-0 left-0 flex max-w-full pr-10">
-              <Transition.Child
-                as={Fragment}
-                enter="transform transition ease-out duration-200"
-                enterFrom="-translate-x-full"
-                enterTo="translate-x-0"
-                leave="transform transition ease-in duration-200"
-                leaveFrom="translate-x-0"
-                leaveTo="-translate-x-full"
-              >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-fit">
-                  <StatelessSidebar />
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+    <SlideOver {...props} slideFrom="left" onlyChild>
+      <StatelessSidebar onItemClick={props.setOpen} />
+    </SlideOver>
   );
 };
 
