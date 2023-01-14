@@ -1,13 +1,12 @@
-import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
 import { useState } from "react";
-//@ts-ignore
 import CSVReader from "react-csv-reader";
 import { useDispatch } from "react-redux";
 import { externalResultUploadCsv } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
+// const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ExternalResultUpload() {
   const dispatch: any = useDispatch();
@@ -59,12 +58,7 @@ export default function ExternalResultUpload() {
   };
 
   return (
-    <div className="px-4">
-      <PageTitle
-        title="Upload External Results"
-        backUrl="/external_results"
-        className="mt-4"
-      />
+    <Page title="Upload External Results" backUrl="/external_results">
       <div className="max-w-3xl mx-auto mt-6">
         <div className="py-4">
           <div className="block text-sm leading-5 font-medium text-gray-700 sm:mt-px sm:pt-2">
@@ -139,6 +133,6 @@ export default function ExternalResultUpload() {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 }

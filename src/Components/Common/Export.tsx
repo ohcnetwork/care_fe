@@ -71,7 +71,7 @@ export const ExportButton = ({
       <ButtonV2
         disabled={isExporting || props.disabled}
         onClick={() => exportFile(props.action, props.filenamePrefix, type)}
-        className="mx-2 tooltip p-4 text-lg text-secondary-800 disabled:text-secondary-500 disabled:bg-transparent"
+        className="mx-2 tooltip px-4 text-lg text-secondary-800 disabled:text-secondary-500 disabled:bg-transparent"
         variant="secondary"
         ghost
         circle

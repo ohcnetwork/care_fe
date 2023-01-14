@@ -23,9 +23,10 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { FacilityCard } from "./FacilityCard";
 import ExportMenu from "../Common/Export";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+// const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const HospitalList = () => {
   const {
@@ -209,34 +210,39 @@ export const HospitalList = () => {
   }
 
   return (
-    <div className="px-6">
-      <div className="flex justify-between items-center">
-        <PageTitle title={t("Facilities")} breadcrumbs={false} hideBack />
-        <ExportMenu
-          exportItems={[
-            {
-              label: "Facilities",
-              action: downloadFacility,
-              filePrefix: "facilities",
-            },
-            {
-              label: "Capacities",
-              action: downloadFacilityCapacity,
-              filePrefix: "capacities",
-            },
-            {
-              label: "Doctors",
-              action: downloadFacilityDoctors,
-              filePrefix: "doctors",
-            },
-            {
-              label: "Triages",
-              action: downloadFacilityTriage,
-              filePrefix: "triages",
-            },
-          ]}
-        />
-      </div>
+    <Page
+      title={t("Facilities")}
+      breadcrumbs={false}
+      hideBack
+      options={
+        <>
+          <ExportMenu
+            exportItems={[
+              {
+                label: "Facilities",
+                action: downloadFacility,
+                filePrefix: "facilities",
+              },
+              {
+                label: "Capacities",
+                action: downloadFacilityCapacity,
+                filePrefix: "capacities",
+              },
+              {
+                label: "Doctors",
+                action: downloadFacilityDoctors,
+                filePrefix: "doctors",
+              },
+              {
+                label: "Triages",
+                action: downloadFacilityTriage,
+                filePrefix: "triages",
+              },
+            ]}
+          />
+        </>
+      }
+    >
       <div className="lg:flex gap-2 mt-4">
         <div className="bg-white overflow-hidden shadow rounded-lg md:mr-2 min-w-fit flex-1">
           <div className="px-4 py-5 sm:p-6">
@@ -329,6 +335,6 @@ export const HospitalList = () => {
       <div className="mt-4 pb-4">
         <div>{manageFacilities}</div>
       </div>
-    </div>
+    </Page>
   );
 };

@@ -31,9 +31,9 @@ import useFilters from "../../Common/hooks/useFilters";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ManageUsers() {
   const { width } = useWindowDimensions();
@@ -559,131 +559,131 @@ export default function ManageUsers() {
   }
 
   return (
-    <div>
-      {linkFacility.show && (
-        <LinkFacilityDialog
-          username={linkFacility.username}
-          handleOk={addFacility}
-          handleCancel={hideLinkFacilityModal}
-        />
-      )}
-      <PageTitle
-        title="User Management"
-        hideBack={true}
-        className="mx-5 px-2"
-        breadcrumbs={false}
-      />
+    <Page
+      title="User Management"
+      hideBack={true}
+      // className="mx-5 px-2"
+      breadcrumbs={false}
+    >
+      <>
+        {linkFacility.show && (
+          <LinkFacilityDialog
+            username={linkFacility.username}
+            handleOk={addFacility}
+            handleCancel={hideLinkFacilityModal}
+          />
+        )}
 
-      <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-2">
-        <div className="bg-white overflow-hidden shadow col-span-1 rounded-lg">
-          <div className="p-5 w-fit sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Users
-              </dt>
-              {/* Show spinner until count is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl lg:text-5xl md:text-4xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
+        <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3">
+          <div className="bg-white overflow-hidden shadow col-span-1 rounded-lg">
+            <div className="p-5 w-fit sm:p-6">
+              <dl>
+                <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
+                  Total Users
+                </dt>
+                {/* Show spinner until count is fetched from server */}
+                {isLoading ? (
+                  <dd className="mt-4 text-5xl leading-9">
+                    <CircularProgress className="text-primary-500" />
+                  </dd>
+                ) : (
+                  <dd className="mt-4 text-5xl lg:text-5xl md:text-4xl leading-9 font-semibold text-gray-900">
+                    {totalCount}
+                  </dd>
+                )}
+              </dl>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col lg:flex-row justify-between col-span-2 lg:px-3 space-y-3 lg:space-y-0 lg:space-x-4 my-2">
-          <div className="w-full">
-            <SearchInput
-              name="username"
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              value={qParams.username}
-              placeholder="Search by username"
-            />
-          </div>
+          <div className="flex flex-col lg:flex-row justify-between col-span-2 lg:px-3 space-y-3 lg:space-y-0 lg:space-x-4 my-2">
+            <div className="w-full">
+              <SearchInput
+                name="username"
+                onChange={(e) => updateQuery({ [e.name]: e.value })}
+                value={qParams.username}
+                placeholder="Search by username"
+              />
+            </div>
 
-          <div>
-            <div className="flex items-start mb-2">
-              <button
-                className="btn btn-primary-ghost w-full"
-                onClick={() => advancedFilter.setShow(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
+            <div>
+              <div className="flex items-start mb-2">
+                <button
+                  className="btn btn-primary-ghost w-full"
+                  onClick={() => advancedFilter.setShow(true)}
                 >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="fill-current w-4 h-4 mr-2"
+                  >
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12">
+                      {" "}
+                    </line>
+                    <line x1="8" y1="18" x2="21" y2="18">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="6" x2="3.01" y2="6">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="12" x2="3.01" y2="12">
+                      {" "}
+                    </line>
+                    <line x1="3" y1="18" x2="3.01" y2="18">
+                      {" "}
+                    </line>
+                  </svg>
+                  <span>Advanced Filters</span>
+                </button>
+              </div>
             </div>
+
+            <SlideOver {...advancedFilter}>
+              <div className="bg-white min-h-screen p-4">
+                <UserFilter {...advancedFilter} />
+              </div>
+            </SlideOver>
           </div>
-
-          <SlideOver {...advancedFilter}>
-            <div className="bg-white min-h-screen p-4">
-              <UserFilter {...advancedFilter} />
-            </div>
-          </SlideOver>
         </div>
-      </div>
 
-      <div className="pl-6 pb-2">
-        <FilterBadges
-          badges={({ badge, value, phoneNumber }) => [
-            badge("Username", "username"),
-            badge("First Name", "first_name"),
-            badge("Last Name", "last_name"),
-            phoneNumber(),
-            phoneNumber("WhatsApp no.", "alt_phone_number"),
-            badge("Role", "user_type"),
-            value("District", "district_id", districtName || ""),
-          ]}
-        />
-      </div>
+        <div className="pl-6 pb-2">
+          <FilterBadges
+            badges={({ badge, value, phoneNumber }) => [
+              badge("Username", "username"),
+              badge("First Name", "first_name"),
+              badge("Last Name", "last_name"),
+              phoneNumber(),
+              phoneNumber("WhatsApp no.", "alt_phone_number"),
+              badge("Role", "user_type"),
+              value("District", "district_id", districtName || ""),
+            ]}
+          />
+        </div>
 
-      <div className="px-3 md:px-6">
         <div>{manageUsers}</div>
-      </div>
-      {userData.show && (
-        <UserDeleteDialog
-          name={userData.name}
-          handleCancel={handleCancel}
-          handleOk={handleSubmit}
-        />
-      )}
-      {unlinkFacilityData.show && (
-        <UnlinkFacilityDialog
-          facilityName={unlinkFacilityData.facility?.name || ""}
-          userName={unlinkFacilityData.userName}
-          handleCancel={hideUnlinkFacilityModal}
-          handleOk={handleUnlinkFacilitySubmit}
-        />
-      )}
-    </div>
+
+        {userData.show && (
+          <UserDeleteDialog
+            name={userData.name}
+            handleCancel={handleCancel}
+            handleOk={handleSubmit}
+          />
+        )}
+        {unlinkFacilityData.show && (
+          <UnlinkFacilityDialog
+            facilityName={unlinkFacilityData.facility?.name || ""}
+            userName={unlinkFacilityData.userName}
+            handleCancel={hideUnlinkFacilityModal}
+            handleOk={handleUnlinkFacilitySubmit}
+          />
+        )}
+      </>
+    </Page>
   );
 }

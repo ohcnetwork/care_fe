@@ -3,12 +3,12 @@ import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import { classNames, goBack } from "../../Utils/utils";
 
-interface PageTitleProps {
+export interface PageTitleProps {
   title: string;
   hideBack?: boolean;
   backUrl?: string;
   backButtonCB?: () => number | void;
-  className?: string;
+  // className?: string;
   componentRight?: React.ReactNode;
   justifyContents?:
     | "justify-center"
@@ -27,7 +27,7 @@ export default function PageTitle({
   hideBack = false,
   backUrl,
   backButtonCB,
-  className = "",
+  // className = "",
   componentRight = <></>,
   breadcrumbs = true,
   crumbsReplacements = {},
@@ -46,13 +46,13 @@ export default function PageTitle({
     backButtonCB ? goBack(backButtonCB()) : goBack(backUrl);
 
   return (
-    <div ref={divRef} className={`pt-4 mb-4 ${className}`}>
+    <div ref={divRef}>
       <PageHeadTitle title={title} />
       <div className={classNames("flex items-center", justifyContents)}>
         <div className="flex items-center">
           {!hideBack && (
             <button onClick={onBackButtonClick}>
-              <i className="fas fa-chevron-left text-2xl rounded-md p-2 hover:bg-gray-200 mr-1">
+              <i className="fas fa-chevron-left text-base rounded-md p-2 hover:bg-gray-300 mr-1">
                 {" "}
               </i>
             </button>
