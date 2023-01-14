@@ -41,7 +41,6 @@ import { TextInputField } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
 import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
-import { formatDate } from "../../Utils/utils";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
@@ -60,12 +59,13 @@ import PrescriptionBuilder, {
 import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import { formatDate } from "../../Utils/utils";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
   discharge_date: string;
-  death_datetime: string;
-  death_confirmed_doctor: string;
+  death_datetime: string | null;
+  death_confirmed_doctor: string | null;
 }
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -78,7 +78,6 @@ export const ConsultationDetails = (props: any) => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
-  const [doctor, setDoctor] = useState("");
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
 
@@ -102,8 +101,8 @@ export const ConsultationDetails = (props: any) => {
       discharge_reason: "",
       discharge_notes: "",
       discharge_date: "",
-      death_datetime: "",
-      death_confirmed_doctor: "",
+      death_datetime: null,
+      death_confirmed_doctor: null,
     });
 
   const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
@@ -227,7 +226,9 @@ export const ConsultationDetails = (props: any) => {
     }
   };
 
-  const handleDischargeSummaryFormChange = (e: any) => {
+  const handleDischargeSummaryFormChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
     const { value } = e.target;
 
     const errorField = Object.assign({}, errors);
@@ -343,11 +344,9 @@ export const ConsultationDetails = (props: any) => {
       <div className="text-sm w-full">
         <p className="font-semibold leading-relaxed">{label}</p>
 
-        {diagnoses
-          .slice(0, !showMore ? nshow : undefined)
-          .map((diagnosis: any) => (
-            <p>{diagnosis.label}</p>
-          ))}
+        {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) => (
+          <p>{diagnosis.label}</p>
+        ))}
         {diagnoses.length > nshow && (
           <>
             {!showMore ? (
@@ -445,6 +444,7 @@ export const ConsultationDetails = (props: any) => {
         }
         show={openDischargeDialog}
         onClose={handleDischargeClose}
+        className="md:max-w-2xl"
       >
         <div className="mt-6 flex flex-col">
           <SelectFormField
@@ -494,18 +494,18 @@ export const ConsultationDetails = (props: any) => {
                 required
                 onChange={handleDateChange}
               />
-              <div>
-                <FieldLabel>Prescription Medication</FieldLabel>
-                <PrescriptionBuilder
-                  prescriptions={dischargeAdvice}
-                  setPrescriptions={setDischargeAdvice}
-                />
-              </div>
-              <div>
-                <FieldLabel>PRN Prescription</FieldLabel>
+              <FieldLabel>Discharge Prescription</FieldLabel>
+              <div className="">
                 <PRNPrescriptionBuilder
                   prescriptions={PRNAdvice}
                   setPrescriptions={setPRNAdvice}
+                />
+              </div>
+              <div>
+                <FieldLabel>Description Advice</FieldLabel>
+                <PrescriptionBuilder
+                  prescriptions={dischargeAdvice}
+                  setPrescriptions={setDischargeAdvice}
                 />
               </div>
             </div>
@@ -535,8 +535,15 @@ export const ConsultationDetails = (props: any) => {
               <TextFormField
                 name="death_confirmed_by"
                 label="Confirmed By"
-                value={doctor}
-                onChange={(e) => setDoctor(e.value)}
+                value={preDischargeForm.death_confirmed_doctor || ""}
+                onChange={(e) => {
+                  setPreDischargeForm((form) => {
+                    return {
+                      ...form,
+                      death_confirmed_doctor: e.value,
+                    };
+                  });
+                }}
                 required
                 placeholder="Attending Doctor's Name and Designation"
               />
@@ -544,7 +551,7 @@ export const ConsultationDetails = (props: any) => {
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row gap-2 md:justify-end">
+        <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
           <Cancel onClick={handleDischargeClose} />
           {isSendingDischargeApi ? (
             <CircularProgress size={20} />
