@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getDistrict } from "../../Redux/actions";
-import { PhoneNumberField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import parsePhoneNumberFromString from "libphonenumber-js";
@@ -12,6 +11,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import { USER_TYPE_OPTIONS } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useMergeState from "../../Common/hooks/useMergeState";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
@@ -146,33 +146,23 @@ export default function UserFilter(props: any) {
 
         <div className="flex flex-wrap">
           <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Phone Number</FieldLabel>
-            <div className="flex justify-between">
-              <div className="w-full">
-                <PhoneNumberField
-                  placeholder="Phone Number"
-                  value={filterState.phone_number}
-                  onChange={(value: string) => {
-                    handleChange({ name: "phone_number", value });
-                  }}
-                />
-              </div>
-            </div>
+            <PhoneNumberFormField
+              label="Phone Number"
+              name="phone_number"
+              placeholder="Phone Number"
+              value={filterState.phone_number}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="w-full flex-none -mt-2">
-            <FieldLabel className="text-sm">Whatsapp Number</FieldLabel>
-            <div className="flex justify-between">
-              <div className="w-full">
-                <PhoneNumberField
-                  placeholder="WhatsApp Phone Number"
-                  value={filterState.alt_phone_number}
-                  onChange={(value: string) => {
-                    handleChange({ name: "alt_phone_number", value });
-                  }}
-                />
-              </div>
-            </div>
+            <PhoneNumberFormField
+              label="Whatsapp Number"
+              name="alt_phone_number"
+              placeholder="WhatsApp Phone Number"
+              value={filterState.alt_phone_number}
+              onChange={handleChange}
+            />
           </div>
         </div>
       </div>

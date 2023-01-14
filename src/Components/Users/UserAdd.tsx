@@ -30,7 +30,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   DateInputField,
-  PhoneNumberField,
   SelectField,
   TextInputField,
   CheckboxField,
@@ -39,6 +38,7 @@ import { FacilityModel } from "../Facility/models";
 
 import { classNames, goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -649,15 +649,17 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <PhoneNumberField
+                <PhoneNumberFormField
                   placeholder="Phone Number"
-                  label="Phone Number*"
+                  label="Phone Number"
+                  name="phone_number"
+                  required
                   value={state.form.phone_number}
-                  onChange={(value: any) =>
-                    handleValueChange(value, "phone_number")
+                  onChange={(event) =>
+                    handleValueChange(event.value, event.name)
                   }
-                  errors={state.errors.phone_number}
-                  onlyIndia={true}
+                  error={state.errors.phone_number}
+                  onlyIndia
                 />
                 <CheckboxField
                   checked={phoneIsWhatsApp}
@@ -671,16 +673,17 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <PhoneNumberField
+                <PhoneNumberFormField
                   placeholder="WhatsApp Phone Number"
                   label="Whatsapp Number"
+                  name="alt_phone_number"
                   value={state.form.alt_phone_number}
-                  onChange={(value: any) =>
-                    handleValueChange(value, "alt_phone_number")
+                  onChange={(event) =>
+                    handleValueChange(event.value, event.name)
                   }
                   disabled={phoneIsWhatsApp}
-                  errors={state.errors.alt_phone_number}
-                  onlyIndia={true}
+                  error={state.errors.alt_phone_number}
+                  onlyIndia
                 />
               </div>
 
