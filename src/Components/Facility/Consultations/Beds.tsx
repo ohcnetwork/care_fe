@@ -139,21 +139,17 @@ const Beds = (props: BedsProps) => {
                 facility={facilityId}
               />
             </div>
-            <div>
-              <FieldLabel htmlFor="date_declared_positive">
-                Date of Shift
-              </FieldLabel>
-              <DateFormField
-                id="date_declared_positive"
-                name="date_declared_positive"
-                value={getDate(startDate)}
-                onChange={(e) =>
-                  setStartDate(moment(e.value).format("YYYY-MM-DD"))
-                }
-                maxDate={new Date()}
-                error=""
-              />
-            </div>
+            <DateFormField
+              label="Date of shift"
+              id="date_declared_positive"
+              name="date_declared_positive"
+              value={getDate(startDate)}
+              onChange={(e) =>
+                setStartDate(moment(e.value).format("YYYY-MM-DD"))
+              }
+              disableFuture
+              error=""
+            />
           </div>
           <div className="flex flex-row justify-center mt-4">
             <div>
