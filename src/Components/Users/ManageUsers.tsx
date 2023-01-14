@@ -429,12 +429,17 @@ export default function ManageUsers() {
       return (
         <>
           {showLinkSkills(username)}
-          <div className="mb-2 mt-2">
-            <img
-              src={`${process.env.PUBLIC_URL}/images/no_skills.svg`}
-              alt="Error 404"
-              className="w-full"
-            />
+          <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
+            <div className="w-full">
+              <img
+                src={`${process.env.PUBLIC_URL}/images/404.svg`}
+                alt="Error 404"
+                className="w-80 mx-auto"
+              />
+            </div>
+            <p className="text-lg font-semibold text-center text-primary pt-4">
+              Select and add some skills
+            </p>
           </div>
         </>
       );
@@ -694,15 +699,12 @@ export default function ManageUsers() {
                 </div>
                 {user.username && (
                   <div className="mt-2">
-                    <Button
-                      className="md:ml-2 w-full"
-                      variant="contained"
-                      color="primary"
-                      size="small"
+                    <a
+                      // className="md:ml-2 w-full"
                       onClick={() => loadSkills(user.username)}
                     >
                       linked skills
-                    </Button>
+                    </a>
                   </div>
                 )}
               </div>
