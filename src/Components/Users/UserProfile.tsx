@@ -5,6 +5,7 @@ import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserDetails,
+  getUserListSkills,
   partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
@@ -112,12 +113,27 @@ export default function UserProfile() {
   const initialDetails: any = [{}];
   const [details, setDetails] = useState(initialDetails);
 
+  interface SkillModelObject {
+    id: string;
+    name: string;
+    description: string;
+  }
+
+  interface SkillModel {
+    id: string;
+    skill_object: SkillModelObject;
+  }
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getUserDetails(username));
+      const resSkills = await dispatchAction(getUserListSkills(username));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res && res.data && resSkills) {
+          res.data.skills = resSkills.data.results.map(
+            (skill: SkillModel) => skill.skill_object
+          );
           setDetails(res.data);
           const formData: EditForm = {
             firstName: res.data.first_name,
@@ -441,6 +457,22 @@ export default function UserProfile() {
                     </dd>
                   </div>
                 </dl>
+                <div className="sm:col-span-1  my-2">
+                  <dt className="text-sm leading-5 font-medium text-black">
+                    Skills
+                  </dt>
+                  <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <div className="flex flex-wrap gap-2">
+                      {details.skills?.map((skill: SkillModelObject) => {
+                        return (
+                          <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-700 rounded-full text-xs px-3">
+                            <p className="py-1.5">{skill.name}</p>
+                          </span>
+                        );
+                      }) || "-"}
+                    </div>
+                  </dd>
+                </div>
               </div>
             )}
 

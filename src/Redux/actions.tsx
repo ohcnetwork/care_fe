@@ -64,6 +64,10 @@ export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
 
+export const getUserListSkills = (pathParam: object) => {
+  return fireRequest("userListSkill", [], {}, pathParam);
+};
+
 export const partialUpdateUser = (username: string, data: any) => {
   return fireRequest("partialUpdateUser", [], data, { username });
 };

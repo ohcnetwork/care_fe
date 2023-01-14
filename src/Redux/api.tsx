@@ -60,6 +60,10 @@ const routes: Routes = {
     path: "/api/v1/users/",
   },
 
+  userListSkill: {
+    path: "/api/v1/users/{username}/skill/",
+  },
+
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
   },
