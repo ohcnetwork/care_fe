@@ -73,7 +73,7 @@ const AssetsList = () => {
         location: qParams.location,
         status: qParams.status,
       };
-      const { data }: any = await dispatch(listAssets(params));
+      const { data } = await dispatch(listAssets(params));
       if (!status.aborted) {
         setIsLoading(false);
         if (!data)
@@ -156,9 +156,7 @@ const AssetsList = () => {
       // QR Maybe searchParams "asset" or "assetQR"
       const assetId = params.asset || params.assetQR;
       if (assetId) {
-        const { data }: any = await dispatch(
-          listAssets({ qr_code_id: assetId })
-        );
+        const { data } = await dispatch(listAssets({ qr_code_id: assetId }));
         return data.results[0].id;
       }
     } catch (err) {
@@ -167,8 +165,7 @@ const AssetsList = () => {
   };
 
   const checkValidAssetId = async (assetId: string) => {
-    const assetData: any = await dispatch(getAsset(assetId));
-    console.log(assetData);
+    const assetData = await dispatch(getAsset(assetId));
     try {
       if (assetData.data) {
         navigate(
@@ -199,13 +196,13 @@ const AssetsList = () => {
         </button>
         <QrReader
           delay={300}
-          onScan={async (value: any) => {
+          onScan={async (value) => {
             if (value) {
               const assetId = await getAssetIdFromQR(value);
               checkValidAssetId(assetId ?? value);
             }
           }}
-          onError={(e: any) =>
+          onError={(e) =>
             Notification.Error({
               msg: e.message,
             })
@@ -280,21 +277,11 @@ const AssetsList = () => {
         <PageTitle title="Assets" breadcrumbs={false} hideBack />
         {authorizedForImportExport && (
           <div className="tooltip">
-            {!facility && (
-              <span className="tooltip-text tooltip-bottom -translate-x-2/3 flex flex-col items-center">
-                <p>Select a facility from the Facilities</p>
-                <p>page and click 'View Assets' from the</p>
-                <p>Manage Facility dropdown</p>
-              </span>
-            )}
-            {/* TODO: ask for facility select dialog instead of disabling */}
             <ExportMenu
-              disabled={!facility || importAssetModalOpen}
               label={importAssetModalOpen ? "Importing..." : "Import/Export"}
               exportItems={[
                 {
                   label: "Import Assets",
-                  // action: () => setImportAssetModalOpen(true),
                   options: {
                     icon: <CareIcon className="care-l-import" />,
                     onClick: () => setImportAssetModalOpen(true),
@@ -403,10 +390,35 @@ const AssetsList = () => {
           </div>
         </>
       )}
+      {typeof facility === "undefined" && importAssetModalOpen && (
+        <FacilitiesSelectDialogue
+          show={true}
+          setSelected={(e) => setFacility(e)}
+          selectedFacility={
+            facility ?? {
+              name: "",
+            }
+          }
+          handleOk={() => {
+            return undefined;
+          }}
+          handleCancel={() => {
+            return undefined;
+          }}
+        />
+      )}
       {facility && (
         <AssetImportModal
           open={importAssetModalOpen}
-          onClose={() => setImportAssetModalOpen(false)}
+          onClose={() => {
+            setImportAssetModalOpen(false);
+            setFacility((f) => {
+              if (!qParams.facility) {
+                return undefined;
+              }
+              return f;
+            });
+          }}
           facility={facility}
         />
       )}
