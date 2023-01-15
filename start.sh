@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 ENV_FILE=config_temp.json
 ENV_PREFIX="CARE_FE__"
