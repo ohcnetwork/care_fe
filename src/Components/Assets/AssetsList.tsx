@@ -166,11 +166,14 @@ const AssetsList = () => {
     }
   };
 
-  const checkValidAssetId = async (assetId: any) => {
+  const checkValidAssetId = async (assetId: string) => {
     const assetData: any = await dispatch(getAsset(assetId));
+    console.log(assetData);
     try {
       if (assetData.data) {
-        navigate(`/assets/${assetId}`);
+        navigate(
+          `/facility/${assetData.data.location_object.facility.id}/assets/${assetId}`
+        );
       }
     } catch (err) {
       console.log(err);
