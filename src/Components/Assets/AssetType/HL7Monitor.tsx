@@ -10,10 +10,10 @@ import MonitorConfigure from "../configure/MonitorConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import Card from "../../../CAREUI/display/Card";
-import TextInputFieldV2 from "../../Common/components/TextInputFieldV2";
 import { Submit } from "../../Common/components/ButtonV2";
 import PatientVitalsCard from "../../Patient/PatientVitalsCard";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import TextFormField from "../../Form/FormFields/TextFormField";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -24,7 +24,9 @@ interface HL7MonitorProps {
 const HL7Monitor = (props: HL7MonitorProps) => {
   const { assetId, asset, facilityId } = props;
   const [assetType, setAssetType] = useState("");
+  const [isConfiguring, setIsConfiguring] = useState(false);
   const [middlewareHostname, setMiddlewareHostname] = useState("");
+  const [middlewareHostnameError, setMiddlewareHostnameError] = useState("");
   const [facilityMiddlewareHostname, setFacilityMiddlewareHostname] =
     useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -52,10 +54,28 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     setIsLoading(false);
   }, [asset]);
 
+  const isValidForm = () => {
+    if (middlewareHostname.trim() === "" || !middlewareHostname) {
+      setMiddlewareHostnameError("Please enter the Middleware Hostname");
+      return false;
+    }
+    if (localipAddress.trim() === "" || !localipAddress) {
+      setIpAddress_error("Please enter the Local IP Adress");
+      return false;
+    }
+    if (!checkIfValidIP(localipAddress)) {
+      setIpAddress_error("Please enter a valid IP Adress");
+      return false;
+    }
+    setMiddlewareHostnameError("");
+    setIpAddress_error("");
+    return true;
+  };
+
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    if (checkIfValidIP(localipAddress)) {
-      setIpAddress_error("");
+    if (isValidForm()) {
+      setIsConfiguring(true);
       const data = {
         meta: {
           asset_type: assetType,
@@ -70,13 +90,14 @@ const HL7Monitor = (props: HL7MonitorProps) => {
         Notification.Success({
           msg: "Asset Configured Successfully",
         });
+        setIsConfiguring(false);
       } else {
         Notification.Error({
           msg: "Something went wrong..!",
         });
+        setIsConfiguring(false);
       }
-    } else {
-      setIpAddress_error("Please Enter a Valid IP address !!");
+      setIsConfiguring(false);
     }
   };
 
@@ -89,22 +110,32 @@ const HL7Monitor = (props: HL7MonitorProps) => {
             <form onSubmit={handleSubmit}>
               <h2 className="text-lg font-bold mb-2">Connection</h2>
               <div>
-                <TextInputFieldV2
+                <TextFormField
+                  name="Middleware Hostname"
                   label="Middleware Hostname"
                   value={middlewareHostname}
-                  onChange={(e) => setMiddlewareHostname(e.target.value)}
+                  onChange={(e) => setMiddlewareHostname(e.value)}
+                  error={middlewareHostnameError}
+                  required
                 />
-                <TextInputFieldV2
+                <TextFormField
+                  name="Local IP Address"
                   label="Local IP Address"
                   value={localipAddress}
-                  onChange={(e) => setLocalIPAddress(e.target.value)}
+                  onChange={(e) => setLocalIPAddress(e.value)}
                   required
                   error={ipadrdress_error}
                 />
               </div>
               <Submit className="w-full">
-                <CareIcon className="care-l-save" />
-                <span>Save Configuration</span>
+                {isConfiguring ? (
+                  <CareIcon className="care-l-spinner animate-spin text-xl" />
+                ) : (
+                  <CareIcon className="care-l-save" />
+                )}
+                <span>
+                  {isConfiguring ? "Configuring..." : "Save Configuration"}
+                </span>
               </Submit>
             </form>
           </Card>

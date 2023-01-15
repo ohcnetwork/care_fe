@@ -1,13 +1,14 @@
-import { Fragment } from "react";
+import { Fragment, SyntheticEvent, useState } from "react";
 import React from "react";
 import { AssetData } from "../AssetTypes";
-import { Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent } from "@material-ui/core";
 import { TextInputField } from "../../Common/HelperInputFields";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { getCameraConfig } from "../../../Utils/transformUtils";
 import { Submit } from "../../Common/components/ButtonV2";
+import { FieldLabel } from "../../Form/FormFields/FormField";
 
 interface CameraConfigureProps {
   asset: AssetData;
@@ -30,20 +31,45 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     refreshPresetsHash,
     facilityMiddlewareHostname,
   } = props;
+  const [bedError, setBedError] = useState("");
+  const [newPresetError, setnewPresetError] = useState("");
 
+  const isFormValid = () => {
+    console.log(bed);
+    if (!bed || Object.keys(bed).length === 0) {
+      setBedError("Please Select a Bed");
+      return false;
+    }
+    if (newPreset.trim() === "") {
+      setnewPresetError("Please enter a preset");
+      return false;
+    }
+    setBedError("");
+    setnewPresetError("");
+    return true;
+  };
+
+  const handleSubmit = (e: SyntheticEvent) => {
+    e.preventDefault();
+    if (isFormValid()) {
+      addPreset(e);
+    }
+  };
   return (
     <Fragment>
       <Card>
-        <form onSubmit={addPreset}>
+        <form onSubmit={handleSubmit}>
           <CardContent>
             <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <InputLabel id="asset-type">Bed</InputLabel>
+                <FieldLabel required id="asset-type">
+                  Bed
+                </FieldLabel>
                 <BedSelect
                   name="bed"
                   setSelected={(selected) => setBed(selected as BedModel)}
                   selected={bed}
-                  errors=""
+                  errors={bedError}
                   multiple={false}
                   margin="dense"
                   location={asset?.location_object?.id}
@@ -51,7 +77,9 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                 />
               </div>
               <div>
-                <InputLabel id="location">Preset Name</InputLabel>
+                <FieldLabel required id="location">
+                  Preset Name
+                </FieldLabel>
                 <TextInputField
                   name="name"
                   id="location"
@@ -60,7 +88,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                   type="text"
                   value={newPreset}
                   onChange={(e) => setNewPreset(e.target.value)}
-                  errors=""
+                  errors={newPresetError}
                 />
               </div>
             </div>

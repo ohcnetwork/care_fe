@@ -1,5 +1,4 @@
-import React, { Dispatch, useEffect } from "react";
-import { InputLabel } from "@material-ui/core";
+import React, { Dispatch, useEffect, useState } from "react";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { AssetData } from "../AssetTypes";
@@ -11,6 +10,7 @@ import {
 import * as Notification from "../../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { Submit } from "../../Common/components/ButtonV2";
+import { FieldLabel } from "../../Form/FormFields/FormField";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const saveLink = (assetId: string, bedId: string, dispatch: Dispatch<any>) => {
   dispatch(createAssetBed({}, assetId, bedId));
@@ -37,6 +37,7 @@ const update_Link = (
 
 export default function MonitorConfigure({ asset }: { asset: AssetData }) {
   const [bed, setBed] = React.useState<BedModel>({});
+  const [bedError, setBedError] = useState("");
   const [updateLink, setUpdateLink] = React.useState<boolean>(false);
   const [assetBed, setAssetBed] = React.useState<any>();
   const dispatch: any = useDispatch();
@@ -58,31 +59,44 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
     }
   }, [asset]);
 
+  const isFormValid = () => {
+    console.log(bed);
+    if (!bed || Object.keys(bed).length === 0) {
+      setBedError("Please Select a Bed");
+      return false;
+    }
+    setBedError("");
+    return true;
+  };
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (updateLink) {
-          update_Link(
-            assetBed?.id as string,
-            asset.id as string,
-            bed as BedModel,
-            assetBed,
-            dispatch
-          );
-        } else {
-          saveLink(asset.id as string, bed?.id as string, dispatch);
+        if (isFormValid()) {
+          if (updateLink) {
+            update_Link(
+              assetBed?.id as string,
+              asset.id as string,
+              bed as BedModel,
+              assetBed,
+              dispatch
+            );
+          } else {
+            saveLink(asset.id as string, bed?.id as string, dispatch);
+          }
         }
       }}
     >
       <div className="flex flex-col">
         <div className="w-full">
-          <InputLabel id="asset-type">Bed</InputLabel>
+          <FieldLabel required id="asset-type">
+            Bed
+          </FieldLabel>
           <BedSelect
             name="bed"
             setSelected={(selected) => setBed(selected as BedModel)}
             selected={bed}
-            errors=""
+            errors={bedError}
             multiple={false}
             margin="dense"
             location={asset?.location_object?.id}

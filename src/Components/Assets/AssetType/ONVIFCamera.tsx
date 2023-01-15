@@ -17,6 +17,7 @@ import { checkIfValidIP } from "../../../Common/validation";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { Submit } from "../../Common/components/ButtonV2";
 import { SyntheticEvent } from "react";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 interface ONVIFCameraProps {
   assetId: string;
@@ -27,12 +28,15 @@ interface ONVIFCameraProps {
 const ONVIFCamera = (props: ONVIFCameraProps) => {
   const { assetId, facilityId, asset } = props;
   const [isLoading, setIsLoading] = useState(true);
+  const [isConfiguring, setIsConfiguring] = useState(false);
   const [assetType, setAssetType] = useState("");
   const [middlewareHostname, setMiddlewareHostname] = useState("");
+  const [middlewareHostnameError, setMiddlewareHostnameError] = useState("");
   const [facilityMiddlewareHostname, setFacilityMiddlewareHostname] =
     useState("");
   const [cameraAddress, setCameraAddress] = useState("");
   const [ipadrdress_error, setIpAddress_error] = useState("");
+  const [cameraAccessKeyError, setCameraAccessKeyError] = useState("");
   const [cameraAccessKey, setCameraAccessKey] = useState("");
   const [bed, setBed] = useState<BedModel>({});
   const [newPreset, setNewPreset] = useState("");
@@ -61,10 +65,34 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     setIsLoading(false);
   }, [asset]);
 
+  const isFormValid = () => {
+    if (middlewareHostname.trim() === "" || !middlewareHostname) {
+      setMiddlewareHostnameError("Please enter the Middleware Hostname");
+      return false;
+    }
+    if (cameraAddress.trim() === "" || !cameraAddress) {
+      setIpAddress_error("Please enter the Local IP Adress");
+      return false;
+    }
+    if (!checkIfValidIP(cameraAddress)) {
+      setIpAddress_error("Please enter a valid IP Adress");
+      return false;
+    }
+    if (cameraAccessKey === "" || !cameraAccessKey) {
+      setCameraAccessKeyError("Please enter the Camera Access Key");
+      return false;
+    }
+    setMiddlewareHostnameError("");
+    setIpAddress_error("");
+    setCameraAccessKeyError("");
+    return true;
+  };
+
   const handleSubmit = async (e: SyntheticEvent) => {
+    setIsConfiguring(true);
     e.preventDefault();
-    if (checkIfValidIP(cameraAddress)) {
-      setIpAddress_error("");
+    console.log(isFormValid(), "hiii");
+    if (isFormValid()) {
       const data = {
         meta: {
           asset_type: "CAMERA",
@@ -80,15 +108,16 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         Notification.Success({
           msg: "Asset Configured Successfully",
         });
+        setIsConfiguring(false);
         window.location.reload();
       } else {
         Notification.Error({
           msg: "Something went wrong..!",
         });
+        setIsConfiguring(false);
       }
-    } else {
-      setIpAddress_error("Please Enter a Valid Camera address !!");
     }
+    setIsConfiguring(false);
   };
 
   const addPreset = async (e: SyntheticEvent) => {
@@ -137,25 +166,26 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1 lg:grid-cols-2 col-span-1">
                 <div>
-                  <label id="middleware-hostname">
-                    Hospital Middleware Hostname
-                  </label>
                   <TextFormField
                     name="middleware-hostname"
                     id="middleware-hostname"
+                    required
+                    label="Hospital Middleware Hostname"
                     type="text"
                     autoComplete="off"
                     value={middlewareHostname}
                     onChange={(e) => setMiddlewareHostname(e.value)}
                     className="mt-2"
+                    error={middlewareHostnameError}
                   />
                 </div>
                 <div>
-                  <label id="camera-addess">Local IP Address</label>
                   <TextFormField
                     name="camera-access-addess"
                     id="camera-access-addess"
+                    required
                     type="text"
+                    label="Local IP Address"
                     autoComplete="new-addess"
                     value={cameraAddress}
                     onChange={(e) => setCameraAddress(e.value)}
@@ -164,27 +194,32 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                   />
                 </div>
                 <div>
-                  <label id="camera-access-key">
-                    Camera Access Key{" "}
-                    <button className="tooltip">
-                      <span className="tooltip-text tooltip-right">
-                        <span className="text-sm font-semibold">
-                          Camera Access Key format: username:password:uuid
-                        </span>
-                      </span>
-                      <button className="rounded">
-                        <i className="fa-solid fa-circle-question"></i>
-                      </button>
-                    </button>
-                  </label>
                   <TextFormField
                     name="camera-access-key"
                     id="camera-access-key"
                     type="password"
+                    label={
+                      <div>
+                        {" "}
+                        Camera Access Key{" "}
+                        <span className="text-red-500">*</span>
+                        <button className="tooltip ml-2">
+                          <span className="tooltip-text tooltip-right">
+                            <span className="text-sm font-semibold">
+                              Camera Access Key format: username:password:uuid
+                            </span>
+                          </span>
+                          <button className="rounded">
+                            <CareIcon className="care-l-question-circle text-xl" />
+                          </button>
+                        </button>
+                      </div>
+                    }
                     autoComplete="new-password" // Chrome ignores autocomplete=off for password fields
                     value={cameraAccessKey}
                     onChange={(e) => setCameraAccessKey(e.value)}
                     className="mt-2"
+                    error={cameraAccessKeyError}
                   />
                 </div>
               </div>
@@ -193,8 +228,16 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                 <Submit
                   className="w-full md:w-auto ml-auto"
                   onClick={handleSubmit}
-                  label="Set Configuration"
-                />
+                >
+                  {isConfiguring ? (
+                    <CareIcon className="care-l-spinner animate-spin text-xl" />
+                  ) : (
+                    <CareIcon className="care-l-check-circle text-xl" />
+                  )}
+                  <span>
+                    {isConfiguring ? "Configuring..." : "Set Configuration"}
+                  </span>
+                </Submit>
               </div>
             </CardContent>
           </form>
