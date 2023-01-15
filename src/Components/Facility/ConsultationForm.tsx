@@ -766,7 +766,6 @@ export const ConsultationForm = (props: any) => {
                 {...field("cause_of_death")}
                 required={state.form.suggestion === "DD"}
                 label="Cause of Death"
-                name="cause_of_death"
                 value={state.form.cause_of_death}
               />
             </div>
@@ -776,7 +775,6 @@ export const ConsultationForm = (props: any) => {
                 type="datetime-local"
                 required={state.form.suggestion === "DD"}
                 label="Date & Time of Death"
-                name="death_datetime"
                 value={state.form.death_datetime}
               />
             </div>
@@ -785,7 +783,6 @@ export const ConsultationForm = (props: any) => {
                 {...field("death_confirmed_doctor")}
                 required={state.form.suggestion === "DD"}
                 label="Death Confirmed by"
-                name="death_confirmed_doctor"
                 value={state.form.death_confirmed_doctor}
               />
             </div>
