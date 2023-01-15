@@ -199,7 +199,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   useEffect(() => {
     if (cameraAsset.id) {
       getPresets({
-        onSuccess: (resp) => setPresets(resp),
         onError: (_) => {
           Notification.Error({
             msg: "Fetching presets failed",
