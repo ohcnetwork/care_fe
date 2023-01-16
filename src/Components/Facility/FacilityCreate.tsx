@@ -54,6 +54,7 @@ import Steps, { Step } from "../Common/Steps";
 import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import useConfig from "../../Common/hooks/useConfig";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -148,6 +149,7 @@ const facilityCreateReducer = (
 };
 
 export const FacilityCreate = (props: FacilityProps) => {
+  const { gov_data_api_key } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
@@ -351,7 +353,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
     if (!validatePincode(e.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(e.value);
+    const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
     const matchedState = states.find((state) => {

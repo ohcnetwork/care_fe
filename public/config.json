@@ -5,6 +5,7 @@
     "static_light_logo": "https://cdn.coronasafe.network/light-logo.svg",
     "static_black_logo": "https://cdn.coronasafe.network/black-logo.svg",
     "gmaps_api_key": "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
+    "gov_data_api_key": "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b",
     "recaptcha_site_key": "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN",
     "kasp_enabled": false,
     "kasp_string": "KASP",
