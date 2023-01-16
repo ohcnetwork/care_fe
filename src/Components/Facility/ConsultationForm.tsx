@@ -412,7 +412,6 @@ export const ConsultationForm = (props: any) => {
           return;
         }
         case "procedure": {
-          console.log(state.form.procedure);
           for (const p of procedures) {
             if (!p.procedure?.replace(/\s/g, "").length) {
               errors[field] = "Procedure field can not be empty";
@@ -454,22 +453,25 @@ export const ConsultationForm = (props: any) => {
         }
 
         case "investigation": {
-          let invalid = false;
-          for (const f of InvestigationAdvice) {
-            if (
-              f.type?.length === 0 ||
-              (f.repetitive
-                ? !f.frequency?.replace(/\s/g, "").length
-                : !f.time?.replace(/\s/g, "").length)
-            ) {
-              invalid = true;
+          for (const i of InvestigationAdvice) {
+            if (!i.type?.length) {
+              errors[field] = "Investigation field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
               break;
             }
-          }
-          if (invalid) {
-            errors[field] = "Investigation Suggestion field can not be empty";
-            if (!error_div) error_div = field;
-            invalidForm = true;
+            if (!i.repetitive && !i.time?.replace(/\s/g, "").length) {
+              errors[field] = "Time field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (i.repetitive && !i.frequency?.replace(/\s/g, "").length) {
+              errors[field] = "Frequency field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
           }
           return;
         }
