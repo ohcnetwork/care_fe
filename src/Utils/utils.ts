@@ -206,3 +206,23 @@ export const includesIgnoreCase = (str1: string, str2: string) => {
     lowerCaseStr2.includes(lowerCaseStr1)
   );
 };
+
+export const getExperienceSuffix = (date?: Date) => {
+  if (!date) return "0 Years";
+
+  const today = new Date();
+
+  let m = (today.getFullYear() - date.getFullYear()) * 12;
+  m -= date.getMonth();
+  m += today.getMonth();
+
+  let str = "";
+
+  const years = Math.floor(m / 12);
+  const months = m % 12;
+
+  if (years) str += `${years} years `;
+  if (months) str += `${months} months`;
+
+  return str;
+};

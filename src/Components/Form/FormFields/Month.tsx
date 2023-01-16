@@ -55,6 +55,7 @@ const MonthFormField = (props: Props) => {
         errorClassName="hidden"
         label=""
         error=""
+        min={1900}
         placeholder="Year"
         value={props.value?.getFullYear().toString()}
         onChange={(event) => {

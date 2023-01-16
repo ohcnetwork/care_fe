@@ -36,7 +36,7 @@ import {
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 
-import { classNames, goBack } from "../../Utils/utils";
+import { classNames, getExperienceSuffix, goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -564,8 +564,9 @@ export const UserAdd = (props: UserProps) => {
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
         doctor_qualification: state.form.doctor_qualification,
-        doctor_experience_commenced_on:
-          state.form.doctor_experience_commenced_on,
+        doctor_experience_commenced_on: moment(
+          state.form.doctor_experience_commenced_on
+        ).format("YYYY-MM-DD"),
         doctor_medical_council_registration:
           state.form.doctor_medical_council_registration,
       };
@@ -606,26 +607,6 @@ export const UserAdd = (props: UserProps) => {
       value: state.form[name],
       error: state.errors[name],
     };
-  };
-
-  const getExperienceSuffix = (date?: Date) => {
-    if (!date) return "0 Years";
-
-    const today = new Date();
-
-    let m = (today.getFullYear() - date.getFullYear()) * 12;
-    m -= date.getMonth();
-    m += today.getMonth();
-
-    let str = "";
-
-    const years = Math.floor(m / 12);
-    const months = m % 12;
-
-    if (years) str += `${years} years `;
-    if (months) str += `${months} months`;
-
-    return <span className="ml-2 text-sm whitespace-nowrap">{str}</span>;
   };
 
   return (
@@ -682,7 +663,11 @@ export const UserAdd = (props: UserProps) => {
                     {...field("doctor_experience_commenced_on")}
                     required
                     label="Experience commenced on"
-                    suffix={getExperienceSuffix}
+                    suffix={(date) => (
+                      <span className="ml-2 text-sm whitespace-nowrap">
+                        {getExperienceSuffix(date)}
+                      </span>
+                    )}
                   />
 
                   <TextFormField

@@ -57,7 +57,7 @@ const FormField = (props: {
           {label}
         </FieldLabel>
       )}
-      {props.children}
+      <div className={props.className}>{props.children}</div>
       {<FieldErrorText error={error} className={errorClassName} />}
     </div>
   );
