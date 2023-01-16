@@ -1,3 +1,4 @@
+import { FieldLabel } from "../../Form/FormFields/FormField";
 import { ErrorHelperText } from "../HelperInputFields";
 
 type SwitchProps<T> = {
@@ -16,13 +17,14 @@ type SwitchProps<T> = {
 export default function SwitchV2<T>(props: SwitchProps<T>) {
   return (
     <div className={props.className}>
-      {props.label && (
-        <label htmlFor={props.name} className="mb-3">
-          {props.label}
-          {props.required && " *"}
-        </label>
-      )}
-      <ul role="list" className="flex" id={props.name}>
+      <FieldLabel
+        htmlFor={props.name}
+        required={props.required}
+        className="mb-3"
+      >
+        {props.label}
+      </FieldLabel>
+      <ul role="list" className="flex">
         {props.options.map((option, index) => {
           const selected = option === props.value;
           const additionalClassNames = selected
