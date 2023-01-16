@@ -97,7 +97,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
             name="bed"
             setSelected={(selected) => setBed(selected as BedModel)}
             selected={bed}
-            errors={bedError}
+            error={bedError}
             multiple={false}
             location={asset?.location_object?.id}
             facility={asset?.location_object?.facility?.id}
