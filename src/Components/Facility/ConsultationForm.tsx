@@ -763,15 +763,6 @@ export const ConsultationForm = (props: any) => {
           <ErrorHelperText error={state.errors.investigation} />
         </div>
 
-        <div id="procedure">
-          <FieldLabel>Procedures</FieldLabel>
-          <ProcedureBuilder
-            procedures={procedures}
-            setProcedures={setProcedures}
-          />
-          <ErrorHelperText error={state.errors.procedure} />
-        </div>
-
         <div id="discharge_advice">
           <FieldLabel>Prescription Medication</FieldLabel>
           <PrescriptionBuilder
@@ -788,6 +779,15 @@ export const ConsultationForm = (props: any) => {
             setPrescriptions={setPRNAdvice}
           />
           <ErrorHelperText error={state.errors.prn_prescription} />
+        </div>
+
+        <div id="procedure">
+          <FieldLabel>Procedures</FieldLabel>
+          <ProcedureBuilder
+            procedures={procedures}
+            setProcedures={setProcedures}
+          />
+          <ErrorHelperText error={state.errors.procedure} />
         </div>
 
         <TextFormField {...field("ip_no")} label="IP Number" required />
