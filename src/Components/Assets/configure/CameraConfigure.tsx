@@ -68,7 +68,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                   className="overflow-y-scoll mt-2"
                   setSelected={(selected) => setBed(selected as BedModel)}
                   selected={bed}
-                  errors={bedError}
+                  error={bedError}
                   multiple={false}
                   location={asset?.location_object?.id}
                   facility={asset?.location_object?.facility?.id}
