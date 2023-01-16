@@ -363,7 +363,7 @@ export default function ManageUsers() {
           key={`usr_${user.id}`}
           className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
         >
-          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
+          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
                 <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
@@ -519,7 +519,7 @@ export default function ManageUsers() {
                                 : "care-l-eye-slash"
                             } text-xl`}
                           />
-                          <span className="tooltip-text tooltip-right">
+                          <span className="tooltip-text tooltip-bottom">
                             {!user.facilities ? "View" : "Hide"} Linked
                             Facilities
                           </span>
