@@ -410,22 +410,19 @@ export const ConsultationForm = (props: any) => {
           return;
         }
         case "prn_prescription": {
-          let invalid = false;
           for (const f of PRNAdvice) {
-            if (
-              !f.dosage?.replace(/\s/g, "").length ||
-              !f.medicine?.replace(/\s/g, "").length ||
-              f.indicator === "" ||
-              f.indicator === " "
-            ) {
-              invalid = true;
+            if (!f.medicine?.replace(/\s/g, "").length) {
+              errors[field] = "Medicine field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
               break;
             }
-          }
-          if (invalid) {
-            errors[field] = "PRN Prescription field can not be empty";
-            if (!error_div) error_div = field;
-            invalidForm = true;
+            if (!f.indicator?.replace(/\s/g, "").length) {
+              errors[field] = "Indicator field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
           }
           return;
         }
@@ -756,7 +753,7 @@ export const ConsultationForm = (props: any) => {
           <ErrorHelperText error={state.errors.discharge_advice} />
         </div>
 
-        <div id="discharge_advice">
+        <div id="prn_prescription">
           <FieldLabel>PRN Prescription</FieldLabel>
           <PRNPrescriptionBuilder
             prescriptions={PRNAdvice}
