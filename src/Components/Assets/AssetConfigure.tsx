@@ -59,7 +59,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
               assets: { uri: `/assets?facility=${facilityId}` },
               [assetId]: { name: asset?.name },
             }}
-            backUrl={`/assets/${assetId}`}
+            backUrl={`/facility/${facilityId}/assets/${assetId}`}
           />
           <HL7Monitor asset={asset} assetId={assetId} facilityId={facilityId} />
         </>
@@ -72,7 +72,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
               assets: { uri: `/assets?facility=${facilityId}` },
               [assetId]: { name: asset?.name },
             }}
-            backUrl={`/assets/${assetId}`}
+            backUrl={`/facility/${facilityId}/assets/${assetId}`}
           />
           <ONVIFCamera
             asset={asset}
