@@ -711,9 +711,8 @@ export const ConsultationForm = (props: any) => {
                   name="bed"
                   setSelected={setBed}
                   selected={bed}
-                  errors=""
+                  error=""
                   multiple={false}
-                  margin="dense"
                   unoccupiedOnly={true}
                   facility={facilityId}
                 />

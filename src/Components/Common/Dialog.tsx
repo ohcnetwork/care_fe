@@ -1,5 +1,6 @@
 import React from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { classNames } from "../../Utils/utils";
 
 type DialogProps = {
   title: React.ReactNode;
@@ -40,7 +41,10 @@ const DialogModal = (props: DialogProps) => {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel
-                  className={`w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all ${className}`}
+                  className={classNames(
+                    className,
+                    "w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                  )}
                 >
                   <Dialog.Title
                     as="h4"
