@@ -87,6 +87,7 @@ type FormDetails = {
   prescribed_medication: string;
   consultation_notes: string;
   ip_no: string;
+  procedure: ProcedureType[];
   discharge_advice: PrescriptionType[];
   prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
@@ -128,6 +129,7 @@ const initForm: FormDetails = {
   prescribed_medication: "",
   consultation_notes: "",
   ip_no: "",
+  procedure: [],
   discharge_advice: [],
   prn_prescription: [],
   investigation: [],
@@ -406,6 +408,30 @@ export const ConsultationForm = (props: any) => {
             errors[field] = errorMsg;
             if (!error_div) error_div = field;
             invalidForm = true;
+          }
+          return;
+        }
+        case "procedure": {
+          console.log(state.form.procedure);
+          for (const p of procedures) {
+            if (!p.procedure?.replace(/\s/g, "").length) {
+              errors[field] = "Procedure field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (!p.repetitive && !p.time?.replace(/\s/g, "").length) {
+              errors[field] = "Time field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (p.repetitive && !p.frequency?.replace(/\s/g, "").length) {
+              errors[field] = "Frequency field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
           }
           return;
         }
@@ -735,13 +761,13 @@ export const ConsultationForm = (props: any) => {
           <ErrorHelperText error={state.errors.investigation} />
         </div>
 
-        <div id="procedures">
+        <div id="procedure">
           <FieldLabel>Procedures</FieldLabel>
           <ProcedureBuilder
             procedures={procedures}
             setProcedures={setProcedures}
           />
-          <ErrorHelperText error={state.errors.procedures} />
+          <ErrorHelperText error={state.errors.procedure} />
         </div>
 
         <div id="discharge_advice">
