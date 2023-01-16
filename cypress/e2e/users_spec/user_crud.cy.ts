@@ -30,7 +30,20 @@ describe("User management", () => {
 
   it("create user", () => {
     cy.contains("Add New User").click();
-    cy.get("[name='user_type']").select("Volunteer");
+    cy.get("[id='user_type'] > div > button").click();
+    cy.get("div").contains("Ward Admin").click();
+    cy.get("[id='state'] > div > button").click();
+    cy.get("div").contains("Kerala").click();
+    cy.get("[id='district'] > div > button").click();
+    cy.get("div").contains("Ernakulam").click();
+    cy.get("[id='localbody'] > div > button").click();
+    cy.get("div").contains("Aikaranad").click();
+    cy.intercept(/\/api\/v1\/facility/).as("facility");
+    cy.get("[name='facilities']")
+      .type("cypress_testing_facility")
+      .wait("@facility");
+    cy.get("[name='facilities']").type("{enter}");
+    cy.wait(1000);
     cy.get("input[type='checkbox']").click();
     cy.wait(1000);
     cy.get("[placeholder='Phone Number']").type(phone_number);
@@ -38,22 +51,23 @@ describe("User management", () => {
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
       force: true,
     });
-    cy.intercept(/\/api\/v1\/facility/).as("facility");
-    cy.get("[name='facilities']").type("Mysore").wait("@facility");
-    cy.get("[name='facilities']").type("{downarrow}{enter}");
-    cy.intercept(/users/).as("checkUsername");
+    cy.intercept(/users/).as("check_availability");
+    cy.get("[id='date_of_birth']").click();
+    cy.get("div").contains("20").click();
+    cy.get("[id='year-0']").click();
+    cy.get("[id='date-1']").click();
     cy.get("[name='username']").type(username, { force: true });
-    cy.wait("@checkUsername").its("response.statusCode").should("eq", 200);
-    cy.get("[name='dob']").type("02/03/2001");
+    cy.wait("@check_availability").its("response.statusCode").should("eq", 200);
     cy.get("[name='password']").type("#@Cypress_test123");
     cy.get("[name='c_password']").type("#@Cypress_test123");
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
     cy.get("[name='email']").type("cypress@tester.com");
-    cy.get("[name='gender']").select("Male");
-    cy.get("[name='state']").select("Kerala");
-    cy.get("[name='district']").select("Ernakulam");
-    cy.get("button[type='submit']").contains("Save User").click();
+    cy.get("[id='gender'] > div > button").click();
+    cy.get("div").contains("Male").click();
+    cy.get("button[id='submit']").contains("Save User").click({
+      force: true,
+    });
     cy.verifyNotification("User added successfully");
   });
 
@@ -61,11 +75,36 @@ describe("User management", () => {
     cy.contains("Advanced Filters").click();
     cy.get("[name='first_name']").type("Cypress Test");
     cy.get("[name='last_name']").type("Tester");
+    cy.get("[id='role'] > div > button").click();
+    cy.get("div")
+      .contains(/^Ward Admin$/)
+      .click();
+    cy.get("input[name='district']").type("Ernakulam").wait(1000);
+    cy.get("input[name='district']").type("{downarrow}{enter}");
     cy.get("[placeholder='Phone Number']").type(phone_number);
     cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
     cy.contains("Apply").click();
+    cy.intercept(/\/api\/v1\/users/).as("getUsers");
+    cy.wait(1000);
     cy.get("[name='username']").type(username, { force: true });
-    // TODO: some verify task
+    cy.wait("@getUsers");
+    cy.wait(1000);
+    cy.get("dd[id='count']").contains(/^1$/).click();
+    cy.get("div[id='usr_0']").within(() => {
+      cy.intercept(`/api/v1/users/${username}/get_facilities/`).as(
+        "userFacility"
+      );
+      cy.get("div[id='role']").contains(/^WardAdmin$/);
+      cy.get("div[id='name']").contains("Cypress Test Tester");
+      cy.get("div[id='district']").contains(/^Ernakulam$/);
+      cy.get("div[id='local_body']").contains("Aikaranad");
+      cy.get("div[id='created_by']").contains(/^devdistrictadmin$/);
+      cy.get("div[id='home_facility']").contains("No Home Facility");
+      cy.get("div[id='facilities'] > div > button").click().wait(1000);
+      cy.wait("@userFacility").then(() => {
+        cy.get("div").contains("cypress_testing_facility");
+      });
+    });
   });
 
   it("link facility for user", () => {
@@ -138,6 +177,7 @@ describe("Edit Profile Testing", () => {
       .type("User 1")
       .trigger("change", { force: true });
     cy.get("form").get("button[type='submit']").contains("Update").click();
+    cy.wait(1000);
     cy.get("dt").contains("First Name").siblings().first().contains("User 1");
   });
 
@@ -153,6 +193,7 @@ describe("Edit Profile Testing", () => {
       .type("User 1")
       .trigger("change", { force: true });
     cy.get("form").get("button[type='submit']").contains("Update").click();
+    cy.wait(1000);
     cy.get("dt").contains("Last Name").siblings().first().contains("User 1");
   });
 
@@ -188,6 +229,7 @@ describe("Edit Profile Testing", () => {
       .should("have.attr", "value", `+91 ${whatsapp_num}`);
     cy.wait(1000);
     cy.get("form").get("button[type='submit']").contains("Update").click();
+    cy.wait(1000);
     cy.get("dt")
       .contains("Whatsapp No")
       .siblings()
@@ -227,6 +269,7 @@ describe("Edit Profile Testing", () => {
       .should("have.attr", "value", `+91 ${phone_num}`);
     cy.wait(1000);
     cy.get("form").get("button[type='submit']").contains("Update").click();
+    cy.wait(1000);
     cy.get("dt")
       .contains("Contact No")
       .siblings()

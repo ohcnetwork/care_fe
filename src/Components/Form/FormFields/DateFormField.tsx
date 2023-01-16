@@ -38,7 +38,8 @@ const DateFormField = ({ position = "RIGHT", ...props }: Props) => {
   return (
     <FormField props={props}>
       <DateInputV2
-        className={classNames(error && "border-danger-500")}
+        className={classNames(error && "border-red-500")}
+        id={props.id}
         value={props.value}
         onChange={(value) => handleChange({ name, value })}
         max={props.max || (props.disableFuture ? new Date() : undefined)}
