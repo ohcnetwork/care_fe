@@ -6,12 +6,12 @@ import {
   getInvestigation,
   getPatient,
 } from "../../../Redux/actions";
-import PageTitle from "../../Common/PageTitle";
 import InvestigationTable from "./InvestigationTable";
 import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
 import * as Notification from "../../../Utils/Notifications.js";
+import Page from "../../Common/components/Page";
 
 const Loading = loadable(() => import("../../Common/Loading"));
 
@@ -160,15 +160,14 @@ export default function ShowInvestigation(props: any) {
   }, [state.initialValues]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
-      <PageTitle
-        title="Investigation"
-        className="mx-3 md:mx-4"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-      />
+    <Page
+      title="Investigation"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [patientId]: { name: patientName },
+      }}
+      className="max-w-7xl mx-auto"
+    >
       {isLoading ? (
         <Loading />
       ) : (
@@ -181,6 +180,6 @@ export default function ShowInvestigation(props: any) {
           handleSave={handleSubmit}
         />
       )}
-    </div>
+    </Page>
   );
 }

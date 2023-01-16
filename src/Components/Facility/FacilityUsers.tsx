@@ -23,9 +23,9 @@ import * as Notification from "../../Utils/Notifications.js";
 import UserDetails from "../Common/UserDetails";
 import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
 import { classNames } from "../../Utils/utils";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function FacilityUsers(props: any) {
   const { facilityId } = props;
@@ -450,7 +450,7 @@ export default function FacilityUsers(props: any) {
   }
 
   return (
-    <div>
+    <Page title={`Users - ${facilityData?.name}`} hideBack breadcrumbs={false}>
       {linkFacility.show && (
         <LinkFacilityDialog
           username={linkFacility.username}
@@ -458,16 +458,9 @@ export default function FacilityUsers(props: any) {
           handleCancel={hideLinkFacilityModal}
         />
       )}
-      <PageTitle
-        title={`Users - ${facilityData?.name}`}
-        hideBack={true}
-        className="mx-3 md:mx-8"
-        breadcrumbs={false}
-      />
-
-      <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-4">
+      <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 my-4">
         <div className="bg-white overflow-hidden shadow col-span-1 rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
+          <div className="py-5 sm:p-6">
             <dl>
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Users
@@ -486,10 +479,7 @@ export default function FacilityUsers(props: any) {
           </div>
         </div>
       </div>
-
-      <div className="px-3 md:px-8">
-        <div>{manageUsers}</div>
-      </div>
+      <div>{manageUsers}</div>
       {userData.show && (
         <UserDeleteDialog
           name={userData.name}
@@ -497,6 +487,6 @@ export default function FacilityUsers(props: any) {
           handleOk={handleSubmit}
         />
       )}
-    </div>
+    </Page>
   );
 }

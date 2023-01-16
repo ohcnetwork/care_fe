@@ -22,9 +22,9 @@ import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm = {
   address: "",
@@ -223,8 +223,7 @@ export default function UpdateResult(props: any) {
   }
 
   return (
-    <div>
-      <PageTitle title="Update External Result" className="px-6 mb-2" />
+    <Page title="Update External Result">
       <CardContent>
         <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -329,6 +328,6 @@ export default function UpdateResult(props: any) {
           </div>
         </form>
       </CardContent>
-    </div>
+    </Page>
   );
 }

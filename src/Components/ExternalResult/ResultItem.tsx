@@ -6,13 +6,13 @@ import { externalResult, deleteExternalResult } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import AlertDialog from "../Common/AlertDialog";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResultItem(props: any) {
   const dispatch: any = useDispatch();
-  let initialData: any = {};
+  const initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
@@ -59,9 +59,7 @@ export default function ResultItem(props: any) {
   }
 
   return (
-    <div>
-      <PageTitle title={"Result details"} className="px-6 mb-2" />
-
+    <Page title={"Result details"}>
       {showDeleteAlert && (
         <AlertDialog
           title="Confirm Delete"
@@ -72,7 +70,7 @@ export default function ResultItem(props: any) {
         />
       )}
 
-      <div className="mx-3 md:mx-8 mb-10 mt-4">
+      <div className="mb-10 mt-4">
         <div className="flex flex-col md:flex-row gap-2 justify-end">
           <button
             className="btn-primary btn mr-2 w-full md:w-auto"
@@ -218,6 +216,6 @@ export default function ResultItem(props: any) {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 }

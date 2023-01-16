@@ -11,9 +11,9 @@ import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 const ScrollingComponent = withScrolling("div");
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
@@ -33,27 +33,20 @@ export default function BoardView() {
   };
 
   return (
-    <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="w-full flex-col md:flex-row flex items-center justify-between">
-        <div className="w-1/3 lg:w-1/4">
-          <PageTitle
-            title="Resource"
-            hideBack
-            className="mx-3 md:mx-5"
-            componentRight={
-              <ExportButton
-                action={() =>
-                  downloadResourceRequests({ ...appliedFilters, csv: 1 })
-                }
-                filenamePrefix="resource_requests"
-              />
-            }
-            breadcrumbs={false}
-          />
-        </div>
-
-        <div className="w-full flex justify-center pt-2 lg:space-x-4 items-center flex-col md:flex-row">
-          <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex mt-1">
+    <Page
+      title="Resource"
+      hideBack
+      componentRight={
+        <ExportButton
+          action={() => downloadResourceRequests({ ...appliedFilters, csv: 1 })}
+          filenamePrefix="resource_requests"
+        />
+      }
+      breadcrumbs={false}
+      className="flex flex-col h-screen"
+      options={
+        <div className="w-full flex justify-center lg:space-x-4 items-center flex-col md:flex-row">
+          <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
             <button
               className={
                 "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
@@ -77,7 +70,7 @@ export default function BoardView() {
               <span>Completed</span>
             </button>
           </div>
-          <div className="mt-2 w-fit inline-flex space-x-1 lg:space-x-4">
+          <div className="w-fit inline-flex space-x-1 lg:space-x-4">
             <button
               className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-28 md:w-36 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
               onClick={onListViewBtnClick}
@@ -94,11 +87,11 @@ export default function BoardView() {
             </button>
           </div>
         </div>
-      </div>
-
+      }
+    >
       <BadgesList {...{ appliedFilters, FilterBadges }} />
-      <ScrollingComponent className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
-        <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
+      <ScrollingComponent className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll pr-4">
+        <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
           {isLoading ? (
             <Loading />
           ) : (
@@ -118,6 +111,6 @@ export default function BoardView() {
           <ListFilter {...advancedFilter} />
         </div>
       </SlideOver>
-    </div>
+    </Page>
   );
 }

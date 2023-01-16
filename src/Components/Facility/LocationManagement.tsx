@@ -8,7 +8,7 @@ import Pagination from "../Common/Pagination";
 import { RoleButton } from "../Common/RoleButton";
 import { LocationModel } from "./models";
 import { ReactElement } from "react";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface LocationManagementProps {
@@ -162,13 +162,11 @@ export const LocationManagement = (props: LocationManagementProps) => {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Location Management"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
-      />
-      <div className="container mx-auto px-4 py-2 sm:px-8">
+    <Page
+      title="Location Management"
+      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+    >
+      <div className="container mx-auto py-2">
         <div className="flex justify-end">
           <RoleButton
             className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
@@ -184,6 +182,6 @@ export const LocationManagement = (props: LocationManagementProps) => {
         </div>
         {location}
       </div>
-    </div>
+    </Page>
   );
 };

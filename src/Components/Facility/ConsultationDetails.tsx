@@ -50,6 +50,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import Page from "../Common/components/Page";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -331,7 +332,60 @@ export const ConsultationDetails = (props: any) => {
   };
 
   return (
-    <div>
+    <Page
+      title="Patient Dashboard"
+      crumbsReplacements={{
+        [facilityId]: { name: patientData?.facility_object?.name },
+        [patientId]: { name: patientData?.name },
+        [consultationId]: {
+          name: `Admitted on ${formatDate(
+            consultationData.admission_date
+              ? consultationData.admission_date
+              : "00:00"
+          )}`,
+        },
+      }}
+      breadcrumbs={true}
+      className="relative"
+      options={
+        <nav className="flex justify-between flex-wrap">
+          <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-3 flex sm:flex-row md:flex-col lg:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+            {patientData.is_active && (
+              <div className="w-full flex flex-col sm:flex-row md:flex-col lg:flex-row px-2">
+                <button
+                  onClick={() => setShowDoctors(true)}
+                  className="w-full btn m-1 btn-primary hover:text-white"
+                >
+                  Doctor Connect
+                </button>
+                {patientData.last_consultation?.id && (
+                  <Link
+                    href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                    className="w-full btn m-1 btn-primary hover:text-white"
+                  >
+                    Camera Feed
+                  </Link>
+                )}
+              </div>
+            )}
+            <div className="w-full flex flex-col sm:flex-row md:flex-col lg:flex-row px-2">
+              <Link
+                href={`/facility/${patientData.facility}/patient/${patientData.id}`}
+                className="w-full btn m-1 btn-primary hover:text-white"
+              >
+                Patient Details
+              </Link>
+              <Link
+                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
+                className="w-full btn m-1 btn-primary hover:text-white"
+              >
+                Doctor&apos;s Notes
+              </Link>
+            </div>
+          </div>
+        </nav>
+      }
+    >
       <Dialog open={open} onClose={handleDischargeSummary}>
         <DialogTitle id="form-dialog-title">
           Download Discharge Summary
@@ -447,58 +501,6 @@ export const ConsultationDetails = (props: any) => {
         </div>
       </DialogModal>
       <div className="px-2 pb-2">
-        <nav className="flex justify-between flex-wrap relative">
-          <PageTitle
-            title="Patient Dashboard"
-            className="sm:m-0 sm:p-0"
-            crumbsReplacements={{
-              [facilityId]: { name: patientData?.facility_object?.name },
-              [patientId]: { name: patientData?.name },
-              [consultationId]: {
-                name: `Admitted on ${formatDate(
-                  consultationData.admission_date
-                    ? consultationData.admission_date
-                    : "00:00"
-                )}`,
-              },
-            }}
-            breadcrumbs={true}
-          />
-          <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
-            {patientData.is_active && (
-              <div className="w-full flex flex-col sm:flex-row px-2">
-                <button
-                  onClick={() => setShowDoctors(true)}
-                  className="w-full btn m-1 btn-primary hover:text-white"
-                >
-                  Doctor Connect
-                </button>
-                {patientData.last_consultation?.id && (
-                  <Link
-                    href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
-                    className="w-full btn m-1 btn-primary hover:text-white"
-                  >
-                    Camera Feed
-                  </Link>
-                )}
-              </div>
-            )}
-            <div className="w-full flex flex-col sm:flex-row px-2">
-              <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}`}
-                className="w-full btn m-1 btn-primary hover:text-white"
-              >
-                Patient Details
-              </Link>
-              <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
-                className="w-full btn m-1 btn-primary hover:text-white"
-              >
-                Doctor&apos;s Notes
-              </Link>
-            </div>
-          </div>
-        </nav>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black w-full">
             <PatientInfoCard
@@ -663,7 +665,9 @@ export const ConsultationDetails = (props: any) => {
         {tab === "UPDATES" && (
           <div className="flex xl:flex-row flex-col">
             <div className="xl:w-2/3 w-full">
-              <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
+              <div className="">
+                <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
+              </div>
               {!consultationData.discharge_date && (
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
                   <PatientVitalsCard
@@ -1194,6 +1198,6 @@ export const ConsultationDetails = (props: any) => {
         show={showDoctors}
         setShow={setShowDoctors}
       />
-    </div>
+    </Page>
   );
 };

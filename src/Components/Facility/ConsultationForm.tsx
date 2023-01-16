@@ -58,9 +58,9 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import DateFormField from "../Form/FormFields/DateFormField";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 type BooleanStrings = "true" | "false";
 
@@ -617,16 +617,14 @@ export const ConsultationForm = (props: any) => {
   };
 
   return (
-    <div ref={topRef}>
-      <PageTitle
-        className="ml-3 mt-5"
-        title={isUpdate ? "Edit Consultation" : "Create Consultation"}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-      />
-
+    <Page
+      title={isUpdate ? "Edit Consultation" : "Create Consultation"}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [patientId]: { name: patientName },
+      }}
+      ref={topRef}
+    >
       <form
         className="mt-10 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto flex flex-col gap-4"
         onSubmit={handleSubmit}
@@ -916,6 +914,6 @@ export const ConsultationForm = (props: any) => {
           </div>
         </div>
       )}
-    </div>
+    </Page>
   );
 };

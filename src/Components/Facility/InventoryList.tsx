@@ -8,7 +8,7 @@ import { getInventorySummary, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { RoleButton } from "../Common/RoleButton";
 import { classNames } from "../../Utils/utils";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function InventoryList(props: any) {
@@ -152,13 +152,11 @@ export default function InventoryList(props: any) {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Inventory Manager"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
-      />
-      <div className="container mx-auto px-4 sm:px-8">
+    <Page
+      title="Inventory Manager"
+      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+    >
+      <div className="container mx-auto">
         <div className="py-4 md:py-8">
           <div className="flex flex-col md:flex-row">
             <div className="mt-2">
@@ -197,6 +195,6 @@ export default function InventoryList(props: any) {
           {inventoryItem}
         </div>
       </div>
-    </div>
+    </Page>
   );
 }

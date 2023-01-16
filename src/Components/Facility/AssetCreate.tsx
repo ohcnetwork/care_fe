@@ -8,7 +8,6 @@ import {
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import CropFreeIcon from "@material-ui/icons/CropFree";
-import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
@@ -32,6 +31,7 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -385,15 +385,15 @@ const AssetCreate = (props: AssetProps) => {
 
   if (locations.length === 0) {
     return (
-      <div className="px-6 pb-2">
-        <PageTitle
-          title={assetId ? "Update Asset" : "Create New Asset"}
-          crumbsReplacements={{
-            [facilityId]: { name: facilityName },
-            assets: { style: "text-gray-200 pointer-events-none" },
-            [assetId || "????"]: { name },
-          }}
-        />
+      <Page
+        title={assetId ? "Update Asset" : "Create New Asset"}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          assets: { style: "text-gray-200 pointer-events-none" },
+          [assetId || "????"]: { name },
+        }}
+        className="pb-2"
+      >
         <section className="text-center">
           <h1 className="text-6xl flex items-center flex-col py-10">
             <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
@@ -411,7 +411,7 @@ const AssetCreate = (props: AssetProps) => {
             Add Location
           </button>
         </section>
-      </div>
+      </Page>
     );
   }
 
@@ -462,16 +462,15 @@ const AssetCreate = (props: AssetProps) => {
   yesterday.setDate(yesterday.getDate() - 1);
 
   return (
-    <div className="pb-2 relative flex flex-col">
-      <PageTitle
-        title={`${assetId ? "Update" : "Create"} Asset`}
-        className="pl-6 flex-grow-0"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          assets: { style: "text-gray-200 pointer-events-none" },
-          [assetId || "????"]: { name },
-        }}
-      />
+    <Page
+      title={`${assetId ? "Update" : "Create"} Asset`}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        assets: { style: "text-gray-200 pointer-events-none" },
+        [assetId || "????"]: { name },
+      }}
+      className="pb-2 relative flex flex-col"
+    >
       <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
         <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
           {Object.keys(sections).map((sectionTitle) => {
@@ -503,10 +502,9 @@ const AssetCreate = (props: AssetProps) => {
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
             >
               <div className="grid grid-cols-1 gap-x-12 items-start">
-                <div className="grid grid-cols-6 gap-x-6">
+                <div className="grid grid-cols-6 gap-6">
                   {/* General Details Section */}
                   {sectionTitle("General Details")}
-
                   {/* Asset Name */}
                   <div className="col-span-6" ref={fieldRef["name"]}>
                     <TextFormField
@@ -599,7 +597,7 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Divider */}
-                  <div className="col-span-6">
+                  {/* <div className="col-span-6">
                     <hr
                       className={
                         "transition-all " +
@@ -608,7 +606,7 @@ const AssetCreate = (props: AssetProps) => {
                           : "opacity-100 my-4")
                       }
                     />
-                  </div>
+                  </div> */}
 
                   {/* Working Status */}
                   <div ref={fieldRef["is_working"]} className="col-span-6">
@@ -665,7 +663,7 @@ const AssetCreate = (props: AssetProps) => {
                   </div>
 
                   {/* Divider */}
-                  <div className="col-span-6">
+                  {/* <div className="col-span-6">
                     <hr
                       className={
                         "transition-all " +
@@ -674,7 +672,7 @@ const AssetCreate = (props: AssetProps) => {
                           : "opacity-100 mb-7")
                       }
                     />
-                  </div>
+                  </div> */}
 
                   {/* Asset QR ID */}
                   <div className="col-span-6">
@@ -902,7 +900,7 @@ const AssetCreate = (props: AssetProps) => {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };
 

@@ -59,7 +59,6 @@ import {
 } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 import AccordionV2 from "../Common/components/AccordionV2";
 import CollapseV2 from "../Common/components/CollapseV2";
@@ -70,6 +69,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import Page from "../Common/components/Page";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -992,7 +992,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   }
 
   return (
-    <div className="px-2 pb-2">
+    <Page
+      title={headerText}
+      backButtonCB={() => {
+        if (showImport) {
+          setShowImport(false);
+        }
+      }}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [id || "????"]: { name: patientName },
+      }}
+    >
       {statusDialog.show && (
         <DuplicatePatientDialog
           patientList={statusDialog.patientList}
@@ -1009,19 +1020,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           facilityId={facilityId}
         />
       )}
-      <PageTitle
-        title={headerText}
-        className="mb-11"
-        backButtonCB={() => {
-          if (showImport) {
-            setShowImport(false);
-          }
-        }}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [id || "????"]: { name: patientName },
-        }}
-      />
       <div className="mt-4">
         <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
           <div className="text-lg font-bold flex items-center mb-1">
@@ -2054,6 +2052,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           )}
         </>
       </div>
-    </div>
+    </Page>
   );
 };

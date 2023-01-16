@@ -15,8 +15,8 @@ import { ReactElement } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import BedDeleteDialog from "./BedDeleteDialog";
+import Page from "../Common/components/Page";
 
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface BedManagementProps {
@@ -237,18 +237,16 @@ export const BedManagement = (props: BedManagementProps) => {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Bed Management"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [locationId]: {
-            name: locationName,
-            uri: `/facility/${facilityId}/location`,
-          },
-        }}
-      />
+    <Page
+      title="Bed Management"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [locationId]: {
+          name: locationName,
+          uri: `/facility/${facilityId}/location`,
+        },
+      }}
+    >
       <div className="container px-4 py-2 sm:px-8">
         <div className="flex justify-end">
           <button
@@ -266,6 +264,6 @@ export const BedManagement = (props: BedManagementProps) => {
         </div>
         {bed}
       </div>
-    </div>
+    </Page>
   );
 };

@@ -7,13 +7,13 @@ import {
   getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import Loading from "../Common/Loading";
 import { RoleButton } from "../Common/RoleButton";
 import { formatDate } from "../../Utils/utils";
+import Page from "../Common/components/Page";
 
 interface PatientNotesProps {
   patientId: any;
@@ -105,16 +105,15 @@ const PatientNotes = (props: PatientNotesProps) => {
   }
 
   return (
-    <div className="w-full flex flex-col">
-      <PageTitle
-        title="Patient Notes"
-        className="mb-5"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-      />
-      <h3 className="text-lg pl-10">Add new notes</h3>
+    <Page
+      className="w-full flex flex-col"
+      title="Patient Notes"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [patientId]: { name: patientName },
+      }}
+    >
+      <h3 className="text-lg pl-10 mt-5">Add new notes</h3>
       <textarea
         rows={3}
         placeholder="Type your Note"
@@ -192,7 +191,7 @@ const PatientNotes = (props: PatientNotesProps) => {
           )}
         </div>
       </div>
-    </div>
+    </Page>
   );
 };
 

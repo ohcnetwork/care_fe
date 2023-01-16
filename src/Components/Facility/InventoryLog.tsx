@@ -12,7 +12,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import { Tooltip } from "@material-ui/core";
 import { formatDate } from "../../Utils/utils";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
@@ -244,16 +244,14 @@ export default function InventoryLog(props: any) {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Inventory Log"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [inventoryId]: { name: itemName },
-        }}
-      />
-      <div className="container mx-auto px-4 sm:px-8">
+    <Page
+      title="Inventory Log"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [inventoryId]: { name: itemName },
+      }}
+    >
+      <div className="container mx-auto">
         <div className="py-8 ">
           <div className="flex justify-between">
             <h4>Item: {itemName}</h4>
@@ -286,6 +284,6 @@ export default function InventoryLog(props: any) {
           {inventoryItem}
         </div>
       </div>
-    </div>
+    </Page>
   );
 }
