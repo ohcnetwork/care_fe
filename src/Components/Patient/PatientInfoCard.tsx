@@ -228,7 +228,7 @@ export default function PatientInfoCard(props: {
                   key={i}
                   variant={action[4] && action[4][0] ? "danger" : "primary"}
                   href={`${action[0]}`}
-                  align="left"
+                  align="start"
                   className="w-full"
                 >
                   <CareIcon className={`care-l-${action[2]}`} />
