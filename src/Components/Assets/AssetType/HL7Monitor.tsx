@@ -111,15 +111,14 @@ const HL7Monitor = (props: HL7MonitorProps) => {
               <h2 className="text-lg font-bold mb-2">Connection</h2>
               <div>
                 <TextFormField
-                  name="Middleware Hostname"
+                  name="middlewareHostname"
                   label="Middleware Hostname"
                   value={middlewareHostname}
                   onChange={(e) => setMiddlewareHostname(e.value)}
-                  error={middlewareHostnameError}
-                  required
+                   error={middlewareHostnameError}
                 />
                 <TextFormField
-                  name="Local IP Address"
+                  name="localipAddress"
                   label="Local IP Address"
                   value={localipAddress}
                   onChange={(e) => setLocalIPAddress(e.value)}

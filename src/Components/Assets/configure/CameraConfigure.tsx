@@ -2,13 +2,12 @@ import { Fragment, SyntheticEvent, useState } from "react";
 import React from "react";
 import { AssetData } from "../AssetTypes";
 import { Card, CardContent } from "@material-ui/core";
-import { TextInputField } from "../../Common/HelperInputFields";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { getCameraConfig } from "../../../Utils/transformUtils";
 import { Submit } from "../../Common/components/ButtonV2";
-import { FieldLabel } from "../../Form/FormFields/FormField";
+import TextFormField from "../../Form/FormFields/TextFormField";
 
 interface CameraConfigureProps {
   asset: AssetData;
@@ -58,37 +57,33 @@ export default function CameraConfigure(props: CameraConfigureProps) {
   return (
     <Fragment>
       <Card>
+
         <form onSubmit={handleSubmit}>
           <CardContent>
             <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <FieldLabel required id="asset-type">
-                  Bed
-                </FieldLabel>
+<label id="asset-type">Bed *</label>
                 <BedSelect
                   name="bed"
+                  className="overflow-y-scoll mt-2"
                   setSelected={(selected) => setBed(selected as BedModel)}
                   selected={bed}
                   errors={bedError}
                   multiple={false}
-                  margin="dense"
                   location={asset?.location_object?.id}
                   facility={asset?.location_object?.facility?.id}
                 />
               </div>
               <div>
-                <FieldLabel required id="location">
-                  Preset Name
-                </FieldLabel>
-                <TextInputField
+                <label id="location">Preset Name</label>
+                <TextFormField
                   name="name"
                   id="location"
-                  variant="outlined"
-                  margin="dense"
                   type="text"
                   value={newPreset}
-                  onChange={(e) => setNewPreset(e.target.value)}
-                  errors={newPresetError}
+                  className="mt-2"
+                  onChange={(e) => setNewPreset(e.value)}
+                  error={newPresetError}
                 />
               </div>
             </div>

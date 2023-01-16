@@ -89,22 +89,22 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
     >
       <div className="flex flex-col">
         <div className="w-full">
-          <FieldLabel required id="asset-type">
+          <FieldLabel required >
             Bed
           </FieldLabel>
+
           <BedSelect
             name="bed"
             setSelected={(selected) => setBed(selected as BedModel)}
             selected={bed}
             errors={bedError}
             multiple={false}
-            margin="dense"
             location={asset?.location_object?.id}
             facility={asset?.location_object?.facility?.id}
             className="w-full"
           />
         </div>
-        <Submit className="shrink-0 w-full">
+        <Submit className="shrink-0 w-full mt-6">
           <i className="fas fa-bed-pulse" />
           {updateLink ? "Update Bed" : "Save Bed"}
         </Submit>
