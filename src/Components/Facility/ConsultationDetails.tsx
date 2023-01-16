@@ -41,7 +41,6 @@ import { TextInputField } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
 import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
-import { formatDate } from "../../Utils/utils";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
@@ -51,9 +50,24 @@ import DialogModal from "../Common/Dialog";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import Page from "../Common/components/Page";
+import DateFormField from "../Form/FormFields/DateFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
+import PRNPrescriptionBuilder, {
+  PRNPrescriptionType,
+} from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import { formatDate } from "../../Utils/utils";
+
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
+  discharge_date: string;
+  death_datetime: string | null;
+  death_confirmed_doctor: string | null;
 }
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -88,7 +102,15 @@ export const ConsultationDetails = (props: any) => {
     useState<PreDischargeFormInterface>({
       discharge_reason: "",
       discharge_notes: "",
+      discharge_date: "",
+      death_datetime: null,
+      death_confirmed_doctor: null,
     });
+
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
+    []
+  );
+  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -158,7 +180,6 @@ export const ConsultationDetails = (props: any) => {
 
   const handlePatientDischarge = async (value: boolean) => {
     setIsSendingDischargeApi(true);
-
     if (!preDischargeForm.discharge_reason) {
       setErrors({
         ...errors,
@@ -182,7 +203,13 @@ export const ConsultationDetails = (props: any) => {
 
     const dischargeResponse = await dispatch(
       dischargePatient(
-        { discharge: value, ...preDischargeForm },
+        {
+          ...preDischargeForm,
+          discharge: value,
+          discharge_date: moment(preDischargeForm.discharge_date).toISOString(
+            true
+          ),
+        },
         { id: patientData.id }
       )
     );
@@ -201,7 +228,9 @@ export const ConsultationDetails = (props: any) => {
     }
   };
 
-  const handleDischargeSummaryFormChange = (e: any) => {
+  const handleDischargeSummaryFormChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
     const { value } = e.target;
 
     const errorField = Object.assign({}, errors);
@@ -223,6 +252,20 @@ export const ConsultationDetails = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
+      setDischargeAdvice(res && res.data && res.data.discharge_advice);
+      setPRNAdvice(
+        !Array.isArray(res.data.prn_prescription)
+          ? []
+          : res.data.prn_prescription
+      );
+      setPreDischargeForm((form) => {
+        return {
+          ...form,
+          discharge_date: res.data.admission_date
+            ? res.data.admission_date
+            : new Date().toISOString(),
+        };
+      });
       if (!status.aborted) {
         if (res && res.data) {
           const data: ConsultationModel = {
@@ -303,11 +346,9 @@ export const ConsultationDetails = (props: any) => {
       <div className="text-sm w-full">
         <p className="font-semibold leading-relaxed">{label}</p>
 
-        {diagnoses
-          .slice(0, !showMore ? nshow : undefined)
-          .map((diagnosis: any) => (
-            <p>{diagnosis.label}</p>
-          ))}
+        {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) => (
+          <p>{diagnosis.label}</p>
+        ))}
         {diagnoses.length > nshow && (
           <>
             {!showMore ? (
@@ -329,6 +370,15 @@ export const ConsultationDetails = (props: any) => {
         )}
       </div>
     ) : null;
+  };
+
+  const handleDateChange = (e: FieldChangeEvent<Date>) => {
+    setPreDischargeForm((form) => {
+      return {
+        ...form,
+        discharge_date: e.value.toString(),
+      };
+    });
   };
 
   return (
@@ -449,6 +499,7 @@ export const ConsultationDetails = (props: any) => {
         }
         show={openDischargeDialog}
         onClose={handleDischargeClose}
+        className="md:max-w-2xl"
       >
         <div className="mt-6 flex flex-col">
           <SelectFormField
@@ -473,6 +524,8 @@ export const ConsultationDetails = (props: any) => {
             label={
               preDischargeForm.discharge_reason == "EXP"
                 ? "Cause of death"
+                : preDischargeForm.discharge_reason === "REC"
+                ? "Discharged Advice"
                 : "Notes"
             }
             name="discharge_notes"
@@ -485,9 +538,75 @@ export const ConsultationDetails = (props: any) => {
             }
             error={errors?.discharge_notes}
           />
+          {preDischargeForm.discharge_reason === "REC" && (
+            <div>
+              <DateFormField
+                label="Discharge Date"
+                name="discharge_date"
+                value={moment(preDischargeForm.discharge_date).toDate()}
+                min={moment(consultationData.admission_date).toDate()}
+                disableFuture={true}
+                required
+                onChange={handleDateChange}
+              />
+              <FieldLabel>Discharge Prescription</FieldLabel>
+              <div className="">
+                <PRNPrescriptionBuilder
+                  prescriptions={PRNAdvice}
+                  setPrescriptions={setPRNAdvice}
+                />
+              </div>
+              <div>
+                <FieldLabel>Description Advice</FieldLabel>
+                <PrescriptionBuilder
+                  prescriptions={dischargeAdvice}
+                  setPrescriptions={setDischargeAdvice}
+                />
+              </div>
+            </div>
+          )}
+          {preDischargeForm.discharge_reason === "EXP" && (
+            <div>
+              <div>
+                Death Date and Time
+                <span className="text-danger-500">{" *"}</span>
+                <input
+                  type="datetime-local"
+                  className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                  value={preDischargeForm.death_datetime || ""}
+                  required
+                  min={consultationData.admission_date?.substring(0, 16)}
+                  max={moment(new Date()).format("YYYY-MM-DDThh:mm")}
+                  onChange={(e) => {
+                    setPreDischargeForm((form) => {
+                      return {
+                        ...form,
+                        death_datetime: e.target.value,
+                      };
+                    });
+                  }}
+                />
+              </div>
+              <TextFormField
+                name="death_confirmed_by"
+                label="Confirmed By"
+                value={preDischargeForm.death_confirmed_doctor || ""}
+                onChange={(e) => {
+                  setPreDischargeForm((form) => {
+                    return {
+                      ...form,
+                      death_confirmed_doctor: e.value,
+                    };
+                  });
+                }}
+                required
+                placeholder="Attending Doctor's Name and Designation"
+              />
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-col md:flex-row gap-2 md:justify-end">
+        <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
           <Cancel onClick={handleDischargeClose} />
           {isSendingDischargeApi ? (
             <CircularProgress size={20} />
