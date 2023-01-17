@@ -286,8 +286,11 @@ describe("Delete User", () => {
   it("deletes user", () => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.awaitUrl("/user");
-    cy.get("[name='username']").type(username);
-    cy.get("button").should("contain", "Delete").contains("Delete").click();
+    cy.get("[name='username']").type(username, { force: true });
+    cy.get("button")
+      .should("contain", "Delete")
+      .contains("Delete")
+      .click({ force: true });
     cy.get("button.font-medium.btn.btn-danger").click();
   });
 });

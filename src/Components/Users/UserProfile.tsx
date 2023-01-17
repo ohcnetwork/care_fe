@@ -448,7 +448,9 @@ export default function UserProfile() {
                             name="firstName"
                             label="First Name"
                             value={states.form.firstName}
-                            onChange={(e) => handleValueChange(e, "firstName")}
+                            onChange={(e) =>
+                              handleValueChange(e?.value, "firstName")
+                            }
                             error={states.errors.firstName}
                             required
                           />
@@ -459,7 +461,9 @@ export default function UserProfile() {
                             name="lastName"
                             label="Last name"
                             value={states.form.lastName}
-                            onChange={(e) => handleValueChange(e, "lastName")}
+                            onChange={(e) =>
+                              handleValueChange(e?.value, "lastName")
+                            }
                             error={states.errors.lastName}
                             required
                           />
