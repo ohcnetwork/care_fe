@@ -458,9 +458,6 @@ const AssetCreate = (props: AssetProps) => {
     );
   };
 
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
   return (
     <div className="pb-2 relative flex flex-col">
       <PageTitle
@@ -738,7 +735,7 @@ const AssetCreate = (props: AssetProps) => {
                         }
                       }}
                       type="date"
-                      min={moment(yesterday).format("YYYY-MM-DD")}
+                      min={moment().format("YYYY-MM-DD")}
                     />
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
