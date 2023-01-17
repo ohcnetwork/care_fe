@@ -32,25 +32,24 @@ export type UserRole =
   | "StateReadOnlyAdmin"
   | "StateAdmin";
 
-const readOnly = true;
 export const USER_TYPE_OPTIONS: {
   id: UserRole;
   role: string;
-  readOnly?: true | undefined;
+  readOnly?: boolean;
 }[] = [
-  { id: "Pharmacist", role: "Pharmacist" },
-  { id: "Volunteer", role: "Volunteer" },
-  { id: "StaffReadOnly", role: "Staff", readOnly },
-  { id: "Staff", role: "Staff" },
-  { id: "Doctor", role: "Doctor" },
-  { id: "WardAdmin", role: "Ward Admin" },
-  { id: "LocalBodyAdmin", role: "Local Body Admin" },
-  { id: "DistrictLabAdmin", role: "District Lab Admin" },
-  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly },
-  { id: "DistrictAdmin", role: "District Admin" },
-  { id: "StateLabAdmin", role: "State Lab Admin" },
-  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly },
-  { id: "StateAdmin", role: "State Admin" },
+  { id: "Pharmacist", role: "Pharmacist", readOnly: false },
+  { id: "Volunteer", role: "Volunteer", readOnly: false },
+  { id: "StaffReadOnly", role: "Staff", readOnly: true },
+  { id: "Staff", role: "Staff", readOnly: false },
+  { id: "Doctor", role: "Doctor", readOnly: false },
+  { id: "WardAdmin", role: "Ward Admin", readOnly: false },
+  { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
+  { id: "DistrictLabAdmin", role: "District Lab Admin", readOnly: false },
+  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly: true },
+  { id: "DistrictAdmin", role: "District Admin", readOnly: false },
+  { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
+  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
+  { id: "StateAdmin", role: "State Admin", readOnly: false },
 ];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
@@ -280,6 +279,7 @@ export const CONSULTATION_SUGGESTION = [
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
+  { id: "DD", text: "Declare Death" },
 ];
 
 export const ADMITTED_TO = [
