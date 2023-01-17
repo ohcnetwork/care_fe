@@ -34,7 +34,7 @@ const ConfirmDialogV2 = ({
       show={show}
     >
       {children}
-      <div className="mt-4 flex justify-between">
+      <div className="mt-4 flex justify-between gap-2 w-full flex-col md:flex-row">
         <Cancel onClick={onClose} label={cancelLabel} />
         <ButtonV2
           onClick={onConfirm}
