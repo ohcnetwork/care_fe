@@ -4,14 +4,20 @@ import { postForgotPassword, postLogin } from "../../Redux/actions";
 import { Grid, CircularProgress } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
-import { RECAPTCHA_SITE_KEY } from "../../Common/env";
 import * as Notification from "../../Utils/Notifications.js";
 import { get } from "lodash";
 import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useConfig from "../../Common/hooks/useConfig";
 
 export const Login = (props: { forgot?: boolean }) => {
+  const {
+    static_light_logo,
+    static_black_logo,
+    recaptcha_site_key,
+    github_url,
+  } = useConfig();
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
@@ -22,7 +28,6 @@ export const Login = (props: { forgot?: boolean }) => {
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
-  const captchaKey = RECAPTCHA_SITE_KEY ?? "";
   const { t } = useTranslation();
   // display spinner while login is under progress
   const [loading, setLoading] = useState(false);
@@ -175,7 +180,7 @@ export const Login = (props: { forgot?: boolean }) => {
           rel="noopener noreferrer"
         >
           <img
-            src={process.env.REACT_APP_LIGHT_LOGO}
+            src={static_light_logo}
             className="h-8 hidden md:inline-block"
             alt="coronasafe logo"
           />
@@ -215,7 +220,7 @@ export const Login = (props: { forgot?: boolean }) => {
             </a>
             <div className="mx-auto mt-2">
               <a
-                href={process.env.REACT_APP_GITHUB_URL}
+                href={github_url}
                 target={"_blank"}
                 rel="noopener noreferrer"
                 className="text-primary-400 hover:text-primary-500"
@@ -238,7 +243,7 @@ export const Login = (props: { forgot?: boolean }) => {
             }
           >
             <img
-              src={process.env.REACT_APP_BLACK_LOGO}
+              src={static_black_logo}
               className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
               alt="care logo"
             />{" "}
@@ -274,7 +279,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   {isCaptchaEnabled && (
                     <Grid item className="px-8 py-4">
                       <ReCaptcha
-                        sitekey={captchaKey}
+                        sitekey={recaptcha_site_key}
                         onChange={onCaptchaChange}
                       />
                       <span className="text-red-500">{errors.captcha}</span>
@@ -319,7 +324,7 @@ export const Login = (props: { forgot?: boolean }) => {
             }
           >
             <img
-              src={process.env.REACT_APP_BLACK_LOGO}
+              src={static_black_logo}
               className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
               alt="care logo"
             />{" "}
