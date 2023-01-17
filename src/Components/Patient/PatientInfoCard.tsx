@@ -231,7 +231,7 @@ export default function PatientInfoCard(props: {
                   align="start"
                   className="w-full"
                 >
-                  <CareIcon className={`care-l-${action[2]}`} />
+                  <CareIcon className={`care-l-${action[2]} text-lg`} />
                   <p className="font-semibold">{action[1]}</p>
                 </ButtonV2>
                 {action[4] && action[4][0] && (
