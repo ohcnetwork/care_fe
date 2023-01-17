@@ -364,7 +364,7 @@ export default function ManageUsers() {
           id={`usr_${idx}`}
           className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
         >
-          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
+          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
                 <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
