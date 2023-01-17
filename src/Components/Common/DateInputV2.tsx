@@ -18,6 +18,7 @@ type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
 
 interface Props {
+  id?: string;
   className?: string;
   value: Date | undefined;
   min?: Date;
@@ -31,6 +32,7 @@ interface Props {
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 const DateInputV2: React.FC<Props> = ({
+  id,
   className,
   value,
   min,
@@ -188,6 +190,7 @@ const DateInputV2: React.FC<Props> = ({
           <Popover.Button disabled={disabled} className="w-full">
             <input type="hidden" name="date" />
             <input
+              id={id}
               type="text"
               readOnly
               disabled={disabled}
@@ -252,8 +255,12 @@ const DateInputV2: React.FC<Props> = ({
               {type === "date" && (
                 <>
                   <div className="flex flex-wrap mb-3">
-                    {DAYS.map((day) => (
-                      <div key={day} className="aspect-square w-[14.26%]">
+                    {DAYS.map((day, i) => (
+                      <div
+                        key={day}
+                        id={`day-${i}`}
+                        className="aspect-square w-[14.26%]"
+                      >
                         <div className="text-gray-800 font-medium text-center text-sm">
                           {day}
                         </div>
@@ -268,7 +275,11 @@ const DateInputV2: React.FC<Props> = ({
                       />
                     ))}
                     {dayCount.map((d, i) => (
-                      <div key={i} className="aspect-square w-[14.26%]">
+                      <div
+                        key={i}
+                        id={`date-${d}`}
+                        className="aspect-square w-[14.26%]"
+                      >
                         <div
                           onClick={setDateValue(d)}
                           className={classNames(
@@ -293,6 +304,7 @@ const DateInputV2: React.FC<Props> = ({
                     .map((_, i) => (
                       <div
                         key={i}
+                        id={`month-${i}`}
                         className={classNames(
                           "cursor-pointer w-1/4 font-semibold py-4 px-2 text-center text-sm rounded-lg",
                           value && isSelectedMonth(i)
@@ -322,6 +334,7 @@ const DateInputV2: React.FC<Props> = ({
                       return (
                         <div
                           key={i}
+                          id={`year-${i}`}
                           className={classNames(
                             "cursor-pointer w-1/4 font-semibold py-4 px-2 text-center text-sm rounded-lg",
                             value && isSelectedYear(y)
