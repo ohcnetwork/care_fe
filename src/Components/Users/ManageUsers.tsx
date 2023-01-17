@@ -254,7 +254,11 @@ export default function ManageUsers() {
     fetchData({ aborted: false });
   };
 
-  const showFacilities = (username: string, facilities: FacilityModel[]) => {
+  const showFacilities = (
+    username: string,
+    facilities: FacilityModel[],
+    district_name: string
+  ) => {
     if (!facilities || !facilities.length) {
       return (
         <>
@@ -278,20 +282,22 @@ export default function ManageUsers() {
                     className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
                     onClick={() => updateHomeFacility(username, facility)}
                   ></i>
-                  <IconButton
-                    size="small"
-                    color="secondary"
-                    disabled={isFacilityLoading}
-                    onClick={() =>
-                      setUnlinkFacilityData({
-                        show: true,
-                        facility: facility,
-                        userName: username,
-                      })
-                    }
-                  >
-                    <CloseIcon />
-                  </IconButton>
+                  {currentUser.data.district_object.name === district_name && (
+                    <IconButton
+                      size="small"
+                      color="secondary"
+                      disabled={isFacilityLoading}
+                      onClick={() =>
+                        setUnlinkFacilityData({
+                          show: true,
+                          facility: facility,
+                          userName: username,
+                        })
+                      }
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  )}
                 </div>
               </div>
             ))}
@@ -513,7 +519,11 @@ export default function ManageUsers() {
                         </ButtonV2>
                       </div>
                       {user.facilities &&
-                        showFacilities(user.username, user.facilities)}
+                        showFacilities(
+                          user.username,
+                          user.facilities,
+                          user.district_object.name
+                        )}
                     </div>
                   )}
                 </div>
