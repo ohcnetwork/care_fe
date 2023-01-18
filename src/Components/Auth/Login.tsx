@@ -10,6 +10,7 @@ import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
+import { classNames } from "../../Utils/utils";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -18,6 +19,7 @@ export const Login = (props: { forgot?: boolean }) => {
     recaptcha_site_key,
     github_url,
     state_logo,
+    state_logo_white,
   } = useConfig();
   const dispatch: any = useDispatch();
   const initForm: any = {
@@ -174,16 +176,20 @@ export const Login = (props: { forgot?: boolean }) => {
   return (
     <div className="flex flex-col-reverse md:flex-row md:h-screen relative overflow-hidden">
       <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
-        <div className="hidden md:flex gap-8 items-center">
+        <div className="hidden md:flex gap-6 items-center">
           {state_logo && (
             <img
               src={state_logo}
-              className="bg-white rounded-lg p-3 h-20"
+              className={classNames(
+                "rounded-lg p-3 h-24",
+                state_logo_white && "invert brightness-0"
+              )}
               alt="state logo"
             />
           )}
+          <div className="w-0.5 bg-white h-20" />
           <a
-            href={"https://coronasafe.network?ref=care_login"}
+            href="https://coronasafe.network?ref=care_login"
             className="inline-block"
             target={"_blank"}
             rel="noopener noreferrer"
