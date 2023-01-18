@@ -143,11 +143,13 @@ const NotificationTile = ({
 interface NotificationsListProps {
   shrinked: boolean;
   onClickCB?: () => void;
+  handleOverflow: any;
 }
 
 export default function NotificationsList({
   shrinked,
   onClickCB,
+  handleOverflow,
 }: NotificationsListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -399,6 +401,7 @@ export default function NotificationsList({
         do={() => setOpen(!open)}
         icon={<CareIcon className="care-l-bell h-5" />}
         badgeCount={unreadCount}
+        handleOverflow={handleOverflow}
       />
       <SlideOver
         open={open}

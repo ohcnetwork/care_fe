@@ -6,7 +6,6 @@ import useActiveLink from "../../../Common/hooks/useActiveLink";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
-import { classNames } from "../../../Utils/utils";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -56,6 +55,7 @@ const StatelessSidebar = ({
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
+  const [isOverflowVisible, setOverflowVisisble] = useState(false);
 
   useEffect(() => {
     if (!indicatorRef.current) return;
@@ -69,7 +69,7 @@ const StatelessSidebar = ({
       const bottomItemOffset = 2;
 
       const indexDifference = index - lastIndicatorPosition;
-      // e.style.display = "block";
+      e.style.display = "block";
 
       // if (indexDifference > 0) {
       //   console.log("indexDifference > 0");
@@ -102,17 +102,27 @@ const StatelessSidebar = ({
         e.style.height = "0.75rem";
         setLastIndicatorPosition(index);
       }, 300);
+    } else {
+      indicatorRef.current.style.display = "none";
     }
-    // else {
-    //   indicatorRef.current.style.display = "none";
-    // }
   }, [activeLink]);
+  useEffect(() => {
+    console.log("hi");
+  }, [isOverflowVisible]);
+
+  const handleOverflow = (value: boolean) => {
+    setOverflowVisisble(value);
+  };
 
   return (
     <nav
       className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
-      } transition-all duration-300 ease-in-out overflow-visible`}
+      } transition-all duration-300 ease-in-out ${
+        isOverflowVisible && shrinked
+          ? " overflow-visible "
+          : " overflow-y-auto overflow-x-hidden "
+      }`}
     >
       <div className="h-3" /> {/* flexible spacing */}
       <img
@@ -126,11 +136,8 @@ const StatelessSidebar = ({
         <div className="flex flex-col relative flex-1 md:flex-none">
           <div
             ref={indicatorRef}
-            // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
-            className={classNames(
-              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all duration-200 ease-in-out",
-              activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
-            )}
+            className={`absolute left-1 w-1 hidden md:block
+            bg-primary-400 rounded z-10 transition-all`}
           />
           {NavItems.map((i) => {
             return (
@@ -140,12 +147,14 @@ const StatelessSidebar = ({
                 icon={<CareIcon className={`${i.icon} h-5`} />}
                 selected={i.to === activeLink}
                 do={() => onItemClick && onItemClick(false)}
+                handleOverflow={handleOverflow}
               />
             );
           })}
 
           <NotificationItem
             shrinked={shrinked}
+            handleOverflow={handleOverflow}
             onClickCB={() => onItemClick && onItemClick(false)}
           />
           <Item
@@ -153,6 +162,7 @@ const StatelessSidebar = ({
             to={dashboard_url}
             icon={<CareIcon className="care-l-dashboard text-lg" />}
             external
+            handleOverflow={handleOverflow}
           />
         </div>
         <div className="hidden md:block md:flex-1" />
