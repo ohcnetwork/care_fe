@@ -27,7 +27,6 @@ import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
 import ReactPlayer from "react-player";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
-import { findDOMNode } from "react-dom";
 import { classNames } from "../../../Utils/utils";
 
 interface IFeedProps {
@@ -300,13 +299,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       !screenfull.isFullscreen
-        ? !isIOS
-          ? screenfull.request(
-              videoWrapper.current
-                ? videoWrapper.current
-                : (liveFeedPlayerRef.current as HTMLElement)
-            )
-          : screenfull.request(findDOMNode(liveFeedPlayerRef.current) as any)
+        ? screenfull.request(
+            videoWrapper.current
+              ? videoWrapper.current
+              : (liveFeedPlayerRef.current as HTMLElement)
+          )
         : screenfull.exit();
     },
     updatePreset: (option) => {
