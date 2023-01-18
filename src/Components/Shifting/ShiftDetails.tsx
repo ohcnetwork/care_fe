@@ -20,11 +20,13 @@ import * as Notification from "../../Utils/Notifications.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import CommentSection from "./CommentsSection";
 import { formatDate } from "../../Utils/utils";
+import useConfig from "../../Common/hooks/useConfig";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ShiftDetails(props: { id: string }) {
+  const { static_header_logo } = useConfig();
   const dispatch: any = useDispatch();
   const initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -387,11 +389,7 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <div id="section-to-print" className="print bg-white ">
-        <div>
-          {data.is_kasp && (
-            <img alt="logo" src={process.env.REACT_APP_HEADER_LOGO} />
-          )}
-        </div>
+        <div>{data.is_kasp && <img alt="logo" src={static_header_logo} />}</div>
         <div className="mx-2">
           <div className="mt-6">
             <span className="font-semibold leading-relaxed mt-4">
