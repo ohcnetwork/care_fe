@@ -655,7 +655,7 @@ export const UserAdd = (props: UserProps) => {
                 label="User Type"
                 options={userTypes}
                 optionLabel={(option) => option.role}
-                optionValue={(option) => option.id}
+                optionValue={(option) => option.role}
               />
 
               {state.form.user_type === "Doctor" && (
