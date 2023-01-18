@@ -178,16 +178,18 @@ export const Login = (props: { forgot?: boolean }) => {
       <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
         <div className="hidden md:flex gap-6 items-center">
           {state_logo && (
-            <img
-              src={state_logo}
-              className={classNames(
-                "rounded-lg p-3 h-24",
-                state_logo_white && "invert brightness-0"
-              )}
-              alt="state logo"
-            />
+            <>
+              <img
+                src={state_logo}
+                className={classNames(
+                  "rounded-lg p-3 h-24",
+                  state_logo_white && "invert brightness-0"
+                )}
+                alt="state logo"
+              />
+              <div className="w-0.5 bg-white h-20" />
+            </>
           )}
-          <div className="w-0.5 bg-white h-20" />
           <a
             href="https://coronasafe.network?ref=care_login"
             className="inline-block"
