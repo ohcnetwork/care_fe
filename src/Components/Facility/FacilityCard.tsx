@@ -45,7 +45,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
 
   return (
     <div key={`usr_${facility.id}`} className="w-full">
-      <div className="block rounded-lg overflow-clip bg-white shadow h-full hover:border-primary-500">
+      <div className="block rounded-lg max-h-56 overflow-clip bg-white shadow h-full hover:border-primary-500">
         <div className="flex h-full">
           <Link
             href={`/facility/${facility.id}`}
