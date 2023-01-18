@@ -983,7 +983,7 @@ export const ConsultationForm = (props: any) => {
         </div>
         {/* End of Telemedicine fields */}
 
-        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-between">
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
           <Cancel
             onClick={() =>
               navigate(`/facility/${facilityId}/patient/${patientId}`)
