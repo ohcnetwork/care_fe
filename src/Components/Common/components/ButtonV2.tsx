@@ -45,7 +45,7 @@ export type ButtonProps = RawButtonProps &
      */
     variant?: ButtonVariant;
     /** Specify text alignment. Defaults to `center` */
-    align?: "left" | "center" | "right" | "between";
+    align?: "start" | "center" | "end" | "between" | "around" | "evenly";
     /** If set, gives an elevated button with hover effects. */
     shadow?: boolean | undefined;
     /** If set, removes the background to give a simple text button. */

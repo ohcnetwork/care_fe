@@ -183,7 +183,7 @@ export const Login = (props: { forgot?: boolean }) => {
         <div className="mt-4 md:mt-12 rounded-lg py-4">
           <div className="max-w-lg">
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-wider">
-              CARE
+              {t("care")}
             </h1>
             <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
               {t("goal")}
@@ -198,7 +198,7 @@ export const Login = (props: { forgot?: boolean }) => {
               rel="noopener noreferrer"
               target={"_blank"}
             >
-              <span>Powered By</span>
+              <span>{t("powered_by")}</span>
               <img
                 src="https://3451063158-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-M233b0_JITp4nk0uAFp%2F-M2Dx6gKxOSU45cjfgNX%2F-M2DxFOkMmkPNn0I6U9P%2FCoronasafe-logo.png?alt=media&token=178cc96d-76d9-4e27-9efb-88f3186368e8"
                 className="h-8 inline-block"
@@ -332,7 +332,7 @@ export const Login = (props: { forgot?: boolean }) => {
             >
               <div className="flex justify-center">
                 <CareIcon className="care-l-arrow-left text-lg" />
-                <span>Back to login</span>
+                <span>{t("back_to_login")}</span>
               </div>
             </button>
             <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">

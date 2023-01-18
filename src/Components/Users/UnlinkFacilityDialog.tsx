@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-} from "@material-ui/core";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 
 interface ConfirmDialogProps {
   facilityName: string;
@@ -24,35 +18,24 @@ const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
     setDisable(true);
   };
   return (
-    <Dialog open={true} onClose={handleCancel}>
-      <DialogContent>
-        <div className="md:min-w-[400px] max-w-[650px]">
-          <DialogContentText
-            id="alert-dialog-description"
-            className="flex text-gray-800 leading-relaxed sm:min-w-[400px]"
-          >
-            <div>
-              Are you sure you want to unlink the facility{" "}
-              <strong>{facilityName}</strong> from user{" "}
-              <strong>{userName}</strong>? The user will lose access to the
-              facility.
-            </div>
-          </DialogContentText>
+    <ConfirmDialogV2
+      title={<span>Unlink User Facility</span>}
+      show={true}
+      action="Unlink"
+      onClose={handleCancel}
+      onConfirm={handleSubmit}
+      disabled={disable}
+      variant="danger"
+    >
+      <div className="flex text-gray-800 leading-relaxed">
+        <div>
+          Are you sure you want to unlink the facility{" "}
+          <strong>{facilityName}</strong> from user <strong>{userName}</strong>?
+          <br />
+          The user will lose access to the facility.
         </div>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCancel} color="primary">
-          Cancel
-        </Button>
-        <button
-          onClick={handleSubmit}
-          className="font-medium btn btn-danger"
-          disabled={disable}
-        >
-          Delete
-        </button>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </ConfirmDialogV2>
   );
 };
 
