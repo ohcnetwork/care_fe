@@ -31,7 +31,7 @@ const theme = createMuiTheme({
 ReactDOM.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
-      <UpdatableApp>
+      <UpdatableApp silentlyAutoUpdate>
         <App />
       </UpdatableApp>
     </ThemeProvider>

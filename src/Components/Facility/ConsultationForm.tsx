@@ -389,17 +389,21 @@ export const ConsultationForm = (props: any) => {
           return;
         case "discharge_advice": {
           let invalid = false;
+          let errorMsg = "";
           for (const f of dischargeAdvice) {
-            if (
-              !f.dosage?.replace(/\s/g, "").length ||
-              !f.medicine?.replace(/\s/g, "").length
-            ) {
+            if (!f.medicine?.replace(/\s/g, "").length) {
               invalid = true;
+              errorMsg = "Prescription Medicine field can not be empty";
+              break;
+            }
+            if (!f.dosage?.replace(/\s/g, "").length) {
+              invalid = true;
+              errorMsg = "Prescription Frequency field can not be empty";
               break;
             }
           }
           if (invalid) {
-            errors[field] = "Prescription field can not be empty";
+            errors[field] = errorMsg;
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -641,6 +645,7 @@ export const ConsultationForm = (props: any) => {
         {hasSymptoms && (
           <DateFormField
             {...field("symptoms_onset_date")}
+            disableFuture
             required
             label="Date of onset of the symptoms"
           />
@@ -693,8 +698,9 @@ export const ConsultationForm = (props: any) => {
         {state.form.suggestion === "A" && (
           <>
             <DateFormField
-              required
               {...field("admission_date")}
+              disablePast
+              required
               label="Admission date"
             />
 
@@ -705,9 +711,8 @@ export const ConsultationForm = (props: any) => {
                   name="bed"
                   setSelected={setBed}
                   selected={bed}
-                  errors=""
+                  error=""
                   multiple={false}
-                  margin="dense"
                   unoccupiedOnly={true}
                   facility={facilityId}
                 />
@@ -771,13 +776,13 @@ export const ConsultationForm = (props: any) => {
         <DiagnosisSelectFormField
           {...field("icd11_provisional_diagnoses_object")}
           multiple
-          label="Provisional Diagnosis"
+          label="Provisional Diagnosis (as per ICD-11 recommended by WHO)"
         />
 
         <DiagnosisSelectFormField
           {...field("icd11_diagnoses_object")}
           multiple
-          label="Diagnosis"
+          label="Diagnosis (as per ICD-11 recommended by WHO)"
         />
 
         {KASP_ENABLED && (

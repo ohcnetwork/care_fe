@@ -8,15 +8,18 @@ import {
   partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
-import { ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
+import { ErrorHelperText } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
-import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { Submit } from "../Common/components/ButtonV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import { handleSignOut } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -219,15 +222,8 @@ export default function UserProfile() {
     return !invalidForm;
   };
 
-  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({
-      type: "set_form",
-      form: { ...states.form, [e.target.name]: e.target.value },
-    });
-  };
-
-  const handleValueChange = (phoneNo: string, name: string) => {
-    const form: EditForm = { ...states.form, [name]: phoneNo };
+  const handleValueChange = (value: any, name: string) => {
+    const form: EditForm = { ...states.form, [name]: value };
     dispatch({ type: "set_form", form });
   };
 
@@ -321,16 +317,18 @@ export default function UserProfile() {
               <h3 className="text-lg font-medium leading-6 text-gray-900">
                 Personal Information
               </h3>
-              <p className="mt-1 text-sm leading-5 text-gray-600">
+              <p className="mt-1 text-sm leading-5 text-gray-600 mb-1">
                 Local Body, District and State are Non Editable Settings.
               </p>
-              <button
-                onClick={(_) => setShowEdit(!showEdit)}
-                type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
-              >
-                {showEdit ? "Cancel" : "Edit User Profile"}
-              </button>
+              <div className="flex flex-col gap-2">
+                <ButtonV2 onClick={(_) => setShowEdit(!showEdit)} type="button">
+                  {showEdit ? "Cancel" : "Edit User Profile"}
+                </ButtonV2>
+                <ButtonV2 variant="danger" onClick={(_) => handleSignOut(true)}>
+                  <CareIcon className="care-l-sign-out-alt" />
+                  Sign out
+                </ButtonV2>
+              </div>
             </div>
           </div>
           <div className="mt-5 lg:mt-0 lg:col-span-2">
@@ -446,32 +444,32 @@ export default function UserProfile() {
                     <div className="px-4 pt-5 bg-white">
                       <div className="grid grid-cols-6 gap-4">
                         <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
+                          <TextFormField
                             name="firstName"
                             label="First Name"
                             value={states.form.firstName}
-                            onChange={handleChangeInput}
+                            onChange={(e) => handleValueChange(e, "firstName")}
                             error={states.errors.firstName}
                             required
                           />
                         </div>
 
                         <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
+                          <TextFormField
                             name="lastName"
                             label="Last name"
                             value={states.form.lastName}
-                            onChange={handleChangeInput}
+                            onChange={(e) => handleValueChange(e, "lastName")}
                             error={states.errors.lastName}
                             required
                           />
                         </div>
                         <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
+                          <TextFormField
                             name="age"
                             label="Age"
                             value={states.form.age}
-                            onChange={handleChangeInput}
+                            onChange={(e) => handleValueChange(e, "age")}
                             error={states.errors.age}
                             required
                           />
@@ -503,35 +501,37 @@ export default function UserProfile() {
                         </div>
 
                         <div className="col-span-6 sm:col-span-3">
-                          <PhoneNumberField
-                            label="Phone Number*"
+                          <PhoneNumberFormField
+                            label="Phone Number"
+                            required
+                            name="phoneNumber"
                             placeholder="Phone Number"
                             value={states.form.phoneNumber}
-                            onChange={(value: string) =>
-                              handleValueChange(value, "phoneNumber")
+                            onChange={(event) =>
+                              handleValueChange(event.value, event.name)
                             }
-                            errors={states.errors.phoneNumber}
+                            error={states.errors.phoneNumber}
                           />
                         </div>
 
                         <div className="col-span-6 sm:col-span-3">
-                          <PhoneNumberField
+                          <PhoneNumberFormField
                             name="altPhoneNumber"
                             label="Whatsapp Number"
                             placeholder="WhatsApp Number"
                             value={states.form.altPhoneNumber}
-                            onChange={(value: string) =>
-                              handleValueChange(value, "altPhoneNumber")
+                            onChange={(event) =>
+                              handleValueChange(event.value, event.name)
                             }
-                            errors={states.errors.altPhoneNumber}
+                            error={states.errors.altPhoneNumber}
                           />
                         </div>
                         <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
+                          <TextFormField
                             name="email"
                             label="Email"
                             value={states.form.email}
-                            onChange={handleChangeInput}
+                            onChange={(e) => handleValueChange(e, "email")}
                             error={states.errors.email}
                           />
                         </div>
@@ -547,7 +547,7 @@ export default function UserProfile() {
                     <div className="px-4 pt-5 bg-white">
                       <div className="grid grid-cols-6 gap-4">
                         <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
+                          <TextFormField
                             name="old_password"
                             label="Current Password"
                             type="password"
@@ -555,7 +555,7 @@ export default function UserProfile() {
                             onChange={(e) =>
                               setChangePasswordForm({
                                 ...changePasswordForm,
-                                old_password: e.target.value,
+                                old_password: e.value,
                               })
                             }
                             error={changePasswordErrors.old_password}
@@ -563,7 +563,7 @@ export default function UserProfile() {
                           />
                         </div>
                         <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
+                          <TextFormField
                             name="new_password_1"
                             label="New Password"
                             type="password"
@@ -571,7 +571,7 @@ export default function UserProfile() {
                             onChange={(e) =>
                               setChangePasswordForm({
                                 ...changePasswordForm,
-                                new_password_1: e.target.value,
+                                new_password_1: e.value,
                               })
                             }
                             error=""
@@ -579,7 +579,7 @@ export default function UserProfile() {
                           />
                         </div>
                         <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
+                          <TextFormField
                             name="new_password_2"
                             label="New Password Confirmation"
                             type="password"
@@ -587,7 +587,7 @@ export default function UserProfile() {
                             onChange={(e) =>
                               setChangePasswordForm({
                                 ...changePasswordForm,
-                                new_password_2: e.target.value,
+                                new_password_2: e.value,
                               })
                             }
                             error={changePasswordErrors.password_confirmation}

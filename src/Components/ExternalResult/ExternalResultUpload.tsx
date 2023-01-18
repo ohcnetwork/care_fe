@@ -2,7 +2,6 @@ import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
 import { useState } from "react";
-//@ts-ignore
 import CSVReader from "react-csv-reader";
 import { useDispatch } from "react-redux";
 import { externalResultUploadCsv } from "../../Redux/actions";
@@ -87,6 +86,7 @@ export default function ExternalResultUpload() {
                   </svg>
                 </span>
                 <CSVReader
+                  inputId="result-upload"
                   cssLabelClass="mx-auto text-sm leading-5 font-medium text-gray-700"
                   cssClass="flex flex-col react-csv-input"
                   cssInputClass="csv-input"

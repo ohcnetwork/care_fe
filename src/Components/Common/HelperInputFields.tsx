@@ -641,6 +641,9 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
   );
 };
 
+/**
+ * Deprecated. Use `PhoneNumberFormField` instead.
+ */
 export const PhoneNumberField = (props: any) => {
   const {
     label,
@@ -653,6 +656,8 @@ export const PhoneNumberField = (props: any) => {
     disabled,
     enableTollFree,
     countryCodeEditable = false,
+    className,
+    name,
   } = props;
   const [maxLength, setMaxLength] = useState(15);
 
@@ -677,7 +682,8 @@ export const PhoneNumberField = (props: any) => {
       {label && <InputLabel>{label}</InputLabel>}
       <div className="relative flex items-center">
         <PhoneInput
-          inputClass="cui-input-base pl-14 pr-10 py-4 tracking-widest"
+          inputClass="cui-input-base pl-14 pr-10 py-5 tracking-widest"
+          containerClass={className}
           countryCodeEditable={countryCodeEditable}
           value={value}
           placeholder={placeholder}
@@ -688,19 +694,21 @@ export const PhoneNumberField = (props: any) => {
           enableLongNumbers={enableTollFree}
           inputProps={{
             maxLength,
+            name,
           }}
           {...countryRestriction}
         />
         <ButtonV2
-          className="absolute right-0 mt-1 max-h-10"
+          className="absolute right-[1px] top-[1px] inset-y-0 h-[40px]"
           variant="secondary"
+          type="button"
           ghost
           onClick={() => onChange("+91")}
         >
           <CareIcon className="care-l-multiply" />
         </ButtonV2>
       </div>
-      <ErrorHelperText error={errors} />
+      {errors && <ErrorHelperText error={errors} />}
     </>
   );
 };
