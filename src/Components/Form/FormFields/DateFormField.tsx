@@ -4,7 +4,6 @@ import FormField from "./FormField";
 import {
   FormFieldBaseProps,
   resolveFormFieldChangeEventHandler,
-  resolveFormFieldError,
 } from "./Utils";
 
 type Props = FormFieldBaseProps<Date> & {
@@ -31,17 +30,13 @@ type Props = FormFieldBaseProps<Date> & {
  * ```
  */
 const DateFormField = ({ position = "RIGHT", ...props }: Props) => {
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-  const error = resolveFormFieldError(props);
-  const name = props.name;
-
   return (
     <FormField props={props}>
       <DateInputV2
-        className={classNames(error && "border-red-500")}
+        className={classNames(props.error && "border-red-500")}
         id={props.id}
         value={props.value}
-        onChange={(value) => handleChange({ name, value })}
+        onChange={resolveFormFieldChangeEventHandler(props)}
         max={props.max || (props.disableFuture ? new Date() : undefined)}
         min={props.min || (props.disablePast ? yesterday() : undefined)}
         position={position}

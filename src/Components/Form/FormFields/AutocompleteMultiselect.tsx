@@ -26,15 +26,12 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
 const AutocompleteMultiSelectFormField = <T, V>(
   props: AutocompleteMultiSelectFormFieldProps<T, V>
 ) => {
-  const { name } = props;
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-
   return (
     <FormField props={props}>
       <AutocompleteMutliSelect
         {...props}
         value={props.value || []}
-        onChange={(value) => handleChange({ name, value })}
+        onChange={resolveFormFieldChangeEventHandler(props)}
       />
     </FormField>
   );

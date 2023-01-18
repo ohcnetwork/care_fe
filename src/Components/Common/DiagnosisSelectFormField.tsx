@@ -13,9 +13,6 @@ type Props =
   { multiple: true } & FormFieldBaseProps<ICD11DiagnosisModel[]>;
 
 export function DiagnosisSelectFormField(props: Props) {
-  const { name } = props;
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-
   const { fetchOptions, isLoading, options } =
     useAsyncOptions<ICD11DiagnosisModel>("id");
 
@@ -38,7 +35,7 @@ export function DiagnosisSelectFormField(props: Props) {
         optionValue={(option) => option}
         onQuery={(query) => fetchOptions(listICD11Diagnosis({ query }, ""))}
         isLoading={isLoading}
-        onChange={(value) => handleChange({ name, value })}
+        onChange={resolveFormFieldChangeEventHandler(props)}
       />
     </FormField>
   );

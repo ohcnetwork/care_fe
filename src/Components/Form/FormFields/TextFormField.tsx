@@ -5,7 +5,6 @@ import FormField from "./FormField";
 import {
   FormFieldBaseProps,
   resolveFormFieldChangeEventHandler,
-  resolveFormFieldError,
 } from "./Utils";
 
 export type TextFormFieldProps = FormFieldBaseProps<string> & {
@@ -25,9 +24,6 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
 };
 
 const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-  const error = resolveFormFieldError(props);
-
   const { leading, trailing } = props;
   const leadingFocused = props.leadingFocused || props.leading;
   const trailingFocused = props.trailingFocused || props.trailing;
@@ -45,7 +41,7 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
       className={classNames(
         "cui-input-base peer",
         hasIcon && "px-10",
-        error && "border-danger-500",
+        props.error && "border-danger-500",
         props.className
       )}
       disabled={props.disabled}
@@ -59,10 +55,9 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
       required={props.required}
       onFocus={props.onFocus}
       onBlur={props.onBlur}
-      onChange={(event) => {
-        event.preventDefault();
-        handleChange(event.target);
-      }}
+      onChange={(event) =>
+        resolveFormFieldChangeEventHandler(props)(event.target.value)
+      }
     />
   );
 

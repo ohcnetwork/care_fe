@@ -20,9 +20,6 @@ type SelectFormFieldProps<T, V = T> = FormFieldBaseProps<V> & {
 };
 
 export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
-  const { name } = props;
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-
   return (
     <FormField props={props}>
       <SelectMenuV2
@@ -38,7 +35,7 @@ export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
         required={props.required}
-        onChange={(value: any) => handleChange({ name, value })}
+        onChange={resolveFormFieldChangeEventHandler<any>(props)}
       />
     </FormField>
   );
@@ -57,9 +54,6 @@ type MultiSelectFormFieldProps<T, V = T> = FormFieldBaseProps<V[]> & {
 export const MultiSelectFormField = <T, V>(
   props: MultiSelectFormFieldProps<T, V>
 ) => {
-  const { name } = props;
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-
   return (
     <FormField props={props}>
       <MultiSelectMenuV2
@@ -73,7 +67,7 @@ export const MultiSelectFormField = <T, V>(
         optionDescription={props.optionDescription}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
-        onChange={(value: any) => handleChange({ name, value })}
+        onChange={resolveFormFieldChangeEventHandler<any>(props)}
       />
     </FormField>
   );

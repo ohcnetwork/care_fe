@@ -1,5 +1,5 @@
 import React, { Dispatch } from "react";
-import { FieldError, FieldValidator } from "../FieldValidators";
+import { FieldError } from "../FieldValidators";
 import { FormAction, FormDetails, FormState } from "../Utils";
 
 export type FieldChangeEvent<T> = { name: string; value: T };
@@ -14,22 +14,10 @@ export type FormFieldBaseProps<T> = {
   required?: boolean;
   labelClassName?: string;
   errorClassName?: string;
-} & (
-  | {
-      error?: undefined;
-      value?: undefined;
-      onChange?: undefined;
-      reducerProps: { state: FormState; dispatch: Dispatch<FormAction> };
-      validate: FieldValidator<T>;
-    }
-  | {
-      error?: FieldError;
-      value?: T;
-      onChange: FieldChangeEventHandler<T>;
-      reducerProps?: undefined;
-      validate?: undefined;
-    }
-);
+  value?: T;
+  onChange: FieldChangeEventHandler<T>;
+  error?: FieldError;
+};
 
 export const handleFormFieldChange = <V, F = FormDetails>(
   state: FormState<F>,
@@ -41,18 +29,9 @@ export const handleFormFieldChange = <V, F = FormDetails>(
   };
 };
 
-export const resolveFormFieldChangeEventHandler = <T>(
-  props: FormFieldBaseProps<T>
-): FieldChangeEventHandler<T> => {
-  if (props.onChange) return props.onChange;
-
-  const { dispatch } = props.reducerProps;
-  return (event) => {
-    const { name, value } = event;
-    const error = props.validate(event.value);
-    dispatch({ type: "set_field", name, value, error });
-  };
+export const resolveFormFieldChangeEventHandler = <T>({
+  name,
+  onChange,
+}: FormFieldBaseProps<T>) => {
+  return (value: T) => onChange({ name, value });
 };
-
-export const resolveFormFieldError = <T>(props: FormFieldBaseProps<T>) =>
-  props.reducerProps?.state.errors[props.name] || props.error;

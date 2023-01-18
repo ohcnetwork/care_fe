@@ -24,9 +24,6 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
 const AutocompleteFormField = <T, V>(
   props: AutocompleteFormFieldProps<T, V>
 ) => {
-  const { name } = props;
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-
   return (
     <FormField props={props}>
       <Autocomplete
@@ -41,7 +38,7 @@ const AutocompleteFormField = <T, V>(
         className={props.className}
         required={props.required}
         onQuery={props.onQuery}
-        onChange={(value: any) => handleChange({ name, value })}
+        onChange={resolveFormFieldChangeEventHandler<any>(props)}
       />
     </FormField>
   );

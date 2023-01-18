@@ -1,6 +1,6 @@
 import { classNames } from "../../../Utils/utils";
 import { FieldError } from "../FieldValidators";
-import { FormFieldBaseProps, resolveFormFieldError } from "./Utils";
+import { FormFieldBaseProps } from "./Utils";
 
 type LabelProps = {
   id?: string | undefined;
@@ -47,7 +47,6 @@ const FormField = (props: {
 }) => {
   const { id, className, required, label, labelClassName, errorClassName } =
     props.props;
-  const error = resolveFormFieldError(props.props);
 
   return (
     <div className={className}>
@@ -57,7 +56,7 @@ const FormField = (props: {
         </FieldLabel>
       )}
       {props.children}
-      {<FieldErrorText error={error} className={errorClassName} />}
+      {<FieldErrorText error={props.props.error} className={errorClassName} />}
     </div>
   );
 };

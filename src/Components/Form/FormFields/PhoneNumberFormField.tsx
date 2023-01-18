@@ -15,15 +15,12 @@ type Props = FormFieldBaseProps<string> & {
 };
 
 const PhoneNumberFormField = (props: Props) => {
-  const { name } = props;
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-
   return (
     <FormField props={props}>
       <PhoneNumberField
         placeholder={props.placeholder}
         value={props.value}
-        onChange={(value: string) => handleChange({ name, value })}
+        onChange={resolveFormFieldChangeEventHandler(props)}
         onlyIndia={props.onlyIndia}
         turnOffAutoFormat={props.noAutoFormat}
         disabled={props.disabled}

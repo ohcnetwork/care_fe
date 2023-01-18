@@ -18,12 +18,11 @@ const ASYMPTOMATIC_ID = 1;
  * - For other scenarios, this simply works like a `MultiSelect`.
  */
 export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
-  const { name } = props;
   const handleChange = resolveFormFieldChangeEventHandler(props);
 
   const updateSelection = (value: number[]) => {
     // Skip the complexities if no initial value was present
-    if (!props.value?.length) return handleChange({ name, value });
+    if (!props.value?.length) return handleChange(value);
 
     const initialValue = props.value || [];
 
@@ -33,16 +32,16 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
       if (asymptomaticIndex > -1) {
         // unselect asym.
         value.splice(asymptomaticIndex, 1);
-        return handleChange({ name, value });
+        return handleChange(value);
       }
     }
 
     if (!initialValue.includes(ASYMPTOMATIC_ID) && value.includes(1)) {
       // If new selections have asym., unselect everything else
-      return handleChange({ name, value: [ASYMPTOMATIC_ID] });
+      return handleChange([ASYMPTOMATIC_ID]);
     }
 
-    handleChange({ name, value });
+    handleChange(value);
   };
 
   const getDescription = ({ id }: { id: number }) => {
