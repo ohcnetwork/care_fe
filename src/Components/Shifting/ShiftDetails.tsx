@@ -6,11 +6,7 @@ import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
 import { navigate, Link } from "raviger";
 import Button from "@material-ui/core/Button";
 import QRCode from "qrcode.react";
-import {
-  GENDER_TYPES,
-  KASP_FULL_STRING,
-  TEST_TYPE_CHOICES,
-} from "../../Common/constants";
+import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -26,7 +22,7 @@ const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ShiftDetails(props: { id: string }) {
-  const { static_header_logo } = useConfig();
+  const { static_header_logo, kasp_full_string } = useConfig();
   const dispatch: any = useDispatch();
   const initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -701,7 +697,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  {KASP_FULL_STRING}:{" "}
+                  {kasp_full_string}:{" "}
                 </span>
                 <span className="badge badge-pill badge-warning py-1 px-2">
                   {" "}

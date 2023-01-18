@@ -16,8 +16,6 @@ import {
   PATIENT_CATEGORIES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
-  KASP_STRING,
-  KASP_ENABLED,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -59,6 +57,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import DateFormField from "../Form/FormFields/DateFormField";
+import useConfig from "../../Common/hooks/useConfig";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -187,6 +186,7 @@ const scrollTo = (id: any) => {
 };
 
 export const ConsultationForm = (props: any) => {
+  const { kasp_enabled, kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
@@ -416,7 +416,7 @@ export const ConsultationForm = (props: any) => {
           if (!state.form[field]) {
             errors[
               field
-            ] = `Please select an option, ${KASP_STRING} is mandatory`;
+            ] = `Please select an option, ${kasp_string} is mandatory`;
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -879,9 +879,9 @@ export const ConsultationForm = (props: any) => {
           label="Diagnosis (as per ICD-11 recommended by WHO)"
         />
 
-        {KASP_ENABLED && (
+        {kasp_enabled && (
           <div className="flex-1" id="is_kasp">
-            <FieldLabel required>{KASP_STRING}</FieldLabel>
+            <FieldLabel required>{kasp_string}</FieldLabel>
             <RadioGroup
               aria-label="covid"
               name="is_kasp"

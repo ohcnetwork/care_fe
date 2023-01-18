@@ -11,12 +11,7 @@ import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  FACILITY_FEATURE_TYPES,
-  FACILITY_TYPES,
-  KASP_ENABLED,
-  KASP_STRING,
-} from "../../Common/constants";
+import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   phonePreg,
@@ -149,7 +144,7 @@ const facilityCreateReducer = (
 };
 
 export const FacilityCreate = (props: FacilityProps) => {
-  const { gov_data_api_key } = useConfig();
+  const { gov_data_api_key, kasp_string, kasp_enabled } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
@@ -1029,13 +1024,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                     </div>
                   </div>
 
-                  {KASP_ENABLED && (
+                  {kasp_enabled && (
                     <div>
                       <FieldLabel
                         htmlFor="facility-kasp_empanelled"
                         className="mb-2"
                       >
-                        Is this facility {KASP_STRING} empanelled?
+                        Is this facility {kasp_string} empanelled?
                       </FieldLabel>
                       <RadioInputsV2
                         name="kasp_empanelled"

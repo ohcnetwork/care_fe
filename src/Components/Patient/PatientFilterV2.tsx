@@ -7,8 +7,6 @@ import {
   FACILITY_TYPES,
   DISEASE_STATUS,
   PATIENT_FILTER_CATEGORIES,
-  KASP_STRING,
-  KASP_ENABLED,
   ADMITTED_TO,
 } from "../../Common/constants";
 import moment from "moment";
@@ -33,11 +31,13 @@ import { DateRange } from "../Common/DateRangeInputV2";
 import FilterButtons from "../Common/FilterButtons";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useMergeState from "../../Common/hooks/useMergeState";
+import useConfig from "../../Common/hooks/useConfig";
 
 const getDate = (value: any) =>
   value && moment(value).isValid() && moment(value).toDate();
 
 export default function PatientFilterV2(props: any) {
+  const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter } = props;
 
   const [filterState, setFilterState] = useMergeState({
@@ -477,14 +477,14 @@ export default function PatientFilterV2(props: any) {
             }
           />
         </div>
-        {KASP_ENABLED && (
+        {kasp_enabled && (
           <div className="w-full flex-none">
-            <FieldLabel className="text-sm">{KASP_STRING}</FieldLabel>
+            <FieldLabel className="text-sm">{kasp_string}</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
               options={[true, false]}
               optionLabel={(o) =>
-                o ? `Show ${KASP_STRING}` : `Show Non ${KASP_STRING}`
+                o ? `Show ${kasp_string}` : `Show Non ${kasp_string}`
               }
               value={filterState.is_kasp}
               onChange={(v) => setFilterState({ ...filterState, is_kasp: v })}
