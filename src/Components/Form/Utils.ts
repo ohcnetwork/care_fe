@@ -1,4 +1,3 @@
-import { ChangeEventHandler } from "react";
 import { FieldError } from "./FieldValidators";
 
 export type FormDetails = Record<string, unknown>;
@@ -13,7 +12,7 @@ export type FormReducer<T = FormDetails> = (
   action: FormAction<T>
 ) => FormState<T>;
 
-export const formReducer: FormReducer = <T = FormDetails>(
+export const formReducer = <T = FormDetails>(
   state: FormState<T>,
   action: FormAction<T>
 ): FormState<T> => {
@@ -28,9 +27,4 @@ export const formReducer: FormReducer = <T = FormDetails>(
         errors: { ...state.errors, [action.name]: action.error },
       };
   }
-};
-
-export type FormFieldCompatibilityProps<T = Element> = {
-  onChange?: ChangeEventHandler<T>;
-  hasError?: boolean;
 };
