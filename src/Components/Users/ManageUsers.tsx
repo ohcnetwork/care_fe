@@ -44,7 +44,7 @@ export default function ManageUsers() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ limit: 15 });
+  } = useFilters({ limit: 18 });
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageUsers: any = null;
@@ -254,7 +254,11 @@ export default function ManageUsers() {
     fetchData({ aborted: false });
   };
 
-  const showFacilities = (username: string, facilities: FacilityModel[]) => {
+  const showFacilities = (
+    username: string,
+    facilities: FacilityModel[],
+    district_name: string
+  ) => {
     if (!facilities || !facilities.length) {
       return (
         <>
@@ -278,20 +282,22 @@ export default function ManageUsers() {
                     className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
                     onClick={() => updateHomeFacility(username, facility)}
                   ></i>
-                  <IconButton
-                    size="small"
-                    color="secondary"
-                    disabled={isFacilityLoading}
-                    onClick={() =>
-                      setUnlinkFacilityData({
-                        show: true,
-                        facility: facility,
-                        userName: username,
-                      })
-                    }
-                  >
-                    <CloseIcon />
-                  </IconButton>
+                  {currentUser.data.district_object.name === district_name && (
+                    <IconButton
+                      size="small"
+                      color="secondary"
+                      disabled={isFacilityLoading}
+                      onClick={() =>
+                        setUnlinkFacilityData({
+                          show: true,
+                          facility: facility,
+                          userName: username,
+                        })
+                      }
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  )}
                 </div>
               </div>
             ))}
@@ -364,7 +370,7 @@ export default function ManageUsers() {
           id={`usr_${idx}`}
           className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
         >
-          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
+          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
                 <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
@@ -513,7 +519,11 @@ export default function ManageUsers() {
                         </ButtonV2>
                       </div>
                       {user.facilities &&
-                        showFacilities(user.username, user.facilities)}
+                        showFacilities(
+                          user.username,
+                          user.facilities,
+                          user.district_object.name
+                        )}
                     </div>
                   )}
                 </div>
