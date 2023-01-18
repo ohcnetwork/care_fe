@@ -323,26 +323,30 @@ export default function ListView() {
         <div className="w-32">
           {/* dummy div to align space as per board view */}
         </div>
-        <div className="my-2 md:my-0">
-          <button
-            className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-            onClick={() => navigate("/shifting/board-view", { query: qParams })}
-          >
-            <i
-              className="fa fa-list mr-1 transform rotate-90"
-              aria-hidden="true"
-            ></i>
-            Board View
-          </button>
-        </div>
-        <div className="flex items-start gap-2">
-          <button
-            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={() => advancedFilter.setShow(true)}
-          >
-            <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-            <span>Filters</span>
-          </button>
+        <div className="flex md:flex-row flex-col justify-center items-center md:gap-6">
+          <div className="my-2 md:my-0">
+            <button
+              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 md:w-40 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+              onClick={() =>
+                navigate("/shifting/board-view", { query: qParams })
+              }
+            >
+              <i
+                className="fa fa-list mr-1 transform rotate-90"
+                aria-hidden="true"
+              ></i>
+              Board View
+            </button>
+          </div>
+          <div className="flex items-start gap-2">
+            <button
+              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+              onClick={() => advancedFilter.setShow(true)}
+            >
+              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
+              <span>Filters</span>
+            </button>
+          </div>
         </div>
       </div>
       <BadgesList {...{ qParams, FilterBadges }} />
