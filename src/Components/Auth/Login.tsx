@@ -17,6 +17,7 @@ export const Login = (props: { forgot?: boolean }) => {
     static_black_logo,
     recaptcha_site_key,
     github_url,
+    state_logo,
   } = useConfig();
   const dispatch: any = useDispatch();
   const initForm: any = {
@@ -173,18 +174,27 @@ export const Login = (props: { forgot?: boolean }) => {
   return (
     <div className="flex flex-col-reverse md:flex-row md:h-screen relative overflow-hidden">
       <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
-        <a
-          href={"https://coronasafe.network?ref=care_login"}
-          className="inline-block"
-          target={"_blank"}
-          rel="noopener noreferrer"
-        >
-          <img
-            src={static_light_logo}
-            className="h-8 hidden md:inline-block"
-            alt="coronasafe logo"
-          />
-        </a>
+        <div className="hidden md:flex gap-8 items-center">
+          {state_logo && (
+            <img
+              src={state_logo}
+              className="bg-white rounded-lg p-3 h-20"
+              alt="state logo"
+            />
+          )}
+          <a
+            href={"https://coronasafe.network?ref=care_login"}
+            className="inline-block"
+            target={"_blank"}
+            rel="noopener noreferrer"
+          >
+            <img
+              src={static_light_logo}
+              className="h-8"
+              alt="coronasafe logo"
+            />
+          </a>
+        </div>
         <div className="mt-4 md:mt-12 rounded-lg py-4">
           <div className="max-w-lg">
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-wider">
