@@ -18,6 +18,8 @@ interface Props {
   className?: string;
   placeholder?: string;
   error?: string;
+  onBlur?: () => void;
+  onFocus?: () => void;
 }
 
 const AutoCompleteAsync = (props: Props) => {
@@ -81,6 +83,8 @@ const AutoCompleteAsync = (props: Props) => {
                   : ""
               }
               onChange={({ target }) => setQuery(target.value)}
+              onFocus={props.onFocus}
+              onBlur={props.onBlur}
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
               <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-secondary-900">

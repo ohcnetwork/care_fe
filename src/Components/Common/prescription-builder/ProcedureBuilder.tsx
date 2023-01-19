@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export type ProcedureType = {
   procedure?: string;
@@ -41,11 +42,11 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
             key={i}
             className={`border-2 ${
               activeIdx === i ? "border-primary-500" : "border-gray-500"
-            } mb-3 border-dashed border-spacing-2 p-3 rounded-lg text-sm text-gray-600`}
+            } mb-2 border-dashed border-spacing-2 p-3 rounded-md text-sm text-gray-600`}
           >
             <div className="flex gap-2 flex-col md:flex-row">
               <div className="flex flex-col gap-2 flex-1 w-full">
-                <div className="flex gap-4 items-center">
+                <div className="flex flex-wrap md:flex-row md:gap-4 gap-2 items-center">
                   <h4 className="text-base font-medium text-gray-700">
                     Procedure No. {i + 1}
                   </h4>
@@ -59,7 +60,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     }
                   >
                     Delete Procedure
-                    <i className="fas fa-trash" />
+                    <CareIcon className="care-l-trash-alt w-4 h-4" />
                   </button>
                 </div>
                 <div className="w-full">
@@ -126,7 +127,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     </div>
                   ) : (
                     <div className="w-full">
-                      Time
+                      <div className="mb-1">Time</div>
                       <input
                         type="datetime-local"
                         className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
@@ -148,7 +149,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                 </div>
 
                 <div className="w-full">
-                  Notes
+                  <div className="mb-1">Notes</div>
                   <input
                     type="text"
                     className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"

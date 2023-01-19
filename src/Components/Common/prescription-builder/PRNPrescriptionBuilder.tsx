@@ -1,6 +1,8 @@
+import { useState } from "react";
 import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
 import SelectMenuV2 from "../../Form/SelectMenuV2";
 import { medicines, routes, units } from "./PrescriptionBuilder";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export type PRNPrescriptionType = {
   medicine?: string;
@@ -39,6 +41,8 @@ export default function PRNPrescriptionBuilder(
       )
     );
   };
+
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
   return (
     <div className="mt-2">
@@ -100,11 +104,32 @@ export default function PRNPrescriptionBuilder(
         return (
           <div
             key={i}
-            className="border-b border-b-gray-500 border-dashed py-2 text-xs text-gray-600"
+            className={`border-2 ${
+              activeIdx === i ? "border-primary-500" : "border-gray-500"
+            } mb-2 border-dashed border-spacing-2 p-3 rounded-md text-sm text-gray-600`}
           >
-            <div className="flex gap-2 flex-col md:flex-row items-center">
+            <div className="flex flex-wrap md:flex-row md:gap-4 gap-2 items-center mb-2">
+              <h4 className="text-base font-medium text-gray-700">
+                Prescription No. {i + 1}
+              </h4>
+              <button
+                type="button"
+                className="h-full flex justify-center items-center gap-1.5 text-gray-100 rounded-md text-sm transition hover:bg-red-600 px-3 py-1 bg-red-500"
+                onClick={() => {
+                  setPrescriptions(
+                    prescriptions.filter((prescription, index) => i != index)
+                  );
+                }}
+              >
+                Delete Prescription
+                <CareIcon className="care-l-trash-alt w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex gap-2 flex-col md:flex-row items-center md:mb-4">
               <div className="w-full">
-                Medicine
+                <div className="mb-2">
+                  Medicine <span className="font-bold text-red-600">*</span>
+                </div>
                 <AutoCompleteAsync
                   placeholder="Medicine"
                   selected={prescription.medicine}
@@ -119,11 +144,13 @@ export default function PRNPrescriptionBuilder(
                   onChange={setMedicine}
                   showNOptions={medicines.length}
                   className="-mt-1"
+                  onFocus={() => setActiveIdx(i)}
+                  onBlur={() => setActiveIdx(null)}
                 />
               </div>
               <div className="flex gap-2">
                 <div className="w-[100px]">
-                  Route
+                  <div className="mb-1">Route</div>
                   <SelectMenuV2
                     placeholder="Route"
                     options={routes}
@@ -133,12 +160,14 @@ export default function PRNPrescriptionBuilder(
                     required={false}
                     showChevronIcon={false}
                     className="mt-[2px]"
+                    onFocus={() => setActiveIdx(i)}
+                    onBlur={() => setActiveIdx(null)}
                   />
                 </div>
                 <div>
                   <div className="w-full md:w-[160px] flex gap-2 shrink-0">
                     <div>
-                      Dosage
+                      <div className="mb-1">Dosage</div>
                       <div className="flex gap-1">
                         <input
                           type="number"
@@ -163,6 +192,8 @@ export default function PRNPrescriptionBuilder(
                             );
                           }}
                           required
+                          onFocus={() => setActiveIdx(i)}
+                          onBlur={() => setActiveIdx(null)}
                         />
                         <div className="w-[80px] shrink-0">
                           <SelectMenuV2
@@ -173,6 +204,8 @@ export default function PRNPrescriptionBuilder(
                             optionLabel={(option) => option}
                             required={false}
                             showChevronIcon={false}
+                            onFocus={() => setActiveIdx(i)}
+                            onBlur={() => setActiveIdx(null)}
                           />
                         </div>
                       </div>
@@ -183,7 +216,9 @@ export default function PRNPrescriptionBuilder(
             </div>
             <div className="flex gap-2 mt-2 flex-col md:flex-row">
               <div className="w-full">
-                Indicator
+                <div className="mb-1">
+                  Indicator <span className="font-bold text-red-600">*</span>
+                </div>
                 <input
                   type="text"
                   className="cui-input-base"
@@ -198,11 +233,14 @@ export default function PRNPrescriptionBuilder(
                       i
                     );
                   }}
+                  onFocus={() => setActiveIdx(i)}
+                  onBlur={() => setActiveIdx(null)}
                 />
               </div>
-              <div className="w-full md:w-[160px] flex gap-2 shrink-0">
+              <div className="w-full md:w-[170px] flex gap-2 shrink-0">
                 <div>
-                  Max Dosage in 24 hrs.
+                  <div className="mb-1">Max Dosage in 24 hrs.</div>
+
                   <div className="flex gap-1">
                     <input
                       type="number"
@@ -227,6 +265,8 @@ export default function PRNPrescriptionBuilder(
                         );
                       }}
                       required
+                      onFocus={() => setActiveIdx(i)}
+                      onBlur={() => setActiveIdx(null)}
                     />
                     <div className="w-[80px] shrink-0">
                       <SelectMenuV2
@@ -237,13 +277,15 @@ export default function PRNPrescriptionBuilder(
                         optionLabel={(option) => option}
                         required={false}
                         showChevronIcon={false}
+                        onFocus={() => setActiveIdx(i)}
+                        onBlur={() => setActiveIdx(null)}
                       />
                     </div>
                   </div>
                 </div>
               </div>
               <div className="w-[160px] shrink-0">
-                Min. time btwn. 2 doses
+                <div className="mb-1">Min. time btwn. 2 doses</div>
                 <div className="flex items-center">
                   <SelectMenuV2
                     placeholder="hours"
@@ -254,22 +296,12 @@ export default function PRNPrescriptionBuilder(
                     }
                     optionLabel={(option) => option}
                     required={false}
+                    onFocus={() => setActiveIdx(i)}
+                    onBlur={() => setActiveIdx(null)}
                   />
                   <div className="ml-2">Hrs.</div>
                 </div>
               </div>
-
-              <button
-                type="button"
-                className="text-gray-400 text-base transition hover:text-red-500"
-                onClick={() => {
-                  setPrescriptions(
-                    prescriptions.filter((prescription, index) => i != index)
-                  );
-                }}
-              >
-                <i className="fas fa-trash" />
-              </button>
             </div>
           </div>
         );
