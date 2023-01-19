@@ -65,6 +65,7 @@ export default function ManageUsers() {
     show: boolean;
     username: string;
   }>({ show: false, username: "" });
+  const [linkedFacilityLoading, setLinkedFacilityLoading] = useState(false);
 
   const [userData, setUserData] = useState<{
     show: boolean;
@@ -164,6 +165,7 @@ export default function ManageUsers() {
       setUsers(updated);
     }
     setIsFacilityLoading(false);
+    setLinkedFacilityLoading(false);
   };
 
   const showLinkFacilityModal = (username: string) => {
@@ -492,13 +494,20 @@ export default function ManageUsers() {
                     <div id="facilities" className="col-span-4">
                       <div className="flex text-gray-800">
                         <p className="flex items-center">Linked Facilities: </p>
+                        {/* {linkedFacilityLoading ? (
+                          <div>
+                            <CircularProgress className="text-primary-500" />
+                          </div>
+                        ) : ( */}
                         <ButtonV2
                           ghost
                           circle
+                          disabled={linkedFacilityLoading}
                           variant="secondary"
                           className="tooltip flex items-center"
                           onClick={() => {
                             if (!user.facilities) {
+                              setLinkedFacilityLoading(true);
                               loadFacilities(user.username);
                             } else {
                               hideFacilities(user.username);
@@ -517,6 +526,7 @@ export default function ManageUsers() {
                             Facilities
                           </span>
                         </ButtonV2>
+                        {/* )} */}
                       </div>
                       {user.facilities &&
                         showFacilities(
