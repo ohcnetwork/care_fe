@@ -57,6 +57,17 @@ const App: React.FC = () => {
     [dispatch]
   );
 
+  useEffect(() => {
+    const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+    const favicon: any = document.querySelector("link[rel~='icon']");
+    console.log(favicon);
+    if (darkThemeMq.matches) {
+      favicon.href = "/favicon-light.ico";
+    } else {
+      favicon.href = "/favicon-dark.ico";
+    }
+  }, []);
+
   if (
     !currentUser ||
     currentUser.isFetching ||
