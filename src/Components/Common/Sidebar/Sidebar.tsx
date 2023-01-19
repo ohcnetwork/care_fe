@@ -69,23 +69,23 @@ const StatelessSidebar = ({
       const bottomItemOffset = 2;
 
       const indexDifference = index - lastIndicatorPosition;
-      // e.style.display = "block";
+      e.style.display = "block";
 
-      // if (indexDifference > 0) {
-      //   console.log("indexDifference > 0");
-      //   e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
-      //   e.style.bottom = "auto";
-      // } else {
-      //   console.log("indexDifference < 0");
-      //   e.style.bottom =
-      //     itemHeight * (NavItems.length + bottomItemOffset) -
-      //     lastIndicatorPosition * itemHeight -
-      //     28 +
-      //     "px";
-      //   e.style.top = "auto";
-      // }
+      if (indexDifference > 0) {
+        console.log("indexDifference > 0");
+        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
+        e.style.bottom = "auto";
+      } else {
+        console.log("indexDifference < 0");
+        e.style.bottom =
+          itemHeight * (NavItems.length + bottomItemOffset) -
+          lastIndicatorPosition * itemHeight -
+          28 +
+          "px";
+        e.style.top = "auto";
+      }
 
-      // e.style.height = `${Math.abs(indexDifference) * itemHeight + 12}px`;
+      e.style.height = `${(Math.abs(indexDifference) * itemHeight + 12) / 2}px`;
       setTimeout(() => {
         if (!e) return;
         if (indexDifference > 0) {
@@ -102,10 +102,9 @@ const StatelessSidebar = ({
         e.style.height = "0.75rem";
         setLastIndicatorPosition(index);
       }, 300);
+    } else {
+      indicatorRef.current.style.display = "none";
     }
-    // else {
-    //   indicatorRef.current.style.display = "none";
-    // }
   }, [activeLink]);
 
   return (
