@@ -151,6 +151,7 @@ export default function ManageUsers() {
     if (isFacilityLoading) {
       return;
     }
+    setLinkedFacilityLoading(true);
     setIsFacilityLoading(true);
     const res = await dispatch(getUserListFacility({ username }));
     if (res && res.data) {
@@ -494,11 +495,6 @@ export default function ManageUsers() {
                     <div id="facilities" className="col-span-4">
                       <div className="flex text-gray-800">
                         <p className="flex items-center">Linked Facilities: </p>
-                        {/* {linkedFacilityLoading ? (
-                          <div>
-                            <CircularProgress className="text-primary-500" />
-                          </div>
-                        ) : ( */}
                         <ButtonV2
                           ghost
                           circle
@@ -507,7 +503,6 @@ export default function ManageUsers() {
                           className="tooltip flex items-center"
                           onClick={() => {
                             if (!user.facilities) {
-                              setLinkedFacilityLoading(true);
                               loadFacilities(user.username);
                             } else {
                               hideFacilities(user.username);
@@ -526,7 +521,6 @@ export default function ManageUsers() {
                             Facilities
                           </span>
                         </ButtonV2>
-                        {/* )} */}
                       </div>
                       {user.facilities &&
                         showFacilities(
