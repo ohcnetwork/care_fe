@@ -85,7 +85,12 @@ const StatelessSidebar = ({
         e.style.top = "auto";
       }
 
-      e.style.height = `${(Math.abs(indexDifference) * itemHeight + 12) / 2}px`;
+      const variableHeight = Math.min(
+        Math.abs(indexDifference) * itemHeight,
+        70
+      );
+
+      e.style.height = `${variableHeight}px`;
       setTimeout(() => {
         if (!e) return;
         if (indexDifference > 0) {
@@ -127,7 +132,7 @@ const StatelessSidebar = ({
             ref={indicatorRef}
             // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
             className={classNames(
-              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all duration-200 ease-in-out",
+              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all",
               activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
             )}
           />
