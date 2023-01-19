@@ -18,6 +18,7 @@ import {
   REVIEW_AT_CHOICES,
   KASP_STRING,
   KASP_ENABLED,
+  CONSULTATION_STATUS,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -70,6 +71,7 @@ type FormDetails = {
   other_symptoms: string;
   symptoms_onset_date?: Date;
   suggestion: string;
+  consultation_status: number;
   patient: string;
   facility: string;
   admitted: BooleanStrings;
@@ -115,6 +117,7 @@ const initForm: FormDetails = {
   other_symptoms: "",
   symptoms_onset_date: undefined,
   suggestion: "A",
+  consultation_status: 0,
   patient: "",
   facility: "",
   admitted: "false",
@@ -325,6 +328,13 @@ export const ConsultationForm = (props: any) => {
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "consultation_status":
+          if (!state.form[field]) {
+            errors[field] = "Please select the consultation status";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -540,6 +550,7 @@ export const ConsultationForm = (props: any) => {
           ? state.form.symptoms_onset_date
           : undefined,
         suggestion: state.form.suggestion,
+        consultation_status: Number(state.form.consultation_status),
         admitted: state.form.suggestion === "A",
         admission_date:
           state.form.suggestion === "A" ? state.form.admission_date : undefined,
@@ -744,6 +755,13 @@ export const ConsultationForm = (props: any) => {
           label="Decision after consultation"
           {...selectField("suggestion")}
           options={CONSULTATION_SUGGESTION}
+        />
+
+        <SelectFormField
+          required
+          label="Status during the consultation"
+          {...selectField("consultation_status")}
+          options={CONSULTATION_STATUS}
         />
 
         {state.form.suggestion === "R" && (
