@@ -95,6 +95,7 @@ export default function ManageUsers() {
         alt_phone_number: qParams.alt_phone_number,
         user_type: qParams.user_type,
         district_id: qParams.district_id,
+        facility_id: qParams.facility_id,
       };
       if (qParams.district_id) {
         const dis = await dispatch(getDistrict(qParams.district_id));
@@ -125,6 +126,7 @@ export default function ManageUsers() {
       qParams.alt_phone_number,
       qParams.user_type,
       qParams.district_id,
+      qParams.facility_id,
       dispatch,
     ]
   );

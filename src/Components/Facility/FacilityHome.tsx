@@ -562,7 +562,7 @@ export const FacilityHome = (props: any) => {
                   View Assets
                 </DropdownItem>
                 <DropdownItem
-                  onClick={() => navigate(`/facility/${facilityId}/users`)}
+                  onClick={() => navigate(`/users?facility_id=${facilityId}`)}
                   icon={<CareIcon className="care-l-users-alt text-lg" />}
                 >
                   View Users

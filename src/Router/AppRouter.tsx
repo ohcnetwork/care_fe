@@ -59,7 +59,6 @@ import HubDashboard from "../Components/Dashboard/HubDashboard";
 import Error404 from "../Components/ErrorPages/404";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import FacilityUsers from "../Components/Facility/FacilityUsers";
 import {
   DesktopSidebar,
   MobileSidebar,
@@ -96,9 +95,6 @@ const routes = {
   ),
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
-  ),
-  "/facility/:facilityId/users": ({ facilityId }: any) => (
-    <FacilityUsers facilityId={facilityId} />
   ),
   "/facility/:facilityId/resource/new": ({ facilityId }: any) => (
     <ResourceCreate facilityId={facilityId} />

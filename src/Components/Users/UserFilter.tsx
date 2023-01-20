@@ -12,6 +12,7 @@ import { USER_TYPE_OPTIONS } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useMergeState from "../../Common/hooks/useMergeState";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FacilitySelect } from "../Common/FacilitySelect";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
@@ -27,6 +28,8 @@ export default function UserFilter(props: any) {
     phone_number: filter.phone_number || "",
     alt_phone_number: filter.alt_phone_number || "",
     user_type: filter.user_type || "",
+    facility_ref: null,
+    facility_id: filter.facility_id || "",
     district_id: filter.district_id || "",
     district_ref: null,
   });
@@ -37,6 +40,8 @@ export default function UserFilter(props: any) {
     phone_number: "",
     alt_phone_number: "",
     user_type: "",
+    facility_ref: null,
+    facility_id: "",
     district_id: "",
     district_ref: null,
   };
@@ -55,6 +60,7 @@ export default function UserFilter(props: any) {
       phone_number,
       alt_phone_number,
       user_type,
+      facility_id,
       district_id,
     } = filterState;
     const data = {
@@ -63,6 +69,7 @@ export default function UserFilter(props: any) {
       phone_number: parsePhoneNumberForFilterParam(phone_number),
       alt_phone_number: parsePhoneNumberForFilterParam(alt_phone_number),
       user_type: user_type || "",
+      facility_id: facility_id || "",
       district_id: district_id || "",
     };
     onChange(data);
@@ -79,6 +86,14 @@ export default function UserFilter(props: any) {
     }
     fetchData();
   }, [dispatch]);
+
+  const setFacility = (selected: any) => {
+    const filterData: any = { ...filterState };
+    filterData["facility_ref"] = selected;
+    filterData["facility_id"] = (selected || {}).id;
+
+    setFilterState(filterData);
+  };
 
   const handleChange = ({ name, value }: any) =>
     setFilterState({ ...filterState, [name]: value });
@@ -130,6 +145,18 @@ export default function UserFilter(props: any) {
             optionValue={(o) => o.id}
             value={filterState.user_type}
             onChange={(v) => setFilterState({ ...filterState, user_type: v })}
+          />
+        </div>
+
+        <div className="w-full flex-none">
+          <FieldLabel className="text-sm">Facility</FieldLabel>
+          <FacilitySelect
+            multiple={false}
+            name="facility"
+            selected={filterState.facility_ref}
+            setSelected={(obj) => setFacility(obj)}
+            className="shifting-page-filter-dropdown"
+            errors={""}
           />
         </div>
 
