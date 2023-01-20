@@ -16,6 +16,7 @@ export const Login = (props: { forgot?: boolean }) => {
   const {
     static_light_logo,
     static_black_logo,
+    static_dpg_white_logo,
     recaptcha_site_key,
     github_url,
     state_logo,
@@ -215,19 +216,27 @@ export const Login = (props: { forgot?: boolean }) => {
         </div>
         <div className="flex items-center lg:absolute lg:inset-x-0 lg:py-12 lg:px-16 pb-10 lg:bottom-0 lg:z-20">
           <div className="text-xs md:text-sm max-w-lg">
-            <a
-              className="flex items-center text-gray-300 mb-2 font-bold"
-              href="https://coronasafe.network/"
-              rel="noopener noreferrer"
-              target={"_blank"}
-            >
-              <span>{t("powered_by")}</span>
+            <div className="flex items-center gap-4 mb-2">
               <img
-                src="https://3451063158-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-M233b0_JITp4nk0uAFp%2F-M2Dx6gKxOSU45cjfgNX%2F-M2DxFOkMmkPNn0I6U9P%2FCoronasafe-logo.png?alt=media&token=178cc96d-76d9-4e27-9efb-88f3186368e8"
-                className="h-8 inline-block"
-                alt="coronasafe logo"
+                src={static_dpg_white_logo}
+                className="h-10"
+                alt="Logo of Digital Public Goods Alliance"
               />
-            </a>
+              <div className="w-[1px] bg-white h-5" />
+              <a
+                className="flex items-center text-gray-300 font-bold"
+                href="https://coronasafe.network/"
+                rel="noopener noreferrer"
+                target={"_blank"}
+              >
+                <span>{t("powered_by")}</span>
+                <img
+                  src="https://3451063158-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-M233b0_JITp4nk0uAFp%2F-M2Dx6gKxOSU45cjfgNX%2F-M2DxFOkMmkPNn0I6U9P%2FCoronasafe-logo.png?alt=media&token=178cc96d-76d9-4e27-9efb-88f3186368e8"
+                  className="h-8 inline-block"
+                  alt="coronasafe logo"
+                />
+              </a>
+            </div>
             <a
               href="https://coronasafe.network/"
               target={"_blank"}

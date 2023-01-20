@@ -7,6 +7,10 @@ export interface IConfig {
   static_light_logo: string;
   static_black_logo: string;
   /**
+   * White logo of Digital Public Goods.
+   */
+  static_dpg_white_logo: string;
+  /**
    * The API key for the Google Maps API used for location picker.
    */
   gmaps_api_key: string;
