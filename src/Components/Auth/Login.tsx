@@ -187,7 +187,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 )}
                 alt="state logo"
               />
-              <div className="w-0.5 bg-white h-20" />
+              <div className="w-0.5 bg-white h-5" />
             </>
           )}
           <a
