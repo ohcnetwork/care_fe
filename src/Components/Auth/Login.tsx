@@ -21,6 +21,7 @@ export const Login = (props: { forgot?: boolean }) => {
     recaptcha_site_key,
     github_url,
     coronasafe_url,
+    dpg_url,
     state_logo,
     state_logo_white,
   } = useConfig();
@@ -196,7 +197,7 @@ export const Login = (props: { forgot?: boolean }) => {
           <a
             href={coronasafe_url}
             className="inline-block"
-            target={"_blank"}
+            target="_blank"
             rel="noopener noreferrer"
           >
             <img
@@ -219,16 +220,18 @@ export const Login = (props: { forgot?: boolean }) => {
         <div className="flex items-center lg:absolute lg:inset-x-0 lg:py-12 lg:px-16 pb-10 lg:bottom-0 lg:z-20">
           <div className="text-xs md:text-sm max-w-lg">
             <div className="ml-1 flex items-center gap-4 mb-2">
-              <img
-                src={static_dpg_white_logo}
-                className="h-12"
-                alt="Logo of Digital Public Goods Alliance"
-              />
+              <a href={dpg_url} rel="noopener noreferrer" target="_blank">
+                <img
+                  src={static_dpg_white_logo}
+                  className="h-12"
+                  alt="Logo of Digital Public Goods Alliance"
+                />
+              </a>
               <div className="ml-2 w-[1px] bg-white/50 h-8 rounded-full" />
               <a
                 href={coronasafe_url}
                 rel="noopener noreferrer"
-                target={"_blank"}
+                target="_blank"
               >
                 <img
                   src={static_coronasafe_logo}
@@ -239,7 +242,7 @@ export const Login = (props: { forgot?: boolean }) => {
             </div>
             <a
               href={coronasafe_url}
-              target={"_blank"}
+              target="_blank"
               rel="noopener noreferrer"
               className="text-gray-500"
             >
@@ -248,7 +251,7 @@ export const Login = (props: { forgot?: boolean }) => {
             <div className="mx-auto mt-2">
               <a
                 href={github_url}
-                target={"_blank"}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-400 hover:text-primary-500"
               >

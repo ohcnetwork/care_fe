@@ -4,6 +4,7 @@ export interface IConfig {
   dashboard_url: string;
   github_url: string;
   coronasafe_url: string;
+  dpg_url: string;
   app_loader_image: string;
   static_header_logo: string;
   static_light_logo: string;

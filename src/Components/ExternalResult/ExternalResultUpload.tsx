@@ -10,7 +10,7 @@ import * as Notification from "../../Utils/Notifications.js";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ExternalResultUpload() {
-  const { sample_format_external_result } = useConfig();
+  const { sample_format_external_result_import } = useConfig();
   const dispatch: any = useDispatch();
   // for disabling save button once clicked
   const [loading, setLoading] = useState(false);
@@ -98,7 +98,7 @@ export default function ExternalResultUpload() {
                 />
                 <a
                   className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                  href={sample_format_external_result}
+                  href={sample_format_external_result_import}
                 >
                   <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
                   <span>Sample Format</span>
