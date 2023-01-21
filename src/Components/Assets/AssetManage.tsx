@@ -20,6 +20,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { UserRole, USER_TYPES } from "../../Common/constants";
 import moment from "moment";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import RelativeTime from "../../CAREUI/display/RelativeTime";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -353,14 +354,19 @@ const AssetManage = (props: AssetManageProps) => {
               </div>
             </div>
 
-            <div className="text-xs text-gray-900 break-words">
-              <i className="text-gray-700">Created: </i>
-              {asset?.created_date &&
-                moment(asset?.created_date).format("DD/MM/YYYY LT")}
-              <br />
-              <i className="text-gray-700">Last Modified: </i>
-              {asset?.modified_date &&
-                moment(asset?.created_date).format("DD/MM/YYYY LT")}
+            <div className="flex flex-col text-sm text-gray-600 break-words justify-end">
+              {asset?.created_date && (
+                <div className="flex gap-1">
+                  <span>Created</span>
+                  <RelativeTime time={asset?.created_date} />
+                </div>
+              )}
+              {asset?.modified_date && (
+                <div className="flex gap-1">
+                  <span>Last updated</span>
+                  <RelativeTime time={asset?.modified_date} />
+                </div>
+              )}
             </div>
           </div>
         </div>
