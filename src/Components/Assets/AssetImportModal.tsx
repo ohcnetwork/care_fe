@@ -13,6 +13,7 @@ import SelectMenuV2 from "../Form/SelectMenuV2";
 import readXlsxFile from "read-excel-file";
 import { XLSXAssetImportSchema } from "../../Common/constants";
 import { parseCsvFile } from "../../Utils/utils";
+import useConfig from "../../Common/hooks/useConfig";
 
 interface Props {
   open: boolean;
@@ -27,6 +28,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
   const [location, setLocation] = useState("");
   const [locations, setLocations] = useState<any>([]);
   const dispatchAction: any = useDispatch();
+  const { asset_import_sample_format } = useConfig();
 
   const closeModal = () => {
     setPreview(undefined);
@@ -281,7 +283,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                   </p>
                   <a
                     className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                    href="https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=11JaEhNHdyCHth4YQs_44YaRlP77Rrqe81VSEfg1glko&exportFormat=xlsx"
+                    href={asset_import_sample_format}
                   >
                     <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
                     <span>Sample Format</span>
