@@ -28,7 +28,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
   const [location, setLocation] = useState("");
   const [locations, setLocations] = useState<any>([]);
   const dispatchAction: any = useDispatch();
-  const { asset_import_sample_format } = useConfig();
+  const { sample_format_asset_import } = useConfig();
 
   const closeModal = () => {
     setPreview(undefined);
@@ -283,7 +283,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                   </p>
                   <a
                     className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                    href={asset_import_sample_format}
+                    href={sample_format_asset_import}
                   >
                     <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
                     <span>Sample Format</span>

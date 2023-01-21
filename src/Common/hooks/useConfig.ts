@@ -33,7 +33,14 @@ export interface IConfig {
    * If true, the state logo will be white by applying "invert brightness-0" classes.
    */
   state_logo_white?: boolean;
-  asset_import_sample_format: string;
+  /**
+   * URL of the sample format for asset import.
+   */
+  sample_format_asset_import: string;
+  /**
+   * URL of the sample format for external result import.
+   */
+  sample_format_external_result: string;
 }
 
 const useConfig = () => {
