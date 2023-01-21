@@ -7,11 +7,11 @@ import { getDailyReport } from "../../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
-import { formatDate } from "../../../Utils/utils";
 import { PatientCategory } from "../models";
 import { PATIENT_CATEGORIES } from "../../../Common/constants";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import RelativeTime from "../../../CAREUI/display/RelativeTime";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
@@ -158,23 +158,19 @@ export const DailyRoundsList = (props: any) => {
                     </Grid>
                   )}
                   <Grid item xs={6}>
-                    <div className="text-xs">
-                      <span className="text-gray-700">Created At:</span>{" "}
-                      <div className="text-xs">
-                        {itemData.created_date
-                          ? formatDate(itemData.created_date)
-                          : "-"}
-                      </div>
+                    <div className="flex gap-1 text-xs">
+                      <span className="text-gray-700">Created</span>
+                      {itemData.created_date && (
+                        <RelativeTime time={itemData.created_date} />
+                      )}
                     </div>
                   </Grid>
                   <Grid item xs={6}>
-                    <div className="text-xs">
-                      <span className="text-gray-700">Updated At:</span>{" "}
-                      <div className="text-xs">
-                        {itemData.modified_date
-                          ? formatDate(itemData.modified_date)
-                          : "-"}
-                      </div>
+                    <div className="flex gap-1 text-xs">
+                      <span className="text-gray-700">Updated</span>
+                      {itemData.modified_date && (
+                        <RelativeTime time={itemData.modified_date} />
+                      )}
                     </div>
                   </Grid>
 

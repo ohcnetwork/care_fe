@@ -35,6 +35,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import RelativeTime from "../../CAREUI/display/RelativeTime";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -477,12 +478,9 @@ export const PatientManager = () => {
                         {" "}
                         {patient.facility_object.name}
                       </p>
-                      <p className="text-sm">
-                        <span className="text-gray-600">last updated</span>{" "}
-                        <span className="font-medium text-gray-900">
-                          {" "}
-                          {moment(patient.modified_date).fromNow()}
-                        </span>
+                      <p className="flex text-sm text-gray-600 space-x-1">
+                        <span>last updated</span>
+                        <RelativeTime time={patient.modified_date} />
                       </p>
                     </div>
                   </div>

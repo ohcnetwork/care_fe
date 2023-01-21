@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import moment from "moment";
 
-const RelativeTime = ({ time }: { time: string }) => {
+const RelativeTime = ({ time }: { time?: string }) => {
   const [relativeTime, setRelativeTime] = useState(moment(time).fromNow());
 
   useEffect(() => {

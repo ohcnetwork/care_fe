@@ -31,6 +31,7 @@ import DialogModal from "../Common/Dialog";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import RelativeTime from "../../CAREUI/display/RelativeTime";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -533,13 +534,15 @@ export const FileUpload = (props: FileUploadProps) => {
                         </span>{" "}
                         {item.uploaded_by ? item.uploaded_by.username : null}
                       </div>
-                      <div>
+                      <div className="flex gap-1">
                         <span className="font-semibold leading-relaxed">
-                          Created On :
-                        </span>{" "}
-                        {item.created_date
-                          ? formatDate(item.created_date)
-                          : "-"}
+                          Created:
+                        </span>
+                        {item.created_date ? (
+                          <RelativeTime time={item.created_date} />
+                        ) : (
+                          "-"
+                        )}
                       </div>
                     </div>
                   </div>
@@ -652,13 +655,15 @@ export const FileUpload = (props: FileUploadProps) => {
                         </span>{" "}
                         {item.uploaded_by ? item.uploaded_by.username : null}
                       </div>
-                      <div>
+                      <div className="flex gap-1">
                         <span className="font-semibold leading-relaxed">
-                          Created On :
-                        </span>{" "}
-                        {item.created_date
-                          ? formatDate(item.created_date)
-                          : "-"}
+                          Created:
+                        </span>
+                        {item.created_date ? (
+                          <RelativeTime time={item.created_date} />
+                        ) : (
+                          "-"
+                        )}
                       </div>
                     </div>
                   </div>
@@ -778,11 +783,15 @@ export const FileUpload = (props: FileUploadProps) => {
                       </span>{" "}
                       {item.uploaded_by ? item.uploaded_by.username : null}
                     </div>
-                    <div>
+                    <div className="flex gap-1">
                       <span className="font-semibold leading-relaxed">
-                        Created On :
-                      </span>{" "}
-                      {item.created_date ? formatDate(item.created_date) : "-"}
+                        Created:
+                      </span>
+                      {item.created_date ? (
+                        <RelativeTime time={item.created_date} />
+                      ) : (
+                        "-"
+                      )}
                     </div>
                   </div>
                 </div>
