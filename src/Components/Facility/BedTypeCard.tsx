@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import moment from "moment";
 import * as Notification from "../../Utils/Notifications";
 import { animated, config, useSpring } from "@react-spring/web";
 import { useDispatch } from "react-redux";
@@ -16,6 +15,7 @@ import DialogModal from "../Common/Dialog";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import RelativeTime from "../../CAREUI/display/RelativeTime";
 
 interface BedTypeCardProps {
   facilityId?: string;
@@ -160,9 +160,12 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
             </div>
             {facilityId && (
               <div className="flex items-center justify-between gap-2 pt-6">
-                <div className="text-xs text-gray-600 font-[400] italic p-1">
-                  Last Updated: {lastUpdated && moment(lastUpdated).fromNow()}
-                </div>
+                {lastUpdated && (
+                  <div className="flex gap-1 text-xs text-gray-600 font-normal">
+                    <span>Last updated:</span>
+                    <RelativeTime time={lastUpdated} />
+                  </div>
+                )}
                 <div className="flex justify-end gap-2 relative">
                   <ButtonV2
                     onClick={() => {
