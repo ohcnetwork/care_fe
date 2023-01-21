@@ -15,7 +15,9 @@ const RelativeTime = ({ time }: { time: string }) => {
   return (
     <div className="tooltip">
       <span className="underline">{relativeTime}</span>
-      <span className="tooltip-text">{time}</span>
+      <span className="tooltip-text font-medium tracking-wider">
+        {moment(time).format("hh:mm A; DD/MM/YYYY")}
+      </span>
     </div>
   );
 };
