@@ -532,7 +532,7 @@ export default function ShiftDetails(props: { id: string }) {
               <div>
                 <div className="">
                   <QRCode
-                    value={`https://${process.env.REACT_APP_DEPLOYED_URL}/shifting/ data.id`}
+                    value={`${window.location.origin}/shifting/ data.id`}
                   />
                 </div>
               </div>
@@ -547,7 +547,7 @@ export default function ShiftDetails(props: { id: string }) {
             Auto Generated for Care
           </div>
           <div className="font-xs font-gray-600 text-center font-mono">
-            {process.env.REACT_APP_DEPLOYED_URL}/shifting/{data.id}
+            {window.location.origin}/shifting/{data.id}
           </div>
         </div>
       </div>
