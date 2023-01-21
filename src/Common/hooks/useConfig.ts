@@ -40,7 +40,7 @@ export interface IConfig {
   /**
    * URL of the sample format for external result import.
    */
-  sample_format_external_result: string;
+  sample_format_external_result_import: string;
 }
 
 const useConfig = () => {
