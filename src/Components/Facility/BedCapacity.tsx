@@ -8,12 +8,11 @@ import {
   getCapacityBed,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { ErrorHelperText } from "../Common/HelperInputFields";
 import { CapacityModal, OptionsType } from "./models";
-import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: string;
@@ -131,7 +130,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
     setIsLastOptionType(lastBedType);
   }, [bedTypes]);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: FieldChangeEvent<unknown>) => {
     const form = { ...state.form };
     form[e.name] = e.value;
     dispatch({ type: "set_form", form });
@@ -227,52 +226,43 @@ export const BedCapacity = (props: BedCapacityProps) => {
         </div>
       ) : (
         <div className={className}>
-          <div>
-            <FieldLabel htmlFor="bed-type" required={true}>
-              Bed Type
-            </FieldLabel>
-            <SelectMenuV2
-              id="bed-type"
-              value={bedTypes.find((type) => type.id == state.form.bedType)}
-              options={bedTypes.filter((type) => !type.disabled)}
-              optionLabel={(option) => option.text}
-              onChange={(e) =>
-                handleChange({ name: "bedType", value: (e && e.id) || "" })
-              }
-              disabled={!!id}
-              className="mt-2"
-            />
-            <ErrorHelperText error={state.errors.bedType} />
-          </div>
+          <SelectFormField
+            name="bedType"
+            id="bed-type"
+            label="Bed Type"
+            required
+            value={state.form.bedType}
+            options={bedTypes.filter((type) => !type.disabled)}
+            optionLabel={(option) => option.text}
+            optionValue={(option) => option.id}
+            onChange={handleChange}
+            disabled={!!id}
+            error={state.errors.bedType}
+          />
           <div className="flex flex-col md:flex-row gap-7">
-            <div className="w-full">
-              <FieldLabel htmlFor="total-capacity" required={true}>
-                Total Capacity
-              </FieldLabel>
-              <TextFormField
-                id="total-capacity"
-                name="totalCapacity"
-                type="number"
-                value={state.form.totalCapacity}
-                onChange={handleChange}
-                error={state.errors.totalCapacity}
-                min={0}
-              />
-            </div>
-            <div className="w-full">
-              <FieldLabel htmlFor="currently-occupied" required={true}>
-                Currently Occupied
-              </FieldLabel>
-              <TextFormField
-                id="currently-occupied"
-                name="currentOccupancy"
-                type="number"
-                value={state.form.currentOccupancy}
-                onChange={handleChange}
-                error={state.errors.currentOccupancy}
-                min={0}
-              />
-            </div>
+            <TextFormField
+              id="total-capacity"
+              name="totalCapacity"
+              label="Total Capacity"
+              required
+              type="number"
+              value={state.form.totalCapacity}
+              onChange={handleChange}
+              error={state.errors.totalCapacity}
+              min={0}
+            />
+            <TextFormField
+              id="currently-occupied"
+              label="Currently Occupied"
+              required
+              name="currentOccupancy"
+              type="number"
+              value={state.form.currentOccupancy}
+              onChange={handleChange}
+              error={state.errors.currentOccupancy}
+              min={0}
+              max={state.form.totalCapacity}
+            />
           </div>
           <div>
             <div className="flex flex-col md:flex-row gap-4 justify-between items-end mt-4">
