@@ -190,7 +190,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 )}
                 alt="state logo"
               />
-              <div className="w-0.5 bg-white h-10" />
+              <div className="w-0.5 bg-white/50 h-10 rounded-full" />
             </>
           )}
           <a
@@ -224,7 +224,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 className="h-12"
                 alt="Logo of Digital Public Goods Alliance"
               />
-              <div className="w-[1px] bg-white h-8" />
+              <div className="ml-2 w-[1px] bg-white/50 h-8 rounded-full" />
               <a
                 href={coronasafe_url}
                 rel="noopener noreferrer"
