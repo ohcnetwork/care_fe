@@ -2,6 +2,7 @@
     "dashboard_url": "https://dashboard.coronasafe.in",
     "github_url": "https://github.com/coronasafe",
     "coronasafe_url": "https://coronasafe.network?ref=care",
+    "app_loader_image": "https://cdn.coronasafe.network/break-chain.webp",
     "static_header_logo": "https://cdn.coronasafe.network/header_logo.png",
     "static_light_logo": "https://cdn.coronasafe.network/light-logo.svg",
     "static_black_logo": "https://cdn.coronasafe.network/black-logo.svg",
