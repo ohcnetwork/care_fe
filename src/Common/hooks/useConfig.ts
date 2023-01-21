@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 export interface IConfig {
   dashboard_url: string;
   github_url: string;
+  coronasafe_url: string;
   static_header_logo: string;
   static_light_logo: string;
   static_black_logo: string;
@@ -10,6 +11,7 @@ export interface IConfig {
    * White logo of Digital Public Goods.
    */
   static_dpg_white_logo: string;
+  static_coronasafe_logo: string;
   /**
    * The API key for the Google Maps API used for location picker.
    */

@@ -17,8 +17,10 @@ export const Login = (props: { forgot?: boolean }) => {
     static_light_logo,
     static_black_logo,
     static_dpg_white_logo,
+    static_coronasafe_logo,
     recaptcha_site_key,
     github_url,
+    coronasafe_url,
     state_logo,
     state_logo_white,
   } = useConfig();
@@ -192,7 +194,7 @@ export const Login = (props: { forgot?: boolean }) => {
             </>
           )}
           <a
-            href="https://coronasafe.network?ref=care_login"
+            href={coronasafe_url}
             className="inline-block"
             target={"_blank"}
             rel="noopener noreferrer"
@@ -224,19 +226,19 @@ export const Login = (props: { forgot?: boolean }) => {
               />
               <div className="w-[1px] bg-white h-8" />
               <a
-                href="https://coronasafe.network/"
+                href={coronasafe_url}
                 rel="noopener noreferrer"
                 target={"_blank"}
               >
                 <img
-                  src="https://3451063158-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-M233b0_JITp4nk0uAFp%2F-M2Dx6gKxOSU45cjfgNX%2F-M2DxFOkMmkPNn0I6U9P%2FCoronasafe-logo.png?alt=media&token=178cc96d-76d9-4e27-9efb-88f3186368e8"
+                  src={static_coronasafe_logo}
                   className="h-10 inline-block"
                   alt="coronasafe logo"
                 />
               </a>
             </div>
             <a
-              href="https://coronasafe.network/"
+              href={coronasafe_url}
               target={"_blank"}
               rel="noopener noreferrer"
               className="text-gray-500"
