@@ -17,9 +17,9 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import BadgesList from "./BadgesList";
 import { ExportButton } from "../Common/Export";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ListView() {
   const dispatch: any = useDispatch();
@@ -296,59 +296,60 @@ export default function ListView() {
   };
 
   return (
-    <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="md:flex md:items-center md:justify-between px-4">
-        <PageTitle
-          title="Shifting"
-          hideBack
-          componentRight={
-            <ExportButton
-              action={() =>
-                downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
-              }
-              filenamePrefix="shift_requests"
-            />
+    <Page
+      title="Shifting"
+      hideBack
+      componentRight={
+        <ExportButton
+          action={() =>
+            downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
           }
-          breadcrumbs={false}
+          filenamePrefix="shift_requests"
         />
-
-        <div className="md:px-4">
-          <SearchInput
-            name="patient_name"
-            value={qParams.patient_name}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder="Search patient"
-          />
-        </div>
-        <div className="w-32">
-          {/* dummy div to align space as per board view */}
-        </div>
-        <div className="flex md:flex-row flex-col justify-center items-center md:gap-6">
-          <div className="my-2 md:my-0">
-            <button
-              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 md:w-40 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-              onClick={() =>
-                navigate("/shifting/board-view", { query: qParams })
-              }
-            >
-              <i
-                className="fa fa-list mr-1 transform rotate-90"
-                aria-hidden="true"
-              ></i>
-              Board View
-            </button>
+      }
+      breadcrumbs={false}
+      className="flex flex-col h-screen pb-2"
+      options={
+        <>
+          <div className="md:px-4">
+            <SearchInput
+              name="patient_name"
+              value={qParams.patient_name}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder="Search patient"
+            />
           </div>
-          <div className="flex items-start gap-2">
-            <button
-              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-              onClick={() => advancedFilter.setShow(true)}
-            >
-              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-              <span>Filters</span>
-            </button>
+          <div className="w-32">
+            {/* dummy div to align space as per board view */}
           </div>
-        </div>
-      </div>
+          <div className="flex md:flex-row flex-col justify-center items-center md:gap-6">
+            <div className="my-2 md:my-0">
+              <button
+                className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 md:w-40 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+                onClick={() =>
+                  navigate("/shifting/board-view", { query: qParams })
+                }
+              >
+                <i
+                  className="fa fa-list mr-1 transform rotate-90"
+                  aria-hidden="true"
+                ></i>
+                Board View
+              </button>
+            </div>
+            <div className="flex items-start gap-2">
+              <button
+                className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+                onClick={() => advancedFilter.setShow(true)}
+              >
+                <i className="fa fa-filter mr-1" aria-hidden="true"></i>
+                <span>Filters</span>
+              </button>
+            </div>
+          </div>
+        </>
+      }
+    >
       <BadgesList {...{ qParams, FilterBadges }} />
       <div className="px-1">
         {isLoading ? (
@@ -379,6 +380,6 @@ export default function ListView() {
           <ListFilter showShiftingStatus={true} {...advancedFilter} />
         </div>
       </SlideOver>
-    </div>
+    </Page>
   );
 }

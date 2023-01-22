@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getNotifications } from "../../Redux/actions";
-import PageTitle from "../Common/PageTitle";
 import { Card, CardContent } from "@material-ui/core";
 import Loading from "../Common/Loading";
 import { formatDate } from "../../Utils/utils";
+import Page from "../Common/components/Page";
 
 export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
@@ -65,9 +65,13 @@ export const NoticeBoard: any = () => {
 
   if (isLoading) return <Loading />;
   return (
-    <div className="px-6">
-      <PageTitle title="Notice Board" hideBack={true} breadcrumbs={false} />
+    <Page
+      className="px-6"
+      title="Notice Board"
+      hideBack={true}
+      breadcrumbs={false}
+    >
       <div>{notices}</div>
-    </div>
+    </Page>
   );
 };

@@ -31,7 +31,7 @@ import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface resourceProps {
@@ -222,14 +222,14 @@ export default function ResourceCreate(props: resourceProps) {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={"Create Resource Request"}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          resource: { style: "pointer-events-none" },
-        }}
-      />
+    <Page
+      title={"Create Resource Request"}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        resource: { style: "pointer-events-none" },
+      }}
+      className="pb-2"
+    >
       <div className="mt-4">
         <Card>
           <CardContent>
@@ -380,6 +380,6 @@ export default function ResourceCreate(props: resourceProps) {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 }

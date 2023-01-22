@@ -8,8 +8,8 @@ import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 
@@ -77,8 +77,7 @@ export const DailyRoundListDetails = (props: any) => {
   }
 
   return (
-    <div className="px-2">
-      <PageTitle title={`Consultation Update #${id}`} />
+    <Page title={`Consultation Update #${id}`}>
       <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="max-w-md">
@@ -219,6 +218,6 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };

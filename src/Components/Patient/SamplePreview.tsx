@@ -1753,7 +1753,9 @@ export default function SampleReport(props: samplePreviewProps) {
   }
   return (
     <Paper className={classes.root}>
-      <PageTitle title="Sample Report" />
+      <div className="px-6 py-3.5">
+        <PageTitle title="Sample Report" />
+      </div>
       {report}
     </Paper>
   );

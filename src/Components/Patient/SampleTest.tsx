@@ -23,8 +23,8 @@ import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const icmrCategories = [...ICMR_CATEGORY];
 const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
@@ -260,14 +260,14 @@ export const SampleTest = (props: any) => {
     return <Loading />;
   }
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={headerText}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-      />
+    <Page
+      title={headerText}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [patientId]: { name: patientName },
+      }}
+      className="pb-2"
+    >
       <div className="mt-4">
         <Card>
           <CardContent>
@@ -494,6 +494,6 @@ export const SampleTest = (props: any) => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

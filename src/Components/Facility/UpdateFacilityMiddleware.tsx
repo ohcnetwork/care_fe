@@ -11,8 +11,8 @@ import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm = {
   name: "",
@@ -118,13 +118,13 @@ export const UpdateFacilityMiddleware = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
-        title="Update Middleware"
-        crumbsReplacements={{
-          [facilityId]: { name: state.form.name },
-        }}
-      />
+    <Page
+      title="Update Middleware"
+      crumbsReplacements={{
+        [facilityId]: { name: state.form.name },
+      }}
+      className="pb-2 max-w-3xl mx-auto"
+    >
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -147,6 +147,6 @@ export const UpdateFacilityMiddleware = (props: any) => {
           </form>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

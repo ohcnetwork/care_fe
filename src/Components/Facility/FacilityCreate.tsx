@@ -54,8 +54,8 @@ import Steps, { Step } from "../Common/Steps";
 import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface FacilityProps {
   facilityId?: string;
@@ -572,13 +572,12 @@ export const FacilityCreate = (props: FacilityProps) => {
   switch (currentStep) {
     case 3:
       return (
-        <div className="px-2 pb-2">
-          <PageTitle
-            title={headerText}
-            crumbsReplacements={{
-              [createdFacilityId || "????"]: { name: state.form.name },
-            }}
-          />
+        <Page
+          title={headerText}
+          crumbsReplacements={{
+            [createdFacilityId || "????"]: { name: state.form.name },
+          }}
+        >
           <Steps steps={getSteps()} />
           <div className="mt-3">
             <DoctorCapacity
@@ -592,17 +591,16 @@ export const FacilityCreate = (props: FacilityProps) => {
               }}
             />
           </div>
-        </div>
+        </Page>
       );
     case 2:
       return (
-        <div className="px-2 pb-2">
-          <PageTitle
-            title={headerText}
-            crumbsReplacements={{
-              [createdFacilityId || "????"]: { name: state.form.name },
-            }}
-          />
+        <Page
+          title={headerText}
+          crumbsReplacements={{
+            [createdFacilityId || "????"]: { name: state.form.name },
+          }}
+        >
           <Steps steps={getSteps()} />
           <div className="mt-3">
             <BedCapacity
@@ -616,18 +614,17 @@ export const FacilityCreate = (props: FacilityProps) => {
               }}
             />
           </div>
-        </div>
+        </Page>
       );
     case 1:
     default:
       return (
-        <div className="px-2 pb-2">
-          <PageTitle
-            title={headerText}
-            crumbsReplacements={{
-              [facilityId || "????"]: { name: state.form.name },
-            }}
-          />
+        <Page
+          title={headerText}
+          crumbsReplacements={{
+            [facilityId || "????"]: { name: state.form.name },
+          }}
+        >
           {!facilityId && <Steps steps={getSteps()} />}
           <Card className="mt-4">
             <CardContent>
@@ -1128,7 +1125,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </form>
             </CardContent>
           </Card>
-        </div>
+        </Page>
       );
   }
 };

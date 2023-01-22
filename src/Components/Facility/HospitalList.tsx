@@ -26,7 +26,6 @@ import ExportMenu from "../Common/Export";
 import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-// const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const HospitalList = () => {
   const {

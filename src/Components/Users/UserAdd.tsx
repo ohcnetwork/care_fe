@@ -37,9 +37,9 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import Checkbox from "../Common/components/CheckBox";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface UserProps {
   userId?: number;
@@ -199,15 +199,15 @@ export const UserAdd = (props: UserProps) => {
   const userTypes = isSuperuser
     ? [...USER_TYPE_OPTIONS]
     : userType === "StaffReadOnly"
-      ? readOnlyUsers.slice(0, 1)
-      : userType === "DistrictReadOnlyAdmin"
-        ? readOnlyUsers.slice(0, 2)
-        : userType === "StateReadOnlyAdmin"
-          ? readOnlyUsers.slice(0, 3)
-          : userType === "Pharmacist"
-            ? USER_TYPE_OPTIONS.slice(0, 1)
-            : // Exception to allow Staff to Create Doctors
-            defaultAllowedUserTypes;
+    ? readOnlyUsers.slice(0, 1)
+    : userType === "DistrictReadOnlyAdmin"
+    ? readOnlyUsers.slice(0, 2)
+    : userType === "StateReadOnlyAdmin"
+    ? readOnlyUsers.slice(0, 3)
+    : userType === "Pharmacist"
+    ? USER_TYPE_OPTIONS.slice(0, 1)
+    : // Exception to allow Staff to Create Doctors
+      defaultAllowedUserTypes;
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
@@ -586,21 +586,18 @@ export const UserAdd = (props: UserProps) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={headerText}
-        componentRight={
-          <Link
-            href="https://school.coronasafe.network/targets/12953"
-            className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
-            target="_blank"
-          >
-            <i className="fas fa-info-circle" /> &nbsp;Need Help?
-          </Link>
-        }
-        justifyContents="justify-between"
-      />
-
+    <Page
+      title={headerText}
+      options={
+        <Link
+          href="https://school.coronasafe.network/targets/12953"
+          className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
+          target="_blank"
+        >
+          <i className="fas fa-info-circle" /> &nbsp;Need Help?
+        </Link>
+      }
+    >
       <Card className="mt-4">
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -977,6 +974,6 @@ export const UserAdd = (props: UserProps) => {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </Page>
   );
 };

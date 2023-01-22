@@ -10,6 +10,7 @@ import { navigate } from "raviger";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
 import _ from "lodash";
 import { formatDate } from "../../Utils/utils";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -293,8 +294,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle title="Sample Test Details" />
+    <Page className="pb-2" title="Sample Test Details">
       {sampleDetails.patient && (
         <div className="flex justify-end">
           <Button
@@ -455,12 +455,13 @@ export const SampleDetails = (props: SampleDetailsProps) => {
         <h4 className="mt-8">Details of patient</h4>
         {showPatientCard(sampleDetails.patient_object)}
       </div>
-
-      <PageTitle
-        title="Sample Test History"
-        hideBack={true}
-        breadcrumbs={false}
-      />
+      <div className="pt-4 mb-4">
+        <PageTitle
+          title="Sample Test History"
+          hideBack={true}
+          breadcrumbs={false}
+        />
+      </div>
       {sampleDetails.flow &&
         sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
 
@@ -474,6 +475,6 @@ export const SampleDetails = (props: SampleDetailsProps) => {
         unspecified={true}
         audio={true}
       />
-    </div>
+    </Page>
   );
 };

@@ -2,7 +2,6 @@ import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
-import PageTitle from "../Common/PageTitle";
 import {
   getAnyFacility,
   listAssets,
@@ -29,6 +28,7 @@ import AuthorizeFor from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import ExportMenu from "../Common/Export";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -265,52 +265,57 @@ const AssetsList = () => {
   }
 
   return (
-    <div className="px-6">
-      <div className="flex justify-between items-center">
-        <PageTitle title="Assets" breadcrumbs={false} hideBack />
-        {authorizedForImportExport && (
-          <div className="tooltip">
-            {!facility && (
-              <span className="tooltip-text tooltip-bottom -translate-x-2/3 flex flex-col items-center">
-                <p>Select a facility from the Facilities</p>
-                <p>page and click 'View Assets' from the</p>
-                <p>Manage Facility dropdown</p>
-              </span>
-            )}
-            {/* TODO: ask for facility select dialog instead of disabling */}
-            <ExportMenu
-              disabled={!facility || importAssetModalOpen}
-              label={importAssetModalOpen ? "Importing..." : "Import/Export"}
-              exportItems={[
-                {
-                  label: "Import Assets",
-                  // action: () => setImportAssetModalOpen(true),
-                  options: {
-                    icon: <CareIcon className="care-l-import" />,
-                    onClick: () => setImportAssetModalOpen(true),
+    <Page
+      title="Assets"
+      breadcrumbs={false}
+      hideBack
+      options={
+        <>
+          {authorizedForImportExport && (
+            <div className="tooltip">
+              {!facility && (
+                <span className="tooltip-text tooltip-bottom -translate-x-2/3 flex flex-col items-center">
+                  <p>Select a facility from the Facilities</p>
+                  <p>page and click 'View Assets' from the</p>
+                  <p>Manage Facility dropdown</p>
+                </span>
+              )}
+              {/* TODO: ask for facility select dialog instead of disabling */}
+              <ExportMenu
+                disabled={!facility || importAssetModalOpen}
+                label={importAssetModalOpen ? "Importing..." : "Import/Export"}
+                exportItems={[
+                  {
+                    label: "Import Assets",
+                    // action: () => setImportAssetModalOpen(true),
+                    options: {
+                      icon: <CareIcon className="care-l-import" />,
+                      onClick: () => setImportAssetModalOpen(true),
+                    },
                   },
-                },
-                {
-                  label: "Export Assets",
-                  action: () =>
-                    authorizedForImportExport &&
-                    listAssets({
-                      ...qParams,
-                      json: true,
-                      limit: totalCount,
-                    }),
-                  type: "json",
-                  filePrefix: `assets_${facility?.name}`,
-                  options: {
-                    icon: <CareIcon className="care-l-export" />,
-                    disabled: totalCount === 0 || !authorizedForImportExport,
+                  {
+                    label: "Export Assets",
+                    action: () =>
+                      authorizedForImportExport &&
+                      listAssets({
+                        ...qParams,
+                        json: true,
+                        limit: totalCount,
+                      }),
+                    type: "json",
+                    filePrefix: `assets_${facility?.name}`,
+                    options: {
+                      icon: <CareIcon className="care-l-export" />,
+                      disabled: totalCount === 0 || !authorizedForImportExport,
+                    },
                   },
-                },
-              ]}
-            />
-          </div>
-        )}
-      </div>
+                ]}
+              />
+            </div>
+          )}
+        </>
+      }
+    >
       <div className="lg:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
@@ -385,7 +390,7 @@ const AssetsList = () => {
             ]}
           />
           <div className="grow">
-            <div className="py-8 md:px-5">
+            <div className="py-8 md:px-6">
               {manageAssets}
               <Pagination totalCount={totalCount} />
             </div>
@@ -409,7 +414,7 @@ const AssetsList = () => {
           setSelectedFacility({ name: "" });
         }}
       />
-    </div>
+    </Page>
   );
 };
 

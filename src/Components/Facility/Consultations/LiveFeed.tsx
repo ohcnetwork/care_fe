@@ -3,7 +3,6 @@ import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import loadable from "@loadable/component";
 import {
   listAssetBeds,
   partialUpdateAssetBed,
@@ -16,7 +15,6 @@ import {
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
 import {
   Card,
@@ -32,6 +30,7 @@ import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../models";
 import { TextInputField } from "../../Common/HelperInputFields";
 import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
+import Page from "../../Common/components/Page";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -294,9 +293,7 @@ const LiveFeed = (props: any) => {
   }
 
   return (
-    <div className="mt-4 px-6 mb-2">
-      <PageTitle title="Live Feed" hideBack={true} />
-
+    <Page title="Live Feed" hideBack={true} className="mb-2">
       {toDelete && (
         <Modal
           className="flex h-fit justify-center items-center top-1/2"
@@ -644,7 +641,7 @@ const LiveFeed = (props: any) => {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };
 

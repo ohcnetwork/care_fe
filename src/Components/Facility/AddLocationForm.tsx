@@ -15,8 +15,8 @@ import {
 } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { Submit, Cancel } from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface LocationFormProps {
   facilityId: string;
@@ -90,19 +90,19 @@ export const AddLocationForm = (props: LocationFormProps) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
-        title={headerText}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          ...(locationId && {
-            [locationId]: {
-              name: locationName,
-              uri: `/facility/${facilityId}/location`,
-            },
-          }),
-        }}
-      />
+    <Page
+      title={headerText}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        ...(locationId && {
+          [locationId]: {
+            name: locationName,
+            uri: `/facility/${facilityId}/location`,
+          },
+        }),
+      }}
+      className="pb-2 max-w-3xl mx-auto"
+    >
       <div className="mt-10">
         <Card>
           <form onSubmit={handleSubmit}>
@@ -149,6 +149,6 @@ export const AddLocationForm = (props: LocationFormProps) => {
           </form>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

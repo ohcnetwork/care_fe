@@ -34,9 +34,9 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
@@ -388,7 +388,15 @@ export const PatientHome = (props: any) => {
   };
 
   return (
-    <div className="px-2 pb-2">
+    <Page
+      title={"Patient Details"}
+      backUrl="/patients"
+      crumbsReplacements={{
+        [facilityId]: { name: patientData?.facility_object?.name },
+        [id]: { name: patientData?.name },
+      }}
+      className="pb-2"
+    >
       {showAlertMessage.show && (
         <AlertDialog
           title={showAlertMessage.title}
@@ -399,15 +407,6 @@ export const PatientHome = (props: any) => {
       )}
 
       <div id="revamp">
-        <PageTitle
-          title={"Patient Details"}
-          backUrl="/patients"
-          crumbsReplacements={{
-            [facilityId]: { name: patientData?.facility_object?.name },
-            [id]: { name: patientData?.name },
-          }}
-        />
-
         <div className="relative mt-2">
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
@@ -1534,6 +1533,6 @@ export const PatientHome = (props: any) => {
           </div>
         )}
       </div>
-    </div>
+    </Page>
   );
 };

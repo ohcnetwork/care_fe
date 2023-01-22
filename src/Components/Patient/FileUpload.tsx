@@ -1246,15 +1246,17 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         </div>
       </DialogModal>
-      <PageTitle
-        title={`${UPLOAD_HEADING[type]}`}
-        hideBack={hideBack}
-        breadcrumbs={false}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-      />
+      <div className="pt-4 mb-4">
+        <PageTitle
+          title={`${UPLOAD_HEADING[type]}`}
+          hideBack={hideBack}
+          breadcrumbs={false}
+          crumbsReplacements={{
+            [facilityId]: { name: facilityName },
+            [patientId]: { name: patientName },
+          }}
+        />
+      </div>
       <div className="mt-4">
         <div className="md:grid grid-cols-2 gap-4">
           {audio ? (
@@ -1367,12 +1369,15 @@ export const FileUpload = (props: FileUploadProps) => {
           ) : null}
         </div>
       </div>
+      <div className="pt-4 mb-4">
+        {" "}
+        <PageTitle
+          title={`${VIEW_HEADING[type]}`}
+          hideBack={true}
+          breadcrumbs={false}
+        />
+      </div>
 
-      <PageTitle
-        title={`${VIEW_HEADING[type]}`}
-        hideBack={true}
-        breadcrumbs={false}
-      />
       <HeadedTabs
         tabs={tabs}
         handleChange={handleTabChange}

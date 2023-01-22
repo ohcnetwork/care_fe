@@ -42,8 +42,8 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
@@ -296,12 +296,11 @@ export const FacilityHome = (props: any) => {
   );
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={facilityData.name || "Facility"}
-        crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
-        focusOnLoad={true}
-      />
+    <Page
+      title={facilityData.name || "Facility"}
+      crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
+      focusOnLoad={true}
+    >
       <Dialog
         maxWidth={"md"}
         open={openDeleteDialog}
@@ -741,6 +740,6 @@ export const FacilityHome = (props: any) => {
           />
         </DialogModal>
       )}
-    </div>
+    </Page>
   );
 };

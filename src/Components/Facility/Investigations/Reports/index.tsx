@@ -9,7 +9,6 @@ import {
   getPatient,
 } from "../../../../Redux/actions";
 import { MultiSelectField } from "../../../Common/HelperInputFields";
-import PageTitle from "../../../Common/PageTitle";
 import { Button, ButtonGroup, Checkbox, TextField } from "@material-ui/core";
 import Loading from "../../../Common/Loading";
 import _ from "lodash";
@@ -18,6 +17,7 @@ import { InputLabel, makeStyles, CircularProgress } from "@material-ui/core";
 import { InvestigationResponse } from "./types";
 import ReportTable from "./ReportTable";
 import * as Notification from "../../../../Utils/Notifications";
+import Page from "../../../Common/components/Page";
 
 const RESULT_PER_PAGE = 14;
 
@@ -331,14 +331,14 @@ const InvestigationReports = ({ id }: any) => {
   const nextSessionDisabled = isNextSessionDisabled || isLoading.tableData;
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
-      <PageTitle
-        title={"Investigation Reports"}
-        crumbsReplacements={{
-          patient: { style: "pointer-events-none" },
-          [id]: { name: patientDetails.name },
-        }}
-      />
+    <Page
+      className="max-w-7xl mx-auto"
+      title={"Investigation Reports"}
+      crumbsReplacements={{
+        patient: { style: "pointer-events-none" },
+        [id]: { name: patientDetails.name },
+      }}
+    >
       {!isLoading.investigationGroupLoading ? (
         <>
           <div className="mt-5">
@@ -485,7 +485,7 @@ const InvestigationReports = ({ id }: any) => {
       ) : (
         <Loading />
       )}
-    </div>
+    </Page>
   );
 };
 

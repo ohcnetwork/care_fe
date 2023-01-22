@@ -32,8 +32,8 @@ import {
 } from "@material-ui/core";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface patientShiftProps {
   id: string;
@@ -237,8 +237,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle title={"Update Shift Request"} />
+    <Page title={"Update Shift Request"} className="pb-2">
       <div className="mt-4">
         <Card>
           <CardContent>
@@ -456,6 +455,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

@@ -32,7 +32,7 @@ import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface patientShiftProps {
@@ -235,14 +235,14 @@ export const ShiftCreate = (props: patientShiftProps) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={"Create Shift Request"}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-      />
+    <Page
+      title={"Create Shift Request"}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [patientId]: { name: patientName },
+      }}
+      className="pb-2"
+    >
       <div className="mt-4">
         <Card>
           <CardContent>
@@ -444,6 +444,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

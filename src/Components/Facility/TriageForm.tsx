@@ -18,8 +18,8 @@ import { goBack } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import DateInputV2 from "../Common/DateInputV2";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface triageFormProps extends PatientStatsModel {
   facilityId: number;
@@ -270,17 +270,15 @@ export const TriageForm = (props: triageFormProps) => {
     : "border-gray-200";
 
   return (
-    <div className="px-2">
-      <PageTitle
-        title={headerText}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [id || "????"]: {
-            name: moment(state.form.entry_date).format("YYYY-MM-DD"),
-          },
-        }}
-      />
-
+    <Page
+      title={headerText}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [id || "????"]: {
+          name: moment(state.form.entry_date).format("YYYY-MM-DD"),
+        },
+      }}
+    >
       <Modal
         open={openModalForExistingTriage}
         aria-labelledby="Triage Check"
@@ -329,7 +327,7 @@ export const TriageForm = (props: triageFormProps) => {
             <CardContent>
               <div className="max-w-[250px] pb-4">
                 <InputLabel>Entry Date</InputLabel>
-                <div className="flex-auto">
+                <div className="flex-auto mt-2">
                   <DateInputV2
                     className={`bg-gray-50 ${borderColor}`}
                     value={state.form.entry_date}
@@ -441,6 +439,6 @@ export const TriageForm = (props: triageFormProps) => {
           </form>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

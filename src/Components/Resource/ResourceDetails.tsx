@@ -15,8 +15,8 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
 import CommentSection from "./CommentSection";
 import { formatDate } from "../../Utils/utils";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResourceDetails(props: { id: string }) {
   const dispatch: any = useDispatch();
@@ -260,23 +260,20 @@ export default function ResourceDetails(props: { id: string }) {
           {ApprovalLetter(data)}
         </div>
       ) : (
-        <div className="mx-3 md:mx-8 mb-10">
-          <div className="my-4 flex flex-col items-start md:flex-row md:justify-between md:items-center">
-            <PageTitle
-              title={"Resource details"}
-              crumbsReplacements={{ [props.id]: { name: data.title } }}
-            />
-            <div>
-              <button
-                onClick={(_) => setIsPrintMode(true)}
-                className="btn btn-primary"
-              >
-                <i className="fas fa-file-alt mr-2"></i> Approval Letter
-              </button>
-            </div>
-          </div>
+        <Page
+          title={"Resource details"}
+          crumbsReplacements={{ [props.id]: { name: data.title } }}
+          options={
+            <button
+              onClick={(_) => setIsPrintMode(true)}
+              className="btn btn-primary"
+            >
+              <i className="fas fa-file-alt mr-2"></i> Approval Letter
+            </button>
+          }
+        >
           {data.assigned_to_object && (
-            <div className="relative rounded-lg shadow bg-primary-200">
+            <div className="relative rounded-lg shadow bg-primary-200 mt-10">
               <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
                 <div className="pr-16 sm:text-center sm:px-16">
                   <p className="font-bold text-primary-800">
@@ -481,7 +478,7 @@ export default function ResourceDetails(props: { id: string }) {
             <h4 className="mb-4">Comments</h4>
             <CommentSection id={props.id} />
           </div>
-        </div>
+        </Page>
       )}
     </div>
   );

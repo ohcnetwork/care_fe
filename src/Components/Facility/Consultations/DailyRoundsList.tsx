@@ -246,11 +246,13 @@ export const DailyRoundsList = (props: any) => {
     <div>
       <div>
         <div className="md:hidden">
-          <PageTitle
-            title="Consultation Update"
-            hideBack={true}
-            breadcrumbs={false}
-          />
+          <div className="pt-4 mb-4">
+            <PageTitle
+              title="Consultation Update"
+              hideBack={true}
+              breadcrumbs={false}
+            />
+          </div>
         </div>
         <div className={!isDailyRoundLoading ? "flex flex-wrap" : ""}>
           <div className="overflow-y-auto h-screen space-y-4">{roundsList}</div>

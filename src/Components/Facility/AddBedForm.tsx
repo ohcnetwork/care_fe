@@ -18,8 +18,8 @@ import {
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface BedFormProps {
   facilityId: string;
@@ -134,30 +134,30 @@ export const AddBedForm = (props: BedFormProps) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
-        title={headerText}
-        backButtonCB={() => {
-          navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
-            replace: true,
-          });
+    <Page
+      className="pb-2 max-w-3xl mx-auto"
+      title={headerText}
+      backButtonCB={() => {
+        navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
+          replace: true,
+        });
 
-          return 0;
-        }}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [locationId]: {
-            name: locationName,
-            uri: `/facility/${facilityId}/location`,
+        return 0;
+      }}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [locationId]: {
+          name: locationName,
+          uri: `/facility/${facilityId}/location`,
+        },
+        ...(bedId && {
+          [bedId]: {
+            name: bedName,
+            uri: `/facility/${facilityId}/location/${locationId}/beds`,
           },
-          ...(bedId && {
-            [bedId]: {
-              name: bedName,
-              uri: `/facility/${facilityId}/location/${locationId}/beds`,
-            },
-          }),
-        }}
-      />
+        }),
+      }}
+    >
       <div className="mt-10">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -223,6 +223,6 @@ export const AddBedForm = (props: BedFormProps) => {
           </form>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

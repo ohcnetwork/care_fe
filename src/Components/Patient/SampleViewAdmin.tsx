@@ -26,8 +26,8 @@ import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function SampleViewAdmin() {
   const {
@@ -308,7 +308,17 @@ export default function SampleViewAdmin() {
   }
 
   return (
-    <div className="px-6">
+    <Page
+      title="Sample Management System"
+      hideBack={true}
+      breadcrumbs={false}
+      componentRight={
+        <ExportButton
+          action={() => downloadSampleTests({ ...qParams })}
+          filenamePrefix="samples"
+        />
+      }
+    >
       {statusDialog.show && (
         <UpdateStatusDialog
           sample={statusDialog.sample}
@@ -317,17 +327,6 @@ export default function SampleViewAdmin() {
           userType={userType}
         />
       )}
-      <PageTitle
-        title="Sample Management System"
-        hideBack={true}
-        breadcrumbs={false}
-        componentRight={
-          <ExportButton
-            action={() => downloadSampleTests({ ...qParams })}
-            filenamePrefix="samples"
-          />
-        }
-      />
       <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
         <div className="flex flex-col lg:flex-row gap-6 justify-between">
           <div className="bg-white overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6 w-full">
@@ -440,6 +439,6 @@ export default function SampleViewAdmin() {
       <div className="md:px-2">
         <div className="flex flex-wrap md:-mx-2 lg:-mx-6">{manageSamples}</div>
       </div>
-    </div>
+    </Page>
   );
 }

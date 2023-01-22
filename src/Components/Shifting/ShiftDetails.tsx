@@ -20,9 +20,9 @@ import * as Notification from "../../Utils/Notifications.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import CommentSection from "./CommentsSection";
 import { formatDate } from "../../Utils/utils";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ShiftDetails(props: { id: string }) {
   const dispatch: any = useDispatch();
@@ -585,9 +585,9 @@ export default function ShiftDetails(props: { id: string }) {
           {printData(data)}
         </div>
       ) : (
-        <div className="mx-3 md:mx-8 mb-10">
-          <div className="my-4 md:flex justify-between items-center mx-1">
-            <PageTitle title={"Shifting details"} />
+        <Page
+          title={"Shifting details"}
+          options={
             <div className="md:flex items-center space-y-2 md:space-y-0 md:space-x-2">
               <div>
                 <Button
@@ -614,9 +614,10 @@ export default function ShiftDetails(props: { id: string }) {
                 </Button>
               </div>
             </div>
-          </div>
+          }
+        >
           {data.assigned_to_object && (
-            <div className="relative rounded-lg shadow bg-primary-200">
+            <div className="relative rounded-lg shadow bg-primary-200 mt-10">
               <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
                 <div className="pr-16 sm:text-center sm:px-16">
                   <p className="font-bold text-primary-800">
@@ -871,7 +872,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
           </div>
-        </div>
+        </Page>
       )}
     </div>
   );

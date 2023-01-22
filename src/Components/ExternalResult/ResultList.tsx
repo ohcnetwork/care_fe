@@ -15,9 +15,9 @@ import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ExportMenu from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResultList() {
   const dispatch: any = useDispatch();
@@ -215,20 +215,11 @@ export default function ResultList() {
   }
 
   return (
-    <div className="px-6">
-      <FacilitiesSelectDialogue
-        show={showDialog}
-        setSelected={(e) => setSelectedFacility(e)}
-        selectedFacility={selectedFacility}
-        handleOk={() =>
-          navigate(`facility/${selectedFacility.id}/patient`, {
-            query: { extId: resultId },
-          })
-        }
-        handleCancel={() => setShowDialog(false)}
-      />
-      <div className="flex items-center justify-between">
-        <PageTitle title="External Results" hideBack breadcrumbs={false} />
+    <Page
+      title="External Results"
+      hideBack
+      breadcrumbs={false}
+      options={
         <ExportMenu
           label="Import/Export"
           exportItems={[
@@ -253,7 +244,19 @@ export default function ResultList() {
             },
           ]}
         />
-      </div>
+      }
+    >
+      <FacilitiesSelectDialogue
+        show={showDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() =>
+          navigate(`facility/${selectedFacility.id}/patient`, {
+            query: { extId: resultId },
+          })
+        }
+        handleCancel={() => setShowDialog(false)}
+      />
       <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -351,6 +354,6 @@ export default function ResultList() {
           <ListFilter {...advancedFilter} dataList={lsgWardData} />
         </div>
       </SlideOver>
-    </div>
+    </Page>
   );
 }

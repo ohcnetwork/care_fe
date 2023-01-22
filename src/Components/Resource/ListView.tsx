@@ -14,9 +14,9 @@ import BadgesList from "./BadgesList";
 import { formatDate } from "../../Utils/utils";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ListView() {
   const dispatch: any = useDispatch();
@@ -85,7 +85,7 @@ export default function ListView() {
         className="w-full md:w-1/2 mt-6 md:px-7"
       >
         <div className="overflow-hidden shadow rounded-lg bg-white h-full">
-          <div className={"p-4 h-full flex flex-col justify-between"}>
+          <div className="p-4 h-full flex flex-col justify-between">
             <div>
               <div className="flex justify-between">
                 <div className="font-bold text-xl capitalize mb-2">
@@ -183,48 +183,46 @@ export default function ListView() {
   };
 
   return (
-    <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="md:flex md:items-center md:justify-between px-4">
-        <PageTitle
-          title="Resource"
-          hideBack
-          componentRight={
-            <ExportButton
-              action={() =>
-                downloadResourceRequests({ ...appliedFilters, csv: 1 })
-              }
-              filenamePrefix="resource_requests"
-            />
-          }
-          breadcrumbs={false}
+    <Page
+      title="Resource"
+      hideBack
+      componentRight={
+        <ExportButton
+          action={() => downloadResourceRequests({ ...appliedFilters, csv: 1 })}
+          filenamePrefix="resource_requests"
         />
-
-        <div className="w-32" />
-        <div className="flex md:flex-row flex-col justify-center items-center md:gap-6">
-          <div className="my-2 md:my-0">
-            <button
-              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 md:w-40 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-              onClick={onBoardViewBtnClick}
-            >
-              <i
-                className="fa fa-list mr-1 transform rotate-90"
-                aria-hidden="true"
-              ></i>
-              Board View
-            </button>
-          </div>
-          <div className="flex items-start gap-2">
-            <button
-              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-              onClick={() => advancedFilter.setShow(true)}
-            >
-              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-              <span>Filters</span>
-            </button>
+      }
+      breadcrumbs={false}
+      className="flex flex-col h-screen pb-2"
+      options={
+        <div className="md:flex md:items-center md:justify-between px-4">
+          <div className="w-32" />
+          <div className="flex md:flex-row flex-col justify-center items-center md:gap-6">
+            <div className="my-2 md:my-0">
+              <button
+                className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 md:w-40 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+                onClick={onBoardViewBtnClick}
+              >
+                <i
+                  className="fa fa-list mr-1 transform rotate-90"
+                  aria-hidden="true"
+                ></i>
+                Board View
+              </button>
+            </div>
+            <div className="flex items-start gap-2">
+              <button
+                className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+                onClick={() => advancedFilter.setShow(true)}
+              >
+                <i className="fa fa-filter mr-1" aria-hidden="true"></i>
+                <span>Filters</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-
+      }
+    >
       <BadgesList {...{ appliedFilters, FilterBadges }} />
 
       <div className="px-1">
@@ -254,6 +252,6 @@ export default function ListView() {
           <ListFilter {...advancedFilter} showResourceStatus={true} />
         </div>
       </SlideOver>
-    </div>
+    </Page>
   );
 }

@@ -9,8 +9,8 @@ import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm = {
   id: "",
@@ -130,20 +130,19 @@ export const SetInventoryForm = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title="Set Minimum Quantity"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          min_quantity: {
-            name: "Min Quantity",
-            uri: `/facility/${facilityId}/inventory/min_quantity/list`,
-          },
-          set: {
-            style: "pointer-events-none",
-          },
-        }}
-      />
+    <Page
+      title="Set Minimum Quantity"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        min_quantity: {
+          name: "Min Quantity",
+          uri: `/facility/${facilityId}/inventory/min_quantity/list`,
+        },
+        set: {
+          style: "pointer-events-none",
+        },
+      }}
+    >
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -201,6 +200,6 @@ export const SetInventoryForm = (props: any) => {
           </form>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

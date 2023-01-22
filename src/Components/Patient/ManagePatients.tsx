@@ -35,9 +35,9 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -633,19 +633,11 @@ export const PatientManager = () => {
   };
 
   return (
-    <div className="px-6">
-      <FacilitiesSelectDialogue
-        show={showDialog}
-        setSelected={(e) => setSelectedFacility(e)}
-        selectedFacility={selectedFacility}
-        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
-        handleCancel={() => {
-          setShowDialog(false);
-          setSelectedFacility({ name: "" });
-        }}
-      />
-      <div className="flex flex-col lg:flex-row justify-between items-center">
-        <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
+    <Page
+      title="Patients"
+      hideBack={true}
+      breadcrumbs={false}
+      options={
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
           <ButtonV2
             className="flex gap-2 items-center font-semibold"
@@ -715,7 +707,18 @@ export const PatientManager = () => {
             )}
           </div>
         </div>
-      </div>
+      }
+    >
+      <FacilitiesSelectDialogue
+        show={showDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+        handleCancel={() => {
+          setShowDialog(false);
+          setSelectedFacility({ name: "" });
+        }}
+      />
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-12px]">
         <div>
           <div className="flex flex-col mt-2 h-full">
@@ -853,6 +856,6 @@ export const PatientManager = () => {
           </TabPanel>
         </SwipeableViews>
       </div>
-    </div>
+    </Page>
   );
 };

@@ -14,8 +14,8 @@ import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm = {
   id: "",
@@ -214,11 +214,10 @@ export const AddInventoryForm = (props: any) => {
   }
 
   return (
-    <div className="px-2">
-      <PageTitle
-        title="Manage Inventory"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
-      />
+    <Page
+      title="Manage Inventory"
+      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+    >
       <div className="mt-4">
         <Card>
           <form onSubmit={handleSubmit}>
@@ -294,6 +293,6 @@ export const AddInventoryForm = (props: any) => {
           </form>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

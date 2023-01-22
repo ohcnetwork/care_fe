@@ -20,7 +20,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { UserRole, USER_TYPES } from "../../Common/constants";
 import moment from "moment";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface AssetManageProps {
@@ -201,17 +201,16 @@ const AssetManage = (props: AssetManageProps) => {
   };
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title="Asset Details"
-        crumbsReplacements={{
-          [facilityId]: { name: asset?.location_object.facility.name },
-          assets: { uri: `/assets?facility=${facilityId}` },
-          [assetId]: {
-            name: asset?.name,
-          },
-        }}
-      />
+    <Page
+      title="Asset Details"
+      crumbsReplacements={{
+        [facilityId]: { name: asset?.location_object.facility.name },
+        assets: { uri: `/assets?facility=${facilityId}` },
+        [assetId]: {
+          name: asset?.name,
+        },
+      }}
+    >
       <ConfirmDialogV2
         title="Delete Asset"
         description="Are you sure you want to delete this asset?"
@@ -404,7 +403,7 @@ const AssetManage = (props: AssetManageProps) => {
           />
         </div>
       )}
-    </div>
+    </Page>
   );
 };
 

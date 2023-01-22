@@ -39,8 +39,8 @@ import {
 import * as Notification from "../../Utils/Notifications";
 import { make as Link } from "../Common/components/Link.gen";
 import { formatDate } from "../../Utils/utils";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm: any = {
   otherSymptom: false,
@@ -489,14 +489,14 @@ export const DailyRounds = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
-        title={headerText}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-      />
+    <Page
+      title={headerText}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [patientId]: { name: patientName },
+      }}
+      className="pb-2 max-w-3xl mx-auto"
+    >
       <div className="mt-4">
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -977,6 +977,6 @@ export const DailyRounds = (props: any) => {
           </form>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };

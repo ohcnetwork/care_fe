@@ -6,7 +6,6 @@ import { useDispatch } from "react-redux";
 import { externalResultUploadCsv } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import Page from "../Common/components/Page";
-// const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ExternalResultUpload() {
   const dispatch: any = useDispatch();
