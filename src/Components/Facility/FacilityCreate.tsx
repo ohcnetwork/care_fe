@@ -1067,12 +1067,17 @@ export const FacilityCreate = (props: FacilityProps) => {
                       error={state.errors.latitude}
                     />
                   </div>
-                  <div className="">
+                  <div className="flex flex-col justify-center md:block">
+                    <FieldLabel className="mb-1">&nbsp;</FieldLabel>
                     <IconButton
                       id="facility-location-button"
                       onClick={(event) => setAnchorEl(event.currentTarget)}
+                      className="tooltip"
                     >
                       <MyLocationIcon />
+                      <span className="tooltip-text tooltip-bottom">
+                        Select location from map
+                      </span>
                     </IconButton>
                     <Popover
                       id={id}

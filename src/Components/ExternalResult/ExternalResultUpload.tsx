@@ -81,6 +81,7 @@ export default function ExternalResultUpload() {
                   </svg>
                 </span>
                 <CSVReader
+                  inputId="result-upload"
                   cssLabelClass="mx-auto text-sm leading-5 font-medium text-gray-700"
                   cssClass="flex flex-col react-csv-input"
                   cssInputClass="csv-input"
