@@ -18,6 +18,7 @@ import {
   REVIEW_AT_CHOICES,
   KASP_STRING,
   KASP_ENABLED,
+  CONSULTATION_STATUS,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -33,6 +34,7 @@ import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
 import { BedSelect } from "../Common/BedSelect";
+import { dischargePatient } from "../../Redux/actions";
 import Beds from "./Consultations/Beds";
 import PrescriptionBuilder, {
   PrescriptionType,
@@ -69,6 +71,7 @@ type FormDetails = {
   other_symptoms: string;
   symptoms_onset_date?: Date;
   suggestion: string;
+  consultation_status: number;
   patient: string;
   facility: string;
   admitted: BooleanStrings;
@@ -99,6 +102,10 @@ type FormDetails = {
   weight: string;
   height: string;
   bed: BedModel | null;
+  discharge_reason: string;
+  cause_of_death: string;
+  death_datetime: string;
+  death_confirmed_doctor: string;
 };
 
 type Action =
@@ -110,6 +117,7 @@ const initForm: FormDetails = {
   other_symptoms: "",
   symptoms_onset_date: undefined,
   suggestion: "A",
+  consultation_status: 0,
   patient: "",
   facility: "",
   admitted: "false",
@@ -140,6 +148,10 @@ const initForm: FormDetails = {
   weight: "",
   height: "",
   bed: null,
+  discharge_reason: "",
+  cause_of_death: "",
+  death_datetime: "",
+  death_confirmed_doctor: "",
 };
 
 const initError = Object.assign(
@@ -196,7 +208,6 @@ export const ConsultationForm = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
-
   const isUpdate = !!id;
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -266,6 +277,10 @@ export const ConsultationForm = (props: any) => {
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
             bed: res.data?.current_bed?.bed_object || null,
+            discharge_reason: res.data?.discharge_reason || "",
+            cause_of_death: res.data?.discharge_notes || "",
+            death_datetime: res.data?.death_datetime || "",
+            death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
           };
           dispatch({ type: "set_form", form: formData });
           setBed(formData.bed);
@@ -317,6 +332,13 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "consultation_status":
+          if (!state.form[field]) {
+            errors[field] = "Please select the consultation status";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         case "ip_no":
           if (!state.form[field]) {
             errors[field] = "Please enter IP Number";
@@ -345,6 +367,28 @@ export const ConsultationForm = (props: any) => {
         case "admission_date":
           if (state.form.suggestion === "A" && !state.form[field]) {
             errors[field] = "Field is required as person is admitted";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "cause_of_death":
+          if (state.form.suggestion === "DD" && !state.form[field]) {
+            errors[field] = "Please enter cause of death";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "death_datetime":
+          if (state.form.suggestion === "DD" && !state.form[field]) {
+            errors[field] = "Please enter the date & time of death";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "death_confirmed_doctor":
+          if (state.form.suggestion === "DD" && !state.form[field]) {
+            errors[field] =
+              "Please enter the name of doctor who confirmed the death";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -467,6 +511,28 @@ export const ConsultationForm = (props: any) => {
     return [!invalidForm, error_div];
   };
 
+  const declareThePatientDead = async (
+    cause_of_death: string,
+    death_datetime: string,
+    death_confirmed_doctor: string
+  ) => {
+    const dischargeResponse = await dispatchAction(
+      dischargePatient(
+        {
+          discharge_reason: "EXP",
+          discharge_notes: cause_of_death,
+          death_datetime: death_datetime,
+          death_confirmed_doctor: death_confirmed_doctor,
+        },
+        { id: patientId }
+      )
+    );
+
+    if (dischargeResponse?.status === 200) {
+      return dischargeResponse;
+    }
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const [validForm, error_div] = validateForm();
@@ -484,6 +550,7 @@ export const ConsultationForm = (props: any) => {
           ? state.form.symptoms_onset_date
           : undefined,
         suggestion: state.form.suggestion,
+        consultation_status: Number(state.form.consultation_status),
         admitted: state.form.suggestion === "A",
         admission_date:
           state.form.suggestion === "A" ? state.form.admission_date : undefined,
@@ -518,12 +585,20 @@ export const ConsultationForm = (props: any) => {
         height: Number(state.form.height),
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
       };
+
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
       );
       setIsLoading(false);
       if (res && res.data && res.status !== 400) {
         dispatch({ type: "set_form", form: initForm });
+        if (data.suggestion === "DD") {
+          await declareThePatientDead(
+            state.form.cause_of_death,
+            state.form.death_datetime,
+            state.form.death_confirmed_doctor
+          );
+        }
         if (id) {
           Notification.Success({
             msg: "Consultation updated successfully",
@@ -682,6 +757,13 @@ export const ConsultationForm = (props: any) => {
           options={CONSULTATION_SUGGESTION}
         />
 
+        <SelectFormField
+          required
+          label="Status during the consultation"
+          {...selectField("consultation_status")}
+          options={CONSULTATION_STATUS}
+        />
+
         {state.form.suggestion === "R" && (
           <div id="referred_to">
             <FieldLabel>Referred To Facility</FieldLabel>
@@ -693,6 +775,36 @@ export const ConsultationForm = (props: any) => {
               errors={state.errors.referred_to}
             />
           </div>
+        )}
+
+        {state.form.suggestion === "DD" && (
+          <>
+            <div id="cause_of_death">
+              <TextAreaFormField
+                {...field("cause_of_death")}
+                required={state.form.suggestion === "DD"}
+                label="Cause of Death"
+                value={state.form.cause_of_death}
+              />
+            </div>
+            <div id="death_datetime">
+              <TextFormField
+                {...field("death_datetime")}
+                type="datetime-local"
+                required={state.form.suggestion === "DD"}
+                label="Date & Time of Death"
+                value={state.form.death_datetime}
+              />
+            </div>
+            <div id="death_confirmed_doctor">
+              <TextAreaFormField
+                {...field("death_confirmed_doctor")}
+                required={state.form.suggestion === "DD"}
+                label="Death Confirmed by"
+                value={state.form.death_confirmed_doctor}
+              />
+            </div>
+          </>
         )}
 
         {state.form.suggestion === "A" && (
@@ -711,9 +823,8 @@ export const ConsultationForm = (props: any) => {
                   name="bed"
                   setSelected={setBed}
                   selected={bed}
-                  errors=""
+                  error=""
                   multiple={false}
-                  margin="dense"
                   unoccupiedOnly={true}
                   facility={facilityId}
                 />

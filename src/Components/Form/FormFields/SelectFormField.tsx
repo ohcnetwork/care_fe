@@ -11,6 +11,7 @@ type OptionCallback<T, R> = (option: T) => R;
 type SelectFormFieldProps<T, V = T> = FormFieldBaseProps<V> & {
   placeholder?: React.ReactNode;
   options: T[];
+  position?: "above" | "below";
   optionLabel: OptionCallback<T, React.ReactNode>;
   optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
@@ -29,6 +30,7 @@ export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
         options={props.options}
         disabled={props.disabled}
         value={props.value}
+        position={props.position}
         placeholder={props.placeholder}
         optionLabel={props.optionLabel}
         optionSelectedLabel={props.optionSelectedLabel}
