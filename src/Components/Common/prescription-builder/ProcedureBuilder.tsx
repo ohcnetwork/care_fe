@@ -44,6 +44,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
               <div className="flex flex-col gap-2 md:flex-row w-full shrink-0 justify-between">
                 <div className="w-full">
                   Procedure
+                  <span className="text-danger-500">{" *"}</span>
                   <input
                     type="text"
                     className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
@@ -83,6 +84,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   {procedure.repetitive ? (
                     <div className="w-full">
                       Frequency
+                      <span className="text-danger-500">{" *"}</span>
                       <PrescriptionDropdown
                         placeholder="Frequency"
                         options={FREQUENCY}
@@ -101,6 +103,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   ) : (
                     <div className="w-full">
                       Time
+                      <span className="text-danger-500">{" *"}</span>
                       <input
                         type="datetime-local"
                         className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
