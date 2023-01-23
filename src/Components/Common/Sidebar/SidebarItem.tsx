@@ -37,11 +37,9 @@ const SidebarItemBase = ({
       onClick={props.do ?? resetHistory}
       onMouseEnter={() => {
         props.handleOverflow(true);
-        console.log(true, "hi1");
       }}
       onMouseLeave={() => {
         props.handleOverflow(false);
-        console.log(false, "hi2");
       }}
     >
       <span className={`tooltip-text tooltip-right ${!shrinked && "hidden"}`}>
