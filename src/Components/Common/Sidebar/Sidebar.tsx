@@ -106,10 +106,6 @@ const StatelessSidebar = ({
       indicatorRef.current.style.display = "none";
     }
   }, [activeLink]);
-  useEffect(() => {
-    console.log("hi");
-  }, [isOverflowVisible]);
-
   const handleOverflow = (value: boolean) => {
     setOverflowVisisble(value);
   };
