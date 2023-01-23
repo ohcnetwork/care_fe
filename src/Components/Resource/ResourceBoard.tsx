@@ -8,10 +8,11 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate } from "raviger";
 import moment from "moment";
 import { CSVLink } from "react-csv";
-import GetAppIcon from "@material-ui/icons/GetApp";
 import { classNames } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
 import { formatDate } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const limit = 14;
 
@@ -266,10 +267,18 @@ export default function ResourceBoard({
             {downloadLoading ? (
               <CircularProgress className="w-6 h-6 ml-2 text-black" />
             ) : (
-              <GetAppIcon
-                className="cursor-pointer"
+              <ButtonV2
                 onClick={triggerDownload}
-              />
+                className="tooltip p-4"
+                variant="secondary"
+                ghost
+                circle
+              >
+                <CareIcon className="care-l-import text-lg font-bold" />
+                <span className="tooltip-text tooltip-bottom -translate-x-16">
+                  Download
+                </span>
+              </ButtonV2>
             )}
           </h3>
           <span className="rounded-lg ml-2 bg-primary-500 text-white px-2">

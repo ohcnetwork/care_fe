@@ -19,6 +19,7 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
+  PATIENT_FILTER_ORDER,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -36,6 +37,7 @@ import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import RelativeTime from "../../CAREUI/display/RelativeTime";
+import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -646,7 +648,6 @@ export const PatientManager = () => {
         <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
           <ButtonV2
-            className="flex gap-2 items-center font-semibold"
             onClick={() => {
               qParams.facility
                 ? navigate(`/facility/${qParams.facility}/patient`)
@@ -656,8 +657,10 @@ export const PatientManager = () => {
             <CareIcon className="care-l-plus text-lg" />
             <p>Add Patient Details</p>
           </ButtonV2>
-          <button
-            className="btn btn-primary-ghost w-full lg:w-fit"
+          <ButtonV2
+            ghost
+            border
+            className="bg-white"
             onClick={() => advancedFilter.setShow(true)}
           >
             <svg
@@ -690,7 +693,36 @@ export const PatientManager = () => {
               </line>
             </svg>
             <span>Advanced Filters</span>
-          </button>
+          </ButtonV2>
+          <DropdownMenu
+            title="Sort by"
+            variant="secondary"
+            className="border border-primary-500 bg-white"
+            icon={<CareIcon className="care-l-sort" />}
+          >
+            {PATIENT_FILTER_ORDER.map((ordering) => {
+              return (
+                <DropdownItem
+                  key={ordering.text}
+                  onClick={() => updateQuery({ ordering: ordering.text })}
+                  icon={
+                    <CareIcon
+                      className={
+                        ordering.order === "Ascending"
+                          ? "care-l-sort-amount-up"
+                          : "care-l-sort-amount-down"
+                      }
+                    />
+                  }
+                >
+                  <span>{ordering.desc}</span>
+                  <span className="text-gray-600 text-sm">
+                    {ordering.order}
+                  </span>
+                </DropdownItem>
+              );
+            })}
+          </DropdownMenu>
           <div className="tooltip">
             <ExportMenu
               disabled={!isExportAllowed}
