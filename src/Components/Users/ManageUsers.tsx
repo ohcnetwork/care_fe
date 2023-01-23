@@ -262,10 +262,7 @@ export default function ManageUsers() {
     fetchData({ aborted: false });
   };
 
-  const showFacilities = (
-    username: string,
-    facilities: FacilityModel[],
-  ) => {
+  const showFacilities = (username: string, facilities: FacilityModel[]) => {
     if (!facilities || !facilities.length) {
       return (
         <>
@@ -381,6 +378,7 @@ export default function ManageUsers() {
         .subtract(5, "minutes")
         .isBefore(user.last_login);
       return (
+        //change
         <div
           key={`usr_${user.id}`}
           id={`usr_${idx}`}
