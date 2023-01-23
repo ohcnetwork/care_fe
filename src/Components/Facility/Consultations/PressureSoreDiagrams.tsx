@@ -8,6 +8,7 @@ import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
 
 export const PressureSoreDiagrams = (props: any) => {
+  //change
   const { consultationId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
