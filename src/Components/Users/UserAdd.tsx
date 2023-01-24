@@ -380,6 +380,14 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
+        case "doctor_qualification":
+        case "doctor_experience_commenced_on":
+        case "doctor_medical_council_registration":
+          if (state.form.user_type === "Doctor" && !state.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
         case "first_name":
         case "last_name":
           if (!state.form[field]) {

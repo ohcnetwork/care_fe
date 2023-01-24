@@ -262,10 +262,7 @@ export default function ManageUsers() {
     fetchData({ aborted: false });
   };
 
-  const showFacilities = (
-    username: string,
-    facilities: FacilityModel[],
-  ) => {
+  const showFacilities = (username: string, facilities: FacilityModel[]) => {
     if (!facilities || !facilities.length) {
       return (
         <>
@@ -469,6 +466,54 @@ export default function ManageUsers() {
                         </div>
                       </UserDetails>
                     </div>
+                  )}
+                  {user.user_type === "Doctor" && (
+                    <>
+                      <div className="col-span-2">
+                        <UserDetails
+                          id="doctor-qualification"
+                          title="Qualification"
+                        >
+                          {user.doctor_qualification ? (
+                            <span className="font-semibold">
+                              {user.doctor_qualification}
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                      <div className="col-span-2">
+                        <UserDetails id="doctor-experience" title="Experience">
+                          {user.doctor_experience_commenced_on ? (
+                            <span className="font-semibold">
+                              {moment().diff(
+                                user.doctor_experience_commenced_on,
+                                "years",
+                                false
+                              )}{" "}
+                              years
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                      <div className="col-span-2">
+                        <UserDetails
+                          id="medical-council-registration"
+                          title="Medical Council Registration"
+                        >
+                          {user.doctor_medical_council_registration ? (
+                            <span className="font-semibold">
+                              {user.doctor_medical_council_registration}
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                    </>
                   )}
                 </div>
                 {user.local_body_object && (
