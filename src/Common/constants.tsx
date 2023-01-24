@@ -375,7 +375,6 @@ export const DISEASE_STATUS = [
   "SUSPECTED",
   "NEGATIVE",
   "RECOVERED",
-  "EXPIRED",
 ];
 
 export const TEST_TYPE = [

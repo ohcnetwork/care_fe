@@ -1167,6 +1167,34 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               </div>
             )}
+            {consultationData.procedure && (
+              <div className="mt-4">
+                <div className="flex flex-col">
+                  <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+                    <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
+                      <ResponsiveMedicineTable
+                        theads={[
+                          "Procedure",
+                          "Repetitive",
+                          "Time",
+                          "Frequency",
+                          "Notes",
+                        ]}
+                        list={consultationData.procedure}
+                        objectKeys={[
+                          "procedure",
+                          "repetitive",
+                          "time",
+                          "frequency",
+                          "notes",
+                        ]}
+                        fieldsToDisplay={[2, 4]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <MedicineTables
               facilityId={facilityId}
