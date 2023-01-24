@@ -36,6 +36,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [cameraAccessKey, setCameraAccessKey] = useState("");
   const [bed, setBed] = useState<BedModel>({});
   const [newPreset, setNewPreset] = useState("");
+  const [loadingAddPreset, setLoadingAddPreset] = useState(false);
+  const [loadingSetConfiguration, setLoadingSetConfiguration] = useState(false);
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
     Number(new Date())
   );
@@ -64,6 +66,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
     if (checkIfValidIP(cameraAddress)) {
+      setLoadingSetConfiguration(true);
       setIpAddress_error("");
       const data = {
         meta: {
@@ -86,6 +89,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           msg: "Something went wrong..!",
         });
       }
+      setLoadingSetConfiguration(false);
     } else {
       setIpAddress_error("Please Enter a Valid Camera address !!");
     }
@@ -99,6 +103,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       preset_name: newPreset,
     };
     try {
+      setLoadingAddPreset(true);
       const presetData = await axios.get(
         `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
@@ -111,10 +116,12 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           )
         )
       );
+      setLoadingAddPreset(false);
       if (res?.status === 201) {
         Notification.Success({
           msg: "Preset Added Successfully",
         });
+        setBed({});
         setNewPreset("");
         setRefreshPresetsHash(Number(new Date()));
       } else {
@@ -193,6 +200,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
                 <Submit
                   className="w-full md:w-auto ml-auto"
                   onClick={handleSubmit}
+                  disabled={loadingSetConfiguration}
                   label="Set Configuration"
                 />
               </div>
@@ -209,6 +217,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           newPreset={newPreset}
           setNewPreset={setNewPreset}
           addPreset={addPreset}
+          isLoading={loadingAddPreset}
           refreshPresetsHash={refreshPresetsHash}
           facilityMiddlewareHostname={facilityMiddlewareHostname}
         />
