@@ -232,15 +232,20 @@ export const SYMPTOM_CHOICES = [
   { id: 5, text: "BREATHLESSNESS" },
   { id: 6, text: "MYALGIA" },
   { id: 7, text: "ABDOMINAL DISCOMFORT" },
-  { id: 8, text: "VOMITING/DIARRHOEA" },
-  { id: 10, text: "SARI" },
+  { id: 8, text: "VOMITING" },
+  { id: 9, text: "OTHERS" },
   { id: 11, text: "SPUTUM" },
   { id: 12, text: "NAUSEA" },
   { id: 13, text: "CHEST PAIN" },
   { id: 14, text: "HEMOPTYSIS" },
   { id: 15, text: "NASAL DISCHARGE" },
   { id: 16, text: "BODY ACHE" },
-  { id: 9, text: "OTHERS" },
+  { id: 17, text: "DIARRHOEA" },
+  { id: 18, text: "PAIN" },
+  { id: 19, text: "PEDAL EDEMA" },
+  { id: 20, text: "WOUND" },
+  { id: 21, text: "CONSTIPATION" },
+  { id: 22, text: "HEAD ACHE" },
 ];
 
 export const DISCHARGE_REASONS = [
