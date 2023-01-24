@@ -282,6 +282,14 @@ export const CONSULTATION_SUGGESTION = [
   { id: "DD", text: "Declare Death" },
 ];
 
+export const CONSULTATION_STATUS = [
+  { id: "1", text: "Brought Dead" },
+  { id: "2", text: "Transferred from ward" },
+  { id: "3", text: "Transferred from ICU" },
+  { id: "4", text: "Referred from other hospital" },
+  { id: "5", text: "Out-patient (walk in)" },
+];
+
 export const ADMITTED_TO = [
   { id: "1", text: "Isolation" },
   { id: "2", text: "ICU" },
@@ -367,7 +375,6 @@ export const DISEASE_STATUS = [
   "SUSPECTED",
   "NEGATIVE",
   "RECOVERED",
-  "EXPIRED",
 ];
 
 export const TEST_TYPE = [
