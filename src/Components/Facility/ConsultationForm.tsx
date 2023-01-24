@@ -836,7 +836,6 @@ export const ConsultationForm = (props: any) => {
           <>
             <DateFormField
               {...field("admission_date")}
-              disablePast
               required
               label="Admission date"
             />
