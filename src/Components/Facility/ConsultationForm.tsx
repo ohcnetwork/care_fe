@@ -89,6 +89,7 @@ type FormDetails = {
   prescribed_medication: string;
   consultation_notes: string;
   ip_no: string;
+  procedure: ProcedureType[];
   discharge_advice: PrescriptionType[];
   prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
@@ -135,6 +136,7 @@ const initForm: FormDetails = {
   prescribed_medication: "",
   consultation_notes: "",
   ip_no: "",
+  procedure: [],
   discharge_advice: [],
   prn_prescription: [],
   investigation: [],
@@ -453,44 +455,67 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
-        case "prn_prescription": {
-          let invalid = false;
-          for (const f of PRNAdvice) {
-            if (
-              !f.dosage?.replace(/\s/g, "").length ||
-              !f.medicine?.replace(/\s/g, "").length ||
-              f.indicator === "" ||
-              f.indicator === " "
-            ) {
-              invalid = true;
+        case "procedure": {
+          for (const p of procedures) {
+            if (!p.procedure?.replace(/\s/g, "").length) {
+              errors[field] = "Procedure field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (!p.repetitive && !p.time?.replace(/\s/g, "").length) {
+              errors[field] = "Time field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (p.repetitive && !p.frequency?.replace(/\s/g, "").length) {
+              errors[field] = "Frequency field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
               break;
             }
           }
-          if (invalid) {
-            errors[field] = "PRN Prescription field can not be empty";
-            if (!error_div) error_div = field;
-            invalidForm = true;
+          return;
+        }
+        case "prn_prescription": {
+          for (const f of PRNAdvice) {
+            if (!f.medicine?.replace(/\s/g, "").length) {
+              errors[field] = "Medicine field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (!f.indicator?.replace(/\s/g, "").length) {
+              errors[field] = "Indicator field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
           }
           return;
         }
 
         case "investigation": {
-          let invalid = false;
-          for (const f of InvestigationAdvice) {
-            if (
-              f.type?.length === 0 ||
-              (f.repetitive
-                ? !f.frequency?.replace(/\s/g, "").length
-                : !f.time?.replace(/\s/g, "").length)
-            ) {
-              invalid = true;
+          for (const i of InvestigationAdvice) {
+            if (!i.type?.length) {
+              errors[field] = "Investigation field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
               break;
             }
-          }
-          if (invalid) {
-            errors[field] = "Investigation Suggestion field can not be empty";
-            if (!error_div) error_div = field;
-            invalidForm = true;
+            if (!i.repetitive && !i.time?.replace(/\s/g, "").length) {
+              errors[field] = "Time field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (i.repetitive && !i.frequency?.replace(/\s/g, "").length) {
+              errors[field] = "Frequency field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
           }
           return;
         }
@@ -849,15 +874,6 @@ export const ConsultationForm = (props: any) => {
           <ErrorHelperText error={state.errors.investigation} />
         </div>
 
-        <div id="procedures">
-          <FieldLabel>Procedures</FieldLabel>
-          <ProcedureBuilder
-            procedures={procedures}
-            setProcedures={setProcedures}
-          />
-          <ErrorHelperText error={state.errors.procedures} />
-        </div>
-
         <div id="discharge_advice">
           <FieldLabel>Prescription Medication</FieldLabel>
           <PrescriptionBuilder
@@ -867,13 +883,22 @@ export const ConsultationForm = (props: any) => {
           <ErrorHelperText error={state.errors.discharge_advice} />
         </div>
 
-        <div id="discharge_advice">
+        <div id="prn_prescription">
           <FieldLabel>PRN Prescription</FieldLabel>
           <PRNPrescriptionBuilder
             prescriptions={PRNAdvice}
             setPrescriptions={setPRNAdvice}
           />
           <ErrorHelperText error={state.errors.prn_prescription} />
+        </div>
+
+        <div id="procedure">
+          <FieldLabel>Procedures</FieldLabel>
+          <ProcedureBuilder
+            procedures={procedures}
+            setProcedures={setProcedures}
+          />
+          <ErrorHelperText error={state.errors.procedure} />
         </div>
 
         <TextFormField {...field("ip_no")} label="IP Number" required />

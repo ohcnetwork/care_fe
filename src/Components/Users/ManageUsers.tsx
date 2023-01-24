@@ -16,7 +16,7 @@ import { navigate } from "raviger";
 import { USER_TYPES } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
 
-import { IconButton, CircularProgress } from "@material-ui/core";
+import { IconButton, CircularProgress, Button } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
@@ -27,10 +27,12 @@ import UserDetails from "../Common/UserDetails";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import SearchInput from "../Form/SearchInput";
+import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import useFilters from "../../Common/hooks/useFilters";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { FacilitySelect } from "../Common/FacilitySelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -53,6 +55,10 @@ export default function ManageUsers() {
   const [isFacilityLoading, setIsFacilityLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [districtName, setDistrictName] = useState<string>();
+
+  const [expandFacilityList, setExpandFacilityList] = useState(false);
+  const [facility, setFacility] = useState<any>(null);
+
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const isSuperuser = currentUser.data.is_superuser;
@@ -151,6 +157,7 @@ export default function ManageUsers() {
       return;
     }
     setIsFacilityLoading(true);
+    setExpandFacilityList(true);
     const res = await dispatch(getUserListFacility({ username }));
     if (res && res.data) {
       const updated = users.map((user) => {
@@ -164,13 +171,6 @@ export default function ManageUsers() {
       setUsers(updated);
     }
     setIsFacilityLoading(false);
-  };
-
-  const showLinkFacilityModal = (username: string) => {
-    setLinkFacility({
-      show: true,
-      username,
-    });
   };
 
   const hideUnlinkFacilityModal = () => {
@@ -230,20 +230,28 @@ export default function ManageUsers() {
     });
   };
 
-  const facilityClassname = classNames(
-    "align-baseline font-bold text-sm",
-    isFacilityLoading ? "text-gray-500" : "text-blue-500 hover:text-blue-800"
-  );
-
   const showLinkFacility = (username: string) => {
     return (
-      <a
-        onClick={() => showLinkFacilityModal(username)}
-        className={facilityClassname}
-        href="#"
-      >
-        Link new facility
-      </a>
+      <div className="flex">
+        <FacilitySelect
+          multiple={false}
+          name="facility"
+          showAll={false} // Show only facilities that user has access to link (not all facilities)
+          showNOptions={8}
+          selected={facility}
+          setSelected={setFacility}
+          errors=""
+          className="z-40"
+        />
+        <Button
+          color="primary"
+          disabled={!facility}
+          onClick={() => addFacility(username, facility)}
+          autoFocus
+        >
+          Add
+        </Button>
+      </div>
     );
   };
 
@@ -254,35 +262,45 @@ export default function ManageUsers() {
     fetchData({ aborted: false });
   };
 
-  const showFacilities = (
-    username: string,
-    facilities: FacilityModel[],
-    district_name: string
-  ) => {
+  const showFacilities = (username: string, facilities: FacilityModel[]) => {
     if (!facilities || !facilities.length) {
       return (
         <>
-          <div className="font-semibold">No Facilities!</div>
           {showLinkFacility(username)}
+          <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
+            <div className="w-full">
+              <img
+                src={`${process.env.PUBLIC_URL}/images/404.svg`}
+                alt="Error 404"
+                className="w-80 mx-auto"
+              />
+            </div>
+            <p className="text-lg font-semibold text-center text-primary pt-4">
+              Select and add some facilities
+            </p>
+          </div>
         </>
       );
     }
     return (
-      <div>
-        <div className="sm:col-start-2 col-span-full sm:col-span-3 max-h-48 overflow-scroll mb-2">
-          <div className="mb-2">
+      <>
+        <div className="sm:col-start-2 col-span-full sm:col-span-3">
+          {showLinkFacility(username)}
+          <div className="mb-2 mt-4">
             {facilities.map((facility, i) => (
               <div
                 key={`facility_${i}`}
-                className="border-2 font-gbold inline-block rounded-md pl-3 py-1 mr-3 mt-2"
+                className={classNames(
+                  "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer"
+                )}
               >
-                <div className="flex items-center  space-x-1">
-                  <div className="font-semibold">{facility.name}</div>
-                  <i
-                    className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
-                    onClick={() => updateHomeFacility(username, facility)}
-                  ></i>
-                  {currentUser.data.district_object.name === district_name && (
+                <div className="flex justify-between">
+                  <div className="text-lg font-bold">{facility.name}</div>
+                  <div>
+                    <i
+                      className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
+                      onClick={() => updateHomeFacility(username, facility)}
+                    ></i>
                     <IconButton
                       size="small"
                       color="secondary"
@@ -297,14 +315,13 @@ export default function ManageUsers() {
                     >
                       <CloseIcon />
                     </IconButton>
-                  )}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        {showLinkFacility(username)}
-      </div>
+      </>
     );
   };
 
@@ -323,11 +340,7 @@ export default function ManageUsers() {
     hideLinkFacilityModal();
     setIsFacilityLoading(true);
     const res = await dispatch(addUserFacility(username, String(facility.id)));
-    if (res?.status === 201) {
-      Notification.Success({
-        msg: "Facility linked successfully",
-      });
-    } else {
+    if (res?.status !== 201) {
       Notification.Error({
         msg: "Error while linking facility",
       });
@@ -509,21 +522,37 @@ export default function ManageUsers() {
                             className={`${
                               !user.facilities
                                 ? "care-l-eye"
-                                : "care-l-eye-slash"
+                                : expandFacilityList
+                                ? "care-l-eye-slash"
+                                : "care-l-eye"
                             } text-xl`}
                           />
                           <span className="tooltip-text tooltip-bottom">
-                            {!user.facilities ? "View" : "Hide"} Linked
-                            Facilities
+                            {!user.facilities
+                              ? "View"
+                              : expandFacilityList
+                              ? "Hide"
+                              : "View"}{" "}
+                            Linked Facilities
                           </span>
                         </ButtonV2>
                       </div>
-                      {user.facilities &&
-                        showFacilities(
-                          user.username,
-                          user.facilities,
-                          user.district_object.name
-                        )}
+                      {user.facilities && (
+                        <div className="col-span-4">
+                          <SlideOverCustom
+                            open={expandFacilityList}
+                            setOpen={setExpandFacilityList}
+                            slideFrom="right"
+                            title="Facilities"
+                            dialogClass="md:w-[400px]"
+                            onCloseClick={() => true}
+                          >
+                            <div>
+                              {showFacilities(user.username, user.facilities)}
+                            </div>
+                          </SlideOverCustom>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
