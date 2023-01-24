@@ -654,6 +654,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
+
+        case "date_of_result":
+          if (state.form[field] < state.form.date_of_test) {
+            errors[field] =
+              "Date should not be before the date of sample collection";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         case "disease_status":
           if (state.form[field] === "POSITIVE") {
             if (!state.form.date_of_test) {
@@ -1895,8 +1904,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_result")
                               }
-                              min={state.form.date_of_test}
-                              minDateMessage="Date should not be before the date of sample collection"
                               errors={state.errors.date_of_result}
                               inputVariant="outlined"
                               margin="dense"
