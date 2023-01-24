@@ -139,7 +139,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
               </div>
             </div>
             <div className="flex flex-col h-1/3 lg:flex-row gap-4 text-center mt-4 justify-center items-center">
-              <div className="w-1/2">
+              <div className="w-1/2 overflow-x-auto">
                 <p className="text-slate-500 font-medium text-lg xl:text-xl">
                   Used:
                   <animated.span className="ml-2 text-slate-700 font-semibold text-lg  xl:text-xl">
@@ -147,7 +147,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                   </animated.span>
                 </p>
               </div>
-              <div className="w-1/2">
+              <div className="w-1/2 overflow-x-auto">
                 <p className="text-slate-500 font-medium text-lg xl:text-xl">
                   Total:
                   <animated.span className="ml-2 text-slate-700 text-lg font-semibold xl:text-xl">
