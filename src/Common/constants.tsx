@@ -213,15 +213,19 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
   { id: 30, text: "30 mins" },
   { id: 60, text: "1 hr" },
-  { id: 120, text: "2 hr" },
-  { id: 180, text: "3 hr" },
-  { id: 240, text: "4 hr" },
-  { id: 360, text: "6 hr" },
-  { id: 480, text: "8 hr" },
-  { id: 720, text: "12 hr" },
-  { id: 1440, text: "24 hr" },
-  { id: 2160, text: "36 hr" },
-  { id: 2880, text: "48 hr" },
+  { id: 2 * 60, text: "2 hr" },
+  { id: 3 * 60, text: "3 hr" },
+  { id: 4 * 60, text: "4 hr" },
+  { id: 6 * 60, text: "6 hr" },
+  { id: 8 * 60, text: "8 hr" },
+  { id: 12 * 60, text: "12 hr" },
+  { id: 24 * 60, text: "24 hr" },
+  { id: 36 * 60, text: "36 hr" },
+  { id: 2 * 24 * 60, text: "2 days" },
+  { id: 3 * 24 * 60, text: "3 days" },
+  { id: 7 * 24 * 60, text: "7 days" },
+  { id: 14 * 24 * 60, text: "2 weeks" },
+  { id: 30 * 24 * 60, text: "1 month" },
 ];
 
 export const SYMPTOM_CHOICES = [
