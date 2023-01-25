@@ -153,20 +153,17 @@ export interface DupPatientModel {
   state_id: number;
 }
 
+export interface Unit {
+  id: number;
+  name: string;
+}
+
 export interface InventoryItemsModel {
   // count?: number;
   id?: number;
   name?: string;
-  default_unit?: {
-    id: number;
-    name: string;
-  };
-  allowed_units?: [
-    {
-      id: number;
-      name: string;
-    }
-  ];
+  default_unit?: Unit;
+  allowed_units?: Unit[];
 }
 
 export interface LocationModel {
