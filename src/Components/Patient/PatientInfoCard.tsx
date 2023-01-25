@@ -9,6 +9,7 @@ import { PATIENT_CATEGORIES } from "../../Common/constants";
 import moment from "moment";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import * as Notification from "../../Utils/Notifications.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -227,7 +228,19 @@ export default function PatientInfoCard(props: {
                 <ButtonV2
                   key={i}
                   variant={action[4] && action[4][0] ? "danger" : "primary"}
-                  href={`${action[0]}`}
+                  href={
+                    !patient.last_consultation?.current_bed && i === 1
+                      ? undefined
+                      : `${action[0]}`
+                  }
+                  onClick={() => {
+                    if (!patient.last_consultation?.current_bed && i === 1) {
+                      Notification.Error({
+                        msg: "Please assign a bed to the patient",
+                      });
+                      setOpen(true);
+                    }
+                  }}
                   align="start"
                   className="w-full"
                 >

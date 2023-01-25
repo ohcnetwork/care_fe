@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import React from "react";
 import { AssetData } from "../AssetTypes";
 import { Card, CardContent } from "@material-ui/core";
@@ -34,7 +33,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
   } = props;
 
   return (
-    <Fragment>
+    <div className="mb-5">
       <Card>
         <form onSubmit={addPreset}>
           <CardContent>
@@ -81,6 +80,6 @@ export default function CameraConfigure(props: CameraConfigureProps) {
           />
         </CardContent>
       </Card>
-    </Fragment>
+    </div>
   );
 }
