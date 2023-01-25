@@ -147,6 +147,23 @@ export default function SampleViewAdmin() {
     });
   };
 
+  const parseExportData = (data: string) =>
+    data
+      .trim()
+      .split("\n")
+      .map((row: string) =>
+        row
+          .trim()
+          .split(",")
+          .map((field: string) =>
+            new Date(field).toString() === "Invalid Date"
+              ? field
+              : formatDate(field, "DD/MM/YYYY hh:mm A")
+          )
+          .join(",")
+      )
+      .join("\n");
+
   let sampleList: any[] = [];
   if (sample && sample.length) {
     sampleList = sample.map((item) => {
@@ -317,23 +334,6 @@ export default function SampleViewAdmin() {
           userType={userType}
         />
       )}
-      {/**
-        const parsedData = res.data
-      .trim()
-      .split("\n")
-      .map((row: string) =>
-        row
-          .trim()
-          .split(",")
-          .map((field: string) =>
-            new Date(field).toString() === "Invalid Date"
-              ? field
-              : formatDate(field, "DD/MM/YYYY hh:mm A")
-          )
-          .join(",")
-      )
-      .join("\n");
-         */}
       <PageTitle
         title="Sample Management System"
         hideBack={true}
@@ -341,23 +341,7 @@ export default function SampleViewAdmin() {
         componentRight={
           <ExportButton
             action={() => downloadSampleTests({ ...qParams })}
-            parse={(data: string) =>
-              data
-                .trim()
-                .split("\n")
-                .map((row: string) =>
-                  row
-                    .trim()
-                    .split(",")
-                    .map((field: string) =>
-                      new Date(field).toString() === "Invalid Date"
-                        ? field
-                        : formatDate(field, "DD/MM/YYYY hh:mm A")
-                    )
-                    .join(",")
-                )
-                .join("\n")
-            }
+            parse={parseExportData}
             filenamePrefix="samples"
           />
         }
