@@ -20,9 +20,11 @@ function RelativeDateUserMention(props: {
       {props.user && (
         <div className="tooltip">
           <span
-            className={`tooltip-text tooltip-${props.tooltipPosition || "top"}`}
+            className={`tooltip-text tooltip-${
+              props.tooltipPosition || "left"
+            }`}
           >
-            <div className="text-sm leading-5 text-white whitespace-normal font-semibold flex flex-col md:w-max">
+            <div className="text-sm leading-5 text-white whitespace-normal font-semibold flex flex-col">
               <p className="flex justify-center">{`${props.user.first_name} ${props.user.last_name}`}</p>
               <p className="flex justify-center">{`@${props.user.username}`}</p>
               <p className="flex justify-center">{props.user.user_type}</p>
