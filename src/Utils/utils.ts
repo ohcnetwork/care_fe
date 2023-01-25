@@ -84,8 +84,11 @@ export const goBack = (deltaOrUrl?: string | number | false | void) => {
   window.history.back();
 };
 
-export const formatDate = (date: string | Date) => {
-  return moment(date).format("hh:mm A; DD/MM/YYYY");
+export const formatDate = (
+  date: string | Date,
+  format = "hh:mm A; DD/MM/YYYY"
+) => {
+  return moment(date).format(format);
 };
 
 export const relativeDate = (date: string | Date) => {
