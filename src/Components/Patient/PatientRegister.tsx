@@ -1012,9 +1012,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <PageTitle
         title={headerText}
         className="mb-11"
-        backButtonCB={() => {
+        onBackClick={() => {
           if (showImport) {
             setShowImport(false);
+            return false;
           }
         }}
         crumbsReplacements={{

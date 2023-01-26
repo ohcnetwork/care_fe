@@ -64,7 +64,8 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   </button>
                 </div>
                 <div className="w-full">
-                  Procedure Name
+                  Procedure
+                  <span className="text-danger-500">{" *"}</span>
                   <input
                     type="text"
                     className="mt-1 w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
@@ -107,7 +108,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   </div>
                   {procedure.repetitive ? (
                     <div className="w-full">
-                      <div className="mb-1">Frequency</div>
+                      <div className="mb-1">Frequency<span className="text-danger-500">{" *"}</span></div>
                       <PrescriptionDropdown
                         onFocus={() => setActiveIdx(i)}
                         onBlur={() => setActiveIdx(null)}
@@ -127,7 +128,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     </div>
                   ) : (
                     <div className="w-full">
-                      <div className="mb-1">Time</div>
+                      <div className="mb-1">Time<span className="text-danger-500">{" *"}</span></div>
                       <input
                         type="datetime-local"
                         className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"

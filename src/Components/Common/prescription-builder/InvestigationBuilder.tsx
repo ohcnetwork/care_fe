@@ -156,7 +156,10 @@ export default function InvestigationBuilder(
             </div>
             <div className="flex gap-2 flex-col">
               <div className="w-full flex flex-col justify-between">
-                Investigations Recommended
+                <div>
+                  Investigations Recommended
+                  <span className="text-danger-500">{" *"}</span>
+                </div>
                 <PrescriptionMultiDropdown
                   options={investigationsList}
                   placeholder="Search Investigations"
@@ -194,7 +197,7 @@ export default function InvestigationBuilder(
                   </div>
                   {investigation.repetitive ? (
                     <div className="w-full">
-                      <div className="mb-1">Frequency</div>
+                      <div className="mb-1">Frequency<span className="text-danger-500">{" *"}</span></div>
                       <PrescriptionDropdown
                         placeholder="Frequency"
                         options={FREQUENCY}
@@ -206,7 +209,7 @@ export default function InvestigationBuilder(
                     </div>
                   ) : (
                     <div className="w-full">
-                      <div className="mb-1">Time</div>
+                      <div className="mb-1">Time<span className="text-danger-500">{" *"}</span></div>
                       <input
                         type="datetime-local"
                         className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
