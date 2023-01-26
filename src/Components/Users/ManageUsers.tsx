@@ -71,6 +71,7 @@ export default function ManageUsers() {
     show: boolean;
     username: string;
   }>({ show: false, username: "" });
+  const [linkedFacilityLoading, setLinkedFacilityLoading] = useState(false);
 
   const [userData, setUserData] = useState<{
     show: boolean;
@@ -156,6 +157,7 @@ export default function ManageUsers() {
     if (isFacilityLoading) {
       return;
     }
+    setLinkedFacilityLoading(true);
     setIsFacilityLoading(true);
     setExpandFacilityList(true);
     const res = await dispatch(getUserListFacility({ username }));
@@ -171,6 +173,7 @@ export default function ManageUsers() {
       setUsers(updated);
     }
     setIsFacilityLoading(false);
+    setLinkedFacilityLoading(false);
   };
 
   const hideUnlinkFacilityModal = () => {
@@ -509,6 +512,7 @@ export default function ManageUsers() {
                         <ButtonV2
                           ghost
                           circle
+                          disabled={linkedFacilityLoading}
                           variant="secondary"
                           className="tooltip flex items-center"
                           onClick={() => {
