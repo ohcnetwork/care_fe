@@ -241,6 +241,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
           />
           <div className="flex flex-col md:flex-row gap-7">
             <TextFormField
+              className="w-full"
               id="total-capacity"
               name="totalCapacity"
               label="Total Capacity"
@@ -252,6 +253,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
               min={0}
             />
             <TextFormField
+              className="w-full"
               id="currently-occupied"
               label="Currently Occupied"
               required
