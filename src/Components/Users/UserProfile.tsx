@@ -20,6 +20,7 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import MonthFormField from "../Form/FormFields/Month";
+import moment from "moment";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -276,6 +277,11 @@ export default function UserProfile() {
           ) || "",
         gender: states.form.gender,
         age: states.form.age,
+        doctor_qualification: states.form.doctor_qualification,
+        doctor_experience_commenced_on:
+          states.form.doctor_experience_commenced_on,
+        doctor_medical_council_registration:
+          states.form.doctor_medical_council_registration,
       };
       const res = await dispatchAction(partialUpdateUser(username, data));
       if (res && res.data) {
@@ -469,9 +475,9 @@ export default function UserProfile() {
             )}
 
             {showEdit && (
-              <div>
+              <div className="space-y-4">
                 <form action="#" method="POST">
-                  <div className="shadow overflow-hidden sm:rounded-md">
+                  <div className="shadow sm:rounded-md">
                     <div className="px-4 pt-5 bg-white">
                       <div className="grid grid-cols-6 gap-4">
                         <TextFormField
@@ -536,6 +542,13 @@ export default function UserProfile() {
                             />
                             <MonthFormField
                               {...fieldProps("doctor_experience_commenced_on")}
+                              value={
+                                states.form.doctor_experience_commenced_on
+                                  ? moment(
+                                      states.form.doctor_experience_commenced_on
+                                    ).toDate()
+                                  : undefined
+                              }
                               required
                               className="col-span-6 sm:col-span-3"
                               label="Experience Commenced On"
