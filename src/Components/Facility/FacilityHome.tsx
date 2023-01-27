@@ -8,9 +8,9 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import {
-  BED_TYPES,
   DOCTOR_SPECIALIZATION,
   FACILITY_FEATURE_TYPES,
+  getBedTypes,
   USER_TYPES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -42,6 +42,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
+import useConfig from "../../Common/hooks/useConfig";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -70,6 +71,7 @@ export const FacilityHome = (props: any) => {
   >([]);
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
   const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
+  const config = useConfig();
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -170,7 +172,7 @@ export const FacilityHome = (props: any) => {
             return;
           }}
         />
-        {BED_TYPES.map((x) => {
+        {getBedTypes(config).map((x) => {
           const res = capacityData.find((data) => {
             return data.room_type === x.id;
           });

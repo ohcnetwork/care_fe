@@ -1,6 +1,5 @@
 import moment from "moment";
 import { navigate } from "raviger";
-import { GOV_DATA_API_KEY } from "../Common/env";
 
 interface ApacheParams {
   age: number;
@@ -196,9 +195,9 @@ export const parseCsvFile = async (
   return parsed;
 };
 
-export const getPincodeDetails = async (pincode: string) => {
+export const getPincodeDetails = async (pincode: string, apiKey: string) => {
   const response = await fetch(
-    `https://api.data.gov.in/resource/5c2f62fe-5afa-4119-a499-fec9d604d5bd?api-key=${GOV_DATA_API_KEY}&format=json&filters[pincode]=${pincode}&limit=1`
+    `https://api.data.gov.in/resource/5c2f62fe-5afa-4119-a499-fec9d604d5bd?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`
   );
   const data = await response.json();
   return data.records[0];

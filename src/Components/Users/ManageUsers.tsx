@@ -265,10 +265,7 @@ export default function ManageUsers() {
     fetchData({ aborted: false });
   };
 
-  const showFacilities = (
-    username: string,
-    facilities: FacilityModel[],
-  ) => {
+  const showFacilities = (username: string, facilities: FacilityModel[]) => {
     if (!facilities || !facilities.length) {
       return (
         <>
