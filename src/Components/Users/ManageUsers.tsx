@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -16,8 +16,7 @@ import { navigate } from "raviger";
 import { USER_TYPES } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
 
-import { IconButton, CircularProgress, Button } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { CircularProgress, Button } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
@@ -52,12 +51,11 @@ export default function ManageUsers() {
   let manageUsers: any = null;
   const [users, setUsers] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFacilityLoading, setIsFacilityLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [districtName, setDistrictName] = useState<string>();
 
   const [expandFacilityList, setExpandFacilityList] = useState(false);
-  const [facility, setFacility] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -67,22 +65,12 @@ export default function ManageUsers() {
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const [linkFacility, setLinkFacility] = useState<{
-    show: boolean;
-    username: string;
-  }>({ show: false, username: "" });
 
   const [userData, setUserData] = useState<{
     show: boolean;
     username: string;
     name: string;
   }>({ show: false, username: "", name: "" });
-
-  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
-    show: boolean;
-    userName: string;
-    facility?: FacilityModel;
-  }>({ show: false, userName: "", facility: undefined });
 
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -152,42 +140,6 @@ export default function ManageUsers() {
     </button>
   );
 
-  const loadFacilities = async (username: string) => {
-    if (isFacilityLoading) {
-      return;
-    }
-    setIsFacilityLoading(true);
-    setExpandFacilityList(true);
-    const res = await dispatch(getUserListFacility({ username }));
-    if (res && res.data) {
-      const updated = users.map((user) => {
-        return user.username === username
-          ? {
-              ...user,
-              facilities: res.data,
-            }
-          : user;
-      });
-      setUsers(updated);
-    }
-    setIsFacilityLoading(false);
-  };
-
-  const hideUnlinkFacilityModal = () => {
-    setUnlinkFacilityData({
-      show: false,
-      facility: undefined,
-      userName: "",
-    });
-  };
-
-  const hideLinkFacilityModal = () => {
-    setLinkFacility({
-      show: false,
-      username: "",
-    });
-  };
-
   const handleCancel = () => {
     setUserData({ show: false, username: "", name: "" });
   };
@@ -209,147 +161,12 @@ export default function ManageUsers() {
     fetchData({ aborted: false });
   };
 
-  const handleUnlinkFacilitySubmit = async () => {
-    setIsFacilityLoading(true);
-    await dispatch(
-      deleteUserFacility(
-        unlinkFacilityData.userName,
-        String(unlinkFacilityData?.facility?.id)
-      )
-    );
-    setIsFacilityLoading(false);
-    loadFacilities(unlinkFacilityData.userName);
-    hideUnlinkFacilityModal();
-  };
-
   const handleDelete = (user: any) => {
     setUserData({
       show: true,
       username: user.username,
       name: `${user.first_name} ${user.last_name}`,
     });
-  };
-
-  const showLinkFacility = (username: string) => {
-    return (
-      <div className="flex">
-        <FacilitySelect
-          multiple={false}
-          name="facility"
-          showAll={false} // Show only facilities that user has access to link (not all facilities)
-          showNOptions={8}
-          selected={facility}
-          setSelected={setFacility}
-          errors=""
-          className="z-40"
-        />
-        <Button
-          color="primary"
-          disabled={!facility}
-          onClick={() => addFacility(username, facility)}
-          autoFocus
-        >
-          Add
-        </Button>
-      </div>
-    );
-  };
-
-  const updateHomeFacility = async (username: string, facility: any) => {
-    setIsFacilityLoading(true);
-    await dispatch(partialUpdateUser(username, { home_facility: facility.id }));
-    setIsFacilityLoading(false);
-    fetchData({ aborted: false });
-  };
-
-  const showFacilities = (
-    username: string,
-    facilities: FacilityModel[],
-  ) => {
-    if (!facilities || !facilities.length) {
-      return (
-        <>
-          {showLinkFacility(username)}
-          <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
-            <div className="w-full">
-              <img
-                src={`${process.env.PUBLIC_URL}/images/404.svg`}
-                alt="Error 404"
-                className="w-80 mx-auto"
-              />
-            </div>
-            <p className="text-lg font-semibold text-center text-primary pt-4">
-              Select and add some facilities
-            </p>
-          </div>
-        </>
-      );
-    }
-    return (
-      <>
-        <div className="sm:col-start-2 col-span-full sm:col-span-3">
-          {showLinkFacility(username)}
-          <div className="mb-2 mt-4">
-            {facilities.map((facility, i) => (
-              <div
-                key={`facility_${i}`}
-                className={classNames(
-                  "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer"
-                )}
-              >
-                <div className="flex justify-between">
-                  <div className="text-lg font-bold">{facility.name}</div>
-                  <div>
-                    <i
-                      className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
-                      onClick={() => updateHomeFacility(username, facility)}
-                    ></i>
-                    <IconButton
-                      size="small"
-                      color="secondary"
-                      disabled={isFacilityLoading}
-                      onClick={() =>
-                        setUnlinkFacilityData({
-                          show: true,
-                          facility: facility,
-                          userName: username,
-                        })
-                      }
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </>
-    );
-  };
-
-  const hideFacilities = (username: string) => {
-    setUsers(
-      users.filter((user) => {
-        if (user.username === username) {
-          user.facilities = null;
-        }
-        return user;
-      })
-    );
-  };
-
-  const addFacility = async (username: string, facility: any) => {
-    hideLinkFacilityModal();
-    setIsFacilityLoading(true);
-    const res = await dispatch(addUserFacility(username, String(facility.id)));
-    if (res?.status !== 201) {
-      Notification.Error({
-        msg: "Error while linking facility",
-      });
-    }
-    setIsFacilityLoading(false);
-    loadFacilities(username);
   };
 
   const showDelete = (user: any) => {
@@ -514,11 +331,8 @@ export default function ManageUsers() {
                           variant="secondary"
                           className="tooltip flex items-center"
                           onClick={() => {
-                            if (!user.facilities) {
-                              loadFacilities(user.username);
-                            } else {
-                              hideFacilities(user.username);
-                            }
+                            setExpandFacilityList(!expandFacilityList);
+                            setSelectedUser(user);
                           }}
                         >
                           <CareIcon
@@ -540,22 +354,6 @@ export default function ManageUsers() {
                           </span>
                         </ButtonV2>
                       </div>
-                      {user.facilities && (
-                        <div className="col-span-4">
-                          <SlideOverCustom
-                            open={expandFacilityList}
-                            setOpen={setExpandFacilityList}
-                            slideFrom="right"
-                            title="Facilities"
-                            dialogClass="md:w-[400px]"
-                            onCloseClick={() => true}
-                          >
-                            <div>
-                              {showFacilities(user.username, user.facilities)}
-                            </div>
-                          </SlideOverCustom>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -589,19 +387,24 @@ export default function ManageUsers() {
 
   return (
     <div>
-      {linkFacility.show && (
-        <LinkFacilityDialog
-          username={linkFacility.username}
-          handleOk={addFacility}
-          handleCancel={hideLinkFacilityModal}
-        />
-      )}
       <PageTitle
         title="User Management"
         hideBack={true}
         className="mx-5 px-2"
         breadcrumbs={false}
       />
+      <SlideOverCustom
+        open={expandFacilityList}
+        setOpen={setExpandFacilityList}
+        slideFrom="right"
+        title="Facilities"
+        dialogClass="w-[350px]"
+        onCloseClick={() => {
+          //fetchData({ aborted: false });
+        }}
+      >
+        <UserFacilities user={selectedUser} />
+      </SlideOverCustom>
 
       <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-2">
         <div className="bg-white overflow-hidden shadow col-span-1 rounded-lg">
@@ -708,6 +511,98 @@ export default function ManageUsers() {
           handleOk={handleSubmit}
         />
       )}
+    </div>
+  );
+}
+
+function UserFacilities(props: { user: any }) {
+  const { user } = props;
+  const username = user.username;
+  const dispatch: any = useDispatch();
+  const [facilities, setFacilities] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [facility, setFacility] = useState<any>(null);
+  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
+    show: boolean;
+    userName: string;
+    facility?: FacilityModel;
+  }>({ show: false, userName: "", facility: undefined });
+  const [linkFacility, setLinkFacility] = useState<{
+    show: boolean;
+    username: string;
+  }>({ show: false, username: "" });
+  const hideUnlinkFacilityModal = () => {
+    setUnlinkFacilityData({
+      show: false,
+      facility: undefined,
+      userName: "",
+    });
+  };
+
+  const fetchFacilities = async () => {
+    setIsLoading(true);
+    const res = await dispatch(getUserListFacility({ username }));
+    if (res && res.data) {
+      setFacilities(res.data);
+    }
+    setIsLoading(false);
+  };
+
+  const updateHomeFacility = async (username: string, facility: any) => {
+    setIsLoading(true);
+    await dispatch(partialUpdateUser(username, { home_facility: facility.id }));
+    user.home_facility_object = facility;
+    setIsLoading(false);
+    fetchFacilities();
+  };
+
+  const handleUnlinkFacilitySubmit = async () => {
+    setIsLoading(true);
+    await dispatch(
+      deleteUserFacility(
+        unlinkFacilityData.userName,
+        String(unlinkFacilityData?.facility?.id)
+      )
+    );
+    setIsLoading(false);
+    fetchFacilities();
+    hideUnlinkFacilityModal();
+  };
+
+  const hideLinkFacilityModal = () => {
+    setLinkFacility({
+      show: false,
+      username: "",
+    });
+  };
+
+  const addFacility = async (username: string, facility: any) => {
+    hideLinkFacilityModal();
+    setIsLoading(true);
+    const res = await dispatch(addUserFacility(username, String(facility.id)));
+    if (res?.status !== 201) {
+      Notification.Error({
+        msg: "Error while linking facility",
+      });
+    }
+    setIsLoading(false);
+    setFacility(null);
+    fetchFacilities();
+  };
+
+  useEffect(() => {
+    fetchFacilities();
+  }, []);
+
+  return (
+    <div className="h-full">
+      {linkFacility.show && (
+        <LinkFacilityDialog
+          username={linkFacility.username}
+          handleOk={addFacility}
+          handleCancel={hideLinkFacilityModal}
+        />
+      )}
       {unlinkFacilityData.show && (
         <UnlinkFacilityDialog
           facilityName={unlinkFacilityData.facility?.name || ""}
@@ -715,6 +610,93 @@ export default function ManageUsers() {
           handleCancel={hideUnlinkFacilityModal}
           handleOk={handleUnlinkFacilitySubmit}
         />
+      )}
+      <div className="flex gap-2 mb-4 items-stretch">
+        <FacilitySelect
+          multiple={false}
+          name="facility"
+          showAll={false} // Show only facilities that user has access to link (not all facilities)
+          showNOptions={8}
+          selected={facility}
+          setSelected={setFacility}
+          errors=""
+          className="z-40"
+        />
+        <Button
+          color="primary"
+          disabled={!facility}
+          className="mt-1"
+          onClick={() => addFacility(username, facility)}
+          autoFocus
+        >
+          Add
+        </Button>
+      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center">
+          <CircularProgress className="text-primary-500" />
+        </div>
+      ) : (
+        <div className="flex flex-col">
+          {facilities.map((facility: any, i: number) => {
+            const isHomeFacility =
+              user?.home_facility_object?.id === facility.id;
+            console.log(
+              user?.home_facility_object?.id,
+              facility.id,
+              isHomeFacility
+            );
+            return (
+              <div
+                key={`facility_${i}`}
+                className={classNames(
+                  "relative p-2 hover:bg-gray-200 focus:bg-gray-200 transition rounded md:rounded-lg cursor-pointer"
+                )}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="">
+                    {facility.name}
+                    {isHomeFacility && (
+                      <div className="text-xs text-gray-500">Home Facility</div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="tooltip text-lg hover:text-primary-500"
+                      onClick={() => updateHomeFacility(username, facility)}
+                    >
+                      <CareIcon
+                        className={
+                          isHomeFacility
+                            ? "care-l-house-user text-primary-500"
+                            : "care-l-estate"
+                        }
+                      />
+                      <span className="tooltip-text tooltip-left">
+                        Set as home facility
+                      </span>
+                    </button>
+                    <button
+                      className="tooltip text-lg text-red-600"
+                      onClick={() =>
+                        setUnlinkFacilityData({
+                          show: true,
+                          facility: facility,
+                          userName: username,
+                        })
+                      }
+                    >
+                      <CareIcon className="care-l-link-broken" />
+                      <span className="tooltip-text tooltip-left">
+                        Unlink Facility
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
