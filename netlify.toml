@@ -35,7 +35,7 @@ to = "/index.html"
 status = 200
 
 [[headers]]
-  for = "/index.html"
+  for = "/*"
   [headers.values]
   cache-control = '''
   max-age=0,
