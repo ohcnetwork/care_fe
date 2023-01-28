@@ -71,6 +71,7 @@ export default function ManageUsers() {
     show: boolean;
     username: string;
   }>({ show: false, username: "" });
+  const [linkedFacilityLoading, setLinkedFacilityLoading] = useState(false);
 
   const [userData, setUserData] = useState<{
     show: boolean;
@@ -156,6 +157,7 @@ export default function ManageUsers() {
     if (isFacilityLoading) {
       return;
     }
+    setLinkedFacilityLoading(true);
     setIsFacilityLoading(true);
     setExpandFacilityList(true);
     const res = await dispatch(getUserListFacility({ username }));
@@ -171,6 +173,7 @@ export default function ManageUsers() {
       setUsers(updated);
     }
     setIsFacilityLoading(false);
+    setLinkedFacilityLoading(false);
   };
 
   const hideUnlinkFacilityModal = () => {
@@ -262,10 +265,7 @@ export default function ManageUsers() {
     fetchData({ aborted: false });
   };
 
-  const showFacilities = (
-    username: string,
-    facilities: FacilityModel[],
-  ) => {
+  const showFacilities = (username: string, facilities: FacilityModel[]) => {
     if (!facilities || !facilities.length) {
       return (
         <>
@@ -470,6 +470,54 @@ export default function ManageUsers() {
                       </UserDetails>
                     </div>
                   )}
+                  {user.user_type === "Doctor" && (
+                    <>
+                      <div className="col-span-2">
+                        <UserDetails
+                          id="doctor-qualification"
+                          title="Qualification"
+                        >
+                          {user.doctor_qualification ? (
+                            <span className="font-semibold">
+                              {user.doctor_qualification}
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                      <div className="col-span-2">
+                        <UserDetails id="doctor-experience" title="Experience">
+                          {user.doctor_experience_commenced_on ? (
+                            <span className="font-semibold">
+                              {moment().diff(
+                                user.doctor_experience_commenced_on,
+                                "years",
+                                false
+                              )}{" "}
+                              years
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                      <div className="col-span-2">
+                        <UserDetails
+                          id="medical-council-registration"
+                          title="Medical Council Registration"
+                        >
+                          {user.doctor_medical_council_registration ? (
+                            <span className="font-semibold">
+                              {user.doctor_medical_council_registration}
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                    </>
+                  )}
                 </div>
                 {user.local_body_object && (
                   <UserDetails id="local_body" title="Location">
@@ -511,6 +559,7 @@ export default function ManageUsers() {
                         <ButtonV2
                           ghost
                           circle
+                          disabled={linkedFacilityLoading}
                           variant="secondary"
                           className="tooltip flex items-center"
                           onClick={() => {

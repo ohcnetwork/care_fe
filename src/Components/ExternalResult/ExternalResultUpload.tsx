@@ -4,11 +4,13 @@ import { navigate } from "raviger";
 import { useState } from "react";
 import CSVReader from "react-csv-reader";
 import { useDispatch } from "react-redux";
+import useConfig from "../../Common/hooks/useConfig";
 import { externalResultUploadCsv } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ExternalResultUpload() {
+  const { sample_format_external_result_import } = useConfig();
   const dispatch: any = useDispatch();
   // for disabling save button once clicked
   const [loading, setLoading] = useState(false);
@@ -96,7 +98,7 @@ export default function ExternalResultUpload() {
                 />
                 <a
                   className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                  href="https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/export?format=csv&id=17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE"
+                  href={sample_format_external_result_import}
                 >
                   <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
                   <span>Sample Format</span>
