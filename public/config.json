@@ -13,7 +13,6 @@
     "kasp_enabled": false,
     "kasp_string": "KASP",
     "kasp_full_string": "Karunya Arogya Suraksha Padhathi",
-    "state_logo": "https://digitalpublicgoods.net/wp-content/themes/dpga/images/logo-w.svg",
     "sample_format_asset_import": "https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=11JaEhNHdyCHth4YQs_44YaRlP77Rrqe81VSEfg1glko&exportFormat=xlsx",
     "sample_format_external_result_import": "https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/export?format=csv&id=17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE"
 }
