@@ -37,6 +37,7 @@ import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -90,7 +91,8 @@ export const PatientManager = () => {
     name: "",
   });
   const [showDialog, setShowDialog] = useState(false);
-
+  const [showDoctors, setShowDoctors] = useState(false);
+  const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
@@ -195,6 +197,12 @@ export const PatientManager = () => {
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
   };
+
+  useEffect(() => {
+    if (params.facility) {
+      setShowDoctorConnect(true);
+    }
+  }, [qParams.facility]);
 
   const date_range_fields = [
     [params.created_date_before, params.created_date_after],
@@ -648,6 +656,15 @@ export const PatientManager = () => {
       <div className="flex flex-col lg:flex-row justify-between items-center">
         <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
+          {showDoctorConnect && (
+            <ButtonV2
+              onClick={() => {
+                setShowDoctors(true);
+              }}
+            >
+              <p>Doctor Connect</p>
+            </ButtonV2>
+          )}
           <ButtonV2
             onClick={() => {
               qParams.facility
@@ -883,6 +900,11 @@ export const PatientManager = () => {
             <div className="mb-4">{managePatients}</div>
           </TabPanel>
         </SwipeableViews>
+        <DoctorVideoSlideover
+          facilityId={params.facility}
+          show={showDoctors}
+          setShow={setShowDoctors}
+        />
       </div>
     </div>
   );
