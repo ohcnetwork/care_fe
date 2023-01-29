@@ -11,16 +11,10 @@ import { FacilityModel } from "../Facility/models";
 import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
-
-const useMergeState = (initialState: any) => {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-};
+import useMergeState from "../../Common/hooks/useMergeState";
 
 export default function UserFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter } = props;
 
   const [filterState, setFilterState] = useMergeState({
     status: filter.status || "",
@@ -87,10 +81,11 @@ export default function UserFilter(props: any) {
           onClick={(_) => {
             navigate("/sample");
             setFilterState(clearFilterState);
+            closeFilter();
           }}
         >
           <i className="fas fa-times mr-2" />
-          Clear Filter
+          Clear Filters
         </button>
         <button className="btn btn-primary" onClick={applyFilter}>
           <i className="fas fa-check mr-2" />
@@ -156,11 +151,9 @@ export default function UserFilter(props: any) {
                 selected={filterState.facility_ref}
                 showAll={true}
                 setSelected={(obj) =>
-                  handleChange({
-                    target: {
-                      name: "facility",
-                      value: (obj as FacilityModel)?.id,
-                    },
+                  setFilterState({
+                    facility: (obj as FacilityModel)?.id,
+                    facility_ref: obj,
                   })
                 }
                 className="shifting-page-filter-dropdown"

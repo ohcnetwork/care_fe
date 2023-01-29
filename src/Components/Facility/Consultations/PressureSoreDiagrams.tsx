@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -6,6 +5,7 @@ import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { make as CriticalCare__PressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.gen";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
+import { formatDate } from "../../../Utils/utils";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -16,9 +16,8 @@ export const PressureSoreDiagrams = (props: any) => {
     data: [],
     id: "",
   });
-  const [currentPart, setPart] = useState<any>();
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCount, _setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -63,7 +62,7 @@ export const PressureSoreDiagrams = (props: any) => {
     [consultationId, currentPage]
   );
 
-  const handlePagination = (page: number, limit: number) => {
+  const handlePagination = (page: number, _limit: number) => {
     setCurrentPage(page);
   };
 
@@ -98,7 +97,7 @@ export const PressureSoreDiagrams = (props: any) => {
           {dates.map((key) => {
             return (
               <option key={key} value={key}>
-                {moment(key).format("LLL")}
+                {formatDate(key)}
               </option>
             );
           })}
@@ -108,7 +107,7 @@ export const PressureSoreDiagrams = (props: any) => {
       <div>
         <select
           title="date"
-          className="border-2 border-gray-400 p-2"
+          className="border-2 border-gray-400 pl-3 pr-8 py-2"
           disabled={true}
         >
           <option>No Data Found</option>
@@ -120,12 +119,14 @@ export const PressureSoreDiagrams = (props: any) => {
   return (
     <div>
       {dates && dropdown(dates)}
-      {!isLoading && selectedData.data && (
+      {!isLoading && selectedData.data ? (
         <CriticalCare__PressureScoreViewer
           pressureSoreParameter={selectedData.data}
           id={selectedData.id}
           consultationId={consultationId}
         />
+      ) : (
+        <div className="h-screen" />
       )}
       {totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">

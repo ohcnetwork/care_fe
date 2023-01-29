@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { sampleReport } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { SampleReportModel } from "./models";
-import moment from "moment";
+import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -485,9 +485,8 @@ export default function SampleReport(props: samplePreviewProps) {
                       <Typography className={`${classes.cellText}`}>
                         {sampleData &&
                           sampleData.specimen_details &&
-                          moment(
-                            sampleData.specimen_details.created_date
-                          ).format("lll")}
+                          sampleData.specimen_details.created_date &&
+                          formatDate(sampleData.specimen_details.created_date)}
                       </Typography>
                     </Box>
                   </Box>

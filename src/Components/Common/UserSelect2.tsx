@@ -3,8 +3,9 @@ import { useDispatch } from "react-redux";
 import { getUserList } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { UserModel } from "../Users/models";
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
 interface UserSelectProps {
+  name?: string | "";
   margin?: string;
   errors: string;
   className?: string;
@@ -15,6 +16,7 @@ interface UserSelectProps {
 
 export const UserSelect = (props: UserSelectProps) => {
   const {
+    name,
     multiple,
     selected,
     setSelected,
@@ -28,7 +30,7 @@ export const UserSelect = (props: UserSelectProps) => {
   const [UserList, setUserList] = useState<Array<UserModel>>([]);
 
   const getPersonName = (user: any) => {
-    let personName = user.first_name + " " + user.last_name;
+    const personName = user.first_name + " " + user.last_name;
 
     return personName.trim().length > 0 ? personName : user.username;
   };
@@ -73,6 +75,7 @@ export const UserSelect = (props: UserSelectProps) => {
 
   return (
     <AutoCompleteAsyncField
+      name={name}
       multiple={multiple}
       variant="outlined"
       margin={margin}

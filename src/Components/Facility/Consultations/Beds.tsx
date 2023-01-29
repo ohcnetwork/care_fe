@@ -9,9 +9,11 @@ import * as Notification from "../../../Utils/Notifications.js";
 import Loading from "../../Common/Loading";
 import { BedModel, CurrentBed } from "../models";
 import { BedSelect } from "../../Common/BedSelect";
-import { Button, InputLabel } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { TextInputField } from "../../Common/HelperInputFields";
+import { formatDate } from "../../../Utils/utils";
+import { FieldLabel } from "../../Form/FormFields/FormField";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import DateFormField from "../../Form/FormFields/DateFormField";
 import moment from "moment";
 
 const formatDateTime: () => string = () => {
@@ -32,10 +34,11 @@ interface BedsProps {
   smallLoader?: boolean;
   discharged?: boolean;
   setState?: Dispatch<SetStateAction<boolean>>;
+  fetchPatientData?: (state: { aborted: boolean }) => void;
 }
 
 const Beds = (props: BedsProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = React.useState<BedModel>({});
   const [startDate, setStartDate] = React.useState<string>(formatDateTime());
@@ -88,7 +91,8 @@ const Beds = (props: BedsProps) => {
       Notification.Success({
         msg: "Bed allocated successfully",
       });
-      window.location.reload();
+      if (props.fetchPatientData) props.fetchPatientData({ aborted: false });
+      if (props.setState) props.setState(false);
     }
   };
 
@@ -103,10 +107,13 @@ const Beds = (props: BedsProps) => {
     return <Loading />;
   }
 
+  const getDate = (value: any) =>
+    value && moment(value).isValid() && moment(value).toDate();
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <div className="text-2xl font-bold">
+        <div className="font-bold text-secondary-500">
           {!discharged ? "Move to bed:" : "Bed History"}
         </div>
         {props.setState && (
@@ -122,44 +129,34 @@ const Beds = (props: BedsProps) => {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
             <div>
-              <InputLabel id="asset-type">Bed</InputLabel>
+              <FieldLabel id="asset-type">Bed</FieldLabel>
               <BedSelect
                 name="bed"
                 setSelected={(selected) => setBed(selected as BedModel)}
                 selected={bed}
-                errors=""
+                error=""
                 multiple={false}
-                margin="dense"
                 facility={facilityId}
               />
             </div>
-            <div>
-              <InputLabel htmlFor="date_declared_positive">
-                Date of Shift
-              </InputLabel>
-              <TextInputField
-                name="date_declared_positive"
-                id="date_declared_positive"
-                variant="outlined"
-                margin="dense"
-                type="datetime-local"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                errors=""
-              />
-            </div>
+            <DateFormField
+              label="Date of shift"
+              id="date_declared_positive"
+              name="date_declared_positive"
+              value={getDate(startDate)}
+              onChange={(e) =>
+                setStartDate(moment(e.value).format("YYYY-MM-DD"))
+              }
+              disableFuture
+              error=""
+            />
           </div>
           <div className="flex flex-row justify-center mt-4">
             <div>
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                startIcon={<i className="fas fa-bed" />}
-              >
+              <ButtonV2 variant="primary" type="submit">
+                <i className="fas fa-bed" />
                 Move to bed
-              </Button>
+              </ButtonV2>
             </div>
           </div>
         </form>
@@ -193,11 +190,11 @@ const Beds = (props: BedsProps) => {
                   {bed?.bed_object?.location_object?.name}
                 </div>
                 <div className="text-center bg-primary-100 p-2 break-words">
-                  {moment(bed?.start_date).format("MMMM Do YYYY, h:mm:ss a")}
+                  {formatDate(bed?.start_date)}
                 </div>
                 {bed?.end_date ? (
                   <div className="text-center bg-primary-100 p-2 break-words">
-                    {moment(bed?.end_date).format("MMMM Do YYYY, h:mm:ss a")}
+                    {formatDate(bed?.end_date)}
                   </div>
                 ) : (
                   <div className="text-center bg-primary-100 p-2">

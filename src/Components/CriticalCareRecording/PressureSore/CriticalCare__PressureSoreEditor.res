@@ -1,6 +1,9 @@
 @val external setTimeout: (unit => unit, int) => float = "setTimeout"
 @val external clearTimeout: float => unit = "clearTimeout"
 
+@val external innerWidth: int = "window.innerWidth"
+@val external innerHeight: int = "window.innerHeight"
+
 @val external document: 'a = "document"
 %%raw("import './styles.css'")
 
@@ -19,6 +22,8 @@ type scrollIntoView = {
 }
 
 type state = {
+  modalPosition: CriticalCare__PressureSoreInputModal.position,
+  selectedRegion: PressureSore.region,
   parts: array<PressureSore.part>,
   saving: bool,
   dirty: bool,
@@ -28,8 +33,13 @@ type state = {
 type action =
   | AutoManageScale(PressureSore.part)
   | AddPressureSore(PressureSore.region)
+  | AddSelectedPart(PressureSore.region)
+  | UpdateSelectedPart(PressureSore.part)
   | RemoveFromSelectedParts(PressureSore.part)
   | Update(array<PressureSore.part>)
+  | SetSelectedRegion(PressureSore.region)
+  | SetModalPosition(CriticalCare__PressureSoreInputModal.position)
+  | ShowInputModal(PressureSore.region, CriticalCare__PressureSoreInputModal.position)
   | SetPreviewMode
   | ClearPreviewMode
   | SetSaving
@@ -62,6 +72,40 @@ let reducer = (state, action) => {
       parts: Js.Array.concat(state.parts, [PressureSore.makeDefault(region)]),
       dirty: true,
     }
+  | AddSelectedPart(region) => {
+      ...state,
+      parts: Js.Array.concat(
+        Js.Array.filter(p => PressureSore.region(p) !== region, state.parts), 
+        [
+          Belt.Option.getWithDefault(
+            Js.Array.find(p => PressureSore.region(p) === region, state.parts), 
+            PressureSore.makeDefault(region)
+          )
+        ]
+      ),
+      dirty: true,
+    }
+  | UpdateSelectedPart(part) => {
+      ...state,
+      parts: Js.Array.concat(
+        Js.Array.filter((item: PressureSore.part) => item.region != part.region, state.parts), 
+        [part],
+      ),
+      dirty: true,
+    }
+  | SetSelectedRegion(region) => {
+      ...state,
+      selectedRegion: region,
+    }
+  | SetModalPosition(position) => {
+      ...state,
+      modalPosition: position,
+    }
+  | ShowInputModal(region, position) => {
+      ...state,
+      selectedRegion: region,
+      modalPosition: position,
+    }
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
   | Update(parts) => {
@@ -77,6 +121,11 @@ let makeField = p => {
   let payload = Js.Dict.empty()
   Js.Dict.set(payload, "region", Js.Json.string(PressureSore.endcodeRegion(p)))
   Js.Dict.set(payload, "scale", Js.Json.number(float_of_int(PressureSore.scale(p))))
+  Js.Dict.set(payload, "width", Js.Json.number(p.width))
+  Js.Dict.set(payload, "length", Js.Json.number(p.length))
+  Js.Dict.set(payload, "tissue_type", Js.Json.string(PressureSore.tissueTypeToString(p.tissue_type)))
+  Js.Dict.set(payload, "exudate_amount", Js.Json.string(PressureSore.extrudateAmountToString(p.exudate_amount)))
+  Js.Dict.set(payload, "description", Js.Json.string(p.description))
   payload
 }
 
@@ -107,56 +156,47 @@ let saveData = (id, consultationId, state, send, updateCB) => {
 let initialState = (psp, previewMode) => {
   {
     parts: psp,
+    modalPosition: {"x": 0, "y": 0},
+    selectedRegion: PressureSore.Other,
     saving: false,
     dirty: false,
     previewMode: previewMode,
   }
 }
 
-let selectedClass = part => {
+let selectedClass = (part: option<PressureSore.part>) => {
   switch part {
   | Some(p) =>
-    switch PressureSore.scale(p) {
-    | 1 => "text-red-200 hover:bg-red-400 tooltip"
-    | 2 => "text-red-400 hover:bg-red-500 tooltip"
-    | 3 => "text-red-500 hover:bg-red-600 tooltip"
-    | 4 => "text-red-600 hover:bg-red-700 tooltip"
-    | 5 => "text-red-700 hover:bg-gray-400 tooltip"
-    | _ => "text-gray-400 hover:bg-red-400 tooltip"
-    }
+    let score =  PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type) 
+    if score <= 0.0 { "text-gray-400 hover:bg-red-400 tooltip" } 
+    else if score <= 3.0 { "text-red-200 hover:bg-red-400 tooltip" }
+    else if score <= 6.0 { "text-red-400 hover:bg-red-500 tooltip" }
+    else if score <= 10.0 { "text-red-500 hover:bg-red-600 tooltip" }
+    else if score <= 15.0 { "text-red-600 hover:bg-red-700 tooltip" }
+    else { "text-red-700 hover:bg-red-800 tooltip" }
   | None => "text-gray-400 hover:text-red-200 tooltip"
   }
 }
 // UI for each Label
-let selectedLabelClass = part => {
+let selectedLabelClass = (part: option<PressureSore.part>) => {
   switch part {
   | Some(p) =>
-    switch PressureSore.scale(p) {
-    | 1 => "bg-red-200 text-red-700 hover:bg-red-400"
-    | 2 => "bg-red-400 text-white hover:bg-red-500"
-    | 3 => "bg-red-500 text-white hover:bg-red-600"
-    | 4 => "bg-red-600 text-white hover:bg-red-700"
-    | 5 => "bg-red-700 text-white hover:bg-red-200"
-    | _ => "bg-gray-300 text-black hover:bg-gray-400"
-    }
+    let score =  PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type) 
+    if score <= 0.0 { "bg-gray-300 text-black hover:bg-gray-400" }
+    else if score <= 3.0 { "bg-red-200 text-red-700 hover:bg-red-400" }
+    else if score <= 6.0 { "bg-red-400 text-white hover:bg-red-500" }
+    else if score <= 10.0 { "bg-red-500 text-white hover:bg-red-600" }
+    else if score <= 15.0 { "bg-red-600 text-white hover:bg-red-700" }
+    else { "bg-red-700 text-white hover:bg-red-200" }
   | None => "bg-gray-300 text-black hover:bg-red-200"
   }
 }
 
-// String for Braden Scale Value
-let bradenScaleValue = selectedPart => {
+let pushScoreValue = (selectedPart: option<PressureSore.part>) => {
   switch selectedPart {
-  | Some(p) =>
-    switch PressureSore.scale(p) {
-    | 1 => ": 1"
-    | 2 => ": 2"
-    | 3 => ": 3"
-    | 4 => ": 4"
-    | 5 => ": 5"
-    | _ => ""
-    }
-  | None => ""
-  }
+  | Some(p) => PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type)
+  | None => 0.0
+  }->Js.Float.toString
 }
 
 let getIntoView = (region: string, isPart: bool) => {
@@ -190,12 +230,26 @@ let getIntoView = (region: string, isPart: bool) => {
 }
 
 let renderBody = (state, send, title, partPaths, substr) => {
+  
+  let show = state.selectedRegion !== PressureSore.Other && partPaths->Belt.Array.some(p => PressureSore.regionForPath(p) === state.selectedRegion)
+
+  let inputModal = React.useRef(Js.Nullable.null)
+  let isMouseOverInputModal = %raw(`
+    function (event, ref) {
+      if (ref.current) {
+        let rect = ref.current.getBoundingClientRect()
+        return event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+      }
+      return false;
+    }
+  `)
+
   <div className=" w-full text-center mx-2">
     <div className="text-2xl font-bold mt-8"> {str(title)} </div>
     <div className="text-left font-bold mx-auto mt-5">
       {str("Braden Scale (Risk Severity) (" ++ title ++ ")")}
     </div>
-    // Braden Scale Divs
+    // Badges
     <div className="mx-auto overflow-x-scroll my-3 border-2">
       <div className="grid grid-rows-3 grid-flow-col auto-cols-max md:flex md:flex-wrap">
         {Js.Array.mapi((part, index) => {
@@ -207,20 +261,14 @@ let renderBody = (state, send, title, partPaths, substr) => {
             className={"p-1 col-auto text-sm rounded m-1 cursor-pointer " ++
             selectedLabelClass(selectedPart)}
             id={PressureSore.regionToString(regionType)}
-            onClick={state.previewMode
-              ? _ => getIntoView(PressureSore.regionToString(regionType), false)
-              : _ => {
-                  switch selectedPart {
-                  | Some(p) => send(AutoManageScale(p))
-                  | None => send(AddPressureSore(regionType))
-                  }
-                }}>
+            onClick={_ => getIntoView(PressureSore.regionToString(regionType), false)}
+          >
             <div className="flex justify-between">
               <div className="border-white px-1">
                 {str(
                   Js.String.sliceToEnd(
                     ~from=substr,
-                    PressureSore.regionToString(regionType) ++ bradenScaleValue(selectedPart),
+                    PressureSore.regionToString(regionType) ++ (pushScoreValue(selectedPart) === "0" ? "" : " : " ++ pushScoreValue(selectedPart)),
                   ),
                 )}
               </div>
@@ -241,7 +289,23 @@ let renderBody = (state, send, title, partPaths, substr) => {
     </div>
     // Diagram
     <div className="flex justify-center mx-auto border-2">
-      <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
+      <div>
+        <CriticalCare__PressureSoreInputModal
+          show={show}
+          modalRef={ReactDOM.Ref.domRef(inputModal)}
+          hideModal={_ => send(SetSelectedRegion(PressureSore.Other))}
+          position={state.modalPosition}
+          part={
+            Belt.Option.getWithDefault(
+              Js.Array.find(p => PressureSore.region(p) === state.selectedRegion, state.parts), 
+              PressureSore.makeDefault(state.selectedRegion)
+            )
+          }
+          updatePart={part => send(UpdateSelectedPart(part))}
+          previewMode={state.previewMode}
+        />
+      </div>
+      <svg className="h-screen py-4 cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
         {Js.Array.mapi((part, renderIndex) => {
           let regionType = PressureSore.regionForPath(part)
           let selectedPart = Js.Array.find(p => PressureSore.region(p) === regionType, state.parts)
@@ -252,14 +316,10 @@ let renderBody = (state, send, title, partPaths, substr) => {
             className={selectedClass(selectedPart)}
             fill="currentColor"
             id={"part" ++ PressureSore.regionToString(regionType)}
-            onClick={state.previewMode
-              ? _ => getIntoView(PressureSore.regionToString(regionType), true)
-              : _ => {
-                  switch selectedPart {
-                  | Some(p) => send(AutoManageScale(p))
-                  | None => send(AddPressureSore(regionType))
-                  }
-                }}>
+            onClick={e => {
+              send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
+            }}
+          >
             <title className=""> {str(PressureSore.regionToString(regionType))} </title>
           </path>
         }, partPaths)->React.array}
@@ -278,11 +338,11 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
   }, [pressureSoreParameter])
 
   <div className="my-5">
-    <div className="flex justify-between">
+    <div className="flex flex-col sm:flex-row justify-between">
       {!previewMode
         ? <>
             <h2> {str("Pressure Sore")} </h2>
-            <label className="flex items-center cursor-pointer">
+            <label className="flex items-center cursor-pointer  sm:mt-0 mt-4">
               // Toggle
 
               //Toggle Button

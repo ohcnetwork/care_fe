@@ -29,9 +29,11 @@ import {
 } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { debounce } from "lodash";
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import PhoneInput, { ICountryData } from "react-phone-input-2";
 import "react-phone-input-2/lib/high-res.css";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "./components/ButtonV2";
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, "onChange"> {
   options: Array<any>;
@@ -77,17 +79,7 @@ type ActionTextFieldProps = TextFieldPropsExtended & {
   actionIcon?: React.ReactElement;
   action?: () => void;
 };
-// type Option = { text: string; score: number };
-// interface InputProps {
-//   options: Array<Option>;
-//   onChange: (
-//     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-//     index: number
-//   ) => void;
-//   handleDeleteOption: (index: number) => void;
-//   errors: Array<Option>;
-//   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-// }
+
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
   onChange: (
@@ -96,18 +88,12 @@ interface DateInputFieldProps extends DatePickerProps {
   ) => void;
   label?: string;
   min?: string;
+  max?: string;
   errors: string;
   inputVariant?: "standard" | "outlined" | "filled";
   disabled?: boolean;
   margin?: "none" | "dense" | "normal";
 }
-// interface TimeInputFieldProps {
-//   value: string;
-//   onChange: (
-//     date: MaterialUiPickersDate,
-//     value?: string | null | undefined
-//   ) => void;
-// }
 
 interface CheckboxProps extends Omit<FormControlLabelProps, "control"> {
   label: string;
@@ -236,6 +222,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
     label,
     errors,
     min,
+    max,
     // variant,
     disabled,
     margin,
@@ -251,6 +238,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
         value={value}
         onChange={onChange}
         minDate={min}
+        maxDate={max}
         disabled={disabled}
         KeyboardButtonProps={{
           "aria-label": "change date",
@@ -280,9 +268,17 @@ export const TimeInputField = (props: any) => {
   );
 };
 
-export const ErrorHelperText = (props: { error: string }) => {
+export const ErrorHelperText = (props: { error?: string }) => {
   const { error } = props;
-  return <div className="error-text">{error}</div>;
+  return (
+    <span
+      className={`error-text mt-2 ml-1 transition-all duration-300 ${
+        error ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      {error}
+    </span>
+  );
 };
 
 export const ShowRadioOptions = (props: OptionsProps) => {
@@ -557,17 +553,21 @@ interface AutoCompleteAsyncFieldProps {
   renderOption: (option: any) => JSX.Element;
   placeholder: string;
   noOptionsText?: string;
-  value: any;
+  value?: any;
+  defaultValue?: any;
   loading?: boolean;
   errors?: string;
+  onBlur?: (e: any) => void;
   onOpen?: (e: any) => void;
   filterOptions?: (options: any) => any;
   name?: string;
   freeSolo?: boolean;
+  disabled?: boolean;
 }
 
 export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
   const {
+    name,
     margin,
     options,
     label,
@@ -580,13 +580,16 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
     onChange,
     onSearch,
     value,
+    defaultValue,
     loading,
+    onBlur,
     onOpen,
     noOptionsText,
     filterOptions,
     multiple = false,
     autoSelect = true,
     className = "",
+    disabled = false,
   } = props;
   return (
     <>
@@ -597,9 +600,12 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         autoSelect={autoSelect}
         multiple={multiple}
         onOpen={onOpen}
+        onBlur={onBlur}
         options={options}
+        disabled={disabled}
         onChange={onChange}
         value={value}
+        defaultValue={defaultValue}
         loading={loading}
         noOptionsText={noOptionsText}
         getOptionSelected={getOptionSelected}
@@ -610,6 +616,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
         renderInput={(params: any) => (
           <TextField
             {...params}
+            name={name}
             variant={variant}
             margin={margin || "normal"}
             label={label}
@@ -634,6 +641,9 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
   );
 };
 
+/**
+ * Deprecated. Use `PhoneNumberFormField` instead.
+ */
 export const PhoneNumberField = (props: any) => {
   const {
     label,
@@ -644,9 +654,20 @@ export const PhoneNumberField = (props: any) => {
     value,
     turnOffAutoFormat,
     disabled,
+    enableTollFree,
+    countryCodeEditable = false,
+    className,
+    name,
   } = props;
+  const [maxLength, setMaxLength] = useState(15);
+
   const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
   const onChangeHandler = debounce(onChange, 500);
+
+  useEffect(() => {
+    setMaxLength(() => (value?.slice(4, 8) === "1800" ? 16 : 15));
+  }, [value]);
+
   const handleChange = (
     value: string,
     data: Partial<ICountryData>,
@@ -655,28 +676,39 @@ export const PhoneNumberField = (props: any) => {
   ) => {
     onChangeHandler(formattedValue);
   };
+
   return (
     <>
       {label && <InputLabel>{label}</InputLabel>}
-      <div className="flex items-center">
+      <div className="relative flex items-center">
         <PhoneInput
-          countryCodeEditable={false}
+          inputClass="cui-input-base pl-14 pr-10 py-5 tracking-widest"
+          containerClass={className}
+          countryCodeEditable={countryCodeEditable}
           value={value}
           placeholder={placeholder}
           onChange={handleChange}
           country="in"
           disabled={disabled}
           autoFormat={!turnOffAutoFormat}
+          enableLongNumbers={enableTollFree}
+          inputProps={{
+            maxLength,
+            name,
+          }}
           {...countryRestriction}
         />
-        <div
-          className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-          onClick={(_) => onChange("+91")}
+        <ButtonV2
+          className="absolute right-[1px] top-[1px] inset-y-0 h-[40px]"
+          variant="secondary"
+          type="button"
+          ghost
+          onClick={() => onChange("+91")}
         >
-          <i className="fas fa-times text-red-600" />
-        </div>
+          <CareIcon className="care-l-multiply" />
+        </ButtonV2>
       </div>
-      <ErrorHelperText error={errors} />
+      {errors && <ErrorHelperText error={errors} />}
     </>
   );
 };

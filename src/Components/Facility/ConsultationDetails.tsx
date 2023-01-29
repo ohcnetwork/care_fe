@@ -5,17 +5,11 @@ import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications";
-import {
-  getConsultation,
-  getDailyReport,
-  getPatient,
-  listAssetBeds,
-} from "../../Redux/actions";
+import { getConsultation, getPatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import { ConsultationModel } from "./models";
+import { ConsultationModel, ICD11DiagnosisModel } from "./models";
 import { PatientModel } from "../Patient/models";
 import {
-  PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   CONSULTATION_TABS,
   OptionsType,
@@ -35,34 +29,48 @@ import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
-import LiveFeed from "./Consultations/LiveFeed";
-import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
-import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
-import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
-import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
+import DoctorVideoSlideover from "./DoctorVideoSlideover";
+import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import InputLabel from "@material-ui/core/InputLabel";
-import {
-  TextInputField,
-  SelectField,
-  MultilineInputField,
-} from "../Common/HelperInputFields";
+import { TextInputField } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
+import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
+import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
+import PatientInfoCard from "../Patient/PatientInfoCard";
+import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import DialogModal from "../Common/Dialog";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import DateFormField from "../Form/FormFields/DateFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
+import PRNPrescriptionBuilder, {
+  PRNPrescriptionType,
+} from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import { formatDate } from "../../Utils/utils";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
+  discharge_date: string;
+  death_datetime: string | null;
+  death_confirmed_doctor: string | null;
 }
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
-const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -77,9 +85,6 @@ export const ConsultationDetails = (props: any) => {
     {}
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [cameraAsset, setCameraAsset] = useState({});
-  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState({});
-  const [cameraConfig, setCameraConfig] = useState({});
   const [open, setOpen] = useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
@@ -95,7 +100,15 @@ export const ConsultationDetails = (props: any) => {
     useState<PreDischargeFormInterface>({
       discharge_reason: "",
       discharge_notes: "",
+      discharge_date: "",
+      death_datetime: null,
+      death_confirmed_doctor: null,
     });
+
+  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
+    []
+  );
+  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -165,7 +178,6 @@ export const ConsultationDetails = (props: any) => {
 
   const handlePatientDischarge = async (value: boolean) => {
     setIsSendingDischargeApi(true);
-
     if (!preDischargeForm.discharge_reason) {
       setErrors({
         ...errors,
@@ -175,9 +187,27 @@ export const ConsultationDetails = (props: any) => {
       return;
     }
 
+    if (
+      preDischargeForm.discharge_reason == "EXP" &&
+      !preDischargeForm.discharge_notes.trim()
+    ) {
+      setErrors({
+        ...errors,
+        discharge_notes: "Please enter the cause of death",
+      });
+      setIsSendingDischargeApi(false);
+      return;
+    }
+
     const dischargeResponse = await dispatch(
       dischargePatient(
-        { discharge: value, ...preDischargeForm },
+        {
+          ...preDischargeForm,
+          discharge: value,
+          discharge_date: moment(preDischargeForm.discharge_date).toISOString(
+            true
+          ),
+        },
         { id: patientData.id }
       )
     );
@@ -196,7 +226,9 @@ export const ConsultationDetails = (props: any) => {
     }
   };
 
-  const handleDischargeSummaryFormChange = (e: any) => {
+  const handleDischargeSummaryFormChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
     const { value } = e.target;
 
     const errorField = Object.assign({}, errors);
@@ -217,18 +249,26 @@ export const ConsultationDetails = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [res, dailyRounds] = await Promise.all([
-        dispatch(getConsultation(consultationId)),
-        dispatch(getDailyReport({ limit: 1, offset: 0 }, { consultationId })),
-      ]);
+      const res = await dispatch(getConsultation(consultationId));
+      setDischargeAdvice(res && res.data && res.data.discharge_advice);
+      setPRNAdvice(
+        !Array.isArray(res.data.prn_prescription)
+          ? []
+          : res.data.prn_prescription
+      );
+      setPreDischargeForm((form) => {
+        return {
+          ...form,
+          discharge_date: res.data.admission_date
+            ? res.data.admission_date
+            : new Date().toISOString(),
+        };
+      });
       if (!status.aborted) {
         if (res && res.data) {
           const data: ConsultationModel = {
             ...res.data,
             symptoms_text: "",
-            category:
-              patientCategoryChoices.find((i) => i.id === res.data.category)
-                ?.text || res.data.category,
           };
           if (res.data.symptoms && res.data.symptoms.length) {
             const symptoms = res.data.symptoms
@@ -242,6 +282,9 @@ export const ConsultationDetails = (props: any) => {
               Object.keys(res.data.discharge_advice).length === 0
                 ? []
                 : res.data.discharge_advice;
+          }
+          if (!Array.isArray(res.data.prn_prescription)) {
+            data.prn_prescription = [];
           }
           setConsultationData(data);
           const id = res.data.patient;
@@ -264,26 +307,9 @@ export const ConsultationDetails = (props: any) => {
             };
             setPatientData(data);
           }
+        } else {
+          navigate("/not-found");
         }
-        const current_bed = (res as ConsultationModel)?.current_bed?.bed_object
-          ?.id;
-        if (dailyRounds?.data?.results?.length && current_bed) {
-          const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
-          if (bedAssets?.data?.results?.length) {
-            const { local_ip_address, camera_access_key, middleware_hostname } =
-              bedAssets.data.results[0].asset_object.meta;
-            setCameraAsset({
-              id: bedAssets.data.results[0].asset_object.id,
-              hostname: local_ip_address,
-              username: camera_access_key.split(":")[0],
-              password: camera_access_key.split(":")[1],
-              port: 80,
-            });
-            setCameraMiddlewareHostname(middleware_hostname);
-            setCameraConfig(bedAssets.data.results[0].meta);
-          }
-        }
-
         setIsLoading(false);
       }
     },
@@ -302,6 +328,56 @@ export const ConsultationDetails = (props: any) => {
     `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
+
+  const ShowDiagnosis = ({
+    diagnoses = [],
+    label = "Diagnosis",
+    nshow = 2,
+  }: {
+    diagnoses: ICD11DiagnosisModel[] | undefined;
+    label: string;
+    nshow?: number;
+  }) => {
+    const [showMore, setShowMore] = useState(false);
+
+    return diagnoses.length ? (
+      <div className="text-sm w-full">
+        <p className="font-semibold leading-relaxed">{label}</p>
+
+        {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) => (
+          <p>{diagnosis.label}</p>
+        ))}
+        {diagnoses.length > nshow && (
+          <>
+            {!showMore ? (
+              <a
+                onClick={() => setShowMore(true)}
+                className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+              >
+                show more
+              </a>
+            ) : (
+              <a
+                onClick={() => setShowMore(false)}
+                className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+              >
+                show less
+              </a>
+            )}
+          </>
+        )}
+      </div>
+    ) : null;
+  };
+
+  const handleDateChange = (e: FieldChangeEvent<Date>) => {
+    setPreDischargeForm((form) => {
+      return {
+        ...form,
+        discharge_date: e.value.toString(),
+      };
+    });
+  };
 
   return (
     <div>
@@ -356,85 +432,154 @@ export const ConsultationDetails = (props: any) => {
         </DialogActions>
       </Dialog>
 
-      <Dialog
-        fullWidth={true}
-        open={openDischargeDialog}
-        onClose={handleDischargeClose}
-      >
-        <DialogTitle>
-          <i className="text-red-500 fas fa-exclamation-triangle"></i>
-          &nbsp;Discharge Patient From Care
-        </DialogTitle>
-        <DialogContent>
-          <div className="flex flex-col gap-4">
-            <div className="sm:w-1/2" id="discharge-reason-div">
-              <InputLabel id="discharge-reason-label">
-                Discharge Reason*
-              </InputLabel>
-              <SelectField
-                name="discharge_reason"
-                variant="standard"
-                value={preDischargeForm.discharge_reason}
-                options={[{ id: "", text: "Select" }, ...DISCHARGE_REASONS]}
-                onChange={(e) =>
-                  setPreDischargeForm((prev) => ({
-                    ...prev,
-                    discharge_reason: e.target.value,
-                  }))
-                }
-                errors={errors?.discharge_reason}
-              />
-            </div>
-
-            <div id="discharge-notes-div">
-              <InputLabel id="refered-label">Discharge Notes</InputLabel>
-              <MultilineInputField
-                name="discharge_notes"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                rows={2}
-                InputLabelProps={{ shrink: !!preDischargeForm.discharge_notes }}
-                value={preDischargeForm.discharge_notes}
-                onChange={(e) =>
-                  setPreDischargeForm((prev) => ({
-                    ...prev,
-                    discharge_notes: e.target.value,
-                  }))
-                }
-                errors={errors?.discharge_notes}
-              />
-            </div>
+      <DialogModal
+        title={
+          <div>
+            <p>Discharge patient from CARE</p>
+            <span className="mt-1 flex gap-1 text-sm text-secondary-500 font-medium">
+              <CareIcon className="care-l-exclamation-triangle text-base" />
+              <p>Caution: this action is irreversible.</p>
+            </span>
           </div>
-        </DialogContent>
-        <DialogActions className="flex justify-between mt-5 px-5 border-t">
-          <Button
-            variant="outlined"
-            className="bg-gray-200 hover:bg-gray-400"
-            onClick={handleDischargeClose}
-          >
-            Cancel
-          </Button>
+        }
+        show={openDischargeDialog}
+        onClose={handleDischargeClose}
+        className="md:max-w-2xl"
+      >
+        <div className="mt-6 flex flex-col">
+          <SelectFormField
+            required
+            label="Reason"
+            name="discharge_reason"
+            id="discharge_reason"
+            value={preDischargeForm.discharge_reason}
+            options={DISCHARGE_REASONS}
+            optionValue={({ id }) => id}
+            optionLabel={({ text }) => text}
+            onChange={(e) =>
+              setPreDischargeForm((prev) => ({
+                ...prev,
+                discharge_reason: e.value,
+              }))
+            }
+            error={errors?.discharge_reason}
+          />
+          <TextAreaFormField
+            required={preDischargeForm.discharge_reason == "EXP"}
+            label={
+              preDischargeForm.discharge_reason == "EXP"
+                ? "Cause of death"
+                : preDischargeForm.discharge_reason === "REC"
+                ? "Discharged Advice"
+                : "Notes"
+            }
+            name="discharge_notes"
+            value={preDischargeForm.discharge_notes}
+            onChange={(e) =>
+              setPreDischargeForm((prev) => ({
+                ...prev,
+                discharge_notes: e.value,
+              }))
+            }
+            error={errors?.discharge_notes}
+          />
+          {preDischargeForm.discharge_reason === "REC" && (
+            <div>
+              <DateFormField
+                label="Discharge Date"
+                name="discharge_date"
+                value={moment(preDischargeForm.discharge_date).toDate()}
+                min={moment(consultationData.admission_date).toDate()}
+                disableFuture={true}
+                required
+                onChange={handleDateChange}
+              />
+              <FieldLabel>Discharge Prescription</FieldLabel>
+              <div className="">
+                <PRNPrescriptionBuilder
+                  prescriptions={PRNAdvice}
+                  setPrescriptions={setPRNAdvice}
+                />
+              </div>
+              <div>
+                <FieldLabel>Description Advice</FieldLabel>
+                <PrescriptionBuilder
+                  prescriptions={dischargeAdvice}
+                  setPrescriptions={setDischargeAdvice}
+                />
+              </div>
+            </div>
+          )}
+          {preDischargeForm.discharge_reason === "EXP" && (
+            <div>
+              <div>
+                Death Date and Time
+                <span className="text-danger-500">{" *"}</span>
+                <input
+                  type="datetime-local"
+                  className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                  value={preDischargeForm.death_datetime || ""}
+                  required
+                  min={consultationData.admission_date?.substring(0, 16)}
+                  max={moment(new Date()).format("YYYY-MM-DDThh:mm")}
+                  onChange={(e) => {
+                    setPreDischargeForm((form) => {
+                      return {
+                        ...form,
+                        death_datetime: e.target.value,
+                      };
+                    });
+                  }}
+                />
+              </div>
+              <TextFormField
+                name="death_confirmed_by"
+                label="Confirmed By"
+                value={preDischargeForm.death_confirmed_doctor || ""}
+                onChange={(e) => {
+                  setPreDischargeForm((form) => {
+                    return {
+                      ...form,
+                      death_confirmed_doctor: e.value,
+                    };
+                  });
+                }}
+                required
+                placeholder="Attending Doctor's Name and Designation"
+              />
+            </div>
+          )}
+        </div>
 
+        <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
+          <Cancel onClick={handleDischargeClose} />
           {isSendingDischargeApi ? (
             <CircularProgress size={20} />
           ) : (
-            <Button
-              variant="contained"
-              color="primary"
+            <Submit
               onClick={() => handlePatientDischarge(false)}
+              label="Confirm Discharge"
               autoFocus
-            >
-              Discharge
-            </Button>
+            />
           )}
-        </DialogActions>
-      </Dialog>
+        </div>
+      </DialogModal>
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap relative">
           <PageTitle
             title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
+            crumbsReplacements={{
+              [facilityId]: { name: patientData?.facility_object?.name },
+              [patientId]: { name: patientData?.name },
+              [consultationId]: {
+                name: `Admitted on ${formatDate(
+                  consultationData.admission_date
+                    ? consultationData.admission_date
+                    : "00:00"
+                )}`,
+              },
+            }}
             breadcrumbs={true}
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
@@ -474,9 +619,10 @@ export const ConsultationDetails = (props: any) => {
         </nav>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black w-full">
-            <TeleICUPatientInfoCard
+            <PatientInfoCard
               patient={patientData}
               ip_no={consultationData.ip_no}
+              fetchPatientData={fetchData}
             />
 
             <div className="flex md:flex-row flex-col justify-between border-t px-4 pt-5">
@@ -503,17 +649,15 @@ export const ConsultationDetails = (props: any) => {
                   )}
                   <div className="text-xs -mt-2">
                     {consultationData.admission_date &&
-                      moment(consultationData.admission_date).format("lll")}
+                      formatDate(consultationData.admission_date)}
                     {consultationData.discharge_date &&
-                      ` - ${moment(consultationData.discharge_date).format(
-                        "lll"
-                      )}`}
+                      ` - ${formatDate(consultationData.discharge_date)}`}
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="flex px-4 flex-col lg:flex-row gap-2">
+            <div className="flex px-4 flex-col-reverse lg:flex-row gap-2">
               <div className="flex flex-col w-3/4 h-full">
                 {/*consultationData.other_symptoms && (
                   <div className="capitalize">
@@ -524,21 +668,36 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )*/}
 
-                {consultationData.diagnosis && (
-                  <div className="text-sm w-full">
-                    <span className="font-semibold leading-relaxed">
-                      Diagnosis:{" "}
-                    </span>
-                    {consultationData.diagnosis}
-                  </div>
-                )}
+                <ShowDiagnosis
+                  diagnoses={
+                    consultationData?.icd11_provisional_diagnoses_object
+                  }
+                  label="Provisional Diagnosis (as per ICD-11 recommended by WHO)"
+                />
+
+                <ShowDiagnosis
+                  diagnoses={[
+                    ...(consultationData?.diagnosis
+                      ? [
+                          {
+                            id: "0",
+                            label: consultationData?.diagnosis,
+                            parentId: null,
+                          },
+                        ]
+                      : []),
+                    ...(consultationData?.icd11_diagnoses_object || []),
+                  ]}
+                  label="Diagnosis (as per ICD-11 recommended by WHO)"
+                />
+
                 {consultationData.verified_by && (
                   <div className="text-sm mt-2">
                     <span className="font-semibold leading-relaxed">
                       Verified By:{" "}
                     </span>
                     {consultationData.verified_by}
-                    <i className="fas fa-check-circle fill-current text-lg text-green-500 ml-2"></i>
+                    <i className="fas fa-check fill-current text-lg text-green-500 ml-2"></i>
                   </div>
                 )}
               </div>
@@ -565,7 +724,10 @@ export const ConsultationDetails = (props: any) => {
               <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
                 <div>
                   <span className="text-gray-900">Created: </span>
-                  {moment(consultationData.created_date).format("lll")} |
+                  {consultationData.created_date
+                    ? formatDate(consultationData.created_date)
+                    : "--:--"}{" "}
+                  |
                 </div>
                 {consultationData.created_by && (
                   <div>
@@ -577,7 +739,10 @@ export const ConsultationDetails = (props: any) => {
               <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
                 <div>
                   <span className="text-gray-900">Last Modified: </span>
-                  {moment(consultationData.modified_date).format("lll")} |
+                  {consultationData.modified_date
+                    ? formatDate(consultationData.modified_date)
+                    : "--:--"}{" "}
+                  |
                 </div>
                 {consultationData.last_edited_by && (
                   <div>
@@ -614,15 +779,17 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>
         {tab === "UPDATES" && (
-          <div className="flex md:flex-row flex-col">
-            <div className="md:w-2/3">
+          <div className="flex xl:flex-row flex-col">
+            <div className="xl:w-2/3 w-full">
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
-              <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row">
-                <TeleICUPatientVitalsCard patient={patientData} />
-                <TeleICUPatientVitalsGraphCard
-                  consultationId={patientData.last_consultation?.id}
-                />
-              </section>
+              {!consultationData.discharge_date && (
+                <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
+                  <PatientVitalsCard
+                    patient={patientData}
+                    facilityId={facilityId}
+                  />
+                </section>
+              )}
               <div className="grid lg:grid-cols-2 gap-4 mt-4">
                 {consultationData.symptoms_text && (
                   <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -644,9 +811,9 @@ export const ConsultationDetails = (props: any) => {
                         )}
                         <span className="font-semibold leading-relaxed text-gray-800 text-xs">
                           from{" "}
-                          {moment(consultationData.symptoms_onset_date).format(
-                            "lll"
-                          )}
+                          {consultationData.symptoms_onset_date
+                            ? formatDate(consultationData.symptoms_onset_date)
+                            : "--:--"}
                         </span>
                       </div>
                     </div>
@@ -703,7 +870,7 @@ export const ConsultationDetails = (props: any) => {
                   <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
                       <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                        Advice
+                        General Instructions
                       </h3>
                       <div className="mt-2">
                         <ReadMore
@@ -756,18 +923,14 @@ export const ConsultationDetails = (props: any) => {
                       <div className="">
                         Intubation Date{" - "}
                         <span className="font-semibold">
-                          {moment(
-                            consultationData.intubation_start_date
-                          ).format("lll")}
+                          {formatDate(consultationData.intubation_start_date)}
                         </span>
                       </div>
                       <div className="">
                         Extubation Date{" - "}
                         <span className="font-semibold">
                           {consultationData.intubation_end_date &&
-                            moment(consultationData.intubation_end_date).format(
-                              "lll"
-                            )}
+                            formatDate(consultationData.intubation_end_date)}
                         </span>
                       </div>
                       <div className="">
@@ -805,7 +968,7 @@ export const ConsultationDetails = (props: any) => {
                           <p>
                             Insertion Date:{" "}
                             <span className="font-semibold">
-                              {moment(line.start_date).format("lll")}
+                              {formatDate(line.start_date)}
                             </span>
                           </p>
                           <p>
@@ -872,7 +1035,7 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               </div>
             </div>
-            <div className="md:w-1/3 pl-4">
+            <div className="xl:w-1/3 w-full pl-4">
               <PageTitle
                 title="Update Log"
                 hideBack={true}
@@ -888,11 +1051,19 @@ export const ConsultationDetails = (props: any) => {
           </div>
         )}
         {tab === "FEED" && (
-          <LiveFeed
-            asset={cameraAsset}
-            middlewareHostname={cameraMiddlewareHostname}
-            config={cameraConfig}
-          />
+          <div>
+            <PageTitle
+              title="Camera Feed"
+              breadcrumbs={false}
+              hideBack={true}
+              focusOnLoad={true}
+            />
+            <Feed
+              facilityId={facilityId}
+              patientId={patientId}
+              consultationId={consultationId}
+            />
+          </div>
         )}
         {tab === "SUMMARY" && (
           <div className="mt-4">
@@ -910,86 +1081,115 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "MEDICINES" && (
           <div>
-            {consultationData.history_of_present_illness && (
-              <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                    History of present illness:{" "}
-                  </h3>
-                  <div className="mt-2">
-                    {consultationData.history_of_present_illness}
-                  </div>
-                </div>
-              </div>
-            )}
             {consultationData.discharge_advice && (
               <div className="mt-4">
-                <h3 className="flex text-lg font-semibold leading-relaxed text-gray-900">
-                  Prescription
-                  <div className="ml-3 text-xs text-gray-600 mt-2">
+                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900 mb-2">
+                  <span className="mr-3">Prescription</span>
+                  <div className="text-xs text-gray-600 mt-2 ">
                     <i className="fas fa-history text-sm pr-2"></i>
                     {consultationData.modified_date &&
-                      moment(consultationData.modified_date).format("lll")}
+                      formatDate(consultationData.modified_date)}
                   </div>
-                </h3>
+                </div>
                 <div className="flex flex-col">
                   <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                     <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-                      <table className="min-w-full">
-                        <thead>
-                          <tr>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
-                              Medicine
-                            </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
-                              Route
-                            </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
-                              Frequency
-                            </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
-                              Dosage
-                            </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
-                              Days
-                            </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
-                              Notes
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {consultationData.discharge_advice.map(
-                            (med: any, index: number) => (
-                              <tr className="bg-white" key={index}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
-                                  {med.medicine}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
-                                  {med.route}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
-                                  {med.dosage}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
-                                  {med.dosage_new}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
-                                  {med.days}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
-                                  {med.notes}
-                                </td>
-                              </tr>
-                            )
-                          )}
-                        </tbody>
-                      </table>
+                      <ResponsiveMedicineTable
+                        theads={[
+                          "Medicine",
+                          "Route",
+                          "Frequency",
+                          "Dosage",
+                          "Days",
+                          "Notes",
+                        ]}
+                        list={consultationData.discharge_advice}
+                        objectKeys={[
+                          "medicine",
+                          "route",
+                          "dosage",
+                          "dosage_new",
+                          "days",
+                          "notes",
+                        ]}
+                        fieldsToDisplay={[2, 3]}
+                      />
                       {consultationData.discharge_advice.length === 0 && (
                         <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
                           No data found
                         </div>
                       )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {consultationData.prn_prescription && (
+              <div className="mt-4">
+                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900 mb-2">
+                  <span className="mr-3">PRN Prescription</span>
+                  <div className="text-xs text-gray-600 mt-2">
+                    <i className="fas fa-history text-sm pr-2"></i>
+                    {consultationData.modified_date &&
+                      formatDate(consultationData.modified_date)}
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+                    <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
+                      <ResponsiveMedicineTable
+                        theads={[
+                          "Medicine",
+                          "Route",
+                          "Dosage",
+                          "Indicator Event",
+                          "Max. Dosage in 24 hrs",
+                          "Min. time between 2 doses",
+                        ]}
+                        list={consultationData.prn_prescription}
+                        objectKeys={[
+                          "medicine",
+                          "route",
+                          "dosage",
+                          "indicator",
+                          "max_dosage",
+                          "min_time",
+                        ]}
+                        fieldsToDisplay={[2, 4]}
+                      />
+                      {consultationData.prn_prescription.length === 0 && (
+                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
+                          No data found
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {consultationData.procedure && (
+              <div className="mt-4">
+                <div className="flex flex-col">
+                  <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+                    <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
+                      <ResponsiveMedicineTable
+                        theads={[
+                          "Procedure",
+                          "Repetitive",
+                          "Time",
+                          "Frequency",
+                          "Notes",
+                        ]}
+                        list={consultationData.procedure}
+                        objectKeys={[
+                          "procedure",
+                          "repetitive",
+                          "time",
+                          "frequency",
+                          "notes",
+                        ]}
+                        fieldsToDisplay={[2, 4]}
+                      />
                     </div>
                   </div>
                 </div>
@@ -1090,9 +1290,7 @@ export const ConsultationDetails = (props: any) => {
               hideBack={true}
               breadcrumbs={false}
             />
-            <PressureSoreDiagrams
-              consultationId={consultationId}
-            ></PressureSoreDiagrams>
+            <PressureSoreDiagrams consultationId={consultationId} />
           </div>
         )}
         {tab === "DIALYSIS" && (
@@ -1114,16 +1312,17 @@ export const ConsultationDetails = (props: any) => {
                 breadcrumbs={false}
               />
               <div className="pt-6">
-                <button
-                  className="btn btn-primary w-full"
+                <ButtonV2
+                  disabled={!patientData.is_active}
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
                     )
                   }
                 >
-                  <i className="fas fa-plus w-4 mr-3"></i> Create Investigation
-                </button>
+                  <CareIcon className="care-l-plus" />
+                  <span>Log Lab Result</span>
+                </ButtonV2>
               </div>
             </div>
             <ViewInvestigations
@@ -1131,6 +1330,7 @@ export const ConsultationDetails = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
             />
+            <ViewInvestigationSuggestions consultationId={consultationId} />
           </div>
         )}
       </div>

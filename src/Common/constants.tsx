@@ -1,3 +1,8 @@
+import { PatientCategory } from "../Components/Facility/models";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import moment from "moment";
+import { IConfig } from "./hooks/useConfig";
+
 export const KeralaLogo = "images/kerala-logo.png";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
@@ -9,25 +14,42 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
-export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
-export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
+export type UserRole =
+  | "Pharmacist"
+  | "Volunteer"
+  | "StaffReadOnly"
+  | "Staff"
+  | "Doctor"
+  | "WardAdmin"
+  | "LocalBodyAdmin"
+  | "DistrictLabAdmin"
+  | "DistrictReadOnlyAdmin"
+  | "DistrictAdmin"
+  | "StateLabAdmin"
+  | "StateReadOnlyAdmin"
+  | "StateAdmin";
 
-export const USER_TYPES: Array<string> = [
-  "Pharmacist",
-  "Volunteer",
-  "StaffReadOnly",
-  "Staff",
-  "Doctor",
-  "WardAdmin",
-  "LocalBodyAdmin",
-  "DistrictLabAdmin",
-  "DistrictReadOnlyAdmin",
-  "DistrictAdmin",
-  "StateLabAdmin",
-  "StateReadOnlyAdmin",
-  "StateAdmin",
+export const USER_TYPE_OPTIONS: {
+  id: UserRole;
+  role: string;
+  readOnly?: boolean;
+}[] = [
+  { id: "Pharmacist", role: "Pharmacist", readOnly: false },
+  { id: "Volunteer", role: "Volunteer", readOnly: false },
+  { id: "StaffReadOnly", role: "Staff", readOnly: true },
+  { id: "Staff", role: "Staff", readOnly: false },
+  { id: "Doctor", role: "Doctor", readOnly: false },
+  { id: "WardAdmin", role: "Ward Admin", readOnly: false },
+  { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
+  { id: "DistrictLabAdmin", role: "District Lab Admin", readOnly: false },
+  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly: true },
+  { id: "DistrictAdmin", role: "District Admin", readOnly: false },
+  { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
+  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
+  { id: "StateAdmin", role: "State Admin", readOnly: false },
 ];
+
+export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
 
 export const DOWNLOAD_TYPES: Array<string> = [
   "Facility List",
@@ -90,6 +112,10 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 850, text: "General hospitals" },
   { id: 860, text: "District Hospitals" },
   { id: 870, text: "Govt Medical College Hospitals" },
+
+  { id: 900, text: "Co-operative hospitals" },
+  { id: 910, text: "Autonomous healthcare facility" },
+
   { id: 950, text: "Corona Testing Labs" },
   { id: 1000, text: "Corona Care Centre" },
   // { id: 1010, text: "COVID-19 Domiciliary Care Center" },
@@ -130,44 +156,49 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
-export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
-  { id: 1, text: "created_date", desc: "ASC Created Date" },
-  { id: 2, text: "-created_date", desc: "DESC Created Date" },
-  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
-  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
-  { id: 5, text: "review_time", desc: "ASC Review Time" },
-  { id: 6, text: "-review_time", desc: "DESC Review Time" },
+export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
+  { id: 1, text: "created_date", desc: "Created Date", order: "Ascending" },
+  { id: 2, text: "-created_date", desc: "Created Date", order: "Descending" },
+  { id: 3, text: "modified_date", desc: "Modified Date", order: "Ascending" },
+  { id: 4, text: "-modified_date", desc: "Modified Date", order: "Descending" },
+  { id: 5, text: "review_time", desc: "Review Time", order: "Ascending" },
+  { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
 ];
 
-const KASP_BED_TYPES = KASP_ENABLED
-  ? [
-      { id: 40, text: KASP_STRING + " Ordinary Beds" },
-      { id: 60, text: KASP_STRING + " Oxygen beds" },
-      { id: 50, text: KASP_STRING + " ICU (ICU without ventilator)" },
-      { id: 70, text: KASP_STRING + " ICU (ICU with ventilator)" },
-    ]
-  : [];
+export const getBedTypes = ({
+  kasp_enabled,
+  kasp_string,
+}: Pick<IConfig, "kasp_enabled" | "kasp_string">) => {
+  const kaspBedTypes = kasp_enabled
+    ? [
+        { id: 40, text: kasp_string + " Ordinary Beds" },
+        { id: 60, text: kasp_string + " Oxygen beds" },
+        { id: 50, text: kasp_string + " ICU (ICU without ventilator)" },
+        { id: 70, text: kasp_string + " ICU (ICU with ventilator)" },
+      ]
+    : [];
 
-export const BED_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Non-Covid Ordinary Beds" },
-  { id: 150, text: "Non-Covid Oxygen beds" },
-  { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
-  { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
-  { id: 30, text: "Covid Ordinary Beds" },
-  { id: 120, text: "Covid Oxygen beds" },
-  { id: 110, text: "Covid ICU (ICU without ventilator)" },
-  { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  ...KASP_BED_TYPES,
-  { id: 2, text: "Hostel" },
-  { id: 3, text: "Single Room with Attached Bathroom" },
-];
+  return [
+    { id: 1, text: "Non-Covid Ordinary Beds" },
+    { id: 150, text: "Non-Covid Oxygen beds" },
+    { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
+    { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
+    { id: 30, text: "Covid Ordinary Beds" },
+    { id: 120, text: "Covid Oxygen beds" },
+    { id: 110, text: "Covid ICU (ICU without ventilator)" },
+    { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
+    ...kaspBedTypes,
+    { id: 2, text: "Hostel" },
+    { id: 3, text: "Single Room with Attached Bathroom" },
+  ];
+};
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
-  { id: 1, text: "General Medicine" },
-  { id: 2, text: "Pulmonology" },
-  { id: 3, text: "Critical Care" },
-  { id: 4, text: "Paediatrics" },
-  { id: 5, text: "Other Speciality" },
+  { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
+  { id: 2, text: "Pulmonology", desc: "bg-doctors-pulmonology" },
+  { id: 3, text: "Critical Care", desc: "bg-doctors-critical" },
+  { id: 4, text: "Paediatrics", desc: "bg-doctors-paediatrics" },
+  { id: 5, text: "Other Speciality", desc: "bg-doctors-other" },
 ];
 
 export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
@@ -182,20 +213,20 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
-  { id: 30, text: "30 minutes" },
-  { id: 60, text: "1 hour" },
-  { id: 120, text: "2 hours" },
-  { id: 180, text: "3 hours" },
-  { id: 240, text: "4 hours" },
-  { id: 360, text: "6 hours" },
-  { id: 480, text: "8 hours" },
-  { id: 720, text: "12 hours" },
-  { id: 1440, text: "24 hours" },
-  { id: 2160, text: "36 hours" },
-  { id: 2880, text: "48 hours" },
+  { id: 30, text: "30 mins" },
+  { id: 60, text: "1 hr" },
+  { id: 120, text: "2 hr" },
+  { id: 180, text: "3 hr" },
+  { id: 240, text: "4 hr" },
+  { id: 360, text: "6 hr" },
+  { id: 480, text: "8 hr" },
+  { id: 720, text: "12 hr" },
+  { id: 1440, text: "24 hr" },
+  { id: 2160, text: "36 hr" },
+  { id: 2880, text: "48 hr" },
 ];
 
-export const SYMPTOM_CHOICES: Array<OptionsType> = [
+export const SYMPTOM_CHOICES = [
   { id: 1, text: "ASYMPTOMATIC" },
   { id: 2, text: "FEVER" },
   { id: 3, text: "SORE THROAT" },
@@ -231,10 +262,10 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 7, text: "Other" },
 ];
 
-export const GENDER_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Male" },
-  { id: 2, text: "Female" },
-  { id: 3, text: "Non-binary" },
+export const GENDER_TYPES = [
+  { id: 1, text: "Male", icon: <i className="fa-solid fa-person" /> },
+  { id: 2, text: "Female", icon: <i className="fa-solid fa-person-dress" /> },
+  { id: 3, text: "Non-binary", icon: <i className="fa-solid fa-genderless" /> },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -250,40 +281,38 @@ export const CONSULTATION_SUGGESTION = [
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
+  { id: "DD", text: "Declare Death" },
+];
+
+export const CONSULTATION_STATUS = [
+  { id: "1", text: "Brought Dead" },
+  { id: "2", text: "Transferred from ward" },
+  { id: "3", text: "Transferred from ICU" },
+  { id: "4", text: "Referred from other hospital" },
+  { id: "5", text: "Out-patient (walk in)" },
 ];
 
 export const ADMITTED_TO = [
-  "Home Isolation",
-  "Isolation Room",
-  "Bed with Oxygen Support",
-  "ICU",
-  "ICU with Oxygen Support",
-  "ICU with Non Invasive Ventilator",
-  "ICU with Invasive Ventilator",
-  "Gynaecology Ward",
-  "Paediatric Ward",
-];
-
-export const PATIENT_FILTER_ADMITTED_TO = [
-  { id: "0", text: "Not admitted" },
-  { id: "1", text: "Isolation Room" },
-  { id: "6", text: "Bed with Oxygen Support" },
+  { id: "1", text: "Isolation" },
   { id: "2", text: "ICU" },
+  { id: "6", text: "Bed with oxygen support" },
+  { id: "7", text: "Regular" },
 ];
 
-export const PATIENT_CATEGORY = [
-  { id: "ASYMPTOMATIC", text: "ASYM (ASYMPTOMATIC) " },
-  { id: "Category-A", text: "Mild (Category A)" },
-  { id: "Category-B", text: "Moderate (Category B)" },
-  { id: "Category-C", text: "Severe (Category C)" },
+export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
+
+export const PATIENT_CATEGORIES: {
+  id: PatientCategoryID;
+  text: PatientCategory;
+  twClass: string;
+}[] = [
+  { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
+  { id: "Stable", text: "Stable", twClass: "patient-stable" },
+  { id: "Moderate", text: "Slightly Abnormal", twClass: "patient-abnormal" },
+  { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
 
-export const PATIENT_FILTER_CATEGORY = [
-  { id: "ASYM", text: "ASYM (ASYMPTOMATIC) " },
-  { id: "Mild", text: "Mild (Category A)" },
-  { id: "Moderate", text: "Moderate (Category B)" },
-  { id: "Severe", text: "Severe (Category C)" },
-];
+export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 
 export const CURRENT_HEALTH_CHANGE = [
   { id: 0, text: "NO DATA", desc: "" },
@@ -348,7 +377,6 @@ export const DISEASE_STATUS = [
   "SUSPECTED",
   "NEGATIVE",
   "RECOVERED",
-  "EXPIRED",
 ];
 
 export const TEST_TYPE = [
@@ -641,12 +669,6 @@ export const CAMERA_TYPE = [
   { id: "HIKVISION", text: "ONVIF Camera (HIKVISION)" },
 ];
 
-export const PREFERENCE_SIDEBAR_KEY = "preferenceSidebar";
-export const SIDEBAR = {
-  COLLAPSED: "collapsed",
-  FULL: "full",
-};
-
 export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
   (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
   {}
@@ -661,68 +683,79 @@ export type CameraPTZ = {
   value?: number;
 };
 
+export const CAMERA_STATES = {
+  IDLE: "idle",
+  MOVING: {
+    GENERIC: "Moving",
+    UP: "Moving Up",
+    DOWN: "Moving Down",
+    LEFT: "Moving Left",
+    RIGHT: "Moving Right",
+  },
+  ZOOMING: {
+    IN: "Zooming In",
+    OUT: "Zooming Out",
+  },
+  PRECISION: "Setting Precision",
+  UPDATING_PRESET: "Updating Preset",
+};
+
 export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   {
     icon: "chevron-up",
     label: "Move Up",
     action: "up",
-    loadingLabel: "Moving Up",
+    loadingLabel: CAMERA_STATES.MOVING.UP,
     shortcutKey: ["Control", "Shift", "ArrowUp"],
   },
   {
     icon: "chevron-down",
     label: "Move Down",
     action: "down",
-    loadingLabel: "Moving Down",
+    loadingLabel: CAMERA_STATES.MOVING.DOWN,
     shortcutKey: ["Control", "Shift", "ArrowDown"],
   },
   {
     icon: "chevron-left",
     label: "Move Left",
     action: "left",
-    loadingLabel: "Moving Left",
+    loadingLabel: CAMERA_STATES.MOVING.LEFT,
     shortcutKey: ["Control", "Shift", "ArrowLeft"],
   },
   {
     icon: "chevron-right",
     label: "Move Right",
     action: "right",
-    loadingLabel: "Moving Right",
+    loadingLabel: CAMERA_STATES.MOVING.RIGHT,
     shortcutKey: ["Control", "Shift", "ArrowRight"],
   },
   {
     value: precision,
     label: "Precision",
     action: "precision",
-    loadingLabel: "Setting Precision",
+    loadingLabel: CAMERA_STATES.PRECISION,
     shortcutKey: ["Shift", "P"],
   },
   {
     icon: "search-plus",
     label: "Zoom In",
     action: "zoomIn",
-    loadingLabel: "Zooming In",
+    loadingLabel: CAMERA_STATES.ZOOMING.IN,
     shortcutKey: ["Shift", "I"],
   },
   {
     icon: "search-minus",
     label: "Zoom Out",
     action: "zoomOut",
-    loadingLabel: "Zooming Out",
+    loadingLabel: CAMERA_STATES.ZOOMING.OUT,
     shortcutKey: ["Shift", "O"],
   },
   {
     icon: "save",
     label: "Update Preset",
     action: "updatePreset",
-    loadingLabel: "Updating Preset",
+    loadingLabel: CAMERA_STATES.UPDATING_PRESET,
     shortcutKey: ["Shift", "S"],
-  },
-  {
-    icon: "stop",
-    label: "Stop",
-    action: "stop",
-    shortcutKey: ["Shift", "X"],
   },
   {
     icon: "undo",
@@ -738,11 +771,12 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   },
 ];
 
+// in future, if you find Unicon equivalents of all these icons, please replace them. Only use the same iconset throughout.
 export const FACILITY_FEATURE_TYPES = [
   {
     id: 1,
-    name: "CT Scan Facility",
-    icon: "circle-dot",
+    name: "CT Scan",
+    icon: "compact-disc",
   },
   {
     id: 2,
@@ -751,17 +785,157 @@ export const FACILITY_FEATURE_TYPES = [
   },
   {
     id: 3,
-    name: "X-Ray facility",
+    name: "X-Ray",
     icon: "x-ray",
   },
   {
     id: 4,
-    name: "Neonatal care",
-    icon: "baby",
+    name: "Neonatal Care",
+    icon: "baby-carriage",
   },
   {
     id: 5,
-    name: "Operation theater",
+    name: "Operation Theater",
     icon: "syringe",
   },
+  {
+    id: 6,
+    name: "Blood Bank",
+    icon: "droplet",
+  },
 ];
+
+export const WAVEFORM_VIEWABLE_LENGTH = 400;
+
+//blacklisted paths will not scroll to top
+export const BLACKLISTED_PATHS: RegExp[] = [
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/feed+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/summary+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/medicines+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/files+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/investigations+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/abg+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/nursing+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/neurological_monitoring+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/ventilator+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/nutrition+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/pressure_sore+/i,
+  /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/dialysis+/i,
+];
+
+export const XLSXAssetImportSchema = {
+  Name: { prop: "name", type: String },
+  Type: {
+    prop: "asset_type",
+    type: String,
+    oneOf: ["INTERNAL", "EXTERNAL"],
+    required: true,
+  },
+  Class: {
+    prop: "asset_class",
+    type: String,
+    oneOf: ["HL7MONITOR", "ONVIF"],
+  },
+  Description: { prop: "description", type: String },
+  "Working Status": {
+    prop: "is_working",
+    type: Boolean,
+    parse: (status: string) => {
+      if (status === "WORKING") {
+        return true;
+      } else if (status === "NOT WORKING") {
+        return false;
+      } else {
+        throw new Error("Invalid Working Status");
+      }
+    },
+    required: true,
+  },
+  "Not Working Reason": {
+    prop: "not_working_reason",
+    type: String,
+  },
+  "QR Code ID": { prop: "qr_code_id", type: String },
+  Manufacturer: { prop: "manufacturer", type: String },
+  "Vendor Name": { prop: "vendor_name", type: String },
+  "Support Name": { prop: "support_name", type: String },
+  "Support Email": {
+    prop: "support_email",
+    type: String,
+    parse: (email: string) => {
+      const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
+
+      if (!isValid) {
+        throw new Error("Invalid Support Email");
+      }
+
+      return email;
+    },
+  },
+  "Support Phone Number": {
+    prop: "support_phone",
+    type: String,
+    parse: (phone: number | string) => {
+      const parsed = parsePhoneNumberFromString(String(phone), "IN");
+
+      if (!parsed?.isValid()) {
+        throw new Error("Invalid Support Phone Number");
+      }
+
+      return parsed?.format("E.164");
+    },
+    required: true,
+  },
+  "Warrenty End Date": {
+    prop: "warranty_amc_end_of_validity",
+    type: String,
+    parse: (date: string) => {
+      const parsed = new Date(date);
+
+      if (String(parsed) === "Invalid Date") {
+        throw new Error("Invalid Warrenty End Date");
+      }
+
+      return moment(parsed).format("YYYY-MM-DD");
+    },
+  },
+  "Last Service Date": {
+    prop: "last_serviced_on",
+    type: String,
+    parse: (date: string) => {
+      const parsed = new Date(date);
+
+      if (String(parsed) === "Invalid Date") {
+        throw new Error("Invalid Last Service Date");
+      }
+
+      return moment(parsed).format("YYYY-MM-DD");
+    },
+  },
+  Notes: { prop: "notes", type: String },
+  META: {
+    prop: "meta",
+    type: {
+      "Config - IP Address": {
+        prop: "local_ip_address",
+        type: String,
+        parse: (ip: string) => {
+          const isValid =
+            /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+              ip
+            );
+
+          if (!isValid) {
+            throw new Error("Invalid Config IP Address");
+          }
+
+          return ip;
+        },
+      },
+      "Config: Camera Access Key": {
+        prop: "camera_access_key",
+        type: String,
+      },
+    },
+  },
+};

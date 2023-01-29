@@ -1,18 +1,19 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { getAllFacilities, getPermittedFacilities } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { FacilityModel } from "../Facility/models";
-const debounce = require("lodash.debounce");
+
 interface FacilitySelectProps {
   name: string;
-  margin?: string;
-  errors: string;
+  errors?: string | undefined;
   className?: string;
   searchAll?: boolean;
   multiple?: boolean;
   facilityType?: number;
+  district?: string;
   showAll?: boolean;
+  showNOptions?: number;
   selected: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
 }
@@ -23,94 +24,52 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     multiple,
     selected,
     setSelected,
-    margin,
-    errors,
     searchAll,
     showAll = true,
+    showNOptions = 10,
     className = "",
     facilityType,
+    district,
+    errors = "",
   } = props;
+
   const dispatchAction: any = useDispatch();
-  const [facilityLoading, isFacilityLoading] = useState(false);
-  const [hasSearchText, setHasSearchText] = useState(false);
-  const [facilityList, setFacilityList] = useState<Array<FacilityModel>>([]);
 
-  const handleValueChange = (
-    current: FacilityModel | FacilityModel[] | null
-  ) => {
-    if (!current) {
-      setFacilityList([]);
-      isFacilityLoading(false);
-      setHasSearchText(false);
-    }
-    setSelected(current);
-  };
+  const facilitySearch = useCallback(
+    async (text: string) => {
+      const params = {
+        limit: 50,
+        offset: 0,
+        search_text: text,
+        all: searchAll,
+        facility_type: facilityType,
+        district,
+      };
 
-  const handelSearch = (e: any) => {
-    isFacilityLoading(true);
-    setHasSearchText(!!e.target.value);
-    onFacilitySearch(e.target.value);
-  };
+      const res = await dispatchAction(
+        showAll ? getAllFacilities(params) : getPermittedFacilities(params)
+      );
 
-  const onFacilitySearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const params = {
-          limit: 50,
-          offset: 0,
-          search_text: text,
-          all: searchAll,
-          facility_type: facilityType,
-        };
-
-        const res = await dispatchAction(
-          showAll ? getAllFacilities(params) : getPermittedFacilities(params)
-        );
-
-        if (res && res.data) {
-          setFacilityList(res.data.results);
-        }
-        isFacilityLoading(false);
-      } else {
-        setFacilityList([]);
-        isFacilityLoading(false);
-      }
-    }, 300),
-    []
+      return res?.data?.results;
+    },
+    [dispatchAction, searchAll, showAll, facilityType, district]
   );
 
   return (
-    <AutoCompleteAsyncField
+    <AutoCompleteAsync
       name={name}
       multiple={multiple}
-      autoSelect={false}
-      variant="outlined"
-      margin={margin}
-      value={selected}
-      options={facilityList}
-      onSearch={handelSearch}
-      onChange={(e: any, selected: any) => handleValueChange(selected)}
-      loading={facilityLoading}
-      placeholder="Search by facility name or by district"
-      noOptionsText={
-        hasSearchText
-          ? "No facility found, please try again"
-          : "Start typing to begin search"
-      }
-      renderOption={(option: any) => (
-        <div>
-          {option.name}
-          {option.district_object ? `, ${option.district_object.name}` : ""}
-        </div>
-      )}
-      getOptionSelected={(option: any, value: any) => option.id === value.id}
-      getOptionLabel={(option: any) =>
+      selected={selected}
+      onChange={setSelected}
+      fetchData={facilitySearch}
+      showNOptions={showNOptions}
+      optionLabel={(option: any) =>
         option.name +
         (option.district_object ? `, ${option.district_object.name}` : "")
       }
-      filterOptions={(options: FacilityModel[]) => options}
-      errors={errors}
+      compareBy="id"
       className={className}
+      error={errors}
     />
   );
 };

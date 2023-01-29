@@ -1,3 +1,5 @@
+import { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { AssignedToObjectModel } from "../Patient/models";
 
 export interface LocalBodyModel {
@@ -25,10 +27,10 @@ export interface FacilityModel {
   id?: number;
   name?: string;
   district?: number;
-  cover_image_url?: string;
+  read_cover_image_url?: string;
   facility_type?: string;
   address?: string;
-  features? : number[];
+  features?: number[];
   location?: {
     latitude: number;
     longitude: number;
@@ -38,6 +40,7 @@ export interface FacilityModel {
   type_b_cylinders?: number;
   type_c_cylinders?: number;
   type_d_cylinders?: number;
+  middleware_address?: string;
   expected_type_b_cylinders?: number;
   expected_type_c_cylinders?: number;
   expected_type_d_cylinders?: number;
@@ -70,14 +73,21 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
+export type PatientCategory =
+  | "Comfort Care"
+  | "Stable"
+  | "Slightly Abnormal"
+  | "Critical";
+
 export interface ConsultationModel {
   admission_date?: string;
   admitted?: boolean;
   test_id?: string;
   admitted_to?: string;
-  category?: string;
+  category?: PatientCategory;
   created_date?: string;
   discharge_date?: string;
+  discharge_reason?: string;
   examination_details?: string;
   history_of_present_illness?: string;
   facility?: number;
@@ -93,6 +103,8 @@ export interface ConsultationModel {
   is_kasp?: boolean;
   kasp_enabled_date?: string;
   diagnosis?: string;
+  icd11_diagnoses_object?: ICD11DiagnosisModel[];
+  icd11_provisional_diagnoses_object?: ICD11DiagnosisModel[];
   verified_by?: string;
   suggestion_text?: string;
   symptoms?: Array<number>;
@@ -101,6 +113,8 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   discharge_advice?: any;
+  prn_prescription?: PRNPrescriptionType[];
+  procedure?: ProcedureType[];
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
@@ -115,6 +129,7 @@ export interface ConsultationModel {
   lines?: any;
   last_daily_round?: any;
   current_bed?: CurrentBed;
+  review_interval?: number;
 }
 export interface PatientStatsModel {
   id?: number;
@@ -173,6 +188,7 @@ export interface BedModel {
     name: string;
   };
   location?: string;
+  is_occupied?: boolean;
 }
 
 export interface CurrentBed {
@@ -186,3 +202,11 @@ export interface CurrentBed {
   end_date: string;
   meta: Record<string, any>;
 }
+
+// Voluntarily made as `type` for it to achieve type-safety when used with
+// `useAsyncOptions<ICD11DiagnosisModel>`
+export type ICD11DiagnosisModel = {
+  id: string;
+  label: string;
+  parentId: string | null;
+};

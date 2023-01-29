@@ -15,6 +15,7 @@ command = "CI='' npm run build"
 [build.environment]
 NODE_VERSION = "16"
 NPM_FLAGS = "--legacy-peer-deps"
+NODE_OPTIONS = "--max_old_space_size=4096"
 ## YARN_VERSION = "3.2.1"
 ## YARN_FLAGS = "--mode=update-lockfile"
 ## YARN_CACHE_FOLDER = "/opt/buildhome/.yarn_cache"
@@ -32,3 +33,11 @@ force = true
 from = "/*"
 to = "/index.html"
 status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+  cache-control = '''
+  max-age=0,
+  no-store'''
+  

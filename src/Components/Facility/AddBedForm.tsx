@@ -1,6 +1,5 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -18,6 +17,7 @@ import {
 } from "../Common/HelperInputFields";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -91,6 +91,11 @@ export const AddBedForm = (props: BedFormProps) => {
     return isValid;
   };
 
+  const handleCancel = () =>
+    navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
+      replace: true,
+    });
+
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
 
@@ -115,7 +120,9 @@ export const AddBedForm = (props: BedFormProps) => {
         ? "Bed updated successfully"
         : "Bed created successfully";
 
-      navigate(`/facility/${facilityId}/location/${locationId}/beds`);
+      navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
+        replace: true,
+      });
       Notification.Success({
         msg: notificationMessage,
       });
@@ -130,6 +137,7 @@ export const AddBedForm = (props: BedFormProps) => {
     <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle
         title={headerText}
+        backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [locationId]: {
@@ -201,29 +209,8 @@ export const AddBedForm = (props: BedFormProps) => {
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                  <Button
-                    color="default"
-                    variant="contained"
-                    type="button"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/location/${locationId}/beds`
-                      )
-                    }
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    type="submit"
-                    startIcon={
-                      <CheckCircleOutlineIcon></CheckCircleOutlineIcon>
-                    }
-                    onClick={(e) => handleSubmit(e)}
-                  >
-                    {buttonText}
-                  </Button>
+                  <Cancel onClick={handleCancel} />
+                  <Submit onClick={handleSubmit} label={buttonText} />
                 </div>
               </div>
             </CardContent>

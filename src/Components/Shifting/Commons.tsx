@@ -1,5 +1,3 @@
-import React from "react";
-
 export const limit = 14;
 
 export const initialFilterData = {

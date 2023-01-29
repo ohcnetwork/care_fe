@@ -1,30 +1,26 @@
 import loadable from "@loadable/component";
 import React, { useState, useCallback, useReducer } from "react";
-import { InputLabel, Button } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  GENDER_TYPES,
-  PREFERENCE_SIDEBAR_KEY,
-  SIDEBAR,
-} from "../../Common/constants";
+import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserDetails,
-  updateUserDetails,
+  partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
-import {
-  PhoneNumberField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
-import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
-import Switch from "@material-ui/core/Switch";
+import TextFormField from "../Form/FormFields/TextFormField";
+import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import { getExperienceSuffix, handleSignOut } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import MonthFormField from "../Form/FormFields/Month";
+import moment from "moment";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -36,6 +32,9 @@ type EditForm = {
   email: string;
   phoneNumber: string;
   altPhoneNumber: string;
+  doctor_qualification: string | undefined;
+  doctor_experience_commenced_on: string | undefined;
+  doctor_medical_council_registration: string | undefined;
 };
 type State = {
   form: EditForm;
@@ -45,14 +44,6 @@ type Action =
   | { type: "set_form"; form: EditForm }
   | { type: "set_error"; errors: EditForm };
 
-const genderTypes = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...GENDER_TYPES,
-];
-
 const initForm: EditForm = {
   firstName: "",
   lastName: "",
@@ -61,6 +52,9 @@ const initForm: EditForm = {
   email: "",
   phoneNumber: "",
   altPhoneNumber: "",
+  doctor_qualification: undefined,
+  doctor_experience_commenced_on: undefined,
+  doctor_medical_council_registration: undefined,
 };
 
 const initError: EditForm = Object.assign(
@@ -118,7 +112,6 @@ export default function UserProfile() {
   });
 
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
-  const [updateBtnText, setUpdateBtnText] = React.useState<string>("Update");
 
   const [isLoading, setIsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
@@ -137,14 +130,15 @@ export default function UserProfile() {
             firstName: res.data.first_name,
             lastName: res.data.last_name,
             age: res.data.age,
-            gender: genderTypes
-              .filter((el) => {
-                return el.text === res.data.gender;
-              })[0]
-              .id.toString(),
+            gender: res.data.gender,
             email: res.data.email,
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
+            doctor_qualification: res.data.doctor_qualification,
+            doctor_experience_commenced_on:
+              res.data.doctor_experience_commenced_on,
+            doctor_medical_council_registration:
+              res.data.doctor_medical_council_registration,
           };
           dispatch({
             type: "set_form",
@@ -171,7 +165,7 @@ export default function UserProfile() {
         case "firstName":
         case "lastName":
         case "gender":
-          if (!states.form[field] || states.form[field] === "0") {
+          if (!states.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -234,32 +228,41 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
+        case "doctor_qualification":
+        case "doctor_experience_commenced_on":
+        case "doctor_medical_council_registration":
+          if (details.user_type === "Doctor" && !states.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
       }
     });
     dispatch({ type: "set_error", errors });
     return !invalidForm;
   };
 
-  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const form: EditForm = { ...states.form, [e.target.name]: e.target.value };
-    dispatch({ type: "set_form", form });
+  const handleFieldChange = (event: FieldChangeEvent<unknown>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...states.form, [event.name]: event.value },
+    });
   };
 
-  const handleValueChange = (phoneNo: string, name: string) => {
-    const form: EditForm = { ...states.form, [name]: phoneNo };
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleWhatsappNumChange = (phoneNo: string, name: string) => {
-    const form: EditForm = { ...states.form, [name]: phoneNo };
-    dispatch({ type: "set_form", form });
+  const fieldProps = (name: string) => {
+    return {
+      name,
+      id: name,
+      value: (states.form as any)[name],
+      onChange: handleFieldChange,
+      error: (states.errors as any)[name],
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validForm = validateForm();
     if (validForm) {
-      setIsLoading(true);
       const data = {
         username: username,
         first_name: states.form.firstName,
@@ -272,23 +275,27 @@ export default function UserProfile() {
           parsePhoneNumberFromString(states.form.altPhoneNumber)?.format(
             "E.164"
           ) || "",
-        gender: Number(states.form.gender),
+        gender: states.form.gender,
         age: states.form.age,
+        doctor_qualification: states.form.doctor_qualification,
+        doctor_experience_commenced_on: moment(
+          states.form.doctor_experience_commenced_on
+        ).format("YYYY-MM-DD"),
+        doctor_medical_council_registration:
+          states.form.doctor_medical_council_registration,
       };
-      const res = await dispatchAction(updateUserDetails(username, data));
-      setIsLoading(false);
+      const res = await dispatchAction(partialUpdateUser(username, data));
       if (res && res.data) {
         Notification.Success({
           msg: "Details updated successfully",
         });
+        window.location.reload();
         setDetails({
           ...details,
           first_name: states.form.firstName,
           last_name: states.form.lastName,
           age: states.form.age,
-          gender: genderTypes.filter((el) => {
-            return el.id === Number(states.form.gender);
-          })[0].text,
+          gender: states.form.gender,
           email: states.form.email,
           phone_number: states.form.phoneNumber,
           alt_phone_number: states.form.altPhoneNumber,
@@ -298,29 +305,6 @@ export default function UserProfile() {
     }
   };
 
-  const checkForNewBuildVersion = async () => {
-    const [isLatestBundle, newVersion] = await checkIfLatestBundle();
-
-    if (!isLatestBundle) {
-      setUpdateBtnText("updating...");
-      localStorage.setItem("build_meta_version", newVersion);
-
-      if ("caches" in window) {
-        // Service worker cache should be cleared with caches.delete()
-        caches.keys().then((names) => {
-          for (const name of names) {
-            caches.delete(name);
-          }
-
-          window.location.reload();
-        });
-      }
-    } else {
-      setUpdateBtnText("You already have the latest version!");
-
-      setTimeout(() => setUpdateBtnText("Update"), 1000);
-    }
-  };
   if (isLoading) {
     return <Loading />;
   }
@@ -364,39 +348,41 @@ export default function UserProfile() {
   };
   return (
     <div>
-      <div className="md:p-20 p-10">
-        <div className="md:grid md:grid-cols-3 md:gap-6">
-          <div className="md:col-span-1">
+      <div className="lg:p-20 p-10">
+        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+          <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
                 Personal Information
               </h3>
-              <p className="mt-1 text-sm leading-5 text-gray-600">
+              <p className="mt-1 text-sm leading-5 text-gray-600 mb-1">
                 Local Body, District and State are Non Editable Settings.
               </p>
-              <button
-                onClick={(_) => setShowEdit(!showEdit)}
-                type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
-              >
-                {showEdit ? "Cancel" : "Edit User Profile"}
-              </button>
+              <div className="flex flex-col gap-2">
+                <ButtonV2 onClick={(_) => setShowEdit(!showEdit)} type="button">
+                  {showEdit ? "Cancel" : "Edit User Profile"}
+                </ButtonV2>
+                <ButtonV2 variant="danger" onClick={(_) => handleSignOut(true)}>
+                  <CareIcon className="care-l-sign-out-alt" />
+                  Sign out
+                </ButtonV2>
+              </div>
             </div>
           </div>
-          <div className="mt-5 md:mt-0 md:col-span-2">
+          <div className="mt-5 lg:mt-0 lg:col-span-2">
             {!showEdit && (
               <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
                 <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1 my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Username
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.username || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Contact No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -404,95 +390,81 @@ export default function UserProfile() {
                     </dd>
                   </div>
 
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Whatsapp No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.alt_phone_number || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Email address
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.email || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       First Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.first_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Last Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Age
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.age || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      Verification Status
-                    </dt>
-                    {details.verified && (
-                      <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
-                        Verified
-                      </dd>
-                    )}
-                    {!details.verified && (
-                      <dd className="mt-1 text-sm leading-5 text-gray-900">
-                        Not Verified
-                      </dd>
-                    )}
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Access Level
                     </dt>
-                    <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
+                      <i className="fa-solid fa-user-check mr-1"></i>{" "}
                       {details.user_type || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Gender
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.gender || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       Local Body
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       District
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="sm:col-span-1  my-2">
+                    <dt className="text-sm leading-5 font-medium text-black">
                       State
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -504,227 +476,162 @@ export default function UserProfile() {
             )}
 
             {showEdit && (
-              <div>
+              <div className="space-y-4">
                 <form action="#" method="POST">
-                  <div className="shadow overflow-hidden sm:rounded-md">
-                    <div className="px-4 py-5 bg-white sm:p-6">
-                      <div className="grid grid-cols-6 gap-6">
-                        <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="firstName"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            First name*
-                          </label>
-                          <TextInputField
-                            name="firstName"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                            value={states.form.firstName}
-                            onChange={handleChangeInput}
-                            errors={states.errors.firstName}
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="lastName"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            Last name*
-                          </label>
-                          <TextInputField
-                            name="lastName"
-                            variant="outlined"
-                            margin="dense"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                            type="text"
-                            value={states.form.lastName}
-                            onChange={handleChangeInput}
-                            errors={states.errors.lastName}
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="age"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            Age*
-                          </label>
-                          <TextInputField
-                            name="age"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                            variant="outlined"
-                            margin="dense"
-                            value={states.form.age}
-                            onChange={handleChangeInput}
-                            errors={states.errors.age}
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="gender"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            Gender*
-                          </label>
-                          <SelectField
-                            name="gender"
-                            variant="outlined"
-                            margin="dense"
-                            value={states.form.gender}
-                            options={genderTypes}
-                            onChange={handleChangeInput}
-                            errors={states.errors.gender}
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <PhoneNumberField
-                            label="Phone Number*"
-                            value={states.form.phoneNumber}
-                            onChange={(value: string) =>
-                              handleValueChange(value, "phoneNumber")
-                            }
-                            errors={states.errors.phoneNumber}
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <PhoneNumberField
-                            name="altPhoneNumber"
-                            label="Whatsapp Number"
-                            value={states.form.altPhoneNumber}
-                            onChange={(value: string) =>
-                              handleWhatsappNumChange(value, "altPhoneNumber")
-                            }
-                            errors={states.errors.altPhoneNumber}
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <InputLabel id="email-label">Email</InputLabel>
-                          <TextInputField
-                            name="email"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            value={states.form.email}
-                            onChange={handleChangeInput}
-                            errors={states.errors.email}
-                          />
-                        </div>
+                  <div className="shadow sm:rounded-md">
+                    <div className="px-4 pt-5 bg-white">
+                      <div className="grid grid-cols-6 gap-4">
+                        <TextFormField
+                          {...fieldProps("firstName")}
+                          required
+                          label="First Name"
+                          className="col-span-6 sm:col-span-3"
+                        />
+                        <TextFormField
+                          {...fieldProps("lastName")}
+                          required
+                          label="Last name"
+                          className="col-span-6 sm:col-span-3"
+                        />
+                        <TextFormField
+                          {...fieldProps("age")}
+                          required
+                          label="Age"
+                          className="col-span-6 sm:col-span-3"
+                          type="number"
+                          min={1}
+                        />
+                        <SelectFormField
+                          {...fieldProps("gender")}
+                          label="Gender"
+                          className="col-span-6 sm:col-span-3"
+                          required
+                          optionLabel={(o) => o.text}
+                          optionValue={(o) => o.text}
+                          optionIcon={(o) => (
+                            <i className="text-base">{o.icon}</i>
+                          )}
+                          options={GENDER_TYPES}
+                        />
+                        <PhoneNumberFormField
+                          {...fieldProps("phoneNumber")}
+                          label="Phone Number"
+                          className="col-span-6 sm:col-span-3"
+                          required
+                          placeholder="Phone Number"
+                        />
+                        <PhoneNumberFormField
+                          {...fieldProps("altPhoneNumber")}
+                          label="Whatsapp Number"
+                          className="col-span-6 sm:col-span-3"
+                          placeholder="WhatsApp Number"
+                        />
+                        <TextFormField
+                          {...fieldProps("email")}
+                          label="Email"
+                          className="col-span-6 sm:col-span-3"
+                          type="email"
+                        />
+                        {details.user_type === "Doctor" && (
+                          <>
+                            <TextFormField
+                              {...fieldProps("doctor_qualification")}
+                              required
+                              className="col-span-6 sm:col-span-3"
+                              label="Qualification"
+                              placeholder="Doctor's Qualification"
+                            />
+                            <MonthFormField
+                              {...fieldProps("doctor_experience_commenced_on")}
+                              value={
+                                states.form.doctor_experience_commenced_on
+                                  ? moment(
+                                      states.form.doctor_experience_commenced_on
+                                    ).toDate()
+                                  : undefined
+                              }
+                              required
+                              className="col-span-6 sm:col-span-3"
+                              label="Experience Commenced On"
+                              suffix={(date) => (
+                                <span className="ml-2 text-sm whitespace-nowrap">
+                                  {getExperienceSuffix(date)}
+                                </span>
+                              )}
+                            />
+                            <TextFormField
+                              {...fieldProps(
+                                "doctor_medical_council_registration"
+                              )}
+                              required
+                              className="col-span-6 sm:col-span-3"
+                              label="Medical Council Registration"
+                              placeholder="Doctor's Medical Council Registration"
+                            />
+                          </>
+                        )}
                       </div>
                     </div>
-                    <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        style={{ marginLeft: "auto" }}
-                        startIcon={
-                          <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                        }
-                        onClick={(e) => handleSubmit(e)}
-                      >
-                        {" "}
-                        UPDATE{" "}
-                      </Button>
+                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                      <Submit onClick={handleSubmit} label="Update" />
                     </div>
                   </div>
                 </form>
                 <form action="#" method="POST">
                   <div className="shadow overflow-hidden sm:rounded-md">
-                    <div className="px-4 py-5 bg-white sm:p-6">
-                      <div className="grid grid-cols-6 gap-6">
-                        <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="old_password"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            Current Password*
-                          </label>
-                          <TextInputField
-                            name="old_password"
-                            variant="outlined"
-                            margin="dense"
-                            type="password"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                            value={changePasswordForm.old_password}
-                            onChange={(e) =>
-                              setChangePasswordForm({
-                                ...changePasswordForm,
-                                old_password: e.target.value,
-                              })
-                            }
-                            errors={changePasswordErrors.old_password}
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="new_password_1"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            New Password*
-                          </label>
-                          <TextInputField
-                            name="new_password_1"
-                            variant="outlined"
-                            margin="dense"
-                            type="password"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                            value={changePasswordForm.new_password_1}
-                            onChange={(e) =>
-                              setChangePasswordForm({
-                                ...changePasswordForm,
-                                new_password_1: e.target.value,
-                              })
-                            }
-                            errors=""
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <label
-                            htmlFor="new_password_2"
-                            className="block text-sm font-medium leading-5 text-gray-700"
-                          >
-                            New Password Confirmation*
-                          </label>
-                          <TextInputField
-                            name="new_password_2"
-                            variant="outlined"
-                            margin="dense"
-                            type="password"
-                            className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                            value={changePasswordForm.new_password_2}
-                            onChange={(e) =>
-                              setChangePasswordForm({
-                                ...changePasswordForm,
-                                new_password_2: e.target.value,
-                              })
-                            }
-                            errors={changePasswordErrors.password_confirmation}
-                          />
-                        </div>
+                    <div className="px-4 pt-5 bg-white">
+                      <div className="grid grid-cols-6 gap-4">
+                        <TextFormField
+                          name="old_password"
+                          label="Current Password"
+                          className="col-span-6 sm:col-span-3"
+                          type="password"
+                          value={changePasswordForm.old_password}
+                          onChange={(e) =>
+                            setChangePasswordForm({
+                              ...changePasswordForm,
+                              old_password: e.value,
+                            })
+                          }
+                          error={changePasswordErrors.old_password}
+                          required
+                        />
+                        <TextFormField
+                          name="new_password_1"
+                          label="New Password"
+                          type="password"
+                          value={changePasswordForm.new_password_1}
+                          className="col-span-6 sm:col-span-3"
+                          onChange={(e) =>
+                            setChangePasswordForm({
+                              ...changePasswordForm,
+                              new_password_1: e.value,
+                            })
+                          }
+                          error=""
+                          required
+                        />
+                        <TextFormField
+                          name="new_password_2"
+                          label="New Password Confirmation"
+                          className="col-span-6 sm:col-span-3"
+                          type="password"
+                          value={changePasswordForm.new_password_2}
+                          onChange={(e) =>
+                            setChangePasswordForm({
+                              ...changePasswordForm,
+                              new_password_2: e.value,
+                            })
+                          }
+                          error={changePasswordErrors.password_confirmation}
+                        />
                       </div>
                     </div>
-                    <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        style={{ marginLeft: "auto" }}
-                        startIcon={
-                          <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                        }
-                        onClick={(e) => changePassword(e)}
-                      >
-                        {" "}
-                        CHANGE PASSWORD{" "}
-                      </Button>
+                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                      <Submit
+                        onClick={changePassword}
+                        label="Change Password"
+                      />
                     </div>
                   </div>
                 </form>
@@ -747,50 +654,6 @@ export default function UserProfile() {
           <div className="mt-5 md:mt-0 md:col-span-2">
             <LanguageSelector className="bg-white w-full" />
           </div>
-        </div>
-        <div>
-          <h1 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-            Preferences
-          </h1>
-          <div className="flex items-center gap-8">
-            <h1 className="text-base font-normal leading-6 text-gray-900">
-              Auto Collapse Sidebar
-            </h1>
-            <Switch
-              color="primary"
-              value={
-                localStorage.getItem(PREFERENCE_SIDEBAR_KEY) ===
-                SIDEBAR.COLLAPSED
-              }
-              onChange={(e) => {
-                localStorage.setItem(
-                  PREFERENCE_SIDEBAR_KEY,
-                  e.target.checked ? SIDEBAR.COLLAPSED : SIDEBAR.FULL
-                );
-                window.dispatchEvent(new Event("storage"));
-              }}
-              defaultChecked={
-                localStorage.getItem(PREFERENCE_SIDEBAR_KEY) ===
-                SIDEBAR.COLLAPSED
-              }
-            />
-          </div>
-        </div>
-
-        <div className="mt-10">
-          <div className="text-lg font-medium leading-6 text-gray-900">
-            Check for software updates
-            <p className="mt-1 text-sm leading-5 text-gray-600">
-              Click the update button to see if you have the latest
-              &quot;care&quot; version.
-            </p>
-          </div>
-          <button
-            className="bg-white text-sm hover:bg-gray-100 text-gray-800 py-2 px-4 border border-gray-400 rounded shadow text-center outline-none mt-3"
-            onClick={() => checkForNewBuildVersion()}
-          >
-            {updateBtnText}
-          </button>
         </div>
       </div>
     </div>

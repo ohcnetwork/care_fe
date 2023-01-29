@@ -1,12 +1,26 @@
 import ReactECharts from "echarts-for-react";
 
 export const LinePlot = (props: any) => {
-  const { title, name, xData, yData, low = null, high = null } = props;
-  let generalOptions = {
+  const {
+    title,
+    name,
+    xData,
+    yData,
+    low = null,
+    high = null,
+    defaultSpace,
+  } = props;
+  let generalOptions: any = {
+    grid: {
+      top: "40px",
+      left: "20px",
+      right: "30px",
+      containLabel: true,
+    },
     title: {
       text: `${title} [ {0|${yData[yData.length - 1]?.toFixed(2) || "NA"}} ]`,
       textStyle: {
-        fontSize: 20,
+        fontSize: 14,
         rich: {
           0: {
             fontSize: 14,
@@ -24,9 +38,12 @@ export const LinePlot = (props: any) => {
     },
     tooltip: {
       trigger: "axis",
+      confine: true,
     },
     toolbox: {
       show: true,
+      orient: "vertical",
+      top: "9%",
       feature: {
         dataZoom: {
           yAxisIndex: "none",
@@ -40,8 +57,9 @@ export const LinePlot = (props: any) => {
       boundaryGap: false,
       data: xData,
       axisLabel: {
-        width: 100,
+        width: 60,
         overflow: "break",
+        align: "center",
       },
     },
     yAxis: {
@@ -78,6 +96,79 @@ export const LinePlot = (props: any) => {
     ],
   };
 
+  if (props.type && props.type === "WAVEFORM") {
+    generalOptions = {
+      ...generalOptions,
+      title: {
+        text: "",
+      },
+      grid: {
+        show: false,
+        borderColor: "transparent",
+        left: "40px",
+        right: "20px",
+      },
+      animation: false,
+      xAxis: {
+        ...generalOptions.xAxis,
+        show: false,
+      },
+      yAxis: {
+        ...generalOptions.yAxis,
+        show: true,
+        min: props.yStart,
+        max: props.yEnd,
+        splitLine: {
+          lineStyle: {
+            color: "#4E4E4E",
+          },
+        },
+      },
+      toolbox: {
+        ...generalOptions.toolbox,
+        show: false,
+      },
+      legend: {
+        show: false,
+      },
+      series: [
+        {
+          ...generalOptions.series[0],
+          showSymbol: false,
+          lineStyle: { color: props.color },
+          areaStyle: {
+            ...generalOptions.series[0].areaStyle,
+            color: {
+              ...generalOptions.series[0].areaStyle.color,
+              colorStops: [
+                {
+                  offset: 0,
+                  color: "transparent",
+                },
+                {
+                  offset: 1,
+                  color: "transparent",
+                },
+              ],
+            },
+          },
+          connectNulls: false,
+        },
+      ],
+    };
+  }
+
+  if (props.type === "WAVEFORM" && defaultSpace != true) {
+    generalOptions = {
+      ...generalOptions,
+      grid: {
+        ...generalOptions.grid,
+        top: "20px",
+        bottom: "20px",
+      },
+    };
+  }
+
   const visualMap: any = {
     visualMap: {
       type: "piecewise",
@@ -105,5 +196,11 @@ export const LinePlot = (props: any) => {
     generalOptions = { ...generalOptions, ...visualMap };
   }
 
-  return <ReactECharts option={generalOptions} />;
+  return (
+    <ReactECharts
+      option={generalOptions}
+      className={props.classes}
+      lazyUpdate={props.type === "WAVEFORM"}
+    />
+  );
 };

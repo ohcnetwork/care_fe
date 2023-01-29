@@ -1,35 +1,42 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import loadable from "@loadable/component";
-import { navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import React, { useEffect, useState, useCallback } from "react";
-import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import { CircularProgress, Tooltip } from "@material-ui/core";
+
 import {
   getAllPatient,
   getDistrict,
   getLocalBody,
   getAnyFacility,
 } from "../../Redux/actions";
-import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
-import Pagination from "../Common/Pagination";
-import { InputSearchBox } from "../Common/SearchBox";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
+  PATIENT_CATEGORIES,
+  PATIENT_FILTER_ORDER,
   TELEMEDICINE_ACTIONS,
-  PATIENT_FILTER_ADMITTED_TO,
-  KASP_STRING,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { FacilityModel } from "../Facility/models";
+import Chip from "../../CAREUI/display/Chip";
+import { FacilityModel, PatientCategory } from "../Facility/models";
+import SearchInput from "../Form/SearchInput";
+import useFilters from "../../Common/hooks/useFilters";
+import FilterBadge from "../../CAREUI/display/FilterBadge";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { ExportMenu } from "../Common/Export";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -57,36 +64,28 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-export function Badge(props: { color: string; icon: string; text: string }) {
-  return (
-    <span
-      className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
-      title={props.text}
-    >
-      <i
-        className={
-          "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-        }
-      ></i>
-      {props.text}
-    </span>
-  );
-}
+const PatientCategoryDisplayText: Record<PatientCategory, string> = {
+  "Comfort Care": "COMFORT CARE",
+  Stable: "STABLE",
+  "Slightly Abnormal": "ABNORMAL",
+  Critical: "CRITICAL",
+};
 
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
-
-const RESULT_LIMIT = 14;
-
-export const PatientManager = (props: any) => {
-  const { facilityId } = props;
+export const PatientManager = () => {
   const dispatch: any = useDispatch();
-
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [DownloadFile, setDownloadFile] = useState("");
-  const [qParams, setQueryParams] = useQueryParams();
-  const [showFilters, setShowFilters] = useState(false);
+  const {
+    qParams,
+    updateQuery,
+    advancedFilter,
+    Pagination,
+    FilterBadges,
+    resultsPerPage,
+  } = useFilters({
+    limit: 12,
+  });
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
@@ -94,14 +93,52 @@ export const PatientManager = (props: any) => {
 
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
-  const [facilityBadgeName, setFacilityBadgeName] = useState("");
-  const [facilityCrumbName, setFacilityCrumbName] = useState("");
+  const [facilityBadgeName, setFacilityBadge] = useState("");
+  const [phone_number, setPhoneNumber] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
+  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
+    useState("");
+
+  useEffect(() => {
+    if (phone_number.length === 15) {
+      setPhoneNumberError("");
+      updateQuery({ phone_number });
+      return;
+    }
+
+    if (phone_number === "+91" || phone_number === "") {
+      setPhoneNumberError("");
+      updateQuery({ phone_number: "" });
+      return;
+    }
+
+    setPhoneNumberError("Enter a valid number");
+  }, [phone_number]);
+
+  useEffect(() => {
+    if (emergency_phone_number.length === 15) {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number });
+      return;
+    }
+
+    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number: "" });
+      return;
+    }
+
+    setEmergencyPhoneNumberError("Enter a valid number");
+  }, [emergency_phone_number]);
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
   const params = {
     page: qParams.page || 1,
+    limit: resultsPerPage,
     name: qParams.name || undefined,
+    ip_no: qParams.ip_no || undefined,
     is_active: qParams.is_active || "True",
     disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number
@@ -113,10 +150,10 @@ export const PatientManager = (props: any) => {
         )
       : undefined,
     local_body: qParams.lsgBody || undefined,
-    facility: facilityId || qParams.facility,
+    facility: qParams.facility,
     facility_type: qParams.facility_type || undefined,
     district: qParams.district || undefined,
-    offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
+    offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     created_date_before: qParams.created_date_before || undefined,
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
@@ -140,8 +177,8 @@ export const PatientManager = (props: any) => {
       qParams.last_consultation_discharge_date_before || undefined,
     last_consultation_discharge_date_after:
       qParams.last_consultation_discharge_date_after || undefined,
-    last_consultation_admitted_to_list:
-      qParams.last_consultation_admitted_to_list || undefined,
+    last_consultation_admitted_bed_type_list:
+      qParams.last_consultation_admitted_bed_type_list || undefined,
     srf_id: qParams.srf_id || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
@@ -190,48 +227,21 @@ export const PatientManager = (props: any) => {
     return 0;
   });
 
-  const isDownloadAllowed =
+  const isExportAllowed =
     durations.every((x) => x >= 0 && x <= 7) &&
     !durations.every((x) => x === 0);
 
   let managePatients: any = null;
-  const handleDownload = async (isFiltered: boolean) => {
-    const res = await dispatch(
-      getAllPatient(
-        {
-          ...params,
-          csv: true,
-          facility: facilityId,
-        },
-        "downloadPatients"
-      )
-    );
-    if (res && res.data && res.status === 200) {
-      setDownloadFile(res.data);
-      document.getElementById("downloadlink")?.click();
-    }
-  };
-  const handleDownloadAll = async () => {
-    await handleDownload(false);
-  };
-  const handleDownloadFiltered = async () => {
-    await handleDownload(true);
+
+  const exportPatients = (isFiltered: boolean) => {
+    const filters = { ...params, csv: true, facility: qParams.facility };
+    if (!isFiltered) delete filters.is_active;
+    return () => getAllPatient(filters, "downloadPatients");
   };
 
   useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatch(getAnyFacility(facilityId));
+    if (params.page === 1) return;
 
-        setFacilityCrumbName(res?.data?.name || "");
-      } else {
-        setFacilityCrumbName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatch, facilityId]);
-
-  useEffect(() => {
     setIsLoading(true);
     dispatch(getAllPatient(params, "listPatients"))
       .then((res: any) => {
@@ -246,14 +256,13 @@ export const PatientManager = (props: any) => {
       });
   }, [
     dispatch,
-    facilityId,
     qParams.last_consultation_admission_date_before,
     qParams.last_consultation_admission_date_after,
     qParams.last_consultation_discharge_date_before,
     qParams.last_consultation_discharge_date_after,
     qParams.age_max,
     qParams.age_min,
-    qParams.last_consultation_admitted_to_list,
+    qParams.last_consultation_admitted_bed_type_list,
     qParams.facility,
     qParams.facility_type,
     qParams.district,
@@ -267,6 +276,7 @@ export const PatientManager = (props: any) => {
     qParams.is_active,
     qParams.disease_status,
     qParams.name,
+    qParams.ip_no,
     qParams.page,
     qParams.phone_number,
     qParams.emergency_phone_number,
@@ -332,7 +342,7 @@ export const PatientManager = (props: any) => {
         qParams.facility && (await dispatch(getAnyFacility(qParams.facility)));
 
       if (!status.aborted) {
-        setFacilityBadgeName(res?.data?.name);
+        setFacilityBadge(res?.data?.name);
       }
     },
     [dispatch, qParams.facility]
@@ -345,112 +355,43 @@ export const PatientManager = (props: any) => {
     [fetchFacilityBadgeName]
   );
 
-  const updateQuery = (params: any) => {
-    const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
-  };
-
-  const handleTabChange = async (tab: number) => {
-    updateQuery({
-      ...qParams,
-      is_active: tab ? "False" : "True",
-      page: 1,
-    });
-  };
-
-  const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page, limit });
-  };
-
-  const searchByName = (value: string) => {
-    updateQuery({ name: value, page: 1 });
-  };
-
-  const searchByPhone = (value: string, name: string) => {
-    updateQuery({ [name]: value, page: 1 });
-  };
-
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
-  const removeFilter = (paramKey: any) => {
-    updateQuery({
-      ...qParams,
-      [paramKey]: "",
-    });
-  };
-
-  const badge = (key: string, value: any, paramKey: string) => {
-    return (
-      value && (
-        <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
-  };
-
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
       return (
         value && (
-          <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-            {key}
-            {": "}
-            {value}
-            <i
-              className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-              onClick={(_) => {
-                const lcat = qParams.last_consultation_admitted_to_list
-                  .split(",")
-                  .filter((x: string) => x != id)
-                  .join(",");
-                updateQuery({
-                  ...qParams,
-                  last_consultation_admitted_to_list: lcat,
-                });
-              }}
-            ></i>
-          </span>
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation_admitted_to_list
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation_admitted_to_list: lcat,
+              });
+            }}
+          />
         )
       );
     };
-
-    return qParams.last_consultation_admitted_to_list
+    return qParams.last_consultation_admitted_bed_type_list
       .split(",")
       .map((id: string) => {
-        const text = PATIENT_FILTER_ADMITTED_TO.find(
-          (obj) => obj.id == id
-        )?.text;
+        const text = ADMITTED_TO.find((obj) => obj.id == id)?.text;
         return badge("Bed Type", text, id);
       });
   };
 
-  const showReviewAlert = (patient: any) => {
-    return (
-      patient.review_time &&
-      !patient.last_consultation?.discharge_date &&
-      moment(patient.review_time).isAfter(
-        patient.last_consultation?.last_daily_round?.modified_date
-      )
-    );
-  };
-
-  let patientList: any[] = [];
+  let patientList: React.ReactNode[] = [];
   if (data && data.length) {
-    patientList = data.map((patient: any, idx: number) => {
+    patientList = data.map((patient: any) => {
       let patientUrl = "";
       if (
         patient.last_consultation &&
-        patient.last_consultation?.facility === patient.facility
+        patient.last_consultation?.facility === patient.facility &&
+        !(patient.last_consultation?.discharge_date && patient.is_active)
       ) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation.id}`;
       } else if (patient.facility) {
@@ -458,517 +399,476 @@ export const PatientManager = (props: any) => {
       } else {
         patientUrl = `/patient/${patient.id}`;
       }
+
+      const category: PatientCategory | undefined =
+        patient?.last_consultation?.category;
+      const categoryClass = category
+        ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
+        : "patient-unknown";
+
       return (
-        <div
+        <Link
           key={`usr_${patient.id}`}
-          onClick={() => navigate(patientUrl)}
-          className={
-            "w-full cursor-pointer border-b-4 md:flex justify-between items-center py-2 " +
-            (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")
-          }
+          href={patientUrl}
+          className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-5 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${categoryClass}-ring overflow-hidden`}
         >
-          <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">      
-            <div>
-              <div className="md:flex justify-between w-full">
-                <div className="text-xl font-normal capitalize">
-                  {patient.name} - {patient.age}
-                  {patient.action && patient.action != 10 && (
-                    <span className="font-semibold ml-2">
-                      -{" "}
+          <div
+            className={`rounded-l-lg absolute top-0 bottom-0 left-0 h-full w-1 group-hover:w-5 transition-all duration-200 ease-in-out flex items-center ${categoryClass}`}
+          >
+            <span className="absolute -left-32 -right-32 top-0 bottom-0 flex justify-center items-center text-center transform -rotate-90 text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out">
+              {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
+            </span>
+          </div>
+          <div className="flex gap-4 items-start">
+            <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
+              {patient?.last_consultation &&
+              patient?.last_consultation?.current_bed ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <Tooltip
+                    title={
+                      patient?.last_consultation?.current_bed?.bed_object
+                        ?.location_object?.name
+                    }
+                  >
+                    <p className="text-gray-900 text-sm text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
                       {
-                        TELEMEDICINE_ACTIONS.find(
-                          (i) => i.id === patient.action
-                        )?.desc
+                        patient?.last_consultation?.current_bed?.bed_object
+                          ?.location_object?.name
                       }
-                    </span>
-                  )}
+                    </p>
+                  </Tooltip>
+                  <Tooltip
+                    title={
+                      patient?.last_consultation?.current_bed?.bed_object?.name
+                    }
+                  >
+                    <p className="text-base font-bold text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                      {patient?.last_consultation?.current_bed?.bed_object.name}
+                    </p>
+                  </Tooltip>
                 </div>
-              </div>
-              {patient.facility_object && (
-                <div className="font-normal text-sm">
-                  {patient.facility_object.name},
-                  <span className="text-xs ml-1">
-                    Updated at: {moment(patient.modified_date).format("lll")}
-                  </span>
-                  {showReviewAlert(patient) && (
-                    <span
-                      className={
-                        "m-1 inline-block items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
-                        (moment().isBefore(patient.review_time)
-                          ? " bg-gray-100"
-                          : "rounded p-1 bg-red-400 text-white")
-                      }
-                    >
-                      {(moment().isBefore(patient.review_time)
-                        ? "Review at: "
-                        : "Review Missed: ") +
-                        moment(patient.review_time).format("lll")}
-                    </span>
-                  )}
+              ) : (
+                <div className="flex items-center justify-center min-h-[5rem]">
+                  <i className="fas fa-user-injured text-3xl text-gray-500"></i>
                 </div>
               )}
             </div>
-            {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed && (
-                <div
-                  className="w-fit self-stretch shrink-0 bg-gray-100 border border-gray-400 text-lg flex items-center justify-center rounded-md pr-2 mt-2
-                "
-                >
-                  <div className="grid grid-cols-2">
-                    <div className="ml-2 mt-2">
-                      <i className="fa-solid fa-bed-pulse"></i>
-                    </div>
-                    <div>
-                      <div className="text-gray-900 text-sm">
+            <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
+              <div>
+                <div className="md:flex justify-between w-full">
+                  <div className="text-xl font-semibold capitalize">
+                    <span>{patient.name}</span>
+                    <span className="text-gray-800">{" - " + patient.age}</span>
+                    {patient.action && patient.action != 10 && (
+                      <span className="font-semibold ml-2 text-gray-700">
+                        -{" "}
                         {
-                          patient?.last_consultation?.current_bed?.bed_object
-                            ?.location_object?.name
+                          TELEMEDICINE_ACTIONS.find(
+                            (i) => i.id === patient.action
+                          )?.desc
                         }
-                      </div>
-                      <div className="text-md font-bold">
-                        {
-                          patient?.last_consultation?.current_bed?.bed_object
-                            .name
-                        }
-                      </div>
-                    </div>
+                      </span>
+                    )}
                   </div>
                 </div>
-              )}
-          </div>
-
-          <div className="flex w-full">
-            <div className="flex flex-wrap flex-row justify-start">
-              {patient.allow_transfer ? (
-                <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
-              ) : (
-                <Badge color="primary" icon="lock" text="Transfer Blocked" />
-              )}
-              {patient.disease_status === "POSITIVE" && (
-                <Badge color="red" icon="radiation" text="Positive" />
-              )}
-              {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
-                0 && (
-                <Badge
-                  color="primary"
-                  icon="smile-beam"
-                  text={patient.disease_status}
-                />
-              )}
-              {patient.gender === 2 &&
-                patient.is_antenatal &&
-                patient.is_active && (
-                <Badge color="blue" icon="baby-carriage" text="Antenatal" />
-              )}
-              {patient.is_medical_worker && patient.is_active && (
-                <Badge color="blue" icon="user-md" text="Medical Worker" />
-              )}
-              {patient.contact_with_confirmed_carrier && (
-                <Badge
-                  color="red"
-                  icon="exclamation-triangle"
-                  text="Contact with confirmed carrier"
-                />
-              )}
-              {patient.contact_with_suspected_carrier && (
-                <Badge
-                  color="yellow"
-                  icon="exclamation-triangle"
-                  text="Contact with suspected carrier"
-                />
-              )}
-              {patient.disease_status === "EXPIRED" && (
-                <Badge
-                  color="yellow"
-                  icon="exclamation-triangle"
-                  text="Patient Expired"
-                />
-              )}
-              {(!patient.last_consultation ||
-                patient.last_consultation?.facility !== patient.facility) && (
-                <span className="relative inline-flex">
-                  <Badge
-                    color="red"
-                    icon="notes-medical"
-                    text="No Consultation Filed"
-                  />
-                  <span className="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
-                  </span>
-                </span>
-              )}
+                {patient.facility_object && (
+                  <div className="mb-2">
+                    <div className="flex flex-wrap items-center">
+                      <p className="text-sm font-medium text-gray-700 mr-2">
+                        {" "}
+                        {patient.facility_object.name}
+                      </p>
+                      <p className="text-sm">
+                        <span className="text-gray-600">last updated</span>{" "}
+                        <span className="font-medium text-gray-900">
+                          {" "}
+                          {moment(patient.modified_date).fromNow()}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex w-full">
+                  <div className="flex flex-wrap gap-2 flex-row justify-start">
+                    {patient.review_time &&
+                      !patient.last_consultation?.discharge_date &&
+                      Number(patient.last_consultation?.review_interval) > 0 &&
+                      moment().isAfter(patient.review_time) && (
+                        <Chip
+                          size="small"
+                          color="red"
+                          startIcon="clock"
+                          text="Review Missed"
+                        />
+                      )}
+                    {patient.allow_transfer ? (
+                      <Chip
+                        size="small"
+                        color="yellow"
+                        startIcon="unlock"
+                        text="Transfer Allowed"
+                      />
+                    ) : (
+                      <Chip
+                        size="small"
+                        color="primary"
+                        startIcon="lock"
+                        text="Transfer Blocked"
+                      />
+                    )}
+                    {patient.disease_status === "POSITIVE" && (
+                      <Chip
+                        size="small"
+                        color="red"
+                        startIcon="radiation"
+                        text="Positive"
+                      />
+                    )}
+                    {patient.gender === 2 &&
+                      patient.is_antenatal &&
+                      patient.is_active && (
+                        <Chip
+                          size="small"
+                          color="blue"
+                          startIcon="baby-carriage"
+                          text="Antenatal"
+                        />
+                      )}
+                    {patient.is_medical_worker && patient.is_active && (
+                      <Chip
+                        size="small"
+                        color="blue"
+                        startIcon="user-md"
+                        text="Medical Worker"
+                      />
+                    )}
+                    {patient.disease_status === "EXPIRED" && (
+                      <Chip
+                        size="small"
+                        color="yellow"
+                        startIcon="exclamation-triangle"
+                        text="Patient Expired"
+                      />
+                    )}
+                    {(!patient.last_consultation ||
+                      patient.last_consultation?.facility !==
+                        patient.facility ||
+                      (patient.last_consultation?.discharge_date &&
+                        patient.is_active)) && (
+                      <span className="relative inline-flex">
+                        <Chip
+                          size="small"
+                          color="red"
+                          startIcon="notes-medical"
+                          text="No Consultation Filed"
+                        />
+                        <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                          <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                        </span>
+                      </span>
+                    )}
+                    {!(
+                      patient.last_consultation?.facility !== patient.facility
+                    ) &&
+                      !(
+                        patient.last_consultation?.discharge_date ||
+                        !patient.is_active
+                      ) &&
+                      moment(patient.last_consultation?.modified_date).isBefore(
+                        new Date().getTime() - 24 * 60 * 60 * 1000
+                      ) && (
+                        <span className="relative inline-flex">
+                          <Chip
+                            size="small"
+                            color="red"
+                            startIcon="circle-exclamation"
+                            text="No update in 24 hours"
+                          />
+                          <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                            <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                          </span>
+                        </span>
+                      )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="px-2">
-            <div className="btn btn-default bg-white">Details</div>
-          </div>
-        </div>
+        </Link>
       );
     });
   }
 
   if (isLoading || !data) {
-    managePatients = <Loading />;
+    managePatients = (
+      <div className="w-full text-center col-span-3 py-8">
+        <Loading />
+      </div>
+    );
   } else if (data && data.length) {
     managePatients = (
       <>
-        {patientList}
-        {totalCount > RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={qParams.page}
-              defaultPerPage={RESULT_LIMIT}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {patientList}
+        </div>
+        <Pagination totalCount={totalCount} />
       </>
     );
   } else if (data && data.length === 0) {
     managePatients = (
-      <div className="w-full text-center">
-        <p className="text-lg font-semibold ">No Patients Found</p>
+      <div className="w-full bg-white rounded-lg p-2 text-center col-span-3 py-8 pt-4">
+        <p className="text-2xl font-bold text-gray-600">No Patients Found</p>
       </div>
     );
   }
 
+  const queryField = <T,>(name: string, defaultValue?: T) => {
+    return {
+      name,
+      value: qParams[name] || defaultValue,
+      onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
+      className: "grow lg:max-w-sm w-full mb-2",
+    };
+  };
+
   return (
-    <div>
-      {showDialog && (
-        <FacilitiesSelectDialogue
-          setSelected={(e) => setSelectedFacility(e)}
-          selectedFacility={selectedFacility}
-          handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
-          handleCancel={() => setShowDialog(false)}
-        />
-      )}
-      <PageTitle
-        title="Patients"
-        hideBack={!facilityId}
-        breadcrumbs={!!facilityId}
-        crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
+    <div className="px-6">
+      <FacilitiesSelectDialogue
+        show={showDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+        handleCancel={() => {
+          setShowDialog(false);
+          setSelectedFacility({ name: "" });
+        }}
       />
-      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="title-text sm:flex align-center">
-          <div className="text-center">
-            <button
-              onClick={handleDownloadFiltered}
-              className="btn text-green-500 font-medium hover:bg-green-50 border border-solid"
+      <div className="flex flex-col lg:flex-row justify-between items-center">
+        <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
+        <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
+          <ButtonV2
+            onClick={() => {
+              qParams.facility
+                ? navigate(`/facility/${qParams.facility}/patient`)
+                : setShowDialog(true);
+            }}
+          >
+            <CareIcon className="care-l-plus text-lg" />
+            <p>Add Patient Details</p>
+          </ButtonV2>
+          <ButtonV2
+            ghost
+            border
+            className="bg-white"
+            onClick={() => advancedFilter.setShow(true)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="fill-current w-4 h-4 mr-2"
             >
-              <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
-              {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
-            </button>
-            <CSVLink
-              id="downloadlink"
-              className="hidden"
-              data={DownloadFile}
-              filename={`patients-${now}.csv`}
-              target="_blank"
-            ></CSVLink>
-          </div>
-          <div className="flex flex-col gap-2">
-            <button
-              disabled={!isDownloadAllowed}
-              onClick={handleDownloadAll}
-              className="btn text-green-500 disabled:text-gray-500 font-medium border border-solid"
-            >
-              <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD ALL
-              PATIENTS
-            </button>
-            {!isDownloadAllowed && (
-              <p className="self-end text-sm italic text-red-400">
-                * Select a 7 day period
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Patients
-              </dt>
-              {/* Show spinner until count is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-10 w-10 text-primary-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
-          </div>
-        </div>
-        <div>
-          <div>
-            <div className="text-sm font-semibold mb-2">Search by Name</div>
-            <InputSearchBox
-              search={searchByName}
-              value={qParams.name}
-              placeholder="Search by Patient Name"
-              errors=""
-            />
-          </div>
-          <div>
-            <div className="text-sm font-semibold mt-2">
-              Search by Primary Number
-            </div>
-            <PhoneNumberField
-              value={qParams.phone_number || "+91"}
-              onChange={(value: string) => searchByPhone(value, "phone_number")}
-              turnOffAutoFormat={false}
-              errors=""
-            />
-          </div>
-        </div>
-        <div className="flex flex-col-reverse md:flex-col">
-          <div>
-            <div className="md:flex items-end gap-2 mb-2">
-              <button
-                className="btn btn-primary-ghost w-full mt-2 md:mt-7 "
-                onClick={(_) => setShowFilters((show) => !show)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
-              <button
-                className="btn-primary btn md:mt-7 mt-2 w-full md:w-fit"
-                onClick={() => {
-                  if (facilityId) {
-                    navigate(`/facility/${facilityId}/patient`);
-                  } else {
-                    setShowDialog(true);
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12">
+                {" "}
+              </line>
+              <line x1="8" y1="18" x2="21" y2="18">
+                {" "}
+              </line>
+              <line x1="3" y1="6" x2="3.01" y2="6">
+                {" "}
+              </line>
+              <line x1="3" y1="12" x2="3.01" y2="12">
+                {" "}
+              </line>
+              <line x1="3" y1="18" x2="3.01" y2="18">
+                {" "}
+              </line>
+            </svg>
+            <span>Advanced Filters</span>
+          </ButtonV2>
+          <DropdownMenu
+            title="Sort by"
+            variant="secondary"
+            className="border border-primary-500 bg-white"
+            icon={<CareIcon className="care-l-sort" />}
+          >
+            {PATIENT_FILTER_ORDER.map((ordering) => {
+              return (
+                <DropdownItem
+                  key={ordering.text}
+                  onClick={() => updateQuery({ ordering: ordering.text })}
+                  icon={
+                    <CareIcon
+                      className={
+                        ordering.order === "Ascending"
+                          ? "care-l-sort-amount-up"
+                          : "care-l-sort-amount-down"
+                      }
+                    />
                   }
-                }}
-                data-testid="add-patient-button"
-              >
-                <i className="fas fa-plus mr-2 text-white"></i>
-                Add Details of a Patient
-              </button>
-            </div>
-          </div>
-          <div>
-            <div className="text-sm font-semibold mt-2">
-              Search by Emergency Number
-            </div>
-            <PhoneNumberField
-              value={qParams.emergency_phone_number || "+91"}
-              onChange={(value: string) =>
-                searchByPhone(value, "emergency_phone_number")
-              }
-              turnOffAutoFormat={false}
-              errors=""
+                >
+                  <span>{ordering.desc}</span>
+                  <span className="text-gray-600 text-sm">
+                    {ordering.order}
+                  </span>
+                </DropdownItem>
+              );
+            })}
+          </DropdownMenu>
+          <div className="tooltip">
+            <ExportMenu
+              disabled={!isExportAllowed}
+              exportItems={[
+                {
+                  label:
+                    tabValue === 0 ? "Live patients" : "Discharged patients",
+                  action: exportPatients(true),
+                },
+                {
+                  label: "All patients",
+                  action: exportPatients(false),
+                },
+              ]}
             />
+            {!isExportAllowed && (
+              <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+                Select a seven day period
+              </span>
+            )}
           </div>
-        </div>
-        <div className="flex flex-wrap w-full col-span-3">
-          {qParams.phone_number?.trim().split(" ").length - 1
-            ? badge("Primary Number", qParams.phone_number, "phone_number")
-            : null}
-          {qParams.emergency_phone_number?.trim().split(" ").length - 1
-            ? badge(
-                "Emergency Number",
-                qParams.emergency_phone_number,
-                "emergency_phone_number"
-              )
-            : null}
-          {badge("Patient Name", qParams.name, "name")}
-          {badge(
-            "Modified After",
-            qParams.modified_date_after,
-            "modified_date_after"
-          )}
-          {badge(
-            "Modified Before",
-            qParams.modified_date_before,
-            "modified_date_before"
-          )}
-          {badge(
-            "Created Before",
-            qParams.created_date_before,
-            "created_date_before"
-          )}
-          {badge(
-            "Created After",
-            qParams.created_date_after,
-            "created_date_after"
-          )}
-          {badge(
-            "Admitted Before",
-            qParams.last_consultation_admission_date_before,
-            "last_consultation_admission_date_before"
-          )}
-          {badge(
-            "Admitted After",
-            qParams.last_consultation_admission_date_after,
-            "last_consultation_admission_date_after"
-          )}
-          {badge(
-            "Discharged Before",
-            qParams.last_consultation_discharge_date_before,
-            "last_consultation_discharge_date_before"
-          )}
-          {badge(
-            "Discharged After",
-            qParams.last_consultation_discharge_date_after,
-            "last_consultation_discharge_date_after"
-          )}
-          {qParams.last_consultation_admitted_to_list &&
-            LastAdmittedToTypeBadges()}
-          {qParams.number_of_doses &&
-            badge(
-              "Number of Vaccination Doses",
-              qParams.number_of_doses,
-              "number_of_doses"
-            )}
-          {qParams.is_kasp &&
-            badge(
-              KASP_STRING,
-              qParams.is_kasp === "true" ? KASP_STRING : `Non ${KASP_STRING}`,
-              "is_kasp"
-            )}
-          {badge("COWIN ID", qParams.covin_id, "covin_id")}
-          {badge("Is Antenatal", qParams.is_antenatal, "is_antenatal")}
-          {badge("Facility", facilityBadgeName, "facility")}
-          {badge("Facility Type", qParams.facility_type, "facility_type")}
-          {badge("District", districtName, "district")}
-          {badge("Ordering", qParams.ordering, "ordering")}
-          {badge("Category", qParams.category, "category")}
-          {badge("Disease Status", qParams.disease_status, "disease_status")}
-          {badge(
-            "Gender",
-            parseOptionId(GENDER_TYPES, qParams.gender),
-            "gender"
-          )}
-          {badge(
-            "Admitted to",
-            ADMITTED_TO[qParams.last_consultation_admitted_to],
-            "last_consultation_admitted_to"
-          )}
-          {badge("Age min", qParams.age_min, "age_min")}
-          {badge("Age max", qParams.age_max, "age_max")}
-          {badge("SRF ID", qParams.srf_id, "srf_id")}
-          {badge("LSG Body", localbodyName, "lsgBody")}
-          {badge(
-            "Declared Status",
-            qParams.is_declared_positive,
-            "is_declared_positive"
-          )}
-          {badge(
-            "Result before",
-            qParams.date_of_result_before,
-            "date_of_result_before"
-          )}
-          {badge(
-            "Result after",
-            qParams.date_of_result_after,
-            "date_of_result_after"
-          )}
-
-          {badge(
-            "Declared positive before",
-            qParams.date_declared_positive_before,
-            "date_declared_positive_before"
-          )}
-
-          {badge(
-            "Declared positive after",
-            qParams.date_declared_positive_after,
-            "date_declared_positive_after"
-          )}
-
-          {badge(
-            "Onset of symptoms before",
-            qParams.last_consultation_symptoms_onset_date_before,
-            "last_consultation_symptoms_onset_date_before"
-          )}
-
-          {badge(
-            "Onset of symptoms after",
-            qParams.last_consultation_symptoms_onset_date_after,
-            "last_consultation_symptoms_onset_date_after"
-          )}
-          {badge(
-            "Vaccinated Date before",
-            qParams.last_vaccinated_date_before,
-            "last_vaccinated_date_before"
-          )}
-
-          {badge(
-            "Vaccinated Date after",
-            qParams.last_vaccinated_date_after,
-            "last_vaccinated_date_after"
-          )}
-          {badge(
-            "Telemedicine",
-            qParams.last_consultation_is_telemedicine,
-            "last_consultation_is_telemedicine"
-          )}
         </div>
       </div>
+      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-12px]">
+        <div>
+          <div className="flex flex-col mt-2 h-full">
+            <div className="bg-white overflow-hidden shadow rounded-lg mb-2 h-full">
+              <div className="px-4 py-24 sm:p-[35px]">
+                <dl>
+                  <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
+                    Total Patients
+                  </dt>
+                  {/* Show spinner until count is fetched from server */}
+                  {isLoading ? (
+                    <dd className="mt-4 text-5xl leading-9">
+                      <CircularProgress className="text-primary-500" />
+                    </dd>
+                  ) : (
+                    <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                      {totalCount}
+                    </dd>
+                  )}
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="w-full col-span-2">
+          <div className="col-span-2 mt-2">
+            <div>
+              <div>
+                <div className="md:flex md:gap-4 mt-1">
+                  <SearchInput
+                    label="Search by Patient"
+                    placeholder="Enter patient name"
+                    {...queryField("name")}
+                  />
+                  <SearchInput
+                    label="Search by IP Number"
+                    placeholder="Enter IP Number"
+                    secondary
+                    {...queryField("ip_no")}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="md:flex md:gap-4">
+              <PhoneNumberFormField
+                label="Search by Primary Number"
+                {...queryField("phone_number", "+91")}
+                value={phone_number}
+                onChange={(e) => setPhoneNumber(e.value)}
+                error={phoneNumberError}
+              />
+              <PhoneNumberFormField
+                label="Search by Emergency Number"
+                {...queryField("emergency_phone_number", "+91")}
+                value={emergency_phone_number}
+                onChange={(e) => setEmergencyPhoneNumber(e.value)}
+                error={emergencyPhoneNumberError}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-wrap w-full col-span-3 mt-6">
+        <FilterBadges
+          badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
+            phoneNumber("Primary number", "phone_number"),
+            phoneNumber("Emergency number", "emergency_phone_number"),
+            badge("Patient name", "name"),
+            badge("IP number", "ip_no"),
+            ...dateRange("Modified", "modified_date"),
+            ...dateRange("Created", "created_date"),
+            ...dateRange("Admitted", "last_consultation_admission_date"),
+            ...dateRange("Discharged", "last_consultation_discharge_date"),
+            // Admitted to type badges
+            badge("No. of vaccination doses", "number_of_doses"),
+            kasp(),
+            badge("COWIN ID", "covin_id"),
+            badge("Is Antenatal", "is_antenatal"),
+            value("Facility", "facility", facilityBadgeName),
+            badge("Facility Type", "facility_type"),
+            value("District", "district", districtName),
+            badge("Ordering", "ordering"),
+            badge("Category", "category"),
+            badge("Disease Status", "disease_status"),
+            value(
+              "Gender",
+              "gender",
+              parseOptionId(GENDER_TYPES, qParams.gender) || ""
+            ),
+            {
+              name: "Admitted to",
+              value: ADMITTED_TO[qParams.last_consultation_admitted_to],
+              paramKey: "last_consultation_admitted_to",
+            },
+            ...range("Age", "age"),
+            badge("SRF ID", "srf_id"),
+            { name: "LSG Body", value: localbodyName, paramKey: "lsgBody" },
+            badge("Declared Status", "is_declared_positive"),
+            ...dateRange("Result", "date_of_result"),
+            ...dateRange("Declared positive", "date_declared_positive"),
+            ...dateRange(
+              "Symptoms onset",
+              "last_consultation_symptoms_onset_date"
+            ),
+            ...dateRange("Last vaccinated", "last_vaccinated_date"),
+            {
+              name: "Telemedicine",
+              paramKey: "last_consultation_is_telemedicine",
+            },
+          ]}
+        />
+        {qParams.last_consultation_admitted_bed_type_list &&
+          LastAdmittedToTypeBadges()}
+      </div>
       <div>
-        <SlideOver show={showFilters} setShow={setShowFilters}>
+        <SlideOver {...advancedFilter}>
           <div className="bg-white min-h-screen p-4">
-            <PatientFilterV2
-              filter={qParams}
-              onChange={applyFilter}
-              closeFilter={() => setShowFilters(false)}
-            />
+            <PatientFilterV2 {...advancedFilter} />
           </div>
         </SlideOver>
         <NavTabs
-          onChange={handleTabChange}
+          onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
           options={[
             { value: 0, label: "Live" },
             { value: 1, label: "Discharged" },
@@ -977,10 +877,10 @@ export const PatientManager = (props: any) => {
         />
         <SwipeableViews index={tabValue}>
           <TabPanel value={tabValue} index={0}>
-            <div className="flex flex-wrap">{managePatients}</div>
+            <div className="mb-4">{managePatients}</div>
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
-            <div className="flex flex-wrap">{managePatients}</div>
+            <div className="mb-4">{managePatients}</div>
           </TabPanel>
         </SwipeableViews>
       </div>

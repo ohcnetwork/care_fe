@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useEffect } from "react";
+import React, { useReducer, useState, useEffect, LegacyRef } from "react";
 import {
   createAsset,
   getAsset,
@@ -7,28 +7,12 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import CancelOutlineIcon from "@material-ui/icons/CancelOutlined";
 import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  FormControlLabel,
-  InputLabel,
-  Radio,
-  RadioGroup,
-} from "@material-ui/core";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
   ActionTextInputField,
-  SelectField,
-  TextInputField,
-  MultilineInputField,
-  PhoneNumberField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
@@ -37,23 +21,52 @@ import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
-import SelectMenu from "../Common/components/SelectMenu";
+import moment from "moment";
+import SwitchV2 from "../Common/components/Switch";
+import useVisibility from "../../Utils/useVisibility";
+import { goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+
 const Loading = loadable(() => import("../Common/Loading"));
 
-const initError: any = {
-  name: "",
-  asset_type: "",
-  asset_class: "",
-  description: "",
-  is_working: "",
-  serial_number: "",
-  warranty_details: "",
-  location: "",
-  vendor_name: "",
-  support_name: "",
-  support_phone: "",
-  support_email: "",
-};
+const formErrorKeys = [
+  "name",
+  "asset_type",
+  "asset_class",
+  "description",
+  "is_working",
+  "serial_number",
+  "location",
+  "vendor_name",
+  "support_name",
+  "support_phone",
+  "support_email",
+  "manufacturer",
+  "warranty_amc_end_of_validity",
+  "last_serviced_on",
+  "notes",
+];
+
+const initError = formErrorKeys.reduce(
+  (acc: { [key: string]: string }, key) => {
+    acc[key] = "";
+    return acc;
+  },
+  {}
+);
+
+const fieldRef = formErrorKeys.reduce(
+  (acc: { [key: string]: React.RefObject<any> }, key) => {
+    acc[key] = React.createRef();
+    return acc;
+  },
+  {}
+);
 
 const initialState = {
   errors: { ...initError },
@@ -77,12 +90,16 @@ const asset_create_reducer = (state = initialState, action: any) => {
   }
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
+type AssetFormSection =
+  | "General Details"
+  | "Warranty Details"
+  | "Service Details";
 
 const AssetCreate = (props: AssetProps) => {
   const { facilityId, assetId } = props;
+
+  let assetTypeInitial: AssetType;
+  let assetClassInitial: AssetClass;
 
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState("");
@@ -92,19 +109,60 @@ const AssetCreate = (props: AssetProps) => {
   const [description, setDescription] = useState("");
   const [is_working, setIsWorking] = useState<string | undefined>(undefined);
   const [serial_number, setSerialNumber] = useState("");
-  const [warranty_details, setWarrantyDetails] = useState("");
   const [vendor_name, setVendorName] = useState("");
   const [support_name, setSupportName] = useState("");
   const [support_phone, setSupportPhone] = useState("");
   const [support_email, setSupportEmail] = useState("");
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const dispatchAction: any = useDispatch();
-  const [locations, setLocations] = useState([]);
+  const [locations, setLocations] = useState<{ name: string; id: string }[]>(
+    []
+  );
   const [asset, setAsset] = useState<AssetData>();
   const [facilityName, setFacilityName] = useState("");
   const [qrCodeId, setQrCodeId] = useState("");
+  const [manufacturer, setManufacturer] = useState("");
+  const [warranty_amc_end_of_validity, setWarrantyAmcEndOfValidity] =
+    useState<any>(null);
+  const [last_serviced_on, setLastServicedOn] = useState<any>(null);
+  const [notes, setNotes] = useState("");
+  const dispatchAction: any = useDispatch();
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
+
+  const [currentSection, setCurrentSection] =
+    useState<AssetFormSection>("General Details");
+
+  const [generalDetailsVisible, generalDetailsRef] = useVisibility();
+  const [warrantyDetailsVisible, warrantyDetailsRef] = useVisibility(-300);
+  const [serviceDetailsVisible, serviceDetailsRef] = useVisibility(-300);
+
+  const sections = {
+    "General Details": {
+      iconClass: "fa-solid fa-circle-info",
+      isVisible: generalDetailsVisible,
+      ref: generalDetailsRef,
+    },
+    "Warranty Details": {
+      iconClass: "fa-solid fa-barcode",
+      isVisible: warrantyDetailsVisible,
+      ref: warrantyDetailsRef,
+    },
+    "Service Details": {
+      iconClass: "fas fa-tools",
+      isVisible: serviceDetailsVisible,
+      ref: serviceDetailsRef,
+    },
+  };
+
+  useEffect(() => {
+    setCurrentSection((currentSection) => {
+      let sectionNow = currentSection;
+      if (serviceDetailsVisible) sectionNow = "Service Details";
+      if (warrantyDetailsVisible) sectionNow = "Warranty Details";
+      if (generalDetailsVisible) sectionNow = "General Details";
+      return sectionNow;
+    });
+  }, [generalDetailsVisible, warrantyDetailsVisible, serviceDetailsVisible]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -125,7 +183,7 @@ const AssetCreate = (props: AssetProps) => {
         setIsLoading(false);
       });
     }
-  }, [assetId]);
+  }, [assetId, dispatchAction, facilityId]);
 
   useEffect(() => {
     if (asset) {
@@ -137,12 +195,16 @@ const AssetCreate = (props: AssetProps) => {
       setIsWorking(String(asset.is_working));
       setNotWorkingReason(asset.not_working_reason);
       setSerialNumber(asset.serial_number);
-      setWarrantyDetails(asset.warranty_details);
       setVendorName(asset.vendor_name);
       setSupportName(asset.support_name);
       setSupportEmail(asset.support_email);
       setSupportPhone(asset.support_phone);
       setQrCodeId(asset.qr_code_id);
+      setManufacturer(asset.manufacturer);
+      asset.warranty_amc_end_of_validity &&
+        setWarrantyAmcEndOfValidity(asset.warranty_amc_end_of_validity);
+      asset.last_serviced_on && setLastServicedOn(asset.last_serviced_on);
+      setNotes(asset.notes);
     }
   }, [asset]);
 
@@ -153,7 +215,7 @@ const AssetCreate = (props: AssetProps) => {
       switch (field) {
         case "name":
           if (!name) {
-            errors[field] = "Field is required";
+            errors[field] = "Asset name can't be empty";
             invalidForm = true;
           }
           return;
@@ -165,28 +227,38 @@ const AssetCreate = (props: AssetProps) => {
           return;
         case "location":
           if (!location || location === "0" || location === "") {
-            errors[field] = "Field is required";
+            errors[field] = "Select a location";
             invalidForm = true;
           }
           return;
         case "asset_type":
-          if (!asset_type) {
-            errors[field] = "Field is required";
+          if (!asset_type || asset_type == "NONE") {
+            errors[field] = "Select an asset type";
             invalidForm = true;
           }
           return;
-        case "support_phone":
+        case "support_phone": {
           if (!support_phone) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumberFromString(support_phone);
-          if (!phoneNumber?.isPossible()) {
+          const supportPhoneSimple = support_phone
+            .replace(/[^0-9]/g, "")
+            .slice(2);
+          const checkTollFree = supportPhoneSimple.startsWith("1800");
+          if (supportPhoneSimple.length > 10 && !checkTollFree) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          } else if (supportPhoneSimple.length > 11 && checkTollFree) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          } else if (supportPhoneSimple.length < 10) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }
           return;
+        }
         case "support_email":
           if (support_email && !validateEmailAddress(support_email)) {
             errors[field] = "Please enter valid email id";
@@ -199,13 +271,42 @@ const AssetCreate = (props: AssetProps) => {
     });
     if (invalidForm) {
       dispatch({ type: "set_error", errors });
+      const firstError = Object.keys(errors).find((key) => errors[key]);
+      if (firstError) {
+        fieldRef[firstError].current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
       return false;
     }
     dispatch({ type: "set_error", errors });
     return true;
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
+  const resetFilters = () => {
+    setName("");
+    setDescription("");
+    setLocation("");
+    setAssetType(assetTypeInitial);
+    setAssetClass(assetClassInitial);
+    setIsWorking("");
+    setNotWorkingReason("");
+    setSerialNumber("");
+    setVendorName("");
+    setSupportName("");
+    setSupportEmail("");
+    setSupportPhone("");
+    setQrCodeId("");
+    setManufacturer("");
+    setWarrantyAmcEndOfValidity("");
+    setLastServicedOn("");
+    setNotes("");
+    setWarrantyAmcEndOfValidity(null);
+    setLastServicedOn(null);
+  };
+
+  const handleSubmit = async (e: React.SyntheticEvent, addMore: boolean) => {
     e.preventDefault();
     const validated = validateForm();
     if (validated) {
@@ -218,7 +319,6 @@ const AssetCreate = (props: AssetProps) => {
         is_working: is_working,
         not_working_reason: is_working === "true" ? "" : not_working_reason,
         serial_number: serial_number,
-        warranty_details: warranty_details,
         location: location,
         vendor_name: vendor_name,
         support_name: support_name,
@@ -226,6 +326,14 @@ const AssetCreate = (props: AssetProps) => {
         support_phone:
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
+        manufacturer: manufacturer,
+        warranty_amc_end_of_validity: warranty_amc_end_of_validity
+          ? moment(warranty_amc_end_of_validity).format("YYYY-MM-DD")
+          : null,
+        last_serviced_on: last_serviced_on
+          ? moment(last_serviced_on).format("YYYY-MM-DD")
+          : last_serviced_on,
+        notes: notes,
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -233,7 +341,13 @@ const AssetCreate = (props: AssetProps) => {
           Notification.Success({
             msg: "Asset created successfully",
           });
-          goBack();
+          if (!addMore) {
+            goBack();
+          } else {
+            resetFilters();
+            const pageContainer = window.document.getElementById("pages");
+            pageContainer?.scroll(0, 0);
+          }
         }
         setIsLoading(false);
       } else {
@@ -260,7 +374,7 @@ const AssetCreate = (props: AssetProps) => {
         return;
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       Notification.Error({ msg: err });
     }
     Notification.Error({ msg: "Invalid Asset Id" });
@@ -324,317 +438,472 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
 
+  const sectionId = (section: AssetFormSection) =>
+    section.toLowerCase().replace(" ", "-");
+
+  const sectionTitle = (sectionTitle: AssetFormSection) => {
+    const section = sections[sectionTitle];
+    return (
+      <div
+        id={sectionId(sectionTitle)}
+        className="col-span-6 flex flex-row items-center mb-6 -ml-2"
+        ref={section.ref as LegacyRef<HTMLDivElement>}
+      >
+        <i className={`${section.iconClass} text-lg mr-3`} />
+        <label className="font-bold text-lg text-gray-900">
+          {sectionTitle}
+        </label>
+        <hr className="ml-6 flex-1 border-gray-400 border" />
+      </div>
+    );
+  };
+
   return (
-    <div className="px-6 pb-2">
+    <div className="pb-2 relative flex flex-col">
       <PageTitle
-        title={assetId ? "Update Asset" : "Create New Asset"}
+        title={`${assetId ? "Update" : "Create"} Asset`}
+        className="pl-6 flex-grow-0"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
       />
-      <Card className="mt-4 mx-auto">
-        <CardContent>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <div>
-                <InputLabel htmlFor="asset-name" id="name=label" required>
-                  Asset Name
-                </InputLabel>
-                <TextInputField
-                  id="asset-name"
-                  fullWidth
-                  name="name"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setName(e.target.value)
-                  }
-                  errors={state.errors.name}
-                />
-              </div>
-              <div className="flex flex-wrap justify-between">
-                <div>
-                  <InputLabel htmlFor="asset-type" id="name=label" required>
-                    Asset Type
-                  </InputLabel>
-                  <div className="my-2">
-                    <SelectMenu
-                      options={[
-                        {
-                          title: "Select",
-                          description:
-                            "Select an Asset Type from the following",
-                          value: undefined,
-                        },
-                        {
-                          title: "Internal",
-                          description: "Asset is inside the facility premises.",
-                          value: "INTERNAL",
-                        },
-                        {
-                          title: "External",
-                          description:
-                            "Asset is outside the facility premises.",
-                          value: "EXTERNAL",
-                        },
-                      ]}
-                      selected={asset_type}
-                      onSelect={setAssetType}
-                    />
-                  </div>
-                  <ErrorHelperText error={state.errors.asset_type} />
-                </div>
-                <div>
-                  <InputLabel htmlFor="asset-class" id="name=label">
-                    Asset Class
-                  </InputLabel>
-                  <div className="my-2">
-                    <SelectMenu
-                      options={[
-                        { title: "Select", value: undefined },
-                        { title: "ONVIF Camera", value: "ONVIF" },
-                        { title: "HL7 Vitals Monitor", value: "HL7MONITOR" },
-                      ]}
-                      selected={asset_class}
-                      onSelect={setAssetClass}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <InputLabel htmlFor="is_working" id="name=label" required>
-                    Working Status
-                  </InputLabel>
-                  <div className="my-2">
-                    <SelectMenu
-                      options={[
-                        { title: "Select", value: undefined },
-                        { title: "Working", value: "true" },
-                        { title: "Not Working", value: "false" },
-                      ]}
-                      selected={is_working}
-                      onSelect={setIsWorking}
-                    />
-                  </div>
-                  <ErrorHelperText error={state.errors.is_working} />
-                </div>
-              </div>
-              {is_working === "false" && (
-                <div>
-                  <InputLabel htmlFor="description" id="name=label">
-                    Reason
-                  </InputLabel>
-                  <MultilineInputField
-                    id="not_working_reason"
-                    rows={3}
-                    fullWidth
-                    name="description"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    value={not_working_reason}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setNotWorkingReason(e.target.value)
-                    }
-                    errors={state.errors.not_working_reason}
-                  />
-                </div>
-              )}
-              <div>
-                <InputLabel htmlFor="description" id="name=label">
-                  Description
-                </InputLabel>
-                <MultilineInputField
-                  id="description"
-                  rows={3}
-                  fullWidth
-                  name="description"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={description}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setDescription(e.target.value)
-                  }
-                  errors={state.errors.description}
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="serial_number" id="name=label">
-                  Serial Number
-                </InputLabel>
-                <TextInputField
-                  id="serial_number"
-                  fullWidth
-                  name="serial_number"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={serial_number}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSerialNumber(e.target.value)
-                  }
-                  errors={state.errors.serial_number}
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="warranty_details" id="name=label">
-                  Warranty Details
-                </InputLabel>
-                <TextInputField
-                  id="warranty_details"
-                  fullWidth
-                  name="warranty_details"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={warranty_details}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWarrantyDetails(e.target.value)
-                  }
-                  errors={state.errors.warranty_details}
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="vendor_name" id="name=label">
-                  Vendor Name
-                </InputLabel>
-                <TextInputField
-                  id="vendor_name"
-                  fullWidth
-                  name="vendor_name"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={vendor_name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setVendorName(e.target.value)
-                  }
-                  errors={state.errors.vendor_name}
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="support_name" id="name=label">
-                  Customer Support Name
-                </InputLabel>
-                <TextInputField
-                  id="support_name"
-                  fullWidth
-                  name="support_name"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={support_name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSupportName(e.target.value)
-                  }
-                  errors={state.errors.support_name}
-                />
-              </div>
-              <div>
-                <PhoneNumberField
-                  label="Phone Number*"
-                  value={support_phone}
-                  onChange={(value: any) => setSupportPhone(value)}
-                  errors={state.errors.support_phone}
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="support_email" id="name=label">
-                  Contact Email
-                </InputLabel>
-                <TextInputField
-                  id="support_email"
-                  fullWidth
-                  name="support_email"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={support_email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSupportEmail(e.target.value)
-                  }
-                  errors={state.errors.support_email}
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="location" id="name=label" required>
-                  Location
-                </InputLabel>
+      <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
+        <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
+          {Object.keys(sections).map((sectionTitle) => {
+            const isCurrent = currentSection === sectionTitle;
+            const section = sections[sectionTitle as AssetFormSection];
+            return (
+              <button
+                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
+                  isCurrent ? "bg-white text-primary-500" : "bg-transparent"
+                } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
+                onClick={() => {
+                  section.ref.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                  setCurrentSection(sectionTitle as AssetFormSection);
+                }}
+              >
+                <i className={`${section.iconClass} text-sm`} />
+                <span>{sectionTitle}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="w-full h-full flex overflow-auto xl:ml-72">
+          <div className="w-full max-w-3xl 2xl:max-w-4xl">
+            <form
+              onSubmit={(e) => handleSubmit(e, false)}
+              className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
+            >
+              <div className="grid grid-cols-1 gap-x-12 items-start">
+                <div className="grid grid-cols-6 gap-x-6">
+                  {/* General Details Section */}
+                  {sectionTitle("General Details")}
 
-                <SelectField
-                  id="location"
-                  fullWidth
-                  name="location"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  options={[{ id: "0", name: "Select" }, ...locations]}
-                  optionValue="name"
-                  value={location}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setLocation(e.target.value)
-                  }
-                  errors={state.errors.location}
-                />
+                  {/* Asset Name */}
+                  <div className="col-span-6" ref={fieldRef["name"]}>
+                    <TextFormField
+                      name="name"
+                      label="Asset Name"
+                      required
+                      value={name}
+                      onChange={({ value }) => setName(value)}
+                      error={state.errors.name}
+                    />
+                  </div>
+
+                  {/* Location */}
+                  <div ref={fieldRef["location"]} className="col-span-6">
+                    <AutocompleteFormField
+                      name="location"
+                      label="Location"
+                      required
+                      placeholder="Select the location of the asset"
+                      options={locations}
+                      optionLabel={({ name }) => name}
+                      optionValue={({ id }) => id}
+                      value={location}
+                      onChange={({ value }) => setLocation(value)}
+                      error={state.errors.location}
+                    />
+                  </div>
+
+                  <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
+                    {/* Asset Type */}
+                    <div ref={fieldRef["asset_type"]} className="flex-1">
+                      <SelectFormField
+                        label="Asset Type"
+                        name="asset_type"
+                        required
+                        options={[
+                          {
+                            title: "Internal",
+                            description:
+                              "Asset is inside the facility premises.",
+                            value: AssetType.INTERNAL,
+                          },
+                          {
+                            title: "External",
+                            description:
+                              "Asset is outside the facility premises.",
+                            value: AssetType.EXTERNAL,
+                          },
+                        ]}
+                        value={asset_type}
+                        optionLabel={({ title }) => title}
+                        optionDescription={({ description }) => description}
+                        optionValue={({ value }) => value}
+                        onChange={({ value }) => setAssetType(value)}
+                        error={state.errors.asset_type}
+                      />
+                    </div>
+
+                    {/* Asset Class */}
+                    <div ref={fieldRef["asset_class"]} className="flex-1">
+                      <SelectFormField
+                        name="asset_class"
+                        label="Asset Class"
+                        value={asset_class}
+                        options={[
+                          { title: "ONVIF Camera", value: AssetClass.ONVIF },
+                          {
+                            title: "HL7 Vitals Monitor",
+                            value: AssetClass.HL7MONITOR,
+                          },
+                        ]}
+                        optionLabel={({ title }) => title}
+                        optionValue={({ value }) => value}
+                        onChange={({ value }) => setAssetClass(value)}
+                        error={state.errors.asset_class}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="col-span-6">
+                    <TextAreaFormField
+                      name="asset_description"
+                      label="Description"
+                      placeholder="Details about the equipment"
+                      value={description}
+                      onChange={({ value }) => setDescription(value)}
+                      error={state.errors.description}
+                    />
+                  </div>
+
+                  {/* Divider */}
+                  <div className="col-span-6">
+                    <hr
+                      className={
+                        "transition-all " +
+                        (is_working === "true"
+                          ? "opacity-0 my-0"
+                          : "opacity-100 my-4")
+                      }
+                    />
+                  </div>
+
+                  {/* Working Status */}
+                  <div ref={fieldRef["is_working"]} className="col-span-6">
+                    <SwitchV2
+                      className="col-span-6"
+                      required
+                      name="is_working"
+                      label="Working Status"
+                      options={["true", "false"]}
+                      optionLabel={(option) => {
+                        return (
+                          {
+                            true: "Working",
+                            false: "Not Working",
+                          }[option] || "undefined"
+                        );
+                      }}
+                      optionClassName={(option) =>
+                        option === "false" &&
+                        "bg-danger-500 text-white border-danger-500 focus:ring-danger-500"
+                      }
+                      value={is_working}
+                      onChange={setIsWorking}
+                      error={state.errors.is_working}
+                    />
+                  </div>
+
+                  {/* Not Working Reason */}
+                  <div
+                    className={
+                      "col-span-6" +
+                      ((is_working !== "false" && " hidden") || "")
+                    }
+                  >
+                    <label htmlFor="not_working_reason">
+                      Why the asset is not working?
+                    </label>
+                    <textarea
+                      id="not_working_reason"
+                      className={
+                        "mt-2 block w-full input" +
+                        ((state.errors.not_working_reason &&
+                          " border-red-500") ||
+                          "")
+                      }
+                      name="not_working_reason"
+                      placeholder="Describe why the asset is not working"
+                      value={not_working_reason}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                        setNotWorkingReason(e.target.value)
+                      }
+                    />
+                    <ErrorHelperText error={state.errors.not_working_reason} />
+                  </div>
+
+                  {/* Divider */}
+                  <div className="col-span-6">
+                    <hr
+                      className={
+                        "transition-all " +
+                        (is_working === "true"
+                          ? "opacity-0 my-0"
+                          : "opacity-100 mb-7")
+                      }
+                    />
+                  </div>
+
+                  {/* Asset QR ID */}
+                  <div className="col-span-6">
+                    <label htmlFor="asset-qr-id">Asset QR ID</label>
+                    <ActionTextInputField
+                      id="qr_code_id"
+                      fullWidth
+                      name="qr_code_id"
+                      placeholder=""
+                      variant="outlined"
+                      margin="dense"
+                      value={qrCodeId}
+                      onChange={(e) => setQrCodeId(e.target.value)}
+                      actionIcon={<CropFreeIcon className="cursor-pointer" />}
+                      action={() => setIsScannerActive(true)}
+                      errors={state.errors.qr_code_id}
+                    />
+                    <ErrorHelperText error={state.errors.qr_id} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-6 gap-x-6">
+                  {sectionTitle("Warranty Details")}
+
+                  {/* Manufacturer */}
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["manufacturer"]}
+                  >
+                    <TextFormField
+                      id="manufacturer"
+                      name="manufacturer"
+                      label="Manufacturer"
+                      value={manufacturer}
+                      placeholder="Eg. XYZ"
+                      onChange={(e) => setManufacturer(e.value)}
+                      error={state.errors.manufacturer}
+                    />
+                  </div>
+
+                  {/* Warranty / AMC Expiry */}
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["warranty_amc_end_of_validity"]}
+                  >
+                    <label className="mb-2">Warranty / AMC Expiry</label>
+                    <TextFormField
+                      name="WarrantyAMCExpiry"
+                      value={warranty_amc_end_of_validity}
+                      onChange={(date) => {
+                        if (
+                          moment(date.value).format("YYYY-MM-DD") <
+                          new Date().toLocaleDateString("en-ca")
+                        ) {
+                          Notification.Error({
+                            msg: "Warranty / AMC Expiry date can't be in past",
+                          });
+                        } else {
+                          setWarrantyAmcEndOfValidity(
+                            moment(date.value).format("YYYY-MM-DD")
+                          );
+                        }
+                      }}
+                      type="date"
+                      min={moment().format("YYYY-MM-DD")}
+                    />
+                    <ErrorHelperText
+                      error={state.errors.warranty_amc_end_of_validity}
+                    />
+                  </div>
+
+                  {/* Customer Support Name */}
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["support_name"]}
+                  >
+                    <TextFormField
+                      id="support-name"
+                      name="support_name"
+                      label="Customer Support Name"
+                      placeholder="Eg. ABC"
+                      value={support_name}
+                      onChange={(e) => setSupportName(e.value)}
+                      error={state.errors.support_name}
+                    />
+                  </div>
+
+                  {/* Customer Support Number */}
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["support_phone"]}
+                  >
+                    <PhoneNumberFormField
+                      name="support_phone"
+                      label="Customer support number"
+                      required
+                      tollFree
+                      value={support_phone}
+                      onChange={(e) => setSupportPhone(e.value)}
+                      error={state.errors.support_phone}
+                    />
+                  </div>
+
+                  {/* Customer Support Email */}
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["support_email"]}
+                  >
+                    <TextFormField
+                      id="support-email"
+                      name="support_email"
+                      label="Customer Support Email"
+                      placeholder="Eg. mail@example.com"
+                      value={support_email}
+                      onChange={(e) => setSupportEmail(e.value)}
+                      error={state.errors.support_email}
+                    />
+                  </div>
+
+                  <div className="sm:col-span-3" />
+
+                  {/* Vendor Name */}
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["vendor_name"]}
+                  >
+                    <TextFormField
+                      id="vendor-name"
+                      name="vendor_name"
+                      label="Vendor Name"
+                      value={vendor_name}
+                      placeholder="Eg. XYZ"
+                      onChange={(e) => setVendorName(e.value)}
+                      error={state.errors.vendor_name}
+                    />
+                  </div>
+
+                  {/* Serial Number */}
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["serial_number"]}
+                  >
+                    <TextFormField
+                      id="serial-number"
+                      name="serial_number"
+                      label="Serial Number"
+                      value={serial_number}
+                      onChange={(e) => setSerialNumber(e.value)}
+                      error={state.errors.serial_number}
+                    />
+                  </div>
+
+                  <div className="mt-6" />
+                  {sectionTitle("Service Details")}
+
+                  {/* Last serviced on */}
+                  <div
+                    className="col-span-6 sm:col-span-3"
+                    ref={fieldRef["last_serviced_on"]}
+                  >
+                    <label htmlFor="last-serviced-on">Last Serviced On</label>
+                    <TextFormField
+                      name="LastServicedOn"
+                      className="mt-2"
+                      value={last_serviced_on}
+                      onChange={(date) => {
+                        if (
+                          moment(date.value).format("YYYY-MM-DD") >
+                          new Date().toLocaleDateString("en-ca")
+                        ) {
+                          Notification.Error({
+                            msg: "Last Serviced date can't be in future",
+                          });
+                        } else {
+                          setLastServicedOn(
+                            moment(date.value).format("YYYY-MM-DD")
+                          );
+                        }
+                      }}
+                      type="date"
+                      max={moment(new Date()).format("YYYY-MM-DD")}
+                    />
+                    <ErrorHelperText error={state.errors.last_serviced_on} />
+                  </div>
+
+                  {/* Notes */}
+                  <div className="col-span-6 mt-6" ref={fieldRef["notes"]}>
+                    <label htmlFor="notes">Notes</label>
+                    <textarea
+                      id="notes"
+                      className={
+                        "mt-2 block w-full input" +
+                        ((state.errors.notes && " border-red-500") || "")
+                      }
+                      name="notes"
+                      placeholder="Eg. Details on functionality, service, etc."
+                      value={notes}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                        setNotes(e.target.value)
+                      }
+                    />
+                    <ErrorHelperText error={state.errors.notes} />
+                  </div>
+                </div>
+
+                <div />
+
+                <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                  <Cancel
+                    onClick={() =>
+                      navigate(
+                        assetId
+                          ? `/facility/${facilityId}/assets/${assetId}`
+                          : `/facility/${facilityId}`
+                      )
+                    }
+                  />
+                  <Submit
+                    onClick={(e) => handleSubmit(e, false)}
+                    label={assetId ? "Update" : "Create Asset"}
+                  />
+                  {!assetId && (
+                    <Submit
+                      onClick={(e) => handleSubmit(e, true)}
+                      label="Create & Add More"
+                    />
+                  )}
+                </div>
               </div>
-              <div>
-                <InputLabel htmlFor="qr_code_id" id="name=label">
-                  Asset QR Code ID
-                </InputLabel>
-                <ActionTextInputField
-                  id="qr_code_id"
-                  fullWidth
-                  name="qr_code_id"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={qrCodeId}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setQrCodeId(e.target.value)
-                  }
-                  actionIcon={<CropFreeIcon className="cursor-pointer" />}
-                  action={() => setIsScannerActive(true)}
-                  errors={state.errors.qr_code_id}
-                />
-              </div>
-            </div>
-            <div className="flex justify-center sm:justify-start gap-x-4 gap-y-2 flex-wrap">
-              <Button
-                id="asset-create"
-                color="primary"
-                variant="contained"
-                type="submit"
-                onClick={(e) => handleSubmit(e)}
-                startIcon={
-                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                }
-                className="w-full sm:w-auto"
-              >
-                {assetId ? "Update" : "Create"}
-              </Button>
-              <Button
-                id="asset-cancel"
-                color="primary"
-                variant="outlined"
-                type="button"
-                onClick={() =>
-                  navigate(
-                    assetId ? `/assets/${assetId}` : `/facility/${facilityId}`
-                  )
-                }
-                startIcon={<CancelOutlineIcon>cancel</CancelOutlineIcon>}
-                className="w-full sm:w-auto"
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

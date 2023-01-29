@@ -1,19 +1,16 @@
-import React, { useReducer, useState, useEffect } from "react";
+import { useReducer, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   TextInputField,
   MultilineInputField,
   ErrorHelperText,
-  PhoneNumberField,
   SelectField,
 } from "../Common/HelperInputFields";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import {
-  FACILITY_TYPES,
   RESOURCE_CATEGORY_CHOICES,
   RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
@@ -26,11 +23,14 @@ import {
   RadioGroup,
   Box,
   FormControlLabel,
-  Button,
 } from "@material-ui/core";
 import { phonePreg } from "../../Common/validation";
 
 import { createResource, getAnyFacility } from "../../Redux/actions";
+import { goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -88,10 +88,6 @@ const initialState = {
   errors: { ...initError },
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
-
 export default function ResourceCreate(props: resourceProps) {
   const { facilityId } = props;
 
@@ -134,12 +130,12 @@ export default function ResourceCreate(props: resourceProps) {
   }, [dispatchAction, facilityId]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
+      const phoneNumber = parsePhoneNumberFromString(state.form[field]);
       switch (field) {
         case "refering_facility_contact_number":
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
@@ -176,7 +172,14 @@ export default function ResourceCreate(props: resourceProps) {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [event.name]: event.value },
+    });
+  };
+
+  const handleSubmit = async () => {
     const validForm = validateForm();
 
     if (validForm) {
@@ -245,18 +248,18 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div>
-                <PhoneNumberField
-                  label="Contact person phone*"
-                  onlyIndia={true}
+                <PhoneNumberFormField
+                  label="Contact person phone"
+                  name="refering_facility_contact_number"
+                  required
+                  onlyIndia
                   value={state.form.refering_facility_contact_number}
-                  onChange={(value: any) =>
-                    handleValueChange(value, "refering_facility_contact_number")
-                  }
-                  errors={state.errors.refering_facility_contact_number}
+                  onChange={handleFormFieldChange}
+                  error={state.errors.refering_facility_contact_number}
                 />
               </div>
 
-              <div>
+              <div className="md:col-span-2">
                 <InputLabel>Name of approving facility*</InputLabel>
                 <FacilitySelect
                   multiple={false}
@@ -267,6 +270,80 @@ export default function ResourceCreate(props: resourceProps) {
                     handleValueChange(value, "approving_facility")
                   }
                   errors={state.errors.approving_facility}
+                />
+              </div>
+
+              <div>
+                <InputLabel>Category</InputLabel>
+                <SelectField
+                  name="category"
+                  variant="outlined"
+                  fullWidth
+                  margin="dense"
+                  optionArray={true}
+                  value={state.form.category}
+                  options={RESOURCE_CATEGORY_CHOICES}
+                  onChange={handleChange}
+                  className="bg-white h-14 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
+
+              <div>
+                <InputLabel>Subcategory</InputLabel>
+                <SelectField
+                  name="sub_category"
+                  variant="outlined"
+                  margin="dense"
+                  fullWidth
+                  value={state.form.sub_category}
+                  options={RESOURCE_SUBCATEGORIES}
+                  onChange={handleChange}
+                  className="bg-white h-14 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
+
+              <div className="md:col-span-1">
+                <InputLabel>Request Title*</InputLabel>
+                <TextInputField
+                  rows={5}
+                  name="title"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Type your title here"
+                  value={state.form.title}
+                  onChange={handleChange}
+                  errors={state.errors.title}
+                />
+              </div>
+
+              <div className="md:col-span-1">
+                <div className="w-full">
+                  <InputLabel>Required Quantity</InputLabel>
+                  <TextInputField
+                    name="requested_quantity"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.required_quantity}
+                    onChange={handleChange}
+                    errors=""
+                  />
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <InputLabel>Description of request*</InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  name="reason"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Type your description here"
+                  value={state.form.reason}
+                  onChange={handleChange}
+                  errors={state.errors.reason}
                 />
               </div>
 
@@ -295,92 +372,9 @@ export default function ResourceCreate(props: resourceProps) {
                 <ErrorHelperText error={state.errors.emergency} />
               </div>
 
-              <div>
-                <InputLabel>Category</InputLabel>
-                <SelectField
-                  name="category"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.category}
-                  options={RESOURCE_CATEGORY_CHOICES}
-                  onChange={handleChange}
-                  className="bg-white h-14 lg:w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-
-              <div>
-                <InputLabel>Subcategory</InputLabel>
-                <SelectField
-                  name="sub_category"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.sub_category}
-                  options={RESOURCE_SUBCATEGORIES}
-                  onChange={handleChange}
-                  className="bg-white h-14 lg:w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-
-              <div>
-                <InputLabel>Required Quantity</InputLabel>
-                <TextInputField
-                  name="requested_quantity"
-                  variant="outlined"
-                  margin="dense"
-                  type="number"
-                  value={state.form.required_quantity}
-                  onChange={handleChange}
-                  errors=""
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Request Title*</InputLabel>
-                <TextInputField
-                  rows={5}
-                  name="title"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Type your title here"
-                  value={state.form.title}
-                  onChange={handleChange}
-                  errors={state.errors.title}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Description of request*</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="reason"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Type your description here"
-                  value={state.form.reason}
-                  onChange={handleChange}
-                  errors={state.errors.reason}
-                />
-              </div>
-
-              <div className="md:col-span-2 flex justify-between mt-4">
-                <Button color="default" variant="contained" onClick={goBack}>
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  onClick={(e) => handleSubmit(e)}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
-                >
-                  Submit
-                </Button>
+              <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} />
               </div>
             </div>
           </CardContent>

@@ -1,6 +1,5 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import React, { useCallback, useReducer, useState, useEffect } from "react";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
+import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -8,6 +7,8 @@ import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
+import { goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -38,21 +39,18 @@ const inventoryFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
-
 export const SetInventoryForm = (props: any) => {
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
+  // const [offset, setOffset] = useState(0);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
   const [facilityName, setFacilityName] = useState("");
 
   const limit = 14;
+  const offset = 0;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -69,7 +67,7 @@ export const SetInventoryForm = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset]
+    [dispatchAction]
   );
   useAbortableEffect(
     (status: statusType) => {
@@ -122,7 +120,7 @@ export const SetInventoryForm = (props: any) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -170,18 +168,6 @@ export const SetInventoryForm = (props: any) => {
                 </div>
 
                 <div>
-                  <InputLabel id="quantity">Item Min Quantity</InputLabel>
-                  <TextInputField
-                    name="quantity"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    value={state.form.quantity}
-                    onChange={handleChange}
-                    errors=""
-                  />
-                </div>
-                <div>
                   <InputLabel id="inventory_name_label">Unit</InputLabel>
                   <TextInputField
                     name="id"
@@ -192,26 +178,24 @@ export const SetInventoryForm = (props: any) => {
                     errors=""
                   />
                 </div>
+
+                <div className="md:col-span-2">
+                  <InputLabel id="quantity">Item Min Quantity</InputLabel>
+                  <TextInputField
+                    fullWidth
+                    name="quantity"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.quantity}
+                    onChange={handleChange}
+                    errors=""
+                  />
+                </div>
               </div>
-              <div className="flex justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={goBack}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  SET{" "}
-                </Button>
+              <div className="sm:flex sm:justify-between mt-4">
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} label="Set" />
               </div>
             </CardContent>
           </form>

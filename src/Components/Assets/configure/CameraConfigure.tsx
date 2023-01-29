@@ -1,13 +1,12 @@
-import { Fragment } from "react";
 import React from "react";
 import { AssetData } from "../AssetTypes";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { Card, CardContent, InputLabel, Button } from "@material-ui/core";
-import { TextInputField } from "../../Common/HelperInputFields";
+import { Card, CardContent } from "@material-ui/core";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { getCameraConfig } from "../../../Utils/transformUtils";
+import { Submit } from "../../Common/components/ButtonV2";
+import TextFormField from "../../Form/FormFields/TextFormField";
 
 interface CameraConfigureProps {
   asset: AssetData;
@@ -17,6 +16,7 @@ interface CameraConfigureProps {
   newPreset: string;
   setNewPreset(preset: string): void;
   refreshPresetsHash: number;
+  facilityMiddlewareHostname: string;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
   const {
@@ -27,51 +27,43 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     newPreset,
     setNewPreset,
     refreshPresetsHash,
+    facilityMiddlewareHostname,
   } = props;
 
   return (
-    <Fragment>
+    <div className="mb-5">
       <Card>
-        <form onSubmit={addPreset}>
+        <form onSubmit={addPreset} className="">
           <CardContent>
             <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <InputLabel id="asset-type">Bed</InputLabel>
+                <label id="asset-type">Bed</label>
                 <BedSelect
                   name="bed"
+                  className="overflow-y-scoll mt-2"
                   setSelected={(selected) => setBed(selected as BedModel)}
                   selected={bed}
-                  errors=""
+                  error=""
                   multiple={false}
-                  margin="dense"
                   location={asset?.location_object?.id}
                   facility={asset?.location_object?.facility?.id}
                 />
               </div>
               <div>
-                <InputLabel id="location">Preset Name</InputLabel>
-                <TextInputField
+                <label id="location">Preset Name</label>
+                <TextFormField
                   name="name"
                   id="location"
-                  variant="outlined"
-                  margin="dense"
                   type="text"
                   value={newPreset}
-                  onChange={(e) => setNewPreset(e.target.value)}
-                  errors=""
+                  className="mt-2"
+                  onChange={(e) => setNewPreset(e.value)}
+                  error=""
                 />
               </div>
             </div>
-            <div className="flex justify-between mt-4">
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-              >
-                Add Preset
-              </Button>
+            <div className="flex justify-end mt-4">
+              <Submit label="Add Preset" />
             </div>
           </CardContent>
         </form>
@@ -79,13 +71,13 @@ export default function CameraConfigure(props: CameraConfigureProps) {
       <Card>
         <CardContent>
           <LiveFeed
-            middlewareHostname={asset?.meta?.middleware_hostname}
+            middlewareHostname={facilityMiddlewareHostname}
             asset={getCameraConfig(asset)}
             showRefreshButton={true}
             refreshPresetsHash={refreshPresetsHash}
           />
         </CardContent>
       </Card>
-    </Fragment>
+    </div>
   );
 }

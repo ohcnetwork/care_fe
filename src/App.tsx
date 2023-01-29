@@ -3,17 +3,25 @@ import loadable from "@loadable/component";
 import SessionRouter from "./Router/SessionRouter";
 import AppRouter from "./Router/AppRouter";
 import { useDispatch, useSelector } from "react-redux";
-import { getCurrentUser } from "./Redux/actions";
+import { getConfig, getCurrentUser } from "./Redux/actions";
 import { useAbortableEffect, statusType } from "./Common/utils";
 import axios from "axios";
+import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
 
 const Loading = loadable(() => import("./Components/Common/Loading"));
 
 const App: React.FC = () => {
   const dispatch: any = useDispatch();
   const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const { currentUser, config } = state;
   const [user, setUser] = useState(null);
+
+  useAbortableEffect(async () => {
+    const res = await dispatch(getConfig());
+    if (res.data && res.status < 400) {
+      localStorage.setItem("config", JSON.stringify(res.data));
+    }
+  }, [dispatch]);
 
   const updateRefreshToken = () => {
     const refresh = localStorage.getItem("care_refresh_token");
@@ -30,12 +38,9 @@ const App: React.FC = () => {
       .post("/api/v1/auth/token/refresh/", {
         refresh,
       })
-      .then((resp: any) => {
+      .then((resp) => {
         localStorage.setItem("care_access_token", resp.data.access);
         localStorage.setItem("care_refresh_token", resp.data.refresh);
-      })
-      .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
       });
   };
   useEffect(() => {
@@ -53,11 +58,33 @@ const App: React.FC = () => {
     [dispatch]
   );
 
-  if (!currentUser || currentUser.isFetching) {
+  useEffect(() => {
+    const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+    const favicon: any = document.querySelector("link[rel~='icon']");
+    console.log(favicon);
+    if (darkThemeMq.matches) {
+      favicon.href = "/favicon-light.ico";
+    } else {
+      favicon.href = "/favicon-dark.ico";
+    }
+  }, []);
+
+  if (
+    !currentUser ||
+    currentUser.isFetching ||
+    !config ||
+    config.isFetching ||
+    !config.data
+  ) {
     return <Loading />;
   }
-  if (currentUser && currentUser.data) {
-    return <AppRouter />;
+
+  if (currentUser?.data) {
+    return (
+      <HistoryAPIProvider>
+        <AppRouter />
+      </HistoryAPIProvider>
+    );
   } else {
     return <SessionRouter />;
   }

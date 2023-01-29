@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -10,29 +10,43 @@ import {
   getUserListFacility,
   deleteUser,
   getDistrict,
+  partialUpdateUser,
 } from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
-import { navigate, useQueryParams } from "raviger";
-import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import { InputSearchBox } from "../Common/SearchBox";
+import { navigate } from "raviger";
+import { USER_TYPES } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
 
-import { IconButton, CircularProgress } from "@material-ui/core";
+import { IconButton, CircularProgress, Button } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
-import classNames from "classnames";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
-import clsx from "clsx";
+import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import SearchInput from "../Form/SearchInput";
+import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
+import useFilters from "../../Common/hooks/useFilters";
+import { classNames } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { FacilitySelect } from "../Common/FacilitySelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ManageUsers() {
-  const [qParams, setQueryParams] = useQueryParams();
+  const { width } = useWindowDimensions();
+  const {
+    qParams,
+    updateQuery,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({ limit: 18 });
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageUsers: any = null;
@@ -40,12 +54,11 @@ export default function ManageUsers() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFacilityLoading, setIsFacilityLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
-  const [showFilters, setShowFilters] = useState(false);
-  const [districtName, setDistrictName] = useState<string | undefined>(
-    undefined
-  );
+  const [districtName, setDistrictName] = useState<string>();
+
+  const [expandFacilityList, setExpandFacilityList] = useState(false);
+  const [facility, setFacility] = useState<any>(null);
+
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const isSuperuser = currentUser.data.is_superuser;
@@ -58,6 +71,7 @@ export default function ManageUsers() {
     show: boolean;
     username: string;
   }>({ show: false, username: "" });
+  const [linkedFacilityLoading, setLinkedFacilityLoading] = useState(false);
 
   const [userData, setUserData] = useState<{
     show: boolean;
@@ -65,25 +79,22 @@ export default function ManageUsers() {
     name: string;
   }>({ show: false, username: "", name: "" });
 
-  const limit = RESULTS_PER_PAGE_LIMIT;
+  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
+    show: boolean;
+    userName: string;
+    facility?: FacilityModel;
+  }>({ show: false, userName: "", facility: undefined });
 
-  const applyFilter = (data: any) => {
-    const filter = { ...qParams, ...data };
-    updateQuery(filter);
-    setShowFilters(false);
-  };
-
-  const updateQuery = (params: any) => {
-    const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, { replace: true });
-  };
+  const extremeSmallScreenBreakpoint = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const params = {
-        limit,
-        offset,
+        limit: resultsPerPage,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
         username: qParams.username,
         first_name: qParams.first_name,
         last_name: qParams.last_name,
@@ -99,6 +110,8 @@ export default function ManageUsers() {
             setDistrictName(dis.data.name);
           }
         }
+      } else {
+        setDistrictName(undefined);
       }
       const res = await dispatch(getUserList(params));
       if (!status.aborted) {
@@ -110,16 +123,16 @@ export default function ManageUsers() {
       }
     },
     [
-      dispatch,
-      limit,
-      offset,
-      qParams.user_type,
+      resultsPerPage,
+      qParams.page,
       qParams.username,
       qParams.first_name,
       qParams.last_name,
       qParams.phone_number,
       qParams.alt_phone_number,
+      qParams.user_type,
       qParams.district_id,
+      dispatch,
     ]
   );
 
@@ -130,20 +143,10 @@ export default function ManageUsers() {
     [fetchData]
   );
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
-
-  const onUserNameChange = (value: string) => {
-    setQueryParams({ ...qParams, username: value });
-  };
-
   const addUser = (
     <button
-      className="px-4 py-1 rounded-md bg-primary-500 mt-4 text-white text-lg font-semibold shadow"
-      onClick={() => navigate("/user/add")}
+      className="px-4 py-1 w-full md:w-auto rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
+      onClick={() => navigate("/users/add")}
     >
       <i className="fas fa-plus mr-2"></i>
       Add New User
@@ -154,7 +157,9 @@ export default function ManageUsers() {
     if (isFacilityLoading) {
       return;
     }
+    setLinkedFacilityLoading(true);
     setIsFacilityLoading(true);
+    setExpandFacilityList(true);
     const res = await dispatch(getUserListFacility({ username }));
     if (res && res.data) {
       const updated = users.map((user) => {
@@ -168,43 +173,15 @@ export default function ManageUsers() {
       setUsers(updated);
     }
     setIsFacilityLoading(false);
+    setLinkedFacilityLoading(false);
   };
 
-  const removeFacility = async (username: string, facility: any) => {
-    setIsFacilityLoading(true);
-    await dispatch(deleteUserFacility(username, String(facility.id)));
-    setIsFacilityLoading(false);
-    loadFacilities(username);
-  };
-
-  const showLinkFacilityModal = (username: string) => {
-    setLinkFacility({
-      show: true,
-      username,
+  const hideUnlinkFacilityModal = () => {
+    setUnlinkFacilityData({
+      show: false,
+      facility: undefined,
+      userName: "",
     });
-  };
-
-  const removeFilter = (paramKey: any) => {
-    updateQuery({
-      ...qParams,
-      [paramKey]: "",
-    });
-  };
-
-  const badge = (key: string, value: any, paramKey: string) => {
-    return (
-      value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={() => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
   };
 
   const hideLinkFacilityModal = () => {
@@ -232,7 +209,20 @@ export default function ManageUsers() {
     }
 
     setUserData({ show: false, username: "", name: "" });
-    window.location.reload();
+    fetchData({ aborted: false });
+  };
+
+  const handleUnlinkFacilitySubmit = async () => {
+    setIsFacilityLoading(true);
+    await dispatch(
+      deleteUserFacility(
+        unlinkFacilityData.userName,
+        String(unlinkFacilityData?.facility?.id)
+      )
+    );
+    setIsFacilityLoading(false);
+    loadFacilities(unlinkFacilityData.userName);
+    hideUnlinkFacilityModal();
   };
 
   const handleDelete = (user: any) => {
@@ -243,82 +233,141 @@ export default function ManageUsers() {
     });
   };
 
-  const facilityClassname = classNames({
-    "align-baseline font-bold text-sm": true,
-    "text-blue-500 hover:text-blue-800": !isFacilityLoading,
-    "text-gray-500": isFacilityLoading,
-  });
-
   const showLinkFacility = (username: string) => {
     return (
-      <a
-        onClick={() => showLinkFacilityModal(username)}
-        className={facilityClassname}
-        href="#"
-      >
-        Link new facility
-      </a>
+      <div className="flex">
+        <FacilitySelect
+          multiple={false}
+          name="facility"
+          showAll={false} // Show only facilities that user has access to link (not all facilities)
+          showNOptions={8}
+          selected={facility}
+          setSelected={setFacility}
+          errors=""
+          className="z-40"
+        />
+        <Button
+          color="primary"
+          disabled={!facility}
+          onClick={() => addFacility(username, facility)}
+          autoFocus
+        >
+          Add
+        </Button>
+      </div>
     );
+  };
+
+  const updateHomeFacility = async (username: string, facility: any) => {
+    setIsFacilityLoading(true);
+    await dispatch(partialUpdateUser(username, { home_facility: facility.id }));
+    setIsFacilityLoading(false);
+    fetchData({ aborted: false });
   };
 
   const showFacilities = (username: string, facilities: FacilityModel[]) => {
     if (!facilities || !facilities.length) {
       return (
         <>
-          <div className="font-semibold">No Facilities!</div>
           {showLinkFacility(username)}
+          <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
+            <div className="w-full">
+              <img
+                src={`${process.env.PUBLIC_URL}/images/404.svg`}
+                alt="Error 404"
+                className="w-80 mx-auto"
+              />
+            </div>
+            <p className="text-lg font-semibold text-center text-primary pt-4">
+              Select and add some facilities
+            </p>
+          </div>
         </>
       );
     }
     return (
-      <div className="sm:col-start-2 col-span-full sm:col-span-3">
-        <div className="mb-2">
-          {facilities.map((facility, i) => (
-            <div
-              key={`facility_${i}`}
-              className="border-2 font-gbold inline-block rounded-md pl-3 py-1 mr-3 mt-2"
-            >
-              <div className="flex items-center  space-x-1">
-                <div className="font-semibold">{facility.name}</div>
-                <IconButton
-                  size="small"
-                  color="secondary"
-                  disabled={isFacilityLoading}
-                  onClick={() => removeFacility(username, facility)}
-                >
-                  <CloseIcon />
-                </IconButton>
+      <>
+        <div className="sm:col-start-2 col-span-full sm:col-span-3">
+          {showLinkFacility(username)}
+          <div className="mb-2 mt-4">
+            {facilities.map((facility, i) => (
+              <div
+                key={`facility_${i}`}
+                className={classNames(
+                  "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer"
+                )}
+              >
+                <div className="flex justify-between">
+                  <div className="text-lg font-bold">{facility.name}</div>
+                  <div>
+                    <i
+                      className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
+                      onClick={() => updateHomeFacility(username, facility)}
+                    ></i>
+                    <IconButton
+                      size="small"
+                      color="secondary"
+                      disabled={isFacilityLoading}
+                      onClick={() =>
+                        setUnlinkFacilityData({
+                          show: true,
+                          facility: facility,
+                          userName: username,
+                        })
+                      }
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-        {showLinkFacility(username)}
-      </div>
+      </>
+    );
+  };
+
+  const hideFacilities = (username: string) => {
+    setUsers(
+      users.filter((user) => {
+        if (user.username === username) {
+          user.facilities = null;
+        }
+        return user;
+      })
     );
   };
 
   const addFacility = async (username: string, facility: any) => {
     hideLinkFacilityModal();
     setIsFacilityLoading(true);
-    await dispatch(addUserFacility(username, String(facility.id)));
+    const res = await dispatch(addUserFacility(username, String(facility.id)));
+    if (res?.status !== 201) {
+      Notification.Error({
+        msg: "Error while linking facility",
+      });
+    }
     setIsFacilityLoading(false);
     loadFacilities(username);
   };
 
   const showDelete = (user: any) => {
-    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateLabAdmin");
+    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateAdmin");
     const STATE_READ_ONLY_ADMIN_LEVEL =
       USER_TYPES.indexOf("StateReadOnlyAdmin");
     const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
     const level = USER_TYPES.indexOf(user.user_type);
     const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
     if (user.is_superuser) return true;
-    if (
-      currentUserLevel >= STATE_ADMIN_LEVEL &&
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
-    )
+
+    if (currentUserLevel >= STATE_ADMIN_LEVEL)
       return user.state_object?.id === currentUser?.data?.state;
-    if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel > level)
+    if (
+      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
+      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
+      currentUserLevel > level
+    )
       return user?.district_object?.id === currentUser?.data?.district;
     return false;
   };
@@ -327,33 +376,42 @@ export default function ManageUsers() {
 
   users &&
     users.length &&
-    (userList = users.map((user: any) => {
+    (userList = users.map((user: any, idx) => {
       const cur_online = moment()
         .subtract(5, "minutes")
         .isBefore(user.last_login);
       return (
         <div
           key={`usr_${user.id}`}
+          id={`usr_${idx}`}
           className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
         >
-          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
+          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="flex lg:flex-row gap-3 flex-col justify-between">
+                <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
                   {user.username && (
-                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit">
+                    <div
+                      id="username"
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit"
+                    >
                       {user.username}
                     </div>
                   )}
                   <div className="flex-shrink-0 text-sm text-gray-600 min-width-50">
                     {user.last_login && cur_online ? (
-                      <span>Currently Online</span>
+                      <span>
+                        {" "}
+                        <i className="fa-solid fa-clock"></i> Currently Online
+                      </span>
                     ) : (
                       <>
-                        <span>Last Online: </span>
+                        <span>
+                          <i className="fa-solid fa-clock"></i> Last Online:{" "}
+                        </span>
                         <span
                           aria-label="Online"
-                          className={clsx(
+                          className={classNames(
                             "shrink-0 inline-block h-2 w-2 rounded-full",
                             cur_online ? "bg-primary-400" : "bg-gray-300"
                           )}
@@ -367,7 +425,7 @@ export default function ManageUsers() {
                     )}
                   </div>
                 </div>
-                <div className="font-black text-2xl capitalize mt-2">
+                <div id="name" className="font-bold text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && cur_online ? (
@@ -376,80 +434,181 @@ export default function ManageUsers() {
                       aria-label="Online"
                     ></i>
                   ) : null}
+                  {showDelete(user) && (
+                    <button
+                      type="button"
+                      className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-white hover:bg-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      onClick={() => handleDelete(user)}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
 
-                <div className="flex justify-between">
+                <div
+                  className={`flex ${
+                    isExtremeSmallScreen
+                      ? " flex-wrap "
+                      : " flex-row justify-between "
+                  } md:grid md:grid-cols-4 gap-2`}
+                >
                   {user.user_type && (
-                    <UserDetails title="Role">
-                      <div className="font-semibold">{user.user_type}</div>
-                    </UserDetails>
+                    <div className="col-span-2">
+                      <UserDetails id="role" title="Role">
+                        <div className="font-semibold break-all">
+                          {user.user_type}
+                        </div>
+                      </UserDetails>
+                    </div>
                   )}
                   {user.district_object && (
-                    <UserDetails title="District">
-                      <div className="font-semibold">
-                        {user.district_object.name}
+                    <div className="col-span-2">
+                      <UserDetails id="district" title="District">
+                        <div className="font-semibold">
+                          {user.district_object.name}
+                        </div>
+                      </UserDetails>
+                    </div>
+                  )}
+                  {user.user_type === "Doctor" && (
+                    <>
+                      <div className="col-span-2">
+                        <UserDetails
+                          id="doctor-qualification"
+                          title="Qualification"
+                        >
+                          {user.doctor_qualification ? (
+                            <span className="font-semibold">
+                              {user.doctor_qualification}
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
                       </div>
-                    </UserDetails>
+                      <div className="col-span-2">
+                        <UserDetails id="doctor-experience" title="Experience">
+                          {user.doctor_experience_commenced_on ? (
+                            <span className="font-semibold">
+                              {moment().diff(
+                                user.doctor_experience_commenced_on,
+                                "years",
+                                false
+                              )}{" "}
+                              years
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                      <div className="col-span-2">
+                        <UserDetails
+                          id="medical-council-registration"
+                          title="Medical Council Registration"
+                        >
+                          {user.doctor_medical_council_registration ? (
+                            <span className="font-semibold">
+                              {user.doctor_medical_council_registration}
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                    </>
                   )}
                 </div>
                 {user.local_body_object && (
-                  <UserDetails title="Location">
+                  <UserDetails id="local_body" title="Location">
                     <div className="font-semibold">
                       {user.local_body_object.name}
                     </div>
                   </UserDetails>
                 )}
-                <div className="flex justify-between">
+                <div
+                  className={`${
+                    isExtremeSmallScreen
+                      ? "flex flex-wrap "
+                      : "grid grid-cols-4 "
+                  }`}
+                >
                   {user.created_by && (
-                    <UserDetails title="Created by">
-                      <div className="font-semibold">{user.created_by}</div>
-                    </UserDetails>
-                  )}
-                  {user.phone_number && (
-                    <div className="mt-2 bg-gray-50 border-t px-6 py-2">
-                      <div className="flex py-4 justify-between">
-                        <div>
-                          <div className="text-gray-500 leading-relaxed">
-                            Phone:
-                          </div>
-                          <a
-                            href={`tel:${user.phone_number}`}
-                            className="font-semibold"
-                          >
-                            {user.phone_number || "-"}
-                          </a>
+                    <div className="col-span-2">
+                      <UserDetails id="created_by" title="Created by">
+                        <div className="font-semibold break-all">
+                          {user.created_by}
                         </div>
+                      </UserDetails>
+                    </div>
+                  )}
+                  {user.username && (
+                    <div className="col-span-2">
+                      <UserDetails id="home_facility" title="Home Facility">
+                        <span className="font-semibold block">
+                          {user.home_facility_object?.name ||
+                            "No Home Facility"}
+                        </span>
+                      </UserDetails>
+                    </div>
+                  )}
+                  {user.username && (
+                    <div id="facilities" className="col-span-4">
+                      <div className="flex text-gray-800">
+                        <p className="flex items-center">Linked Facilities: </p>
+                        <ButtonV2
+                          ghost
+                          circle
+                          disabled={linkedFacilityLoading}
+                          variant="secondary"
+                          className="tooltip flex items-center"
+                          onClick={() => {
+                            if (!user.facilities) {
+                              loadFacilities(user.username);
+                            } else {
+                              hideFacilities(user.username);
+                            }
+                          }}
+                        >
+                          <CareIcon
+                            className={`${
+                              !user.facilities
+                                ? "care-l-eye"
+                                : expandFacilityList
+                                ? "care-l-eye-slash"
+                                : "care-l-eye"
+                            } text-xl`}
+                          />
+                          <span className="tooltip-text tooltip-bottom">
+                            {!user.facilities
+                              ? "View"
+                              : expandFacilityList
+                              ? "Hide"
+                              : "View"}{" "}
+                            Linked Facilities
+                          </span>
+                        </ButtonV2>
                       </div>
+                      {user.facilities && (
+                        <div className="col-span-4">
+                          <SlideOverCustom
+                            open={expandFacilityList}
+                            setOpen={setExpandFacilityList}
+                            slideFrom="right"
+                            title="Facilities"
+                            dialogClass="md:w-[400px]"
+                            onCloseClick={() => true}
+                          >
+                            <div>
+                              {showFacilities(user.username, user.facilities)}
+                            </div>
+                          </SlideOverCustom>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-
-                {user.username && (
-                  <UserDetails title="Facilities">
-                    {user.facilities &&
-                      showFacilities(user.username, user.facilities)}
-                    {!user.facilities && (
-                      <a
-                        onClick={() => loadFacilities(user.username)}
-                        className={`inline-block ${facilityClassname}`}
-                        href="#"
-                      >
-                        Click here to show
-                      </a>
-                    )}
-                  </UserDetails>
-                )}
               </div>
-
-              {showDelete(user) && (
-                <button
-                  type="button"
-                  className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                  onClick={() => handleDelete(user)}
-                >
-                  Delete
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -463,16 +622,7 @@ export default function ManageUsers() {
       <div>
         {userTypes.length && addUser}
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
-        )}
+        <Pagination totalCount={totalCount} />
       </div>
     );
   } else if (users && users.length === 0) {
@@ -515,7 +665,10 @@ export default function ManageUsers() {
                   <CircularProgress className="text-primary-500" />
                 </dd>
               ) : (
-                <dd className="mt-4 text-5xl lg:text-5xl md:text-4xl leading-9 font-semibold text-gray-900">
+                <dd
+                  id="count"
+                  className="mt-4 text-5xl lg:text-5xl md:text-4xl leading-9 font-semibold text-gray-900"
+                >
                   {totalCount}
                 </dd>
               )}
@@ -524,19 +677,19 @@ export default function ManageUsers() {
         </div>
         <div className="flex flex-col lg:flex-row justify-between col-span-2 lg:px-3 space-y-3 lg:space-y-0 lg:space-x-4 my-2">
           <div className="w-full">
-            <InputSearchBox
-              search={onUserNameChange}
+            <SearchInput
+              name="username"
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
               value={qParams.username}
-              placeholder="Search by User Name"
-              errors=""
+              placeholder="Search by username"
             />
           </div>
 
           <div>
             <div className="flex items-start mb-2">
               <button
-                className="btn btn-primary-ghost"
-                onClick={() => setShowFilters((show) => !show)}
+                className="btn btn-primary-ghost w-full"
+                onClick={() => advancedFilter.setShow(true)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -572,38 +725,26 @@ export default function ManageUsers() {
             </div>
           </div>
 
-          <SlideOver show={showFilters} setShow={setShowFilters}>
+          <SlideOver {...advancedFilter}>
             <div className="bg-white min-h-screen p-4">
-              <UserFilter
-                filter={qParams}
-                onChange={applyFilter}
-                closeFilter={() => setShowFilters(false)}
-              />
+              <UserFilter {...advancedFilter} />
             </div>
           </SlideOver>
         </div>
       </div>
 
-      <div className="flex mt-2 mx-6 flex-wrap gap-2 items-center">
-        {badge("Username", qParams.username, "username")}
-        {badge("First Name", qParams.first_name, "first_name")}
-        {badge("Last Name", qParams.last_name, "last_name")}
-        {qParams.phone_number?.trim()
-          ? badge("Phone Number", qParams.phone_number, "phone_number")
-          : null}
-        {qParams.alt_phone_number?.trim()
-          ? badge(
-              "Alternate Phone Number",
-              qParams.alt_phone_number,
-              "alt_phone_number"
-            )
-          : null}
-        {qParams.user_type
-          ? badge("Role", qParams.user_type, "user_type")
-          : null}
-        {qParams.district_id
-          ? badge("District", districtName, "district_id")
-          : null}
+      <div className="pl-6 pb-2">
+        <FilterBadges
+          badges={({ badge, value, phoneNumber }) => [
+            badge("Username", "username"),
+            badge("First Name", "first_name"),
+            badge("Last Name", "last_name"),
+            phoneNumber(),
+            phoneNumber("WhatsApp no.", "alt_phone_number"),
+            badge("Role", "user_type"),
+            value("District", "district_id", districtName || ""),
+          ]}
+        />
       </div>
 
       <div className="px-3 md:px-6">
@@ -614,6 +755,14 @@ export default function ManageUsers() {
           name={userData.name}
           handleCancel={handleCancel}
           handleOk={handleSubmit}
+        />
+      )}
+      {unlinkFacilityData.show && (
+        <UnlinkFacilityDialog
+          facilityName={unlinkFacilityData.facility?.name || ""}
+          userName={unlinkFacilityData.userName}
+          handleCancel={hideUnlinkFacilityModal}
+          handleOk={handleUnlinkFacilitySubmit}
         />
       )}
     </div>

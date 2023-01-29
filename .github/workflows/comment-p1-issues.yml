@@ -1,0 +1,43 @@
+name: Comment on P1 issues
+
+on:
+  issues:
+    types:
+      - labeled
+
+jobs:
+  add-comment:
+    if: github.event.label.name == 'P1'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Add comment
+        uses: actions/github-script@v6.3.3
+        with:
+          script: |
+            const body = ':warning: **Refrain from assigning this issue to yourself if you have another `P1` issue assigned that is not yet closed.**'
+            const options = {
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            }
+
+            const result = await github.rest.issues.get({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+
+            const { assignees } = result.data
+
+            if (assignees.length == 0) {
+              await github.rest.issues.createComment({ ...options, body })
+              return
+            }
+
+            const assignees_tagged = assignees.map((user) => '@' + user.login).join(' ')
+            await github.rest.issues.createComment({
+              ...options,
+              body: body + `\n ${assignees_tagged} kindly acknowledge this message by commenting 'Acknowledged' below.`,
+            })

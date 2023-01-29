@@ -27,6 +27,7 @@ build
 .swp
 stats.json
 public/build-meta.json
+.vscode
 
 
 # Reason React
@@ -48,5 +49,9 @@ public/build-meta.json
 
 
 # Using NPM
-# package-lock.json
 yarn.lock
+pnpm-lock.yaml
+
+# Cypress
+cypress/downloads
+cypress/fixtures/token.json

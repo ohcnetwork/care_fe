@@ -18,9 +18,20 @@ import {
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
-import { Card, CardContent, Modal, Tooltip } from "@material-ui/core";
+import {
+  Card,
+  CardContent,
+  InputLabel,
+  Modal,
+  Tooltip,
+} from "@material-ui/core";
 import { FeedCameraPTZHelpButton } from "./Feed";
+import { AxiosError } from "axios";
 import { isNull } from "lodash";
+import { BedSelect } from "../../Common/BedSelect";
+import { BedModel } from "../models";
+import { TextInputField } from "../../Common/HelperInputFields";
+import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -34,6 +45,8 @@ const LiveFeed = (props: any) => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
     StreamStatus.Offline
   );
+  const [bed, setBed] = useState<BedModel>({});
+  const [preset, setNewPreset] = useState<string>("");
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
   const [page, setPage] = useState({
@@ -42,7 +55,11 @@ const LiveFeed = (props: any) => {
     offset: 0,
   });
   const [toDelete, setToDelete] = useState<any>(null);
-
+  const [toUpdate, setToUpdate] = useState<any>(null);
+  const { width } = useWindowDimensions();
+  const extremeSmallScreenBreakpoint = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
   const liveFeedPlayerRef = useRef<any>(null);
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
@@ -74,7 +91,21 @@ const LiveFeed = (props: any) => {
       middlewareHostname,
       ...cameraAsset,
     },
+    dispatch,
   });
+
+  const fetchCameraPresets = () =>
+    getPresets({
+      onSuccess: (resp) => {
+        setPresets(resp);
+      },
+      onError: (resp) => {
+        resp instanceof AxiosError &&
+          Notification.Error({
+            msg: "Camera is offline",
+          });
+      },
+    });
 
   const getBedPresets = async (id: any) => {
     const bedAssets = await dispatch(
@@ -104,15 +135,51 @@ const LiveFeed = (props: any) => {
     setToDelete(null);
   };
 
+  const updatePreset = async (currentPreset: any) => {
+    const data = {
+      bed_id: bed.id,
+      preset_name: preset,
+    };
+    const response = await dispatch(
+      partialUpdateAssetBed(
+        {
+          asset: currentPreset.asset_object.id,
+          bed: bed.id,
+          meta: {
+            ...currentPreset.meta,
+            ...data,
+          },
+        },
+        currentPreset?.id
+      )
+    );
+    if (response && response.status === 200) {
+      Notification.Success({ msg: "Preset Updated" });
+    } else {
+      Notification.Error({ msg: "Something Went Wrong" });
+    }
+    getBedPresets(cameraAsset?.id);
+    fetchCameraPresets();
+    setToUpdate(null);
+  };
+
   const gotoBedPreset = (preset: any) => {
     setLoading("Moving");
     absoluteMove(preset.meta.position, {
       onSuccess: () => setLoading(undefined),
     });
   };
+
   useEffect(() => {
-    getPresets({ onSuccess: (resp) => setPresets(resp.data) });
+    if (cameraAsset?.hostname) {
+      fetchCameraPresets();
+    }
   }, []);
+
+  useEffect(() => {
+    setNewPreset(toUpdate?.meta?.preset_name);
+    setBed(toUpdate?.bed_object);
+  }, [toUpdate]);
 
   useEffect(() => {
     getBedPresets(cameraAsset.id);
@@ -121,8 +188,8 @@ const LiveFeed = (props: any) => {
     }
   }, [page.offset, cameraAsset.id, refreshPresetsHash]);
 
-  const viewOptions = (page: number) =>
-    presets
+  const viewOptions = (page: number) => {
+    return presets
       ? Object.entries(presets)
           .map(([key, value]) => ({ label: key, value }))
           .slice(page, page + 10)
@@ -130,7 +197,7 @@ const LiveFeed = (props: any) => {
           label: "Monitor " + (i + 1),
           value: i + 1,
         }));
-
+  };
   useEffect(() => {
     let tId: any;
     if (streamStatus !== StreamStatus.Playing) {
@@ -168,16 +235,13 @@ const LiveFeed = (props: any) => {
         onError: () => setStreamStatus(StreamStatus.Offline),
       });
     },
-    stop: () => {
-      // NEED ID TO STOP STREAM
-    },
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       screenfull.request(liveFeedPlayerRef.current);
     },
     updatePreset: (option) => {
       getCameraStatus({
-        onSuccess: async ({ data }) => {
+        onSuccess: async (data) => {
           console.log({ currentPreset, data });
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
@@ -198,7 +262,7 @@ const LiveFeed = (props: any) => {
             if (response && response.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               getBedPresets(cameraAsset?.id);
-              getPresets({});
+              fetchCameraPresets();
             }
             setLoading(undefined);
           }
@@ -253,6 +317,56 @@ const LiveFeed = (props: any) => {
                   Confirm
                 </button>
                 <button className="text-sm" onClick={() => setToDelete(null)}>
+                  Cancel
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </Modal>
+      )}
+      {toUpdate && (
+        <Modal
+          className="flex h-fit justify-center items-center top-1/2"
+          open={!isNull(toUpdate)}
+        >
+          <Card>
+            <CardContent>
+              <h5>Update Preset</h5>
+              <hr />
+              <div>
+                <InputLabel id="asset-type">Bed</InputLabel>
+                <BedSelect
+                  name="bed"
+                  setSelected={(selected) => setBed(selected as BedModel)}
+                  selected={bed}
+                  error=""
+                  multiple={false}
+                  location={cameraAsset.location_id}
+                  facility={cameraAsset.facility_id}
+                />
+              </div>
+              <div>
+                <InputLabel id="location">Preset Name</InputLabel>
+                <TextInputField
+                  name="name"
+                  id="location"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  value={preset}
+                  onChange={(e) => setNewPreset(e.target.value)}
+                  errors=""
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end mt-2">
+                <button
+                  onClick={() => updatePreset(toUpdate)}
+                  className="bg-red-500 px-3 text-sm py-1 rounded-md text-white"
+                >
+                  Confirm
+                </button>
+                <button className="text-sm" onClick={() => setToUpdate(null)}>
                   Cancel
                 </button>
               </div>
@@ -320,7 +434,11 @@ const LiveFeed = (props: any) => {
                 )}
               </div>
             </div>
-            <div className="md:flex max-w-lg mt-4">
+            <div
+              className={`${
+                isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
+              } max-w-lg mt-4`}
+            >
               {cameraPTZ.map((option) => {
                 const shortcutKeyDescription =
                   option.shortcutKey &&
@@ -369,7 +487,7 @@ const LiveFeed = (props: any) => {
           </div>
 
           <div className="flex flex-col mx-4 max-w-sm">
-            <nav className="flex w-full">
+            <nav className="flex flex-wrap">
               <button
                 className={`flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
                   showDefaultPresets
@@ -396,7 +514,11 @@ const LiveFeed = (props: any) => {
               </button>
             </nav>
             <div className="w-full space-y-4 my-2">
-              <div className="grid grid-cols-2 my-auto gap-2">
+              <div
+                className={`grid ${
+                  isExtremeSmallScreen ? " sm:grid-cols-2 " : " grid-cols-2 "
+                } my-auto gap-2`}
+              >
                 {showDefaultPresets ? (
                   <>
                     {viewOptions(presetsPage)?.map((option: any, i) => (
@@ -432,7 +554,7 @@ const LiveFeed = (props: any) => {
                             gotoBedPreset(preset);
                             setCurrentPreset(preset);
                             getBedPresets(cameraAsset?.id);
-                            getPresets({});
+                            fetchCameraPresets();
                           }}
                         >
                           <span className="justify-start text-xs font-semibold">
@@ -444,13 +566,20 @@ const LiveFeed = (props: any) => {
                               : `Unnamed Preset ${index + 1}`}
                           </span>
                         </button>
-                        <button
-                          onClick={() => setToDelete(preset)}
-                          className="text-red-800 text-sm py-1 bg-red-200 justify-center items-center gap-2 flex hover:bg-red-800 hover:text-red-200 rounded-b-md"
-                        >
-                          <i className="fa-solid fa-trash-can"></i>
-                          <span>Delete</span>
-                        </button>
+                        <div className="flex">
+                          <button
+                            onClick={() => setToUpdate(preset)}
+                            className="text-green-800 text-sm py-1 bg-green-200 w-1/2 justify-center items-center gap-2 flex hover:bg-green-800 hover:text-green-200 "
+                          >
+                            <i className="fa-solid fa-pencil"></i>
+                          </button>
+                          <button
+                            onClick={() => setToDelete(preset)}
+                            className="text-red-800 text-sm py-1 bg-red-200 w-1/2 justify-center items-center gap-2 flex hover:bg-red-800 hover:text-red-200 "
+                          >
+                            <i className="fa-solid fa-trash-can"></i>
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </>
@@ -470,7 +599,7 @@ const LiveFeed = (props: any) => {
                   </button>
                   <button
                     className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
-                    disabled={presetsPage >= presets.length}
+                    disabled={presetsPage >= presets?.length}
                     onClick={() => {
                       setPresetsPage(presetsPage + 10);
                     }}
@@ -505,7 +634,7 @@ const LiveFeed = (props: any) => {
                   className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full"
                   onClick={() => {
                     getBedPresets(cameraAsset?.id);
-                    getPresets({});
+                    fetchCameraPresets();
                   }}
                 >
                   <RefreshIcon /> Refresh

@@ -1,17 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { UserSelect } from "../Common/UserSelect2";
-import {
-  SelectField,
-  DateInputField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { SelectField } from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
-  KASP_STRING,
   BREATHLESSNESS_LEVEL,
-  KASP_ENABLED,
 } from "../../Common/constants";
 import moment from "moment";
 import { getAnyFacility, getUserList } from "../../Redux/actions";
@@ -20,55 +14,44 @@ import { CircularProgress } from "@material-ui/core";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-}
+import parsePhoneNumberFromString from "libphonenumber-js";
+import useMergeState from "../../Common/hooks/useMergeState";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import useConfig from "../../Common/hooks/useConfig";
 
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
-  const { filter, onChange, closeFilter, local } = props;
+  const { kasp_enabled, kasp_string } = useConfig();
+  const { filter, onChange, closeFilter } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
 
   const [filterState, setFilterState] = useMergeState({
-    orgin_facility: filter.orgin_facility || local.orgin_facility || "",
+    orgin_facility: filter.orgin_facility || "",
     orgin_facility_ref: null,
-    shifting_approving_facility:
-      filter.shifting_approving_facility ||
-      local.shifting_approving_facility ||
-      "",
+    shifting_approving_facility: filter.shifting_approving_facility || "",
     shifting_approving_facility_ref: null,
-    assigned_facility:
-      filter.assigned_facility || local.assigned_facility || "",
+    assigned_facility: filter.assigned_facility || "",
     assigned_facility_ref: null,
-    emergency: filter.emergency || local.emergency || "--",
-    is_up_shift: filter.is_up_shift || local.is_up_shift || "--",
-    created_date_before:
-      filter.created_date_before || local.created_date_before || null,
-    created_date_after:
-      filter.created_date_after || local.created_date_after || null,
-    modified_date_before:
-      filter.modified_date_before || local.modified_date_before || null,
-    modified_date_after:
-      filter.modified_date_after || local.modified_date_after || null,
-    patient_phone_number:
-      filter.patient_phone_number || local.patient_phone_number || "",
-    ordering: filter.ordering || local.ordering || null,
-    is_kasp: filter.is_kasp || local.is_kasp || "--",
-    status: filter.status || local.status || null,
+    emergency: filter.emergency || "--",
+    is_up_shift: filter.is_up_shift || "--",
+    created_date_before: filter.created_date_before || null,
+    created_date_after: filter.created_date_after || null,
+    modified_date_before: filter.modified_date_before || null,
+    modified_date_after: filter.modified_date_after || null,
+    patient_phone_number: filter.patient_phone_number || "",
+    ordering: filter.ordering || null,
+    is_kasp: filter.is_kasp || "--",
+    status: filter.status || null,
     assigned_user_ref: null,
-    assigned_to: filter.assigned_to || local.assigned_to || "",
-    disease_status: filter.disease_status || local.disease_status || "",
-    is_antenatal: filter.is_antenatal || local.is_antenatal || "--",
-    breathlessness_level:
-      filter.breathlessness_level || local.breathlessness_level || "",
+    assigned_to: filter.assigned_to || "",
+    disease_status: filter.disease_status || "",
+    is_antenatal: filter.is_antenatal || "--",
+    breathlessness_level: filter.breathlessness_level || "",
   });
   const dispatch: any = useDispatch();
 
@@ -170,8 +153,14 @@ export default function ListFilter(props: any) {
     setFilterState(filterData);
   };
 
+  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
+    setFilterState({
+      ...filterState,
+      [event.name]: event.value === "--" ? "" : event.value,
+    });
+  };
+
   const clearFilters = () => {
-    localStorage.removeItem("shift-filters");
     closeFilter();
   };
 
@@ -201,7 +190,9 @@ export default function ListFilter(props: any) {
       assigned_facility: assigned_facility || "",
       emergency: emergency || "",
       is_up_shift: is_up_shift || "",
-      patient_phone_number: patient_phone_number || "",
+      patient_phone_number: patient_phone_number
+        ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164")
+        : "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()
           ? moment(created_date_before).format("YYYY-MM-DD")
@@ -226,7 +217,6 @@ export default function ListFilter(props: any) {
       is_antenatal: is_antenatal || "",
       breathlessness_level: breathlessness_level || "",
     };
-    localStorage.setItem("shift-filters", JSON.stringify({ ...data }));
     onChange(data);
   };
 
@@ -344,6 +334,7 @@ export default function ListFilter(props: any) {
               <CircularProgress size={20} />
             ) : (
               <UserSelect
+                name="assigned_to"
                 multiple={false}
                 selected={filterState.assigned_user_ref}
                 setSelected={(obj) => setAssignedUser(obj)}
@@ -353,19 +344,6 @@ export default function ListFilter(props: any) {
             )}
           </div>
         </div>
-
-        {/* <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Status</span>
-          <SelectField
-                name="status"
-                variant="outlined"
-                margin="dense"
-                optionArray={true}
-                value={filterState.status}
-                options={shiftStatusOptions}
-                onChange={handleChange}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div> */}
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Ordering</span>
@@ -396,9 +374,9 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        {KASP_ENABLED && (
+        {kasp_enabled && (
           <div className="w-full flex-none">
-            <span className="text-sm font-semibold">Is {KASP_STRING}</span>
+            <span className="text-sm font-semibold">Is {kasp_string}</span>
             <SelectField
               name="is_kasp"
               variant="outlined"
@@ -469,14 +447,11 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Patient Phone Number</span>
-          <TextInputField
+          <PhoneNumberFormField
+            label="Patient Phone Number"
             name="patient_phone_number"
-            variant="outlined"
-            margin="dense"
-            errors=""
             value={filterState.patient_phone_number}
-            onChange={handleChange}
+            onChange={handleFormFieldChange}
           />
         </div>
 
@@ -512,17 +487,6 @@ export default function ListFilter(props: any) {
             size="small"
           />
         </div>
-        {/* <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Is upshift case</span>
-          <DateTimeFiled
-                name="X_before"
-                inputVariant="outlined"
-                margin="dense"
-                errors=""
-                value={filter.X_before}
-                onChange={date => handleChange({target: {name: "X_before", value: date}})}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div>         */}
       </div>
     </div>
   );

@@ -10,19 +10,12 @@ import {
   Box,
   Button,
 } from "@material-ui/core";
-import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
+import { createStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
 import { SelectField, TextInputField } from "../../Common/HelperInputFields";
 import _ from "lodash";
-import clsx from "clsx";
-
-const useStyle = makeStyles(() => ({
-  tableCell: {
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-}));
+import { classNames } from "../../../Utils/utils";
 
 const StyledTableRow = withStyles(() =>
   createStyles({
@@ -51,7 +44,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
         {data?.investigation_object?.name || "---"}
       </TableCell>
       <TableCell
-        className={clsx(
+        className={classNames(
           "h-12 text-sm border-l border-r border-gray-400",
           showForm ? "p-0" : "px-2"
         )}
@@ -127,14 +120,14 @@ export const InvestigationTable = ({
 
   return (
     <Box padding="1rem" margin="1rem 0">
-      <div className="flex items-center justify-between mb">
+      <div className="flex flex-col sm:flex-row items-center justify-between mb">
         {title && <div className="font-bold text-xl">{title}</div>}
-        <div>
+        <div className="py-2 flex sm:flex-row flex-col ">
           <Button
             color="primary"
             variant="outlined"
             onClick={() => window.print()}
-            className="mr-2"
+            className="mr-2 my-2"
             disabled={showForm}
           >
             Print Report
@@ -142,6 +135,7 @@ export const InvestigationTable = ({
           <Button
             variant={showForm ? "outlined" : "contained"}
             color="primary"
+            className="mr-2 my-2"
             onClick={() => {
               showForm && handleUpdateCancel();
               setShowForm((prev) => !prev);
@@ -155,7 +149,7 @@ export const InvestigationTable = ({
               variant={"contained"}
               color="primary"
               onClick={() => handleSave()}
-              className="ml-2"
+              className="mr-2 my-2"
             >
               Save
             </Button>
@@ -172,12 +166,8 @@ export const InvestigationTable = ({
         onChange={(e) => setSearchFilter(e.target.value)}
       />
       <br />
-      <TableContainer
-        component={Paper}
-        className="overflow-hidden"
-        id="section-to-print"
-      >
-        <Table aria-label="simple table overflow-hidden" size="small">
+      <TableContainer component={Paper} id="section-to-print">
+        <Table aria-label="simple table" size="small">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>

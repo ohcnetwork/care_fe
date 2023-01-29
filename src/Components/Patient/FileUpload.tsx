@@ -1,31 +1,36 @@
 import axios from "axios";
 import { Button, CircularProgress, InputLabel } from "@material-ui/core";
-import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
   retrieveUpload,
   createUpload,
   getPatient,
+  editUpload,
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
 import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import { GetApp, Visibility } from "@material-ui/icons";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Modal from "@material-ui/core/Modal";
-import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
-
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
+import { formatDate } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
+import HeadedTabs from "../Common/HeadedTabs";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import DialogModal from "../Common/Dialog";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import TextFormField from "../Form/FormFields/TextFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -50,14 +55,17 @@ export const header_content_type: URLS = {
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 
-// Object for possible extension of image files
-const ExtImage: URLS = {
-  jpeg: "1",
-  jpg: "1",
-  gif: "1",
-  png: "1",
-  svg: "1",
-};
+// Array of image extensions
+const ExtImage: string[] = [
+  "jpeg",
+  "jpg",
+  "png",
+  "gif",
+  "svg",
+  "bmp",
+  "webp",
+  "jfif",
+];
 
 export const LinearProgressWithLabel = (props: any) => {
   return (
@@ -89,17 +97,29 @@ interface URLS {
   [id: string]: string;
 }
 
+interface ModalDetails {
+  name?: string;
+  id?: string;
+  reason?: string;
+  userArchived?: string;
+  archiveTime?: any;
+}
+
 interface StateInterface {
   open: boolean;
   isImage: boolean;
+  name: string;
+  extension: string;
   zoom: number;
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
+  rotation: number;
 }
 
 export const FileUpload = (props: FileUploadProps) => {
+  const { t } = useTranslation();
   const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [file, setFile] = useState<File | undefined>();
+  const [file, setFile] = useState<File | null>();
   const {
     facilityId,
     consultationId,
@@ -118,24 +138,25 @@ export const FileUpload = (props: FileUploadProps) => {
   ]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
-  // const [uploadSuccess, setUploadSuccess] = useState(false);
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
+  const [uploadFileError, setUploadFileError] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
   const [audioName, setAudioName] = useState<string>("");
-  const [audioNameError, setAudioNameError] = useState<string>("");
+  const [audioFileError, setAudioFileError] = useState<string>("");
   const [contentType, setcontentType] = useState<string>("");
-  // const classes = useStyles();
-  // const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
   const initialState = {
     open: false,
     isImage: false,
+    name: "",
+    extension: "",
     zoom: 3,
     isZoomInDisabled: false,
     isZoomOutDisabled: false,
+    rotation: 0,
   };
   const [file_state, setFileState] = useState<StateInterface>(initialState);
 
@@ -144,8 +165,26 @@ export const FileUpload = (props: FileUploadProps) => {
   const [offset, setOffset] = useState(0);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [modalOpenForEdit, setModalOpenForEdit] = useState(false);
+  const [modalOpenForArchive, setModalOpenForArchive] = useState(false);
+  const [modalOpenForMoreDetails, setModalOpenForMoreDetails] = useState(false);
+  const [archiveReason, setArchiveReason] = useState("");
+  const [archiveReasonError, setArchiveReasonError] = useState("");
+  const [modalDetails, setModalDetails] = useState<ModalDetails>();
+  const [editFileName, setEditFileName] = useState<any>("");
+  const [editFileNameError, setEditFileNameError] = useState("");
+  const [btnloader, setbtnloader] = useState(false);
+  const [sortFileState, setSortFileState] = useState("UNARCHIVED");
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+  const currentuser_username = currentUser.data.username;
+  const currentuser_type = currentUser.data.user_type;
   const limit = RESULTS_PER_PAGE_LIMIT;
-
+  const [isActive, setIsActive] = useState(true);
+  const tabs = [
+    { name: "Unarchived Files", value: "UNARCHIVED" },
+    { name: "Archived Files", value: "ARCHIVED" },
+  ];
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
@@ -153,6 +192,7 @@ export const FileUpload = (props: FileUploadProps) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setIsActive(res.data.is_active);
         }
       } else {
         setPatientName("");
@@ -178,39 +218,26 @@ export const FileUpload = (props: FileUploadProps) => {
   ];
 
   const handleZoomIn = () => {
-    const len = zoom_values.length - 1;
-    if (file_state.zoom + 1 === len) {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom + 1,
-        isZoomOutDisabled: false,
-        isZoomInDisabled: true,
-      });
-      // setZoomInDisabled(true);
-    } else {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom + 1,
-        isZoomOutDisabled: false,
-      });
-    }
+    const checkFull = file_state.zoom === zoom_values.length;
+    setFileState({
+      ...file_state,
+      zoom: !checkFull ? file_state.zoom + 1 : file_state.zoom,
+    });
   };
 
   const handleZoomOut = () => {
-    if (file_state.zoom - 1 === 0) {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom - 1,
-        isZoomOutDisabled: true,
-        isZoomInDisabled: false,
-      });
-    } else {
-      setFileState({
-        ...file_state,
-        zoom: file_state.zoom - 1,
-        isZoomInDisabled: false,
-      });
-    }
+    const checkFull = file_state.zoom === 1;
+    setFileState({
+      ...file_state,
+      zoom: !checkFull ? file_state.zoom - 1 : file_state.zoom,
+    });
+  };
+
+  const handleRotate = (rotation: number) => {
+    setFileState((prev) => ({
+      ...prev,
+      rotation: prev.rotation + rotation,
+    }));
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
@@ -262,7 +289,12 @@ export const FileUpload = (props: FileUploadProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           audio_urls(res.data.results);
-          setuploadedFiles(res.data.results);
+          setuploadedFiles(
+            res.data.results.filter(
+              (file: FileUploadModel) =>
+                file.upload_completed || file.file_category === "AUDIO"
+            )
+          );
           setTotalCount(res.data.count);
         }
         setIsLoading(false);
@@ -300,14 +332,81 @@ export const FileUpload = (props: FileUploadProps) => {
     [dispatch, fetchData, id, reload]
   );
 
-  // Function to extract the extension of the file and check if its image or not
+  // Function to extract the extension of the file
   const getExtension = (url: string) => {
     const div1 = url.split("?")[0].split(".");
     const ext: string = div1[div1.length - 1].toLowerCase();
-    if (ExtImage[ext] && ExtImage[ext] === "1") {
-      return true;
+    return ext;
+  };
+
+  const getIconClassName = (extensionName: string | undefined) => {
+    // check for image files
+    if (
+      [
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".tif",
+        ".tiff",
+        ".bmp",
+        ".eps",
+        ".apng",
+        ".avif",
+        ".jfif",
+        ".pjpeg",
+        ".pjp",
+        ".svg",
+        ".webp",
+      ].some((ext) => ext === extensionName)
+    ) {
+      return "fa-solid fa-file-image";
     }
-    return false;
+    // check for video files
+    if (
+      [
+        ".webm",
+        ".mpg",
+        ".mp2",
+        ".mpeg",
+        ".mpe",
+        ".mpv",
+        ".ogg",
+        ".mp4",
+        ".m4v",
+        ".avi",
+        ".wmv",
+        ".mov",
+        ".qt",
+        ".flv",
+        ".swf",
+      ].some((ext) => ext === extensionName)
+    ) {
+      return "fa-solid fa-file-video";
+    }
+    // check for compressed files
+    if (extensionName === ".zip" || extensionName === ".rar") {
+      return "fa-solid fa-file-zipper";
+    }
+    // check for misclaneous files whose icons are available freely in fontawesome
+    if (extensionName === ".pdf") {
+      return "fa-solid fa-file-pdf";
+    }
+    if (extensionName === ".docx") {
+      return "fa-solid fa-file-word";
+    }
+    if (extensionName === ".csv") {
+      return "fa-solid fa-file-csv";
+    }
+    if (extensionName === ".xlsx") {
+      return "fa-solid fa-file-excel";
+    }
+    if (extensionName === ".txt") {
+      return "fa-solid fa-file-lines";
+    }
+    if (extensionName === ".pptx") {
+      return "fa-solid fa-file-powerpoint";
+    }
+    return "fa-solid fa-file-medical";
   };
 
   const loadFile = async (id: any) => {
@@ -315,97 +414,408 @@ export const FileUpload = (props: FileUploadProps) => {
     setFileState({ ...file_state, open: true });
     const data = { file_type: type, associating_id: getAssociatedId() };
     const responseData = await dispatch(retrieveUpload(data, id));
+    const file_extension = getExtension(responseData.data.read_signed_url);
     setFileState({
       ...file_state,
       open: true,
-      isImage: getExtension(responseData.data.read_signed_url),
+      name: responseData.data.name,
+      extension: file_extension,
+      isImage: ExtImage.includes(file_extension),
     });
     downloadFileUrl(responseData.data.read_signed_url);
     setFileUrl(responseData.data.read_signed_url);
   };
 
+  const validateEditFileName = (name: any) => {
+    if (name.trim() === "") {
+      setEditFileNameError("Please enter a name!");
+      return false;
+    } else {
+      setEditFileNameError("");
+      return true;
+    }
+  };
+
+  const validateArchiveReason = (name: any) => {
+    if (name.trim() === "") {
+      setArchiveReasonError("Please enter a valid reason!");
+      return false;
+    } else {
+      setArchiveReasonError("");
+      return true;
+    }
+  };
+
+  const partialupdateFileName = async (id: any, name: string) => {
+    const data = {
+      file_type: type,
+      name: name,
+      associating_id: getAssociatedId(),
+    };
+    if (validateEditFileName(name)) {
+      const res = await dispatch(
+        editUpload({ name: data.name }, id, data.file_type, data.associating_id)
+      );
+      if (res && res.status === 200) {
+        fetchData(res.status);
+        Notification.Success({
+          msg: "File name changed successfully",
+        });
+        setbtnloader(false);
+        setModalOpenForEdit(false);
+      } else {
+        setbtnloader(false);
+      }
+    } else {
+      setbtnloader(false);
+    }
+  };
+
+  const archiveFile = async (id: any, archiveReason: string) => {
+    const data = {
+      file_type: type,
+      is_archived: true,
+      archive_reason: archiveReason,
+      associating_id: getAssociatedId(),
+    };
+    if (validateArchiveReason(archiveReason)) {
+      const res = await dispatch(
+        editUpload(
+          {
+            is_archived: data.is_archived,
+            archive_reason: data.archive_reason,
+          },
+          id,
+          data.file_type,
+          data.associating_id
+        )
+      );
+      if (res && res.status === 200) {
+        fetchData(res.status);
+        Notification.Success({
+          msg: "File archived successfully",
+        });
+        setbtnloader(false);
+        setModalOpenForArchive(false);
+      } else {
+        setbtnloader(false);
+      }
+    } else {
+      setbtnloader(false);
+    }
+  };
+
   const renderFileUpload = (item: FileUploadModel) => {
     return (
-      <div className="mt-4 border bg-white shadow rounded-lg p-4" key={item.id}>
-        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
-          <div>
-            <div>
-              <span className="font-semibold leading-relaxed">File Name: </span>{" "}
-              {item.name}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">Created By:</span>{" "}
-              {item.uploaded_by ? item.uploaded_by.username : null}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Created On :
-              </span>{" "}
-              {item.created_date
-                ? moment(item.created_date).format("lll")
-                : "-"}
-            </div>
-          </div>
-          <div className="flex items-center">
-            {item.file_category === "AUDIO" ? (
-              <div className="flex space-x-2">
-                {item.id ? (
-                  Object.keys(url).length > 0 ? (
-                    <>
-                      <audio
-                        className="max-h-full max-w-full m-auto object-contain"
-                        src={url[item.id]}
-                        controls
-                        preload="auto"
-                        controlsList="nodownload"
-                      />
-                      <a
-                        href={url[item.id]}
-                        className="text-black p-4"
-                        download={true}
-                      >
+      <>
+        <div
+          className="mt-4 border bg-white shadow rounded-lg p-4"
+          key={item.id}
+        >
+          {!item.is_archived ? (
+            <>
+              {item.file_category === "AUDIO" ? (
+                <div className="flex flex-wrap justify-between space-y-2">
+                  <div className="flex flex-wrap justify-between space-x-2">
+                    <div>
+                      <i className="fa-solid fa-file-audio fa-3x m-3 text-primary-500"></i>
+                    </div>
+                    <div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          File Name:{" "}
+                        </span>{" "}
+                        {item.name}
+                      </div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          Created By:
+                        </span>{" "}
+                        {item.uploaded_by ? item.uploaded_by.username : null}
+                      </div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          Created On :
+                        </span>{" "}
+                        {item.created_date
+                          ? formatDate(item.created_date)
+                          : "-"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    {item.id ? (
+                      Object.keys(url).length > 0 ? (
+                        <div className="flex flex-wrap">
+                          <audio
+                            className="max-h-full max-w-full m-auto object-contain"
+                            src={url[item.id]}
+                            controls
+                            preload="auto"
+                            controlsList="nodownload"
+                          />
+                        </div>
+                      ) : (
+                        <CircularProgress />
+                      )
+                    ) : (
+                      <div>File Not found</div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center">
+                    {item.id ? (
+                      Object.keys(url).length > 0 ? (
+                        <div className="flex flex-wrap">
+                          <a
+                            href={url[item.id]}
+                            download={item.name}
+                            className="Button outline-offset-1 button-size-default button-shape-square button-primary-default m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
+                          >
+                            <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
+                            DOWNLOAD
+                          </a>
+                          {item?.uploaded_by?.username ===
+                            currentuser_username ||
+                          currentuser_type === "DistrictAdmin" ||
+                          currentuser_type === "StateAdmin" ? (
+                            <>
+                              <ButtonV2
+                                onClick={() => {
+                                  setModalDetails({
+                                    name: item.name,
+                                    id: item.id,
+                                  });
+                                  setEditFileName(item?.name);
+                                  setModalOpenForEdit(true);
+                                }}
+                                className="m-1 sm:w-auto w-full"
+                              >
+                                <CareIcon className="care-l-pen text-lg" />
+                                EDIT FILE NAME
+                              </ButtonV2>
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          {item?.uploaded_by?.username ===
+                            currentuser_username ||
+                          currentuser_type === "DistrictAdmin" ||
+                          currentuser_type === "StateAdmin" ? (
+                            <>
+                              <ButtonV2
+                                onClick={() => {
+                                  setArchiveReason("");
+                                  setModalDetails({
+                                    name: item.name,
+                                    id: item.id,
+                                  });
+                                  setModalOpenForArchive(true);
+                                }}
+                                className="m-1 sm:w-auto w-full"
+                              >
+                                <CareIcon className="care-l-archive text-lg" />
+                                ARCHIVE
+                              </ButtonV2>
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                        </div>
+                      ) : (
+                        <CircularProgress />
+                      )
+                    ) : (
+                      <div>File Not found</div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap justify-between space-y-2">
+                  <div className="flex flex-wrap justify-between space-x-2">
+                    <div>
+                      <i
+                        className={`${getIconClassName(
+                          item?.extension
+                        )} fa-3x m-3 text-primary-500`}
+                      ></i>
+                    </div>
+                    <div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          File Name:{" "}
+                        </span>{" "}
+                        {item.name}
+                      </div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          Created By:
+                        </span>{" "}
+                        {item.uploaded_by ? item.uploaded_by.username : null}
+                      </div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          Created On :
+                        </span>{" "}
+                        {item.created_date
+                          ? formatDate(item.created_date)
+                          : "-"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center">
+                    <ButtonV2
+                      onClick={() => {
+                        loadFile(item.id);
+                      }}
+                      className="m-1 sm:w-auto w-full"
+                    >
+                      {" "}
+                      <CareIcon className="care-l-eye text-lg" />
+                      PREVIEW FILE
+                    </ButtonV2>
+                    {item?.uploaded_by?.username === currentuser_username ||
+                    currentuser_type === "DistrictAdmin" ||
+                    currentuser_type === "StateAdmin" ? (
+                      <>
+                        {" "}
+                        <ButtonV2
+                          onClick={() => {
+                            setModalDetails({ name: item.name, id: item.id });
+                            setEditFileName(item?.name);
+                            setModalOpenForEdit(true);
+                          }}
+                          className="m-1 sm:w-auto w-full"
+                        >
+                          <CareIcon className="care-l-pen text-lg" />
+                          EDIT FILE NAME
+                        </ButtonV2>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                    {item?.uploaded_by?.username === currentuser_username ||
+                    currentuser_type === "DistrictAdmin" ||
+                    currentuser_type === "StateAdmin" ? (
+                      <>
+                        <ButtonV2
+                          onClick={() => {
+                            setArchiveReason("");
+                            setModalDetails({ name: item.name, id: item.id });
+                            setModalOpenForArchive(true);
+                          }}
+                          className="m-1 sm:w-auto w-full"
+                        >
+                          <CareIcon className="care-l-archive text-lg" />
+                          ARCHIVE
+                        </ButtonV2>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="flex flex-wrap justify-between space-y-2">
+                <div className="flex flex-wrap justify-between space-x-2">
+                  <div>
+                    {item.file_category === "AUDIO" ? (
+                      <div className="relative">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-6 w-6"
                           fill="none"
                           viewBox="0 0 24 24"
+                          strokeWidth={1.5}
                           stroke="currentColor"
-                          strokeWidth={2}
+                          className="absolute w-6 h-6 bottom-1 right-1 text-red-600"
                         >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
-                      </a>
-                    </>
-                  ) : (
-                    <CircularProgress />
-                  )
-                ) : (
-                  <div>File Not found</div>
-                )}
+
+                        <i className="fa-solid fa-file-audio fa-3x m-3 text-gray-500"></i>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="absolute w-6 h-6 bottom-1 right-1 text-red-600"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+
+                        <i
+                          className={`${getIconClassName(
+                            item?.extension
+                          )} fa-3x m-3 text-gray-500`}
+                        ></i>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <div>
+                      <span className="font-semibold leading-relaxed">
+                        File Name:{" "}
+                      </span>{" "}
+                      {item.name}
+                    </div>
+                    <div>
+                      <span className="font-semibold leading-relaxed">
+                        Created By:
+                      </span>{" "}
+                      {item.uploaded_by ? item.uploaded_by.username : null}
+                    </div>
+                    <div>
+                      <span className="font-semibold leading-relaxed">
+                        Created On :
+                      </span>{" "}
+                      {item.created_date ? formatDate(item.created_date) : "-"}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center">
+                  <ButtonV2
+                    variant="secondary"
+                    className="m-1 sm:w-auto w-full"
+                  >
+                    {" "}
+                    <CareIcon className="care-l-eye-slash text-lg" /> FILE
+                    ARCHIVED
+                  </ButtonV2>
+                  <ButtonV2
+                    onClick={() => {
+                      setModalDetails({
+                        name: item.name,
+                        reason: item.archive_reason,
+                        userArchived: item.archived_by?.username,
+                        archiveTime: item.archived_datetime,
+                      });
+                      setModalOpenForMoreDetails(true);
+                    }}
+                    className="m-1 sm:w-auto w-full"
+                  >
+                    <CareIcon className="care-l-question-circle text-lg" />
+                    MORE DETAILS
+                  </ButtonV2>
+                </div>
               </div>
-            ) : (
-              <div>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={<Visibility />}
-                  onClick={() => {
-                    loadFile(item.id);
-                  }}
-                >
-                  Preview File
-                </Button>
-              </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
-      </div>
+      </>
     );
   };
 
@@ -423,10 +833,11 @@ export const FileUpload = (props: FileUploadProps) => {
     setUploadFileName(
       fileName.substring(0, fileName.lastIndexOf(".")) || fileName
     );
+
     const ext: string = fileName.split(".")[1];
     setcontentType(header_content_type[ext]);
 
-    if (ExtImage[ext] && ExtImage[ext] === "1") {
+    if (ExtImage.includes(ext)) {
       const options = {
         initialQuality: 0.6,
         alwaysKeepResolution: true,
@@ -443,7 +854,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const url = response.data.signed_url;
     const internal_name = response.data.internal_name;
     const f = file;
-    if (f === undefined) return;
+    if (!f) return;
     const newFile = new File([f], `${internal_name}`);
 
     const config = {
@@ -458,34 +869,66 @@ export const FileUpload = (props: FileUploadProps) => {
         setUploadPercent(percentCompleted);
       },
     };
-    axios
-      .put(url, newFile, config)
-      .then(() => {
-        setUploadStarted(false);
-        // setUploadSuccess(true);
-        setUploadFileName("");
-        setReload(!reload);
-        Notification.Success({
-          msg: "File Uploaded Successfully",
+    return new Promise<void>((resolve, reject) => {
+      axios
+        .put(url, newFile, config)
+        .then(() => {
+          setUploadStarted(false);
+          // setUploadSuccess(true);
+          setFile(null);
+          setUploadFileName("");
+          setReload(!reload);
+          Notification.Success({
+            msg: "File Uploaded Successfully",
+          });
+          setUploadFileError("");
+          resolve(response);
+        })
+        .catch((e) => {
+          Notification.Error({
+            msg: "Error Uploading File: " + e.message,
+          });
+          setUploadStarted(false);
+          reject();
         });
-      })
-      .catch(() => {
-        setUploadStarted(false);
-      });
+    });
+  };
+
+  const validateFileUpload = () => {
+    const filenameLength = uploadFileName.trim().length;
+    const f = file;
+    if (f === undefined || f === null) {
+      setUploadFileError("Please choose a file to upload");
+      return false;
+    }
+    if (filenameLength === 0) {
+      setUploadFileError("Please give a name !!");
+      return false;
+    }
+    if (f.size > 10e7) {
+      setUploadFileError("Maximum size of files is 100 MB");
+      return false;
+    }
+    return true;
+  };
+  const markUploadComplete = async (response: any) => {
+    return dispatch(
+      editUpload(
+        { upload_completed: true },
+        response.data.id,
+        type,
+        getAssociatedId()
+      )
+    );
   };
 
   const handleUpload = async (status: any) => {
+    if (!validateFileUpload()) return;
     const f = file;
-    if (f === undefined) {
-      Notification.Error({
-        msg: "Please choose a file to upload",
-      });
-      return;
-    }
-    setFile(undefined);
+
     const category = "UNSPECIFIED";
-    const filename = uploadFileName === "" ? f.name : uploadFileName;
-    const name = f.name;
+    const filename = uploadFileName === "" && f ? f.name : uploadFileName;
+    const name = f?.name;
     setUploadStarted(true);
     // setUploadSuccess(false);
     const requestData = {
@@ -497,13 +940,13 @@ export const FileUpload = (props: FileUploadProps) => {
     };
     dispatch(createUpload(requestData))
       .then(uploadfile)
+      .then(markUploadComplete)
       .catch(() => {
         setUploadStarted(false);
       })
-      .then(fetchData(status).then(() => {}));
-
-    // setting the value of file name to empty
-    setUploadFileName("");
+      .then(() => {
+        fetchData(status);
+      });
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
@@ -543,9 +986,13 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const validateAudioUpload = () => {
-    const filenameLength = audioName.trim().length;
     const f = audioBlob;
-    if (f === undefined) {
+    if (f === undefined || f === null) {
+      setAudioFileError("Please upload a file");
+      return false;
+    }
+    if (f.size > 10e7) {
+      setAudioFileError("File size must not exceed 100 MB");
       return false;
     }
     return true;
@@ -553,7 +1000,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleAudioUpload = async () => {
     if (!validateAudioUpload()) return;
-    setAudioNameError("");
+    setAudioFileError("");
     const category = "AUDIO";
     const name = "audio.mp3";
     const filename =
@@ -584,6 +1031,10 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
+  const handleTabChange = (tabValue: string) => {
+    setSortFileState(tabValue);
+  };
+
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
       <Modal
@@ -594,66 +1045,67 @@ export const FileUpload = (props: FileUploadProps) => {
       >
         {fileUrl && fileUrl.length > 0 ? (
           <>
-            <div className="flex absolute w-3/5 right-2">
-              {file_state.isImage && (
-                <div className="w-2/6 flex">
-                  <div className="mr-4">
-                    <Button
-                      color="default"
-                      variant="contained"
-                      style={{ marginLeft: "auto" }}
-                      startIcon={<ZoomIn />}
-                      onClick={() => {
-                        handleZoomIn();
-                      }}
-                      disabled={file_state.isZoomInDisabled}
-                    >
-                      Zoom in
-                    </Button>
-                  </div>
-                  <div>
-                    <Button
-                      color="default"
-                      variant="contained"
-                      style={{ marginLeft: "4px" }}
-                      startIcon={<ZoomOut />}
-                      onClick={() => {
-                        handleZoomOut();
-                      }}
-                      disabled={file_state.isZoomOutDisabled}
-                    >
-                      Zoom Out
-                    </Button>
-                  </div>
-                </div>
-              )}
-              <div className="flex absolute right-2">
-                {downloadURL && downloadURL.length > 0 && (
-                  <div>
-                    <a
-                      href={downloadURL}
-                      download
-                      className="text-white p-4 my-2 rounded m-2 bg-primary-500"
-                    >
-                      <GetApp>load</GetApp>
-                      Download
-                    </a>
-                  </div>
+            <div className="flex absolute h-full sm:h-auto sm:inset-x-4 sm:top-4 p-4 sm:p-0 justify-between flex-col sm:flex-row">
+              <div className="flex gap-3">
+                {file_state.isImage && (
+                  <>
+                    {[
+                      [
+                        t("Zoom In"),
+                        "magnifying-glass-plus",
+                        handleZoomIn,
+                        file_state.zoom === zoom_values.length,
+                      ],
+                      [
+                        t("Zoom Out"),
+                        "magnifying-glass-minus",
+                        handleZoomOut,
+                        file_state.zoom === 1,
+                      ],
+                      [
+                        t("Rotate Left"),
+                        "rotate-left",
+                        () => handleRotate(-90),
+                        false,
+                      ],
+                      [
+                        t("Rotate Right"),
+                        "rotate-right",
+                        () => handleRotate(90),
+                        false,
+                      ],
+                    ].map((button, index) => (
+                      <button
+                        key={index}
+                        onClick={button[2] as () => void}
+                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70 z-50"
+                        disabled={button[3] as boolean}
+                      >
+                        <i className={`fas fa-${button[1]} mr-2`} />
+                        {button[0] as string}
+                      </button>
+                    ))}
+                  </>
                 )}
-
-                <div>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    style={{ marginLeft: "auto" }}
-                    startIcon={<Close />}
-                    onClick={() => {
-                      handleClose();
-                    }}
+              </div>
+              <div className="flex gap-3">
+                {downloadURL && downloadURL.length > 0 && (
+                  <a
+                    href={downloadURL}
+                    download={file_state.name}
+                    className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
                   >
-                    Close
-                  </Button>
-                </div>
+                    <i className="fas fa-download mr-2" />
+                    Download
+                  </a>
+                )}
+                <button
+                  onClick={handleClose}
+                  className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
+                >
+                  <i className="fas fa-times mr-2" />
+                  Close
+                </button>
               </div>
             </div>
             {file_state.isImage ? (
@@ -663,6 +1115,9 @@ export const FileUpload = (props: FileUploadProps) => {
                 className={
                   "object-contain mx-auto " + zoom_values[file_state.zoom]
                 }
+                style={{
+                  transform: `rotate(${file_state.rotation}deg)`,
+                }}
               />
             ) : (
               <iframe
@@ -680,7 +1135,127 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         )}
       </Modal>
-
+      <DialogModal
+        show={modalOpenForEdit}
+        title={
+          <div className="flex flex-row">
+            <div className="rounded-full bg-primary-100 py-4 px-5">
+              <CareIcon className="care-l-edit-alt text-primary-500 text-lg" />
+            </div>
+            <div className="m-4">
+              <h1 className="text-black text-xl "> Edit File Name</h1>
+            </div>
+          </div>
+        }
+        onClose={() => setModalOpenForEdit(false)}
+      >
+        <form
+          onSubmit={(event: any) => {
+            event.preventDefault();
+            setbtnloader(true);
+            partialupdateFileName(modalDetails?.id, editFileName);
+          }}
+          className="flex flex-col w-full"
+        >
+          <div>
+            <TextFormField
+              name="editFileName"
+              label="Enter the file name"
+              value={editFileName}
+              onChange={(e) => setEditFileName(e.value)}
+              error={editFileNameError}
+            />
+          </div>
+          <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+            <Cancel onClick={() => setModalOpenForEdit(false)} />
+            <Submit disabled={btnloader} label="Proceed" />
+          </div>
+        </form>
+      </DialogModal>
+      <DialogModal
+        show={modalOpenForArchive}
+        title={
+          <div className="flex flex-row">
+            <div className="text-center my-1 mr-3 rounded-full bg-red-100 py-4 px-5">
+              <CareIcon className="care-l-exclamation-triangle text-lg text-danger-500 " />
+            </div>
+            <div className="text-sm text-grey-200">
+              <h1 className="text-xl text-black">Archive File</h1>
+              This action is irreversible. Once a file is archived it cannot be
+              unarchived.
+            </div>
+          </div>
+        }
+        onClose={() => setModalOpenForArchive(false)}
+      >
+        <form
+          onSubmit={(event: any) => {
+            event.preventDefault();
+            setbtnloader(true);
+            archiveFile(modalDetails?.id, archiveReason);
+          }}
+          className="flex flex-col w-full my-4 mx-2"
+        >
+          <div>
+            <TextAreaFormField
+              name="editFileName"
+              label={
+                <span>
+                  State the reason for archiving <b>{modalDetails?.name}</b>{" "}
+                  file?
+                </span>
+              }
+              rows={6}
+              required
+              placeholder="Type the reason..."
+              value={archiveReason}
+              onChange={(e) => setArchiveReason(e.value)}
+              error={archiveReasonError}
+            />
+          </div>
+          <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+            <Cancel onClick={() => setModalOpenForArchive(false)} />
+            <Submit disabled={btnloader} label="Proceed" />
+          </div>
+        </form>
+      </DialogModal>
+      <DialogModal
+        show={modalOpenForMoreDetails}
+        title={
+          <div className="flex flex-row">
+            <div className="text-center my-1 mr-3 px-5 py-4 rounded-full bg-primary-100">
+              <CareIcon className="care-l-question-circle text-lg text-primary-500 " />
+            </div>
+            <div className="text-sm text-grey-200">
+              <h1 className="text-xl text-black">File Details</h1>
+              This file is archived. Once a file is archived it cannot be
+              unarchived.
+            </div>
+          </div>
+        }
+        onClose={() => setModalOpenForMoreDetails(false)}
+      >
+        <div className="flex flex-col">
+          <div>
+            <div className="text-md text-center m-2">
+              <b>{modalDetails?.name}</b> file is archived.
+            </div>
+            <div className="text-md text-center">
+              <b>Reason:</b> {modalDetails?.reason}
+            </div>
+            <div className="text-md text-center">
+              <b>Archived_by:</b> {modalDetails?.userArchived}
+            </div>
+            <div className="text-md text-center">
+              <b>Time of Archive:</b>
+              {formatDate(modalDetails?.archiveTime)}
+            </div>
+          </div>
+          <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
+            <Cancel onClick={(_) => setModalOpenForMoreDetails(false)} />
+          </div>
+        </div>
+      </DialogModal>
       <PageTitle
         title={`${UPLOAD_HEADING[type]}`}
         hideBack={hideBack}
@@ -711,7 +1286,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 onChange={(e: any) => {
                   setAudioName(e.target.value);
                 }}
-                errors={audioNameError}
+                errors={audioFileError}
               />
               {audiouploadStarted ? (
                 <LinearProgressWithLabel value={uploadPercent} />
@@ -744,46 +1319,57 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4>Upload New File</h4>
               </div>
               <div>
-                <InputLabel id="spo2-label">Enter File Name</InputLabel>
+                <InputLabel id="spo2-label">Enter File Name*</InputLabel>
                 <TextInputField
                   name="consultation_file"
                   variant="outlined"
                   margin="dense"
                   type="text"
                   InputLabelProps={{ shrink: !!uploadFileName }}
-                  // value={uploadFileName}
+                  value={uploadFileName}
                   disabled={uploadStarted}
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
                   }}
-                  errors={`${[]}`}
+                  errors={uploadFileError}
                 />
               </div>
               <div className="mt-4">
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="md:flex justify-between">
-                    <input
-                      title="changeFile"
-                      onChange={onFileChange}
-                      type="file"
-                    />
-                    <div className="mt-2">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        startIcon={
-                          <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                        }
-                        onClick={() => {
-                          handleUpload({ status });
-                        }}
-                      >
-                        Upload
-                      </Button>
-                    </div>
+                  <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
+                    <label className="flex items-center btn btn-primary">
+                      <i className="fas fa-file-arrow-down mr-2" /> Choose file
+                      <input
+                        title="changeFile"
+                        onChange={onFileChange}
+                        type="file"
+                        hidden
+                      />
+                    </label>
+                    <button
+                      className="btn btn-primary"
+                      disabled={!file || !uploadFileName || !isActive}
+                      onClick={() => {
+                        handleUpload({ status });
+                      }}
+                    >
+                      <i className="fas fa-cloud-arrow-up mr-2" /> Upload
+                    </button>
+                  </div>
+                )}
+                {file && (
+                  <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                    {file?.name}
+                    <button
+                      onClick={() => {
+                        setFile(null);
+                        setUploadFileName("");
+                      }}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
                   </div>
                 )}
               </div>
@@ -797,25 +1383,75 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={true}
         breadcrumbs={false}
       />
-      {uploadedFiles && uploadedFiles.length > 0 ? (
-        uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))
-      ) : (
-        <div className="mt-4 border bg-white shadow rounded-lg p-4">
-          <div className="font-bold text-gray-500 text-3xl flex justify-center items-center">
-            {"No Data Found"}
+      <HeadedTabs
+        tabs={tabs}
+        handleChange={handleTabChange}
+        currentTabState={sortFileState}
+      />
+
+      <div>
+        {uploadedFiles && uploadedFiles.length > 0 ? (
+          sortFileState === "UNARCHIVED" ? (
+            // First it would check the filtered array contains any files or not else it would state the message
+            <>
+              {[
+                ...uploadedFiles.filter(
+                  (item: FileUploadModel) => !item.is_archived
+                ),
+              ].length > 0 ? (
+                [
+                  ...uploadedFiles.filter(
+                    (item: FileUploadModel) => !item.is_archived
+                  ),
+                ].map((item: FileUploadModel) => renderFileUpload(item))
+              ) : (
+                <div className="mt-4 border bg-white shadow rounded-lg p-4">
+                  <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+                    {"No Unarchived File in the Current Page"}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            // First it would check the filtered array contains any files or not else it would state the message
+            <>
+              {[
+                ...uploadedFiles.filter(
+                  (item: FileUploadModel) => item.is_archived
+                ),
+              ].length > 0 ? (
+                [
+                  ...uploadedFiles.filter(
+                    (item: FileUploadModel) => item.is_archived
+                  ),
+                ].map((item: FileUploadModel) => renderFileUpload(item))
+              ) : (
+                <div className="mt-4 border bg-white shadow rounded-lg p-4">
+                  <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+                    {"No Archived File in the Current Page"}
+                  </div>
+                </div>
+              )}
+            </>
+          )
+        ) : (
+          <div className="mt-4 border bg-white shadow rounded-lg p-4">
+            <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+              {"No Data Found"}
+            </div>
           </div>
-        </div>
-      )}
-      {totalCount > limit && (
-        <div className="mt-4 flex w-full justify-center">
-          <Pagination
-            cPage={currentPage}
-            defaultPerPage={limit}
-            data={{ totalCount }}
-            onChange={handlePagination}
-          />
-        </div>
-      )}
+        )}
+        {totalCount > limit && (
+          <div className="mt-4 flex w-full justify-center">
+            <Pagination
+              cPage={currentPage}
+              defaultPerPage={limit}
+              data={{ totalCount }}
+              onChange={handlePagination}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

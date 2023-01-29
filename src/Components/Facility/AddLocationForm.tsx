@@ -1,6 +1,5 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -15,12 +14,9 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
+import { Submit, Cancel } from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const goBack = () => {
-  window.history.go(-1);
-};
 
 interface LocationFormProps {
   facilityId: string;
@@ -31,8 +27,8 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const { facilityId, locationId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [name, setName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [facilityName, setFacilityName] = useState("");
   const [locationName, setLocationName] = useState("");
 
@@ -80,7 +76,9 @@ export const AddLocationForm = (props: LocationFormProps) => {
         ? "Location updated successfully"
         : "Location created successfully";
 
-      navigate(`/facility/${facilityId}/location`);
+      navigate(`/facility/${facilityId}/location`, {
+        replace: true,
+      });
       Notification.Success({
         msg: notificationMessage,
       });
@@ -107,7 +105,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
       />
       <div className="mt-10">
         <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
+          <form onSubmit={handleSubmit}>
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1">
                 <div>
@@ -138,23 +136,14 @@ export const AddLocationForm = (props: LocationFormProps) => {
                 </div>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={goBack}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  {buttonText}
-                </Button>
+                <Cancel
+                  onClick={() =>
+                    navigate(`/facility/${facilityId}/location`, {
+                      replace: true,
+                    })
+                  }
+                />
+                <Submit onClick={handleSubmit} label={buttonText} />
               </div>
             </CardContent>
           </form>

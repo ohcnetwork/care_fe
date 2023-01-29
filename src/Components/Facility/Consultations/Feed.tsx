@@ -1,8 +1,11 @@
-import clsx from "clsx";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
-import { CameraPTZ, getCameraPTZ } from "../../../Common/constants";
+import {
+  CameraPTZ,
+  CAMERA_STATES,
+  getCameraPTZ,
+} from "../../../Common/constants";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import {
   ICameraAssetState,
@@ -14,15 +17,18 @@ import {
   getConsultation,
   listAssetBeds,
   partialUpdateAssetBed,
+  getPermittedFacility,
 } from "../../../Redux/actions";
 import Loading from "../../Common/Loading";
-import PageTitle from "../../Common/PageTitle";
 import { ConsultationModel } from "../models";
 import * as Notification from "../../../Utils/Notifications.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
-import { AxiosError } from "axios";
+import ReactPlayer from "react-player";
+import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
+import { findDOMNode } from "react-dom";
+import { classNames } from "../../../Utils/utils";
 
 interface IFeedProps {
   facilityId: string;
@@ -31,28 +37,34 @@ interface IFeedProps {
 }
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
-export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
+export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
 
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
-    hostname: "",
     id: "",
-    password: "",
-    port: 123,
-    username: "",
     accessKey: "",
   });
   const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
-
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
+
+  useEffect(() => {
+    const fetchFacility = async () => {
+      const res = await dispatch(getPermittedFacility(facilityId));
+
+      if (res.status === 200 && res.data) {
+        setCameraMiddlewareHostname(res.data.middleware_address);
+      }
+    };
+
+    if (facilityId) fetchFacility();
+  }, [dispatch, facilityId]);
 
   useEffect(() => {
     if (cameraState) {
@@ -74,18 +86,22 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     return () => clearTimeout(timeout);
   }, [cameraState]);
 
-  const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  const liveFeedPlayerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
-      const consultation = res.data as ConsultationModel;
-      if (!status.aborted) {
-        if (consultation?.current_bed?.bed_object?.id) {
+      if (!status.aborted && res.data) {
+        const consultation = res.data as ConsultationModel;
+        const consultationBedId = consultation.current_bed?.bed_object?.id;
+        if (consultationBedId) {
           let bedAssets = await dispatch(
-            listAssetBeds({ bed: consultation?.current_bed?.bed_object?.id })
+            listAssetBeds({ bed: consultationBedId })
           );
-          setBed(consultation?.current_bed?.bed_object?.id);
+          setBed(consultationBedId);
           bedAssets = {
             ...bedAssets,
             data: {
@@ -99,20 +115,15 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               ),
             },
           };
-          console.log("Found " + bedAssets.data.results.length + "bedAssets:");
+
           if (bedAssets?.data?.results?.length) {
-            const { local_ip_address, camera_access_key, middleware_hostname } =
+            const { camera_access_key } =
               bedAssets.data.results[0].asset_object.meta;
             const config = camera_access_key.split(":");
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
-              hostname: local_ip_address,
-              username: config[0] || "",
-              password: config[1] || "",
-              port: 80,
               accessKey: config[2] || "",
             });
-            setCameraMiddlewareHostname(middleware_hostname);
             setCameraConfig(bedAssets.data.results[0].meta);
             setCameraState({
               ...bedAssets.data.results[0].meta.position,
@@ -126,8 +137,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
     [consultationId, dispatch]
   );
-  const middlewareHostname =
-    cameraMiddlewareHostname || "dev_middleware.coronasafe.live";
 
   // const [position, setPosition] = useState<any>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -135,7 +144,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const [currentPreset, setCurrentPreset] = useState<any>();
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
 
-  const [loading, setLoading] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState<string>(CAMERA_STATES.IDLE);
   const [camTimeout, setCamTimeout] = useState<number>(0);
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -153,18 +162,25 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     StreamStatus.Offline
   );
 
-  const url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
+  const url = !isIOS
+    ? `wss://${cameraMiddlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
+    : `https://${cameraMiddlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
+
   const {
     startStream,
     // setVideoEl,
-  } = useMSEMediaPlayer({
-    config: {
-      middlewareHostname,
-      ...cameraAsset,
-    },
-    url,
-    videoEl: liveFeedPlayerRef.current,
-  });
+  } = isIOS
+    ? // eslint-disable-next-line react-hooks/rules-of-hooks
+      useHLSPLayer(liveFeedPlayerRef.current as ReactPlayer)
+    : // eslint-disable-next-line react-hooks/rules-of-hooks
+      useMSEMediaPlayer({
+        config: {
+          middlewareHostname: cameraMiddlewareHostname,
+          ...cameraAsset,
+        },
+        url,
+        videoEl: liveFeedPlayerRef.current as HTMLVideoElement,
+      });
 
   const {
     absoluteMove,
@@ -173,10 +189,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     getPresets,
     relativeMove,
   } = useFeedPTZ({
-    config: {
-      middlewareHostname,
-      ...cameraAsset,
-    },
+    config: cameraAsset,
+    dispatch,
   });
 
   const getBedPresets = async (asset: any) => {
@@ -187,11 +201,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   };
 
   useEffect(() => {
-    if (cameraAsset.hostname) {
-      getPresets({ onSuccess: (resp) => setPresets(resp.data) });
+    if (cameraAsset.id) {
+      getPresets({
+        onSuccess: (resp) => setPresets(resp),
+        onError: (_) => {
+          Notification.Error({
+            msg: "Fetching presets failed",
+          });
+        },
+      });
       getBedPresets(cameraAsset);
     }
-  }, [cameraAsset]);
+  }, [cameraAsset, cameraMiddlewareHostname]);
 
   useEffect(() => {
     let tId: any;
@@ -216,7 +237,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   useEffect(() => {
     if (streamStatus === StreamStatus.Playing) {
-      setLoading("Moving");
+      setLoading(CAMERA_STATES.MOVING.GENERIC);
       const preset =
         bedPresets?.find(
           (preset: any) =>
@@ -227,12 +248,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       if (preset) {
         absoluteMove(preset?.meta?.position, {
           onSuccess: () => {
-            setLoading(undefined);
+            setLoading(CAMERA_STATES.IDLE);
             setCurrentPreset(preset);
           },
-          onError: (err: AxiosError<any>) => {
-            setLoading(undefined);
-            const responseData = err.response?.data;
+          onError: (err: Record<any, any>) => {
+            setLoading(CAMERA_STATES.IDLE);
+            const responseData = err.data.result;
             if (responseData.status) {
               switch (responseData.status) {
                 case "error":
@@ -256,7 +277,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           },
         });
       } else {
-        setLoading(undefined);
+        setLoading(CAMERA_STATES.IDLE);
       }
     }
   }, [bedPresets, streamStatus]);
@@ -276,22 +297,21 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         onError: () => setStreamStatus(StreamStatus.Offline),
       });
     },
-    stop: () => {
-      // NEED ID TO STOP STREAM
-    },
     fullScreen: () => {
       if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
       !screenfull.isFullscreen
-        ? screenfull.request(
-            videoWrapper.current
-              ? videoWrapper.current
-              : liveFeedPlayerRef.current
-          )
+        ? isIOS
+          ? screenfull.request(
+              videoWrapper.current
+                ? videoWrapper.current
+                : (liveFeedPlayerRef.current as HTMLElement)
+            )
+          : screenfull.request(findDOMNode(liveFeedPlayerRef.current) as any)
         : screenfull.exit();
     },
     updatePreset: (option) => {
       getCameraStatus({
-        onSuccess: async ({ data }) => {
+        onSuccess: async (data) => {
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
             const response = await dispatch(
@@ -312,7 +332,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               getBedPresets(cameraAsset?.id);
               getPresets({});
             }
-            setLoading(undefined);
+            setLoading(CAMERA_STATES.IDLE);
           }
         },
       });
@@ -320,7 +340,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     other: (option, value) => {
       setLoading(option.loadingLabel);
       relativeMove(getPTZPayload(option.action, precision, value), {
-        onSuccess: () => setLoading(undefined),
+        onSuccess: () => setLoading(CAMERA_STATES.IDLE),
       });
     },
   };
@@ -346,13 +366,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   return (
     <div className="px-2 flex flex-col h-[calc(100vh-1.5rem)]">
       <div className="flex items-center flex-wrap justify-between gap-2">
-        <PageTitle
-          title={
-            "Camera Feed | " +
-            (bedPresets?.[0]?.asset_object?.location_object?.name ?? "")
-          }
-          breadcrumbs={false}
-        />
         <div className="flex items-center gap-4 px-3">
           <p className="block text-lg font-medium"> Camera Presets :</p>
           <div className="flex items-center">
@@ -360,18 +373,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               <button
                 key={preset.id}
                 onClick={() => {
-                  setLoading("Moving");
+                  setLoading(CAMERA_STATES.MOVING.GENERIC);
                   // gotoBedPreset(preset);
                   absoluteMove(preset.meta.position, {
                     onSuccess: () => {
-                      setLoading(undefined);
+                      setLoading(CAMERA_STATES.IDLE);
                       setCurrentPreset(preset);
                       console.log(
                         "onSuccess: Set Preset to " + preset?.meta?.preset_name
                       );
                     },
                     onError: () => {
-                      setLoading(undefined);
+                      setLoading(CAMERA_STATES.IDLE);
                       setCurrentPreset(preset);
                       console.log(
                         "onError: Set Preset to " + preset?.meta?.preset_name
@@ -380,7 +393,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   });
                   getCameraStatus({});
                 }}
-                className={clsx(
+                className={classNames(
                   "px-4 py-2 border border-gray-500 block",
                   currentPreset === preset
                     ? "bg-primary-500 border-primary-500 text-white rounded"
@@ -397,15 +410,41 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden"
         ref={videoWrapper}
       >
-        <video
-          id="mse-video"
-          autoPlay
-          muted
-          playsInline
-          className="max-h-full max-w-full"
-          ref={liveFeedPlayerRef}
-        />
-        {loading && (
+        {isIOS ? (
+          <ReactPlayer
+            url={url}
+            ref={liveFeedPlayerRef.current as any}
+            controls={false}
+            playsinline={true}
+            playing={true}
+            muted={true}
+            width="100%"
+            height="100%"
+            onBuffer={() => {
+              setStreamStatus(StreamStatus.Loading);
+            }}
+            onError={(e: any, _: any, hlsInstance: any) => {
+              if (e === "hlsError") {
+                const recovered = hlsInstance.recoverMediaError();
+                console.log(recovered);
+              }
+            }}
+            onEnded={() => {
+              setStreamStatus(StreamStatus.Stop);
+            }}
+          />
+        ) : (
+          <video
+            id="mse-video"
+            autoPlay
+            muted
+            playsInline
+            className="max-h-full max-w-full"
+            ref={liveFeedPlayerRef as any}
+          />
+        )}
+
+        {loading !== CAMERA_STATES.IDLE && (
           <div className="absolute inset-x-0 top-2 text-center flex items-center justify-center">
             <div className="inline-flex items-center rounded p-4 gap-2 bg-white/70">
               <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
@@ -446,16 +485,21 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           )}
         </div>
         <div className="absolute top-8 right-8 z-20 flex flex-col gap-4">
-          {[10, 9, 7, 5, 6].map((button) => {
-            const option = cameraPTZ[button];
-            return (
-              <FeedButton
-                camProp={option}
-                styleType="CHHOTUBUTTON"
-                clickAction={() => cameraPTZ[button].callback()}
-              />
-            );
-          })}
+          {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
+            (button, index) => {
+              const option = cameraPTZ.find(
+                (option) => option.action === button
+              );
+              return (
+                <FeedButton
+                  key={index}
+                  camProp={option}
+                  styleType="CHHOTUBUTTON"
+                  clickAction={() => option?.callback()}
+                />
+              );
+            }
+          )}
           <div className="pl-3 hideonmobilescreen">
             <FeedCameraPTZHelpButton
               cameraPTZ={cameraPTZ}
@@ -487,6 +531,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               const button = c as any;
               out = (
                 <FeedButton
+                  key={i}
                   camProp={button}
                   styleType="BUTTON"
                   clickAction={() => {

@@ -2,27 +2,21 @@ import React, { useCallback, useState } from "react";
 import { navigate } from "raviger";
 import { SelectField } from "../../Common/HelperInputFields";
 import { CircularProgress } from "@material-ui/core";
-import { FACILITY_TYPES, KASP_STRING } from "../../../Common/constants";
+import { FACILITY_TYPES } from "../../../Common/constants";
 import { getStates, getDistrictByState } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useAbortableEffect, statusType } from "../../../Common/utils";
 import LocalBodySelect from "./LocalBodySelect";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-
-  return [state, setMergedState];
-}
+import useMergeState from "../../../Common/hooks/useMergeState";
+import useConfig from "../../../Common/hooks/useConfig";
 
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
-function FacillityFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+function FacilityFilter(props: any) {
+  const { filter, onChange, closeFilter } = props;
+  const { kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
 
   const [isStateLoading, setIsStateLoading] = useState(false);
@@ -112,22 +106,22 @@ function FacillityFilter(props: any) {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
+      <div className="flex flex-wrap justify-between">
+        <button className="btn btn-default mt-1" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
         <button
-          className="btn btn-default"
+          className="btn btn-default mt-1"
           onClick={(_) => {
             closeFilter();
             navigate("/facility");
           }}
         >
           <i className="fas fa-times mr-2" />
-          Clear Filter
+          Clear Filters
         </button>
-        <button className="btn btn-primary" onClick={applyFilter}>
+        <button className="btn btn-primary mt-1" onClick={applyFilter}>
           <i className="fas fa-check mr-2" />
           Apply
         </button>
@@ -201,7 +195,7 @@ function FacillityFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">
-            {KASP_STRING} Empanelled
+            {kasp_string} Empanelled
           </span>
           <SelectField
             name="kasp_empanelled"
@@ -222,4 +216,4 @@ function FacillityFilter(props: any) {
   );
 }
 
-export default FacillityFilter;
+export default FacilityFilter;

@@ -7,7 +7,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getInventorySummary, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { RoleButton } from "../Common/RoleButton";
-import clsx from "clsx";
+import { classNames } from "../../Utils/utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -72,7 +72,10 @@ export default function InventoryList(props: any) {
     inventoryList = inventory.map((inventoryItem: any) => (
       <tr
         key={inventoryItem.id}
-        className={clsx("cursor-pointer hover:bg-gray-200", inventoryItem.is_low ? "bg-red-100" : "bg-white")}
+        className={classNames(
+          "cursor-pointer hover:bg-gray-200",
+          inventoryItem.is_low ? "bg-red-100" : "bg-white"
+        )}
         onClick={() =>
           navigate(
             `/facility/${facilityId}/inventory/${inventoryItem.item_object?.id}`
@@ -152,15 +155,15 @@ export default function InventoryList(props: any) {
     <div>
       <PageTitle
         title="Inventory Manager"
-        hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-4 md:py-8">
-          <div className="flex flex-col md:flex-row items-center">
+          <div className="flex flex-col md:flex-row">
             <div className="mt-2">
               <RoleButton
+                className="w-full"
                 materialButtonProps={{
                   variant: "contained",
                   color: "primary",
@@ -172,12 +175,12 @@ export default function InventoryList(props: any) {
                 disableFor="readOnly"
                 buttonType="materialUI"
               >
-                Add Inventory
+                Manage Inventory
               </RoleButton>
             </div>
             <div className="mt-2">
               <Button
-                className="ml-2"
+                className="md:ml-2 w-full"
                 variant="contained"
                 color="primary"
                 size="small"

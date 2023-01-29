@@ -41,17 +41,37 @@ type region =
   | PosteriorRightFoot
   | Other
 
+type extrudateAmount = 
+  | None
+  | Light
+  | Moderate
+  | Heavy
+
+type tissueType = 
+  | Closed
+  | Epithelial 
+  | Granulation 
+  | Slough 
+  | Necrotic
+
 type path = {d: string, transform: string, region: region}
 let d = path => path.d
 let transform = path => path.transform
 let regionForPath = path => path.region
 
-type part = {region: region, scale: int}
+type part = {
+  region: region, 
+  scale: int, 
+  length: float, 
+  width: float,
+  exudate_amount: extrudateAmount,
+  tissue_type: tissueType,
+  description: string,
+}
 
 export type t = array<part>
 
-let makePart = p => {
-  let region = switch p["region"] {
+let decodeRegion = region => switch region {
   | "anterior_head" => AnteriorHead
   | "anterior_neck" => AnteriorNeck
   | "anterior_right_shoulder" => AnteriorRightShoulder
@@ -95,8 +115,71 @@ let makePart = p => {
   | _ => Other
   }
 
-  {region: region, scale: p["scale"]}
+  let decodeExtrudateAmount = extrudateAmount => switch extrudateAmount {
+  | "None" => None
+  | "Light" => Light
+  | "Moderate" => Moderate
+  | "Heavy" => Heavy
+  | _ => None
+  }
+
+  let decodeTissueType = tissueType => switch tissueType {
+  | "Closed" => Closed
+  | "Epithelial" => Epithelial
+  | "Granulation" => Granulation
+  | "Slough" => Slough
+  | "Necrotic" => Necrotic
+  | _ => Closed
+  }
+
+let makePart = p => {
+  {
+    region: decodeRegion(p["region"]),
+    scale: p["scale"],
+    length: p["length"],
+    width: p["width"],
+    exudate_amount: decodeExtrudateAmount(p["exudate_amount"]),
+    tissue_type: decodeTissueType(p["tissue_type"]),
+    description: p["description"],
+  }
 }
+
+let encodeExudateAmount = extrudateAmount => {
+  switch extrudateAmount {
+  | None => "None"
+  | Light => "Light"
+  | Moderate => "Moderate"
+  | Heavy => "Heavy"
+  }
+}
+
+let extrudateAmountToString = extrudateAmount => {
+  switch extrudateAmount {
+  | None => "None"
+  | Light => "Light"
+  | Moderate => "Moderate"
+  | Heavy => "Heavy"
+  }
+}
+
+let encodeTissueType = tissueType => {
+  switch tissueType {
+    | Closed => "Closed"
+    | Epithelial => "Epithelial"
+    | Granulation => "Granulation"
+    | Slough => "Slough"
+    | Necrotic => "Necrotic"
+  }
+}
+
+let tissueTypeToString = tissueType => switch tissueType {
+  | Closed => "Closed"
+  | Epithelial => "Epithelial"
+  | Granulation => "Granulation"
+  | Slough => "Slough"
+  | Necrotic => "Necrotic"
+}
+
 
 let endcodeRegion = part => {
   switch part.region {
@@ -192,7 +275,44 @@ let regionToString = region => {
 
 let region = part => part.region
 let scale = part => part.scale
-let makeDefault = region => {region: region, scale: 1}
+let makeDefault = (region) => {
+  region: region, 
+  scale: 1, 
+  length: 0.0, 
+  width: 0.0, 
+  exudate_amount: None, 
+  tissue_type: Closed, 
+  description: ""
+}
+
+let calculatePushScore = (length, width, exudate_amount, tissue_type) => {
+  let areaIntervalPoints = [0.0, 0.3, 0.6, 1.0, 2.2, 3.0, 4.0, 8.0, 12.0, 24.0]
+    let exudateAmounts = ["None", "Light", "Moderate", "Heavy"]
+    let tissueTypes = ["Closed", "Epithelial", "Granulation", "Slough", "Necrotic"]
+
+    let area = length *. width
+    let areaScore =
+      areaIntervalPoints
+      ->Belt.Array.getIndexBy(interval => interval >= area)
+      ->Belt.Option.getWithDefault(10)
+      ->float_of_int
+    let exudateScore =
+      exudateAmounts
+      ->Belt.Array.getIndexBy(amount =>
+        amount == exudate_amount->extrudateAmountToString
+      )
+      ->Belt.Option.getWithDefault(0)
+      ->float_of_int
+    let tissueScore =
+      tissueTypes
+      ->Belt.Array.getIndexBy(tissue =>
+        tissue == tissue_type->tissueTypeToString
+      )
+      ->Belt.Option.getWithDefault(0)
+      ->float_of_int
+
+    areaScore +. exudateScore +. tissueScore
+}
 
 let autoScale = part => {
   {...part, scale: mod(part.scale + 1, 6)}

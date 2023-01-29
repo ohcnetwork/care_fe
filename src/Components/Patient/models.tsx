@@ -1,4 +1,4 @@
-import { ConsultationModel } from "../Facility/models";
+import { ConsultationModel, PatientCategory } from "../Facility/models";
 
 export interface FlowModel {
   id?: number;
@@ -90,6 +90,7 @@ export interface PatientModel {
   last_vaccinated_date?: string;
   date_of_birth?: string;
   blood_group?: string;
+  review_interval?: number;
   review_time?: string;
   date_of_return?: string;
   cluster_name?: string;
@@ -99,8 +100,18 @@ export interface PatientModel {
   fit_for_blood_donation?: boolean;
   date_declared_positive?: string;
   is_declared_positive?: boolean;
-  last_edited?: { first_name?: string; username?: string; last_name?: string };
-  created_by?: { first_name?: string; username?: string; last_name?: string };
+  last_edited?: {
+    first_name?: string;
+    username?: string;
+    last_name?: string;
+    user_type?: string;
+  };
+  created_by?: {
+    first_name?: string;
+    username?: string;
+    last_name?: string;
+    user_type?: string;
+  };
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
 }
@@ -258,7 +269,7 @@ export interface DailyRoundsModel {
   id?: any;
   other_symptoms?: string;
   admitted_to?: string;
-  patient_category?: string;
+  patient_category?: PatientCategory;
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
@@ -289,6 +300,12 @@ export interface FileUploadModel {
   id?: string;
   name?: string;
   created_date?: string;
+  upload_completed?: boolean;
   uploaded_by?: { username?: string };
   file_category?: string;
+  is_archived?: boolean;
+  archive_reason?: string;
+  extension?: string;
+  archived_by?: { username?: string };
+  archived_datetime?: string;
 }

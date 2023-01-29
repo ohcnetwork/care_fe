@@ -10,8 +10,8 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
-import moment from "moment";
 import { Tooltip } from "@material-ui/core";
+import { formatDate } from "../../Utils/utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -75,7 +75,7 @@ export default function InventoryLog(props: any) {
       Notification.Success({
         msg: "Updated Successfully",
       });
-      window.location.reload();
+      fetchData({ aborted: false });
     }
     setSaving(false);
   };
@@ -93,7 +93,7 @@ export default function InventoryLog(props: any) {
       Notification.Success({
         msg: "Last entry deleted Successfully",
       });
-      window.location.reload();
+      fetchData({ aborted: false });
     } else {
       Notification.Error({
         msg: "Error while deleting last entry: " + (res?.data?.detail || ""),
@@ -122,7 +122,7 @@ export default function InventoryLog(props: any) {
           <div className="flex items-center">
             <div className="ml-3">
               <p className="text-gray-900 whitespace-nowrap">
-                {moment(inventoryItem.created_date).format("DD-MM-YYYY LTS")}
+                {formatDate(inventoryItem.created_date)}
               </p>
             </div>
           </div>
@@ -247,7 +247,6 @@ export default function InventoryLog(props: any) {
     <div>
       <PageTitle
         title="Inventory Log"
-        hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },

@@ -10,12 +10,15 @@ import * as Sentry from "@sentry/browser";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 
 import "./style/index.css";
+import UpdatableApp from "./Components/Common/UpdatableApp";
 
 const store = createStore(reducer, applyMiddleware(thunk));
-Sentry.init({
-  environment: process.env.NODE_ENV,
-  dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
-});
+if (process.env.NODE_ENV === "production") {
+  Sentry.init({
+    environment: process.env.NODE_ENV,
+    dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
+  });
+}
 
 const theme = createMuiTheme({
   palette: {
@@ -28,7 +31,9 @@ const theme = createMuiTheme({
 ReactDOM.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
-      <App />
+      <UpdatableApp silentlyAutoUpdate>
+        <App />
+      </UpdatableApp>
     </ThemeProvider>
   </Provider>,
   document.getElementById("root")

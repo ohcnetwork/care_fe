@@ -6,12 +6,7 @@ import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
 import { navigate, Link } from "raviger";
 import Button from "@material-ui/core/Button";
 import QRCode from "qrcode.react";
-import {
-  GENDER_TYPES,
-  KASP_FULL_STRING,
-  TEST_TYPE_CHOICES,
-} from "../../Common/constants";
-import moment from "moment";
+import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -20,11 +15,14 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import CommentSection from "./CommentsSection";
+import { formatDate } from "../../Utils/utils";
+import useConfig from "../../Common/hooks/useConfig";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ShiftDetails(props: { id: string }) {
+  const { static_header_logo, kasp_full_string } = useConfig();
   const dispatch: any = useDispatch();
   const initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -134,7 +132,7 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
-        <div className="mt-2">
+        <div className="mt-2 grid grid-cols-1 md:grid-cols-2 justify-between gap-4">
           <div>
             <span className="font-semibold leading-relaxed">Name: </span>
             <Link href={`/patient/${patientData?.id}`}>
@@ -171,7 +169,7 @@ export default function ShiftDetails(props: { id: string }) {
               Date of Test:{" "}
             </span>
             {(patientData?.date_of_test &&
-              moment(patientData?.date_of_test).format("LL")) ||
+              formatDate(patientData?.date_of_test)) ||
               "-"}
           </div>
 
@@ -275,7 +273,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Estimated contact date:{" "}
               </span>
-              {moment(patientData?.estimated_contact_date).format("LL")}
+              {formatDate(patientData?.estimated_contact_date)}
             </div>
           )}
           <div className="md:col-span-2">
@@ -385,11 +383,7 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <div id="section-to-print" className="print bg-white ">
-        <div>
-          {data.is_kasp && (
-            <img alt="logo" src={process.env.REACT_APP_HEADER_LOGO} />
-          )}
-        </div>
+        <div>{data.is_kasp && <img alt="logo" src={static_header_logo} />}</div>
         <div className="mx-2">
           <div className="mt-6">
             <span className="font-semibold leading-relaxed mt-4">
@@ -408,7 +402,7 @@ export default function ShiftDetails(props: { id: string }) {
               {" "}
               Date and Time:{" "}
             </span>
-            {moment(data.created_date).format("LLL") || "--"}
+            {formatDate(data.created_date) || "--"}
           </div>
           <div className="text-left mt-2">
             <span className="font-semibold leading-relaxed"> Unique Id: </span>
@@ -458,9 +452,9 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of Admission:{" "}
               </span>
-              {moment(
+              {formatDate(
                 consultation.admission_date || consultation.created_date
-              ).format("LL") || "-"}
+              ) || "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">OP/IP No: </span>
@@ -473,7 +467,7 @@ export default function ShiftDetails(props: { id: string }) {
                 Date of Positive Covid 19 Swab:{" "}
               </span>
               {(patientData?.date_of_test &&
-                moment(patientData?.date_of_test).format("LL")) ||
+                formatDate(patientData?.date_of_test)) ||
                 "-"}
             </div>
             <div>
@@ -536,7 +530,7 @@ export default function ShiftDetails(props: { id: string }) {
               <div>
                 <div className="">
                   <QRCode
-                    value={`https://${process.env.REACT_APP_DEPLOYED_URL}/shifting/ data.id`}
+                    value={`${window.location.origin}/shifting/ data.id`}
                   />
                 </div>
               </div>
@@ -551,7 +545,7 @@ export default function ShiftDetails(props: { id: string }) {
             Auto Generated for Care
           </div>
           <div className="font-xs font-gray-600 text-center font-mono">
-            {process.env.REACT_APP_DEPLOYED_URL}/shifting/{data.id}
+            {window.location.origin}/shifting/{data.id}
           </div>
         </div>
       </div>
@@ -587,7 +581,7 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="my-4 md:flex justify-between items-center mx-1">
             <PageTitle title={"Shifting details"} />
             <div className="md:flex items-center space-y-2 md:space-y-0 md:space-x-2">
-              <div className="">
+              <div>
                 <Button
                   fullWidth
                   variant="contained"
@@ -600,12 +594,17 @@ export default function ShiftDetails(props: { id: string }) {
                   Update Status/Details
                 </Button>
               </div>
-              <button
-                onClick={(_) => setIsPrintMode(true)}
-                className="btn btn-primary"
-              >
-                <i className="fas fa-file-alt mr-2"></i> Referral Letter
-              </button>
+              <div>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="medium"
+                  onClick={() => setIsPrintMode(true)}
+                >
+                  <i className="fas fa-file-alt mr-2"></i> Referral Letter
+                </Button>
+              </div>
             </div>
           </div>
           {data.assigned_to_object && (
@@ -696,7 +695,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  {KASP_FULL_STRING}:{" "}
+                  {kasp_full_string}:{" "}
                 </span>
                 <span className="badge badge-pill badge-warning py-1 px-2">
                   {" "}
@@ -739,7 +738,7 @@ export default function ShiftDetails(props: { id: string }) {
                   {" "}
                   Record Created at :{" "}
                 </span>
-                {moment(data.created_date).format("LLL") || "--"}
+                {formatDate(data.created_date) || "--"}
               </div>
 
               <div>
@@ -747,11 +746,11 @@ export default function ShiftDetails(props: { id: string }) {
                   {" "}
                   Last Updated on :{" "}
                 </span>
-                {moment(data.modified_date).format("LLL") || "--"}
+                {formatDate(data.modified_date) || "--"}
               </div>
             </div>
 
-            <div className="flex justify-end mt-4 hidden">
+            <div className="flex justify-end mt-4">
               <div>
                 <Button
                   fullWidth
@@ -776,19 +775,25 @@ export default function ShiftDetails(props: { id: string }) {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={() => setOpenDeleteShiftDialog(false)}
-                      color="primary"
-                    >
-                      No
-                    </Button>
-                    <Button
-                      color="primary"
-                      onClick={handleShiftDelete}
-                      autoFocus
-                    >
-                      Yes
-                    </Button>
+                    <div className="flex flex-col md:flex-row w-full gap-2 justify-end">
+                      <div>
+                        <button
+                          onClick={() => setOpenDeleteShiftDialog(false)}
+                          className="btn btn-primary w-full md:w-auto"
+                        >
+                          No
+                        </button>
+                      </div>
+                      <div>
+                        <button
+                          onClick={handleShiftDelete}
+                          id="facility-delete-confirm"
+                          className="btn btn-danger w-full md:w-auto"
+                        >
+                          Yes
+                        </button>
+                      </div>
+                    </div>
                   </DialogActions>
                 </Dialog>
               </div>
@@ -812,8 +817,8 @@ export default function ShiftDetails(props: { id: string }) {
             <div className="col-span-2">
               <h4 className="mt-8">Audit Log</h4>
 
-              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
-                <div className="border-r-2">
+              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2 grid lg:grid-cols-2">
+                <div className="lg:border-r-2 border-b-2 lg:border-b-0 pb-2 lg:pb-0">
                   <div className="text-sm leading-5 font-medium text-gray-500">
                     Created
                   </div>
@@ -823,23 +828,21 @@ export default function ShiftDetails(props: { id: string }) {
                       {data?.created_by_object?.last_name}
                     </div>
                     <div className="text-xs">
-                      {data.created_date &&
-                        moment(data.created_date).format("lll")}
+                      {data.created_date && formatDate(data.created_date)}
                     </div>
                   </div>
                 </div>
-                <div className="">
+                <div className="mt-2 lg:mt-0">
                   <div className="text-sm leading-5 font-medium text-gray-500">
                     Last Edited
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
                     <div className="text-sm">
-                      {data?.last_edited_by_object?.first_name}
+                      {data?.last_edited_by_object?.first_name}{" "}
                       {data?.last_edited_by_object?.last_name}
                     </div>
                     <div className="text-xs">
-                      {data.modified_date &&
-                        moment(data.modified_date).format("lll")}
+                      {data.modified_date && formatDate(data.modified_date)}
                     </div>
                   </div>
                 </div>

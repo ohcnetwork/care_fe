@@ -4,9 +4,10 @@ import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getMinQuantity, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import { Button, ButtonBase } from "@material-ui/core";
 import { navigate } from "raviger";
 import { RoleButton } from "../Common/RoleButton";
+import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -21,6 +22,9 @@ export default function MinQuantityList(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [facilityName, setFacilityName] = useState("");
+  const [showMinQuantityRequiredModal, setShowMinQuantityRequiredModal] =
+    useState(false);
+  const [selectedItem, setSelectedItem] = useState({ id: 0, item_id: 0 });
   const limit = 14;
 
   const fetchData = useCallback(
@@ -70,27 +74,72 @@ export default function MinQuantityList(props: any) {
   if (inventory && inventory.length) {
     inventoryList = inventory.map((inventoryItem: any) => (
       <tr key={inventoryItem.id} className="bg-white">
-        <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <div className="flex items-center">
-            <p className="text-gray-900 whitespace-nowrap">
+        <td className="px-5 py-5 border-b border-gray-200 sm:text-sm sm:hover:bg-white hover:bg-gray-200 sm:cursor-default cursor-pointer">
+          <div className="sm:flex flex-col hidden">
+            <p className="text-gray-900 whitespace-nowrap font-normal">
               {inventoryItem.item_object?.name}
             </p>
           </div>
+          <ButtonV2
+            ghost={true}
+            className="sm:hidden hover:bg-gray-200 w-full"
+            onClick={() => {
+              setSelectedItem({
+                id: inventoryItem.id,
+                item_id: inventoryItem.item_object?.id,
+              });
+              setShowMinQuantityRequiredModal(true);
+            }}
+          >
+            <div className="sm:hidden flex justify-between items-center w-full">
+              <div className="flex flex-col">
+                <p className="text-gray-900 whitespace-nowrap font-semibold">
+                  {inventoryItem.item_object?.name}
+                </p>
+                <p className="text-gray-900 whitespace-nowrap text-sm mt-1">
+                  {"Min Quantity: "}
+                  {inventoryItem.min_quantity}{" "}
+                  {inventoryItem.item_object?.default_unit?.name}
+                </p>
+              </div>
+              <div className="text-gray-600">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+              </div>
+            </div>
+          </ButtonV2>
         </td>
-        <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <p className="text-gray-900 whitespace-nowrap lowercase">
+        <td className="px-5 py-5 border-b border-gray-200 text-sm sm:flex hidden w-full justify-between">
+          <p className="text-gray-900 whitespace-nowrap lowercase mt-2">
             {inventoryItem.min_quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
-        </td>
-        <td className="px-5 py-5 border-b border-gray-200 text-sm ">
           <RoleButton
-            className="ml-2 bg-primary-400 hover:bg-primary-600 text-white"
-            handleClickCB={() =>
-              navigate(
-                `/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`
-              )
-            }
+            className=" bg-primary-500 hover:bg-primary-600 text-white"
+            materialButtonProps={{
+              variant: "contained",
+              color: "primary",
+              size: "medium",
+            }}
+            handleClickCB={() => {
+              setSelectedItem({
+                id: inventoryItem.id,
+                item_id: inventoryItem.item_object?.id,
+              });
+              setShowMinQuantityRequiredModal(true);
+            }}
             disableFor="readOnly"
             buttonType="materialUI"
           >
@@ -104,7 +153,7 @@ export default function MinQuantityList(props: any) {
       <tr className="bg-white">
         <td
           colSpan={3}
-          className="px-5 py-5 border-b border-gray-200 text-center"
+          className="pxf-5 py-5 border-b border-gray-200 text-center"
         >
           <p className="text-gray-500 whitespace-nowrap">
             No item with minimum quantity set
@@ -119,24 +168,30 @@ export default function MinQuantityList(props: any) {
   } else if (inventory) {
     inventoryItem = (
       <>
-        <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
-          <div className="inline-block min-w-full">
+        <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4">
+          <div className="min-w-full sm:inline-block hidden bg-white">
             <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
               <thead>
                 <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Item
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Minimum Quantity
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider"></th>
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-500 text-left text-xs font-semibold text-white uppercase tracking-wider"></th>
                 </tr>
               </thead>
               <tbody>{inventoryList}</tbody>
             </table>
           </div>
+          <div className="sm:hidden bg-gray-100 shadow-sm rounded-lg">
+            <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
+              {inventoryList}
+            </table>
+          </div>
         </div>
+
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
@@ -155,7 +210,6 @@ export default function MinQuantityList(props: any) {
     <div>
       <PageTitle
         title="Minimum Quantity Required"
-        hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
@@ -188,6 +242,19 @@ export default function MinQuantityList(props: any) {
           {inventoryItem}
         </div>
       </div>
+      {showMinQuantityRequiredModal && (
+        <MinQuantityRequiredModal
+          facilityId={facilityId}
+          inventoryId={selectedItem.id}
+          itemId={selectedItem.item_id}
+          show={showMinQuantityRequiredModal}
+          handleClose={() => setShowMinQuantityRequiredModal(false)}
+          handleUpdate={() => {
+            fetchData({ aborted: false });
+            setShowMinQuantityRequiredModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }

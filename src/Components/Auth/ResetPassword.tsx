@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Typography, CardContent, Button } from "@material-ui/core";
 import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
 import { useDispatch } from "react-redux";
@@ -6,7 +6,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-import { postResetPassword } from "../../Redux/actions";
+import { postResetPassword, checkResetToken } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -99,6 +99,18 @@ export const ResetPassword = (props: any) => {
       });
     }
   };
+
+  useEffect(() => {
+    if (props.token) {
+      dispatch(checkResetToken({ token: props.token })).then((resp: any) => {
+        const res = resp && resp.data;
+        if (!res || res.status !== "OK") navigate("/invalid-reset");
+      });
+    } else {
+      navigate("/invalid-reset");
+    }
+  }, []);
+
   return (
     <div className="py-10 md:py-40">
       <div>
@@ -127,11 +139,11 @@ export const ResetPassword = (props: any) => {
                   <ExpansionPanel>
                     <ExpansionPanelDetails>
                       <Typography className="text-red-500">
-                        <li>Minimum password length 8</li>
-                        <li>Require at least one digit</li>
-                        <li>Require at least one upper case</li>
-                        <li>Require at least one lower case letter</li>
-                        <li>Require at least one symbol</li>
+                        <li>{t("min_password_len_8")}</li>
+                        <li>{t("req_atleast_one_digit")}</li>
+                        <li>{t("req_atleast_one_uppercase")}</li>
+                        <li>{t("req_atleast_one_lowercase")}</li>
+                        <li>{t("req_atleast_one_symbol")}</li>
                       </Typography>
                     </ExpansionPanelDetails>
                   </ExpansionPanel>
@@ -152,7 +164,7 @@ export const ResetPassword = (props: any) => {
               <Button
                 color="default"
                 variant="contained"
-                onClick={() => navigate(`/login`)}
+                onClick={() => navigate("/login")}
                 type="button"
               >
                 Cancel{" "}

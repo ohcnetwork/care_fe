@@ -1,10 +1,8 @@
 import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
 import { useState, useEffect } from "react";
-import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../Components/Facility/TreatmentSummary";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
-import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
 import { FacilityCreate } from "../Components/Facility/FacilityCreate";
 import { FacilityHome } from "../Components/Facility/FacilityHome";
 import { HospitalList } from "../Components/Facility/HospitalList";
@@ -25,7 +23,6 @@ import InventoryLog from "../Components/Facility/InventoryLog";
 import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
 import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
 import MinQuantityList from "../Components/Facility/MinQuantityList";
-import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
 import { ShiftCreate } from "../Components/Patient/ShiftCreate";
 import UserProfile from "../Components/Users/UserProfile";
 import ShiftBoardView from "../Components/Shifting/BoardView";
@@ -59,21 +56,23 @@ import AssetManage from "../Components/Assets/AssetManage";
 import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import HubDashboard from "../Components/Dashboard/HubDashboard";
-import { SideBar } from "../Components/Common/SideBar";
-import { Feed } from "../Components/Facility/Consultations/Feed";
-import { TeleICUFacility } from "../Components/TeleIcu/Facility";
-import TeleICUPatientPage from "../Components/TeleIcu/Patient";
-import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 import Error404 from "../Components/ErrorPages/404";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import FacilityUsers from "../Components/Facility/FacilityUsers";
-
-const logoBlack = process.env.REACT_APP_BLACK_LOGO;
+import {
+  DesktopSidebar,
+  MobileSidebar,
+} from "../Components/Common/Sidebar/Sidebar";
+import { BLACKLISTED_PATHS } from "../Common/constants";
+import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
+import useConfig from "../Common/hooks/useConfig";
 
 const routes = {
   "/hub": () => <HubDashboard />,
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
-  "/user/add": () => <UserAdd />,
+  "/users/add": () => <UserAdd />,
   "/user/profile": () => <UserProfile />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
@@ -91,6 +90,9 @@ const routes = {
   "/facility/:facilityId/update": ({ facilityId }: any) => (
     <FacilityCreate facilityId={facilityId} />
   ),
+  "/facility/:facilityId/middleware/update": ({ facilityId }: any) => (
+    <UpdateFacilityMiddleware facilityId={facilityId} />
+  ),
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
   ),
@@ -102,15 +104,6 @@ const routes = {
   ),
   "/facility/:facilityId/triage": ({ facilityId }: any) => (
     <TriageForm facilityId={facilityId} />
-  ),
-  "/facility/:facilityId/bed": ({ facilityId }: any) => (
-    <BedCapacityForm facilityId={facilityId} />
-  ),
-  "/facility/:facilityId/doctor": ({ facilityId }: any) => (
-    <DoctorCapacityForm facilityId={facilityId} />
-  ),
-  "/facility/:facilityId/patients": ({ facilityId }: any) => (
-    <PatientManager facilityId={facilityId} />
   ),
   "/facility/:facilityId/patient": ({ facilityId }: any) => (
     <PatientRegister facilityId={facilityId} />
@@ -148,12 +141,6 @@ const routes = {
   ),
   "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
     <TriageForm facilityId={facilityId} id={id} />
-  ),
-  "/facility/:facilityId/bed/:id": ({ facilityId, id }: any) => (
-    <BedCapacityForm facilityId={facilityId} id={id} />
-  ),
-  "/facility/:facilityId/doctor/:id": ({ facilityId, id }: any) => (
-    <DoctorCapacityForm facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,
@@ -301,36 +288,35 @@ const routes = {
     facilityId,
     inventoryId,
   }: any) => <InventoryLog facilityId={facilityId} inventoryId={inventoryId} />,
-  "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({
-    facilityId,
-    inventoryId,
-    itemId,
-  }: any) => (
-    <UpdateMinQuantity
-      facilityId={facilityId}
-      inventoryId={inventoryId}
-      itemId={itemId}
-    />
-  ),
   "/facility/:facilityId/assets/new": ({ facilityId }: any) => (
     <AssetCreate facilityId={facilityId} />
   ),
-  "/facility/:facilityId/assets/:assetId": ({ facilityId, assetId }: any) => (
-    <AssetCreate facilityId={facilityId} assetId={assetId} />
-  ),
+  "/facility/:facilityId/assets/:assetId/update": ({
+    facilityId,
+    assetId,
+  }: any) => <AssetCreate facilityId={facilityId} assetId={assetId} />,
   "/assets": () => <AssetsList />,
-  "/assets/:assetId": ({ assetId }: any) => <AssetManage assetId={assetId} />,
-  "/assets/:assetId/configure": ({ assetId }: any) => (
-    <AssetConfigure assetId={assetId} />
+  "/facility/:facilityId/assets/:assetId": ({ assetId, facilityId }: any) => (
+    <AssetManage assetId={assetId} facilityId={facilityId} />
   ),
+  "/facility/:facilityId/assets/:assetId/configure": ({
+    assetId,
+    facilityId,
+  }: any) => <AssetConfigure assetId={assetId} facilityId={facilityId} />,
 
   "/shifting": () =>
     localStorage.getItem("defaultShiftView") === "list" ? (
       <ShiftListView />
     ) : (
-      <ShiftBoardView />
+      <DndProvider backend={HTML5Backend}>
+        <ShiftBoardView />
+      </DndProvider>
     ),
-  "/shifting/board-view": () => <ShiftBoardView />,
+  "/shifting/board-view": () => (
+    <DndProvider backend={HTML5Backend}>
+      <ShiftBoardView />
+    </DndProvider>
+  ),
   "/shifting/list-view": () => <ShiftListView />,
   "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
   "/shifting/:id/update": ({ id }: any) => <ShiftDetailsUpdate id={id} />,
@@ -338,10 +324,16 @@ const routes = {
     localStorage.getItem("defaultResourceView") === "list" ? (
       <ResourceListView />
     ) : (
-      <ResourceBoardView />
+      <DndProvider backend={HTML5Backend}>
+        <ResourceBoardView />
+      </DndProvider>
     ),
 
-  "/resource/board-view": () => <ResourceBoardView />,
+  "/resource/board-view": () => (
+    <DndProvider backend={HTML5Backend}>
+      <ResourceBoardView />
+    </DndProvider>
+  ),
   "/resource/list-view": () => <ResourceListView />,
   "/resource/:id": ({ id }: any) => <ResourceDetails id={id} />,
   "/resource/:id/update": ({ id }: any) => <ResourceDetailsUpdate id={id} />,
@@ -364,14 +356,6 @@ const routes = {
       tab={"updates"}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/feed":
-    ({ facilityId, patientId, consultationId }: any) => (
-      <Feed
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={consultationId}
-      />
-    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
     ({ facilityId, patientId, consultationId }: any) => (
       <TreatmentSummary
@@ -390,40 +374,46 @@ const routes = {
         tab={tab}
       />
     ),
-
-  "/teleicu/facility/:facilityId/patient/:patientId": ({
-    patientId,
-    facilityId,
-  }: any) => (
-    <TeleICUPatientPage facilityId={facilityId} patientId={patientId} />
-  ),
-  "/teleicu/facility": () => <TeleICUFacility />,
-  "/teleicu/facility/:facilityId": ({ facilityId }: any) => (
-    <TeleICUPatientsList facilityId={facilityId} />
-  ),
+  "/not-found": () => <Error404 />,
 };
 
 export default function AppRouter() {
+  const { static_black_logo } = useConfig();
   useRedirect("/", "/facility");
-  useRedirect("/teleicu", "/teleicu/facility");
   useRedirect("/user", "/users");
   const pages = useRoutes(routes) || <Error404 />;
   const path = usePath();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const pageContainer = window.document.getElementById("pages");
-    pageContainer?.scroll(0, 0);
+    setSidebarOpen(false);
+    let flag = false;
+    if (path) {
+      BLACKLISTED_PATHS.forEach((regex: RegExp) => {
+        flag = flag || regex.test(path);
+      });
+      if (!flag) {
+        const pageContainer = window.document.getElementById("pages");
+        pageContainer?.scroll(0, 0);
+      }
+    }
   }, [path]);
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-100">
-      <SideBar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+    <div className="absolute inset-0 h-screen flex overflow-hidden bg-gray-100">
+      <>
+        <div className="block md:hidden">
+          <MobileSidebar open={sidebarOpen} setOpen={setSidebarOpen} />{" "}
+        </div>
+        <div className="md:block hidden">
+          <DesktopSidebar />
+        </div>
+      </>
 
       <div className="flex flex-col w-full flex-1 overflow-hidden">
         <div className="flex md:hidden relative z-10 shrink-0 h-16 bg-white shadow">
           <button
-            onClick={() => setIsSidebarOpen(true)}
+            onClick={() => setSidebarOpen(true)}
             className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:bg-gray-100 focus:text-gray-600 md:hidden"
             aria-label="Open sidebar"
           >
@@ -445,7 +435,11 @@ export default function AppRouter() {
             href="/"
             className="md:hidden flex h-full w-full items-center px-4"
           >
-            <img className="h-6 w-auto" src={logoBlack} alt="care logo" />
+            <img
+              className="h-6 w-auto"
+              src={static_black_logo}
+              alt="care logo"
+            />
           </a>
         </div>
 
