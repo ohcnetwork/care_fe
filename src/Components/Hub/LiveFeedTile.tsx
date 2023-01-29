@@ -4,10 +4,9 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import ReactPlayer from "react-player";
 import screenfull from "screenfull";
-import loadable from "@loadable/component";
 import { getAsset, listAssetBeds } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-
+import { useTranslation } from "react-i18next";
 interface LiveFeedTileProps {
   assetId: string;
 }
@@ -38,6 +37,8 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
     y: 0,
     zoom: 0,
   });
+  const { t } = useTranslation();
+
   useEffect(() => {
     let loadingTimeout: any;
     if (loading === true)
@@ -59,7 +60,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
         // setLoading(false);
         if (!assetData.data)
           Notification.Error({
-            msg: "Something went wrong..!",
+            msg: t("something_went_wrong"),
           });
         else {
           console.log("Asset Fetched", assetData.data);
@@ -84,14 +85,14 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           `https://${asset.meta.middleware_hostname}${resp.data.uri}`
         );
       })
-      .catch((ex: any) => {
+      .catch((_ex: any) => {
         // console.error('Error while refreshing',ex);
       });
   };
   const stopStream = (url: string | undefined) => {
     console.log("stop", url);
     if (url) {
-      let urlSegments = url.split("/");
+      const urlSegments = url.split("/");
       const id = urlSegments?.pop();
       axios
         .post(`https://${asset.meta.middleware_hostname}/stop`, {
@@ -101,7 +102,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           console.log(resp);
           // setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
         })
-        .catch((ex: any) => {
+        .catch((_ex: any) => {
           // console.error('Error while refreshing',ex);
         });
     }
@@ -114,7 +115,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
       .then((resp: any) => {
         setPosition(resp.data.position);
       })
-      .catch((ex: any) => {
+      .catch((_ex: any) => {
         // console.error('Error while refreshing',ex);
       });
   };
@@ -127,11 +128,11 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
         setPresets(resp.data);
         console.log("PRESETS", resp.data);
       })
-      .catch((ex: any) => {
+      .catch((_ex: any) => {
         // console.error('Error while refreshing',ex);
       });
   };
-  const getBedPresets = async (asset: any) => {
+  const getBedPresets = async (_asset: any) => {
     const bedAssets = await dispatch(listAssetBeds({ asset: props.assetId }));
     setBedPresets(bedAssets.data.results);
   };
@@ -147,7 +148,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
       .then((resp: any) => {
         console.log(resp.data);
       })
-      .catch((ex: any) => {
+      .catch((_ex: any) => {
         // console.error('Error while refreshing',ex);
       });
   };
@@ -156,7 +157,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
     if (!position) {
       getCameraStatus(asset);
     } else {
-      let data = {
+      const data = {
         x: 0,
         y: 0,
         zoom: 0,
@@ -202,7 +203,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           console.log(resp.data);
           getCameraStatus(asset);
         })
-        .catch((ex: any) => {
+        .catch((_ex: any) => {
           // console.error('Error while refreshing',ex);
         });
     }
@@ -215,7 +216,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
         ...data,
         ...asset,
       })
-      .then((resp: any) => {
+      .then((_resp: any) => {
         getCameraStatus(asset);
       })
       .catch((ex: any) => {
@@ -249,19 +250,19 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
         .map(([key, value]) => ({ label: key, value }))
         .slice(0, 10)
     : Array.from(Array(10), (_, i) => ({
-        label: "Monitor " + (i + 1),
+        label: t("monitor") + (i + 1),
         value: i + 1,
       }));
 
   const cameraPTZ = [
-    { icon: "fa fa-arrow-up", label: "Up", action: "up" },
-    { icon: "fa fa-arrow-down", label: "Down", action: "down" },
-    { icon: "fa fa-arrow-left", label: "Left", action: "left" },
-    { icon: "fa fa-arrow-right", label: "Right", action: "right" },
-    { icon: "fa fa-search-plus", label: "Zoom In", action: "zoomIn" },
-    { icon: "fa fa-search-minus", label: "Zoom Out", action: "zoomOut" },
-    { icon: "fa fa-stop", label: "Stop", action: "stop" },
-    { icon: "fa fa-undo", label: "Reset", action: "reset" },
+    { icon: "fa fa-arrow-up", label: t("up"), action: "up" },
+    { icon: "fa fa-arrow-down", label: t("down"), action: "down" },
+    { icon: "fa fa-arrow-left", label: t("left"), action: "left" },
+    { icon: "fa fa-arrow-right", label: t("right"), action: "right" },
+    { icon: "fa fa-search-plus", label: t("zoom_in"), action: "zoomIn" },
+    { icon: "fa fa-search-minus", label: t("zoom_out"), action: "zoomOut" },
+    { icon: "fa fa-stop", label: t("stop"), action: "stop" },
+    { icon: "fa fa-undo", label: t("reset"), action: "reset" },
   ];
 
   return (
@@ -306,7 +307,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
                   STATUS: <span className="text-red-600">OFFLINE</span>
                 </p>
                 <p className="font-semibold text-black">
-                  Feed is currently not live
+                  {t("feed_is_currently_not_live")}
                 </p>
               </div>
             )}
@@ -330,7 +331,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
                   className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
                   onClick={handleClickFullscreen}
                 >
-                  <span className="sr-only">Full Screen</span>
+                  <span className="sr-only">{t("full_screen")}</span>
                   <i className="fas fa-expand hover:text-black"></i>
                 </button>
               </div>
@@ -380,7 +381,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              <div className="text-white text-2xl">Moving Camera</div>
+              <div className="text-white text-2xl">{t("moving_camera")}</div>
             </div>
           </div>
           <div className="grid grid-cols-2 md:ml-12 md:w-1/3 my-auto gap-4 mt-4 md:mt-0">
@@ -419,8 +420,8 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
               }}
             >
               {showDefaultPresets
-                ? "Show Patient Presets"
-                : "Show Default Presets"}
+                ? t("show_patient_presets")
+                : t("show_default_presets")}
             </button>
           </div>
         </div>
