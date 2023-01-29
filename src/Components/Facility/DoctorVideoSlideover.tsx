@@ -1,8 +1,8 @@
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import SlideOver from "../../CAREUI/interactive/SlideOver";
 import { getFacilityUsers } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import { UserAssignedModel } from "../Users/models";
 
 export default function DoctorVideoSlideover(props: {
@@ -37,69 +37,57 @@ export default function DoctorVideoSlideover(props: {
   }, [show, facilityId]);
 
   return (
-    <SlideOver show={show} setShow={setShow}>
-      <div className="bg-white min-h-screen p-4">
-        {/* Title and close button */}
-        <div className="flex justify-between items-center pb-4">
+    <SlideOver
+      open={show}
+      setOpen={setShow}
+      title="Doctor Connect"
+      dialogClass="md:w-[400px]"
+    >
+      {/* Title and close button */}
+      <p className="text-gray-600 text-sm -mt-3 pb-4">
+        Select a doctor to connect via video
+      </p>
+      {[
+        {
+          title: "Doctors",
+          user_type: "Doctor",
+          home: true,
+        },
+        {
+          title: "Staff",
+          user_type: "Staff",
+          home: true,
+        },
+        {
+          title: "TeleICU Hub",
+          user_type: "Doctor",
+          home: false,
+        },
+      ].map((type, i) => (
+        <div key={i} className="mb-4">
           <div>
-            <h2 className="text-2xl font-bold">Doctor Connect</h2>
-            <p className="text-gray-600 text-sm">
-              Select a doctor to connect via video
-            </p>
+            <span className="text-lg font-semibold">{type.title}</span>
           </div>
-          <button
-            className="text-gray-600 hover:text-gray-800 border border-gray-400 rounded-xl py-2 px-4"
-            onClick={() => setShow(false)}
-          >
-            {/* Times Icon */}
-            <span>
-              <i className="fas fa-times mr-2"></i>
-              Close
-            </span>
-          </button>
-        </div>
-        {[
-          {
-            title: "Doctors",
-            user_type: "Doctor",
-            home: true,
-          },
-          {
-            title: "Staff",
-            user_type: "Staff",
-            home: true,
-          },
-          {
-            title: "TeleICU Hub",
-            user_type: "Doctor",
-            home: false,
-          },
-        ].map((type, i) => (
-          <div key={i} className="mb-4">
-            <div>
-              <span className="text-lg font-semibold">{type.title}</span>
-            </div>
 
-            <ul
-              className="max-h-96 scroll-py-3 overflow-y-auto list-none"
-              id="options"
-              role="listbox"
-            >
-              {doctors
-                .filter((doc) => {
-                  const isHomeUser =
-                    (doc.home_facility_object?.id || "") === facilityId;
-                  return (
-                    doc.user_type === type.user_type && isHomeUser === type.home
-                  );
-                })
-                .map((doctor) => {
-                  return <UserListItem key={doctor.id} user={doctor} />;
-                })}
-            </ul>
-          </div>
-        ))}
-      </div>
+          <ul
+            className="max-h-96 scroll-py-3 overflow-y-auto list-none"
+            id="options"
+            role="listbox"
+          >
+            {doctors
+              .filter((doc) => {
+                const isHomeUser =
+                  (doc.home_facility_object?.id || "") === facilityId;
+                return (
+                  doc.user_type === type.user_type && isHomeUser === type.home
+                );
+              })
+              .map((doctor) => {
+                return <UserListItem key={doctor.id} user={doctor} />;
+              })}
+          </ul>
+        </div>
+      ))}
     </SlideOver>
   );
 }
@@ -148,8 +136,13 @@ function UserListItem(props: { user: UserAssignedModel }) {
             }
           </div>
           <div className="ml-4 flex-auto">
-            <p className="text-sm font-medium text-gray-700">
-              {user.first_name} {user.last_name}
+            <p className="flex gap-2 text-sm font-medium text-gray-700">
+              <span>
+                {user.first_name} {user.last_name}
+              </span>
+              {user.user_type === "Doctor" && (
+                <span>{user.doctor_qualification}</span>
+              )}
             </p>
             <p className="text-sm text-gray-500 flex gap-2 divide-gray-800">
               <span>{user.alt_phone_number}</span>

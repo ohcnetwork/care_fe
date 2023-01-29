@@ -16,7 +16,6 @@ import {
   FACILITY_TYPES,
   SHIFTING_VEHICLE_CHOICES,
   BREATHLESSNESS_LEVEL,
-  KASP_FULL_STRING,
 } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
 import { CircularProgress } from "@material-ui/core";
@@ -33,6 +32,7 @@ import {
 } from "@material-ui/core";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useConfig from "../../Common/hooks/useConfig";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -68,6 +68,7 @@ const initialState = {
 };
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
+  const { kasp_full_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -334,7 +335,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
               <div>
                 <InputLabel>
-                  {t("is")} {KASP_FULL_STRING}?
+                  {t("is")} {kasp_full_string}?
                 </InputLabel>
                 <RadioGroup
                   aria-label="is_kasp"
