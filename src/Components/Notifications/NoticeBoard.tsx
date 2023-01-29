@@ -5,11 +5,13 @@ import PageTitle from "../Common/PageTitle";
 import { Card, CardContent } from "@material-ui/core";
 import Loading from "../Common/Loading";
 import { formatDate } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
 export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<any[]>([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setIsLoading(true);
@@ -43,7 +45,7 @@ export const NoticeBoard: any = () => {
                   </span>
                 </div>
                 <div className="text-xs text-gray-900">
-                  On: {formatDate(item.created_date)}
+                  {t("on")}: {formatDate(item.created_date)}
                 </div>
               </div>
             </CardContent>
@@ -56,7 +58,7 @@ export const NoticeBoard: any = () => {
       <Card key="no-notice" className="my-4 rounded-lg">
         <CardContent>
           <div className="text-xl text-center semibold">
-            No notices for you.
+            {t("no_notices_for_you")}
           </div>
         </CardContent>
       </Card>
@@ -66,7 +68,11 @@ export const NoticeBoard: any = () => {
   if (isLoading) return <Loading />;
   return (
     <div className="px-6">
-      <PageTitle title="Notice Board" hideBack={true} breadcrumbs={false} />
+      <PageTitle
+        title={t("Notice Board")}
+        hideBack={true}
+        breadcrumbs={false}
+      />
       <div>{notices}</div>
     </div>
   );
