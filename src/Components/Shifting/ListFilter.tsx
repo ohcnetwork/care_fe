@@ -20,6 +20,7 @@ import parsePhoneNumberFromString from "libphonenumber-js";
 import useMergeState from "../../Common/hooks/useMergeState";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { useTranslation } from "react-i18next";
 
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
@@ -29,6 +30,7 @@ export default function ListFilter(props: any) {
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
+  const { t } = useTranslation();
 
   const [filterState, setFilterState] = useMergeState({
     orgin_facility: filter.orgin_facility || "",
@@ -237,7 +239,7 @@ export default function ListFilter(props: any) {
       <div className="flex justify-between">
         <button className="btn btn-default" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />
-          Cancel
+          {t("cancel")}
         </button>
         <Link
           href="/shifting"
@@ -245,18 +247,18 @@ export default function ListFilter(props: any) {
           onClick={clearFilters}
         >
           <i className="fas fa-times mr-2" />
-          Clear Filters
+          {t("clear_filters")}
         </Link>
         <button className="btn btn-primary" onClick={applyFilter}>
           <i className="fas fa-check mr-2" />
-          Apply
+          {t("apply")}
         </button>
       </div>
-      <div className="font-light text-md mt-2">Filter By:</div>
+      <div className="font-light text-md mt-2">{t("filter_by") + ":"}</div>
       <div className="flex flex-wrap gap-2">
         {props.showShiftingStatus && (
           <div className="w-full flex-none">
-            <span className="text-sm font-semibold">Status</span>
+            <span className="text-sm font-semibold">{t("status")}</span>
             <SelectField
               name="status"
               variant="outlined"
@@ -270,7 +272,7 @@ export default function ListFilter(props: any) {
           </div>
         )}
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Origin facility</span>
+          <span className="text-sm font-semibold">{t("origin_facility")}</span>
           <div className="">
             {isOriginLoading ? (
               <CircularProgress size={20} />
@@ -289,7 +291,7 @@ export default function ListFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">
-            Shifting approving facility
+            {t("shifting_approving_facility")}
           </span>
           <div className="">
             {isShiftingLoading ? (
@@ -310,7 +312,9 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Assigned facility</span>
+          <span className="text-sm font-semibold">
+            {t("assigned_facility")}
+          </span>
           <div className="">
             {isAssignedLoading ? (
               <CircularProgress size={20} />
@@ -328,7 +332,7 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Assigned To</span>
+          <span className="text-sm font-semibold">{t("assigned_to")}</span>
           <div className="">
             {isAssignedUserLoading ? (
               <CircularProgress size={20} />
@@ -346,7 +350,7 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Ordering</span>
+          <span className="text-sm font-semibold">{t("ordering")}</span>
           <SelectField
             name="ordering"
             variant="outlined"
@@ -361,7 +365,9 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Is emergency case</span>
+          <span className="text-sm font-semibold">
+            {t("is_emergency_case")}
+          </span>
           <SelectField
             name="emergency"
             variant="outlined"
@@ -376,7 +382,9 @@ export default function ListFilter(props: any) {
 
         {KASP_ENABLED && (
           <div className="w-full flex-none">
-            <span className="text-sm font-semibold">Is {KASP_STRING}</span>
+            <span className="text-sm font-semibold">{`${t(
+              "is"
+            )} ${KASP_STRING}`}</span>
             <SelectField
               name="is_kasp"
               variant="outlined"
@@ -391,7 +399,7 @@ export default function ListFilter(props: any) {
         )}
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Is upshift case</span>
+          <span className="text-sm font-semibold">{t("is_upshift_case")}</span>
           <SelectField
             name="is_up_shift"
             variant="outlined"
@@ -405,7 +413,7 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Disease Status</span>
+          <span className="text-sm font-semibold">{t("disease_status")}</span>
           <SelectField
             name="disease_status"
             variant="outlined"
@@ -419,7 +427,7 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Is Antenatal</span>
+          <span className="text-sm font-semibold">{t("is_antenatal")}</span>
           <SelectField
             name="is_antenatal"
             variant="outlined"
@@ -433,7 +441,9 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Breathlessness Level</span>
+          <span className="text-sm font-semibold">
+            {t("breathlessness_level")}
+          </span>
           <SelectField
             name="breathlessness_level"
             variant="outlined"
@@ -448,7 +458,7 @@ export default function ListFilter(props: any) {
 
         <div className="w-full flex-none">
           <PhoneNumberFormField
-            label="Patient Phone Number"
+            label={t("patient_phone_number")}
             name="patient_phone_number"
             value={filterState.patient_phone_number}
             onChange={handleFormFieldChange}
@@ -468,7 +478,7 @@ export default function ListFilter(props: any) {
             }
             endDateId={"created_date_before"}
             startDateId={"created_date_after"}
-            label={"Created Date"}
+            label={t("created_date")}
             size="small"
           />
           <DateRangePicker
@@ -483,7 +493,7 @@ export default function ListFilter(props: any) {
             }
             endDateId={"modified_date_before"}
             startDateId={"modified_date_after"}
-            label={"Modified Date"}
+            label={t("modified_date")}
             size="small"
           />
         </div>
