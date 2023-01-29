@@ -571,9 +571,8 @@ const CreateHealthIDSection = ({
     const res = await dispatch(
       createHealthId({ txnId: transactionId, patientId, healthId })
     );
-    if (res.status === 200 && res.data?.abha) {
-      console.log(res);
-      setAbha?.(res.data.abha);
+    if (res.status === 200) {
+      setAbha?.(res.data);
       Notify.Success({ msg: "Health ID created" });
       onCreateSuccess(res.data.txnId);
     } else {

@@ -664,11 +664,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (!validForm) {
       scrollTo(error_div);
     } else {
-      if (!id && !state.form.abha_number) {
-        setShowLinkAbhaNumberModal(true);
-        return;
-      }
-
       setIsLoading(true);
       const medical_history: Array<medicalHistoryModel> = [];
       state.form.medical_history.forEach((id: number) => {
@@ -864,6 +859,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleValuesChange = (values: { [key: string]: any }) => {
+    dispatch({ type: "set_form", form: { ...state.form, ...values } });
+  };
+
   const handleDateChange = (date: any, field: string) => {
     if (moment(date).isValid()) {
       const form = { ...state.form };
@@ -961,7 +960,47 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         <LinkABHANumberModal
           show={showLinkAbhaNumberModal}
           onClose={() => setShowLinkAbhaNumberModal(false)}
-          setAbha={(abha: string) => handleValueChange(abha, "abha_number")}
+          setAbha={({
+            healthIdNumber,
+            healthId,
+            name,
+            mobile,
+            gender,
+            monthOfBirth,
+            dayOfBirth,
+            yearOfBirth,
+            pincode,
+          }: any) => {
+            const values: any = {};
+
+            if (healthIdNumber) values["abha_number"] = healthIdNumber;
+            if (healthId) values["health_id"] = healthId;
+            if (name) values["name"] = name;
+            if (mobile) {
+              values["phone_number"] = parsePhoneNumberFromString(
+                mobile,
+                "IN"
+              )?.format("E.164");
+              values["emergency_phone_number"] = parsePhoneNumberFromString(
+                mobile,
+                "IN"
+              )?.format("E.164");
+            }
+            if (gender)
+              values["gender"] =
+                gender === "M" ? "1" : gender === "F" ? "2" : "3";
+            if (monthOfBirth && dayOfBirth && yearOfBirth)
+              values["date_of_birth"] = new Date(
+                `${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`
+              );
+            if (pincode) {
+              values["pincode"] = pincode;
+            } else {
+              // handle state and district using stateName and districtName
+            }
+
+            handleValuesChange(values);
+          }}
         />
       )}
       {statusDialog.show && (
@@ -1062,6 +1101,69 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     {" "}
                     Import From External Results
                   </button>
+                  <Card elevation={0} className="mb-8 rounded">
+                    <CardContent>
+                      <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                        ABHA Details
+                      </h1>
+                      {!state.form.abha_number ? (
+                        <button
+                          className="btn btn-primary my-4"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setShowLinkAbhaNumberModal(true);
+                          }}
+                        >
+                          Link Abha Number
+                        </button>
+                      ) : (
+                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                          <div id="abha-number">
+                            <InputLabel
+                              id="abha-number-label"
+                              htmlFor="abha-number"
+                            >
+                              ABHA Number
+                            </InputLabel>
+                            <TextInputField
+                              id="abha-number"
+                              name="abha-number"
+                              variant="outlined"
+                              margin="dense"
+                              type="text"
+                              value={state.form.abha_number}
+                              disabled={true} // using input field to keep the consistent look
+                              errors=""
+                            />
+                          </div>
+                          <div id="health-id">
+                            <InputLabel
+                              id="health-id-label"
+                              htmlFor="health-id"
+                            >
+                              Health ID
+                            </InputLabel>
+                            {state.form.health_id ? (
+                              <TextInputField
+                                id="health-id"
+                                name="health-id"
+                                variant="outlined"
+                                margin="dense"
+                                type="text"
+                                value={state.form.health_id}
+                                disabled={true} // using input field to keep the consistent look
+                                errors=""
+                              />
+                            ) : (
+                              <div className="text-sm text-gray-500 mt-4">
+                                No Health ID Associated with this ABHA Number
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                   <Card elevation={0} className="mb-8 rounded">
                     <CardContent>
                       <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
