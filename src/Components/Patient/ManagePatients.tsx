@@ -74,7 +74,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
 export const PatientManager = () => {
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const {
     qParams,
@@ -90,7 +90,6 @@ export const PatientManager = () => {
     name: "",
   });
   const [showDialog, setShowDialog] = useState(false);
-
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
@@ -241,17 +240,13 @@ export const PatientManager = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    dispatch(getAllPatient(params, "listPatients"))
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
+    dispatch(getAllPatient(params, "listPatients")).then((res: any) => {
+      if (res && res.data) {
+        setData(res.data.results);
+        setTotalCount(res.data.count);
         setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+      }
+    });
   }, [
     dispatch,
     qParams.last_consultation_admission_date_before,
