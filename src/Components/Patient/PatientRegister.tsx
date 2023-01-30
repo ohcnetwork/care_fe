@@ -70,6 +70,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import useConfig from "../../Common/hooks/useConfig";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -193,6 +194,7 @@ const scrollTo = (id: any) => {
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
+  const { gov_data_api_key } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -686,7 +688,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
     if (!validatePincode(e.target.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(e.target.value);
+    const pincodeDetails = await getPincodeDetails(
+      e.target.value,
+      gov_data_api_key
+    );
     if (!pincodeDetails) return;
 
     const matchedState = states.find((state) => {
@@ -1012,9 +1017,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <PageTitle
         title={headerText}
         className="mb-11"
-        backButtonCB={() => {
+        onBackClick={() => {
           if (showImport) {
             setShowImport(false);
+            return false;
           }
         }}
         crumbsReplacements={{

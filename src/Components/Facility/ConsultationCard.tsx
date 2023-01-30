@@ -2,11 +2,11 @@ import { CardContent, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import React from "react";
 import { ConsultationModel } from "./models";
-import { KASP_STRING } from "../../Common/constants";
 import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import useConfig from "../../Common/hooks/useConfig";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -15,11 +15,12 @@ interface ConsultationProps {
 
 export const ConsultationCard = (props: ConsultationProps) => {
   const { itemData, isLastConsultation } = props;
+  const { kasp_string } = useConfig();
   return (
     <div className="block border rounded-lg bg-white shadow cursor-pointer hover:border-primary-500 text-black mt-4">
       {itemData.is_kasp && (
         <div className="ml-3 mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-          {KASP_STRING}
+          {kasp_string}
         </div>
       )}
 
@@ -57,7 +58,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               <Typography>
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-semibold text-zinc-400">
-                    {KASP_STRING} Enabled date{" "}
+                    {kasp_string} Enabled date{" "}
                   </div>
                   <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
                     {itemData.kasp_enabled_date
