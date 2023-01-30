@@ -73,7 +73,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
 
 export const PatientManager = () => {
   const dispatch: any = useDispatch();
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const {
