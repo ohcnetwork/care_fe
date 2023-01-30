@@ -240,8 +240,6 @@ export const PatientManager = () => {
   };
 
   useEffect(() => {
-    if (params.page === 1) return;
-
     setIsLoading(true);
     dispatch(getAllPatient(params, "listPatients"))
       .then((res: any) => {
