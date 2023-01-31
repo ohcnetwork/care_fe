@@ -6,11 +6,7 @@ import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
 import { navigate, Link } from "raviger";
 import Button from "@material-ui/core/Button";
 import QRCode from "qrcode.react";
-import {
-  GENDER_TYPES,
-  KASP_FULL_STRING,
-  TEST_TYPE_CHOICES,
-} from "../../Common/constants";
+import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -20,11 +16,13 @@ import * as Notification from "../../Utils/Notifications.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import CommentSection from "./CommentsSection";
 import { formatDate } from "../../Utils/utils";
+import useConfig from "../../Common/hooks/useConfig";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ShiftDetails(props: { id: string }) {
+  const { static_header_logo, kasp_full_string } = useConfig();
   const dispatch: any = useDispatch();
   const initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -387,11 +385,7 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <div id="section-to-print" className="print bg-white ">
-        <div>
-          {data.is_kasp && (
-            <img alt="logo" src={process.env.REACT_APP_HEADER_LOGO} />
-          )}
-        </div>
+        <div>{data.is_kasp && <img alt="logo" src={static_header_logo} />}</div>
         <div className="mx-2">
           <div className="mt-6">
             <span className="font-semibold leading-relaxed mt-4">
@@ -538,7 +532,7 @@ export default function ShiftDetails(props: { id: string }) {
               <div>
                 <div className="">
                   <QRCode
-                    value={`https://${process.env.REACT_APP_DEPLOYED_URL}/shifting/ data.id`}
+                    value={`${window.location.origin}/shifting/ data.id`}
                   />
                 </div>
               </div>
@@ -553,7 +547,7 @@ export default function ShiftDetails(props: { id: string }) {
             Auto Generated for Care
           </div>
           <div className="font-xs font-gray-600 text-center font-mono">
-            {process.env.REACT_APP_DEPLOYED_URL}/shifting/{data.id}
+            {window.location.origin}/shifting/{data.id}
           </div>
         </div>
       </div>
@@ -703,7 +697,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  {KASP_FULL_STRING}:{" "}
+                  {kasp_full_string}:{" "}
                 </span>
                 <span className="badge badge-pill badge-warning py-1 px-2">
                   {" "}

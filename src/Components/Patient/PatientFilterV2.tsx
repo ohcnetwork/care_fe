@@ -2,13 +2,10 @@ import { useEffect, useCallback } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import {
-  PATIENT_FILTER_ORDER,
   GENDER_TYPES,
   FACILITY_TYPES,
   DISEASE_STATUS,
   PATIENT_FILTER_CATEGORIES,
-  KASP_STRING,
-  KASP_ENABLED,
   ADMITTED_TO,
 } from "../../Common/constants";
 import moment from "moment";
@@ -33,11 +30,13 @@ import { DateRange } from "../Common/DateRangeInputV2";
 import FilterButtons from "../Common/FilterButtons";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useMergeState from "../../Common/hooks/useMergeState";
+import useConfig from "../../Common/hooks/useConfig";
 
 const getDate = (value: any) =>
   value && moment(value).isValid() && moment(value).toDate();
 
 export default function PatientFilterV2(props: any) {
+  const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter } = props;
 
   const [filterState, setFilterState] = useMergeState({
@@ -56,7 +55,6 @@ export default function PatientFilterV2(props: any) {
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
     modified_date_after: filter.modified_date_after || null,
-    ordering: filter.ordering,
     category: filter.category || null,
     gender: filter.gender || null,
     disease_status: filter.disease_status || null,
@@ -109,7 +107,6 @@ export default function PatientFilterV2(props: any) {
     created_date_after: "",
     modified_date_before: "",
     modified_date_after: "",
-    ordering: "",
     category: null,
     gender: null,
     disease_status: null,
@@ -211,7 +208,6 @@ export default function PatientFilterV2(props: any) {
       created_date_after,
       modified_date_before,
       modified_date_after,
-      ordering,
       category,
       gender,
       disease_status,
@@ -298,7 +294,6 @@ export default function PatientFilterV2(props: any) {
         moment(last_consultation_discharge_date_after).isValid()
           ? moment(last_consultation_discharge_date_after).format("YYYY-MM-DD")
           : "",
-      ordering: ordering || "",
       category: category || "",
       gender: gender || "",
       disease_status:
@@ -364,31 +359,7 @@ export default function PatientFilterV2(props: any) {
           closeFilter();
         }}
       />
-      <div className="w-full flex-none pt-20">
-        <div className="mb-3 text-md flex items-center text-gray-700 gap-2">
-          <CareIcon className="care-l-sort text-lg" />
-          <p>Ordering</p>
-        </div>
-        <SelectMenuV2
-          options={PATIENT_FILTER_ORDER}
-          optionLabel={(o) => o.desc}
-          optionSelectedLabel={(option) => `${option.desc} (${option.order})`}
-          optionDescription={(o) => o.order}
-          optionIcon={(option) => (
-            <CareIcon
-              className={`${
-                option.order === "Ascending"
-                  ? "care-l-sort-amount-up"
-                  : "care-l-sort-amount-down"
-              }`}
-            />
-          )}
-          value={filterState.ordering || undefined}
-          optionValue={(o) => o.text}
-          onChange={(v) => setFilterState({ ...filterState, ordering: v })}
-        />
-      </div>
-      <div className="text-md my-6 flex items-center text-gray-700 gap-2">
+      <div className="text-md pt-20 py-6 flex items-center text-gray-700 gap-2">
         <CareIcon className="care-l-filter text-lg" />
         <p>Filter by</p>
       </div>
@@ -477,14 +448,14 @@ export default function PatientFilterV2(props: any) {
             }
           />
         </div>
-        {KASP_ENABLED && (
+        {kasp_enabled && (
           <div className="w-full flex-none">
-            <FieldLabel className="text-sm">{KASP_STRING}</FieldLabel>
+            <FieldLabel className="text-sm">{kasp_string}</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
               options={[true, false]}
               optionLabel={(o) =>
-                o ? `Show ${KASP_STRING}` : `Show Non ${KASP_STRING}`
+                o ? `Show ${kasp_string}` : `Show Non ${kasp_string}`
               }
               value={filterState.is_kasp}
               onChange={(v) => setFilterState({ ...filterState, is_kasp: v })}

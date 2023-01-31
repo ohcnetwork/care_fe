@@ -45,7 +45,7 @@ export type ButtonProps = RawButtonProps &
      */
     variant?: ButtonVariant;
     /** Specify text alignment. Defaults to `center` */
-    align?: "left" | "center" | "right" | "between";
+    align?: "start" | "center" | "end" | "between" | "around" | "evenly";
     /** If set, gives an elevated button with hover effects. */
     shadow?: boolean | undefined;
     /** If set, removes the background to give a simple text button. */
@@ -151,7 +151,6 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
       id="submit"
       type="submit"
       className="w-full md:w-auto"
-      // Voluntarily setting children this way, so that it's overridable when using.
       children={
         <>
           <CareIcon className="care-l-check-circle text-lg" />
@@ -170,8 +169,8 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       id="cancel"
       type="button"
       variant="secondary"
+      border
       className="w-full md:w-auto"
-      // Voluntarily setting children this way, so that it's overridable when using.
       children={
         <>
           <CareIcon className="care-l-times-circle text-lg" />

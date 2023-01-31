@@ -2,12 +2,13 @@ import React, { useCallback, useState } from "react";
 import { navigate } from "raviger";
 import { SelectField } from "../../Common/HelperInputFields";
 import { CircularProgress } from "@material-ui/core";
-import { FACILITY_TYPES, KASP_STRING } from "../../../Common/constants";
+import { FACILITY_TYPES } from "../../../Common/constants";
 import { getStates, getDistrictByState } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useAbortableEffect, statusType } from "../../../Common/utils";
 import LocalBodySelect from "./LocalBodySelect";
 import useMergeState from "../../../Common/hooks/useMergeState";
+import useConfig from "../../../Common/hooks/useConfig";
 
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
@@ -15,6 +16,7 @@ const selectStates = [{ id: 0, name: "Please select your state" }];
 
 function FacilityFilter(props: any) {
   const { filter, onChange, closeFilter } = props;
+  const { kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
 
   const [isStateLoading, setIsStateLoading] = useState(false);
@@ -117,7 +119,7 @@ function FacilityFilter(props: any) {
           }}
         >
           <i className="fas fa-times mr-2" />
-          Clear Filter
+          Clear Filters
         </button>
         <button className="btn btn-primary mt-1" onClick={applyFilter}>
           <i className="fas fa-check mr-2" />
@@ -193,7 +195,7 @@ function FacilityFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">
-            {KASP_STRING} Empanelled
+            {kasp_string} Empanelled
           </span>
           <SelectField
             name="kasp_empanelled"
