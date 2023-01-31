@@ -94,22 +94,23 @@ const Form = <T extends FormDetails>({
         }}
       >
         {props.onlyChild ? (
-          <Consumer children={props.children} />
+          <Consumer>{props.children}</Consumer>
         ) : (
           <>
             <div className="my-6 flex flex-col gap-4">
-              <Consumer children={props.children} />
+              <Consumer>{props.children}</Consumer>
             </div>
             <div className="flex justify-end gap-2">
               <Cancel
                 className="w-full md:w-auto"
                 onClick={props.onCancel}
-                label={props.cancelLabel}
+                label={props.cancelLabel ?? "Cancel"}
               />
               <Submit
+                type="submit"
                 className="w-full md:w-auto"
                 disabled={disabled}
-                label={props.submitLabel}
+                label={props.submitLabel ?? "Submit"}
               />
             </div>
           </>
