@@ -41,22 +41,26 @@ export const FieldErrorText = ({ error, className }: ErrorProps) => {
   );
 };
 
-const FormField = (props: {
-  props: FormFieldBaseProps<any>;
+const FormField = ({
+  field,
+  children,
+}: {
+  field: FormFieldBaseProps<any>;
   children: React.ReactNode;
 }) => {
-  const { id, className, required, label, labelClassName, errorClassName } =
-    props.props;
-
   return (
-    <div className={className}>
-      {label && (
-        <FieldLabel htmlFor={id} required={required} className={labelClassName}>
-          {label}
+    <div className={field.className}>
+      {field.label && (
+        <FieldLabel
+          htmlFor={field.id}
+          required={field.required}
+          className={field.labelClassName}
+        >
+          {field.label}
         </FieldLabel>
       )}
-      {props.children}
-      {<FieldErrorText error={props.props.error} className={errorClassName} />}
+      {children}
+      {<FieldErrorText error={field.error} className={field.errorClassName} />}
     </div>
   );
 };
