@@ -2,10 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-} from "./Utils";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
 import {
   dropdownOptionClassNames,
@@ -26,12 +23,14 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
 const AutocompleteMultiSelectFormField = <T, V>(
   props: AutocompleteMultiSelectFormFieldProps<T, V>
 ) => {
+  const field = useFormFieldPropsResolver(props);
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <AutocompleteMutliSelect
         {...props}
-        value={props.value || []}
-        onChange={resolveFormFieldChangeEventHandler(props)}
+        {...field}
+        value={field.value || []}
+        onChange={field.handleChange}
       />
     </FormField>
   );

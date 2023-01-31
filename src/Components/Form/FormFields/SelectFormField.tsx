@@ -1,10 +1,7 @@
 import MultiSelectMenuV2 from "../MultiSelectMenuV2";
 import SelectMenuV2 from "../SelectMenuV2";
 import FormField from "./FormField";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-} from "./Utils";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -20,13 +17,16 @@ type SelectFormFieldProps<T, V = T> = FormFieldBaseProps<V> & {
 };
 
 export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
+  const field = useFormFieldPropsResolver(props);
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <SelectMenuV2
-        id={props.id}
+        id={field.id}
         options={props.options}
-        disabled={props.disabled}
-        value={props.value}
+        disabled={field.disabled}
+        value={field.value}
+        required={field.required}
+        onChange={(value: any) => field.handleChange(value)}
         position={props.position}
         placeholder={props.placeholder}
         optionLabel={props.optionLabel}
@@ -34,8 +34,6 @@ export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
         optionDescription={props.optionDescription}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
-        required={props.required}
-        onChange={resolveFormFieldChangeEventHandler<any>(props)}
       />
     </FormField>
   );
@@ -54,20 +52,21 @@ type MultiSelectFormFieldProps<T, V = T> = FormFieldBaseProps<V[]> & {
 export const MultiSelectFormField = <T, V>(
   props: MultiSelectFormFieldProps<T, V>
 ) => {
+  const field = useFormFieldPropsResolver(props);
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <MultiSelectMenuV2
-        id={props.id}
+        id={field.id}
+        disabled={field.disabled}
+        value={field.value}
+        onChange={(value: any) => field.handleChange(value)}
         options={props.options}
-        disabled={props.disabled}
-        value={props.value}
         placeholder={props.placeholder}
         optionLabel={props.optionLabel}
         optionSelectedLabel={props.optionSelectedLabel}
         optionDescription={props.optionDescription}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
-        onChange={resolveFormFieldChangeEventHandler<any>(props)}
       />
     </FormField>
   );

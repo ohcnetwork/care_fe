@@ -2,10 +2,7 @@ import React, { HTMLInputTypeAttribute, useState } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { classNames } from "../../../Utils/utils";
 import FormField from "./FormField";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-} from "./Utils";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 export type TextFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
@@ -24,6 +21,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
 };
 
 const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
+  const field = useFormFieldPropsResolver(props as any);
   const { leading, trailing } = props;
   const leadingFocused = props.leadingFocused || props.leading;
   const trailingFocused = props.trailingFocused || props.trailing;
@@ -37,27 +35,25 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   let child = (
     <input
       ref={ref as any}
-      id={props.id}
+      id={field.id}
       className={classNames(
         "cui-input-base peer",
         hasIcon && "px-10",
-        props.error && "border-danger-500",
-        props.className
+        field.error && "border-danger-500",
+        field.className
       )}
-      disabled={props.disabled}
+      disabled={field.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}
       placeholder={props.placeholder}
-      name={props.name}
-      value={props.value}
+      name={field.name}
+      value={field.value}
       min={props.min}
       max={props.max}
       autoComplete={props.autoComplete}
-      required={props.required}
+      required={field.required}
       onFocus={props.onFocus}
       onBlur={props.onBlur}
-      onChange={(event) =>
-        resolveFormFieldChangeEventHandler(props)(event.target.value)
-      }
+      onChange={(e) => field.handleChange(e.target.value)}
     />
   );
 
@@ -117,7 +113,7 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
     );
   }
 
-  return <FormField props={props}>{child}</FormField>;
+  return <FormField field={field}>{child}</FormField>;
 });
 
 export default TextFormField;

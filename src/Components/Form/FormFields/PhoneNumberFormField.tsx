@@ -1,9 +1,6 @@
 import { PhoneNumberField } from "../../Common/HelperInputFields";
 import FormField from "./FormField";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-} from "./Utils";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 type Props = FormFieldBaseProps<string> & {
   placeholder?: string;
@@ -15,19 +12,20 @@ type Props = FormFieldBaseProps<string> & {
 };
 
 const PhoneNumberFormField = (props: Props) => {
+  const field = useFormFieldPropsResolver(props as any);
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <PhoneNumberField
+        name={field.name}
+        disabled={field.disabled}
+        value={field.value}
+        onChange={field.handleChange}
         placeholder={props.placeholder}
-        value={props.value}
-        onChange={resolveFormFieldChangeEventHandler(props)}
         onlyIndia={props.onlyIndia}
         turnOffAutoFormat={props.noAutoFormat}
-        disabled={props.disabled}
         enableTollFree={props.tollFree}
         countryCodeEditable={!!props.countryCodeEditable}
         className="my-0"
-        name={name}
       />
     </FormField>
   );

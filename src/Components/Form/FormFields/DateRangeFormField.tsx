@@ -1,10 +1,7 @@
 import { classNames } from "../../../Utils/utils";
 import DateRangeInputV2, { DateRange } from "../../Common/DateRangeInputV2";
 import FormField from "./FormField";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-} from "./Utils";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 type Props = FormFieldBaseProps<DateRange> & {
   max?: Date;
@@ -28,15 +25,16 @@ type Props = FormFieldBaseProps<DateRange> & {
  * ```
  */
 const DateRangeFormField = (props: Props) => {
+  const field = useFormFieldPropsResolver(props as any);
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <DateRangeInputV2
-        className={classNames(props.error && "border-red-500")}
-        value={props.value}
-        onChange={resolveFormFieldChangeEventHandler(props)}
+        className={classNames(field.error && "border-red-500")}
+        value={field.value}
+        onChange={field.handleChange}
+        disabled={field.disabled}
         min={props.min || (props.disableFuture ? new Date() : undefined)}
         max={props.max || (props.disablePast ? new Date() : undefined)}
-        disabled={props.disabled}
       />
     </FormField>
   );

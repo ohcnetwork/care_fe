@@ -3,7 +3,7 @@ import { SYMPTOM_CHOICES } from "../../Common/constants";
 import FormField from "../Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
+  useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 
@@ -18,11 +18,11 @@ const ASYMPTOMATIC_ID = 1;
  * - For other scenarios, this simply works like a `MultiSelect`.
  */
 export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
-  const handleChange = resolveFormFieldChangeEventHandler(props);
+  const field = useFormFieldPropsResolver(props);
 
   const updateSelection = (value: number[]) => {
     // Skip the complexities if no initial value was present
-    if (!props.value?.length) return handleChange(value);
+    if (!props.value?.length) return field.handleChange(value);
 
     const initialValue = props.value || [];
 
@@ -32,16 +32,16 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
       if (asymptomaticIndex > -1) {
         // unselect asym.
         value.splice(asymptomaticIndex, 1);
-        return handleChange(value);
+        return field.handleChange(value);
       }
     }
 
     if (!initialValue.includes(ASYMPTOMATIC_ID) && value.includes(1)) {
       // If new selections have asym., unselect everything else
-      return handleChange([ASYMPTOMATIC_ID]);
+      return field.handleChange([ASYMPTOMATIC_ID]);
     }
 
-    handleChange(value);
+    field.handleChange(value);
   };
 
   const getDescription = ({ id }: { id: number }) => {
@@ -68,9 +68,9 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
   };
 
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <MultiSelectMenuV2
-        id={props.id}
+        id={field.id}
         options={SYMPTOM_CHOICES}
         disabled={props.disabled}
         placeholder="Select symptoms"

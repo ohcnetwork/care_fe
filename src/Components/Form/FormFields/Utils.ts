@@ -94,10 +94,3 @@ export const useFormFieldPropsResolver = <
     handleChange,
   };
 };
-
-export const resolveFormFieldChangeEventHandler = <T>({
-  name,
-  onChange,
-}: FormFieldBaseProps<T>) => {
-  return (value: T) => onChange({ name, value });
-};
