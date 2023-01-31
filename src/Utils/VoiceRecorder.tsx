@@ -1,6 +1,5 @@
 import * as React from "react";
 import useRecorder from "./useRecorder";
-import { Button } from "@material-ui/core";
 import MicIcon from "@material-ui/icons/Mic";
 import MicOffIcon from "@material-ui/icons/MicOff";
 import { useEffect, useState } from "react";
@@ -28,7 +27,7 @@ export const VoiceRecorder = (props: any) => {
       <div className="text-xs">
         Please allow browser permission before you start speaking
       </div>
-      <div className="mt-2">
+      <div>
         {isRecording ? (
           <>
             <div className="space-x-2 flex">
@@ -36,16 +35,13 @@ export const VoiceRecorder = (props: any) => {
                 <i className="fas fa-microphone-alt animate-pulse mr-2"></i>
                 Recording...
               </div>
-              <Button
-                color="primary"
-                variant="contained"
+              <button
+                className="btn btn-primary"
                 style={{ marginLeft: "auto" }}
-                startIcon={<MicOffIcon />}
                 onClick={stopRecording}
-                disabled={!isRecording}
               >
-                Stop
-              </Button>
+                <MicOffIcon /> Stop
+              </button>
             </div>
             <div className="mx-3">
               <span>{("0" + Math.floor((time / 60000) % 60)).slice(-2)}:</span>
@@ -53,16 +49,13 @@ export const VoiceRecorder = (props: any) => {
             </div>
           </>
         ) : (
-          <Button
-            color="primary"
-            variant="contained"
-            style={{ marginLeft: "auto" }}
-            startIcon={<MicIcon />}
+          <button
+            className="btn btn-primary"
+            // style={{ marginLeft: "auto" }}
             onClick={startRecording}
-            disabled={isRecording}
           >
-            {audioURL ? "Re-Record" : "Record"}
-          </Button>
+            <MicIcon /> {audioURL ? "Re-Record" : "Record"}
+          </button>
         )}
       </div>
       {audioURL && (
