@@ -1,13 +1,18 @@
 {
     "dashboard_url": "https://dashboard.coronasafe.in",
     "github_url": "https://github.com/coronasafe",
+    "coronasafe_url": "https://coronasafe.network?ref=care",
     "static_header_logo": "https://cdn.coronasafe.network/header_logo.png",
     "static_light_logo": "https://cdn.coronasafe.network/light-logo.svg",
     "static_black_logo": "https://cdn.coronasafe.network/black-logo.svg",
+    "static_dpg_white_logo": "https://digitalpublicgoods.net/wp-content/themes/dpga/images/logo-w.svg",
+    "static_coronasafe_logo": "https://3451063158-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-M233b0_JITp4nk0uAFp%2F-M2Dx6gKxOSU45cjfgNX%2F-M2DxFOkMmkPNn0I6U9P%2FCoronasafe-logo.png?alt=media&token=178cc96d-76d9-4e27-9efb-88f3186368e8",
     "gmaps_api_key": "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
+    "gov_data_api_key": "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b",
     "recaptcha_site_key": "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN",
     "kasp_enabled": false,
     "kasp_string": "KASP",
     "kasp_full_string": "Karunya Arogya Suraksha Padhathi",
-    "state_logo": "https://digitalpublicgoods.net/wp-content/themes/dpga/images/logo.svg"
+    "sample_format_asset_import": "https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=11JaEhNHdyCHth4YQs_44YaRlP77Rrqe81VSEfg1glko&exportFormat=xlsx",
+    "sample_format_external_result_import": "https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/export?format=csv&id=17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE"
 }

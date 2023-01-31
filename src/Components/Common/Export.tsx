@@ -26,6 +26,7 @@ interface ExportButtonProps {
   tooltipClassName?: string;
   type?: "csv" | "json";
   action?: any;
+  parse?: (data: string) => string;
   filenamePrefix: string;
 }
 
@@ -61,6 +62,7 @@ export const ExportMenu = ({
 export const ExportButton = ({
   tooltipClassName = "tooltip-bottom -translate-x-7",
   type = "csv",
+  parse,
   ...props
 }: ExportButtonProps) => {
   const { isExporting, exportFile, _CSVLink } = useExport();
@@ -70,7 +72,9 @@ export const ExportButton = ({
       <_CSVLink />
       <ButtonV2
         disabled={isExporting || props.disabled}
-        onClick={() => exportFile(props.action, props.filenamePrefix, type)}
+        onClick={() =>
+          exportFile(props.action, props.filenamePrefix, type, parse)
+        }
         className="mx-2 tooltip p-4 text-lg text-secondary-800 disabled:text-secondary-500 disabled:bg-transparent"
         variant="secondary"
         ghost
