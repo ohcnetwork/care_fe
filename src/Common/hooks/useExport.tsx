@@ -21,27 +21,35 @@ export default function useExport() {
 
   const getTimestamp = () => new Date().toISOString();
 
-  const exportCSV = async (filenamePrefix: string, action: any) => {
+  const exportCSV = async (
+    filenamePrefix: string,
+    action: any,
+    parse = (data: string) => data
+  ) => {
     setIsExporting(true);
 
     const filename = `${filenamePrefix}_${getTimestamp()}.csv`;
 
     const res = await dispatch(action);
     if (res.status === 200) {
-      setCsvLinkProps({ ...csvLinkProps, filename, data: res.data });
+      setCsvLinkProps({ ...csvLinkProps, filename, data: parse(res.data) });
       document.getElementById(csvLinkProps.id)?.click();
     }
 
     setIsExporting(false);
   };
 
-  const exportJSON = async (filenamePrefix: string, action: any) => {
+  const exportJSON = async (
+    filenamePrefix: string,
+    action: any,
+    parse = (data: string) => data
+  ) => {
     setIsExporting(true);
 
     const res = await dispatch(action);
     if (res.status === 200) {
       const a = document.createElement("a");
-      const blob = new Blob([JSON.stringify(res.data.results)], {
+      const blob = new Blob([parse(JSON.stringify(res.data.results))], {
         type: "application/json",
       });
       a.href = URL.createObjectURL(blob);
@@ -52,18 +60,23 @@ export default function useExport() {
     setIsExporting(false);
   };
 
-  const exportFile = (action: any, filePrefix = "export", type = "csv") => {
+  const exportFile = (
+    action: any,
+    filePrefix = "export",
+    type = "csv",
+    parse = (data: string) => data
+  ) => {
     if (!action) return;
 
     switch (type) {
       case "csv":
-        exportCSV(filePrefix, action());
+        exportCSV(filePrefix, action(), parse);
         break;
       case "json":
-        exportJSON(filePrefix, action());
+        exportJSON(filePrefix, action(), parse);
         break;
       default:
-        exportCSV(filePrefix, action());
+        exportCSV(filePrefix, action(), parse);
     }
   };
 
