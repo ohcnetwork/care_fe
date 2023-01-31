@@ -5,16 +5,10 @@ import { RoleButton } from "../Common/RoleButton";
 import { useDispatch } from "react-redux";
 import { deleteDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from "@material-ui/core";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 
 interface DoctorsCountProps extends DoctorModal {
   facilityId: string;
@@ -88,33 +82,15 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             Delete
           </RoleButton>
         </div>
-        <Dialog
-          maxWidth={"md"}
-          open={openDeleteDialog}
+        <ConfirmDialogV2
+          show={openDeleteDialog}
           onClose={handleDeleteClose}
-        >
-          <DialogTitle className="flex justify-center bg-primary-100">
-            Are you sure you want to delete {specialization?.text} doctors?
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              You will not be able to access this docter specialization type
-              later.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <button onClick={handleDeleteClose} className="btn btn-primary">
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteSubmit}
-              id="facility-delete-confirm"
-              className="btn btn-danger"
-            >
-              Delete
-            </button>
-          </DialogActions>
-        </Dialog>
+          title={`Delete ${specialization?.text} doctors`}
+          description="You will not be able to access this docter specialization type later."
+          action="Delete"
+          variant="danger"
+          onConfirm={handleDeleteSubmit}
+        />
       </div>
       {open && (
         <DialogModal

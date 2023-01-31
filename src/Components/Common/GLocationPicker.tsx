@@ -3,9 +3,9 @@ import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { deepEqual } from "../../Common/utils";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
 import PersonPinIcon from "@material-ui/icons/PersonPin";
-import { GMAPS_API_KEY } from "../../Common/env";
 import Spinner from "./Spinner";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useConfig from "../../Common/hooks/useConfig";
 
 const render = (status: Status) => {
   if (status === "LOADING") {
@@ -32,6 +32,7 @@ const GLocationPicker = ({
   handleOnClose,
   handleOnSelectCurrentLocation,
 }: GLocationPickerProps) => {
+  const { gmaps_api_key } = useConfig();
   const [location, setLocation] = React.useState<google.maps.LatLng | null>(
     null
   );
@@ -66,7 +67,7 @@ const GLocationPicker = ({
 
   return (
     <div className="flex w-80 h-80 sm:w-96 sm:h-96">
-      <Wrapper libraries={["places"]} apiKey={GMAPS_API_KEY} render={render}>
+      <Wrapper libraries={["places"]} apiKey={gmaps_api_key} render={render}>
         <Map
           center={center}
           onClick={onClick}

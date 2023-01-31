@@ -16,8 +16,7 @@ import {
   PATIENT_CATEGORIES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
-  KASP_STRING,
-  KASP_ENABLED,
+  CONSULTATION_STATUS,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -59,6 +58,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import DateFormField from "../Form/FormFields/DateFormField";
+import useConfig from "../../Common/hooks/useConfig";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -70,6 +70,7 @@ type FormDetails = {
   other_symptoms: string;
   symptoms_onset_date?: Date;
   suggestion: string;
+  consultation_status: number;
   patient: string;
   facility: string;
   admitted: BooleanStrings;
@@ -88,6 +89,7 @@ type FormDetails = {
   prescribed_medication: string;
   consultation_notes: string;
   ip_no: string;
+  procedure: ProcedureType[];
   discharge_advice: PrescriptionType[];
   prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
@@ -115,6 +117,7 @@ const initForm: FormDetails = {
   other_symptoms: "",
   symptoms_onset_date: undefined,
   suggestion: "A",
+  consultation_status: 0,
   patient: "",
   facility: "",
   admitted: "false",
@@ -133,6 +136,7 @@ const initForm: FormDetails = {
   prescribed_medication: "",
   consultation_notes: "",
   ip_no: "",
+  procedure: [],
   discharge_advice: [],
   prn_prescription: [],
   investigation: [],
@@ -187,6 +191,7 @@ const scrollTo = (id: any) => {
 };
 
 export const ConsultationForm = (props: any) => {
+  const { kasp_enabled, kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
@@ -329,6 +334,13 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "consultation_status":
+          if (!state.form[field]) {
+            errors[field] = "Please select the consultation status";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         case "ip_no":
           if (!state.form[field]) {
             errors[field] = "Please enter IP Number";
@@ -416,7 +428,7 @@ export const ConsultationForm = (props: any) => {
           if (!state.form[field]) {
             errors[
               field
-            ] = `Please select an option, ${KASP_STRING} is mandatory`;
+            ] = `Please select an option, ${kasp_string} is mandatory`;
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -443,44 +455,67 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
-        case "prn_prescription": {
-          let invalid = false;
-          for (const f of PRNAdvice) {
-            if (
-              !f.dosage?.replace(/\s/g, "").length ||
-              !f.medicine?.replace(/\s/g, "").length ||
-              f.indicator === "" ||
-              f.indicator === " "
-            ) {
-              invalid = true;
+        case "procedure": {
+          for (const p of procedures) {
+            if (!p.procedure?.replace(/\s/g, "").length) {
+              errors[field] = "Procedure field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (!p.repetitive && !p.time?.replace(/\s/g, "").length) {
+              errors[field] = "Time field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (p.repetitive && !p.frequency?.replace(/\s/g, "").length) {
+              errors[field] = "Frequency field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
               break;
             }
           }
-          if (invalid) {
-            errors[field] = "PRN Prescription field can not be empty";
-            if (!error_div) error_div = field;
-            invalidForm = true;
+          return;
+        }
+        case "prn_prescription": {
+          for (const f of PRNAdvice) {
+            if (!f.medicine?.replace(/\s/g, "").length) {
+              errors[field] = "Medicine field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (!f.indicator?.replace(/\s/g, "").length) {
+              errors[field] = "Indicator field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
           }
           return;
         }
 
         case "investigation": {
-          let invalid = false;
-          for (const f of InvestigationAdvice) {
-            if (
-              f.type?.length === 0 ||
-              (f.repetitive
-                ? !f.frequency?.replace(/\s/g, "").length
-                : !f.time?.replace(/\s/g, "").length)
-            ) {
-              invalid = true;
+          for (const i of InvestigationAdvice) {
+            if (!i.type?.length) {
+              errors[field] = "Investigation field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
               break;
             }
-          }
-          if (invalid) {
-            errors[field] = "Investigation Suggestion field can not be empty";
-            if (!error_div) error_div = field;
-            invalidForm = true;
+            if (!i.repetitive && !i.time?.replace(/\s/g, "").length) {
+              errors[field] = "Time field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
+            if (i.repetitive && !i.frequency?.replace(/\s/g, "").length) {
+              errors[field] = "Frequency field can not be empty";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+              break;
+            }
           }
           return;
         }
@@ -540,6 +575,7 @@ export const ConsultationForm = (props: any) => {
           ? state.form.symptoms_onset_date
           : undefined,
         suggestion: state.form.suggestion,
+        consultation_status: Number(state.form.consultation_status),
         admitted: state.form.suggestion === "A",
         admission_date:
           state.form.suggestion === "A" ? state.form.admission_date : undefined,
@@ -746,6 +782,13 @@ export const ConsultationForm = (props: any) => {
           options={CONSULTATION_SUGGESTION}
         />
 
+        <SelectFormField
+          required
+          label="Status during the consultation"
+          {...selectField("consultation_status")}
+          options={CONSULTATION_STATUS}
+        />
+
         {state.form.suggestion === "R" && (
           <div id="referred_to">
             <FieldLabel>Referred To Facility</FieldLabel>
@@ -793,7 +836,6 @@ export const ConsultationForm = (props: any) => {
           <>
             <DateFormField
               {...field("admission_date")}
-              disablePast
               required
               label="Admission date"
             />
@@ -831,15 +873,6 @@ export const ConsultationForm = (props: any) => {
           <ErrorHelperText error={state.errors.investigation} />
         </div>
 
-        <div id="procedures">
-          <FieldLabel>Procedures</FieldLabel>
-          <ProcedureBuilder
-            procedures={procedures}
-            setProcedures={setProcedures}
-          />
-          <ErrorHelperText error={state.errors.procedures} />
-        </div>
-
         <div id="discharge_advice">
           <FieldLabel>Prescription Medication</FieldLabel>
           <PrescriptionBuilder
@@ -849,13 +882,22 @@ export const ConsultationForm = (props: any) => {
           <ErrorHelperText error={state.errors.discharge_advice} />
         </div>
 
-        <div id="discharge_advice">
+        <div id="prn_prescription">
           <FieldLabel>PRN Prescription</FieldLabel>
           <PRNPrescriptionBuilder
             prescriptions={PRNAdvice}
             setPrescriptions={setPRNAdvice}
           />
           <ErrorHelperText error={state.errors.prn_prescription} />
+        </div>
+
+        <div id="procedure">
+          <FieldLabel>Procedures</FieldLabel>
+          <ProcedureBuilder
+            procedures={procedures}
+            setProcedures={setProcedures}
+          />
+          <ErrorHelperText error={state.errors.procedure} />
         </div>
 
         <TextFormField {...field("ip_no")} label="IP Number" required />
@@ -879,9 +921,9 @@ export const ConsultationForm = (props: any) => {
           label="Diagnosis (as per ICD-11 recommended by WHO)"
         />
 
-        {KASP_ENABLED && (
+        {kasp_enabled && (
           <div className="flex-1" id="is_kasp">
-            <FieldLabel required>{KASP_STRING}</FieldLabel>
+            <FieldLabel required>{kasp_string}</FieldLabel>
             <RadioGroup
               aria-label="covid"
               name="is_kasp"
@@ -983,7 +1025,7 @@ export const ConsultationForm = (props: any) => {
         </div>
         {/* End of Telemedicine fields */}
 
-        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-between">
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
           <Cancel
             onClick={() =>
               navigate(`/facility/${facilityId}/patient/${patientId}`)

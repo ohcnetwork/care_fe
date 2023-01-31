@@ -4,7 +4,7 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { sendNotificationMessages } from "../../Redux/actions";
-import { FACILITY_FEATURE_TYPES, KASP_STRING } from "../../Common/constants";
+import { FACILITY_FEATURE_TYPES } from "../../Common/constants";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
 import Chip from "../../CAREUI/display/Chip";
@@ -12,9 +12,11 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { parsePhoneNumber } from "libphonenumber-js";
 import DialogModal from "../Common/Dialog";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import useConfig from "../../Common/hooks/useConfig";
 
 export const FacilityCard = (props: { facility: any; userType: any }) => {
   const { facility, userType } = props;
+  const { kasp_string } = useConfig();
 
   const { t } = useTranslation();
   const dispatchAction: any = useDispatch();
@@ -82,7 +84,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div className="flow-root">
                   {facility.kasp_empanelled && (
                     <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-                      {KASP_STRING}
+                      {kasp_string}
                     </div>
                   )}
                   <Link

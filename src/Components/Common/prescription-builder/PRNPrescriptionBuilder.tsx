@@ -105,6 +105,7 @@ export default function PRNPrescriptionBuilder(
             <div className="flex gap-2 flex-col md:flex-row items-center">
               <div className="w-full">
                 Medicine
+                <span className="text-danger-500">{" *"}</span>
                 <AutoCompleteAsync
                   placeholder="Medicine"
                   selected={prescription.medicine}
@@ -184,6 +185,7 @@ export default function PRNPrescriptionBuilder(
             <div className="flex gap-2 mt-2 flex-col md:flex-row">
               <div className="w-full">
                 Indicator
+                <span className="text-danger-500">{" *"}</span>
                 <input
                   type="text"
                   className="cui-input-base"

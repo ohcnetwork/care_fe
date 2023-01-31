@@ -47,6 +47,7 @@ const FormField = ({
 }: {
   field: FormFieldBaseProps<any>;
   children: React.ReactNode;
+  className?: string;
 }) => {
   return (
     <div className={field.className}>
@@ -59,8 +60,8 @@ const FormField = ({
           {field.label}
         </FieldLabel>
       )}
-      {children}
-      {<FieldErrorText error={field.error} className={field.errorClassName} />}
+      <div className={field.className}>{children}</div>
+      <FieldErrorText error={field.error} className={field.errorClassName} />
     </div>
   );
 };

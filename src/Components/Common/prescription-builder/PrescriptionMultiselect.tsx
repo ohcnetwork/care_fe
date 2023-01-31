@@ -33,7 +33,7 @@ export function PrescriptionMultiDropdown(props: {
   return (
     <div className="w-full relative">
       <div className="flex gap-1 flex-wrap my-2">
-        {selectedValues.length > 0 ? (
+        {selectedValues.length > 0 &&
           selectedValues.map((selectedValue, i) => {
             return (
               <div
@@ -53,10 +53,7 @@ export function PrescriptionMultiDropdown(props: {
                 </button>
               </div>
             );
-          })
-        ) : (
-          <div className="my-1 text-red-400">Nothing selected</div>
-        )}
+          })}
       </div>
 
       <input
