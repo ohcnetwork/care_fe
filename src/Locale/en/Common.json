@@ -16,5 +16,9 @@
   "Assets": "Assets",
   "Notifications": "Notifications",
   "Submit": "Submit",
-  "Cancel": "Cancel"
+  "Cancel": "Cancel",
+  "Apply": "Apply",
+  "Clear Filters": "Clear Filters",
+  "powered_by": "Powered By",
+  "care": "CARE"
 }

@@ -8,12 +8,11 @@ import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import LiveMonitoring from "../../Hub/LiveMonitoring";
+import { Link } from "raviger";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
-const LOGO = process.env.REACT_APP_LIGHT_LOGO;
-const LOGO_COLLAPSE =
-  process.env.REACT_APP_LIGHT_COLLAPSE_LOGO || "/images/logo_collapsed.svg";
+const LOGO_COLLAPSE = "/images/logo_collapsed.svg";
 
 type StatelessSidebarProps =
   | {
@@ -52,6 +51,7 @@ const StatelessSidebar = ({
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
+  const { static_light_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
   const { dashboard_url } = useConfig();
@@ -117,12 +117,14 @@ const StatelessSidebar = ({
       } transition-all duration-300 ease-in-out overflow-y-auto overflow-x-hidden`}
     >
       <div className="h-3" /> {/* flexible spacing */}
-      <img
-        className={`${
-          shrinked ? "mx-auto" : "ml-5"
-        } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
-        src={shrinked ? LOGO_COLLAPSE : LOGO}
-      />
+      <Link href="/">
+        <img
+          className={`${
+            shrinked ? "mx-auto" : "ml-5"
+          } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
+          src={shrinked ? LOGO_COLLAPSE : static_light_logo}
+        />
+      </Link>
       <div className="h-3" /> {/* flexible spacing */}
       <div className="flex flex-col relative h-full mb-4 md:mb-0">
         <div className="flex flex-col relative flex-1 md:flex-none">

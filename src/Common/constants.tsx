@@ -1,6 +1,7 @@
 import { PatientCategory } from "../Components/Facility/models";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
+import { IConfig } from "./hooks/useConfig";
 
 export const KeralaLogo = "images/kerala-logo.png";
 
@@ -12,10 +13,6 @@ export interface OptionsType {
   desc?: string;
   disabled?: boolean;
 }
-
-export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
-export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
-export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
 export type UserRole =
   | "Pharmacist"
@@ -32,25 +29,24 @@ export type UserRole =
   | "StateReadOnlyAdmin"
   | "StateAdmin";
 
-const readOnly = true;
 export const USER_TYPE_OPTIONS: {
   id: UserRole;
   role: string;
-  readOnly?: true | undefined;
+  readOnly?: boolean;
 }[] = [
-  { id: "Pharmacist", role: "Pharmacist" },
-  { id: "Volunteer", role: "Volunteer" },
-  { id: "StaffReadOnly", role: "Staff", readOnly },
-  { id: "Staff", role: "Staff" },
-  { id: "Doctor", role: "Doctor" },
-  { id: "WardAdmin", role: "Ward Admin" },
-  { id: "LocalBodyAdmin", role: "Local Body Admin" },
-  { id: "DistrictLabAdmin", role: "District Lab Admin" },
-  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly },
-  { id: "DistrictAdmin", role: "District Admin" },
-  { id: "StateLabAdmin", role: "State Lab Admin" },
-  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly },
-  { id: "StateAdmin", role: "State Admin" },
+  { id: "Pharmacist", role: "Pharmacist", readOnly: false },
+  { id: "Volunteer", role: "Volunteer", readOnly: false },
+  { id: "StaffReadOnly", role: "Staff", readOnly: true },
+  { id: "Staff", role: "Staff", readOnly: false },
+  { id: "Doctor", role: "Doctor", readOnly: false },
+  { id: "WardAdmin", role: "Ward Admin", readOnly: false },
+  { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
+  { id: "DistrictLabAdmin", role: "District Lab Admin", readOnly: false },
+  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly: true },
+  { id: "DistrictAdmin", role: "District Admin", readOnly: false },
+  { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
+  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
+  { id: "StateAdmin", role: "State Admin", readOnly: false },
 ];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
@@ -169,28 +165,33 @@ export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
   { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
 ];
 
-const KASP_BED_TYPES = KASP_ENABLED
-  ? [
-      { id: 40, text: KASP_STRING + " Ordinary Beds" },
-      { id: 60, text: KASP_STRING + " Oxygen beds" },
-      { id: 50, text: KASP_STRING + " ICU (ICU without ventilator)" },
-      { id: 70, text: KASP_STRING + " ICU (ICU with ventilator)" },
-    ]
-  : [];
+export const getBedTypes = ({
+  kasp_enabled,
+  kasp_string,
+}: Pick<IConfig, "kasp_enabled" | "kasp_string">) => {
+  const kaspBedTypes = kasp_enabled
+    ? [
+        { id: 40, text: kasp_string + " Ordinary Beds" },
+        { id: 60, text: kasp_string + " Oxygen beds" },
+        { id: 50, text: kasp_string + " ICU (ICU without ventilator)" },
+        { id: 70, text: kasp_string + " ICU (ICU with ventilator)" },
+      ]
+    : [];
 
-export const BED_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Non-Covid Ordinary Beds" },
-  { id: 150, text: "Non-Covid Oxygen beds" },
-  { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
-  { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
-  { id: 30, text: "Covid Ordinary Beds" },
-  { id: 120, text: "Covid Oxygen beds" },
-  { id: 110, text: "Covid ICU (ICU without ventilator)" },
-  { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  ...KASP_BED_TYPES,
-  { id: 2, text: "Hostel" },
-  { id: 3, text: "Single Room with Attached Bathroom" },
-];
+  return [
+    { id: 1, text: "Non-Covid Ordinary Beds" },
+    { id: 150, text: "Non-Covid Oxygen beds" },
+    { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
+    { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
+    { id: 30, text: "Covid Ordinary Beds" },
+    { id: 120, text: "Covid Oxygen beds" },
+    { id: 110, text: "Covid ICU (ICU without ventilator)" },
+    { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
+    ...kaspBedTypes,
+    { id: 2, text: "Hostel" },
+    { id: 3, text: "Single Room with Attached Bathroom" },
+  ];
+};
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
@@ -283,6 +284,14 @@ export const CONSULTATION_SUGGESTION = [
   { id: "DD", text: "Declare Death" },
 ];
 
+export const CONSULTATION_STATUS = [
+  { id: "1", text: "Brought Dead" },
+  { id: "2", text: "Transferred from ward" },
+  { id: "3", text: "Transferred from ICU" },
+  { id: "4", text: "Referred from other hospital" },
+  { id: "5", text: "Out-patient (walk in)" },
+];
+
 export const ADMITTED_TO = [
   { id: "1", text: "Isolation" },
   { id: "2", text: "ICU" },
@@ -368,7 +377,6 @@ export const DISEASE_STATUS = [
   "SUSPECTED",
   "NEGATIVE",
   "RECOVERED",
-  "EXPIRED",
 ];
 
 export const TEST_TYPE = [

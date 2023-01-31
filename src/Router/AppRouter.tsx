@@ -67,8 +67,7 @@ import {
 import LiveMonitoring from "../Components/Hub/LiveMonitoring";
 import { BLACKLISTED_PATHS } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
-
-const logoBlack = process.env.REACT_APP_BLACK_LOGO;
+import useConfig from "../Common/hooks/useConfig";
 
 const routes = {
   "/hub": () => <HubDashboard />,
@@ -381,6 +380,7 @@ const routes = {
 };
 
 export default function AppRouter() {
+  const { static_black_logo } = useConfig();
   useRedirect("/", "/facility");
   useRedirect("/user", "/users");
   const pages = useRoutes(routes) || <Error404 />;
@@ -437,7 +437,11 @@ export default function AppRouter() {
             href="/"
             className="md:hidden flex h-full w-full items-center px-4"
           >
-            <img className="h-6 w-auto" src={logoBlack} alt="care logo" />
+            <img
+              className="h-6 w-auto"
+              src={static_black_logo}
+              alt="care logo"
+            />
           </a>
         </div>
 

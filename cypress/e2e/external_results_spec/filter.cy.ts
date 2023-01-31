@@ -16,44 +16,46 @@ describe("External Results Filters", () => {
     cy.get("[placeholder='Select Local Body']")
       .type("ernakulam")
       .type("{downarrow}{enter}");
+    cy.contains("Apply").click();
+    cy.contains("LSG:");
   });
 
   it("filter by ward", () => {
     cy.get("[placeholder='Select wards']")
       .type("ernakulam")
       .type("{downarrow}{enter}");
+    cy.contains("Apply").click();
+    cy.contains("Ward:");
   });
 
   it("filter by created date", () => {
-    cy.get("[name='created_date_after']").type("06/12/2020");
-    cy.get("[name='created_date_before']").type("31/12/2020");
+    cy.get("[name='created_date_after']").type("2020-12-06");
+    cy.get("[name='created_date_before']").type("2020-12-31");
+    cy.contains("Apply").click();
+    cy.contains("Created after: 2020-12-06");
+    cy.contains("Created before: 2020-12-31");
   });
 
   it("filter by result date", () => {
-    cy.get("[name='result_date_after']").type("02/03/2021");
-    cy.get("[name='result_date_before']").type("02/04/2021");
+    cy.get("[name='result_date_after']").type("2021-03-02");
+    cy.get("[name='result_date_before']").type("2021-04-02");
+    cy.contains("Apply").click();
+    cy.contains("Result after: 2021-03-02");
+    cy.contains("Result before: 2021-04-02");
   });
 
   it("filter by sample collection date", () => {
-    cy.get("[name='sample_collection_date_after']").type("04/01/2021");
-    cy.get("[name='sample_collection_date_before']").type("03/03/2021");
+    cy.get("[name='sample_collection_date_after']").type("2021-01-04");
+    cy.get("[name='sample_collection_date_before']").type("2021-03-03");
+    cy.contains("Apply").click();
+    cy.contains("Sample created after: 2021-01-04");
+    cy.contains("Sample created before: 2021-03-03");
   });
 
   it("filter by srf id", () => {
     cy.get("[name='srf_id']").type("432");
-  });
-
-  it("Apply filter", () => {
-    cy.intercept(/\/api\/v1\/external_result/).as("external_result_filter");
     cy.contains("Apply").click();
-    cy.wait("@external_result_filter").then((interception) => {
-      expect(interception.response.statusCode).to.equal(200);
-      expect(interception.request.url).to.include("srf_id=");
-      expect(interception.request.url).to.include("created_date_before=");
-      expect(interception.request.url).to.include("created_date_after=");
-      expect(interception.request.url).to.include("wards=");
-      expect(interception.request.url).to.include("local_bodies=");
-    });
+    cy.contains("SRF ID: 432");
   });
 
   afterEach(() => {

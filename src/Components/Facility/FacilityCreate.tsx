@@ -14,8 +14,7 @@ import { useDispatch } from "react-redux";
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
-  KASP_ENABLED,
-  KASP_STRING,
+  getBedTypes,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -32,6 +31,8 @@ import {
   getStates,
   updateFacility,
   getWardByLocalBody,
+  listCapacity,
+  listDoctor,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText } from "../Common/HelperInputFields";
@@ -54,6 +55,10 @@ import Steps, { Step } from "../Common/Steps";
 import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import useConfig from "../../Common/hooks/useConfig";
+import { CapacityModal, DoctorModal } from "./models";
+import BedTypeCard from "./BedTypeCard";
+import DoctorsCountCard from "./DoctorsCountCard";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -148,6 +153,7 @@ const facilityCreateReducer = (
 };
 
 export const FacilityCreate = (props: FacilityProps) => {
+  const { gov_data_api_key, kasp_string, kasp_enabled } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
@@ -165,6 +171,10 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [createdFacilityId, setCreatedFacilityId] = useState("");
   const { width } = useWindowDimensions();
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
+  const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
+  const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
+  const [bedCapacityKey, setBedCapacityKey] = useState(0);
+  const [docCapacityKey, setDocCapacityKey] = useState(0);
 
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
@@ -351,7 +361,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
     if (!validatePincode(e.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(e.value);
+    const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
     const matchedState = states.find((state) => {
@@ -569,6 +579,110 @@ export const FacilityCreate = (props: FacilityProps) => {
   const open = Boolean(anchorEl);
   const id = open ? "map-popover" : undefined;
 
+  let capacityList: any = null;
+  let totalBedCount = 0;
+  let totalOccupiedBedCount = 0;
+
+  if (!capacityData || !capacityData.length) {
+    capacityList = (
+      <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+        No Bed Types Found
+      </h5>
+    );
+  } else {
+    capacityData.forEach((x) => {
+      totalBedCount += x.total_capacity ? x.total_capacity : 0;
+      totalOccupiedBedCount += x.current_capacity ? x.current_capacity : 0;
+    });
+
+    capacityList = (
+      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-7 w-full">
+        <BedTypeCard
+          label={"Total Beds"}
+          bedCapacityId={0}
+          used={totalOccupiedBedCount}
+          total={totalBedCount}
+          handleUpdate={() => {
+            return;
+          }}
+        />
+        {getBedTypes({ kasp_string, kasp_enabled }).map((x) => {
+          const res = capacityData.find((data) => {
+            return data.room_type === x.id;
+          });
+          if (res && res.current_capacity && res.total_capacity) {
+            const removeCurrentBedType = (bedTypeId: number | undefined) => {
+              setCapacityData((state) =>
+                state.filter((i) => i.id !== bedTypeId)
+              );
+              setBedCapacityKey((bedCapacityKey) => bedCapacityKey + 1);
+            };
+            return (
+              <BedTypeCard
+                facilityId={createdFacilityId}
+                bedCapacityId={res.id}
+                key={`bed_${res.id}`}
+                room_type={res.room_type}
+                label={x.text}
+                used={res.current_capacity}
+                total={res.total_capacity}
+                lastUpdated={res.modified_date}
+                removeBedType={removeCurrentBedType}
+                handleUpdate={async () => {
+                  const capacityRes = await dispatchAction(
+                    listCapacity({}, { facilityId: createdFacilityId })
+                  );
+                  if (capacityRes && capacityRes.data) {
+                    setCapacityData(capacityRes.data.results);
+                  }
+                }}
+              />
+            );
+          }
+        })}
+      </div>
+    );
+  }
+
+  let doctorList: any = null;
+  if (!doctorData || !doctorData.length) {
+    doctorList = (
+      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+        No Doctors Found
+      </h5>
+    );
+  } else {
+    doctorList = (
+      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
+        {doctorData.map((data: DoctorModal) => {
+          const removeCurrentDoctorData = (doctorId: number | undefined) => {
+            setDoctorData((state) =>
+              state.filter((i: DoctorModal) => i.id !== doctorId)
+            );
+            setDocCapacityKey((docCapacityKey) => docCapacityKey + 1);
+          };
+
+          return (
+            <DoctorsCountCard
+              facilityId={createdFacilityId || ""}
+              key={`bed_${data.id}`}
+              handleUpdate={async () => {
+                const doctorRes = await dispatchAction(
+                  listDoctor({}, { facilityId: createdFacilityId })
+                );
+                if (doctorRes && doctorRes.data) {
+                  setDoctorData(doctorRes.data.results);
+                }
+              }}
+              {...data}
+              removeDoctor={removeCurrentDoctorData}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
   switch (currentStep) {
     case 3:
       return (
@@ -582,15 +696,27 @@ export const FacilityCreate = (props: FacilityProps) => {
           <Steps steps={getSteps()} />
           <div className="mt-3">
             <DoctorCapacity
+              key={docCapacityKey}
               className="max-w-2xl w-full mx-auto"
               facilityId={createdFacilityId || ""}
               handleClose={() => {
                 navigate(`/facility/${createdFacilityId}`);
               }}
-              handleUpdate={() => {
-                return;
+              handleUpdate={async () => {
+                const doctorRes = await dispatchAction(
+                  listDoctor({}, { facilityId: createdFacilityId })
+                );
+                if (doctorRes && doctorRes.data) {
+                  setDoctorData(doctorRes.data.results);
+                }
               }}
             />
+          </div>
+          <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
+            <div className="md:flex justify-between md:pb-2">
+              <div className="font-bold text-xl mb-2">Doctors List</div>
+            </div>
+            <div className="mt-4">{doctorList}</div>
           </div>
         </div>
       );
@@ -606,15 +732,27 @@ export const FacilityCreate = (props: FacilityProps) => {
           <Steps steps={getSteps()} />
           <div className="mt-3">
             <BedCapacity
+              key={bedCapacityKey}
               className="max-w-2xl w-full mx-auto"
               facilityId={createdFacilityId || ""}
               handleClose={() => {
                 setCurrentStep(3);
               }}
-              handleUpdate={() => {
-                return;
+              handleUpdate={async () => {
+                const capacityRes = await dispatchAction(
+                  listCapacity({}, { facilityId: createdFacilityId })
+                );
+                if (capacityRes && capacityRes.data) {
+                  setCapacityData(capacityRes.data.results);
+                }
               }}
             />
+          </div>
+          <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
+            <div className="md:flex justify-between  md:border-b md:pb-2">
+              <div className="font-semibold text-xl mb-2">Bed Capacity</div>
+            </div>
+            <div>{capacityList}</div>
           </div>
         </div>
       );
@@ -1027,13 +1165,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                     </div>
                   </div>
 
-                  {KASP_ENABLED && (
+                  {kasp_enabled && (
                     <div>
                       <FieldLabel
                         htmlFor="facility-kasp_empanelled"
                         className="mb-2"
                       >
-                        Is this facility {KASP_STRING} empanelled?
+                        Is this facility {kasp_string} empanelled?
                       </FieldLabel>
                       <RadioInputsV2
                         name="kasp_empanelled"
@@ -1067,12 +1205,17 @@ export const FacilityCreate = (props: FacilityProps) => {
                       error={state.errors.latitude}
                     />
                   </div>
-                  <div className="">
+                  <div className="flex flex-col justify-center md:block">
+                    <FieldLabel className="mb-1">&nbsp;</FieldLabel>
                     <IconButton
                       id="facility-location-button"
                       onClick={(event) => setAnchorEl(event.currentTarget)}
+                      className="tooltip"
                     >
                       <MyLocationIcon />
+                      <span className="tooltip-text tooltip-bottom">
+                        Select location from map
+                      </span>
                     </IconButton>
                     <Popover
                       id={id}

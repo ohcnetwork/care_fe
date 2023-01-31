@@ -31,7 +31,7 @@ export const FieldErrorText = ({ error, className }: ErrorProps) => {
   return (
     <span
       className={classNames(
-        "font-medium tracking-wide text-danger-500 text-xs mt-2 ml-1 transition-opacity duration-300",
+        "error-text font-medium tracking-wide text-danger-500 text-xs mt-2 ml-1 transition-opacity duration-300",
         error ? "opacity-100" : "opacity-0",
         className
       )}
@@ -44,6 +44,7 @@ export const FieldErrorText = ({ error, className }: ErrorProps) => {
 const FormField = (props: {
   props: FormFieldBaseProps<any>;
   children: React.ReactNode;
+  className?: string;
 }) => {
   const { id, className, required, label, labelClassName, errorClassName } =
     props.props;
@@ -56,7 +57,7 @@ const FormField = (props: {
           {label}
         </FieldLabel>
       )}
-      {props.children}
+      <div className={props.className}>{props.children}</div>
       {<FieldErrorText error={error} className={errorClassName} />}
     </div>
   );

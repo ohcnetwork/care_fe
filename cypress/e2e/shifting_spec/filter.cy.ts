@@ -108,7 +108,7 @@ describe("Shifting section filter", () => {
       .then((phoneNumber) => {
         cy.contains("Filters").click();
         cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-        cy.get("[placeholder='Patinet phone number']").type(phoneNumber);
+        cy.get("[name='patient_phone_number']").type(phoneNumber);
         cy.contains("Apply").click().wait("@facilities_filter");
       });
   });

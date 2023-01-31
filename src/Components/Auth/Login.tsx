@@ -4,14 +4,27 @@ import { postForgotPassword, postLogin } from "../../Redux/actions";
 import { Grid, CircularProgress } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
-import { RECAPTCHA_SITE_KEY } from "../../Common/env";
 import * as Notification from "../../Utils/Notifications.js";
 import { get } from "lodash";
 import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useConfig from "../../Common/hooks/useConfig";
+import { classNames } from "../../Utils/utils";
 
 export const Login = (props: { forgot?: boolean }) => {
+  const {
+    static_light_logo,
+    static_black_logo,
+    static_dpg_white_logo,
+    static_coronasafe_logo,
+    recaptcha_site_key,
+    github_url,
+    coronasafe_url,
+    dpg_url,
+    state_logo,
+    state_logo_white,
+  } = useConfig();
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
@@ -22,7 +35,6 @@ export const Login = (props: { forgot?: boolean }) => {
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
-  const captchaKey = RECAPTCHA_SITE_KEY ?? "";
   const { t } = useTranslation();
   // display spinner while login is under progress
   const [loading, setLoading] = useState(false);
@@ -168,22 +180,37 @@ export const Login = (props: { forgot?: boolean }) => {
   return (
     <div className="flex flex-col-reverse md:flex-row md:h-screen relative overflow-hidden">
       <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
-        <a
-          href={"https://coronasafe.network?ref=care_login"}
-          className="inline-block"
-          target={"_blank"}
-          rel="noopener noreferrer"
-        >
-          <img
-            src={process.env.REACT_APP_LIGHT_LOGO}
-            className="h-8 hidden md:inline-block"
-            alt="coronasafe logo"
-          />
-        </a>
+        <div className="hidden md:flex gap-6 items-center">
+          {state_logo && (
+            <>
+              <img
+                src={state_logo}
+                className={classNames(
+                  "rounded-lg p-3 h-24",
+                  state_logo_white && "invert brightness-0"
+                )}
+                alt="state logo"
+              />
+              <div className="w-0.5 bg-white/50 h-10 rounded-full" />
+            </>
+          )}
+          <a
+            href={coronasafe_url}
+            className="inline-block"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src={static_light_logo}
+              className="h-8"
+              alt="coronasafe logo"
+            />
+          </a>
+        </div>
         <div className="mt-4 md:mt-12 rounded-lg py-4">
           <div className="max-w-lg">
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-wider">
-              CARE
+              {t("care")}
             </h1>
             <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
               {t("goal")}
@@ -192,22 +219,30 @@ export const Login = (props: { forgot?: boolean }) => {
         </div>
         <div className="flex items-center lg:absolute lg:inset-x-0 lg:py-12 lg:px-16 pb-10 lg:bottom-0 lg:z-20">
           <div className="text-xs md:text-sm max-w-lg">
+            <div className="ml-1 flex items-center gap-4 mb-2">
+              <a href={dpg_url} rel="noopener noreferrer" target="_blank">
+                <img
+                  src={static_dpg_white_logo}
+                  className="h-12"
+                  alt="Logo of Digital Public Goods Alliance"
+                />
+              </a>
+              <div className="ml-2 w-[1px] bg-white/50 h-8 rounded-full" />
+              <a
+                href={coronasafe_url}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <img
+                  src={static_coronasafe_logo}
+                  className="h-10 inline-block"
+                  alt="coronasafe logo"
+                />
+              </a>
+            </div>
             <a
-              className="flex items-center text-gray-300 mb-2 font-bold"
-              href="https://coronasafe.network/"
-              rel="noopener noreferrer"
-              target={"_blank"}
-            >
-              <span>Powered By</span>
-              <img
-                src="https://3451063158-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-M233b0_JITp4nk0uAFp%2F-M2Dx6gKxOSU45cjfgNX%2F-M2DxFOkMmkPNn0I6U9P%2FCoronasafe-logo.png?alt=media&token=178cc96d-76d9-4e27-9efb-88f3186368e8"
-                className="h-8 inline-block"
-                alt="coronasafe logo"
-              />
-            </a>
-            <a
-              href="https://coronasafe.network/"
-              target={"_blank"}
+              href={coronasafe_url}
+              target="_blank"
               rel="noopener noreferrer"
               className="text-gray-500"
             >
@@ -215,8 +250,8 @@ export const Login = (props: { forgot?: boolean }) => {
             </a>
             <div className="mx-auto mt-2">
               <a
-                href={process.env.REACT_APP_GITHUB_URL}
-                target={"_blank"}
+                href={github_url}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-400 hover:text-primary-500"
               >
@@ -238,7 +273,7 @@ export const Login = (props: { forgot?: boolean }) => {
             }
           >
             <img
-              src={process.env.REACT_APP_BLACK_LOGO}
+              src={static_black_logo}
               className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
               alt="care logo"
             />{" "}
@@ -274,7 +309,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   {isCaptchaEnabled && (
                     <Grid item className="px-8 py-4">
                       <ReCaptcha
-                        sitekey={captchaKey}
+                        sitekey={recaptcha_site_key}
                         onChange={onCaptchaChange}
                       />
                       <span className="text-red-500">{errors.captcha}</span>
@@ -319,7 +354,7 @@ export const Login = (props: { forgot?: boolean }) => {
             }
           >
             <img
-              src={process.env.REACT_APP_BLACK_LOGO}
+              src={static_black_logo}
               className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
               alt="care logo"
             />{" "}
@@ -332,7 +367,7 @@ export const Login = (props: { forgot?: boolean }) => {
             >
               <div className="flex justify-center">
                 <CareIcon className="care-l-arrow-left text-lg" />
-                <span>Back to login</span>
+                <span>{t("back_to_login")}</span>
               </div>
             </button>
             <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
