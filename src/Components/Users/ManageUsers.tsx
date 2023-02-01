@@ -11,24 +11,20 @@ import {
   deleteUser,
   getDistrict,
   partialUpdateUser,
-  addUserSkill,
-  getUserListSkills,
   deleteUserSkill,
 } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { USER_TYPES } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
-import { SkillModel, SkillObjectModel } from "../Users/models";
+import { SkillModel } from "../Users/models";
 
-import { IconButton, CircularProgress, Button } from "@material-ui/core";
+import { IconButton, CircularProgress } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
-import { SkillSelect } from "../Common/SkillSelect";
 import UserDetails from "../Common/UserDetails";
 
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
@@ -40,6 +36,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import SkillsSlideOver from "./SkillsSlideOver";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -61,8 +58,8 @@ export default function ManageUsers() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFacilityLoading, setIsFacilityLoading] = useState(false);
-  const [isSkillLoading, setIsSkillLoading] = useState(false);
   const [expandSkillList, setExpandSkillList] = useState(false);
+  const [selectedUser, setSelectedUser] = useState("");
 
   const [totalCount, setTotalCount] = useState(0);
   const [districtName, setDistrictName] = useState<string>();
@@ -184,27 +181,6 @@ export default function ManageUsers() {
     setIsFacilityLoading(false);
   };
 
-  const loadSkills = async (username: string) => {
-    if (isSkillLoading) {
-      return;
-    }
-    setIsSkillLoading(true);
-    setExpandSkillList(true);
-    const res = await dispatch(getUserListSkills({ username }));
-    if (res && res.data) {
-      const updated = users.map((user) => {
-        return user.username === username
-          ? {
-              ...user,
-              skills: res.data.results,
-            }
-          : user;
-      });
-      setUsers(updated);
-    }
-    setIsSkillLoading(false);
-  };
-
   const showLinkFacilityModal = (username: string) => {
     setLinkFacility({
       show: true,
@@ -270,15 +246,12 @@ export default function ManageUsers() {
   };
 
   const handleUnlinkSkillSubmit = async () => {
-    setIsSkillLoading(true);
     await dispatch(
       deleteUserSkill(
         unlinkSkillData.userName,
         String(unlinkSkillData?.skill?.id)
       )
     );
-    setIsSkillLoading(false);
-    loadSkills(unlinkSkillData.userName);
     hideUnlinkSkillModal();
   };
 
@@ -307,8 +280,6 @@ export default function ManageUsers() {
     );
   };
 
-  const [skill, setSkill] = useState<any>(null);
-
   const addFacility = async (username: string, facility: any) => {
     hideLinkFacilityModal();
     setIsFacilityLoading(true);
@@ -324,38 +295,6 @@ export default function ManageUsers() {
     }
     setIsFacilityLoading(false);
     loadFacilities(username);
-  };
-
-  const addSkill = async (username: string, skill: SkillObjectModel) => {
-    setIsSkillLoading(true);
-    const res = await dispatch(addUserSkill(username, String(skill.id)));
-    console.log(res);
-    if (res?.status !== 201) {
-      Notification.Error({
-        msg: "Error while adding skill",
-      });
-    }
-    setIsSkillLoading(false);
-    loadSkills(username);
-  };
-
-  const showLinkSkills = (username: string) => {
-    return (
-      <div className="flex">
-        <SkillSelect
-          multiple={false}
-          name="skill"
-          showAll={true}
-          showNOptions={8}
-          selected={skill}
-          setSelected={setSkill}
-          errors=""
-        />
-        <Button color="primary" onClick={() => addSkill(username, skill)}>
-          Add
-        </Button>
-      </div>
-    );
   };
 
   const updateHomeFacility = async (username: string, facility: any) => {
@@ -421,65 +360,6 @@ export default function ManageUsers() {
         }
         return user;
       })
-    );
-  };
-
-  const showSkills = (username: string, skills: SkillModel[]) => {
-    if (!skills || !skills.length) {
-      return (
-        <>
-          {showLinkSkills(username)}
-          <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
-            <div className="w-full">
-              <img
-                src={`${process.env.PUBLIC_URL}/images/404.svg`}
-                alt="Error 404"
-                className="w-80 mx-auto"
-              />
-            </div>
-            <p className="text-lg font-semibold text-center text-primary pt-4">
-              Select and add some skills
-            </p>
-          </div>
-        </>
-      );
-    }
-    return (
-      <div className="sm:col-start-2 col-span-full sm:col-span-3">
-        {showLinkSkills(username)}
-        <div className="mb-2 mt-4">
-          {skills.map((skill, i) => (
-            <div
-              key={`facility_${i}`}
-              className={classNames(
-                "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer"
-              )}
-            >
-              <div className="flex justify-between">
-                <div className="text-lg font-bold">
-                  {skill.skill_object.name}
-                </div>
-                <div>
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    disabled={isSkillLoading}
-                    onClick={() =>
-                      setUnlinkSkillData({
-                        show: true,
-                        skill: skill,
-                        userName: username,
-                      })
-                    }
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     );
   };
 
@@ -682,24 +562,13 @@ export default function ManageUsers() {
                         showFacilities(user.username, user.facilities)}
                     </div>
                   )}
-                  {user.username && user.skills && (
-                    <div className="col-span-4">
-                      <SlideOverCustom
-                        open={expandSkillList}
-                        setOpen={setExpandSkillList}
-                        slideFrom="right"
-                        title="Skills"
-                        dialogClass="md:w-[400px]"
-                        onCloseClick={() => true}
-                      >
-                        <div>{showSkills(user.username, user.skills)}</div>
-                      </SlideOverCustom>
-                    </div>
-                  )}
                 </div>
                 {user.username && (
                   <div
-                    onClick={() => loadSkills(user.username)}
+                    onClick={() => {
+                      setExpandSkillList(true);
+                      setSelectedUser(user.username);
+                    }}
                     className={`col-span-4 mt-2 ${modalClassname}`}
                   >
                     Click here to show linked skills
@@ -742,6 +611,13 @@ export default function ManageUsers() {
           handleCancel={hideLinkFacilityModal}
         />
       )}
+
+      <SkillsSlideOver
+        show={expandSkillList}
+        setShow={setExpandSkillList}
+        setUnlinkSkillData={setUnlinkSkillData}
+        username={selectedUser}
+      />
 
       <PageTitle
         title="User Management"
