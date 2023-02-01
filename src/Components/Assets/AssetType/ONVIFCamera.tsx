@@ -140,7 +140,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   return (
     <div className="space-y-6">
       <form className="bg-white rounded shadow p-8" onSubmit={handleSubmit}>
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+        <div className="grid gap-x-4 grid-cols-1 lg:grid-cols-2">
           <TextFormField
             name="middleware_hostname"
             label="Hospital Middleware Hostname"
@@ -182,10 +182,9 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             onChange={({ value }) => setStreamUuid(value)}
           />
         </div>
-        <Submit
-          className="w-full md:w-auto self-end place-self-end justify-self-end"
-          label="Set Configuration"
-        />
+        <div className="flex justify-end">
+          <Submit className="w-full md:w-auto" label="Set Configuration" />
+        </div>
       </form>
 
       {assetType === "ONVIF" ? (
