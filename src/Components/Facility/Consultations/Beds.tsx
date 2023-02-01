@@ -15,6 +15,7 @@ import { FieldLabel } from "../../Form/FormFields/FormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import DateFormField from "../../Form/FormFields/DateFormField";
 import moment from "moment";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const formatDateTime: () => string = () => {
   const current = new Date();
@@ -35,6 +36,7 @@ interface BedsProps {
   discharged?: boolean;
   setState?: Dispatch<SetStateAction<boolean>>;
   fetchPatientData?: (state: { aborted: boolean }) => void;
+  hideTitle?: boolean;
 }
 
 const Beds = (props: BedsProps) => {
@@ -112,19 +114,23 @@ const Beds = (props: BedsProps) => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <div className="font-bold text-secondary-500">
-          {!discharged ? "Move to bed:" : "Bed History"}
+      {!props.hideTitle && (
+        <div className="flex justify-between items-center mb-4">
+          <div className="font-bold text-secondary-500">
+            {!discharged ? "Move to bed" : "Bed History"}
+          </div>
+          {props.setState && (
+            <ButtonV2
+              variant="secondary"
+              circle
+              ghost
+              onClick={() => props.setState && props.setState(false)}
+            >
+              <CareIcon className="care-l-times text-lg" />
+            </ButtonV2>
+          )}
         </div>
-        {props.setState && (
-          <button
-            className="text-xl"
-            onClick={() => props.setState && props.setState(false)}
-          >
-            <i className="fas fa-times"></i>
-          </button>
-        )}
-      </div>
+      )}
       {!discharged ? (
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
