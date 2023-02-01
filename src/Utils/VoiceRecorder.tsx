@@ -35,7 +35,7 @@ export const VoiceRecorder = (props: any) => {
                 <i className="fas fa-microphone-alt animate-pulse mr-2"></i>
                 Recording...
               </div>
-              <ButtonV2 className="btn btn-primary" onClick={stopRecording}>
+              <ButtonV2 onClick={stopRecording}>
                 <CareIcon className={"care-l-microphone-slash text-lg"} />
                 Stop
               </ButtonV2>
@@ -46,7 +46,7 @@ export const VoiceRecorder = (props: any) => {
             </div>
           </>
         ) : (
-          <ButtonV2 className="btn btn-primary" onClick={startRecording}>
+          <ButtonV2 onClick={startRecording}>
             <CareIcon className={"care-l-microphone text-lg"} />
             {audioURL ? "Re-Record" : "Record"}
           </ButtonV2>

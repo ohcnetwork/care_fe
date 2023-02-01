@@ -1294,7 +1294,6 @@ export const FileUpload = (props: FileUploadProps) => {
                   <VoiceRecorder createAudioBlob={createAudioBlob} />
                   {audioBlob && (
                     <ButtonV2
-                      className="btn btn-primary flex gap-2"
                       onClick={() => {
                         handleAudioUpload();
                       }}
