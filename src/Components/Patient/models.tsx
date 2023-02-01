@@ -274,7 +274,7 @@ export interface DailyRoundsModel {
   created_date?: string;
   modified_date?: string;
   taken_at?: string;
-  rounds_type?: string;
+  rounds_type?: "NORMAL" | "VENTILATOR" | "ICU" | "AUTOMATED";
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
   created_by?: {
