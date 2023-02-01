@@ -13,9 +13,9 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { formatDate } from "../../../Utils/utils";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
-import DateFormField from "../../Form/FormFields/DateFormField";
 import moment from "moment";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import TextFormField from "../../Form/FormFields/TextFormField";
 
 const formatDateTime: () => string = () => {
   const current = new Date();
@@ -76,19 +76,16 @@ const Beds = (props: BedsProps) => {
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+
     if (!bed?.id)
       return Notification.Error({
         msg: "Please select a bed first..!",
       });
-    const res: any = await Promise.resolve(
-      dispatch(
-        createConsultationBed(
-          { start_date: startDate },
-          consultationId,
-          bed?.id
-        )
-      )
+
+    const res: any = await dispatch(
+      createConsultationBed({ start_date: startDate }, consultationId, bed?.id)
     );
+
     if (res && res.status === 201) {
       Notification.Success({
         msg: "Bed allocated successfully",
@@ -108,9 +105,6 @@ const Beds = (props: BedsProps) => {
     }
     return <Loading />;
   }
-
-  const getDate = (value: any) =>
-    value && moment(value).isValid() && moment(value).toDate();
 
   return (
     <div>
@@ -145,15 +139,14 @@ const Beds = (props: BedsProps) => {
                 facility={facilityId}
               />
             </div>
-            <DateFormField
+            <TextFormField
               label="Date of shift"
-              id="date_declared_positive"
-              name="date_declared_positive"
-              value={getDate(startDate)}
-              onChange={(e) =>
-                setStartDate(moment(e.value).format("YYYY-MM-DD"))
-              }
-              disableFuture
+              id="start_date"
+              name="start_date"
+              value={startDate}
+              type="datetime-local"
+              onChange={(e) => setStartDate(e.value)}
+              max={moment().format("YYYY-MM-DDTHH:mm")}
               error=""
             />
           </div>
