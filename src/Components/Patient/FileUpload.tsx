@@ -1,6 +1,5 @@
 import axios from "axios";
 import { CircularProgress, InputLabel } from "@material-ui/core";
-import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -1294,15 +1293,15 @@ export const FileUpload = (props: FileUploadProps) => {
                 <>
                   <VoiceRecorder createAudioBlob={createAudioBlob} />
                   {audioBlob && (
-                    <button
+                    <ButtonV2
                       className="btn btn-primary flex gap-2"
                       onClick={() => {
                         handleAudioUpload();
                       }}
                     >
-                      <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon> Save
-                      Recording
-                    </button>
+                      <CareIcon className={"care-l-cloud-upload text-xl"} />
+                      Save Recording
+                    </ButtonV2>
                   )}
                 </>
               )}

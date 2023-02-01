@@ -1,8 +1,8 @@
 import * as React from "react";
 import useRecorder from "./useRecorder";
-import MicIcon from "@material-ui/icons/Mic";
-import MicOffIcon from "@material-ui/icons/MicOff";
 import { useEffect, useState } from "react";
+import ButtonV2 from "../Components/Common/components/ButtonV2";
+import CareIcon from "../CAREUI/icons/CareIcon";
 export const VoiceRecorder = (props: any) => {
   const { createAudioBlob } = props;
   const [audioURL, isRecording, startRecording, stopRecording, newBlob] =
@@ -35,13 +35,10 @@ export const VoiceRecorder = (props: any) => {
                 <i className="fas fa-microphone-alt animate-pulse mr-2"></i>
                 Recording...
               </div>
-              <button
-                className="btn btn-primary"
-                style={{ marginLeft: "auto" }}
-                onClick={stopRecording}
-              >
-                <MicOffIcon /> Stop
-              </button>
+              <ButtonV2 className="btn btn-primary" onClick={stopRecording}>
+                <CareIcon className={"care-l-microphone-slash text-lg"} />
+                Stop
+              </ButtonV2>
             </div>
             <div className="mx-3">
               <span>{("0" + Math.floor((time / 60000) % 60)).slice(-2)}:</span>
@@ -49,13 +46,10 @@ export const VoiceRecorder = (props: any) => {
             </div>
           </>
         ) : (
-          <button
-            className="btn btn-primary"
-            // style={{ marginLeft: "auto" }}
-            onClick={startRecording}
-          >
-            <MicIcon /> {audioURL ? "Re-Record" : "Record"}
-          </button>
+          <ButtonV2 className="btn btn-primary" onClick={startRecording}>
+            <CareIcon className={"care-l-microphone text-lg"} />
+            {audioURL ? "Re-Record" : "Record"}
+          </ButtonV2>
         )}
       </div>
       {audioURL && (
