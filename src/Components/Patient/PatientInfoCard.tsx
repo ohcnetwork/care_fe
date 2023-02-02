@@ -227,12 +227,18 @@ export default function PatientInfoCard(props: {
                     key={i}
                     variant={action[4] && action[4][0] ? "danger" : "primary"}
                     href={
-                      !patient.last_consultation?.current_bed && i === 1
+                      patient.last_consultation?.admitted &&
+                      !patient.last_consultation?.current_bed &&
+                      i === 1
                         ? undefined
                         : `${action[0]}`
                     }
                     onClick={() => {
-                      if (!patient.last_consultation?.current_bed && i === 1) {
+                      if (
+                        patient.last_consultation?.admitted &&
+                        !patient.last_consultation?.current_bed &&
+                        i === 1
+                      ) {
                         Notification.Error({
                           msg: "Please assign a bed to the patient",
                         });

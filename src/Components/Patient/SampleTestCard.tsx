@@ -74,7 +74,15 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
   };
 
   return (
-    <div className="block border rounded-lg bg-white shadow cursor-pointer hover:border-primary-500 text-black mt-4">
+    <div
+      className={`${
+        itemData.result === "POSITIVE"
+          ? "hover:border-red-700 border-red-500 bg-red-100"
+          : itemData.result === "NEGATIVE"
+          ? "hover:border-primary-700 border-primary-500 bg-primary-100"
+          : "bg-white hover:border-primary-500"
+      } block border rounded-lg bg-white shadow cursor-pointer text-black mt-4`}
+    >
       <CardContent>
         <div
           onClick={(_e) =>
@@ -129,38 +137,40 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             </div>
           </div>
         </div>
-        <div className="mt-4 flex flex-col md:flex-row justify-between gap-4 ml-2">
-          <div>
-            <div className="text-gray-700 text-sm mb-2">
-              <span className="text-black font-medium">Date of Sample:</span>{" "}
-              {itemData.date_of_sample
-                ? formatDate(itemData.date_of_sample)
-                : "Not Available"}
-            </div>
-            <div className="text-gray-700 text-sm">
-              <span className="text-black font-medium">Date of Result:</span>{" "}
-              {itemData.date_of_result
-                ? formatDate(itemData.date_of_result)
-                : "Not Available"}
+        <div className="mt-4 flex flex-col md:flex-row justify-between gap-4 m-2">
+          <div className="flex flex-col md:flex-row justify-between gap-4">
+            <div>
+              <div className="text-gray-700 text-sm mb-2">
+                <span className="text-black font-medium">Date of Sample:</span>{" "}
+                {itemData.date_of_sample
+                  ? formatDate(itemData.date_of_sample)
+                  : "Not Available"}
+              </div>
+              <div className="text-gray-700 text-sm">
+                <span className="text-black font-medium">Date of Result:</span>{" "}
+                {itemData.date_of_result
+                  ? formatDate(itemData.date_of_result)
+                  : "Not Available"}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex flex-col mt-6 gap-2 ml-2">
-          {
+          <div className="flex flex-col gap-2">
+            {
+              <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
+                Created:{" "}
+                <RelativeDateUserMention
+                  actionDate={itemData.created_date}
+                  user={itemData.created_by}
+                />
+              </div>
+            }
             <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
-              Created:{" "}
+              Last Modified:{" "}
               <RelativeDateUserMention
-                actionDate={itemData.created_date}
-                user={itemData.created_by}
+                actionDate={itemData.modified_date}
+                user={itemData.last_edited_by}
               />
             </div>
-          }
-          <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
-            Last Modified:{" "}
-            <RelativeDateUserMention
-              actionDate={itemData.modified_date}
-              user={itemData.last_edited_by}
-            />
           </div>
         </div>
         <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between mx-2">
