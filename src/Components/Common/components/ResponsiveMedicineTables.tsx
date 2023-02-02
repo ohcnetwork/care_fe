@@ -40,83 +40,87 @@ export default function ResponsiveMedicineTable(props: {
             </tr>
           </thead>
           <tbody>
-            {props.list.map((med: any, index: number) => (
-              <tr className="bg-white" key={index}>
-                {props.objectKeys.map((key, idx) => {
-                  if (idx === 0)
-                    return (
-                      <td className="px-6 py-4 w-[450px] text-sm leading-5 font-medium text-gray-900">
-                        {med[key]}
-                      </td>
-                    );
-                  else
-                    return (
-                      <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
-                        {med[key]}
-                      </td>
-                    );
-                })}
-              </tr>
-            ))}
+            {props.list &&
+              props.list.length > 0 &&
+              props.list.map((med: any, index: number) => (
+                <tr className="bg-white" key={index}>
+                  {props.objectKeys.map((key, idx) => {
+                    if (idx === 0)
+                      return (
+                        <td className="px-6 py-4 w-[450px] text-sm leading-5 font-medium text-gray-900">
+                          {med[key]}
+                        </td>
+                      );
+                    else
+                      return (
+                        <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                          {med[key]}
+                        </td>
+                      );
+                  })}
+                </tr>
+              ))}
           </tbody>
         </table>
       ) : (
         <div className="rounded-md shadow-sm">
-          {props.list.map((med: any, index: number) => (
-            <AccordionV2
-              title={
-                <div className="grid">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-medium overflow-hidden text-ellipsis w-full text-left">
-                      {med[props.objectKeys[0]]}
-                    </h3>
-                  </div>
-                  <div className="flex gap-[160px] w-full mt-2">
-                    {props.fieldsToDisplay?.map((i) => (
-                      <div>
-                        <h4 className="text-base font-semibold">
-                          {props.theads[i]}
-                        </h4>
-                        {med[props.objectKeys[i]]}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              }
-              className={
-                props.list.length - 1 === index
-                  ? "bg-white p-5 "
-                  : "bg-white p-5 border-b border-b-gray-400"
-              }
-              key={index}
-            >
-              <div className="flex flex-col w-full border-t border-t-gray-400 mt-3">
-                <div className="grid grid-cols-2 gap-3 w-full mt-3">
-                  {props.objectKeys.map((key, i) => {
-                    if (i !== 0 && i !== props.objectKeys.length - 1)
-                      return (
+          {props.list &&
+            props.list.length > 0 &&
+            props.list.map((med: any, index: number) => (
+              <AccordionV2
+                title={
+                  <div className="grid">
+                    <div className="flex flex-col">
+                      <h3 className="text-sm font-medium overflow-hidden text-ellipsis w-full text-left">
+                        {med[props.objectKeys[0]]}
+                      </h3>
+                    </div>
+                    <div className="flex gap-[160px] w-full mt-2">
+                      {props.fieldsToDisplay?.map((i) => (
                         <div>
-                          <h4 className="font-semibold text-base">
+                          <h4 className="text-base font-semibold">
                             {props.theads[i]}
-                          </h4>{" "}
-                          <p>{med[key]}</p>
+                          </h4>
+                          {med[props.objectKeys[i]]}
                         </div>
-                      );
+                      ))}
+                    </div>
+                  </div>
+                }
+                className={
+                  props.list.length - 1 === index
+                    ? "bg-white p-5 "
+                    : "bg-white p-5 border-b border-b-gray-400"
+                }
+                key={index}
+              >
+                <div className="flex flex-col w-full border-t border-t-gray-400 mt-3">
+                  <div className="grid grid-cols-2 gap-3 w-full mt-3">
+                    {props.objectKeys.map((key, i) => {
+                      if (i !== 0 && i !== props.objectKeys.length - 1)
+                        return (
+                          <div>
+                            <h4 className="font-semibold text-base">
+                              {props.theads[i]}
+                            </h4>{" "}
+                            <p>{med[key]}</p>
+                          </div>
+                        );
 
-                    if (i === props.objectKeys.length - 1)
-                      return (
-                        <div className="col-span-2">
-                          <h4 className="font-semibold text-base">
-                            {props.theads[i]}
-                          </h4>{" "}
-                          <p>{med[key]}</p>
-                        </div>
-                      );
-                  })}
+                      if (i === props.objectKeys.length - 1)
+                        return (
+                          <div className="col-span-2">
+                            <h4 className="font-semibold text-base">
+                              {props.theads[i]}
+                            </h4>{" "}
+                            <p>{med[key]}</p>
+                          </div>
+                        );
+                    })}
+                  </div>
                 </div>
-              </div>
-            </AccordionV2>
-          ))}
+              </AccordionV2>
+            ))}
         </div>
       )}
     </>
