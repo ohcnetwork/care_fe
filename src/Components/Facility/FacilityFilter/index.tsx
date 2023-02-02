@@ -9,6 +9,7 @@ import { useAbortableEffect, statusType } from "../../../Common/utils";
 import LocalBodySelect from "./LocalBodySelect";
 import useMergeState from "../../../Common/hooks/useMergeState";
 import useConfig from "../../../Common/hooks/useConfig";
+import FilterButtons from "../../Common/FilterButtons";
 
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
@@ -105,27 +106,16 @@ function FacilityFilter(props: any) {
   };
 
   return (
-    <div>
-      <div className="flex flex-wrap justify-between">
-        <button className="btn btn-default mt-1" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />
-          Cancel
-        </button>
-        <button
-          className="btn btn-default mt-1"
-          onClick={(_) => {
-            closeFilter();
-            navigate("/facility");
-          }}
-        >
-          <i className="fas fa-times mr-2" />
-          Clear Filters
-        </button>
-        <button className="btn btn-primary mt-1" onClick={applyFilter}>
-          <i className="fas fa-check mr-2" />
-          Apply
-        </button>
-      </div>
+    <div className="pb-10">
+      <FilterButtons
+        onClose={closeFilter}
+        onApply={applyFilter}
+        onClear={() => {
+          navigate("/patients");
+          setFilterState(filterState);
+          closeFilter();
+        }}
+      />
       <div className="w-full flex-none mt-2">
         <div className="font-light text-md mt-2">Filter By:</div>
 
