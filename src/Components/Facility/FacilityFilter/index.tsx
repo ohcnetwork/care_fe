@@ -106,16 +106,19 @@ function FacilityFilter(props: any) {
   };
 
   return (
-    <div className="pb-10">
-      <FilterButtons
-        onClose={closeFilter}
-        onApply={applyFilter}
-        onClear={() => {
-          navigate("/patients");
-          setFilterState(filterState);
-          closeFilter();
-        }}
-      />
+    <div>
+      <div className="pb-10">
+        <FilterButtons
+          onClose={closeFilter}
+          onApply={applyFilter}
+          onClear={() => {
+            navigate("/facility");
+            setFilterState(filterState);
+            closeFilter();
+          }}
+        />
+      </div>
+
       <div className="w-full flex-none mt-2">
         <div className="font-light text-md mt-2">Filter By:</div>
 
