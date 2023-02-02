@@ -43,6 +43,7 @@ import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
 import useConfig from "../../Common/hooks/useConfig";
+import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -66,6 +67,7 @@ export const FacilityHome = (props: any) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
   const [imageKey, setImageKey] = useState(Date.now());
+  const [totalDoctors, setTotalDoctors] = useState(0);
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
@@ -96,6 +98,15 @@ export const FacilityHome = (props: any) => {
             }
             if (doctorRes && doctorRes.data) {
               setDoctorData(doctorRes.data.results);
+              // calculating total doctors count
+              let totalCount = 0;
+              console.log(doctorRes.data.results[0]);
+              doctorRes.data.results.map((doctor: DoctorModal) => {
+                if (doctor.count) {
+                  totalCount += doctor.count;
+                }
+              });
+              setTotalDoctors(totalCount);
             }
             if (
               triageRes &&
@@ -219,6 +230,23 @@ export const FacilityHome = (props: any) => {
   } else {
     doctorList = (
       <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
+        {/* Total Doctors Count Card */}
+        <div className="w-full">
+          <div className="shadow-sm rounded-sm h-full border border-primary-500 bg-primary-100 flex flex-col">
+            <div className="flex justify-start items-center gap-3 px-4 py-6 flex-1">
+              <div className="rounded-full p-4 bg-primary-500">
+                <DoctorIcon className="fill-current text-white w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-medium text-sm text-[#808080]">
+                  Total Doctors
+                </div>
+                <h2 className="font-bold text-xl mt-2">{totalDoctors}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {doctorData.map((data: DoctorModal) => {
           const removeCurrentDoctorData = (doctorId: number | undefined) => {
             setDoctorData((state) =>
