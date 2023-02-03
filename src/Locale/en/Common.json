@@ -81,11 +81,9 @@
   "filters": "Filters",
   "unknown": "Unknown",
   "active": "Active",
-  "completed": "Completed"
+  "completed": "Completed",
   "Apply": "Apply",
   "Clear Filters": "Clear Filters",
-  "powered_by": "Powered By",
-  "care": "CARE",
   "on": "On",
   "open": "Open"
 }
