@@ -339,9 +339,8 @@ const LiveFeed = (props: any) => {
                   name="bed"
                   setSelected={(selected) => setBed(selected as BedModel)}
                   selected={bed}
-                  errors=""
+                  error=""
                   multiple={false}
-                  margin="dense"
                   location={cameraAsset.location_id}
                   facility={cameraAsset.facility_id}
                 />

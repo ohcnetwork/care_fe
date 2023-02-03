@@ -13,6 +13,7 @@ import SelectMenuV2 from "../Form/SelectMenuV2";
 import readXlsxFile from "read-excel-file";
 import { XLSXAssetImportSchema } from "../../Common/constants";
 import { parseCsvFile } from "../../Utils/utils";
+import useConfig from "../../Common/hooks/useConfig";
 
 interface Props {
   open: boolean;
@@ -27,6 +28,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
   const [location, setLocation] = useState("");
   const [locations, setLocations] = useState<any>([]);
   const dispatchAction: any = useDispatch();
+  const { sample_format_asset_import } = useConfig();
 
   const closeModal = () => {
     setPreview(undefined);
@@ -54,7 +56,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                 schema: XLSXAssetImportSchema,
               });
               if (parsedData.errors.length) {
-                parsedData.errors.map((error: any) => {
+                parsedData.errors.map((error) => {
                   Notification.Error({
                     msg: `Please check the row ${error.row} of column ${error.column}`,
                   });
@@ -174,16 +176,25 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
             <span className="mt-1 text-gray-700">{facility.name}</span>
           </div>
           {locations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full">
-              <h1 className="text-2xl font-medium text-gray-700 m-7">
-                You need at least one location to import an assest.
-              </h1>
-              <Link href={`/facility/${facility.id}/location/add`}>
-                <a className="bg-primary text-white px-4 py-2 rounded-md">
-                  Add Asset Location
-                </a>
-              </Link>
-            </div>
+            <>
+              <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-2xl font-medium text-gray-700 m-7">
+                  You need at least one location to import an assest.
+                </h1>
+                <Link href={`/facility/${facility.id}/location/add`}>
+                  <a className="bg-primary text-white px-4 py-2 rounded-md">
+                    Add Asset Location
+                  </a>
+                </Link>
+              </div>
+              <div className="mt-6 flex flex-col justify-center items-center">
+                <Cancel
+                  onClick={closeModal}
+                  disabled={isImporting}
+                  className="px-4 py-2 w-1/4"
+                />
+              </div>
+            </>
           ) : (
             <>
               {preview && preview?.length > 0 ? (
@@ -281,7 +292,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                   </p>
                   <a
                     className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                    href="https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=11JaEhNHdyCHth4YQs_44YaRlP77Rrqe81VSEfg1glko&exportFormat=xlsx"
+                    href={sample_format_asset_import}
                   >
                     <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
                     <span>Sample Format</span>

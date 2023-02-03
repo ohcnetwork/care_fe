@@ -3,10 +3,7 @@ import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-} from "./Utils";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
 
 type OptionCallback<T, R> = (option: T) => R;
@@ -24,24 +21,22 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
 const AutocompleteFormField = <T, V>(
   props: AutocompleteFormFieldProps<T, V>
 ) => {
-  const { name } = props;
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-
+  const field = useFormFieldPropsResolver(props);
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <Autocomplete
-        id={props.id}
+        id={field.id}
+        disabled={field.disabled}
+        required={field.required}
+        className={field.className}
+        value={field.value}
+        onChange={(value: any) => field.handleChange(value)}
         options={props.options}
-        disabled={props.disabled}
-        value={props.value}
         placeholder={props.placeholder}
         optionLabel={props.optionLabel}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
-        className={props.className}
-        required={props.required}
         onQuery={props.onQuery}
-        onChange={(value: any) => handleChange({ name, value })}
       />
     </FormField>
   );
