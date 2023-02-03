@@ -43,12 +43,12 @@ export interface UserAssignedModel {
 }
 
 export interface SkillObjectModel {
-  id?: number;
-  name?: string;
+  id: string;
+  name: string;
   description?: string;
 }
 
 export interface SkillModel {
-  id?: number;
+  id: string;
   skill_object: SkillObjectModel;
 }

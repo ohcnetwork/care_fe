@@ -11,13 +11,10 @@ import {
   deleteUser,
   getDistrict,
   partialUpdateUser,
-  deleteUserSkill,
 } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { USER_TYPES } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
-import { SkillModel } from "../Users/models";
-
 import { IconButton, CircularProgress } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import LinkFacilityDialog from "./LinkFacilityDialog";
@@ -26,10 +23,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import UserFilter from "./UserFilter";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
-
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
-import UnlinkSkillDialog from "./UnlinkSkillDialog";
-
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
@@ -87,11 +81,6 @@ export default function ManageUsers() {
     userName: string;
     facility?: FacilityModel;
   }>({ show: false, userName: "", facility: undefined });
-  const [unlinkSkillData, setUnlinkSkillData] = useState<{
-    show: boolean;
-    userName: string;
-    skill?: SkillModel;
-  }>({ show: false, userName: "", skill: undefined });
 
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -196,14 +185,6 @@ export default function ManageUsers() {
     });
   };
 
-  const hideUnlinkSkillModal = () => {
-    setUnlinkSkillData({
-      show: false,
-      skill: undefined,
-      userName: "",
-    });
-  };
-
   const hideLinkFacilityModal = () => {
     setLinkFacility({
       show: false,
@@ -243,16 +224,6 @@ export default function ManageUsers() {
     setIsFacilityLoading(false);
     loadFacilities(unlinkFacilityData.userName);
     hideUnlinkFacilityModal();
-  };
-
-  const handleUnlinkSkillSubmit = async () => {
-    await dispatch(
-      deleteUserSkill(
-        unlinkSkillData.userName,
-        String(unlinkSkillData?.skill?.id)
-      )
-    );
-    hideUnlinkSkillModal();
   };
 
   const handleDelete = (user: any) => {
@@ -615,7 +586,6 @@ export default function ManageUsers() {
       <SkillsSlideOver
         show={expandSkillList}
         setShow={setExpandSkillList}
-        setUnlinkSkillData={setUnlinkSkillData}
         username={selectedUser}
       />
 
@@ -734,14 +704,6 @@ export default function ManageUsers() {
           userName={unlinkFacilityData.userName}
           handleCancel={hideUnlinkFacilityModal}
           handleOk={handleUnlinkFacilitySubmit}
-        />
-      )}
-      {unlinkSkillData.show && (
-        <UnlinkSkillDialog
-          skillName={unlinkSkillData.skill?.skill_object.name || ""}
-          userName={unlinkSkillData.userName}
-          handleCancel={hideUnlinkSkillModal}
-          handleOk={handleUnlinkSkillSubmit}
         />
       )}
     </div>

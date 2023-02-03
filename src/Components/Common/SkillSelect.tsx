@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { getAllSkills } from "../../Redux/actions";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
-import { SkillModel } from "../Users/models";
+import { SkillObjectModel } from "../Users/models";
 
 interface SkillSelectProps {
   name: string;
@@ -12,8 +12,8 @@ interface SkillSelectProps {
   multiple?: boolean;
   showAll?: boolean;
   showNOptions?: number;
-  selected: SkillModel | SkillModel[] | null;
-  setSelected: (selected: any) => void;
+  selected: SkillObjectModel | SkillObjectModel[] | null;
+  setSelected: (selected: SkillObjectModel) => void;
 }
 
 export const SkillSelect = (props: SkillSelectProps) => {

@@ -5,7 +5,12 @@ import { IconButton, Button } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import { SkillSelect } from "../Common/SkillSelect";
-import { addUserSkill, getUserListSkills } from "../../Redux/actions";
+import {
+  addUserSkill,
+  getUserListSkills,
+  deleteUserSkill,
+} from "../../Redux/actions";
+import UnlinkSkillDialog from "./UnlinkSkillDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 
@@ -13,17 +18,15 @@ interface IProps {
   username: string;
   show: boolean;
   setShow: (show: boolean) => void;
-  setUnlinkSkillData: (data: {
-    userName: string;
-    skill: SkillModel;
-    show: boolean;
-  }) => void;
 }
 
-export default ({ show, setShow, username, setUnlinkSkillData }: IProps) => {
+export default ({ show, setShow, username }: IProps) => {
   const [skills, setSkills] = useState<SkillModel[]>([]);
-  const [selectedSkill, setSelectedSkill] = useState<SkillModel | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<SkillObjectModel | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
+  const [deleteSkill, setDeleteSkill] = useState<SkillModel | null>(null);
   const dispatch: any = useDispatch();
 
   const fetchSkills = useCallback(
@@ -42,21 +45,29 @@ export default ({ show, setShow, username, setUnlinkSkillData }: IProps) => {
     async (username: string, skill: SkillObjectModel | null) => {
       if (!skill) return;
       setIsLoading(true);
-      const res = await dispatch(addUserSkill(username, String(skill.id)));
-      console.log(res);
+      const res = await dispatch(addUserSkill(username, skill.id));
       if (res?.status !== 201) {
         Notification.Error({
           msg: "Error while adding skill",
         });
       }
+      setSelectedSkill(null);
       setIsLoading(false);
       fetchSkills(username);
     },
     [dispatch, fetchSkills]
   );
 
+  const removeSkill = useCallback(
+    async (username: string, skillId: string) => {
+      await dispatch(deleteUserSkill(username, skillId));
+      setDeleteSkill(null);
+      fetchSkills(username);
+    },
+    [dispatch, fetchSkills]
+  );
+
   useEffect(() => {
-    console.log("hello there");
     setIsLoading(true);
     if (username) fetchSkills(username);
     setIsLoading(false);
@@ -64,6 +75,14 @@ export default ({ show, setShow, username, setUnlinkSkillData }: IProps) => {
 
   return (
     <div className="col-span-4">
+      {deleteSkill && (
+        <UnlinkSkillDialog
+          skillName={deleteSkill.skill_object.name || ""}
+          userName={username}
+          handleCancel={() => setDeleteSkill(null)}
+          handleOk={() => removeSkill(username, deleteSkill.id)}
+        />
+      )}
       <SlideOverCustom
         open={show}
         setOpen={setShow}
@@ -121,13 +140,7 @@ export default ({ show, setShow, username, setUnlinkSkillData }: IProps) => {
                           size="small"
                           color="primary"
                           disabled={isLoading}
-                          onClick={() =>
-                            setUnlinkSkillData({
-                              show: true,
-                              skill: skill,
-                              userName: username,
-                            })
-                          }
+                          onClick={() => setDeleteSkill(skill)}
                         >
                           <CloseIcon />
                         </IconButton>

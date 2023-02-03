@@ -76,8 +76,6 @@ export const getUserListFacility = (pathParam: object) => {
 };
 
 export const addUserSkill = (username: string, skill: string) => {
-  console.log(username);
-  console.log(skill);
   return fireRequest("addUserSkill", [], { skill }, { username });
 };
 
