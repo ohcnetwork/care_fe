@@ -6,12 +6,12 @@ import useActiveLink from "../../../Common/hooks/useActiveLink";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
+import { classNames } from "../../../Utils/utils";
+import { Link } from "raviger";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
-const LOGO = process.env.REACT_APP_LIGHT_LOGO;
-const LOGO_COLLAPSE =
-  process.env.REACT_APP_LIGHT_COLLAPSE_LOGO || "/images/logo_collapsed.svg";
+const LOGO_COLLAPSE = "/images/logo_collapsed.svg";
 
 type StatelessSidebarProps =
   | {
@@ -49,6 +49,7 @@ const StatelessSidebar = ({
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
+  const { static_light_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
   const { dashboard_url } = useConfig();
@@ -71,21 +72,27 @@ const StatelessSidebar = ({
       const indexDifference = index - lastIndicatorPosition;
       e.style.display = "block";
 
-      // if (indexDifference > 0) {
-      //   console.log("indexDifference > 0");
-      //   e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
-      //   e.style.bottom = "auto";
-      // } else {
-      //   console.log("indexDifference < 0");
-      //   e.style.bottom =
-      //     itemHeight * (NavItems.length + bottomItemOffset) -
-      //     lastIndicatorPosition * itemHeight -
-      //     28 +
-      //     "px";
-      //   e.style.top = "auto";
-      // }
 
-      // e.style.height = `${Math.abs(indexDifference) * itemHeight + 12}px`;
+      if (indexDifference > 0) {
+        console.log("indexDifference > 0");
+        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
+        e.style.bottom = "auto";
+      } else {
+        console.log("indexDifference < 0");
+        e.style.bottom =
+          itemHeight * (NavItems.length + bottomItemOffset) -
+          lastIndicatorPosition * itemHeight -
+          28 +
+          "px";
+        e.style.top = "auto";
+      }
+
+      const variableHeight = Math.min(
+        Math.abs(indexDifference) * itemHeight,
+        70
+      );
+
+      e.style.height = `${variableHeight}px`;
       setTimeout(() => {
         if (!e) return;
         if (indexDifference > 0) {
@@ -121,19 +128,24 @@ const StatelessSidebar = ({
       }`}
     >
       <div className="h-3" /> {/* flexible spacing */}
-      <img
-        className={`${
-          shrinked ? "mx-auto" : "ml-5"
-        } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
-        src={shrinked ? LOGO_COLLAPSE : LOGO}
-      />
+      <Link href="/">
+        <img
+          className={`${
+            shrinked ? "mx-auto" : "ml-5"
+          } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
+          src={shrinked ? LOGO_COLLAPSE : static_light_logo}
+        />
+      </Link>
       <div className="h-3" /> {/* flexible spacing */}
       <div className="flex flex-col relative h-full mb-4 md:mb-0">
         <div className="flex flex-col relative flex-1 md:flex-none">
           <div
             ref={indicatorRef}
-            className={`absolute left-1 w-1 hidden md:block
-            bg-primary-400 rounded z-10 transition-all`}
+            // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
+            className={classNames(
+              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all",
+              activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
+            )}
           />
           {NavItems.map((i) => {
             return (

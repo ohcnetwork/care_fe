@@ -141,11 +141,11 @@ export const FileUpload = (props: FileUploadProps) => {
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
-  const [uploadFileNameError, setUploadFileNameError] = useState<string>("");
+  const [uploadFileError, setUploadFileError] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
   const [audioName, setAudioName] = useState<string>("");
-  const [audioNameError, setAudioNameError] = useState<string>("");
+  const [audioFileError, setAudioFileError] = useState<string>("");
   const [contentType, setcontentType] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>();
   const initialState = {
@@ -833,6 +833,7 @@ export const FileUpload = (props: FileUploadProps) => {
     setUploadFileName(
       fileName.substring(0, fileName.lastIndexOf(".")) || fileName
     );
+
     const ext: string = fileName.split(".")[1];
     setcontentType(header_content_type[ext]);
 
@@ -880,7 +881,7 @@ export const FileUpload = (props: FileUploadProps) => {
           Notification.Success({
             msg: "File Uploaded Successfully",
           });
-          setUploadFileNameError("");
+          setUploadFileError("");
           resolve(response);
         })
         .catch((e) => {
@@ -896,12 +897,16 @@ export const FileUpload = (props: FileUploadProps) => {
   const validateFileUpload = () => {
     const filenameLength = uploadFileName.trim().length;
     const f = file;
-    if (f === undefined) {
-      setUploadFileNameError("Please choose a file to upload");
+    if (f === undefined || f === null) {
+      setUploadFileError("Please choose a file to upload");
       return false;
     }
     if (filenameLength === 0) {
-      setUploadFileNameError("Please give a name !!");
+      setUploadFileError("Please give a name !!");
+      return false;
+    }
+    if (f.size > 10e7) {
+      setUploadFileError("Maximum size of files is 100 MB");
       return false;
     }
     return true;
@@ -982,7 +987,12 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const validateAudioUpload = () => {
     const f = audioBlob;
-    if (f === undefined) {
+    if (f === undefined || f === null) {
+      setAudioFileError("Please upload a file");
+      return false;
+    }
+    if (f.size > 10e7) {
+      setAudioFileError("File size must not exceed 100 MB");
       return false;
     }
     return true;
@@ -990,7 +1000,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleAudioUpload = async () => {
     if (!validateAudioUpload()) return;
-    setAudioNameError("");
+    setAudioFileError("");
     const category = "AUDIO";
     const name = "audio.mp3";
     const filename =
@@ -1276,7 +1286,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 onChange={(e: any) => {
                   setAudioName(e.target.value);
                 }}
-                errors={audioNameError}
+                errors={audioFileError}
               />
               {audiouploadStarted ? (
                 <LinearProgressWithLabel value={uploadPercent} />
@@ -1309,7 +1319,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4>Upload New File</h4>
               </div>
               <div>
-                <InputLabel id="spo2-label">Enter File Name</InputLabel>
+                <InputLabel id="spo2-label">Enter File Name*</InputLabel>
                 <TextInputField
                   name="consultation_file"
                   variant="outlined"
@@ -1321,7 +1331,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
                   }}
-                  errors={uploadFileNameError}
+                  errors={uploadFileError}
                 />
               </div>
               <div className="mt-4">

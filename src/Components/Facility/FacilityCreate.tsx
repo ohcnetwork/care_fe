@@ -12,11 +12,9 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
-  BED_TYPES,
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
-  KASP_ENABLED,
-  KASP_STRING,
+  getBedTypes,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -57,6 +55,7 @@ import Steps, { Step } from "../Common/Steps";
 import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import useConfig from "../../Common/hooks/useConfig";
 import { CapacityModal, DoctorModal } from "./models";
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
@@ -154,6 +153,7 @@ const facilityCreateReducer = (
 };
 
 export const FacilityCreate = (props: FacilityProps) => {
+  const { gov_data_api_key, kasp_string, kasp_enabled } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
@@ -361,7 +361,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
     if (!validatePincode(e.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(e.value);
+    const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
     const matchedState = states.find((state) => {
@@ -606,7 +606,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             return;
           }}
         />
-        {BED_TYPES.map((x) => {
+        {getBedTypes({ kasp_string, kasp_enabled }).map((x) => {
           const res = capacityData.find((data) => {
             return data.room_type === x.id;
           });
@@ -1165,13 +1165,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                     </div>
                   </div>
 
-                  {KASP_ENABLED && (
+                  {kasp_enabled && (
                     <div>
                       <FieldLabel
                         htmlFor="facility-kasp_empanelled"
                         className="mb-2"
                       >
-                        Is this facility {KASP_STRING} empanelled?
+                        Is this facility {kasp_string} empanelled?
                       </FieldLabel>
                       <RadioInputsV2
                         name="kasp_empanelled"

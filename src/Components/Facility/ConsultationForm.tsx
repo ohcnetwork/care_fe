@@ -16,8 +16,6 @@ import {
   PATIENT_CATEGORIES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
-  KASP_STRING,
-  KASP_ENABLED,
   CONSULTATION_STATUS,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -60,6 +58,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import DateFormField from "../Form/FormFields/DateFormField";
+import useConfig from "../../Common/hooks/useConfig";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -192,6 +191,7 @@ const scrollTo = (id: any) => {
 };
 
 export const ConsultationForm = (props: any) => {
+  const { kasp_enabled, kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
@@ -342,8 +342,9 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "ip_no":
+          if (state.form.suggestion !== "A") return;
           if (!state.form[field]) {
-            errors[field] = "Please enter IP Number";
+            errors[field] = "IP Number is required as person is admitted";
             if (!error_div) error_div = field;
             invalidForm = true;
           } else if (!state.form[field].replace(/\s/g, "").length) {
@@ -428,7 +429,7 @@ export const ConsultationForm = (props: any) => {
           if (!state.form[field]) {
             errors[
               field
-            ] = `Please select an option, ${KASP_STRING} is mandatory`;
+            ] = `Please select an option, ${kasp_string} is mandatory`;
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -836,7 +837,6 @@ export const ConsultationForm = (props: any) => {
           <>
             <DateFormField
               {...field("admission_date")}
-              disablePast
               required
               label="Admission date"
             />
@@ -901,7 +901,11 @@ export const ConsultationForm = (props: any) => {
           <ErrorHelperText error={state.errors.procedure} />
         </div>
 
-        <TextFormField {...field("ip_no")} label="IP Number" required />
+        <TextFormField
+          {...field("ip_no")}
+          label="IP Number"
+          required={state.form.suggestion === "A"}
+        />
 
         <TextAreaFormField
           {...field("verified_by")}
@@ -922,9 +926,9 @@ export const ConsultationForm = (props: any) => {
           label="Diagnosis (as per ICD-11 recommended by WHO)"
         />
 
-        {KASP_ENABLED && (
+        {kasp_enabled && (
           <div className="flex-1" id="is_kasp">
-            <FieldLabel required>{KASP_STRING}</FieldLabel>
+            <FieldLabel required>{kasp_string}</FieldLabel>
             <RadioGroup
               aria-label="covid"
               name="is_kasp"
@@ -1026,7 +1030,7 @@ export const ConsultationForm = (props: any) => {
         </div>
         {/* End of Telemedicine fields */}
 
-        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-between">
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
           <Cancel
             onClick={() =>
               navigate(`/facility/${facilityId}/patient/${patientId}`)

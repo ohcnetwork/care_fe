@@ -3,17 +3,11 @@ import moment from "moment";
 import * as Notification from "../../Utils/Notifications";
 import { animated, config, useSpring } from "@react-spring/web";
 import { useDispatch } from "react-redux";
-import {
-  DialogContentText,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from "@material-ui/core";
 import { deleteCapacity } from "../../Redux/actions";
 import { RoleButton } from "../Common/RoleButton";
 import { BedCapacity } from "./BedCapacity";
 import DialogModal from "../Common/Dialog";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 
 interface BedTypeCardProps {
   facilityId?: string;
@@ -63,10 +57,6 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
         }
       }
     }
-  };
-
-  const handleDeleteClose = () => {
-    setOpenDeleteDialog(false);
   };
 
   const _p = total ? Math.round((used / total) * 100) : 0;
@@ -139,7 +129,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
               </div>
             </div>
             <div className="flex flex-col h-1/3 lg:flex-row gap-4 text-center mt-4 justify-center items-center">
-              <div className="w-1/2">
+              <div className="w-1/2 overflow-x-auto">
                 <p className="text-slate-500 font-medium text-lg xl:text-xl">
                   Used:
                   <animated.span className="ml-2 text-slate-700 font-semibold text-lg  xl:text-xl">
@@ -147,7 +137,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                   </animated.span>
                 </p>
               </div>
-              <div className="w-1/2">
+              <div className="w-1/2 overflow-x-auto">
                 <p className="text-slate-500 font-medium text-lg xl:text-xl">
                   Total:
                   <animated.span className="ml-2 text-slate-700 text-lg font-semibold xl:text-xl">
@@ -216,32 +206,15 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
           </p>
         </div>
       </div>
-      <Dialog
-        maxWidth={"md"}
-        open={openDeleteDialog}
-        onClose={handleDeleteClose}
-      >
-        <DialogTitle className="flex justify-center bg-primary-100">
-          Are you sure you want to delete {label} type?
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            You will not be able to access this bed type later.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <button onClick={handleDeleteClose} className="btn btn-primary">
-            Cancel
-          </button>
-          <button
-            onClick={handleDeleteSubmit}
-            id="facility-delete-confirm"
-            className="btn btn-danger"
-          >
-            Delete
-          </button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmDialogV2
+        show={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        title={`Delete ${label}?`}
+        description="You will not be able to access this bed type later."
+        action="Delete"
+        variant="danger"
+        onConfirm={handleDeleteSubmit}
+      />
       {open && (
         <DialogModal
           show={open}
