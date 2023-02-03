@@ -1190,6 +1190,11 @@ export const ConsultationDetails = (props: any) => {
                         ]}
                         fieldsToDisplay={[2, 4]}
                       />
+                      {!consultationData.procedure?.length && (
+                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
+                          No data found
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

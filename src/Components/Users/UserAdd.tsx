@@ -646,8 +646,10 @@ export const UserAdd = (props: UserProps) => {
                 required
                 label="User Type"
                 options={userTypes}
-                optionLabel={(option) => option.role}
-                optionValue={(option) => option.role}
+                optionLabel={(o) =>
+                  o.role + ((o.readOnly && " (Read Only)") || "")
+                }
+                optionValue={(o) => o.id}
               />
 
               {state.form.user_type === "Doctor" && (
@@ -742,16 +744,14 @@ export const UserAdd = (props: UserProps) => {
                             <>
                               {usernameExists === userExistsEnums.exists ? (
                                 <div>
-                                  {" "}
-                                  <i className="fas fa-circle-xmark text-red-500" />
+                                  <i className="fas fa-circle-xmark text-red-500" />{" "}
                                   <span className="text-red-500">
                                     Username is not available
                                   </span>
                                 </div>
                               ) : (
                                 <div>
-                                  {" "}
-                                  <i className="fas fa-circle-check text-green-500" />
+                                  <i className="fas fa-circle-check text-green-500" />{" "}
                                   <span className="text-primary-500">
                                     Username is available
                                   </span>
