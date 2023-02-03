@@ -19,7 +19,7 @@ const DuplicatePatientDialog = (props: Props) => {
 
   return (
     <DialogModal
-      title={<FieldLabel className="text-lg">Patient Records Found</FieldLabel>}
+      title="Patient Records Found"
       show={true}
       onClose={handleCancel}
       className="w-3/4 md:w-1/2"
