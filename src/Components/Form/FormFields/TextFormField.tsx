@@ -14,6 +14,8 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   trailing?: React.ReactNode | undefined;
   leadingFocused?: React.ReactNode | undefined;
   trailingFocused?: React.ReactNode | undefined;
+  trailingPadding?: string | undefined;
+  leadingPadding?: string | undefined;
   min?: string | number;
   max?: string | number;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
@@ -25,7 +27,9 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   const { leading, trailing } = props;
   const leadingFocused = props.leadingFocused || props.leading;
   const trailingFocused = props.trailingFocused || props.trailing;
-  const hasIcon = !!(leading || trailing || leadingFocused || trailingFocused);
+  const hasLeading = !!(leading || leadingFocused);
+  const hasTrailing = !!(trailing || trailingFocused);
+  const hasIcon = hasLeading || hasTrailing;
   const [showPassword, setShowPassword] = useState(false);
 
   const getPasswordFieldType = () => {
@@ -38,7 +42,8 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
       id={field.id}
       className={classNames(
         "cui-input-base peer",
-        hasIcon && "px-10",
+        hasLeading && (props.leadingPadding || "pl-10"),
+        hasTrailing && (props.trailingPadding || "pr-10"),
         field.error && "border-danger-500",
         field.className
       )}
