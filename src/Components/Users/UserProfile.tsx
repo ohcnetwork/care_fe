@@ -283,12 +283,20 @@ export default function UserProfile() {
           ) || "",
         gender: states.form.gender,
         age: states.form.age,
-        doctor_qualification: states.form.doctor_qualification,
-        doctor_experience_commenced_on: moment(
-          states.form.doctor_experience_commenced_on
-        ).format("YYYY-MM-DD"),
+        doctor_qualification:
+          details.user_type === "Doctor"
+            ? states.form.doctor_qualification
+            : undefined,
+        doctor_experience_commenced_on:
+          details.user_type === "Doctor"
+            ? moment(states.form.doctor_experience_commenced_on).format(
+                "YYYY-MM-DD"
+              )
+            : undefined,
         doctor_medical_council_registration:
-          states.form.doctor_medical_council_registration,
+          details.user_type === "Doctor"
+            ? states.form.doctor_medical_council_registration
+            : undefined,
       };
       const res = await dispatchAction(partialUpdateUser(username, data));
       if (res && res.data) {
