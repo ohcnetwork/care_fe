@@ -78,10 +78,6 @@ const routes: Routes = {
     method: "POST",
   },
 
-  getUserSkills: {
-    path: "/api/v1/users/{username}/skill/",
-  },
-
   deleteUserFacility: {
     path: "/api/v1/users/{username}/delete_facility/",
     method: "DELETE",

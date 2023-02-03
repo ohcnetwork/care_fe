@@ -22,6 +22,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import MonthFormField from "../Form/FormFields/Month";
 import moment from "moment";
+import { SkillModel, SkillObjectModel } from "../Users/models";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -120,22 +121,11 @@ export default function UserProfile() {
   const initialDetails: any = [{}];
   const [details, setDetails] = useState(initialDetails);
 
-  interface SkillModelObject {
-    id: string;
-    name: string;
-    description: string;
-  }
-
-  interface SkillModel {
-    id: string;
-    skill_object: SkillModelObject;
-  }
-
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getUserDetails(username));
-      const resSkills = await dispatchAction(getUserListSkills(username));
+      const resSkills = await dispatchAction(getUserListSkills({ username }));
       if (!status.aborted) {
         if (res && res.data && resSkills) {
           res.data.skills = resSkills.data.results.map(
@@ -494,13 +484,15 @@ export default function UserProfile() {
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-gray-900">
                     <div className="flex flex-wrap gap-2">
-                      {details.skills?.map((skill: SkillModelObject) => {
-                        return (
-                          <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-700 rounded-full text-xs px-3">
-                            <p className="py-1.5">{skill.name}</p>
-                          </span>
-                        );
-                      }) || "-"}
+                      {details.skills && details.skills.length
+                        ? details.skills?.map((skill: SkillObjectModel) => {
+                            return (
+                              <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-700 rounded-full text-xs px-3">
+                                <p className="py-1.5">{skill.name}</p>
+                              </span>
+                            );
+                          })
+                        : "-"}
                     </div>
                   </dd>
                 </div>
