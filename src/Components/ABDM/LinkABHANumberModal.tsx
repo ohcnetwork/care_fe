@@ -62,6 +62,7 @@ export default function LinkABHANumberModal({
               setCurrentStep("AadhaarVerification");
             }}
             patientId={patientId}
+            setAbha={setAbha}
           />
         )}
 
@@ -104,9 +105,14 @@ export default function LinkABHANumberModal({
 interface ScanABHAQRSectionProps {
   onSignup: () => void;
   patientId?: string;
+  setAbha?: (abha: any) => void;
 }
 
-const ScanABHAQRSection = ({ onSignup, patientId }: ScanABHAQRSectionProps) => {
+const ScanABHAQRSection = ({
+  onSignup,
+  patientId,
+  setAbha,
+}: ScanABHAQRSectionProps) => {
   const dispatch = useDispatch<any>();
 
   const [qrValue, setQrValue] = useState("");
@@ -177,7 +183,7 @@ const ScanABHAQRSection = ({ onSignup, patientId }: ScanABHAQRSectionProps) => {
 
                 console.log(response);
                 if (response.status === 200) {
-                  location.reload(); // TODO: Fetch and update patient
+                  setAbha?.(response.data);
                 } else {
                   Notification.Error({
                     msg: response?.message ?? "Something went wrong!",

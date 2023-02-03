@@ -1000,6 +1000,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
 
             handleValuesChange(values);
+            setShowLinkAbhaNumberModal(false);
           }}
         />
       )}
