@@ -5,6 +5,7 @@ import { getShiftComments, addShiftComments } from "../../Redux/actions";
 import { Button, CircularProgress } from "@material-ui/core";
 import * as Notification from "../../Utils/Notifications.js";
 import { formatDate } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
 interface CommentSectionProps {
   id: string;
@@ -15,6 +16,8 @@ const CommentSection = (props: CommentSectionProps) => {
   const [comments, setComments] = useState(initialData);
   const [commentBox, setCommentBox] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
+
   const fetchData = useCallback(
     async (status: statusType = { aborted: false }) => {
       setIsLoading(true);
@@ -42,12 +45,12 @@ const CommentSection = (props: CommentSectionProps) => {
     };
     if (!/\S+/.test(commentBox)) {
       Notification.Error({
-        msg: "Comment Should Contain At Least 1 Character",
+        msg: t("comment_min_length"),
       });
       return;
     }
     dispatch(addShiftComments(props.id, payload)).then((_: any) => {
-      Notification.Success({ msg: "Comment added successfully" });
+      Notification.Success({ msg: t("comment_added_successfully") });
       fetchData();
       setCommentBox("");
     });
@@ -59,7 +62,7 @@ const CommentSection = (props: CommentSectionProps) => {
         rows={3}
         value={commentBox}
         minLength={3}
-        placeholder="Type your comment"
+        placeholder={t("type_your_comment")}
         className="mt-4 border border-gray-500 rounded-lg p-4 focus:ring-primary-500"
         onChange={(e) => setCommentBox(e.target.value)}
       />
@@ -68,7 +71,7 @@ const CommentSection = (props: CommentSectionProps) => {
           onClick={onSubmitComment}
           className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
         >
-          Post Your Comment
+          {t("post_your_comment")}
         </Button>
       </div>
       <div className=" w-full">
@@ -92,10 +95,11 @@ const CommentSection = (props: CommentSectionProps) => {
               </div>
               <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">
                 <div className="flex justify-center items-center w-8 h-8 rounded-full bg-primary-700 uppercase text-white p-1">
-                  {comment.created_by_object?.first_name?.charAt(0) || "U"}
+                  {comment.created_by_object?.first_name?.charAt(0) ||
+                    t("unknown")}
                 </div>
                 <span className="text-gray-700 text-sm pl-2">
-                  {comment.created_by_object?.first_name || "Unknown"}{" "}
+                  {comment.created_by_object?.first_name || t("unknown")}{" "}
                   {comment.created_by_object?.last_name}
                 </span>
               </div>
