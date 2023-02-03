@@ -563,12 +563,20 @@ export const UserAdd = (props: UserProps) => {
           ) || "",
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
-        doctor_qualification: state.form.doctor_qualification,
-        doctor_experience_commenced_on: moment(
-          state.form.doctor_experience_commenced_on
-        ).format("YYYY-MM-DD"),
+        doctor_qualification:
+          state.form.user_type === "Doctor"
+            ? state.form.doctor_qualification
+            : undefined,
+        doctor_experience_commenced_on:
+          state.form.user_type === "Doctor"
+            ? moment(state.form.doctor_experience_commenced_on).format(
+                "YYYY-MM-DD"
+              )
+            : undefined,
         doctor_medical_council_registration:
-          state.form.doctor_medical_council_registration,
+          state.form.user_type === "Doctor"
+            ? state.form.doctor_medical_council_registration
+            : undefined,
       };
 
       const res = await dispatchAction(addUser(data));
