@@ -666,6 +666,16 @@ export const FacilityCreate = (props: FacilityProps) => {
     );
   }
 
+  const field = (name: string) => {
+    return {
+      name,
+      id: name,
+      value: (state.form as any)[name],
+      error: (state.errors as any)[name],
+      onChange: handleChange,
+    };
+  };
+
   switch (currentStep) {
     case 3:
       return (
@@ -755,47 +765,32 @@ export const FacilityCreate = (props: FacilityProps) => {
               <form onSubmit={(e) => handleSubmit(e)}>
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <SelectFormField
-                    name="facility_type"
-                    id="facility-type"
-                    label="Facility Type"
+                    {...field("facility_type")}
                     required
+                    label="Facility Type"
                     options={FACILITY_TYPES}
-                    value={state.form.facility_type}
                     optionLabel={(o) => o.text}
                     optionValue={(o) => o.text}
-                    onChange={handleChange}
-                    error={state.errors.facility_type}
                   />
                   <TextFormField
-                    id="facility-name"
-                    label="Facility Name"
-                    name="name"
+                    {...field("name")}
                     required
-                    onChange={handleChange}
-                    value={state.form.name}
-                    error={state.errors.name}
+                    label="Facility Name"
                   />
                   <MultiSelectFormField
-                    id="facility-features"
-                    name="features"
+                    {...field("features")}
                     label="Features"
                     placeholder="Features"
-                    value={state.form.features}
                     options={FACILITY_FEATURE_TYPES}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
-                    onChange={handleChange}
-                    error={state.errors.features}
                   />
                   <div>
                     <TextFormField
-                      id="facility-pincode"
-                      name="pincode"
+                      {...field("pincode")}
                       label="Pincode"
                       required
                       onChange={handlePincodeChange}
-                      value={state.form.pincode}
-                      error={state.errors.pincode}
                     />
                     {showAutoFilledPincode && (
                       <div>
@@ -807,47 +802,39 @@ export const FacilityCreate = (props: FacilityProps) => {
                     )}
                   </div>
                   <SelectFormField
-                    id="facility-state"
+                    {...field("state")}
+                    required
                     placeholder="Choose State"
-                    name="state"
                     className={isStateLoading ? "animate-pulse" : ""}
                     disabled={isStateLoading}
-                    required
                     label="State"
                     options={states}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
-                    value={state.form.state}
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
                       fetchDistricts(event.value);
                     }}
-                    error={state.errors.state}
                   />
                   <SelectFormField
-                    id="facility-district"
+                    {...field("district")}
                     placeholder="Choose District"
                     label="District"
                     required
-                    name="district"
                     className={isDistrictLoading ? "animate-pulse" : ""}
                     disabled={isDistrictLoading}
                     options={districts}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
-                    value={state.form.district}
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
                       fetchLocalBody(event.value);
                     }}
-                    error={state.errors.district}
                   />
-
                   <SelectFormField
-                    id="facility-localbody"
-                    name="local_body"
+                    {...field("local_body")}
                     label="Local Body"
                     required
                     className={isLocalbodyLoading ? "animate-pulse" : ""}
@@ -856,22 +843,18 @@ export const FacilityCreate = (props: FacilityProps) => {
                     options={localBodies}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
-                    value={state.form.local_body}
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
                       fetchWards(event.value);
                     }}
-                    error={state.errors.local_body}
                   />
-
                   <SelectFormField
-                    name="ward"
-                    label="Ward"
+                    {...field("ward")}
                     required
+                    label="Ward"
                     className={isWardLoading ? "animate-pulse" : ""}
                     disabled={isWardLoading}
-                    id="facility-ward"
                     placeholder="Choose Ward"
                     options={ward
                       .sort((a, b) => a.number - b.number)
@@ -883,114 +866,79 @@ export const FacilityCreate = (props: FacilityProps) => {
                       })}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
-                    value={state.form.ward}
-                    onChange={handleChange}
-                    error={state.errors.ward}
                   />
-
                   <TextAreaFormField
-                    id="facility-address"
-                    name="address"
+                    {...field("address")}
                     label="Address"
                     required
-                    onChange={handleChange}
-                    value={state.form.address}
-                    error={state.errors.address}
                   />
-
                   <PhoneNumberFormField
-                    name="phone_number"
+                    {...field("phone_number")}
                     label="Emergency Contact Number"
                     required
-                    value={state.form.phone_number}
-                    onChange={handleChange}
-                    error={state.errors.phone_number}
                     onlyIndia
                   />
-
                   <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 py-4">
                     <TextFormField
-                      id="facility-oxygen_capacity"
-                      name="oxygen_capacity"
+                      {...field("oxygen_capacity")}
+                      type="number"
                       label="Liquid Oxygen Capacity"
+                      required
                       trailingPadding=" "
                       trailing={
                         <p className="text-xs text-gray-700 mr-8">Litres</p>
                       }
-                      type="number"
-                      required
-                      onChange={handleChange}
-                      value={String(state.form.oxygen_capacity)}
                       min={0}
                     />
                     <TextFormField
-                      id="facility-expected_oxygen_requirement"
-                      name="expected_oxygen_requirement"
+                      {...field("expected_oxygen_requirement")}
+                      type="number"
+                      required
                       trailingPadding=" "
                       trailing={
                         <p className="text-xs text-gray-700 mr-8">Litres/day</p>
                       }
                       label="Expected Burn Rate"
-                      type="number"
-                      required
-                      onChange={handleChange}
-                      value={String(state.form.expected_oxygen_requirement)}
-                      error={state.errors.expected_oxygen_requirement}
                       min={0}
                     />
 
                     <TextFormField
-                      id="facility-type_b_cylinders"
-                      name="type_b_cylinders"
+                      {...field("type_b_cylinders")}
+                      type="number"
+                      required
                       label="B Type Cylinders"
-                      type="number"
-                      required
                       trailingPadding=" "
                       trailing={
                         <p className="text-xs text-gray-700 mr-8">Cylinders</p>
                       }
-                      onChange={handleChange}
-                      value={String(state.form.type_b_cylinders)}
-                      error={state.errors.type_b_cylinders}
                       min={0}
                     />
                     <TextFormField
-                      id="facility-expected_type_b_cylinders"
-                      name="expected_type_b_cylinders"
+                      {...field("expected_type_b_cylinders")}
                       type="number"
-                      label="Expected Burn Rate"
                       required
+                      label="Expected Burn Rate"
                       trailingPadding=" "
                       trailing={
                         <p className="text-xs text-gray-700 mr-8">
                           Cylinders/day
                         </p>
                       }
-                      onChange={handleChange}
-                      value={String(state.form.expected_type_b_cylinders)}
-                      error={state.errors.expected_type_b_cylinders}
                       min={0}
                     />
-
                     <TextFormField
-                      id="facility-type_c_cylinders"
-                      name="type_c_cylinders"
+                      {...field("type_c_cylinders")}
+                      type="number"
+                      required
                       label="C Type Cylinders"
-                      type="number"
-                      required
                       trailingPadding=" "
                       trailing={
                         <p className="text-xs text-gray-700 mr-8">Cylinders</p>
                       }
-                      onChange={handleChange}
-                      value={String(state.form.type_c_cylinders)}
-                      error={state.errors.type_c_cylinders}
                       min={0}
                     />
-
                     <TextFormField
-                      id="facility-expected_type_c_cylinders"
-                      name="expected_type_c_cylinders"
+                      {...field("expected_type_c_cylinders")}
                       type="number"
                       required
                       trailingPadding=" "
@@ -1000,30 +948,21 @@ export const FacilityCreate = (props: FacilityProps) => {
                         </p>
                       }
                       label="Expected Burn Rate"
-                      onChange={handleChange}
-                      value={String(state.form.expected_type_c_cylinders)}
-                      error={state.errors.expected_type_c_cylinders}
                       min={0}
                     />
-
                     <TextFormField
-                      id="facility-type_d_cylinders"
-                      name="type_d_cylinders"
+                      {...field("type_d_cylinders")}
                       type="number"
+                      required
                       label="D Type Cylinders"
-                      required
                       trailingPadding=" "
                       trailing={
                         <p className="text-xs text-gray-700 mr-8">Cylinders</p>
                       }
-                      onChange={handleChange}
-                      value={String(state.form.type_d_cylinders)}
-                      error={state.errors.type_d_cylinders}
                       min={0}
                     />
                     <TextFormField
-                      id="facility-expected_type_d_cylinders"
-                      name="expected_type_d_cylinders"
+                      {...field("expected_type_d_cylinders")}
                       type="number"
                       required
                       label="Expected Burn Rate"
@@ -1033,37 +972,27 @@ export const FacilityCreate = (props: FacilityProps) => {
                           Cylinders/day
                         </p>
                       }
-                      onChange={handleChange}
-                      value={String(state.form.expected_type_d_cylinders)}
-                      error={state.errors.expected_type_d_cylinders}
                       min={0}
                     />
                   </div>
 
                   {kasp_enabled && (
                     <RadioFormField
+                      {...field("kasp_empanelled")}
                       label={`Is this facility ${kasp_string} empanelled?`}
-                      name="kasp_empanelled"
-                      onChange={handleChange}
                       options={[true, false]}
                       optionDisplay={(o) => (o ? "Yes" : "No")}
                       optionValue={(o) => String(o)}
-                      value={state.form.kasp_empanelled}
-                      error={state.errors.kasp_empanelled}
                     />
                   )}
                 </div>
 
                 <div className="flex gap-2 items-center">
                   <TextFormField
-                    id="facility-latitude"
                     className="flex-1 px-2"
-                    name="latitude"
+                    {...field("latitude")}
                     label="Location"
                     placeholder="Latitude"
-                    value={state.form.latitude}
-                    onChange={handleChange}
-                    error={state.errors.latitude}
                   />
 
                   <div className="flex flex-col justify-center md:block">
@@ -1105,14 +1034,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                     </Popover>
                   </div>
                   <TextFormField
-                    label={<br />}
-                    id="facility-longitude"
                     className="flex-1 px-2"
-                    name="longitude"
+                    {...field("longitude")}
+                    label={<br />}
                     placeholder="Longitude"
-                    value={state.form.longitude}
-                    onChange={handleChange}
-                    error={state.errors.longitude}
                   />
                 </div>
                 <div className="mt-12 flex flex-col-reverse sm:flex-row gap-3 justify-end">
