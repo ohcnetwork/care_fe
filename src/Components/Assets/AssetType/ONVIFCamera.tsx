@@ -122,7 +122,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           )
         )
       );
-      setLoadingAddPreset(false);
       if (res?.status === 201) {
         Notification.Success({
           msg: "Preset Added Successfully",
@@ -140,6 +139,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         msg: "Something went wrong..!",
       });
     }
+    setLoadingAddPreset(false);
   };
 
   if (isLoading) return <Loading />;
@@ -190,7 +190,11 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           />
         </div>
         <div className="flex justify-end">
-          <Submit className="w-full md:w-auto" label="Set Configuration" />
+          <Submit
+            disabled={loadingSetConfiguration}
+            className="w-full md:w-auto"
+            label="Set Configuration"
+          />
         </div>
       </form>
 
