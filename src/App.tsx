@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getConfig, getCurrentUser } from "./Redux/actions";
 import { useAbortableEffect, statusType } from "./Common/utils";
 import axios from "axios";
+import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
 
 const Loading = loadable(() => import("./Components/Common/Loading"));
 
@@ -57,6 +58,17 @@ const App: React.FC = () => {
     [dispatch]
   );
 
+  useEffect(() => {
+    const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+    const favicon: any = document.querySelector("link[rel~='icon']");
+    console.log(favicon);
+    if (darkThemeMq.matches) {
+      favicon.href = "/favicon-light.ico";
+    } else {
+      favicon.href = "/favicon-dark.ico";
+    }
+  }, []);
+
   if (
     !currentUser ||
     currentUser.isFetching ||
@@ -68,7 +80,11 @@ const App: React.FC = () => {
   }
 
   if (currentUser?.data) {
-    return <AppRouter />;
+    return (
+      <HistoryAPIProvider>
+        <AppRouter />
+      </HistoryAPIProvider>
+    );
   } else {
     return <SessionRouter />;
   }

@@ -8,18 +8,19 @@ import {
   partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
-import { ErrorHelperText } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import { FieldLabel } from "../Form/FormFields/FormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { handleSignOut } from "../../Utils/utils";
+import { getExperienceSuffix, handleSignOut } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import MonthFormField from "../Form/FormFields/Month";
+import moment from "moment";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -31,6 +32,9 @@ type EditForm = {
   email: string;
   phoneNumber: string;
   altPhoneNumber: string;
+  doctor_qualification: string | undefined;
+  doctor_experience_commenced_on: string | undefined;
+  doctor_medical_council_registration: string | undefined;
 };
 type State = {
   form: EditForm;
@@ -48,6 +52,9 @@ const initForm: EditForm = {
   email: "",
   phoneNumber: "",
   altPhoneNumber: "",
+  doctor_qualification: undefined,
+  doctor_experience_commenced_on: undefined,
+  doctor_medical_council_registration: undefined,
 };
 
 const initError: EditForm = Object.assign(
@@ -127,6 +134,11 @@ export default function UserProfile() {
             email: res.data.email,
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
+            doctor_qualification: res.data.doctor_qualification,
+            doctor_experience_commenced_on:
+              res.data.doctor_experience_commenced_on,
+            doctor_medical_council_registration:
+              res.data.doctor_medical_council_registration,
           };
           dispatch({
             type: "set_form",
@@ -216,15 +228,35 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
+        case "doctor_qualification":
+        case "doctor_experience_commenced_on":
+        case "doctor_medical_council_registration":
+          if (details.user_type === "Doctor" && !states.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
       }
     });
     dispatch({ type: "set_error", errors });
     return !invalidForm;
   };
 
-  const handleValueChange = (value: any, name: string) => {
-    const form: EditForm = { ...states.form, [name]: value };
-    dispatch({ type: "set_form", form });
+  const handleFieldChange = (event: FieldChangeEvent<unknown>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...states.form, [event.name]: event.value },
+    });
+  };
+
+  const fieldProps = (name: string) => {
+    return {
+      name,
+      id: name,
+      value: (states.form as any)[name],
+      onChange: handleFieldChange,
+      error: (states.errors as any)[name],
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -245,6 +277,12 @@ export default function UserProfile() {
           ) || "",
         gender: states.form.gender,
         age: states.form.age,
+        doctor_qualification: states.form.doctor_qualification,
+        doctor_experience_commenced_on: moment(
+          states.form.doctor_experience_commenced_on
+        ).format("YYYY-MM-DD"),
+        doctor_medical_council_registration:
+          states.form.doctor_medical_council_registration,
       };
       const res = await dispatchAction(partialUpdateUser(username, data));
       if (res && res.data) {
@@ -438,103 +476,100 @@ export default function UserProfile() {
             )}
 
             {showEdit && (
-              <div>
+              <div className="space-y-4">
                 <form action="#" method="POST">
-                  <div className="shadow overflow-hidden sm:rounded-md">
+                  <div className="shadow sm:rounded-md">
                     <div className="px-4 pt-5 bg-white">
                       <div className="grid grid-cols-6 gap-4">
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextFormField
-                            name="firstName"
-                            label="First Name"
-                            value={states.form.firstName}
-                            onChange={(e) => handleValueChange(e, "firstName")}
-                            error={states.errors.firstName}
-                            required
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextFormField
-                            name="lastName"
-                            label="Last name"
-                            value={states.form.lastName}
-                            onChange={(e) => handleValueChange(e, "lastName")}
-                            error={states.errors.lastName}
-                            required
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextFormField
-                            name="age"
-                            label="Age"
-                            value={states.form.age}
-                            onChange={(e) => handleValueChange(e, "age")}
-                            error={states.errors.age}
-                            required
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <FieldLabel className="text-sm">Gender</FieldLabel>
-                          <SelectMenuV2
-                            required
-                            placeholder="Select"
-                            optionLabel={(o) => o.text}
-                            optionValue={(o) => o.text}
-                            optionIcon={(o) => (
-                              <i className="text-base">{o.icon}</i>
-                            )}
-                            value={states.form.gender}
-                            options={GENDER_TYPES}
-                            onChange={(v) => {
-                              dispatch({
-                                type: "set_form",
-                                form: {
-                                  ...states.form,
-                                  gender: v,
-                                },
-                              });
-                            }}
-                          />
-                          <ErrorHelperText error={states.errors.gender} />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <PhoneNumberFormField
-                            label="Phone Number"
-                            required
-                            name="phoneNumber"
-                            placeholder="Phone Number"
-                            value={states.form.phoneNumber}
-                            onChange={(event) =>
-                              handleValueChange(event.value, event.name)
-                            }
-                            error={states.errors.phoneNumber}
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <PhoneNumberFormField
-                            name="altPhoneNumber"
-                            label="Whatsapp Number"
-                            placeholder="WhatsApp Number"
-                            value={states.form.altPhoneNumber}
-                            onChange={(event) =>
-                              handleValueChange(event.value, event.name)
-                            }
-                            error={states.errors.altPhoneNumber}
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextFormField
-                            name="email"
-                            label="Email"
-                            value={states.form.email}
-                            onChange={(e) => handleValueChange(e, "email")}
-                            error={states.errors.email}
-                          />
-                        </div>
+                        <TextFormField
+                          {...fieldProps("firstName")}
+                          required
+                          label="First Name"
+                          className="col-span-6 sm:col-span-3"
+                        />
+                        <TextFormField
+                          {...fieldProps("lastName")}
+                          required
+                          label="Last name"
+                          className="col-span-6 sm:col-span-3"
+                        />
+                        <TextFormField
+                          {...fieldProps("age")}
+                          required
+                          label="Age"
+                          className="col-span-6 sm:col-span-3"
+                          type="number"
+                          min={1}
+                        />
+                        <SelectFormField
+                          {...fieldProps("gender")}
+                          label="Gender"
+                          className="col-span-6 sm:col-span-3"
+                          required
+                          optionLabel={(o) => o.text}
+                          optionValue={(o) => o.text}
+                          optionIcon={(o) => (
+                            <i className="text-base">{o.icon}</i>
+                          )}
+                          options={GENDER_TYPES}
+                        />
+                        <PhoneNumberFormField
+                          {...fieldProps("phoneNumber")}
+                          label="Phone Number"
+                          className="col-span-6 sm:col-span-3"
+                          required
+                          placeholder="Phone Number"
+                        />
+                        <PhoneNumberFormField
+                          {...fieldProps("altPhoneNumber")}
+                          label="Whatsapp Number"
+                          className="col-span-6 sm:col-span-3"
+                          placeholder="WhatsApp Number"
+                        />
+                        <TextFormField
+                          {...fieldProps("email")}
+                          label="Email"
+                          className="col-span-6 sm:col-span-3"
+                          type="email"
+                        />
+                        {details.user_type === "Doctor" && (
+                          <>
+                            <TextFormField
+                              {...fieldProps("doctor_qualification")}
+                              required
+                              className="col-span-6 sm:col-span-3"
+                              label="Qualification"
+                              placeholder="Doctor's Qualification"
+                            />
+                            <MonthFormField
+                              {...fieldProps("doctor_experience_commenced_on")}
+                              value={
+                                states.form.doctor_experience_commenced_on
+                                  ? moment(
+                                      states.form.doctor_experience_commenced_on
+                                    ).toDate()
+                                  : undefined
+                              }
+                              required
+                              className="col-span-6 sm:col-span-3"
+                              label="Experience Commenced On"
+                              suffix={(date) => (
+                                <span className="ml-2 text-sm whitespace-nowrap">
+                                  {getExperienceSuffix(date)}
+                                </span>
+                              )}
+                            />
+                            <TextFormField
+                              {...fieldProps(
+                                "doctor_medical_council_registration"
+                              )}
+                              required
+                              className="col-span-6 sm:col-span-3"
+                              label="Medical Council Registration"
+                              placeholder="Doctor's Medical Council Registration"
+                            />
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
@@ -546,53 +581,50 @@ export default function UserProfile() {
                   <div className="shadow overflow-hidden sm:rounded-md">
                     <div className="px-4 pt-5 bg-white">
                       <div className="grid grid-cols-6 gap-4">
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextFormField
-                            name="old_password"
-                            label="Current Password"
-                            type="password"
-                            value={changePasswordForm.old_password}
-                            onChange={(e) =>
-                              setChangePasswordForm({
-                                ...changePasswordForm,
-                                old_password: e.value,
-                              })
-                            }
-                            error={changePasswordErrors.old_password}
-                            required
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextFormField
-                            name="new_password_1"
-                            label="New Password"
-                            type="password"
-                            value={changePasswordForm.new_password_1}
-                            onChange={(e) =>
-                              setChangePasswordForm({
-                                ...changePasswordForm,
-                                new_password_1: e.value,
-                              })
-                            }
-                            error=""
-                            required
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextFormField
-                            name="new_password_2"
-                            label="New Password Confirmation"
-                            type="password"
-                            value={changePasswordForm.new_password_2}
-                            onChange={(e) =>
-                              setChangePasswordForm({
-                                ...changePasswordForm,
-                                new_password_2: e.value,
-                              })
-                            }
-                            error={changePasswordErrors.password_confirmation}
-                          />
-                        </div>
+                        <TextFormField
+                          name="old_password"
+                          label="Current Password"
+                          className="col-span-6 sm:col-span-3"
+                          type="password"
+                          value={changePasswordForm.old_password}
+                          onChange={(e) =>
+                            setChangePasswordForm({
+                              ...changePasswordForm,
+                              old_password: e.value,
+                            })
+                          }
+                          error={changePasswordErrors.old_password}
+                          required
+                        />
+                        <TextFormField
+                          name="new_password_1"
+                          label="New Password"
+                          type="password"
+                          value={changePasswordForm.new_password_1}
+                          className="col-span-6 sm:col-span-3"
+                          onChange={(e) =>
+                            setChangePasswordForm({
+                              ...changePasswordForm,
+                              new_password_1: e.value,
+                            })
+                          }
+                          error=""
+                          required
+                        />
+                        <TextFormField
+                          name="new_password_2"
+                          label="New Password Confirmation"
+                          className="col-span-6 sm:col-span-3"
+                          type="password"
+                          value={changePasswordForm.new_password_2}
+                          onChange={(e) =>
+                            setChangePasswordForm({
+                              ...changePasswordForm,
+                              new_password_2: e.value,
+                            })
+                          }
+                          error={changePasswordErrors.password_confirmation}
+                        />
                       </div>
                     </div>
                     <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">

@@ -1,4 +1,5 @@
 import { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { AssignedToObjectModel } from "../Patient/models";
 
 export interface LocalBodyModel {
@@ -113,6 +114,7 @@ export interface ConsultationModel {
   is_telemedicine?: boolean;
   discharge_advice?: any;
   prn_prescription?: PRNPrescriptionType[];
+  procedure?: ProcedureType[];
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;

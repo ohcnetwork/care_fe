@@ -49,6 +49,7 @@ const AssetsList = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
+  const [asset_class, setAssetClass] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const dispatch: any = useDispatch();
@@ -68,6 +69,7 @@ const AssetsList = () => {
         search_text: qParams.search || "",
         facility: qParams.facility,
         asset_type: qParams.asset_type,
+        asset_class: qParams.asset_class,
         location: qParams.location,
         status: qParams.status,
       };
@@ -90,6 +92,7 @@ const AssetsList = () => {
       qParams.search,
       qParams.facility,
       qParams.asset_type,
+      qParams.asset_class,
       qParams.location,
       qParams.status,
     ]
@@ -98,6 +101,10 @@ const AssetsList = () => {
   useEffect(() => {
     setAssetType(qParams.asset_type);
   }, [qParams.asset_type]);
+
+  useEffect(() => {
+    setAssetClass(qParams.asset_class);
+  }, [qParams.asset_class]);
 
   useAbortableEffect(
     (status: statusType) => {
@@ -380,6 +387,7 @@ const AssetsList = () => {
               value("Facility", ["facility", "location"], facility?.name || ""),
               badge("Name", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
+              value("Asset Class", "asset_class", asset_class || ""),
               badge("Status", "status"),
               value("Location", "location", locationName || ""),
             ]}

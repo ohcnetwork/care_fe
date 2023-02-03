@@ -5,9 +5,7 @@ import { SelectField } from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
-  KASP_STRING,
   BREATHLESSNESS_LEVEL,
-  KASP_ENABLED,
 } from "../../Common/constants";
 import moment from "moment";
 import { getAnyFacility, getUserList } from "../../Redux/actions";
@@ -20,10 +18,12 @@ import parsePhoneNumberFromString from "libphonenumber-js";
 import useMergeState from "../../Common/hooks/useMergeState";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import useConfig from "../../Common/hooks/useConfig";
 
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
+  const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
@@ -374,9 +374,9 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        {KASP_ENABLED && (
+        {kasp_enabled && (
           <div className="w-full flex-none">
-            <span className="text-sm font-semibold">Is {KASP_STRING}</span>
+            <span className="text-sm font-semibold">Is {kasp_string}</span>
             <SelectField
               name="is_kasp"
               variant="outlined"

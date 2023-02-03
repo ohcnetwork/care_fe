@@ -55,7 +55,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     }
   };
   return (
-    <Fragment>
+    <div className="mb-5">
       <Card>
 
         <form onSubmit={handleSubmit}>
@@ -103,6 +103,6 @@ export default function CameraConfigure(props: CameraConfigureProps) {
           />
         </CardContent>
       </Card>
-    </Fragment>
+    </div>
   );
 }
