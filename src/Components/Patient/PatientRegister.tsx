@@ -71,6 +71,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useConfig from "../../Common/hooks/useConfig";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -188,7 +189,7 @@ const patientFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const scrollTo = (id: any) => {
+const scrollTo = (id: string | boolean) => {
   const element = document.querySelector(`#${id}-div`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
@@ -653,6 +654,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
+
+        case "date_of_result":
+          if (state.form[field] < state.form.date_of_test) {
+            errors[field] =
+              "Date should not be before the date of sample collection";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         case "disease_status":
           if (state.form[field] === "POSITIVE") {
             if (!state.form.date_of_test) {
@@ -759,7 +769,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : undefined,
         date_declared_positive:
           JSON.parse(state.form.is_declared_positive) &&
-          state.form.date_declared_positive
+            state.form.date_declared_positive
             ? state.form.date_declared_positive
             : null,
         test_id: state.form.test_id,
@@ -773,8 +783,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             : Number("0"),
         vaccine_name:
           state.form.vaccine_name &&
-          state.form.vaccine_name !== "Select" &&
-          state.form.is_vaccinated === "true"
+            state.form.vaccine_name !== "Select" &&
+            state.form.is_vaccinated === "true"
             ? state.form.vaccine_name
             : null,
         last_vaccinated_date:
@@ -807,8 +817,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         permanent_address: sameAddress
           ? state.form.address
           : state.form.permanent_address
-          ? state.form.permanent_address
-          : undefined,
+            ? state.form.permanent_address
+            : undefined,
         present_health: state.form.present_health
           ? state.form.present_health
           : undefined,
@@ -821,13 +831,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         estimated_contact_date:
           (JSON.parse(state.form.contact_with_confirmed_carrier) ||
             JSON.parse(state.form.contact_with_suspected_carrier)) &&
-          state.form.estimated_contact_date
+            state.form.estimated_contact_date
             ? state.form.estimated_contact_date
             : null,
         cluster_name:
           (JSON.parse(state.form.contact_with_confirmed_carrier) ||
             JSON.parse(state.form.contact_with_suspected_carrier)) &&
-          state.form.cluster_name
+            state.form.cluster_name
             ? state.form.cluster_name
             : null,
         allergies: state.form.allergies,
@@ -908,7 +918,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleDateChange = (date: any, field: string) => {
+  const handleDateChange = (date: MaterialUiPickersDate, field: string) => {
     if (moment(date).isValid()) {
       const form = { ...state.form };
       form[field] = date;
@@ -939,8 +949,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           const duplicateList = !id
             ? res.data.results
             : res.data.results.filter(
-                (item: DupPatientModel) => item.patient_id !== id
-              );
+              (item: DupPatientModel) => item.patient_id !== id
+            );
           if (duplicateList.length) {
             setStatusDialog({
               show: true,
@@ -1894,7 +1904,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_result")
                               }
-                              min={state.form.date_of_test}
                               errors={state.errors.date_of_result}
                               inputVariant="outlined"
                               margin="dense"

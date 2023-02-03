@@ -11,6 +11,8 @@ export function PrescriptionDropdown(props: {
   type?: "string" | "number";
   min?: number;
   className?: string;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) {
   const { options, tips, value, setValue } = props;
   const [open, setOpen] = useState(false);
@@ -43,6 +45,8 @@ export function PrescriptionDropdown(props: {
         onChange={(e) => setValue(e.target.value)}
         required
         min={props.min}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
       />
       <div
         ref={dropRef}

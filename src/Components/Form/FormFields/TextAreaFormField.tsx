@@ -1,9 +1,5 @@
 import FormField from "./FormField";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-  resolveFormFieldError,
-} from "./Utils";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
@@ -14,24 +10,21 @@ type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
 };
 
 const TextAreaFormField = ({ rows = 3, ...props }: TextAreaFormFieldProps) => {
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-  const error = resolveFormFieldError(props);
-
+  const field = useFormFieldPropsResolver(props as any);
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <textarea
-        id={props.id}
-        className={`cui-input-base resize-none ${error && "border-danger-500"}`}
-        disabled={props.disabled}
-        rows={rows}
+        id={field.id}
+        disabled={field.disabled}
+        name={field.name}
+        value={field.value}
+        required={field.required}
+        onChange={(e) => field.handleChange(e.target.value)}
         placeholder={props.placeholder}
-        name={props.name}
-        value={props.value}
-        required={props.required}
-        onChange={(event) => {
-          event.preventDefault();
-          handleChange(event.target);
-        }}
+        rows={rows}
+        className={`cui-input-base resize-none ${
+          field.error && "border-danger-500"
+        }`}
       />
     </FormField>
   );
