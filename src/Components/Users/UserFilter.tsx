@@ -123,6 +123,7 @@ export default function UserFilter(props: any) {
         <div className="w-full flex-none">
           <FieldLabel className="text-sm">Role</FieldLabel>
           <SelectMenuV2
+            id="role"
             placeholder="Show all"
             options={USER_TYPE_OPTIONS}
             optionLabel={(o) => o.role + ((o.readOnly && " (Read Only)") || "")}

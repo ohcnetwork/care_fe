@@ -10,10 +10,10 @@ import MonitorConfigure from "../configure/MonitorConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import Card from "../../../CAREUI/display/Card";
-import TextInputFieldV2 from "../../Common/components/TextInputFieldV2";
 import { Submit } from "../../Common/components/ButtonV2";
 import PatientVitalsCard from "../../Patient/PatientVitalsCard";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import TextFormField from "../../Form/FormFields/TextFormField";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -89,15 +89,17 @@ const HL7Monitor = (props: HL7MonitorProps) => {
             <form onSubmit={handleSubmit}>
               <h2 className="text-lg font-bold mb-2">Connection</h2>
               <div>
-                <TextInputFieldV2
+                <TextFormField
+                  name="middlewareHostname"
                   label="Middleware Hostname"
                   value={middlewareHostname}
-                  onChange={(e) => setMiddlewareHostname(e.target.value)}
+                  onChange={(e) => setMiddlewareHostname(e.value)}
                 />
-                <TextInputFieldV2
+                <TextFormField
+                  name="localipAddress"
                   label="Local IP Address"
                   value={localipAddress}
-                  onChange={(e) => setLocalIPAddress(e.target.value)}
+                  onChange={(e) => setLocalIPAddress(e.value)}
                   required
                   error={ipadrdress_error}
                 />

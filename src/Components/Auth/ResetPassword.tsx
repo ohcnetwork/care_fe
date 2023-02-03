@@ -139,11 +139,11 @@ export const ResetPassword = (props: any) => {
                   <ExpansionPanel>
                     <ExpansionPanelDetails>
                       <Typography className="text-red-500">
-                        <li>Minimum password length 8</li>
-                        <li>Require at least one digit</li>
-                        <li>Require at least one upper case</li>
-                        <li>Require at least one lower case letter</li>
-                        <li>Require at least one symbol</li>
+                        <li>{t("min_password_len_8")}</li>
+                        <li>{t("req_atleast_one_digit")}</li>
+                        <li>{t("req_atleast_one_uppercase")}</li>
+                        <li>{t("req_atleast_one_lowercase")}</li>
+                        <li>{t("req_atleast_one_symbol")}</li>
                       </Typography>
                     </ExpansionPanelDetails>
                   </ExpansionPanel>

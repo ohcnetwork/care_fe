@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 ENV_FILE=config_temp.json
 ENV_PREFIX="CARE_FE__"
@@ -36,5 +36,5 @@ echo "Copying $ENV_FILE to config.json"
 # cp $ENV_FILE config.json
 if ! cp /usr/share/nginx/html/$ENV_FILE /usr/share/nginx/html/config.json; then
   >&2 echo "Error: Failed to update the final configuration file."
-  exit 1
 fi
+exit 0

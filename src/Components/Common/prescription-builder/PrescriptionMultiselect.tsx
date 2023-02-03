@@ -8,6 +8,8 @@ export function PrescriptionMultiDropdown(props: {
   placeholder?: string;
   type?: "string" | "number";
   min?: number;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) {
   const { options, selectedValues, setSelectedValues } = props;
   const [open, setOpen] = useState(false);
@@ -33,7 +35,7 @@ export function PrescriptionMultiDropdown(props: {
   return (
     <div className="w-full relative">
       <div className="flex gap-1 flex-wrap my-2">
-        {selectedValues.length > 0 ? (
+        {selectedValues.length > 0 &&
           selectedValues.map((selectedValue, i) => {
             return (
               <div
@@ -53,10 +55,7 @@ export function PrescriptionMultiDropdown(props: {
                 </button>
               </div>
             );
-          })
-        ) : (
-          <div className="my-1 text-red-400">Nothing selected</div>
-        )}
+          })}
       </div>
 
       <input
@@ -65,6 +64,8 @@ export function PrescriptionMultiDropdown(props: {
         onClick={() => setOpen(!open)}
         value={value}
         onChange={(e) => setValue(e.target.value)}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
       />
       <div
         ref={dropRef}

@@ -73,8 +73,22 @@ const routes: Routes = {
     method: "PUT",
   },
 
+  addUserSkill: {
+    path: "/api/v1/users/{username}/skill/",
+    method: "POST",
+  },
+
+  getUserSkills: {
+    path: "/api/v1/users/{username}/skill/",
+  },
+
   deleteUserFacility: {
     path: "/api/v1/users/{username}/delete_facility/",
+    method: "DELETE",
+  },
+
+  deleteUserSkill: {
+    path: "/api/v1/users/{username}/skill/{id}/",
     method: "DELETE",
   },
 
@@ -119,6 +133,12 @@ const routes: Routes = {
   updateUserPnconfig: {
     path: "/api/v1/users/{username}/pnconfig/",
     method: "PATCH",
+  },
+
+  // Skill Endpoints
+
+  getAllSkills: {
+    path: "/api/v1/skill/",
   },
 
   // Facility Endpoints
