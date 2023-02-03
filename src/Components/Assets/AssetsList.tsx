@@ -343,7 +343,7 @@ const AssetsList = () => {
             name="search"
             value={qParams.search}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder="Search assets"
+            placeholder="Search by name/serial no./QR code ID"
           />
         </div>
         <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
@@ -385,7 +385,7 @@ const AssetsList = () => {
           <FilterBadges
             badges={({ badge, value }) => [
               value("Facility", ["facility", "location"], facility?.name || ""),
-              badge("Name", "search"),
+              badge("Name/Serial No./QR ID", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
               value("Asset Class", "asset_class", asset_class || ""),
               badge("Status", "status"),
