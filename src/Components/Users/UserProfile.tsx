@@ -279,17 +279,17 @@ export default function UserProfile() {
         age: states.form.age,
         doctor_qualification:
           details.user_type === "Doctor"
-            ? state.form.doctor_qualification
+            ? states.form.doctor_qualification
             : undefined,
         doctor_experience_commenced_on:
           details.user_type === "Doctor"
-            ? moment(state.form.doctor_experience_commenced_on).format(
+            ? moment(states.form.doctor_experience_commenced_on).format(
                 "YYYY-MM-DD"
               )
             : undefined,
         doctor_medical_council_registration:
           details.user_type === "Doctor"
-            ? state.form.doctor_medical_council_registration
+            ? states.form.doctor_medical_council_registration
             : undefined,
       };
       const res = await dispatchAction(partialUpdateUser(username, data));
