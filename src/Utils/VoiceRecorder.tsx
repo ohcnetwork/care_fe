@@ -24,9 +24,6 @@ export const VoiceRecorder = (props: any) => {
 
   return (
     <div>
-      <div className="text-xs">
-        Please allow browser permission before you start speaking
-      </div>
       <div>
         {isRecording ? (
           <>
@@ -46,10 +43,14 @@ export const VoiceRecorder = (props: any) => {
             </div>
           </>
         ) : (
-          <ButtonV2 onClick={startRecording}>
-            <CareIcon className={"care-l-microphone text-lg"} />
-            {audioURL ? "Re-Record" : "Record"}
-          </ButtonV2>
+          <div>
+            {!audioURL && (
+              <ButtonV2 onClick={startRecording}>
+                <CareIcon className={"care-l-microphone text-lg"} />
+                Record
+              </ButtonV2>
+            )}
+          </div>
         )}
       </div>
       {audioURL && (
