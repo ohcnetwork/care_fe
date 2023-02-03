@@ -47,17 +47,17 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
 
   return (
     <div key={`usr_${facility.id}`} className="w-full">
-      <div className="block rounded-lg overflow-clip bg-white shadow h-full hover:border-primary-500">
+      <div className="block rounded-lg h-full overflow-clip bg-white shadow hover:border-primary-500">
         <div className="flex h-full">
           <Link
             href={`/facility/${facility.id}`}
-            className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0"
+            className="group md:flex hidden w-1/4 self-stretch bg-gray-300 items-center justify-center relative z-0"
           >
             {(facility.read_cover_image_url && (
               <img
                 src={facility.read_cover_image_url}
                 alt={facility.name}
-                className="w-full h-full object-cover"
+                className="w-full h-[210px] object-cover"
               />
             )) || (
               <i className="fas fa-hospital text-4xl block text-gray-500" />
@@ -66,13 +66,13 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
           <div className="h-full w-full grow">
             <Link
               href={`/facility/${facility.id}`}
-              className="group md:hidden flex w-full self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0"
+              className="group md:hidden flex w-full self-stretch bg-gray-300 items-center justify-center relative z-0"
             >
               {(facility.read_cover_image_url && (
                 <img
                   src={facility.read_cover_image_url}
                   alt={facility.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full max-h-32 object-cover"
                 />
               )) || (
                 <i className="fas fa-hospital text-4xl block text-gray-500 p-10" />
