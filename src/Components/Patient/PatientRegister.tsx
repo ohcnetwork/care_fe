@@ -70,6 +70,8 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import useConfig from "../../Common/hooks/useConfig";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -187,12 +189,13 @@ const patientFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const scrollTo = (id: any) => {
+const scrollTo = (id: string | boolean) => {
   const element = document.querySelector(`#${id}-div`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
+  const { gov_data_api_key } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -651,6 +654,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
+
+        case "date_of_result":
+          if (state.form[field] < state.form.date_of_test) {
+            errors[field] =
+              "Date should not be before the date of sample collection";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         case "disease_status":
           if (state.form[field] === "POSITIVE") {
             if (!state.form.date_of_test) {
@@ -686,7 +698,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
     if (!validatePincode(e.target.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(e.target.value);
+    const pincodeDetails = await getPincodeDetails(
+      e.target.value,
+      gov_data_api_key
+    );
     if (!pincodeDetails) return;
 
     const matchedState = states.find((state) => {
@@ -903,7 +918,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleDateChange = (date: any, field: string) => {
+  const handleDateChange = (date: MaterialUiPickersDate, field: string) => {
     if (moment(date).isValid()) {
       const form = { ...state.form };
       form[field] = date;
@@ -1012,9 +1027,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <PageTitle
         title={headerText}
         className="mb-11"
-        backButtonCB={() => {
+        onBackClick={() => {
           if (showImport) {
             setShowImport(false);
+            return false;
           }
         }}
         crumbsReplacements={{
@@ -1888,7 +1904,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_result")
                               }
-                              min={state.form.date_of_test}
                               errors={state.errors.date_of_result}
                               inputVariant="outlined"
                               margin="dense"
