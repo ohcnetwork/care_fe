@@ -5,7 +5,7 @@ import { AutocompleteMutliSelect } from "../Form/FormFields/AutocompleteMultisel
 import FormField from "../Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
+  useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 
 type Props =
@@ -13,9 +13,7 @@ type Props =
   { multiple: true } & FormFieldBaseProps<ICD11DiagnosisModel[]>;
 
 export function DiagnosisSelectFormField(props: Props) {
-  const { name } = props;
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-
+  const field = useFormFieldPropsResolver(props);
   const { fetchOptions, isLoading, options } =
     useAsyncOptions<ICD11DiagnosisModel>("id");
 
@@ -28,17 +26,17 @@ export function DiagnosisSelectFormField(props: Props) {
   }
 
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <AutocompleteMutliSelect
-        id={props.id}
-        disabled={props.disabled}
-        value={props.value || []}
+        id={field.id}
+        disabled={field.disabled}
+        value={field.value || []}
+        onChange={field.handleChange}
         options={options(props.value)}
         optionLabel={(option) => option.label}
         optionValue={(option) => option}
         onQuery={(query) => fetchOptions(listICD11Diagnosis({ query }, ""))}
         isLoading={isLoading}
-        onChange={(value) => handleChange({ name, value })}
       />
     </FormField>
   );
