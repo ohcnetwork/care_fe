@@ -246,6 +246,8 @@ export const SYMPTOM_CHOICES = [
   { id: 20, text: "WOUND" },
   { id: 21, text: "CONSTIPATION" },
   { id: 22, text: "HEAD ACHE" },
+  { id: 23, text: "BLEEDING" },
+  { id: 24, text: "DIZZINESS" },
 ];
 
 export const DISCHARGE_REASONS = [
