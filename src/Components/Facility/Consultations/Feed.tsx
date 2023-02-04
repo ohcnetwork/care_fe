@@ -364,50 +364,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="px-2 flex flex-col h-[calc(100vh-1.5rem)]">
-      <div className="flex items-center flex-wrap justify-between gap-2">
-        <div className="flex items-center gap-4 px-3">
-          <p className="block text-lg font-medium"> Camera Presets :</p>
-          <div className="flex items-center">
-            {bedPresets?.map((preset: any, index: number) => (
-              <button
-                key={preset.id}
-                onClick={() => {
-                  setLoading(CAMERA_STATES.MOVING.GENERIC);
-                  // gotoBedPreset(preset);
-                  absoluteMove(preset.meta.position, {
-                    onSuccess: () => {
-                      setLoading(CAMERA_STATES.IDLE);
-                      setCurrentPreset(preset);
-                      console.log(
-                        "onSuccess: Set Preset to " + preset?.meta?.preset_name
-                      );
-                    },
-                    onError: () => {
-                      setLoading(CAMERA_STATES.IDLE);
-                      setCurrentPreset(preset);
-                      console.log(
-                        "onError: Set Preset to " + preset?.meta?.preset_name
-                      );
-                    },
-                  });
-                  getCameraStatus({});
-                }}
-                className={classNames(
-                  "px-4 py-2 border border-gray-500 block",
-                  currentPreset === preset
-                    ? "bg-primary-500 border-primary-500 text-white rounded"
-                    : "bg-transparent"
-                )}
-              >
-                {preset.meta.preset_name || `Preset ${index + 1}`}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+    <div className="px-2 flex flex-col lg:flex-row w-full">
       <div
-        className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden"
+        className="bg-black w-full h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden"
         ref={videoWrapper}
       >
         {isIOS ? (
@@ -569,6 +528,49 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
 
             return out;
           })}
+        </div>
+      </div>
+      <div className="">
+        <div className="flex items-center justify-center gap-4 px-3 flex-col">
+          <p className="block text-lg font-medium whitespace-nowrap text-center">
+            Camera Presets
+          </p>
+          <div className="flex items-center flex-col">
+            {bedPresets?.map((preset: any, index: number) => (
+              <button
+                key={preset.id}
+                onClick={() => {
+                  setLoading(CAMERA_STATES.MOVING.GENERIC);
+                  // gotoBedPreset(preset);
+                  absoluteMove(preset.meta.position, {
+                    onSuccess: () => {
+                      setLoading(CAMERA_STATES.IDLE);
+                      setCurrentPreset(preset);
+                      console.log(
+                        "onSuccess: Set Preset to " + preset?.meta?.preset_name
+                      );
+                    },
+                    onError: () => {
+                      setLoading(CAMERA_STATES.IDLE);
+                      setCurrentPreset(preset);
+                      console.log(
+                        "onError: Set Preset to " + preset?.meta?.preset_name
+                      );
+                    },
+                  });
+                  getCameraStatus({});
+                }}
+                className={classNames(
+                  "px-4 py-2 border border-gray-500 block w-full",
+                  currentPreset === preset
+                    ? "bg-primary-500 border-primary-500 text-white rounded"
+                    : "bg-transparent"
+                )}
+              >
+                {preset.meta.preset_name || `Preset ${index + 1}`}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
