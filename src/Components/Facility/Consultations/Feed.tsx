@@ -361,9 +361,52 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="px-2 flex flex-col lg:flex-row w-full">
+    <div className="px-2 flex w-full flex-col">
+      <div>
+        <div className="flex items-center flex-col gap-4 px-3">
+          <p className="px-4 font-bold text-center text-primary-500 border-primary-500 border-b-2 w-full">
+            Camera Presets
+          </p>
+          <div className="flex items-center flex-row overflow-scroll pb-4 mb-4 max-w-full">
+            {bedPresets?.map((preset: any, index: number) => (
+              <button
+                key={preset.id}
+                onClick={() => {
+                  setLoading(CAMERA_STATES.MOVING.GENERIC);
+                  // gotoBedPreset(preset);
+                  absoluteMove(preset.meta.position, {
+                    onSuccess: () => {
+                      setLoading(CAMERA_STATES.IDLE);
+                      setCurrentPreset(preset);
+                      console.log(
+                        "onSuccess: Set Preset to " + preset?.meta?.preset_name
+                      );
+                    },
+                    onError: () => {
+                      setLoading(CAMERA_STATES.IDLE);
+                      setCurrentPreset(preset);
+                      console.log(
+                        "onError: Set Preset to " + preset?.meta?.preset_name
+                      );
+                    },
+                  });
+                  getCameraStatus({});
+                }}
+                className={classNames(
+                  "px-4 py-2 border border-gray-500 block w-full rounded min-w-fit",
+                  currentPreset === preset
+                    ? "bg-primary-500 border-primary-500 text-white"
+                    : "bg-transparent hover:bg-primary-200"
+                )}
+              >
+                {preset.meta.preset_name || `Preset ${index + 1}`}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
       <div
-        className="bg-black w-full h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden"
+        className="bg-black w-full lg:h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden"
         ref={videoWrapper}
       >
         {isIOS ? (
@@ -395,7 +438,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             autoPlay
             muted
             playsInline
-            className="max-h-full max-w-full"
+            className="max-w-full max-h-full"
             ref={liveFeedPlayerRef as any}
           />
         )}
@@ -440,7 +483,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             </div>
           )}
         </div>
-        <div className="absolute top-8 right-8 z-20 flex flex-col gap-4">
+        <div className="hidden lg:absolute top-8 right-8 z-20 lg:flex flex-col gap-4">
           {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
             (button, index) => {
               const option = cameraPTZ.find(
@@ -463,14 +506,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             />
           </div>
         </div>
-        <div className="absolute bottom-8 right-8 z-20">
+        <div className="hidden lg:absolute bottom-8 right-8 z-20">
           <FeedButton
             camProp={cameraPTZ[4]}
             styleType="CHHOTUBUTTON"
             clickAction={() => cameraPTZ[4].callback()}
           />
         </div>
-        <div className="absolute bottom-8 right-8 grid grid-rows-3 grid-flow-col gap-1 z-10">
+        <div className="hidden lg:absolute bottom-8 right-8 lg:grid grid-rows-3 grid-flow-col gap-1 z-10">
           {[
             false,
             cameraPTZ[2],
@@ -525,49 +568,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
 
             return out;
           })}
-        </div>
-      </div>
-      <div>
-        <div className="flex items-center justify-center gap-4 px-3 flex-col">
-          <p className="p-4 font-bold text-center border-primary-500 text-primary-600 border-b-2 w-full">
-            Camera Presets
-          </p>
-          <div className="flex items-center flex-row flex-wrap lg:flex-col lg:flex-nowrap gap-2 lg:overflow-y-auto">
-            {bedPresets?.map((preset: any, index: number) => (
-              <button
-                key={preset.id}
-                onClick={() => {
-                  setLoading(CAMERA_STATES.MOVING.GENERIC);
-                  // gotoBedPreset(preset);
-                  absoluteMove(preset.meta.position, {
-                    onSuccess: () => {
-                      setLoading(CAMERA_STATES.IDLE);
-                      setCurrentPreset(preset);
-                      console.log(
-                        "onSuccess: Set Preset to " + preset?.meta?.preset_name
-                      );
-                    },
-                    onError: () => {
-                      setLoading(CAMERA_STATES.IDLE);
-                      setCurrentPreset(preset);
-                      console.log(
-                        "onError: Set Preset to " + preset?.meta?.preset_name
-                      );
-                    },
-                  });
-                  getCameraStatus({});
-                }}
-                className={classNames(
-                  "px-4 py-2 border border-gray-500 block w-full rounded",
-                  currentPreset === preset
-                    ? "bg-primary-500 border-primary-500 text-white"
-                    : "bg-transparent hover:bg-primary-200"
-                )}
-              >
-                {preset.meta.preset_name || `Preset ${index + 1}`}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     </div>
