@@ -527,12 +527,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           })}
         </div>
       </div>
-      <div className="">
+      <div>
         <div className="flex items-center justify-center gap-4 px-3 flex-col">
-          <p className="block text-lg font-medium whitespace-nowrap text-center">
+          <p className="p-4 font-bold text-center border-primary-500 text-primary-600 border-b-2 w-full">
             Camera Presets
           </p>
-          <div className="flex items-center flex-col">
+          <div className="flex items-center flex-row flex-wrap lg:flex-col lg:flex-nowrap gap-2 lg:overflow-y-auto">
             {bedPresets?.map((preset: any, index: number) => (
               <button
                 key={preset.id}
@@ -558,10 +558,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                   getCameraStatus({});
                 }}
                 className={classNames(
-                  "px-4 py-2 border border-gray-500 block w-full",
+                  "px-4 py-2 border border-gray-500 block w-full rounded",
                   currentPreset === preset
-                    ? "bg-primary-500 border-primary-500 text-white rounded"
-                    : "bg-transparent"
+                    ? "bg-primary-500 border-primary-500 text-white"
+                    : "bg-transparent hover:bg-primary-200"
                 )}
               >
                 {preset.meta.preset_name || `Preset ${index + 1}`}
