@@ -8,7 +8,6 @@ export const VoiceRecorder = (props: any) => {
   const [audioURL, isRecording, startRecording, stopRecording, newBlob] =
     useRecorder();
   const [time, setTime] = useState(0);
-  createAudioBlob(newBlob);
   useEffect(() => {
     let interval: any;
     if (isRecording) {
@@ -32,7 +31,12 @@ export const VoiceRecorder = (props: any) => {
                 <i className="fas fa-microphone-alt animate-pulse mr-2"></i>
                 Recording...
               </div>
-              <ButtonV2 onClick={stopRecording}>
+              <ButtonV2
+                onClick={() => {
+                  stopRecording();
+                  createAudioBlob(newBlob);
+                }}
+              >
                 <CareIcon className={"care-l-microphone-slash text-lg"} />
                 Stop
               </ButtonV2>
