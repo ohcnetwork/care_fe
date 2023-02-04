@@ -367,7 +367,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           <p className="px-4 font-bold text-center text-primary-500 border-primary-500 border-b-2 w-full">
             Camera Presets
           </p>
-          <div className="flex items-center flex-row overflow-scroll pb-4 mb-4 max-w-full">
+          <div className="flex items-center flex-row overflow-scroll pb-2 mb-2 max-w-full">
             {bedPresets?.map((preset: any, index: number) => (
               <button
                 key={preset.id}
@@ -419,6 +419,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             muted={true}
             width="100%"
             height="100%"
+            className="max-w-full max-h-full"
             onBuffer={() => {
               setStreamStatus(StreamStatus.Loading);
             }}
@@ -569,6 +570,46 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             return out;
           })}
         </div>
+      </div>
+      <div className="lg:hidden w-full flex items-center justify-center max-w-full overflow-auto rounded pb-2 px-2 mt-2">
+        {cameraPTZ.map((option) => {
+          const shortcutKeyDescription =
+            option.shortcutKey &&
+            option.shortcutKey
+              .join(" + ")
+              .replace("Control", "Ctrl")
+              .replace("ArrowUp", "↑")
+              .replace("ArrowDown", "↓")
+              .replace("ArrowLeft", "←")
+              .replace("ArrowRight", "→");
+
+          return (
+            <Tooltip
+              placement="top"
+              arrow={true}
+              title={
+                <span className="text-sm font-semibold">
+                  {`${option.label}  (${shortcutKeyDescription})`}
+                </span>
+              }
+              key={option.action}
+            >
+              <button
+                className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
+                onClick={option.callback}
+              >
+                <span className="sr-only">{option.label}</span>
+                {option.icon ? (
+                  <i className={`fas fa-${option.icon} md:p-2`}></i>
+                ) : (
+                  <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                    {option.value}x
+                  </span>
+                )}
+              </button>
+            </Tooltip>
+          );
+        })}
       </div>
     </div>
   );
