@@ -4,9 +4,15 @@ import { useEffect, useState } from "react";
 import ButtonV2 from "../Components/Common/components/ButtonV2";
 import CareIcon from "../CAREUI/icons/CareIcon";
 export const VoiceRecorder = (props: any) => {
-  const { createAudioBlob } = props;
-  const [audioURL, isRecording, startRecording, stopRecording, newBlob] =
-    useRecorder();
+  const { createAudioBlob, reset, setResetRecording } = props;
+  const [
+    audioURL,
+    isRecording,
+    startRecording,
+    stopRecording,
+    newBlob,
+    resetRecording,
+  ] = useRecorder();
   const [time, setTime] = useState(0);
   useEffect(() => {
     let interval: any;
@@ -18,8 +24,12 @@ export const VoiceRecorder = (props: any) => {
       clearInterval(interval);
       setTime(0);
     }
+    if (reset) {
+      resetRecording();
+      setResetRecording(false);
+    }
     return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [isRecording, reset, setResetRecording, resetRecording]);
 
   return (
     <div>

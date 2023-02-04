@@ -119,7 +119,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const { t } = useTranslation();
   const [audioBlob, setAudioBlob] = useState<Blob>();
   const [audioBlobExists, setAudioBlobExists] = useState(false);
-  const [voiceRecorderKey, setVoiceRecorderKey] = useState(new Date());
+  const [resetRecording, setResetRecording] = useState(false);
   const [file, setFile] = useState<File | null>();
   const {
     facilityId,
@@ -957,7 +957,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const deleteAudioBlob = () => {
     setAudioBlobExists(false);
-    setVoiceRecorderKey(new Date());
+    setResetRecording(true);
   };
 
   const uploadAudiofile = (response: any) => {
@@ -1316,7 +1316,8 @@ export const FileUpload = (props: FileUploadProps) => {
                   )}
                   <VoiceRecorder
                     createAudioBlob={createAudioBlob}
-                    key={voiceRecorderKey}
+                    reset={resetRecording}
+                    setResetRecording={setResetRecording}
                   />
                   {audioBlobExists && (
                     <div className="flex items-center w-full md:w-auto">
