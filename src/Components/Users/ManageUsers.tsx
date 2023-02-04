@@ -15,7 +15,6 @@ import {
 import { navigate } from "raviger";
 import { USER_TYPES } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
-
 import { CircularProgress, Button } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
@@ -31,6 +30,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import SkillsSlideOver from "./SkillsSlideOver";
 import { FacilitySelect } from "../Common/FacilitySelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -51,12 +51,11 @@ export default function ManageUsers() {
   let manageUsers: any = null;
   const [users, setUsers] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
+  const [expandSkillList, setExpandSkillList] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [districtName, setDistrictName] = useState<string>();
-
   const [expandFacilityList, setExpandFacilityList] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
-
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const isSuperuser = currentUser.data.is_superuser;
@@ -405,6 +404,17 @@ export default function ManageUsers() {
                     </div>
                   )}
                 </div>
+                {user.username && (
+                  <div
+                    onClick={() => {
+                      setExpandSkillList(true);
+                      setSelectedUser(user.username);
+                    }}
+                    className="col-span-4 mt-2 align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+                  >
+                    Click here to show linked skills
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -435,6 +445,11 @@ export default function ManageUsers() {
 
   return (
     <div>
+      <SkillsSlideOver
+        show={expandSkillList}
+        setShow={setExpandSkillList}
+        username={selectedUser}
+      />
       <PageTitle
         title="User Management"
         hideBack={true}
