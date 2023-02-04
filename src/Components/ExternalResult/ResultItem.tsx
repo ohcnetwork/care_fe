@@ -6,16 +6,18 @@ import { externalResult, deleteExternalResult } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import AlertDialog from "../Common/AlertDialog";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResultItem(props: any) {
   const dispatch: any = useDispatch();
-  let initialData: any = {};
+  const initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const { t } = useTranslation();
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -35,11 +37,12 @@ export default function ResultItem(props: any) {
     const res = await dispatch(deleteExternalResult(props.id));
     if (res?.status === 204) {
       Notification.Success({
-        msg: "Record has been deleted successfully.",
+        msg: t("record_has_been_deleted_successfully"),
       });
     } else {
       Notification.Error({
-        msg: "Error while deleting record: " + (res?.data?.detail || ""),
+        msg:
+          t("error_while_deleting_record") + ": " + (res?.data?.detail || ""),
       });
     }
 
@@ -60,13 +63,13 @@ export default function ResultItem(props: any) {
 
   return (
     <div>
-      <PageTitle title={"Result details"} className="px-6 mb-2" />
+      <PageTitle title={t("result_details")} className="px-6 mb-2" />
 
       {showDeleteAlert && (
         <AlertDialog
-          title="Confirm Delete"
-          message={"Are you sure want to delete this record?"}
-          primaryButton={{ text: "DELETE", color: "secondary" }}
+          title={t("confirm_delete")}
+          message={t("are_you_sure_want_to_delete_this_record")}
+          primaryButton={{ text: t("delete"), color: "secondary" }}
           handleClose={() => handleDelete()}
           handleCancel={() => setShowDeleteAlert(false)}
         />
@@ -79,14 +82,14 @@ export default function ResultItem(props: any) {
             onClick={() => navigate(`/external_results/${data.id}/update`)}
           >
             <i className="fas fa-pencil-alt text-white mr-2"></i>
-            Update Record
+            {t("update_record")}
           </button>
           <button
             className="btn btn-danger w-full md:w-auto"
             onClick={() => setShowDeleteAlert(true)}
           >
             <i className="fas fa-trash text-white mr-2"></i>
-            Delete Record
+            {t("delete_record")}
           </button>
         </div>
         <div className="bg-white shadow overflow-hidden sm:rounded-lg mt-4">
@@ -95,14 +98,14 @@ export default function ResultItem(props: any) {
               {data.name} - {data.age} {data.age_in} | {data.result}
             </h3>
             <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
-              SRF ID: {data.srf_id}
+              {t("srf_id")}: {data.srf_id}
             </p>
             <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
-              Care external results ID: {data.id}
+              {t("care_external_results_id")}: {data.id}
             </p>
             {data.patient_created ? (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-green-100 text-green-800 capitalize">
-                Patient Created
+                {t("patient_created")}
               </span>
             ) : null}
           </div>
@@ -110,7 +113,7 @@ export default function ResultItem(props: any) {
             <dl>
               <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Gender
+                  {t("gender")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.gender}
@@ -118,7 +121,7 @@ export default function ResultItem(props: any) {
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Address
+                  {t("address")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.address}
@@ -135,7 +138,7 @@ export default function ResultItem(props: any) {
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Mobile Number
+                  {t("mobile_number")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.mobile_number}
@@ -146,12 +149,12 @@ export default function ResultItem(props: any) {
                   Repeat?
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-                  {data.is_repeat ? "Yes" : "No"}
+                  {data.is_repeat ? t("yes") : t("no")}
                 </dd>
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Patient Status
+                  {t("patient_status")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.patient_status}
@@ -159,7 +162,7 @@ export default function ResultItem(props: any) {
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Sample Type
+                  {t("sample_type")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.sample_type}
@@ -167,7 +170,7 @@ export default function ResultItem(props: any) {
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Test Type
+                  {t("test_type")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.test_type}
@@ -175,7 +178,7 @@ export default function ResultItem(props: any) {
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Sample collection date
+                  {t("sample_collection_date")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.sample_collection_date || "-"}
@@ -183,7 +186,7 @@ export default function ResultItem(props: any) {
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Result Date
+                  {t("result_date")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.result_date || "-"}
@@ -191,7 +194,7 @@ export default function ResultItem(props: any) {
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Result
+                  {t("result")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.result}
@@ -199,7 +202,7 @@ export default function ResultItem(props: any) {
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Source
+                  {t("source")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.source}
@@ -208,7 +211,7 @@ export default function ResultItem(props: any) {
 
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
                 <dt className="text-sm leading-5 font-medium text-gray-500">
-                  Patient Category
+                  {t("patient_category")}
                 </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.patient_category}
