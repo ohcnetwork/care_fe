@@ -1,28 +1,40 @@
 import { classNames } from "../../../Utils/utils";
 import DateRangeInputV2, { DateRange } from "../../Common/DateRangeInputV2";
 import FormField from "./FormField";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-  resolveFormFieldError,
-} from "./Utils";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 type Props = FormFieldBaseProps<DateRange> & {
-  placeholder?: string;
+  max?: Date;
+  min?: Date;
+  disableFuture?: boolean;
+  disablePast?: boolean;
 };
 
+/**
+ * A FormField to pick a date range.
+ *
+ * Example usage:
+ *
+ * ```jsx
+ * <DateRangeFormField
+ *   {...field("user_date_of_birth_prediction")}
+ *   label="Predicted date of birth"
+ *   required
+ *   disablePast // equivalent to min={new Date()}
+ * />
+ * ```
+ */
 const DateRangeFormField = (props: Props) => {
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-  const error = resolveFormFieldError(props);
-  const name = props.name;
-
+  const field = useFormFieldPropsResolver(props as any);
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <DateRangeInputV2
-        className={classNames(error && "border-red-500")}
-        value={props.value}
-        onChange={(value) => handleChange({ name, value })}
-        disabled={props.disabled}
+        className={classNames(field.error && "border-red-500")}
+        value={field.value}
+        onChange={field.handleChange}
+        disabled={field.disabled}
+        min={props.min || (props.disableFuture ? new Date() : undefined)}
+        max={props.max || (props.disablePast ? new Date() : undefined)}
       />
     </FormField>
   );

@@ -4,7 +4,13 @@ const username = "devdistrictadmin";
 const password = "Coronasafe@123";
 const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
 const emergency_phone_number = "9430123487";
+const yearOfBirth = "1999";
 let patient_url = "";
+
+const calculateAge = () => {
+  const currentYear = new Date().getFullYear();
+  return currentYear - parseInt(yearOfBirth);
+};
 
 describe("Patient Creation", () => {
   before(() => {
@@ -18,14 +24,14 @@ describe("Patient Creation", () => {
   });
 
   it("Create", () => {
-    cy.get("[name='facility-details']").first().click();
+    cy.get("[id='facility-details']").first().click();
     cy.get("button").should("contain", "Add Details of a Patient");
     cy.get("button")
       .contains("Add Details of a Patient")
       .click({ force: true });
     cy.get("[data-testid=phone-number] input").type(phone_number);
     cy.get("[data-testid=date-of-birth] svg").click();
-    cy.get("div").contains("1999").click();
+    cy.get("div").contains(yearOfBirth).click();
     cy.get("span").contains("OK").click();
     cy.get("[data-testid=name] input").type("Test E2E User");
     cy.get("[data-testid=Gender] select").select("Male");
@@ -41,10 +47,11 @@ describe("Patient Creation", () => {
     cy.get("[data-testid=ward-respective-lsgi] select").select(
       "1: MANAKKAPADY"
     );
-    cy.get("h1").contains("Health Details").click({ force: true });
+    cy.get("h1").contains("COVID Details").click({ force: true });
     cy.get("select#test_type").select("ANTIGEN");
     cy.get("[name='is_vaccinated']").check();
     cy.get("[data-testid=pincode] input").type("159015");
+    cy.get("[name=medical_history_check_1]").check();
     cy.get("[data-testid=blood-group] select").select("O+");
     cy.get("[data-testid=emergency-phone-number] input").type(
       emergency_phone_number,
@@ -63,7 +70,7 @@ describe("Patient Creation", () => {
   it("Dashboard", () => {
     cy.awaitUrl(patient_url);
     cy.url().should("include", "/patient/");
-    cy.get("[data-testid=patient-dashboard]").should("contain", "22");
+    cy.get("[data-testid=patient-dashboard]").should("contain", calculateAge());
     cy.get("[data-testid=patient-dashboard]").should(
       "contain",
       "Test E2E User"

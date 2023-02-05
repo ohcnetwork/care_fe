@@ -1,6 +1,26 @@
+import { IConfig } from "../Common/hooks/useConfig";
 import { actions } from "./fireRequest";
 
-const reducer = (state = {}, changeAction: any) => {
+export const getCachedConfig = () => {
+  const localConfig = localStorage.getItem("config");
+  if (localConfig) {
+    try {
+      const config = JSON.parse(localConfig) as IConfig;
+      return config;
+    } catch (_) {
+      return undefined;
+    }
+  }
+};
+
+const cachedConfig = getCachedConfig();
+
+const reducer = (
+  state = {
+    config: cachedConfig,
+  },
+  changeAction: any
+) => {
   switch (changeAction.type) {
     case actions.FETCH_REQUEST: {
       const obj: any = Object.assign({}, state);

@@ -1,6 +1,7 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import useAppHistory from "../../../Common/hooks/useAppHistory";
 
 export type SidebarIcon = React.ReactNode;
 
@@ -10,7 +11,7 @@ type SidebarItemProps = {
   external?: true | undefined;
   badgeCount?: number | undefined;
   selected?: boolean | undefined;
-} & ({ to: string; do?: undefined } | { to?: undefined; do: () => void });
+} & ({ to: string; do?: undefined } | { to?: string; do: () => void });
 
 type SidebarItemBaseProps = SidebarItemProps & { shrinked?: boolean };
 const SidebarItemBase = ({
@@ -19,6 +20,7 @@ const SidebarItemBase = ({
   ...props
 }: SidebarItemBaseProps) => {
   const { t } = useTranslation();
+  const { resetHistory } = useAppHistory();
 
   return (
     <Link
@@ -31,7 +33,7 @@ const SidebarItemBase = ({
       target={external && "_blank"}
       rel={external && "noreferrer"}
       href={props.to ?? ""}
-      onClick={props.do}
+      onClick={props.do ?? resetHistory}
     >
       <span className={`tooltip-text tooltip-right ${!shrinked && "hidden"}`}>
         {t(props.text)}

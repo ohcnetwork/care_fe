@@ -1,5 +1,8 @@
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
+export const getConfig = () => {
+  return fireRequestForFiles("config");
+};
 // User
 export const postLogin = (params: object) => {
   return fireRequest("login", [], params);
@@ -61,15 +64,29 @@ export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
 
+export const getUserListSkills = (pathParam: object) => {
+  return fireRequest("userListSkill", [], {}, pathParam);
+};
+
 export const partialUpdateUser = (username: string, data: any) => {
   return fireRequest("partialUpdateUser", [], data, { username });
 };
 export const getUserListFacility = (pathParam: object) => {
   return fireRequest("userListFacility", [], {}, pathParam);
 };
+
+export const addUserSkill = (username: string, skill: string) => {
+  return fireRequest("addUserSkill", [], { skill }, { username });
+};
+
 export const addUserFacility = (username: string, facility: string) => {
   return fireRequest("addUserFacility", [], { facility }, { username });
 };
+
+export const deleteUserSkill = (username: string, id: string) => {
+  return fireRequest("deleteUserSkill", [], {}, { username, id });
+};
+
 export const deleteUserFacility = (username: string, facility: string) => {
   return fireRequest(
     "deleteUserFacility",
@@ -85,7 +102,11 @@ export const getAllFacilities = (params: object) => {
   return fireRequest("getAllFacilities", [], params);
 };
 
-export const getPermittedFacility = (id: string, key?: string) => {
+export const getAllSkills = (params: object) => {
+  return fireRequest("getAllSkills", [], params);
+};
+
+export const getPermittedFacility = (id: number | string, key?: string) => {
   return fireRequest("getPermittedFacility", [], {}, { id: id }, key);
 };
 
@@ -787,6 +808,8 @@ export const createAssetUserLocation = (params: object) =>
   fireRequest("createAssetUserLocation", [], params);
 export const getAsset = (id: string) =>
   fireRequest("getAsset", [], {}, { external_id: id });
+export const deleteAsset = (id: string) =>
+  fireRequest("deleteAsset", [], {}, { external_id: id });
 export const updateAsset = (id: string, params: object) =>
   fireRequest("updateAsset", [], params, { external_id: id });
 export const partialUpdateAsset = (id: string, params: object) =>

@@ -5,7 +5,6 @@ import {
   TextInputField,
   MultilineInputField,
   ErrorHelperText,
-  PhoneNumberField,
   SelectField,
 } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
@@ -31,6 +30,8 @@ import { phonePreg } from "../../Common/validation";
 import { createShift, getPatient } from "../../Redux/actions";
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -177,6 +178,13 @@ export const ShiftCreate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [event.name]: event.value },
+    });
+  };
+
   const handleSubmit = async () => {
     const validForm = validateForm();
 
@@ -253,14 +261,14 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <PhoneNumberField
-                  label="Contact person phone*"
-                  onlyIndia={true}
+                <PhoneNumberFormField
+                  label="Contact person phone"
+                  name="refering_facility_contact_number"
+                  required
+                  onlyIndia
                   value={state.form.refering_facility_contact_number}
-                  onChange={(value: any) =>
-                    handleValueChange(value, "refering_facility_contact_number")
-                  }
-                  errors={state.errors.refering_facility_contact_number}
+                  onChange={handleFormFieldChange}
+                  error={state.errors.refering_facility_contact_number}
                 />
               </div>
 

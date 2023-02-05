@@ -9,12 +9,12 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-import { PhoneNumberField } from "../Common/HelperInputFields";
 import parsePhoneNumberFromString from "libphonenumber-js";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ExportMenu from "../Common/Export";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -283,12 +283,13 @@ export default function ResultList() {
           />
           <div className="text-sm font-medium my-2">Search by number</div>
           <div className="w-full max-w-sm">
-            <PhoneNumberField
+            <PhoneNumberFormField
+              name="mobile_number"
+              labelClassName="hidden"
               value={qParams.mobile_number || "+91"}
-              onChange={(value: any) => updateQuery({ mobile_number: value })}
+              onChange={(event) => updateQuery({ [event.name]: event.value })}
               placeholder="Search by Phone Number"
-              turnOffAutoFormat={false}
-              errors=""
+              noAutoFormat
             />
           </div>
         </div>

@@ -1,14 +1,12 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { listFacilityBeds } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { BedModel } from "../Facility/models";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
-import { debounce } from "lodash";
+import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 interface BedSelectProps {
   name: string;
-  margin?: string;
-  errors: string;
+  error?: string | undefined;
   className?: string;
   searchAll?: boolean;
   unoccupiedOnly?: boolean;
@@ -16,7 +14,7 @@ interface BedSelectProps {
   facility?: string;
   location?: string;
   showAll?: boolean;
-  disabled?: boolean;
+  showNOptions?: number;
   selected: BedModel | BedModel[] | null;
   setSelected: (selected: BedModel | BedModel[] | null) => void;
 }
@@ -27,34 +25,18 @@ export const BedSelect = (props: BedSelectProps) => {
     multiple,
     selected,
     setSelected,
-    margin,
-    errors,
+    error,
     searchAll,
     unoccupiedOnly,
     className = "",
     facility,
     location,
-    disabled = false,
+    showNOptions = 10,
   } = props;
   const dispatchAction: any = useDispatch();
-  const [bedLoading, isBedLoading] = useState(false);
-  const [bedList, setBedList] = useState<Array<BedModel>>([]);
-
-  const handleValueChange = (current: BedModel | BedModel[] | null) => {
-    if (!current) {
-      setBedList([]);
-      isBedLoading(false);
-    }
-    setSelected(current);
-  };
-
-  const handelSearch = (e: any) => {
-    isBedLoading(true);
-    onBedSearch(e.target.value);
-  };
 
   const onBedSearch = useCallback(
-    debounce(async (text: string) => {
+    async (text: string) => {
       const params = {
         limit: 50,
         offset: 0,
@@ -71,44 +53,32 @@ export const BedSelect = (props: BedSelectProps) => {
           beds = beds.filter((bed: BedModel) => bed?.is_occupied === false);
         }
 
-        setBedList(beds);
+        return beds;
       }
-      isBedLoading(false);
-    }, 300),
-    []
+    },
+    [dispatchAction, facility, location, searchAll, unoccupiedOnly]
   );
 
-  useEffect(() => {
-    onBedSearch("");
-  }, []);
-
   return (
-    <AutoCompleteAsyncField
+    <AutoCompleteAsync
       name={name}
       multiple={multiple}
-      variant="outlined"
-      margin={margin}
-      value={selected}
-      options={bedList}
-      onSearch={handelSearch}
-      disabled={disabled}
-      onChange={(e: any, selected: any) => handleValueChange(selected)}
-      loading={bedLoading}
+      selected={selected}
+      onChange={setSelected}
+      showNOptions={showNOptions}
       placeholder="Search by beds name"
-      noOptionsText="No beds found, please try again"
-      renderOption={(option: any) => (
-        <div>
-          {`${option.name} (${
+      fetchData={onBedSearch}
+      optionLabel={(option: any) => {
+        if (Object.keys(option).length === 0) return "";
+        return (
+          `${option.name} ${
             LOCATION_BED_TYPES.find((x) => x.id === option.bed_type)?.name ||
             "Unknown"
-          })`}{" "}
-          | {option?.location_object?.name}
-        </div>
-      )}
-      getOptionSelected={(option: any, value: any) => option?.id === value?.id}
-      getOptionLabel={(option: any) => option?.name || ""}
-      filterOptions={(options: BedModel[]) => options}
-      errors={errors}
+          } ` || option?.location_object?.name
+        );
+      }}
+      compareBy="id"
+      error={error}
       className={className}
     />
   );

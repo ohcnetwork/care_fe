@@ -9,6 +9,12 @@ interface Routes {
 }
 
 const routes: Routes = {
+  config: {
+    path: process.env.REACT_APP_CONFIG || "/config.json",
+    method: "GET",
+    noAuth: true,
+  },
+
   // Auth Endpoints
   login: {
     path: "/api/v1/auth/login/",
@@ -54,6 +60,10 @@ const routes: Routes = {
     path: "/api/v1/users/",
   },
 
+  userListSkill: {
+    path: "/api/v1/users/{username}/skill/",
+  },
+
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
   },
@@ -63,8 +73,18 @@ const routes: Routes = {
     method: "PUT",
   },
 
+  addUserSkill: {
+    path: "/api/v1/users/{username}/skill/",
+    method: "POST",
+  },
+
   deleteUserFacility: {
     path: "/api/v1/users/{username}/delete_facility/",
+    method: "DELETE",
+  },
+
+  deleteUserSkill: {
+    path: "/api/v1/users/{username}/skill/{id}/",
     method: "DELETE",
   },
 
@@ -109,6 +129,12 @@ const routes: Routes = {
   updateUserPnconfig: {
     path: "/api/v1/users/{username}/pnconfig/",
     method: "PATCH",
+  },
+
+  // Skill Endpoints
+
+  getAllSkills: {
+    path: "/api/v1/skill/",
   },
 
   // Facility Endpoints
@@ -743,6 +769,10 @@ const routes: Routes = {
   getAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "GET",
+  },
+  deleteAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "DELETE",
   },
   updateAsset: {
     path: "/api/v1/asset/{external_id}/",

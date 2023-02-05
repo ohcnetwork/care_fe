@@ -1,4 +1,7 @@
 import { PatientCategory } from "../Components/Facility/models";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import moment from "moment";
+import { IConfig } from "./hooks/useConfig";
 
 export const KeralaLogo = "images/kerala-logo.png";
 
@@ -10,10 +13,6 @@ export interface OptionsType {
   desc?: string;
   disabled?: boolean;
 }
-
-export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
-export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
-export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
 export type UserRole =
   | "Pharmacist"
@@ -30,25 +29,24 @@ export type UserRole =
   | "StateReadOnlyAdmin"
   | "StateAdmin";
 
-const readOnly = true;
 export const USER_TYPE_OPTIONS: {
   id: UserRole;
   role: string;
-  readOnly?: true | undefined;
+  readOnly?: boolean;
 }[] = [
-  { id: "Pharmacist", role: "Pharmacist" },
-  { id: "Volunteer", role: "Volunteer" },
-  { id: "StaffReadOnly", role: "Staff", readOnly },
-  { id: "Staff", role: "Staff" },
-  { id: "Doctor", role: "Doctor" },
-  { id: "WardAdmin", role: "Ward Admin" },
-  { id: "LocalBodyAdmin", role: "Local Body Admin" },
-  { id: "DistrictLabAdmin", role: "District Lab Admin" },
-  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly },
-  { id: "DistrictAdmin", role: "District Admin" },
-  { id: "StateLabAdmin", role: "State Lab Admin" },
-  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly },
-  { id: "StateAdmin", role: "State Admin" },
+  { id: "Pharmacist", role: "Pharmacist", readOnly: false },
+  { id: "Volunteer", role: "Volunteer", readOnly: false },
+  { id: "StaffReadOnly", role: "Staff", readOnly: true },
+  { id: "Staff", role: "Staff", readOnly: false },
+  { id: "Doctor", role: "Doctor", readOnly: false },
+  { id: "WardAdmin", role: "Ward Admin", readOnly: false },
+  { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
+  { id: "DistrictLabAdmin", role: "District Lab Admin", readOnly: false },
+  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly: true },
+  { id: "DistrictAdmin", role: "District Admin", readOnly: false },
+  { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
+  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
+  { id: "StateAdmin", role: "State Admin", readOnly: false },
 ];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
@@ -167,28 +165,33 @@ export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
   { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
 ];
 
-const KASP_BED_TYPES = KASP_ENABLED
-  ? [
-      { id: 40, text: KASP_STRING + " Ordinary Beds" },
-      { id: 60, text: KASP_STRING + " Oxygen beds" },
-      { id: 50, text: KASP_STRING + " ICU (ICU without ventilator)" },
-      { id: 70, text: KASP_STRING + " ICU (ICU with ventilator)" },
-    ]
-  : [];
+export const getBedTypes = ({
+  kasp_enabled,
+  kasp_string,
+}: Pick<IConfig, "kasp_enabled" | "kasp_string">) => {
+  const kaspBedTypes = kasp_enabled
+    ? [
+        { id: 40, text: kasp_string + " Ordinary Beds" },
+        { id: 60, text: kasp_string + " Oxygen beds" },
+        { id: 50, text: kasp_string + " ICU (ICU without ventilator)" },
+        { id: 70, text: kasp_string + " ICU (ICU with ventilator)" },
+      ]
+    : [];
 
-export const BED_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Non-Covid Ordinary Beds" },
-  { id: 150, text: "Non-Covid Oxygen beds" },
-  { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
-  { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
-  { id: 30, text: "Covid Ordinary Beds" },
-  { id: 120, text: "Covid Oxygen beds" },
-  { id: 110, text: "Covid ICU (ICU without ventilator)" },
-  { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  ...KASP_BED_TYPES,
-  { id: 2, text: "Hostel" },
-  { id: 3, text: "Single Room with Attached Bathroom" },
-];
+  return [
+    { id: 1, text: "Non-Covid Ordinary Beds" },
+    { id: 150, text: "Non-Covid Oxygen beds" },
+    { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
+    { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
+    { id: 30, text: "Covid Ordinary Beds" },
+    { id: 120, text: "Covid Oxygen beds" },
+    { id: 110, text: "Covid ICU (ICU without ventilator)" },
+    { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
+    ...kaspBedTypes,
+    { id: 2, text: "Hostel" },
+    { id: 3, text: "Single Room with Attached Bathroom" },
+  ];
+};
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
@@ -212,15 +215,19 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
   { id: 30, text: "30 mins" },
   { id: 60, text: "1 hr" },
-  { id: 120, text: "2 hr" },
-  { id: 180, text: "3 hr" },
-  { id: 240, text: "4 hr" },
-  { id: 360, text: "6 hr" },
-  { id: 480, text: "8 hr" },
-  { id: 720, text: "12 hr" },
-  { id: 1440, text: "24 hr" },
-  { id: 2160, text: "36 hr" },
-  { id: 2880, text: "48 hr" },
+  { id: 2 * 60, text: "2 hr" },
+  { id: 3 * 60, text: "3 hr" },
+  { id: 4 * 60, text: "4 hr" },
+  { id: 6 * 60, text: "6 hr" },
+  { id: 8 * 60, text: "8 hr" },
+  { id: 12 * 60, text: "12 hr" },
+  { id: 24 * 60, text: "24 hr" },
+  { id: 36 * 60, text: "36 hr" },
+  { id: 2 * 24 * 60, text: "2 days" },
+  { id: 3 * 24 * 60, text: "3 days" },
+  { id: 7 * 24 * 60, text: "7 days" },
+  { id: 14 * 24 * 60, text: "2 weeks" },
+  { id: 30 * 24 * 60, text: "1 month" },
 ];
 
 export const SYMPTOM_CHOICES = [
@@ -278,6 +285,15 @@ export const CONSULTATION_SUGGESTION = [
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
+  { id: "DD", text: "Declare Death" },
+];
+
+export const CONSULTATION_STATUS = [
+  { id: "1", text: "Brought Dead" },
+  { id: "2", text: "Transferred from ward" },
+  { id: "3", text: "Transferred from ICU" },
+  { id: "4", text: "Referred from other hospital" },
+  { id: "5", text: "Out-patient (walk in)" },
 ];
 
 export const ADMITTED_TO = [
@@ -365,7 +381,6 @@ export const DISEASE_STATUS = [
   "SUSPECTED",
   "NEGATIVE",
   "RECOVERED",
-  "EXPIRED",
 ];
 
 export const TEST_TYPE = [
@@ -760,6 +775,7 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   },
 ];
 
+// in future, if you find Unicon equivalents of all these icons, please replace them. Only use the same iconset throughout.
 export const FACILITY_FEATURE_TYPES = [
   {
     id: 1,
@@ -769,28 +785,12 @@ export const FACILITY_FEATURE_TYPES = [
   {
     id: 2,
     name: "Maternity Care",
-    icon: (
-      <svg
-        viewBox="0 0 14 18"
-        xmlns="http://www.w3.org/2000/svg"
-        className="text-primary-500 w-[14px] h-[18px] fill-current"
-      >
-        <path d="M7.00005 0.666626C7.66309 0.666626 8.29897 0.930018 8.76782 1.39886C9.23666 1.8677 9.50005 2.50358 9.50005 3.16663C9.50005 3.82967 9.23666 4.46555 8.76782 4.93439C8.29897 5.40323 7.66309 5.66663 7.00005 5.66663C6.33701 5.66663 5.70112 5.40323 5.23228 4.93439C4.76344 4.46555 4.50005 3.82967 4.50005 3.16663C4.50005 2.50358 4.76344 1.8677 5.23228 1.39886C5.70112 0.930018 6.33701 0.666626 7.00005 0.666626ZM13.6667 14L12 9.46663C11.7084 8.64163 11.45 7.92496 10.3334 7.33329C9.18338 6.74996 8.35005 6.49996 7.00005 6.49996C5.64172 6.49996 4.81671 6.74996 3.66671 7.33329C2.55005 7.92496 2.29171 8.64163 2.00005 9.46663L0.333382 14C0.066715 15.125 2.30005 16.0333 3.75838 16.6583V14.8333C3.75838 14.0416 4.47505 13.4833 5.90838 13.1416C6.04171 13.1083 6.16671 13.0916 6.26671 13.075C5.81671 12.3916 5.63338 11.7833 5.61671 11.7333L7.09171 11.2333C7.10005 11.25 7.52505 12.5583 8.53338 13.2166C8.70838 13.275 8.88338 13.3416 9.05005 13.4166C9.69172 13.7 10.075 14.0666 10.2 14.5083C9.08338 14.95 8.01672 15.175 7.00005 15.175L6.16671 15.0916V17.2833L7.00005 17.3333C8.14171 17.3333 9.22505 17.1 10.2417 16.6583C11.7 16.0333 13.875 14.9416 13.6667 14ZM9.91671 13.1666C9.58519 13.1666 9.26725 13.0349 9.03283 12.8005C8.79841 12.5661 8.66671 12.2481 8.66671 11.9166C8.66671 11.5851 8.79841 11.2672 9.03283 11.0327C9.26725 10.7983 9.58519 10.6666 9.91671 10.6666C10.2482 10.6666 10.5662 10.7983 10.8006 11.0327C11.035 11.2672 11.1667 11.5851 11.1667 11.9166C11.1667 12.2481 11.035 12.5661 10.8006 12.8005C10.5662 13.0349 10.2482 13.1666 9.91671 13.1666Z" />
-      </svg>
-    ),
+    icon: "person-breastfeeding",
   },
   {
     id: 3,
     name: "X-Ray",
-    icon: (
-      <svg
-        viewBox="0 0 20 20"
-        xmlns="http://www.w3.org/2000/svg"
-        className="fill-current text-primary-500 w-4 h-4"
-      >
-        <path d="M0 1.5C0 .8.6.2 1.3.2h17.4a1.2 1.2 0 1 1 0 2.5v12.6a1.2 1.2 0 1 1 0 2.4H1.4a1.2 1.2 0 1 1 0-2.4V2.7C.6 2.8 0 2.3 0 1.6Zm10 1.3c-.3 0-.6.2-.6.6V4H5.6c-.3 0-.6.3-.6.6 0 .4.3.7.6.7h3.8v1.2h-5c-.4 0-.7.3-.7.6 0 .4.3.7.7.7h5V9H5.6c-.3 0-.6.3-.6.6 0 .4.3.7.6.7h3.8v1.2H5.9a1 1 0 0 0-.7 1.5l1.2 1.8c.2.3.5.4.8.4h5.6c.3 0 .6-.1.8-.4l1.2-1.8a1 1 0 0 0-.7-1.5h-3.5v-1.3h3.8c.3 0 .6-.2.6-.6 0-.3-.3-.6-.6-.6h-3.8V7.7h5c.4 0 .7-.2.7-.6 0-.3-.3-.6-.7-.6h-5V5.2h3.8c.3 0 .6-.2.6-.6 0-.3-.3-.6-.6-.6h-3.8v-.6c0-.4-.3-.6-.6-.6ZM8.1 14a.6.6 0 0 1-.6-.6c0-.4.3-.7.6-.7.4 0 .7.3.7.7 0 .3-.3.6-.7.6Zm4.4-.6c0 .3-.3.6-.6.6a.6.6 0 0 1-.7-.6c0-.4.3-.7.7-.7.3 0 .6.3.6.7Z" />
-      </svg>
-    ),
+    icon: "x-ray",
   },
   {
     id: 4,
@@ -805,7 +805,7 @@ export const FACILITY_FEATURE_TYPES = [
   {
     id: 6,
     name: "Blood Bank",
-    icon: "tear",
+    icon: "droplet",
   },
 ];
 
@@ -826,3 +826,120 @@ export const BLACKLISTED_PATHS: RegExp[] = [
   /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/pressure_sore+/i,
   /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/dialysis+/i,
 ];
+
+export const XLSXAssetImportSchema = {
+  Name: { prop: "name", type: String },
+  Type: {
+    prop: "asset_type",
+    type: String,
+    oneOf: ["INTERNAL", "EXTERNAL"],
+    required: true,
+  },
+  Class: {
+    prop: "asset_class",
+    type: String,
+    oneOf: ["HL7MONITOR", "ONVIF"],
+  },
+  Description: { prop: "description", type: String },
+  "Working Status": {
+    prop: "is_working",
+    type: Boolean,
+    parse: (status: string) => {
+      if (status === "WORKING") {
+        return true;
+      } else if (status === "NOT WORKING") {
+        return false;
+      } else {
+        throw new Error("Invalid Working Status");
+      }
+    },
+    required: true,
+  },
+  "Not Working Reason": {
+    prop: "not_working_reason",
+    type: String,
+  },
+  "QR Code ID": { prop: "qr_code_id", type: String },
+  Manufacturer: { prop: "manufacturer", type: String },
+  "Vendor Name": { prop: "vendor_name", type: String },
+  "Support Name": { prop: "support_name", type: String },
+  "Support Email": {
+    prop: "support_email",
+    type: String,
+    parse: (email: string) => {
+      const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
+
+      if (!isValid) {
+        throw new Error("Invalid Support Email");
+      }
+
+      return email;
+    },
+  },
+  "Support Phone Number": {
+    prop: "support_phone",
+    type: String,
+    parse: (phone: number | string) => {
+      const parsed = parsePhoneNumberFromString(String(phone), "IN");
+
+      if (!parsed?.isValid()) {
+        throw new Error("Invalid Support Phone Number");
+      }
+
+      return parsed?.format("E.164");
+    },
+    required: true,
+  },
+  "Warrenty End Date": {
+    prop: "warranty_amc_end_of_validity",
+    type: String,
+    parse: (date: string) => {
+      const parsed = new Date(date);
+
+      if (String(parsed) === "Invalid Date") {
+        throw new Error("Invalid Warrenty End Date");
+      }
+
+      return moment(parsed).format("YYYY-MM-DD");
+    },
+  },
+  "Last Service Date": {
+    prop: "last_serviced_on",
+    type: String,
+    parse: (date: string) => {
+      const parsed = new Date(date);
+
+      if (String(parsed) === "Invalid Date") {
+        throw new Error("Invalid Last Service Date");
+      }
+
+      return moment(parsed).format("YYYY-MM-DD");
+    },
+  },
+  Notes: { prop: "notes", type: String },
+  META: {
+    prop: "meta",
+    type: {
+      "Config - IP Address": {
+        prop: "local_ip_address",
+        type: String,
+        parse: (ip: string) => {
+          const isValid =
+            /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+              ip
+            );
+
+          if (!isValid) {
+            throw new Error("Invalid Config IP Address");
+          }
+
+          return ip;
+        },
+      },
+      "Config: Camera Access Key": {
+        prop: "camera_access_key",
+        type: String,
+      },
+    },
+  },
+};
