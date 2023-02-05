@@ -522,12 +522,12 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
                 <div className="w-full md:w-1/3">
-                  <FieldLabel id="rounds_type">Round Type</FieldLabel>
                   <SelectField
                     className=""
                     name="rounds_type"
                     variant="standard"
                     margin="dense"
+                    label="Round Type"
                     options={[
                       {
                         id: "NORMAL",
@@ -545,13 +545,11 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
                 <div className="w-full md:w-1/3">
-                  <FieldLabel id="category-label" required>
-                    Category
-                  </FieldLabel>
                   <SelectField
                     name="patient_category"
                     variant="standard"
                     margin="dense"
+                    label="Category"
                     value={state.form.patient_category}
                     options={PATIENT_CATEGORIES}
                     onChange={handleChange}
@@ -937,7 +935,7 @@ export const DailyRounds = (props: any) => {
               )}
 
               <div className="mt-4 flex flex-col md:flex-row gap-2 justify-between">
-                <Cancel onClick={() => goBack()} label="Back" />
+                <Cancel onClick={() => goBack()} />
                 <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
               </div>
             </CardContent>
