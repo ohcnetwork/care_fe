@@ -17,6 +17,7 @@ interface Props {
   debounceTime?: number;
   className?: string;
   placeholder?: string;
+  disabled?: boolean;
   error?: string;
   onBlur?: () => void;
   onFocus?: () => void;
@@ -35,6 +36,7 @@ const AutoCompleteAsync = (props: Props) => {
     debounceTime = 300,
     className = "",
     placeholder,
+    disabled = false,
     error,
   } = props;
   const [data, setData] = useState([]);
@@ -63,6 +65,7 @@ const AutoCompleteAsync = (props: Props) => {
     <div className={className}>
       <Combobox
         value={selected}
+        disabled={disabled}
         onChange={onChange}
         by={compareBy}
         multiple={multiple as any}
