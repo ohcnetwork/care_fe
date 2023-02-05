@@ -7,8 +7,8 @@ export type FieldValidator<T> = (value: T) => FieldError;
  * <EmailField
  *   ...
  *   validate={MultiValidator([
- *     RequiredFieldValidator,
- *     EmailValidator,
+ *     RequiredFieldValidator(),
+ *     EmailValidator(),
  *   ])}
  *   ...
  * />
@@ -29,7 +29,9 @@ export const MultiValidator = <T>(
   return validator;
 };
 
-export const RequiredFieldValidator = <T>(value: T): FieldError => {
-  if (value === undefined || (typeof value === "string" && value === ""))
-    return "Field is required";
+export const RequiredFieldValidator = (message = "Field is required") => {
+  return <T>(value: T): FieldError => {
+    if (!value) return message;
+    if (Array.isArray(value) && value.length === 0) return message;
+  };
 };
