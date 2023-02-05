@@ -53,6 +53,7 @@ import {
 } from "../Form/FormFields/SelectFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -147,6 +148,7 @@ const facilityCreateReducer = (
 };
 
 export const FacilityCreate = (props: FacilityProps) => {
+  const { t } = useTranslation();
   const { gov_data_api_key, kasp_string, kasp_enabled } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
@@ -418,7 +420,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         case "name":
         case "address":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = "required";
             invalidForm = true;
           }
           return;
@@ -428,14 +430,14 @@ export const FacilityCreate = (props: FacilityProps) => {
         case "local_body":
         case "ward":
           if (!Number(state.form[field])) {
-            errors[field] = "Field is required";
+            errors[field] = "required";
             invalidForm = true;
           }
           return;
 
         case "pincode":
           if (!validatePincode(state.form[field])) {
-            errors[field] = "Please enter valid pincode";
+            errors[field] = "invalid_pincode";
             invalidForm = true;
           }
           return;
@@ -447,20 +449,19 @@ export const FacilityCreate = (props: FacilityProps) => {
             !phoneNumber?.isPossible() ||
             !phonePreg(String(phoneNumber?.number))
           ) {
-            errors[field] = "Please enter valid phone number";
+            errors[field] = "invalid_phone_number";
             invalidForm = true;
           }
           return;
         case "latitude":
           if (!!state.form.latitude && !validateLatitude(state.form[field])) {
-            errors[field] = "Please enter valid latitude between -90 and 90.";
+            errors[field] = "latitude_invalid";
             invalidForm = true;
           }
           return;
         case "longitude":
           if (!!state.form.longitude && !validateLongitude(state.form[field])) {
-            errors[field] =
-              "Please enter valid longitude between -180 and 180.";
+            errors[field] = "longitude_invalid";
             invalidForm = true;
           }
           return;
@@ -569,7 +570,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   if (!capacityData || !capacityData.length) {
     capacityList = (
       <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
-        No Bed Types Found
+        {t("no_bed_types")}
       </h5>
     );
   } else {
@@ -581,7 +582,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     capacityList = (
       <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-7 w-full">
         <BedTypeCard
-          label={"Total Beds"}
+          label={t("total_beds")}
           bedCapacityId={0}
           used={totalOccupiedBedCount}
           total={totalBedCount}
@@ -631,7 +632,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   if (!doctorData || !doctorData.length) {
     doctorList = (
       <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
-        No Doctors Found
+        {t("no_doctors")}
       </h5>
     );
   } else {
@@ -670,6 +671,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     return {
       name,
       id: name,
+      label: t(name),
       value: (state.form as any)[name],
       error: (state.errors as any)[name],
       onChange: handleChange,
@@ -707,7 +709,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           </div>
           <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
             <div className="md:flex justify-between md:pb-2">
-              <div className="font-bold text-xl mb-2">Doctors List</div>
+              <div className="font-bold text-xl mb-2">{t("doctors_list")}</div>
             </div>
             <div className="mt-4">{doctorList}</div>
           </div>
@@ -743,7 +745,9 @@ export const FacilityCreate = (props: FacilityProps) => {
           </div>
           <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
             <div className="md:flex justify-between  md:border-b md:pb-2">
-              <div className="font-semibold text-xl mb-2">Bed Capacity</div>
+              <div className="font-semibold text-xl mb-2">
+                {t("bed_capacity")}
+              </div>
             </div>
             <div>{capacityList}</div>
           </div>
@@ -767,7 +771,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <SelectFormField
                     {...field("facility_type")}
                     required
-                    label="Facility Type"
                     options={FACILITY_TYPES}
                     optionLabel={(o) => o.text}
                     optionValue={(o) => o.text}
@@ -775,12 +778,11 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <TextFormField
                     {...field("name")}
                     required
-                    label="Facility Name"
+                    label={t("facility_name")}
                   />
                   <MultiSelectFormField
                     {...field("features")}
-                    label="Features"
-                    placeholder="Features"
+                    placeholder={t("features")}
                     options={FACILITY_FEATURE_TYPES}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
@@ -788,7 +790,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <div>
                     <TextFormField
                       {...field("pincode")}
-                      label="Pincode"
                       required
                       onChange={handlePincodeChange}
                     />
@@ -807,7 +808,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                     placeholder="Choose State"
                     className={isStateLoading ? "animate-pulse" : ""}
                     disabled={isStateLoading}
-                    label="State"
                     options={states}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
@@ -820,7 +820,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <SelectFormField
                     {...field("district")}
                     placeholder="Choose District"
-                    label="District"
                     required
                     className={isDistrictLoading ? "animate-pulse" : ""}
                     disabled={isDistrictLoading}
@@ -835,7 +834,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                   />
                   <SelectFormField
                     {...field("local_body")}
-                    label="Local Body"
                     required
                     className={isLocalbodyLoading ? "animate-pulse" : ""}
                     disabled={isLocalbodyLoading}
@@ -852,7 +850,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <SelectFormField
                     {...field("ward")}
                     required
-                    label="Ward"
                     className={isWardLoading ? "animate-pulse" : ""}
                     disabled={isWardLoading}
                     placeholder="Choose Ward"
