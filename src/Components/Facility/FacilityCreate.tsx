@@ -1031,16 +1031,11 @@ export const FacilityCreate = (props: FacilityProps) => {
                         />
                       </div>
                       <div>
-                        <FieldLabel
-                          htmlFor="facility-expected_oxygen_requirement"
-                          className="mb-2"
-                        >
-                          Expected Burn Rate
-                        </FieldLabel>
                         <TextFormField
                           id="facility-expected_oxygen_requirement"
                           name="expected_oxygen_requirement"
                           type="number"
+                          label="Expected Oxygen Requirement"
                           required
                           placeholder="Litres / day"
                           onChange={handleChange}

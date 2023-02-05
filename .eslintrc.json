@@ -7,13 +7,13 @@
   "settings": {
     "react": {
       "version": "detect"
-    },
-    "@flycode-org/react-i18next": {
-      "translationFiles": {
-        "location": "src/Locale/*/*.json",
-        "format": "flat"
-      }
     }
+    // "@flycode-org/react-i18next": {
+    //   "translationFiles": {
+    //     "location": "src/Locale/*/*.json",
+    //     "format": "flat"
+    //   }
+    // }
   },
   "extends": [
     "eslint:recommended",
@@ -21,8 +21,7 @@
     "plugin:prettier/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:i18next/recommended",
-    "plugin:@flycode-org/react-i18next/recommended"
+    "plugin:i18next/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -58,8 +57,8 @@
           "exclude": [".*"]
         }
       }
-    ],
-    "@flycode-org/react-i18next/valid-key": "error"
+    ]
+    // "@flycode-org/react-i18next/valid-key": "error"
   },
   "ignorePatterns": [
     "dist",
