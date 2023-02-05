@@ -562,6 +562,7 @@ export default function UserProfile() {
                           {...fieldProps("email")}
                           label="Email"
                           className="col-span-6 sm:col-span-3"
+                          required
                           type="email"
                         />
                         {details.user_type === "Doctor" && (
