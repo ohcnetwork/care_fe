@@ -75,7 +75,9 @@ export default ({ show, setShow, username }: IProps) => {
     setIsLoading(false);
   }, [username, fetchSkills]);
 
-  const authorizeForAddSkill = useIsAuthorized(AuthorizeFor(["DistrictAdmin"]));
+  const authorizeForAddSkill = useIsAuthorized(
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+  );
 
   return (
     <div className="col-span-4">
@@ -115,7 +117,7 @@ export default ({ show, setShow, username }: IProps) => {
               </ButtonV2>
               {!authorizeForAddSkill && (
                 <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
-                  Contact your district admin to add skills
+                  Contact your admin to add skills
                 </span>
               )}
             </div>
