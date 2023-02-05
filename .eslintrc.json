@@ -7,6 +7,12 @@
   "settings": {
     "react": {
       "version": "detect"
+    },
+    "@flycode-org/react-i18next": {
+      "translationFiles": {
+        "location": "src/Locale/*/*.json",
+        "format": "flat"
+      }
     }
   },
   "extends": [
@@ -14,7 +20,9 @@
     "plugin:react-hooks/recommended",
     "plugin:prettier/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:i18next/recommended",
+    "plugin:@flycode-org/react-i18next/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -24,7 +32,11 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint", 
+    "i18next",
+    "@flycode-org/react-i18next"
+  ],
   "rules": {
     "quotes": ["error", "double"],
     "no-unused-vars": "off",
@@ -36,7 +48,18 @@
         "caughtErrorsIgnorePattern": "^_"
       }
     ],
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "i18next/no-literal-string": [
+      "warn",
+      {
+        "mode": "all",
+        "jsx-attributes": {
+          "include": ["label", "placeholder", "error", "title"],
+          "exclude": [".*"]
+        }
+      }
+    ],
+    "@flycode-org/react-i18next/valid-key": "error"
   },
   "ignorePatterns": [
     "dist",
