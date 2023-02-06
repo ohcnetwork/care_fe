@@ -229,7 +229,10 @@ export default function UserProfile() {
           }
           return;
         case "email":
-          if (states.form[field] && !validateEmailAddress(states.form[field])) {
+          if (!states.form[field]) {
+            errors[field] = "This field is required";
+            invalidForm = true;
+          } else if (!validateEmailAddress(states.form[field])) {
             errors[field] = "Enter a valid email address";
             invalidForm = true;
           }
