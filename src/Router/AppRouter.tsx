@@ -64,6 +64,7 @@ import {
   DesktopSidebar,
   MobileSidebar,
 } from "../Components/Common/Sidebar/Sidebar";
+import LiveMonitoring from "../Components/Hub/LiveMonitoring";
 import { BLACKLISTED_PATHS } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
 import useConfig from "../Common/hooks/useConfig";
@@ -374,6 +375,7 @@ const routes = {
         tab={tab}
       />
     ),
+  "/live_monitoring": () => <LiveMonitoring />,
   "/not-found": () => <Error404 />,
 };
 
