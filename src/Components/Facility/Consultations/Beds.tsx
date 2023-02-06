@@ -9,10 +9,13 @@ import * as Notification from "../../../Utils/Notifications.js";
 import Loading from "../../Common/Loading";
 import { BedModel, CurrentBed } from "../models";
 import { BedSelect } from "../../Common/BedSelect";
-import { Button, InputLabel } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { TextInputField } from "../../Common/HelperInputFields";
 import { formatDate } from "../../../Utils/utils";
+import { FieldLabel } from "../../Form/FormFields/FormField";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import moment from "moment";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import TextFormField from "../../Form/FormFields/TextFormField";
 
 const formatDateTime: () => string = () => {
   const current = new Date();
@@ -33,6 +36,7 @@ interface BedsProps {
   discharged?: boolean;
   setState?: Dispatch<SetStateAction<boolean>>;
   fetchPatientData?: (state: { aborted: boolean }) => void;
+  hideTitle?: boolean;
 }
 
 const Beds = (props: BedsProps) => {
@@ -72,19 +76,16 @@ const Beds = (props: BedsProps) => {
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+
     if (!bed?.id)
       return Notification.Error({
         msg: "Please select a bed first..!",
       });
-    const res: any = await Promise.resolve(
-      dispatch(
-        createConsultationBed(
-          { start_date: startDate },
-          consultationId,
-          bed?.id
-        )
-      )
+
+    const res: any = await dispatch(
+      createConsultationBed({ start_date: startDate }, consultationId, bed?.id)
     );
+
     if (res && res.status === 201) {
       Notification.Success({
         msg: "Bed allocated successfully",
@@ -107,61 +108,54 @@ const Beds = (props: BedsProps) => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <div className="font-bold text-secondary-500">
-          {!discharged ? "Move to bed:" : "Bed History"}
+      {!props.hideTitle && (
+        <div className="flex justify-between items-center mb-4">
+          <div className="font-bold text-secondary-500">
+            {!discharged ? "Move to bed" : "Bed History"}
+          </div>
+          {props.setState && (
+            <ButtonV2
+              variant="secondary"
+              circle
+              ghost
+              onClick={() => props.setState && props.setState(false)}
+            >
+              <CareIcon className="care-l-times text-lg" />
+            </ButtonV2>
+          )}
         </div>
-        {props.setState && (
-          <button
-            className="text-xl"
-            onClick={() => props.setState && props.setState(false)}
-          >
-            <i className="fas fa-times"></i>
-          </button>
-        )}
-      </div>
+      )}
       {!discharged ? (
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
             <div>
-              <InputLabel id="asset-type">Bed</InputLabel>
+              <FieldLabel id="asset-type">Bed</FieldLabel>
               <BedSelect
                 name="bed"
                 setSelected={(selected) => setBed(selected as BedModel)}
                 selected={bed}
-                errors=""
+                error=""
                 multiple={false}
-                margin="dense"
                 facility={facilityId}
               />
             </div>
-            <div>
-              <InputLabel htmlFor="date_declared_positive">
-                Date of Shift
-              </InputLabel>
-              <TextInputField
-                name="date_declared_positive"
-                id="date_declared_positive"
-                variant="outlined"
-                margin="dense"
-                type="datetime-local"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                errors=""
-              />
-            </div>
+            <TextFormField
+              label="Date of shift"
+              id="start_date"
+              name="start_date"
+              value={startDate}
+              type="datetime-local"
+              onChange={(e) => setStartDate(e.value)}
+              max={moment().format("YYYY-MM-DDTHH:mm")}
+              error=""
+            />
           </div>
           <div className="flex flex-row justify-center mt-4">
             <div>
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                startIcon={<i className="fas fa-bed" />}
-              >
+              <ButtonV2 variant="primary" type="submit">
+                <i className="fas fa-bed" />
                 Move to bed
-              </Button>
+              </ButtonV2>
             </div>
           </div>
         </form>

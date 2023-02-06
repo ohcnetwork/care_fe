@@ -431,7 +431,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
               {yesornoBadge(sampleDetails.patient_has_suspected_contact)}
             </div>
             {sampleDetails.patient_travel_history &&
-              sampleDetails.patient_travel_history !== "[]" && (
+              sampleDetails.patient_travel_history.length !== 0 && (
                 <div className="md:col-span-2">
                   <span className="font-semibold leading-relaxed">
                     Countries travelled:{" "}

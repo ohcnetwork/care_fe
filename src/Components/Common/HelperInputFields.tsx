@@ -658,6 +658,7 @@ export const PhoneNumberField = (props: any) => {
     enableTollFree,
     countryCodeEditable = false,
     className,
+    name,
   } = props;
   const [maxLength, setMaxLength] = useState(15);
 
@@ -665,7 +666,7 @@ export const PhoneNumberField = (props: any) => {
   const onChangeHandler = debounce(onChange, 500);
 
   useEffect(() => {
-    setMaxLength(() => (value.slice(4, 8) === "1800" ? 16 : 15));
+    setMaxLength(() => (value?.slice(4, 8) === "1800" ? 16 : 15));
   }, [value]);
 
   const handleChange = (
@@ -695,6 +696,7 @@ export const PhoneNumberField = (props: any) => {
           enableLongNumbers={enableTollFree}
           inputProps={{
             maxLength,
+            name,
           }}
           {...countryRestriction}
         />

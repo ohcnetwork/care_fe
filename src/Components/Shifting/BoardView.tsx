@@ -12,6 +12,7 @@ import { formatFilter } from "./Commons";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -29,13 +30,14 @@ export default function BoardView() {
   });
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [isLoading] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="w-full flex flex-col md:flex-row items-center justify-between">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
-            title="Shifting"
+            title={t("shifting")}
             className="mx-3 md:mx-5"
             hideBack
             componentRight={
@@ -54,7 +56,7 @@ export default function BoardView() {
             name="patient_name_search"
             value={qParams.patient_name}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder="Search patient"
+            placeholder={t("search_patient")}
           />
           <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex mt-1">
             <button
@@ -66,7 +68,7 @@ export default function BoardView() {
               }
               onClick={() => setBoardFilter(ACTIVE)}
             >
-              <span>Active</span>
+              <span>{t("active")}</span>
             </button>
             <button
               className={
@@ -77,7 +79,7 @@ export default function BoardView() {
               }
               onClick={() => setBoardFilter(COMPLETED)}
             >
-              <span>Completed</span>
+              <span>{t("completed")}</span>
             </button>
           </div>
           <div className="mt-1 w-fit inline-flex space-x-1 lg:space-x-4">
@@ -88,14 +90,14 @@ export default function BoardView() {
               }
             >
               <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
-              List View
+              {t("list_view")}
             </button>
             <button
               className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-28 md:w-36 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
               onClick={() => advancedFilter.setShow(true)}
             >
               <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-              <span>Filters</span>
+              <span>{t("filters")}</span>
             </button>
           </div>
         </div>
