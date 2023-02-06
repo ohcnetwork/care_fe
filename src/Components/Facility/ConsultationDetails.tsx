@@ -1252,6 +1252,7 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "NEUROLOGICAL_MONITORING" && (
           <div>
+            {/* change */}
             <PageTitle
               title="Neurological Monitoring"
               hideBack={true}
