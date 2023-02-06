@@ -2,8 +2,9 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
-import { getFacilityUsers } from "../../Redux/actions";
-import { UserAssignedModel } from "../Users/models";
+import { getFacilityUsers, getUserListSkills } from "../../Redux/actions";
+import { SkillModel, UserAssignedModel } from "../Users/models";
+import { SkillObjectModel } from "../Users/models";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -93,9 +94,28 @@ export default function DoctorVideoSlideover(props: {
 }
 
 function UserListItem(props: { user: UserAssignedModel }) {
+  const dispatchAction = useDispatch<any>();
+  const [skills, setSkills] = useState<SkillObjectModel[]>([]);
   const user = props.user;
   const icon =
     user.user_type === "Doctor" ? "fa-user-doctor " : " fa-user-nurse";
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      const res = await dispatchAction(
+        getUserListSkills({ username: user.username })
+      );
+
+      if (res && res.data && res.data.results) {
+        setSkills(
+          res.data.results.map((skill: SkillModel) => skill.skill_object)
+        );
+      }
+    };
+
+    if (user.username) fetchSkills();
+  }, [dispatchAction, user.username]);
+
   return (
     <li>
       <li
@@ -144,6 +164,17 @@ function UserListItem(props: { user: UserAssignedModel }) {
                 <span>{user.doctor_qualification}</span>
               )}
             </p>
+            {!!skills.length && (
+              <div className="mt-1 text-sm leading-5 text-gray-900">
+                <div className="flex flex-wrap gap-2">
+                  {skills?.map((skill: SkillObjectModel) => (
+                    <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-900 rounded-full text-xs px-3">
+                      <p className="py-1.5">{skill.name}</p>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
             <p className="text-sm text-gray-500 flex gap-2 divide-gray-800">
               <span>{user.alt_phone_number}</span>
               {user.last_login && (
