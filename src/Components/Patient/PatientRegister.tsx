@@ -961,19 +961,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           show={showLinkAbhaNumberModal}
           onClose={() => setShowLinkAbhaNumberModal(false)}
           setAbha={({
-            healthIdNumber,
-            healthId,
-            name,
-            mobile,
-            gender,
-            monthOfBirth,
-            dayOfBirth,
-            yearOfBirth,
-            pincode,
+            id,
+            abha: {
+              healthIdNumber,
+              healthId,
+              name,
+              mobile,
+              gender,
+              monthOfBirth,
+              dayOfBirth,
+              yearOfBirth,
+              pincode,
+            },
           }: any) => {
             const values: any = {};
-
-            if (healthIdNumber) values["abha_number"] = healthIdNumber;
+            if (id) values["abha_number"] = id;
+            if (healthIdNumber) values["health_id_number"] = healthIdNumber;
             if (healthId) values["health_id"] = healthId;
             if (name) values["name"] = name;
             if (mobile) {
@@ -1132,7 +1135,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               variant="outlined"
                               margin="dense"
                               type="text"
-                              value={state.form.abha_number}
+                              value={state.form.health_id_number}
                               disabled={true} // using input field to keep the consistent look
                               errors=""
                             />
