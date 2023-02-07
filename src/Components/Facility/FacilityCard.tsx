@@ -47,7 +47,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
 
   return (
     <div key={`usr_${facility.id}`} className="w-full">
-      <div className="block rounded-lg h-full overflow-clip bg-white shadow hover:border-primary-500">
+      <div className="block rounded-lg h-64 overflow-clip bg-white shadow hover:border-primary-500">
         <div className="flex h-full">
           <Link
             href={`/facility/${facility.id}`}
@@ -57,7 +57,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
               <img
                 src={facility.read_cover_image_url}
                 alt={facility.name}
-                className="h-full object-cover"
+                className="object-cover w-full h-full"
               />
             )) || (
               <i className="fas fa-hospital text-4xl block text-gray-500" />
