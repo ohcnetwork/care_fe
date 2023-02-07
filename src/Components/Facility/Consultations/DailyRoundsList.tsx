@@ -1,4 +1,4 @@
-import { Grid, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -7,34 +7,10 @@ import { getDailyReport } from "../../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
-import { formatDate } from "../../../Utils/utils";
-import { PatientCategory } from "../models";
-import { PATIENT_CATEGORIES } from "../../../Common/constants";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+import VirtualNursingAssistantLogUpdateCard from "./DailyRounds/VirtualNursingAssistantLogUpdateCard";
+import DefaultLogUpdateCard from "./DailyRounds/DefaultLogUpdateCard";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
-
-export const PatientCategoryBadge = (props: { category?: PatientCategory }) => {
-  const categoryClass = props.category
-    ? PATIENT_CATEGORIES.find((c) => c.text === props.category)?.twClass
-    : "patient-unknown";
-  return (
-    <span
-      className={`px-2 py-1 text-sm rounded-full ${categoryClass} font-medium`}
-    >
-      {props.category}
-    </span>
-  );
-};
-
-const getName = (item: any) => {
-  const fallback = "Virtual Nursing Assistant";
-  if (item?.first_name === "" && item?.last_name === "") {
-    return fallback;
-  }
-  return `${item?.first_name} ${item?.last_name} - ${item?.user_type}`;
-};
 
 export const DailyRoundsList = (props: any) => {
   const { facilityId, patientId, consultationId, consultationData } = props;
@@ -105,139 +81,42 @@ export const DailyRoundsList = (props: any) => {
     );
   } else if (dailyRoundsListData.length) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
-      const telemedicine_doctor_update =
-        itemData.created_by_telemedicine ||
-        itemData.last_updated_by_telemedicine;
+      if (itemData.rounds_type === "AUTOMATED" || idx % 2 === 0) {
+        return (
+          <VirtualNursingAssistantLogUpdateCard
+            round={itemData}
+            previousRound={dailyRoundsListData[idx + 1]}
+          />
+        );
+      }
 
       return (
-        <div key={`daily_round_${idx}`} className="w-full">
-          <div
-            className={`block border rounded-lg ${
-              telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
-            } shadow`}
-          >
-            <div className="p-2">
-              <Grid container justify="space-between" alignItems="center">
-                <Grid item xs={11} container spacing={1}>
-                  {telemedicine_doctor_update ? (
-                    <Grid item xs={6}>
-                      <Typography>
-                        <span className="text-gray-700">Updated by:</span>{" "}
-                        {telemedicine_doctor_update &&
-                        consultationData.assigned_to_object
-                          ? getName(consultationData.assigned_to_object)
-                          : "-"}
-                      </Typography>
-                    </Grid>
-                  ) : null}
-
-                  {!telemedicine_doctor_update && itemData?.last_edited_by ? (
-                    <Grid item xs={12}>
-                      <Typography>
-                        <span className="text-gray-700">Updated by:</span>{" "}
-                        {getName(itemData.last_edited_by)}
-                      </Typography>
-                    </Grid>
-                  ) : null}
-
-                  {!telemedicine_doctor_update && itemData?.created_by ? (
-                    <Grid item xs={12}>
-                      <Typography>
-                        <span className="text-gray-700">Created by:</span>{" "}
-                        {getName(itemData.created_by)}
-                      </Typography>
-                    </Grid>
-                  ) : null}
-
-                  {itemData.patient_category && (
-                    <Grid item xs={12}>
-                      <span className="text-gray-700">Category: </span>
-                      <PatientCategoryBadge
-                        category={itemData.patient_category}
-                      />
-                    </Grid>
-                  )}
-                  <Grid item xs={6}>
-                    <div className="text-xs">
-                      <span className="text-gray-700">Created At:</span>{" "}
-                      <div className="text-xs">
-                        {itemData.created_date
-                          ? formatDate(itemData.created_date)
-                          : "-"}
-                      </div>
-                    </div>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <div className="text-xs">
-                      <span className="text-gray-700">Updated At:</span>{" "}
-                      <div className="text-xs">
-                        {itemData.modified_date
-                          ? formatDate(itemData.modified_date)
-                          : "-"}
-                      </div>
-                    </div>
-                  </Grid>
-
-                  {itemData.physical_examination_info && (
-                    <Grid item xs={12}>
-                      <Typography>
-                        <span className="text-gray-700">
-                          Physical Examination Info:
-                        </span>{" "}
-                        {itemData.physical_examination_info}
-                      </Typography>
-                    </Grid>
-                  )}
-                  {itemData.other_details && (
-                    <Grid item xs={12}>
-                      <Typography>
-                        <span className="text-gray-700">Other Details:</span>{" "}
-                        {itemData.other_details}
-                      </Typography>
-                    </Grid>
-                  )}
-                </Grid>
-              </Grid>
-              <div className="mt-2 flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-2">
-                <ButtonV2
-                  variant="secondary"
-                  border
-                  ghost
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}`
-                    )
-                  }
-                >
-                  <CareIcon className="care-l-eye text-lg" />
-                  <span>View Details</span>
-                </ButtonV2>
-                {!consultationData.discharge_reason && (
-                  <ButtonV2
-                    variant="secondary"
-                    border
-                    ghost
-                    className="tooltip"
-                    onClick={() => {
-                      if (itemData.rounds_type === "NORMAL") {
-                        navigate(
-                          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
-                        );
-                      } else {
-                        navigate(
-                          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
-                        );
-                      }
-                    }}
-                  >
-                    <CareIcon className="care-l-pen text-lg" />
-                    <span>Update Log</span>
-                  </ButtonV2>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <DefaultLogUpdateCard
+          round={itemData}
+          consultationData={consultationData}
+          onViewDetails={() => {
+            if (itemData.rounds_type === "NORMAL") {
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
+              );
+            } else {
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
+              );
+            }
+          }}
+          onUpdateLog={() => {
+            if (itemData.rounds_type === "NORMAL") {
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
+              );
+            } else {
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
+              );
+            }
+          }}
+        />
       );
     });
   }
@@ -253,7 +132,9 @@ export const DailyRoundsList = (props: any) => {
           />
         </div>
         <div className={!isDailyRoundLoading ? "flex flex-wrap" : ""}>
-          <div className="overflow-y-auto h-screen space-y-4">{roundsList}</div>
+          <div className="overflow-y-auto overflow-x-visible h-[85vh] space-y-4 p-2">
+            {roundsList}
+          </div>
           {!isDailyRoundLoading && totalCount > limit && (
             <div className="mt-4 flex justify-center">
               <Pagination
