@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
-import { FieldLabel } from "../Form/FormFields/FormField";
 import { DupPatientModel } from "./models";
 
 interface Props {
@@ -73,7 +72,7 @@ const DuplicatePatientDialog = (props: Props) => {
             >
               <input
                 type="radio"
-                className="m-3"
+                className="m-3 text-green-600 focus:ring-green-500 focus:ring-2"
                 id="transfer"
                 name="confirm_action"
                 value="transfer"
@@ -94,7 +93,7 @@ const DuplicatePatientDialog = (props: Props) => {
               <input
                 type="radio"
                 id="close"
-                className="m-3"
+                className="m-3 text-red-600 focus:ring-red-500 focus:ring-2"
                 name="confirm_action"
                 value="close"
                 onChange={(e) => setAction(e.target.value)}
