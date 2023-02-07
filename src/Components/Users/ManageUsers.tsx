@@ -130,13 +130,10 @@ export default function ManageUsers() {
   );
 
   const addUser = (
-    <button
-      className="px-4 py-1 w-full rounded-md bg-primary-500 text-white font-semibold shadow"
-      onClick={() => navigate("/users/add")}
-    >
-      <i className="fas fa-plus mr-2"></i>
-      Add New User
-    </button>
+    <ButtonV2 onClick={() => navigate("/users/add")}>
+      <CareIcon className="care-l-plus text-lg w-full" />
+      <p>Add New User</p>
+    </ButtonV2>
   );
 
   const handleCancel = () => {
