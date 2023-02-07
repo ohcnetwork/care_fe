@@ -56,10 +56,11 @@ const extractVirtualNursingAssistantFields = (round?: DailyRoundsModel) => {
 };
 
 const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
-  const diff: Partial<DailyRoundsModel> = getDeepDiff(
-    extractVirtualNursingAssistantFields(props.round),
-    extractVirtualNursingAssistantFields(props.previousRound)
-  );
+  const diff: Partial<ReturnType<typeof extractVirtualNursingAssistantFields>> =
+    getDeepDiff(
+      extractVirtualNursingAssistantFields(props.round),
+      extractVirtualNursingAssistantFields(props.previousRound)
+    );
 
   const diffKeys = Object.keys(diff);
 
@@ -84,7 +85,7 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
             <LogUpdateCardAttribute
               key={key}
               attributeKey={key as keyof DailyRoundsModel}
-              attributeValue={diff[key as keyof DailyRoundsModel]}
+              attributeValue={(diff as any)[key]}
             />
           ))
         ) : (
