@@ -90,7 +90,7 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
           ))
         ) : (
           <span className="text-sm italic text-gray-600">
-            No changes since previous log update
+            No changes since last log update
           </span>
         )}
       </div>
