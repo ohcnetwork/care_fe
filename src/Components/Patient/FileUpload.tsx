@@ -951,8 +951,11 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
-    setAudioBlobExists(true);
     setAudioBlob(createdBlob);
+  };
+
+  const confirmAudioBlobExists = () => {
+    setAudioBlobExists(true);
   };
 
   const deleteAudioBlob = () => {
@@ -1026,6 +1029,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setAudioUploadStarted(false);
       });
     setAudioName("");
+    setAudioBlobExists(false);
   };
 
   // For creating the Download File URL
@@ -1316,6 +1320,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   )}
                   <VoiceRecorder
                     createAudioBlob={createAudioBlob}
+                    confirmAudioBlobExists={confirmAudioBlobExists}
                     reset={resetRecording}
                     setResetRecording={setResetRecording}
                   />

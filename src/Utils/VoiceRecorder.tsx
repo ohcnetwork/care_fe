@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import ButtonV2 from "../Components/Common/components/ButtonV2";
 import CareIcon from "../CAREUI/icons/CareIcon";
 export const VoiceRecorder = (props: any) => {
-  const { createAudioBlob, reset, setResetRecording } = props;
+  const { createAudioBlob, confirmAudioBlobExists, reset, setResetRecording } =
+    props;
   const [
     audioURL,
     isRecording,
@@ -14,6 +15,7 @@ export const VoiceRecorder = (props: any) => {
     resetRecording,
   ] = useRecorder();
   const [time, setTime] = useState(0);
+  createAudioBlob(newBlob);
   useEffect(() => {
     let interval: any;
     if (isRecording) {
@@ -44,7 +46,7 @@ export const VoiceRecorder = (props: any) => {
               <ButtonV2
                 onClick={() => {
                   stopRecording();
-                  createAudioBlob(newBlob);
+                  confirmAudioBlobExists();
                 }}
               >
                 <CareIcon className={"care-l-microphone-slash text-lg"} />
