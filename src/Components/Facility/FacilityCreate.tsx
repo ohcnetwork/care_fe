@@ -420,7 +420,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         case "name":
         case "address":
           if (!state.form[field]) {
-            errors[field] = "required";
+            errors[field] = t("required");
             invalidForm = true;
           }
           return;
@@ -430,14 +430,14 @@ export const FacilityCreate = (props: FacilityProps) => {
         case "local_body":
         case "ward":
           if (!Number(state.form[field])) {
-            errors[field] = "required";
+            errors[field] = t("required");
             invalidForm = true;
           }
           return;
 
         case "pincode":
           if (!validatePincode(state.form[field])) {
-            errors[field] = "invalid_pincode";
+            errors[field] = t("invalid_pincode");
             invalidForm = true;
           }
           return;
@@ -449,19 +449,19 @@ export const FacilityCreate = (props: FacilityProps) => {
             !phoneNumber?.isPossible() ||
             !phonePreg(String(phoneNumber?.number))
           ) {
-            errors[field] = "invalid_phone_number";
+            errors[field] = t("invalid_phone_number");
             invalidForm = true;
           }
           return;
         case "latitude":
           if (!!state.form.latitude && !validateLatitude(state.form[field])) {
-            errors[field] = "latitude_invalid";
+            errors[field] = t("latitude_invalid");
             invalidForm = true;
           }
           return;
         case "longitude":
           if (!!state.form.longitude && !validateLongitude(state.form[field])) {
-            errors[field] = "longitude_invalid";
+            errors[field] = t("longitude_invalid");
             invalidForm = true;
           }
           return;
@@ -570,7 +570,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   if (!capacityData || !capacityData.length) {
     capacityList = (
       <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
-        {t("no_bed_types")}
+        {t("no_bed_types_found")}
       </h5>
     );
   } else {

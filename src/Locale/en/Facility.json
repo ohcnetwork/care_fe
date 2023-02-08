@@ -8,7 +8,7 @@
   "no_duplicate_facility": "You should not create duplicate facilities",
   "no_facilities": "No Facilities found",
   "no_doctors": "No Doctors found",
-  "no_bed_types": "No Bed Types found",
+  "no_bed_types_found": "No Bed Types found",
   "total_beds": "Total Beds",
   "create_facility": "Create a new facility",
   "doctors_list": "Doctors List",
