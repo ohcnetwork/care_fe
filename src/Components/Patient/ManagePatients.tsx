@@ -761,8 +761,8 @@ export const PatientManager = () => {
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-12px]">
         <div>
           <div className="flex flex-col mt-2 h-full">
-            <div className="bg-white overflow-hidden shadow rounded-lg mb-2 h-full">
-              <div className="px-4 py-24 sm:p-[35px]">
+            <div className="bg-white overflow-hidden shadow rounded-lg mb-2">
+              <div className="px-4 py-24 sm:p-[47px]">
                 <dl>
                   <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                     Total Patients
