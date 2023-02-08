@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "raviger";
 import moment from "moment";
 import useMergeState from "../../Common/hooks/useMergeState";
+import { useTranslation } from "react-i18next";
 
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter, dataList } = props;
@@ -30,6 +31,7 @@ export default function ListFilter(props: any) {
     sample_collection_date_after: filter.sample_collection_date_after || null,
     srf_id: filter.srf_id || null,
   });
+  const { t } = useTranslation();
 
   const handleDateRangeChange = (
     startDateId: string,
@@ -183,7 +185,7 @@ export default function ListFilter(props: any) {
       <div className="flex justify-between">
         <button className="btn btn-default" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />
-          Cancel
+          {t("cancel")}
         </button>
         <Link
           href="/external_results"
@@ -191,24 +193,24 @@ export default function ListFilter(props: any) {
           onClick={clearFilters}
         >
           <i className="fas fa-times mr-2" />
-          Clear Filters
+          {t("clear_filters")}
         </Link>
         <button className="btn btn-primary" onClick={applyFilter}>
           <i className="fas fa-check mr-2" />
-          Apply
+          {t("apply")}
         </button>
       </div>
-      <div className="font-light text-md mt-2">Filter By:</div>
+      <div className="font-light text-md mt-2">{t("filter_by")}:</div>
       <div className="flex flex-wrap gap-2">
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Lsg</span>
+          <span className="text-sm font-semibold">{t("lsg")}</span>
           <AutoCompleteAsyncField
             multiple={true}
             name="local_bodies"
             options={lsgList}
-            label="Local Body"
+            label={t("Local Body")}
             variant="outlined"
-            placeholder="Select Local Body"
+            placeholder={t("select_local_body")}
             loading={loading}
             freeSolo={false}
             value={selectedLsgs}
@@ -223,14 +225,14 @@ export default function ListFilter(props: any) {
       </div>
       <div className="flex flex-wrap gap-2">
         <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Ward</span>
+          <span className="text-sm font-semibold">{t("Ward")}</span>
           <AutoCompleteAsyncField
             multiple={true}
             name="wards"
             options={filterWards()}
-            label="Ward"
+            label={t("Ward")}
             variant="outlined"
-            placeholder="Select wards"
+            placeholder={t("select_wards")}
             loading={loading}
             freeSolo={false}
             value={wards}
@@ -256,7 +258,7 @@ export default function ListFilter(props: any) {
           }
           endDateId={"created_date_before"}
           startDateId={"created_date_after"}
-          label={"Created Date"}
+          label={t("created_date")}
           size="small"
         />
       </div>
@@ -269,7 +271,7 @@ export default function ListFilter(props: any) {
           }
           endDateId={"result_date_before"}
           startDateId={"result_date_after"}
-          label={"Result Date"}
+          label={t("result_date")}
           size="small"
         />
       </div>
@@ -286,12 +288,12 @@ export default function ListFilter(props: any) {
           }
           endDateId={"sample_collection_date_before"}
           startDateId={"sample_collection_date_after"}
-          label={"Sample Collection Date"}
+          label={t("sample_collection_date")}
           size="small"
         />
       </div>
       <div className="w-full flex-none">
-        <span className="text-sm font-semibold">SRF ID</span>
+        <span className="text-sm font-semibold">{t("srf_id")}</span>
         <TextInputField
           id="srf_id"
           name="srf_id"
@@ -300,7 +302,7 @@ export default function ListFilter(props: any) {
           errors=""
           value={filterState.srf_id}
           onChange={handleChange}
-          label="Srf id"
+          label={t("srf_id")}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
         />
       </div>

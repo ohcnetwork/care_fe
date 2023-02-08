@@ -445,11 +445,13 @@ export default function ManageUsers() {
 
   return (
     <div>
-      <SkillsSlideOver
-        show={expandSkillList}
-        setShow={setExpandSkillList}
-        username={selectedUser}
-      />
+      {expandSkillList && (
+        <SkillsSlideOver
+          show={expandSkillList}
+          setShow={setExpandSkillList}
+          username={selectedUser}
+        />
+      )}
       <PageTitle
         title="User Management"
         hideBack={true}

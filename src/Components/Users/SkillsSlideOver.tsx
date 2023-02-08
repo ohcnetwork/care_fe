@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../Utils/utils";
-import { IconButton, Button } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import { SkillSelect } from "../Common/SkillSelect";
 import {
@@ -13,6 +11,10 @@ import {
 import UnlinkSkillDialog from "./UnlinkSkillDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
+import ButtonV2 from "../Common/components/ButtonV2";
+import AuthorizeFor from "../../Utils/AuthorizeFor";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
 
 interface IProps {
   username: string;
@@ -73,6 +75,10 @@ export default ({ show, setShow, username }: IProps) => {
     setIsLoading(false);
   }, [username, fetchSkills]);
 
+  const authorizeForAddSkill = useIsAuthorized(
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+  );
+
   return (
     <div className="col-span-4">
       {deleteSkill && (
@@ -92,22 +98,28 @@ export default ({ show, setShow, username }: IProps) => {
       >
         <div>
           <div className="sm:col-start-2 col-span-full sm:col-span-3">
-            <div className="flex">
+            <div className="tooltip flex items-center gap-2">
               <SkillSelect
                 multiple={false}
                 name="skill"
+                disabled={!authorizeForAddSkill}
                 showAll={true}
                 showNOptions={8}
                 selected={selectedSkill}
                 setSelected={setSelectedSkill}
                 errors=""
               />
-              <Button
-                color="primary"
+              <ButtonV2
+                disabled={!authorizeForAddSkill}
                 onClick={() => addSkill(username, selectedSkill)}
               >
                 Add
-              </Button>
+              </ButtonV2>
+              {!authorizeForAddSkill && (
+                <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
+                  Contact your admin to add skills
+                </span>
+              )}
             </div>
             <div className="mb-2 mt-4">
               {skills.length === 0 ? (
@@ -136,14 +148,15 @@ export default ({ show, setShow, username }: IProps) => {
                         {skill.skill_object.name}
                       </div>
                       <div>
-                        <IconButton
+                        <ButtonV2
                           size="small"
-                          color="primary"
+                          variant="danger"
+                          ghost={true}
                           disabled={isLoading}
                           onClick={() => setDeleteSkill(skill)}
                         >
-                          <CloseIcon />
-                        </IconButton>
+                          <CareIcon className="care-l-times text-lg" />
+                        </ButtonV2>
                       </div>
                     </div>
                   </div>

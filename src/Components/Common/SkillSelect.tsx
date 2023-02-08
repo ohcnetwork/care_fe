@@ -12,6 +12,7 @@ interface SkillSelectProps {
   multiple?: boolean;
   showAll?: boolean;
   showNOptions?: number;
+  disabled?: boolean;
   selected: SkillObjectModel | SkillObjectModel[] | null;
   setSelected: (selected: SkillObjectModel) => void;
 }
@@ -25,6 +26,7 @@ export const SkillSelect = (props: SkillSelectProps) => {
     searchAll,
     showAll = true,
     showNOptions = 10,
+    disabled = false,
     className = "",
     errors = "",
   } = props;
@@ -53,6 +55,7 @@ export const SkillSelect = (props: SkillSelectProps) => {
       multiple={multiple}
       selected={selected}
       onChange={setSelected}
+      disabled={disabled}
       fetchData={skillSearch}
       showNOptions={showNOptions}
       optionLabel={(option: any) =>
