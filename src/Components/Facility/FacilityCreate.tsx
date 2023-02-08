@@ -84,14 +84,14 @@ type FacilityForm = {
   latitude: string;
   longitude: string;
   pincode: string;
-  oxygen_capacity: number;
-  type_b_cylinders: number;
-  type_c_cylinders: number;
-  type_d_cylinders: number;
-  expected_oxygen_requirement: number;
-  expected_type_b_cylinders: number;
-  expected_type_c_cylinders: number;
-  expected_type_d_cylinders: number;
+  oxygen_capacity?: number;
+  type_b_cylinders?: number;
+  type_c_cylinders?: number;
+  type_d_cylinders?: number;
+  expected_oxygen_requirement?: number;
+  expected_type_b_cylinders?: number;
+  expected_type_c_cylinders?: number;
+  expected_type_d_cylinders?: number;
 };
 
 const initForm: FacilityForm = {
@@ -108,14 +108,14 @@ const initForm: FacilityForm = {
   latitude: "",
   longitude: "",
   pincode: "",
-  oxygen_capacity: 0,
-  type_b_cylinders: 0,
-  type_c_cylinders: 0,
-  type_d_cylinders: 0,
-  expected_oxygen_requirement: 0,
-  expected_type_b_cylinders: 0,
-  expected_type_c_cylinders: 0,
-  expected_type_d_cylinders: 0,
+  oxygen_capacity: undefined,
+  type_b_cylinders: undefined,
+  type_c_cylinders: undefined,
+  type_d_cylinders: undefined,
+  expected_oxygen_requirement: undefined,
+  expected_type_b_cylinders: undefined,
+  expected_type_c_cylinders: undefined,
+  expected_type_d_cylinders: undefined,
 };
 
 const initError: Record<keyof FacilityForm, string> = Object.assign(
