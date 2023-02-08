@@ -483,8 +483,10 @@ export const PatientManager = () => {
                         {patient.facility_object.name}
                       </p>
                       <RelativeTime
-                        className="text-gray-600"
-                        prefix={t("updated")}
+                        className="text-sm text-gray-900"
+                        prefix={
+                          <span className="text-gray-600">{t("updated")}</span>
+                        }
                         time={patient.modified_date}
                       />
                     </div>
