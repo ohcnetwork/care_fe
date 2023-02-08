@@ -10,6 +10,7 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RelativeTime from "../../CAREUI/display/RelativeTime";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import { useTranslation } from "react-i18next";
 
 interface BedTypeCardProps {
   facilityId?: string;
@@ -37,6 +38,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
   removeBedType,
   handleUpdate,
 }) => {
+  const { t } = useTranslation();
   const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [open, setOpen] = useState(false);
@@ -153,7 +155,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                 {lastUpdated && (
                   <RelativeTime
                     className="text-xs text-gray-600 font-normal"
-                    prefix="Updated"
+                    prefix={t("updated")}
                     time={lastUpdated}
                   />
                 )}

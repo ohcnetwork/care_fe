@@ -537,7 +537,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         <RelativeTime
                           prefix={
                             <span className="font-semibold leading-relaxed">
-                              Created
+                              {t("created")}:
                             </span>
                           }
                           time={item.created_date}
@@ -658,7 +658,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         <RelativeTime
                           prefix={
                             <span className="font-semibold leading-relaxed">
-                              Created
+                              {t("created")}:
                             </span>
                           }
                           time={item.created_date}
@@ -786,7 +786,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       <RelativeTime
                         prefix={
                           <span className="font-semibold leading-relaxed">
-                            Created:
+                            {t("created")}:
                           </span>
                         }
                         time={item.created_date}

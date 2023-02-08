@@ -12,6 +12,7 @@ import { PATIENT_CATEGORIES } from "../../../Common/constants";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import RelativeTime from "../../../CAREUI/display/RelativeTime";
+import { useTranslation } from "react-i18next";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
@@ -37,6 +38,7 @@ const getName = (item: any) => {
 };
 
 export const DailyRoundsList = (props: any) => {
+  const { t } = useTranslation();
   const { facilityId, patientId, consultationId, consultationData } = props;
   const dispatch: any = useDispatch();
   const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
@@ -161,7 +163,7 @@ export const DailyRoundsList = (props: any) => {
                     {itemData.created_date && (
                       <RelativeTime
                         className="text-xs text-gray-700"
-                        prefix="Created"
+                        prefix={t("created")}
                         time={itemData.created_date}
                       />
                     )}
@@ -170,7 +172,7 @@ export const DailyRoundsList = (props: any) => {
                     {itemData.modified_date && (
                       <RelativeTime
                         className="text-gray-700 text-xs"
-                        prefix="Updated"
+                        prefix={t("updated")}
                         time={itemData.modified_date}
                       />
                     )}

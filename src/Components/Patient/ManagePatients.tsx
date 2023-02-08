@@ -39,6 +39,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import RelativeTime from "../../CAREUI/display/RelativeTime";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -74,6 +75,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
 };
 
 export const PatientManager = () => {
+  const { t } = useTranslation();
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>();
   const [isLoading, setIsLoading] = useState(false);
@@ -482,7 +484,7 @@ export const PatientManager = () => {
                       </p>
                       <RelativeTime
                         className="text-gray-600"
-                        prefix="updated"
+                        prefix={t("updated")}
                         time={patient.modified_date}
                       />
                     </div>
