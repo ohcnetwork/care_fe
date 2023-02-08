@@ -17,6 +17,7 @@ interface CameraConfigureProps {
   setNewPreset(preset: string): void;
   refreshPresetsHash: number;
   facilityMiddlewareHostname: string;
+  isLoading: boolean;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
   const {
@@ -24,6 +25,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     addPreset,
     setBed,
     bed,
+    isLoading,
     newPreset,
     setNewPreset,
     refreshPresetsHash,
@@ -62,7 +64,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             </div>
           </div>
           <div className="flex justify-end mt-4">
-            <Submit label="Add Preset" />
+            <Submit disabled={isLoading} label="Add Preset" />
           </div>
         </form>
       </Card>

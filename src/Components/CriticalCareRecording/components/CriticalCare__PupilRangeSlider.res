@@ -1,5 +1,3 @@
-%%raw("import './styles.css'")
-
 let str = React.string
 
 let handleOnChange = (setValueCB, event) => {

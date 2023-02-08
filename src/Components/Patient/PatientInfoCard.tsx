@@ -5,7 +5,7 @@ import DialogModal from "../Common/Dialog";
 import Beds from "../Facility/Consultations/Beds";
 import { useState } from "react";
 import { PatientCategory } from "../Facility/models";
-import { PATIENT_CATEGORIES } from "../../Common/constants";
+import { DISCHARGE_REASONS, PATIENT_CATEGORIES } from "../../Common/constants";
 import moment from "moment";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -180,6 +180,25 @@ export default function PatientInfoCard(props: {
           </div>
         </div>
         <div className="w-full lg:w-fit flex gap-2 flex-col px-4 py-1 lg:p-6">
+          {patient.is_active === false && (
+            <div className="flex flex-col justify-center items-center">
+              <div className="text-sm leading-5 font-normal text-gray-500">
+                Discharge Reason
+              </div>
+              <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                {!patient.last_consultation?.discharge_reason ? (
+                  <span className="text-gray-800">UNKNOWN</span>
+                ) : patient.last_consultation?.discharge_reason === "EXP" ? (
+                  <span className="text-red-600">EXPIRED</span>
+                ) : (
+                  DISCHARGE_REASONS.find(
+                    (reason) =>
+                      reason.id === patient.last_consultation?.discharge_reason
+                  )?.text
+                )}
+              </div>
+            </div>
+          )}
           {[
             [
               `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`,

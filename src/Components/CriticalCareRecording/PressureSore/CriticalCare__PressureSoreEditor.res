@@ -5,7 +5,6 @@
 @val external innerHeight: int = "window.innerHeight"
 
 @val external document: 'a = "document"
-%%raw("import './styles.css'")
 
 let str = React.string
 open CriticalCare__Types
