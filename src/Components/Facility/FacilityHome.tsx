@@ -100,7 +100,6 @@ export const FacilityHome = (props: any) => {
               setDoctorData(doctorRes.data.results);
               // calculating total doctors count
               let totalCount = 0;
-              console.log(doctorRes.data.results[0]);
               doctorRes.data.results.map((doctor: DoctorModal) => {
                 if (doctor.count) {
                   totalCount += doctor.count;
