@@ -879,6 +879,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     <TextFormField
                       {...field("oxygen_capacity")}
                       type="number"
+                      placeholder="0"
                       label="Liquid Oxygen Capacity"
                       required
                       trailingPadding=" "
@@ -890,6 +891,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     <TextFormField
                       {...field("expected_oxygen_requirement")}
                       type="number"
+                      placeholder="0"
                       required
                       trailingPadding=" "
                       trailing={
@@ -902,6 +904,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     <TextFormField
                       {...field("type_b_cylinders")}
                       type="number"
+                      placeholder="0"
                       required
                       label="B Type Cylinders"
                       trailingPadding=" "
@@ -913,6 +916,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     <TextFormField
                       {...field("expected_type_b_cylinders")}
                       type="number"
+                      placeholder="0"
                       required
                       label="Expected Burn Rate"
                       trailingPadding=" "
@@ -926,6 +930,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     <TextFormField
                       {...field("type_c_cylinders")}
                       type="number"
+                      placeholder="0"
                       required
                       label="C Type Cylinders"
                       trailingPadding=" "
@@ -937,6 +942,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     <TextFormField
                       {...field("expected_type_c_cylinders")}
                       type="number"
+                      placeholder="0"
                       required
                       trailingPadding=" "
                       trailing={
@@ -950,6 +956,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     <TextFormField
                       {...field("type_d_cylinders")}
                       type="number"
+                      placeholder="0"
                       required
                       label="D Type Cylinders"
                       trailingPadding=" "
@@ -961,6 +968,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     <TextFormField
                       {...field("expected_type_d_cylinders")}
                       type="number"
+                      placeholder="0"
                       required
                       label="Expected Burn Rate"
                       trailingPadding=" "
