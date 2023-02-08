@@ -151,7 +151,6 @@ export const AddBedForm = (props: BedFormProps) => {
             },
           }),
         }}
-        backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
       />
       <div className="mt-10">
         <Card>
