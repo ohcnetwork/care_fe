@@ -794,9 +794,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                       onChange={handlePincodeChange}
                     />
                     {showAutoFilledPincode && (
-                      <div>
-                        <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
-                        <span className="text-primary-500 text-sm">
+                      <div className="flex items-center gap-2 text-primary-500">
+                        <CareIcon className="care-l-check-circle" />
+                        <span className="text-sm">
                           State and district auto-filled from pincode
                         </span>
                       </div>
@@ -864,14 +864,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
                   />
-                  <TextAreaFormField
-                    {...field("address")}
-                    label="Address"
-                    required
-                  />
+                  <TextAreaFormField {...field("address")} required />
                   <PhoneNumberFormField
                     {...field("phone_number")}
-                    label="Emergency Contact Number"
+                    label={t("emergency_contact_number")}
                     required
                     onlyIndia
                   />
@@ -880,12 +876,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("oxygen_capacity")}
                       type="number"
                       placeholder="0"
-                      label="Liquid Oxygen Capacity"
+                      label={t("liquid_oxygen_capacity")}
                       required
                       trailingPadding=" "
-                      trailing={
-                        <p className="text-xs text-gray-700 mr-8">Litres</p>
-                      }
+                      trailing={<FieldUnit unit={t("litres")} />}
                       min={0}
                     />
                     <TextFormField
@@ -894,10 +888,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                       placeholder="0"
                       required
                       trailingPadding=" "
-                      trailing={
-                        <p className="text-xs text-gray-700 mr-8">Litres/day</p>
-                      }
-                      label="Expected Burn Rate"
+                      trailing={<FieldUnit unit={t("litres_per_day")} />}
+                      label={t("expected_burn_rate")}
                       min={0}
                     />
 
@@ -906,11 +898,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                       type="number"
                       placeholder="0"
                       required
-                      label="B Type Cylinders"
                       trailingPadding=" "
-                      trailing={
-                        <p className="text-xs text-gray-700 mr-8">Cylinders</p>
-                      }
+                      trailing={<FieldUnit unit={t("cylinders")} />}
                       min={0}
                     />
                     <TextFormField
@@ -918,13 +907,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                       type="number"
                       placeholder="0"
                       required
-                      label="Expected Burn Rate"
+                      label={t("expected_burn_rate")}
                       trailingPadding=" "
-                      trailing={
-                        <p className="text-xs text-gray-700 mr-8">
-                          Cylinders/day
-                        </p>
-                      }
+                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
                       min={0}
                     />
                     <TextFormField
@@ -932,11 +917,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                       type="number"
                       placeholder="0"
                       required
-                      label="C Type Cylinders"
                       trailingPadding=" "
-                      trailing={
-                        <p className="text-xs text-gray-700 mr-8">Cylinders</p>
-                      }
+                      trailing={<FieldUnit unit={t("cylinders")} />}
                       min={0}
                     />
                     <TextFormField
@@ -945,12 +927,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                       placeholder="0"
                       required
                       trailingPadding=" "
-                      trailing={
-                        <p className="text-xs text-gray-700 mr-8">
-                          Cylinders/day
-                        </p>
-                      }
-                      label="Expected Burn Rate"
+                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
+                      label={t("expected_burn_rate")}
                       min={0}
                     />
                     <TextFormField
@@ -958,11 +936,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                       type="number"
                       placeholder="0"
                       required
-                      label="D Type Cylinders"
                       trailingPadding=" "
-                      trailing={
-                        <p className="text-xs text-gray-700 mr-8">Cylinders</p>
-                      }
+                      trailing={<FieldUnit unit={t("cylinders")} />}
                       min={0}
                     />
                     <TextFormField
@@ -970,13 +945,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                       type="number"
                       placeholder="0"
                       required
-                      label="Expected Burn Rate"
+                      label={t("expected_burn_rate")}
                       trailingPadding=" "
-                      trailing={
-                        <p className="text-xs text-gray-700 mr-8">
-                          Cylinders/day
-                        </p>
-                      }
+                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
                       min={0}
                     />
                   </div>
@@ -996,7 +967,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <TextFormField
                     className="flex-1 px-2"
                     {...field("latitude")}
-                    label="Location"
+                    label={t("location")}
                     placeholder="Latitude"
                   />
 
@@ -1055,4 +1026,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         </div>
       );
   }
+};
+
+const FieldUnit = ({ unit }: { unit: string }) => {
+  return <p className="text-xs text-gray-700 mr-8">{unit}</p>;
 };

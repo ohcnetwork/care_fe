@@ -12,5 +12,12 @@
   "total_beds": "Total Beds",
   "create_facility": "Create a new facility",
   "doctors_list": "Doctors List",
-  "bed_capacity": "Bed Capacity"
+  "bed_capacity": "Bed Capacity",
+  "cylinders": "Cylinders",
+  "cylinders_per_day": "Cylinders/day",
+  "liquid_oxygen_capacity": "Liquid Oxygen Capacity",
+  "expected_burn_rate": "Expected Burn Rate",
+  "type_b_cylinders": "B Type Cylinders",
+  "type_c_cylinders": "C Type Cylinders",
+  "type_d_cylinders": "D Type Cylinders"
 }
