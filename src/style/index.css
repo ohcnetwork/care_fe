@@ -586,7 +586,10 @@ button:disabled,
 }
 
 .error-text {
-    @apply font-medium tracking-wide text-error text-xs
+    font-size: 0.75rem;
+    line-height: 1rem; 
+    font-weight: 500; 
+    letter-spacing: 0.025em; 
 }
 
 .textMarginCenter {
