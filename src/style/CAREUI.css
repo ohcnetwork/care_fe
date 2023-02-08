@@ -102,7 +102,7 @@
 .button-primary-ghost { @apply accent-primary-500 hover:bg-primary-100 text-primary-500 !important }
 .button-primary-border { @apply border border-primary-500 }
 
-.button-secondary-default { @apply accent-secondary-200 bg-secondary-300 hover:bg-secondary-200 text-secondary-800 !important }
+.button-secondary-default { @apply accent-secondary-200 bg-white hover:bg-secondary-200 text-secondary-800 !important }
 .button-secondary-ghost { @apply accent-secondary-200 hover:bg-secondary-100 text-secondary-700 !important }
 .button-secondary-border { @apply border border-secondary-300 }
 

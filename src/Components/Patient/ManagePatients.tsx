@@ -19,6 +19,7 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
+  PATIENT_FILTER_ORDER,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -36,6 +37,8 @@ import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import RelativeTime from "../../CAREUI/display/RelativeTime";
+import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -72,8 +75,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
 
 export const PatientManager = () => {
   const dispatch: any = useDispatch();
-
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const {
@@ -90,7 +92,8 @@ export const PatientManager = () => {
     name: "",
   });
   const [showDialog, setShowDialog] = useState(false);
-
+  const [showDoctors, setShowDoctors] = useState(false);
+  const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
@@ -196,6 +199,12 @@ export const PatientManager = () => {
     is_antenatal: qParams.is_antenatal || undefined,
   };
 
+  useEffect(() => {
+    if (params.facility) {
+      setShowDoctorConnect(true);
+    }
+  }, [qParams.facility]);
+
   const date_range_fields = [
     [params.created_date_before, params.created_date_after],
     [params.modified_date_before, params.modified_date_after],
@@ -240,20 +249,14 @@ export const PatientManager = () => {
   };
 
   useEffect(() => {
-    if (params.page === 1) return;
-
     setIsLoading(true);
-    dispatch(getAllPatient(params, "listPatients"))
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
+    dispatch(getAllPatient(params, "listPatients")).then((res: any) => {
+      if (res && res.data) {
+        setData(res.data.results);
+        setTotalCount(res.data.count);
         setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+      }
+    });
   }, [
     dispatch,
     qParams.last_consultation_admission_date_before,
@@ -645,8 +648,16 @@ export const PatientManager = () => {
       <div className="flex flex-col lg:flex-row justify-between items-center">
         <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
+          {showDoctorConnect && (
+            <ButtonV2
+              onClick={() => {
+                setShowDoctors(true);
+              }}
+            >
+              <p>Doctor Connect</p>
+            </ButtonV2>
+          )}
           <ButtonV2
-            className="flex gap-2 items-center font-semibold"
             onClick={() => {
               qParams.facility
                 ? navigate(`/facility/${qParams.facility}/patient`)
@@ -656,8 +667,10 @@ export const PatientManager = () => {
             <CareIcon className="care-l-plus text-lg" />
             <p>Add Patient Details</p>
           </ButtonV2>
-          <button
-            className="btn btn-primary-ghost w-full lg:w-fit"
+          <ButtonV2
+            ghost
+            border
+            className="bg-white"
             onClick={() => advancedFilter.setShow(true)}
           >
             <svg
@@ -690,7 +703,36 @@ export const PatientManager = () => {
               </line>
             </svg>
             <span>Advanced Filters</span>
-          </button>
+          </ButtonV2>
+          <DropdownMenu
+            title="Sort by"
+            variant="secondary"
+            className="border border-primary-500 bg-white"
+            icon={<CareIcon className="care-l-sort" />}
+          >
+            {PATIENT_FILTER_ORDER.map((ordering) => {
+              return (
+                <DropdownItem
+                  key={ordering.text}
+                  onClick={() => updateQuery({ ordering: ordering.text })}
+                  icon={
+                    <CareIcon
+                      className={
+                        ordering.order === "Ascending"
+                          ? "care-l-sort-amount-up"
+                          : "care-l-sort-amount-down"
+                      }
+                    />
+                  }
+                >
+                  <span>{ordering.desc}</span>
+                  <span className="text-gray-600 text-sm">
+                    {ordering.order}
+                  </span>
+                </DropdownItem>
+              );
+            })}
+          </DropdownMenu>
           <div className="tooltip">
             <ExportMenu
               disabled={!isExportAllowed}
@@ -850,6 +892,11 @@ export const PatientManager = () => {
             <div className="mb-4">{managePatients}</div>
           </TabPanel>
         </SwipeableViews>
+        <DoctorVideoSlideover
+          facilityId={params.facility}
+          show={showDoctors}
+          setShow={setShowDoctors}
+        />
       </div>
     </div>
   );
