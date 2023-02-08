@@ -357,16 +357,10 @@ const AssetManage = (props: AssetManageProps) => {
 
             <div className="flex flex-col text-sm text-gray-600 break-words justify-end">
               {asset?.created_date && (
-                <div className="flex gap-1">
-                  <span>Created</span>
-                  <RelativeTime time={asset?.created_date} />
-                </div>
+                <RelativeTime prefix="Created" time={asset?.created_date} />
               )}
               {asset?.modified_date && (
-                <div className="flex gap-1">
-                  <span>Last updated</span>
-                  <RelativeTime time={asset?.modified_date} />
-                </div>
+                <RelativeTime prefix="Updated" time={asset?.modified_date} />
               )}
             </div>
           </div>

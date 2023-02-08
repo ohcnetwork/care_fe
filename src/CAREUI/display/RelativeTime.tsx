@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react";
 import moment from "moment";
 
-const RelativeTime = ({ time }: { time?: string }) => {
+interface Props {
+  time?: string;
+  prefix?: React.ReactNode;
+  className?: string;
+}
+
+/**
+ * A generic component to display relative time along with a tooltip and a user
+ * if provided.
+ */
+const RelativeTime = ({ time, prefix, className }: Props) => {
   const [relativeTime, setRelativeTime] = useState(moment(time).fromNow());
 
   useEffect(() => {
@@ -12,7 +22,7 @@ const RelativeTime = ({ time }: { time?: string }) => {
     return () => clearInterval(timer);
   }, [time]);
 
-  return (
+  let child = (
     <div className="tooltip">
       <span className="underline">{relativeTime}</span>
       <span className="tooltip-text font-medium tracking-wider text-xs -translate-x-1/3">
@@ -20,6 +30,17 @@ const RelativeTime = ({ time }: { time?: string }) => {
       </span>
     </div>
   );
+
+  if (prefix) {
+    child = (
+      <div className="flex items-center gap-1">
+        {prefix}
+        {child}
+      </div>
+    );
+  }
+
+  return <div className={className}>{child}</div>;
 };
 
 export default RelativeTime;

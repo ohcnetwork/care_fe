@@ -478,13 +478,13 @@ export const PatientManager = () => {
                   <div className="mb-2">
                     <div className="flex flex-wrap items-center">
                       <p className="text-sm font-medium text-gray-700 mr-2">
-                        {" "}
                         {patient.facility_object.name}
                       </p>
-                      <p className="flex text-sm text-gray-600 space-x-1">
-                        <span>last updated</span>
-                        <RelativeTime time={patient.modified_date} />
-                      </p>
+                      <RelativeTime
+                        className="text-gray-600"
+                        prefix="updated"
+                        time={patient.modified_date}
+                      />
                     </div>
                   </div>
                 )}

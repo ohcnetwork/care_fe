@@ -533,16 +533,16 @@ export const FileUpload = (props: FileUploadProps) => {
                         </span>{" "}
                         {item.uploaded_by ? item.uploaded_by.username : null}
                       </div>
-                      <div className="flex gap-1">
-                        <span className="font-semibold leading-relaxed">
-                          Created:
-                        </span>
-                        {item.created_date ? (
-                          <RelativeTime time={item.created_date} />
-                        ) : (
-                          "-"
-                        )}
-                      </div>
+                      {item.created_date && (
+                        <RelativeTime
+                          prefix={
+                            <span className="font-semibold leading-relaxed">
+                              Created
+                            </span>
+                          }
+                          time={item.created_date}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -654,16 +654,16 @@ export const FileUpload = (props: FileUploadProps) => {
                         </span>{" "}
                         {item.uploaded_by ? item.uploaded_by.username : null}
                       </div>
-                      <div className="flex gap-1">
-                        <span className="font-semibold leading-relaxed">
-                          Created:
-                        </span>
-                        {item.created_date ? (
-                          <RelativeTime time={item.created_date} />
-                        ) : (
-                          "-"
-                        )}
-                      </div>
+                      {item.created_date && (
+                        <RelativeTime
+                          prefix={
+                            <span className="font-semibold leading-relaxed">
+                              Created
+                            </span>
+                          }
+                          time={item.created_date}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center">
@@ -782,16 +782,16 @@ export const FileUpload = (props: FileUploadProps) => {
                       </span>{" "}
                       {item.uploaded_by ? item.uploaded_by.username : null}
                     </div>
-                    <div className="flex gap-1">
-                      <span className="font-semibold leading-relaxed">
-                        Created:
-                      </span>
-                      {item.created_date ? (
-                        <RelativeTime time={item.created_date} />
-                      ) : (
-                        "-"
-                      )}
-                    </div>
+                    {item.created_date && (
+                      <RelativeTime
+                        prefix={
+                          <span className="font-semibold leading-relaxed">
+                            Created:
+                          </span>
+                        }
+                        time={item.created_date}
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center">

@@ -151,10 +151,11 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
             {facilityId && (
               <div className="flex items-center justify-between gap-2 pt-6">
                 {lastUpdated && (
-                  <div className="flex gap-1 text-xs text-gray-600 font-normal">
-                    <span>Last updated:</span>
-                    <RelativeTime time={lastUpdated} />
-                  </div>
+                  <RelativeTime
+                    className="text-xs text-gray-600 font-normal"
+                    prefix="Updated"
+                    time={lastUpdated}
+                  />
                 )}
                 <div className="flex justify-end gap-2 relative">
                   <ButtonV2

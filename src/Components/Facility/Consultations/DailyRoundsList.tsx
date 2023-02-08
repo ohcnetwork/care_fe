@@ -158,20 +158,22 @@ export const DailyRoundsList = (props: any) => {
                     </Grid>
                   )}
                   <Grid item xs={6}>
-                    <div className="flex gap-1 text-xs">
-                      <span className="text-gray-700">Created</span>
-                      {itemData.created_date && (
-                        <RelativeTime time={itemData.created_date} />
-                      )}
-                    </div>
+                    {itemData.created_date && (
+                      <RelativeTime
+                        className="text-xs text-gray-700"
+                        prefix="Created"
+                        time={itemData.created_date}
+                      />
+                    )}
                   </Grid>
                   <Grid item xs={6}>
-                    <div className="flex gap-1 text-xs">
-                      <span className="text-gray-700">Updated</span>
-                      {itemData.modified_date && (
-                        <RelativeTime time={itemData.modified_date} />
-                      )}
-                    </div>
+                    {itemData.modified_date && (
+                      <RelativeTime
+                        className="text-gray-700 text-xs"
+                        prefix="Updated"
+                        time={itemData.modified_date}
+                      />
+                    )}
                   </Grid>
 
                   {itemData.physical_examination_info && (
