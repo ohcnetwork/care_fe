@@ -775,13 +775,13 @@ export const FacilityHome = (props: any) => {
               if (doctorRes && doctorRes.data) {
                 setDoctorData(doctorRes.data.results);
                 // update total doctors count
-                let totalCount = 0;
-                doctorRes.data.results.map((doctor: DoctorModal) => {
-                  if (doctor.count) {
-                    totalCount += doctor.count;
-                  }
-                });
-                setTotalDoctors(totalCount);
+                setTotalDoctors(
+                  doctorRes.data.results.reduce(
+                    (acc: number, doctor: DoctorModal) =>
+                      acc + (doctor.count || 0),
+                    0
+                  )
+                );
               }
             }}
           />
