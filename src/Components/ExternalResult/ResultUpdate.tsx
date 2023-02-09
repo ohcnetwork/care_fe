@@ -21,7 +21,7 @@ import {
 import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory.js";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
