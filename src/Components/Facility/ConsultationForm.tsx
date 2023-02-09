@@ -726,6 +726,11 @@ export const ConsultationForm = (props: any) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          id
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
+            : `/facility/${facilityId}/patient/${patientId}`
+        }
       />
 
       <form

@@ -1092,7 +1092,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         disabled={button[3] as boolean}
                       >
                         <i className={`fas fa-${button[1]} mr-2`} />
-                        {button[0] as string}
+                        {button[0] as String}
                       </button>
                     ))}
                   </>
@@ -1274,6 +1274,11 @@ export const FileUpload = (props: FileUploadProps) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          type === "CONSULTATION"
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+            : `/facility/${facilityId}/patient/${patientId}`
+        }
       />
       <div className="mt-4">
         <div className="md:grid grid-cols-2 gap-4">

@@ -503,6 +503,11 @@ export const DailyRounds = (props: any) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          id
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+            : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+        }
       />
       <div className="mt-4">
         <div className="bg-white rounded shadow">

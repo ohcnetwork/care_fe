@@ -1753,7 +1753,7 @@ export default function SampleReport(props: samplePreviewProps) {
   }
   return (
     <Paper className={classes.root}>
-      <PageTitle title="Sample Report" />
+      <PageTitle title="Sample Report" backUrl={`/sample/${sampleId}`} />
       {report}
     </Paper>
   );

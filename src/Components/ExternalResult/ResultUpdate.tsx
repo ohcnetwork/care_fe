@@ -224,7 +224,11 @@ export default function UpdateResult(props: any) {
 
   return (
     <div>
-      <PageTitle title="Update External Result" className="px-6 mb-2" />
+      <PageTitle
+        title="Update External Result"
+        className="px-6 mb-2"
+        backUrl={`/external_results/${id}`}
+      />
       <CardContent>
         <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900">

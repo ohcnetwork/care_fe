@@ -644,7 +644,10 @@ export default function ShiftDetails(props: { id: string }) {
       ) : (
         <div className="mx-3 md:mx-8 mb-10">
           <div className="my-4 md:flex justify-between items-center mx-1">
-            <PageTitle title={t("shifting_details")} />
+            <PageTitle
+              title={t("shifting_details")}
+              backUrl="/shifting/board-view"
+            />
             <div className="md:flex items-center space-y-2 md:space-y-0 md:space-x-2">
               <div>
                 <Button
