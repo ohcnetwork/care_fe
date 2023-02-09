@@ -279,6 +279,7 @@ export const TriageForm = (props: triageFormProps) => {
             name: moment(state.form.entry_date).format("YYYY-MM-DD"),
           },
         }}
+        backUrl={`/facility/${facilityId}`}
       />
 
       <Modal

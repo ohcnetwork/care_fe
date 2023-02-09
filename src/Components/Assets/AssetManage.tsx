@@ -211,6 +211,7 @@ const AssetManage = (props: AssetManageProps) => {
             name: asset?.name,
           },
         }}
+        backUrl="/assets"
       />
       <ConfirmDialogV2
         title="Delete Asset"

@@ -242,6 +242,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={`/facility/${facilityId}/patient/${patientId}`}
       />
       <div className="mt-4">
         <Card>

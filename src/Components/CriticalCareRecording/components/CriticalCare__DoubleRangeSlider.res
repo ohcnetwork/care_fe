@@ -1,7 +1,5 @@
 @val external document: {..} = "document"
 
-%%raw("import './styles.css'")
-
 let str = React.string
 
 let handleClick = val => {

@@ -252,6 +252,7 @@ export default function InventoryLog(props: any) {
           [facilityId]: { name: facilityName },
           [inventoryId]: { name: itemName },
         }}
+        backUrl={`/facility/${facilityId}/inventory`}
       />
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8 ">

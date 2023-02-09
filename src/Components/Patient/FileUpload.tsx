@@ -118,6 +118,8 @@ interface StateInterface {
 export const FileUpload = (props: FileUploadProps) => {
   const { t } = useTranslation();
   const [audioBlob, setAudioBlob] = useState<Blob>();
+  const [audioBlobExists, setAudioBlobExists] = useState(false);
+  const [resetRecording, setResetRecording] = useState(false);
   const [file, setFile] = useState<File | null>();
   const {
     facilityId,
@@ -952,13 +954,21 @@ export const FileUpload = (props: FileUploadProps) => {
     setAudioBlob(createdBlob);
   };
 
+  const confirmAudioBlobExists = () => {
+    setAudioBlobExists(true);
+  };
+
+  const deleteAudioBlob = () => {
+    setAudioBlobExists(false);
+    setResetRecording(true);
+  };
+
   const uploadAudiofile = (response: any) => {
     const url = response.data.signed_url;
     const internal_name = response.data.internal_name;
     const f = audioBlob;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
-
     const config = {
       onUploadProgress: (progressEvent: any) => {
         const percentCompleted = Math.round(
@@ -1019,6 +1029,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setAudioUploadStarted(false);
       });
     setAudioName("");
+    setAudioBlobExists(false);
   };
 
   // For creating the Download File URL
@@ -1081,7 +1092,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         disabled={button[3] as boolean}
                       >
                         <i className={`fas fa-${button[1]} mr-2`} />
-                        {button[0] as string}
+                        {button[0] as String}
                       </button>
                     ))}
                   </>
@@ -1263,6 +1274,11 @@ export const FileUpload = (props: FileUploadProps) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          type === "CONSULTATION"
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+            : `/facility/${facilityId}/patient/${patientId}`
+        }
       />
       <div className="mt-4">
         <div className="md:grid grid-cols-2 gap-4">
@@ -1287,22 +1303,46 @@ export const FileUpload = (props: FileUploadProps) => {
                 }}
                 errors={audioFileError}
               />
+              <div className="text-xs">
+                Please allow browser permission before you start speaking
+              </div>
               {audiouploadStarted ? (
                 <LinearProgressWithLabel value={uploadPercent} />
               ) : (
-                <>
-                  <VoiceRecorder createAudioBlob={createAudioBlob} />
-                  {audioBlob && (
-                    <ButtonV2
-                      onClick={() => {
-                        handleAudioUpload();
-                      }}
-                    >
-                      <CareIcon className={"care-l-cloud-upload text-xl"} />
-                      Save Recording
-                    </ButtonV2>
+                <div className="flex flex-col lg:flex-row justify-between w-full">
+                  {audioBlobExists && (
+                    <div className="flex items-center w-full md:w-auto">
+                      <ButtonV2
+                        variant="danger"
+                        className="w-full"
+                        onClick={() => {
+                          deleteAudioBlob();
+                        }}
+                      >
+                        <CareIcon className="care-l-trash h-4" /> Delete
+                      </ButtonV2>
+                    </div>
                   )}
-                </>
+                  <VoiceRecorder
+                    createAudioBlob={createAudioBlob}
+                    confirmAudioBlobExists={confirmAudioBlobExists}
+                    reset={resetRecording}
+                    setResetRecording={setResetRecording}
+                  />
+                  {audioBlobExists && (
+                    <div className="flex items-center w-full md:w-auto">
+                      <ButtonV2
+                        onClick={() => {
+                          handleAudioUpload();
+                        }}
+                        className="w-full"
+                      >
+                        <CareIcon className={"care-l-cloud-upload text-xl"} />
+                        Save
+                      </ButtonV2>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           ) : null}

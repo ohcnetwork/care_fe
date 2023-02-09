@@ -401,11 +401,13 @@ export const PatientHome = (props: any) => {
       <div id="revamp">
         <PageTitle
           title={"Patient Details"}
-          backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
             [id]: { name: patientData?.name },
           }}
+          backUrl={
+            facilityId ? `/facility/${facilityId}/patients` : `/patients`
+          }
         />
 
         <div className="relative mt-2">
