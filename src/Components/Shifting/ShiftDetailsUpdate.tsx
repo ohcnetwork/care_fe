@@ -30,9 +30,9 @@ import {
   Box,
   FormControlLabel,
 } from "@material-ui/core";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useConfig from "../../Common/hooks/useConfig";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -68,6 +68,7 @@ const initialState = {
 };
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
+  const { goBack } = useAppHistory();
   const { kasp_full_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();

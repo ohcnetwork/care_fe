@@ -52,11 +52,7 @@ import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
 import { InfoOutlined } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import {
-  getPincodeDetails,
-  goBack,
-  includesIgnoreCase,
-} from "../../Utils/utils";
+import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -72,6 +68,7 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -195,6 +192,7 @@ const scrollTo = (id: string | boolean) => {
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
+  const { goBack } = useAppHistory();
   const { gov_data_api_key } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
