@@ -339,9 +339,7 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="font-semibold leading-relaxed">
                   {t("countries_travelled")}:{" "}
                 </span>
-                {Array.isArray(patientData?.countries_travelled)
-                  ? patientData?.countries_travelled.join(", ")
-                  : patientData?.countries_travelled.split(",").join(", ")}
+                {patientData?.countries_travelled.join(", ")}
               </div>
             )}
           {patientData?.ongoing_medication && (
