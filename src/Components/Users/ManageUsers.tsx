@@ -130,7 +130,10 @@ export default function ManageUsers() {
   );
 
   const addUser = (
-    <ButtonV2 onClick={() => navigate("/users/add")}>
+    <ButtonV2
+      className="btn btn-primary-ghost w-full"
+      onClick={() => navigate("/users/add")}
+    >
       <CareIcon className="care-l-plus text-lg w-full" />
       <p>Add New User</p>
     </ButtonV2>
