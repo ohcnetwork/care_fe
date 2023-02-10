@@ -221,6 +221,7 @@ export default function MinQuantityList(props: any) {
             style: "pointer-events-none",
           },
         }}
+        backUrl={`/facility/${facilityId}/inventory`}
       />
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">

@@ -342,8 +342,9 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "ip_no":
+          if (state.form.suggestion !== "A") return;
           if (!state.form[field]) {
-            errors[field] = "Please enter IP Number";
+            errors[field] = "IP Number is required as person is admitted";
             if (!error_div) error_div = field;
             invalidForm = true;
           } else if (!state.form[field].replace(/\s/g, "").length) {
@@ -725,6 +726,11 @@ export const ConsultationForm = (props: any) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          id
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
+            : `/facility/${facilityId}/patient/${patientId}`
+        }
       />
 
       <form
@@ -900,7 +906,11 @@ export const ConsultationForm = (props: any) => {
           <ErrorHelperText error={state.errors.procedure} />
         </div>
 
-        <TextFormField {...field("ip_no")} label="IP Number" required />
+        <TextFormField
+          {...field("ip_no")}
+          label="IP Number"
+          required={state.form.suggestion === "A"}
+        />
 
         <TextAreaFormField
           {...field("verified_by")}

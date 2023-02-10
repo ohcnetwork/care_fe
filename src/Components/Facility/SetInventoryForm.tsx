@@ -143,6 +143,7 @@ export const SetInventoryForm = (props: any) => {
             style: "pointer-events-none",
           },
         }}
+        backUrl={`/facility/${facilityId}/inventory/min_quantity/list`}
       />
       <div className="mt-4">
         <Card>

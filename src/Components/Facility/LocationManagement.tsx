@@ -167,6 +167,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
         title="Location Management"
         className="mx-3 md:mx-8"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+        backUrl={`/facility/${facilityId}`}
       />
       <div className="container mx-auto px-4 py-2 sm:px-8">
         <div className="flex justify-end">
