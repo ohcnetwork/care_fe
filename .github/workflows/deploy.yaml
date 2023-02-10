@@ -21,6 +21,7 @@ env:
 
 jobs:
   test:
+    if: github.repository == 'coronasafe/care_fe'
     runs-on: ubuntu-latest
     name: Test
     steps:
