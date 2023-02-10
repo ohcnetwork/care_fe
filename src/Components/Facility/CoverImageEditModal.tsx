@@ -354,15 +354,14 @@ const CoverImageEditModal = ({
                           setPreviewImage(null);
                         }}
                         className="m-2"
+                        disabled={isUploading}
                       >
                         Retake
                       </ButtonV2>
                       <ButtonV2 onClick={handleUpload} className="m-2">
-                        {isCaptureImgBeingUploaded ? (
+                        {isCaptureImgBeingUploaded && (
                           <CareIcon className="care-l-spinner text-lg animate-spin" />
-                        ) : (
-                          <></>
-                        )}{" "}
+                        )}
                         Submit
                       </ButtonV2>
                     </div>
@@ -402,7 +401,7 @@ const CoverImageEditModal = ({
                             captureImage();
                           }}
                         >
-                          <CareIcon className="care-l-capture text-lg" />{" "}
+                          <CareIcon className="care-l-capture text-lg" />
                           Capture
                         </ButtonV2>
                       </div>
@@ -417,7 +416,7 @@ const CoverImageEditModal = ({
                         >
                           Retake
                         </ButtonV2>
-                        <Submit onClick={handleUpload}>
+                        <Submit disabled={isUploading} onClick={handleUpload}>
                           {isCaptureImgBeingUploaded ? (
                             <>
                               {" "}
