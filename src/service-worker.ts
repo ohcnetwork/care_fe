@@ -70,9 +70,27 @@ registerRoute(
   })
 );
 
+self.addEventListener("fetch", (event) => {
+  event.waitUntil(
+    (async () => {
+      if (!event.clientId) return;
+
+      const client = await self.clients.get(event.clientId);
+      if (!client) return;
+
+      client.postMessage({
+        msg: "Hey I just got a fetch from you!",
+        url: event.request.url,
+      });
+    })()
+  );
+});
+
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
 self.addEventListener("message", (event) => {
+  console.log("service worker -- message", event);
+  console.log("service worker -- clients", self.clients);
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
@@ -80,6 +98,7 @@ self.addEventListener("message", (event) => {
 
 // Any other custom service worker logic can go here.
 self.addEventListener("push", async function (event) {
+  console.log("service worker -- push", event);
   if (event.data) {
     const data = JSON.parse(event.data.text());
 

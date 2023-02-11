@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
 import Dialog from "@material-ui/core/Dialog";
@@ -65,6 +65,12 @@ export const FacilityHome = (props: any) => {
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
+
+  useEffect(() => {
+    navigator.serviceWorker.addEventListener("message", (e) => {
+      console.log("service worker -- message -- fac", e);
+    });
+  }, []);
 
   const fetchData = useCallback(
     async (status: statusType) => {
