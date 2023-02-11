@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
 import Dialog from "@material-ui/core/Dialog";
@@ -39,6 +39,7 @@ import { PatientIcon } from "../TeleIcu/Icons/PatientIcon";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ContactLink from "../Common/components/ContactLink";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -66,15 +67,7 @@ export const FacilityHome = (props: any) => {
     Array<PatientStatsModel>
   >([]);
 
-  useEffect(() => {
-    navigator.serviceWorker.onmessage = (e) => {
-      console.log("sw message listener", e);
-    };
-
-    return () => {
-      navigator.serviceWorker.onmessage = null;
-    };
-  });
+  useMessageListener((data) => console.log(data));
 
   const fetchData = useCallback(
     async (status: statusType) => {
