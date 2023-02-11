@@ -202,8 +202,8 @@ export default function ManageUsers() {
           id={`usr_${idx}`}
           className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
         >
-          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible">
-            <div className="h-full flex flex-col justify-between">
+          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible relative">
+            <div className="h-full flex flex-col justify-between pb-20 sm:pb-16">
               <div className="px-6 py-4">
                 <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
                   {user.username && (
@@ -265,7 +265,7 @@ export default function ManageUsers() {
                   className={`flex ${
                     isExtremeSmallScreen
                       ? " flex-wrap "
-                      : " flex-row justify-between "
+                      : " flex-col md:flex-row justify-between "
                   } md:grid md:grid-cols-4 gap-2`}
                 >
                   {user.user_type && (
@@ -370,7 +370,7 @@ export default function ManageUsers() {
                   )}
                   {user.username && (
                     <div id="facilities" className="col-span-4">
-                      <div className="flex text-gray-800">
+                      <div className="flex text-gray-800 absolute bottom-12 sm:bottom-9 left-6">
                         <p className="flex items-center">Linked Facilities: </p>
                         <ButtonV2
                           ghost
@@ -410,7 +410,7 @@ export default function ManageUsers() {
                       setExpandSkillList(true);
                       setSelectedUser(user.username);
                     }}
-                    className="col-span-4 mt-2 align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+                    className="col-span-4 mt-2 align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 absolute bottom-3"
                   >
                     Click here to show linked skills
                   </div>
