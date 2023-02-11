@@ -103,6 +103,9 @@ self.addEventListener("push", async function (event) {
   if (event.data) {
     const data = JSON.parse(event.data.text());
 
+    console.log(data);
+    self.serviceWorker.postMessage({ data, additionals: "hello there" });
+
     event.waitUntil(
       self.registration.showNotification("Care - CoronaSafe Network", {
         body: data.title,
