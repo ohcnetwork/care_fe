@@ -71,6 +71,7 @@ registerRoute(
 );
 
 self.addEventListener("fetch", (event) => {
+  console.log("service worker -- fetch", event);
   event.waitUntil(
     (async () => {
       if (!event.clientId) return;
