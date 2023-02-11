@@ -11,11 +11,8 @@ describe("Asset Creation", () => {
       cy.restoreLocalStorage();
       cy.awaitUrl("/");
 
-      cy.get("[data-cy=facility-buttons]")
-        .should("contain", "Facility")
-        .contains("Facility")
-        .click({ force: true });
-      cy.contains("Manage Facility").click();
+      cy.get("#facility-details").click({ force: true });
+      cy.get("#manage-facility-dropdown").click();
       cy.contains("Location Management").click();
       cy.contains("Add New Location").click();
       cy.get("[name='name']").type("Test Location");
@@ -23,15 +20,13 @@ describe("Asset Creation", () => {
       cy.get("button").contains("Add Location").click();
       cy.verifyNotification("Location created successfully");
       cy.get("[data-cy=back-button]").click();
-      cy.get("[data-cy=back-button]").click();
-      cy.contains("Manage Facility").click();
+      cy.get("#manage-facility-dropdown").click();
       cy.contains("Create Asset").click();
       cy.get("#asset-name").type("New Test Asset");
-      cy.get("[data-cy=asset-location]").click();
-      cy.get("[data-cy=asset-location-1]").click();
-      cy.get("[data-cy=asset-type]").click();
+      cy.get("#asset-location").type("Test Location{enter}");
+      cy.get("#asset-type").click();
       cy.get("[data-cy=asset-type-0]").click();
-      cy.get("[data-test=asset-class]").click();
+      cy.get("#asset-class").click();
       cy.get("[data-cy=asset-class-1]").click();
       cy.get("#asset-description").type("Test Description");
       cy.get("[data-cy=is_working-0]").click();
@@ -43,10 +38,10 @@ describe("Asset Creation", () => {
       cy.get("#vendor-name").type("Vendor's Name");
       const serial_no = parseInt((Math.random() * 10 ** 10).toString());
       cy.get("#serial-number").type(serial_no);
-      // cy.get("#warranty-expiry input").type("25/12/2025");
-      // cy.get("#last-serviced-on input").type("25/12/2021");
+      cy.get("#warranty-expiry").type("2025-12-25");
+      cy.get("#last-serviced-on").type("2021-12-25");
       const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
-      cy.get("[data-cy=support_phone]").type(phone_number);
+      cy.get("[name=support_phone]").type(phone_number);
       cy.wait(500);
       cy.get("#notes").type("Test note for asset creation!");
       cy.get("#submit").click({ force: true });

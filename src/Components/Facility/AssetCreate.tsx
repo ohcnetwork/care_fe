@@ -508,6 +508,7 @@ const AssetCreate = (props: AssetProps) => {
                   {/* Asset Name */}
                   <div className="col-span-6" ref={fieldRef["name"]}>
                     <TextFormField
+                      id="asset-name"
                       name="name"
                       label="Asset Name"
                       required
@@ -520,6 +521,7 @@ const AssetCreate = (props: AssetProps) => {
                   {/* Location */}
                   <div ref={fieldRef["location"]} className="col-span-6">
                     <AutocompleteFormField
+                      id="asset-location"
                       name="location"
                       label="Location"
                       required
@@ -537,6 +539,7 @@ const AssetCreate = (props: AssetProps) => {
                     {/* Asset Type */}
                     <div ref={fieldRef["asset_type"]} className="flex-1">
                       <SelectFormField
+                        id="asset-type"
                         label="Asset Type"
                         name="asset_type"
                         required
@@ -566,6 +569,7 @@ const AssetCreate = (props: AssetProps) => {
                     {/* Asset Class */}
                     <div ref={fieldRef["asset_class"]} className="flex-1">
                       <SelectFormField
+                        id="asset-class"
                         name="asset_class"
                         label="Asset Class"
                         value={asset_class}
@@ -587,6 +591,7 @@ const AssetCreate = (props: AssetProps) => {
                   {/* Description */}
                   <div className="col-span-6">
                     <TextAreaFormField
+                      id="asset-description"
                       name="asset_description"
                       label="Description"
                       placeholder="Details about the equipment"
@@ -719,6 +724,7 @@ const AssetCreate = (props: AssetProps) => {
                   >
                     <label className="mb-2">Warranty / AMC Expiry</label>
                     <TextFormField
+                      id="warranty-expiry"
                       name="WarrantyAMCExpiry"
                       value={warranty_amc_end_of_validity}
                       onChange={(date) => {
@@ -765,6 +771,7 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["support_phone"]}
                   >
                     <PhoneNumberFormField
+                      id="support-phone"
                       name="support_phone"
                       label="Customer support number"
                       required
@@ -834,6 +841,7 @@ const AssetCreate = (props: AssetProps) => {
                   >
                     <label htmlFor="last-serviced-on">Last Serviced On</label>
                     <TextFormField
+                      id="last-serviced-on"
                       name="LastServicedOn"
                       className="mt-2"
                       value={last_serviced_on}
