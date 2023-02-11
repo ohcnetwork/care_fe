@@ -70,7 +70,11 @@ export const FacilityHome = (props: any) => {
     navigator.serviceWorker.onmessage = (e) => {
       console.log("sw message listener", e);
     };
-  }, []);
+
+    return () => {
+      navigator.serviceWorker.onmessage = null;
+    };
+  });
 
   const fetchData = useCallback(
     async (status: statusType) => {
