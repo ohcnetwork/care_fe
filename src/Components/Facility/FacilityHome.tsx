@@ -72,6 +72,10 @@ export const FacilityHome = (props: any) => {
     addEventListener("message", (e) => {
       console.log("message listner", e);
     });
+
+    navigator.serviceWorker.onmessage = (e) => {
+      console.log("sw message listener", e);
+    };
   }, []);
 
   const fetchData = useCallback(
