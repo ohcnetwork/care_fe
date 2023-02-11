@@ -67,12 +67,6 @@ export const FacilityHome = (props: any) => {
   >([]);
 
   useEffect(() => {
-    console.log("added event listener");
-
-    addEventListener("message", (e) => {
-      console.log("message listner", e);
-    });
-
     navigator.serviceWorker.onmessage = (e) => {
       console.log("sw message listener", e);
     };

@@ -73,7 +73,6 @@ registerRoute(
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
 self.addEventListener("message", (event) => {
-  console.log("service worker -- message", event);
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
@@ -81,16 +80,12 @@ self.addEventListener("message", (event) => {
 
 // Any other custom service worker logic can go here.
 self.addEventListener("push", async function (event) {
-  console.log("service worker -- push", event);
   if (event.data) {
     const data = JSON.parse(event.data.text());
 
     self.clients.matchAll().then((clients) => {
-      console.log("clients", clients);
       clients[0].postMessage({ data, additionals: "service worker method" });
     });
-
-    postMessage({ data, additionals: "direct method" });
 
     event.waitUntil(
       self.registration.showNotification("Care - CoronaSafe Network", {
