@@ -67,6 +67,7 @@ export const FacilityHome = (props: any) => {
   >([]);
 
   useEffect(() => {
+    console.log("added event listener");
     navigator.serviceWorker.addEventListener("message", (e) => {
       console.log("service worker -- message -- fac", e);
     });
