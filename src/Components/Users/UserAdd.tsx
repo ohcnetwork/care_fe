@@ -632,6 +632,7 @@ export const UserAdd = (props: UserProps) => {
           </Link>
         }
         justifyContents="justify-between"
+        backUrl="/users"
       />
 
       <Card className="mt-4">

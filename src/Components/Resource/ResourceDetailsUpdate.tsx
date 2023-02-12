@@ -226,6 +226,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       <PageTitle
         title={"Update Resource Request"}
         crumbsReplacements={{ [props.id]: { name: requestTitle } }}
+        backUrl={`/resource/${props.id}`}
       />
       <div className="mt-4">
         <Card>

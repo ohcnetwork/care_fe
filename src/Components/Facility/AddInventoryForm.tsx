@@ -218,6 +218,7 @@ export const AddInventoryForm = (props: any) => {
       <PageTitle
         title="Manage Inventory"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+        backUrl={`/facility/${facilityId}/inventory`}
       />
       <div className="mt-4">
         <Card>
