@@ -18,6 +18,7 @@ import { FacilityModel } from "./models";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import * as Notification from "../../Utils/Notifications.js";
+import { useTranslation } from "react-i18next";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -53,7 +54,7 @@ const CoverImageEditModal = ({
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
   const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
-
+  const { t } = useTranslation();
   const handleSwitchCamera = useCallback(() => {
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
@@ -168,11 +169,11 @@ const CoverImageEditModal = ({
   };
   const commonHint = (
     <>
-      Max size for image uploaded should be 1mb.
+      {t("max_size_for_image_uploaded_should_be")} 1mb.
       <br />
-      Allowed formats are jpg,png,jpeg.
+      {t("allowed_formats_are")} jpg,png,jpeg.
       <br />
-      Recommended aspect ratio for facility cover photo is 1:1.
+      {t("recommended_aspect_ratio_for")} facility cover photo is 1:1
     </>
   );
 
@@ -182,7 +183,9 @@ const CoverImageEditModal = ({
         {!isCameraOpen ? (
           <form className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-screen overflow-auto flex flex-col shadow">
             <div className="px-6 py-6 flex flex-col bg-gray-300">
-              <span className="text-xl font-medium">Edit Cover Photo</span>
+              <span className="text-xl font-medium">
+                {t("edit_cover_photo")}
+              </span>
               <span className="mt-1 text-gray-700">{facility.name}</span>
             </div>
 
@@ -238,10 +241,10 @@ const CoverImageEditModal = ({
                 >
                   {dragProps.fileDropError !== ""
                     ? dragProps.fileDropError
-                    : "Drag & drop image to upload"}
+                    : `${t("drag_drop_image_to_upload")}`}
                 </p>
                 <p className="mt-4 text-gray-700 font-medium text-center">
-                  No cover photo uploaded for this facility. <br />
+                  {t("no_cover_photo_uploaded_for_this_facility")}. <br />
                   {commonHint}
                 </p>
               </div>
@@ -251,7 +254,7 @@ const CoverImageEditModal = ({
               <div>
                 <label className="w-full rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center justify-center cursor-pointer transition-all">
                   <CareIcon className="care-l-cloud-upload text-lg" />
-                  Upload an image
+                  {t("upload_an_image")}
                   <input
                     title="changeFile"
                     type="file"
@@ -267,8 +270,7 @@ const CoverImageEditModal = ({
                   setIsCameraOpen(true);
                 }}
               >
-                {" "}
-                Open Camera
+                {`${t("open")} ${t("camera")}`}
               </ButtonV2>
               <Cancel
                 onClick={(e) => {
@@ -284,7 +286,7 @@ const CoverImageEditModal = ({
                   onClick={handleDelete}
                   disabled={isUploading}
                 >
-                  Delete
+                  {t("delete_norm")}
                 </ButtonV2>
               )}
               <ButtonV2 onClick={handleUpload} disabled={isUploading}>
@@ -293,14 +295,18 @@ const CoverImageEditModal = ({
                 ) : (
                   <CareIcon className="care-l-save text-lg" />
                 )}
-                <span>{isUploading ? "Uploading..." : "Save"}</span>
+                <span>
+                  {isUploading ? `${t("uploading")}...` : `${t("save")}`}
+                </span>
               </ButtonV2>
             </div>
           </form>
         ) : (
           <div className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-screen overflow-auto flex flex-col shadow">
             <div className="px-6 py-6 flex flex-col bg-gray-300">
-              <span className="text-xl font-medium">Capture Cover Photo</span>
+              <span className="text-xl font-medium">
+                {t("capture_cover_photo")}
+              </span>
               <span className="mt-1 text-gray-700">{facility.name}</span>
             </div>
             <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
@@ -326,7 +332,7 @@ const CoverImageEditModal = ({
               <div>
                 {!previewImage ? (
                   <ButtonV2 onClick={handleSwitchCamera} className="m-2">
-                    Switch
+                    {t("switch")}
                   </ButtonV2>
                 ) : (
                   <></>
@@ -342,7 +348,7 @@ const CoverImageEditModal = ({
                         }}
                         className="m-2"
                       >
-                        Capture
+                        {t("capture")}
                       </ButtonV2>
                     </div>
                   </>
@@ -356,13 +362,13 @@ const CoverImageEditModal = ({
                         className="m-2"
                         disabled={isUploading}
                       >
-                        Retake
+                        {t("retake")}
                       </ButtonV2>
                       <ButtonV2 onClick={handleUpload} className="m-2">
                         {isCaptureImgBeingUploaded && (
                           <CareIcon className="care-l-spinner text-lg animate-spin" />
                         )}
-                        Submit
+                        {t("submit")}
                       </ButtonV2>
                     </div>
                   </>
@@ -378,7 +384,7 @@ const CoverImageEditModal = ({
                   }}
                   className="m-2"
                 >
-                  Close
+                  {t("close")}
                 </ButtonV2>
               </div>
             </div>
@@ -386,8 +392,8 @@ const CoverImageEditModal = ({
             <div className={`${isLaptopScreen ? " " : " hidden "}`}>
               <div className="flex m-4 lg:hidden">
                 <ButtonV2 onClick={handleSwitchCamera}>
-                  <CareIcon className="care-l-camera-change text-lg" /> Switch
-                  Camera
+                  <CareIcon className="care-l-camera-change text-lg" />
+                  {`${t("switch")} ${t("camera")}`}
                 </ButtonV2>
               </div>
 
@@ -402,7 +408,7 @@ const CoverImageEditModal = ({
                           }}
                         >
                           <CareIcon className="care-l-capture text-lg" />
-                          Capture
+                          {t("capture")}
                         </ButtonV2>
                       </div>
                     </>
@@ -414,18 +420,17 @@ const CoverImageEditModal = ({
                             setPreviewImage(null);
                           }}
                         >
-                          Retake
+                          {t("retake")}
                         </ButtonV2>
                         <Submit disabled={isUploading} onClick={handleUpload}>
                           {isCaptureImgBeingUploaded ? (
                             <>
-                              {" "}
-                              <CareIcon className="care-l-spinner text-lg animate-spin" />{" "}
-                              Submitting..{" "}
+                              <CareIcon className="care-l-spinner text-lg animate-spin" />
+                              {`${t("submitting")}...`}
                             </>
                           ) : (
-                            <>Submit</>
-                          )}{" "}
+                            <> {t("submit")}</>
+                          )}
                         </Submit>
                       </div>
                     </>
@@ -440,7 +445,7 @@ const CoverImageEditModal = ({
                     webRef.current.stopCamera();
                   }}
                 >
-                  Close Camera
+                  {`${t("close")} ${t("camera")}`}
                 </ButtonV2>
               </div>
             </div>
