@@ -286,7 +286,7 @@ const CoverImageEditModal = ({
                   onClick={handleDelete}
                   disabled={isUploading}
                 >
-                  {t("delete_norm")}
+                  {t("delete")}
                 </ButtonV2>
               )}
               <ButtonV2 onClick={handleUpload} disabled={isUploading}>
