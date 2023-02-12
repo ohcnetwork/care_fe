@@ -25,7 +25,6 @@ env:
 
 jobs:
   build-care-frontend:
-    needs: test
     name: Build & Push Production to container registries
     if: github.repository == 'coronasafe/care_fe_hcx' && github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
