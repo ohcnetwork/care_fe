@@ -180,7 +180,7 @@ let make = (
         </div>
         <div className="grow border-t border-gray-400 mt-4" />
         <div>
-          <CriticalCare__PageTitle title="Ventilator Parameters" />
+          <CriticalCare__PageTitle title="Respiratory Support" />
           <DailyRound__VentilatorParameters
             ventilatorParameters
             renderOptionalInt
