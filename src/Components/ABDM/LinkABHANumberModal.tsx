@@ -12,6 +12,7 @@ import {
   initiateAbdmAuthentication,
   confirmWithMobileOtp,
   confirmWithAadhaarOtp,
+  linkViaQR,
 } from "../../Redux/actions";
 import * as Notify from "../../Utils/Notifications";
 import { classNames } from "../../Utils/utils";
@@ -63,6 +64,7 @@ export default function LinkABHANumberModal({
             }}
             patientId={patientId}
             setAbha={setAbha}
+            closeModal={props.onClose}
           />
         )}
 
@@ -106,12 +108,14 @@ interface ScanABHAQRSectionProps {
   onSignup: () => void;
   patientId?: string;
   setAbha?: (abha: any) => void;
+  closeModal?: () => void;
 }
 
 const ScanABHAQRSection = ({
   onSignup,
   patientId,
   setAbha,
+  closeModal,
 }: ScanABHAQRSectionProps) => {
   const dispatch = useDispatch<any>();
 
@@ -130,11 +134,19 @@ const ScanABHAQRSection = ({
         value={qrValue}
         disabled={!!authMethods.length}
         onChange={setQrValue}
-        parse={(value: string) => {
+        parse={async (value: string) => {
           if (!value) return;
 
           try {
             const abha = JSON.parse(value);
+            if (patientId) {
+              const res = await dispatch(linkViaQR(abha, patientId));
+
+              if (res.status === 200 || res.status === 202) {
+                Notification.Success({ msg: "Request sent successfully" });
+                closeModal?.();
+              }
+            }
             return abha?.hidn;
           } catch (e) {
             console.log(e);

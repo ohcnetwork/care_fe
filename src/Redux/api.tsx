@@ -815,6 +815,11 @@ const routes: Routes = {
     path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
     method: "POST",
   },
+
+  linkViaQR: {
+    path: "/api/v1/abdm/healthid/link_via_qr",
+    method: "POST",
+  },
 };
 
 export default routes;
