@@ -139,6 +139,7 @@ const ScanABHAQRSection = ({
 
           try {
             const abha = JSON.parse(value);
+            console.log("scan", patientId, abha);
             if (patientId) {
               const res = await dispatch(linkViaQR(abha, patientId));
 
