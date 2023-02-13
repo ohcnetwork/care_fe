@@ -840,5 +840,10 @@ export const confirmWithMobileOtp = (
   patientId?: string
 ) => fireRequest("confirmWithMobileOtp", [], { txnId, otp, patientId });
 
-export const linkViaQR = (abha_details: any, patientId?: string) =>
-  fireRequest("linkViaQR", [], { ...abha_details, patientId });
+export const linkViaQR = (abha_details: any, patientId?: string) => {
+  console.log(patientId);
+  return fireRequest("linkViaQR", [], {
+    ...abha_details,
+    facilityId: "8be5ab36-1b66-44ca-ae77-c719e084160d",
+  });
+};
