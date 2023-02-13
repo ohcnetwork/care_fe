@@ -91,7 +91,7 @@ const QRScanner = ({
         disabled={disabled}
         onClose={() => setShowScanner(false)}
         onScan={async (scannedValue: any) => {
-          const parsedValue = await (parse?.(scannedValue) ?? null);
+          const parsedValue = (await parse?.(scannedValue)) ?? null;
           if (parsedValue) {
             onChange(parsedValue);
             setShowScanner(false);
