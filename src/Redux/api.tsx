@@ -817,7 +817,7 @@ const routes: Routes = {
   },
 
   linkViaQR: {
-    path: "/api/v1/abdm/healthid/link_via_qr",
+    path: "/api/v1/abdm/healthid/link_via_qr/",
     method: "POST",
   },
 };
